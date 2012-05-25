@@ -34,13 +34,13 @@
             this.AddProjectButton = new System.Windows.Forms.Button();
             this.ShowHideButton = new System.Windows.Forms.Button();
             this.ProjectsGridView = new System.Windows.Forms.DataGridView();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.columnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnLead = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnUnit = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnCode = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnCanDelete = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.ProjectsGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -128,12 +128,13 @@
             // 
             // columnName
             // 
+            this.columnName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.columnName.DataPropertyName = "Name";
+            this.columnName.FillWeight = 30F;
             this.columnName.HeaderText = "Name";
             this.columnName.MinimumWidth = 50;
             this.columnName.Name = "columnName";
             this.columnName.ReadOnly = true;
-            this.columnName.Width = 150;
             // 
             // columnLead
             // 
@@ -157,6 +158,7 @@
             // 
             this.columnDescription.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.columnDescription.DataPropertyName = "Description";
+            this.columnDescription.FillWeight = 70F;
             this.columnDescription.HeaderText = "Description";
             this.columnDescription.MinimumWidth = 100;
             this.columnDescription.Name = "columnDescription";
@@ -164,12 +166,13 @@
             // 
             // columnCode
             // 
+            this.columnCode.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.columnCode.DataPropertyName = "Code";
             this.columnCode.HeaderText = "Code";
             this.columnCode.MinimumWidth = 40;
             this.columnCode.Name = "columnCode";
             this.columnCode.ReadOnly = true;
-            this.columnCode.Width = 60;
+            this.columnCode.Width = 57;
             // 
             // columnCanDelete
             // 
