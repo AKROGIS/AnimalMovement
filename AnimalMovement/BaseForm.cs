@@ -1,6 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Globalization;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace AnimalMovement
@@ -12,7 +10,6 @@ namespace AnimalMovement
         {
             base.OnFormClosed(e);
 
-            //Location is written to settings on property changes
             Properties.Settings.Default[Name + "Location"] = Location;
             Properties.Settings.Default[Name + "Size"] = Size;
             //Properties.Settings.Default[Name + "WindowState"] = Convert.ToString(this.WindowState, CultureInfo.CurrentCulture);

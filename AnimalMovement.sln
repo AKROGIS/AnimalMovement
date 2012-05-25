@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerExtensions", "ARCN_Animals\SqlServerExtensions.csproj", "{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataModel", "DataModel\DataModel.csproj", "{4B8A418A-482D-4631-A605-938D52BDF8BC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalMovement", "AnimalMovement\AnimalMovement.csproj", "{13F68A3E-F10E-4769-93D0-BAE7052B0E26}"
@@ -10,6 +8,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryLayerBuilder", "QueryLayerBuilder\QueryLayerBuilder.csproj", "{B1EF3AD5-C73C-4DEA-A603-6B2A68D136EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcMap_Addin", "ArcMap_Addin\ArcMap_Addin.csproj", "{517810C9-BD72-495D-949C-C843FD4835D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerExtensions", "SqlServerExtensions\SqlServerExtensions.csproj", "{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,16 +21,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|x86.ActiveCfg = Release|Any CPU
 		{4B8A418A-482D-4631-A605-938D52BDF8BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4B8A418A-482D-4631-A605-938D52BDF8BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B8A418A-482D-4631-A605-938D52BDF8BC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -71,6 +61,20 @@ Global
 		{517810C9-BD72-495D-949C-C843FD4835D9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{517810C9-BD72-495D-949C-C843FD4835D9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{517810C9-BD72-495D-949C-C843FD4835D9}.Release|x86.ActiveCfg = Release|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
+		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
