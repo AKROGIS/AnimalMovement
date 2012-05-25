@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//FIXME - canceling the open file dialog will cause an exception (file not found (with directory))
 //FIXME - do activation and other time consuming tasks on a background thread.
 //FIXME - try and speed up file activation
 //TODO - ask to create necessary database records to support file - i.e. collars/animals/deployments
@@ -182,10 +181,12 @@ namespace AnimalMovement
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
-            openFileDialog.ShowDialog();
-            FileNameTextBox.Text = openFileDialog.FileName;
-            LookupCollarFileFormat format = GuessFileFormat(FileNameTextBox.Text);
-            FormatComboBox.SelectedItem = format;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                FileNameTextBox.Text = openFileDialog.FileName;
+                LookupCollarFileFormat format = GuessFileFormat(FileNameTextBox.Text);
+                FormatComboBox.SelectedItem = format;
+            }
         }
 
         private LookupCollarFileFormat GuessFileFormat(string path)
