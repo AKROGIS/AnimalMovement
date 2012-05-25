@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{13F68A3E-F10E-4769-93D0-BAE7052B0E26}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AnimalMovement</RootNamespace>
+    <AssemblyName>AnimalMovement</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddAnimalForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddAnimalForm.Designer.cs">
+      <DependentUpon>AddAnimalForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddCollarForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddCollarForm.Designer.cs">
+      <DependentUpon>AddCollarForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddEditorForm.Designer.cs">
+      <DependentUpon>AddEditorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddFileForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddFileForm.Designer.cs">
+      <DependentUpon>AddFileForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddProjectForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddProjectForm.Designer.cs">
+      <DependentUpon>AddProjectForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AnimalDetailsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AnimalDetailsForm.Designer.cs">
+      <DependentUpon>AnimalDetailsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangeInvestigatorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangeInvestigatorForm.Designer.cs">
+      <DependentUpon>ChangeInvestigatorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CollarAnimalForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CollarAnimalForm.Designer.cs">
+      <DependentUpon>CollarAnimalForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CollarDetailsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CollarDetailsForm.Designer.cs">
+      <DependentUpon>CollarDetailsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CreateQueryLayerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateQueryLayerForm.Designer.cs">
+      <DependentUpon>CreateQueryLayerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DeployCollarForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DeployCollarForm.Designer.cs">
+      <DependentUpon>DeployCollarForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="FileContentsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FileContentsForm.Designer.cs">
+      <DependentUpon>FileContentsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProjectsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProjectsForm.Designer.cs">
+      <DependentUpon>ProjectsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FileDetailsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FileDetailsForm.Designer.cs">
+      <DependentUpon>FileDetailsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InvestigatorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InvestigatorForm.Designer.cs">
+      <DependentUpon>InvestigatorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="ProjectDetailsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProjectDetailsForm.Designer.cs">
+      <DependentUpon>ProjectDetailsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RetrieveCollarForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RetrieveCollarForm.Designer.cs">
+      <DependentUpon>RetrieveCollarForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.cs" />
+    <EmbeddedResource Include="AddAnimalForm.resx">
+      <DependentUpon>AddAnimalForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddCollarForm.resx">
+      <DependentUpon>AddCollarForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddEditorForm.resx">
+      <DependentUpon>AddEditorForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddFileForm.resx">
+      <DependentUpon>AddFileForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddProjectForm.resx">
+      <DependentUpon>AddProjectForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AnimalDetailsForm.resx">
+      <DependentUpon>AnimalDetailsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChangeInvestigatorForm.resx">
+      <DependentUpon>ChangeInvestigatorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CollarAnimalForm.resx">
+      <DependentUpon>CollarAnimalForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CollarDetailsForm.resx">
+      <DependentUpon>CollarDetailsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreateQueryLayerForm.resx">
+      <DependentUpon>CreateQueryLayerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DeployCollarForm.resx">
+      <DependentUpon>DeployCollarForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FileContentsForm.resx">
+      <DependentUpon>FileContentsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FileDetailsForm.resx">
+      <DependentUpon>FileDetailsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProjectsForm.resx">
+      <DependentUpon>ProjectsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InvestigatorForm.resx">
+      <DependentUpon>InvestigatorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProjectDetailsForm.resx">
+      <DependentUpon>ProjectDetailsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="RetrieveCollarForm.resx">
+      <DependentUpon>RetrieveCollarForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DataModel\DataModel.csproj">
+      <Project>{4B8A418A-482D-4631-A605-938D52BDF8BC}</Project>
+      <Name>DataModel</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Images\add.gif" />
+    <Content Include="Images\GenericAddGreen16.png" />
+    <Content Include="Images\GenericBlackAdd16.png" />
+    <Content Include="Images\GenericBlackDelete16.png" />
+    <Content Include="Images\GenericBlackSubtract16.png" />
+    <Content Include="Images\GenericBlueAdd16.png" />
+    <Content Include="Images\GenericBlueSubtract16.png" />
+    <Content Include="Images\GenericCheckMarkSmall16.png" />
+    <Content Include="Images\GenericDeleteRed16.png" />
+    <Content Include="Images\GenericInformation16.png" />
+    <Content Include="Images\GenericInformation_B_16.png" />
+    <Content Include="Images\GenericPencil16.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

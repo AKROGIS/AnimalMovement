@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Animal_Movement" Class="SettingsDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKRO39088\SQL2008R2;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.Settings" Member="Settings">
+    <Type Name="Setting">
+      <Column Name="Username" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="[Key]" Member="Key" Type="System.String" DbType="NVarChar(30) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Value" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
+    </Type>
+    <UpdateFunction FunctionId="FunctionId1">
+      <Argument Parameter="key" Member="Key" />
+      <Argument Parameter="value" Member="Value" />
+    </UpdateFunction>
+  </Table>
+  <Table Name="dbo.LookupCollarFileHeaders" Member="LookupCollarFileHeaders">
+    <Type Name="LookupCollarFileHeader">
+      <Column Name="Header" Type="System.String" DbType="NVarChar(450) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="FileFormat" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.LookupQueryLayerServers" Member="LookupQueryLayerServers">
+    <Type Name="LookupQueryLayerServer">
+      <Column Name="Location" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Connection" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Function Id="FunctionId1" Name="dbo.Settings_Update" Method="Settings_Update">
+    <Parameter Name="Key" Parameter="key" Type="System.String" DbType="NVarChar(30)" />
+    <Parameter Name="Value" Parameter="value" Type="System.String" DbType="NVarChar(500)" />
+    <Return Type="System.Int32" />
+  </Function>
+</Database>

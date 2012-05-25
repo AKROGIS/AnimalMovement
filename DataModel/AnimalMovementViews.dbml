@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Animal_Movement" Class="AnimalMovementViewsDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKRO39088\SQL2008R2;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.AnimalFixesByFile" Member="AnimalFixesByFiles">
+    <Type Name="AnimalFixesByFile">
+      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Manufacturer" Type="System.String" DbType="NVarChar(200)" CanBeNull="true" />
+      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="Project" Type="System.String" DbType="NVarChar(150)" CanBeNull="true" />
+      <Column Name="AnimalId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="[First Fix]" Member="First_Fix" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="[Last Fix]" Member="Last_Fix" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="[Number of Fixes]" Member="Number_of_Fixes" Type="System.Int32" DbType="Int" CanBeNull="true" />
+    </Type>
+  </Table>
+</Database>

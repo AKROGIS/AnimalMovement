@@ -1,0 +1,137 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="AnimalMovement.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Animal_MovementConnectionString" Type="(Connection string)" Scope="Application">
+      <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;SerializableConnectionString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;ConnectionString&gt;Data Source=INPAKRO39088\SQL2008R2;Initial Catalog=Animal_Movement;Integrated Security=True&lt;/ConnectionString&gt;
+  &lt;ProviderName&gt;System.Data.SqlClient&lt;/ProviderName&gt;
+&lt;/SerializableConnectionString&gt;</DesignTimeValue>
+      <Value Profile="(Default)">Data Source=INPAKRO39088\SQL2008R2;Initial Catalog=Animal_Movement;Integrated Security=True</Value>
+    </Setting>
+    <Setting Name="AddFileFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AddAnimalFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AddCollarFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AddEditorFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AddProjectFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AnimalDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="ChangeInvestigatorFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="CollarAnimalFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="CollarDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="CreateQueryLayerFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="DeployCollarFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="FileContentsFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="FileDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="InvestigatorFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="MainFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="ProjectDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="ProjectsFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="RetrieveCollarFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AddAnimalFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">284, 232</Value>
+    </Setting>
+    <Setting Name="AddCollarFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">376, 370</Value>
+    </Setting>
+    <Setting Name="AddEditorFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">405, 246</Value>
+    </Setting>
+    <Setting Name="AddFileFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">284, 260</Value>
+    </Setting>
+    <Setting Name="AddProjectFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">324, 220</Value>
+    </Setting>
+    <Setting Name="AnimalDetailsFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">489, 314</Value>
+    </Setting>
+    <Setting Name="ChangeInvestigatorFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">285, 142</Value>
+    </Setting>
+    <Setting Name="CollarAnimalFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">284, 131</Value>
+    </Setting>
+    <Setting Name="CollarDetailsFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">483, 357</Value>
+    </Setting>
+    <Setting Name="CreateQueryLayerFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">376, 541</Value>
+    </Setting>
+    <Setting Name="DeployCollarFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">284, 131</Value>
+    </Setting>
+    <Setting Name="FileContentsFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">427, 440</Value>
+    </Setting>
+    <Setting Name="FileDetailsFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">492, 331</Value>
+    </Setting>
+    <Setting Name="InvestigatorFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">462, 434</Value>
+    </Setting>
+    <Setting Name="MainFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">231, 194</Value>
+    </Setting>
+    <Setting Name="ProjectDetailsFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">536, 406</Value>
+    </Setting>
+    <Setting Name="ProjectsFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">602, 251</Value>
+    </Setting>
+    <Setting Name="RetrieveCollarFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">224, 78</Value>
+    </Setting>
+    <Setting Name="InvestigatorFormSplitterDistance" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">231</Value>
+    </Setting>
+    <Setting Name="ProjectDetailsFormSplitter1Distance" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">143</Value>
+    </Setting>
+    <Setting Name="ProjectDetailsFormSplitter2Distance" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">176</Value>
+    </Setting>
+    <Setting Name="CreateQueryLayerFormSplitter1Distance" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">112</Value>
+    </Setting>
+    <Setting Name="CreateQueryLayerFormSplitter2Distance" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">112</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
