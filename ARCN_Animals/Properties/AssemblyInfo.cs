@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Sql Server Extensions for Animal Movements")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Sql Server Extensions for Animal Movements")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("National Park Service, Alaska GIS Team")]
 [assembly: AssemblyProduct("Sql Server Extensions for Animal Movements")]

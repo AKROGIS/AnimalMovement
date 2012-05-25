@@ -7,7 +7,6 @@ using DataModel;
 
 //TODO - Add Region Filter
 //FIXME - layerfile extension .lyr is not being added
-//FIXME - Fix Addin so not case sensitive on SQLServer or field names
 
 namespace AnimalMovement
 {
