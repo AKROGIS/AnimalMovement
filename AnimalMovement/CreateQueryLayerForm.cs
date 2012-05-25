@@ -6,12 +6,14 @@ using System.Windows.Forms;
 using DataModel;
 
 //TODO - Add Region Filter
+//FIXME - layerfile extension .lyr is not being added
+//FIXME - Fix Addin so not case sensitive on SQLServer or field names
 
 namespace AnimalMovement
 {
     internal partial class CreateQueryLayerForm : BaseForm
     {
-        private const string ConnectionTemplate = @"dbclient=SQLServer;serverinstance={0};database=Animal_Movement;authentication_mode=OSA";
+        private const string ConnectionTemplate = @"dbclient=sqlserver;serverinstance={0};database=Animal_Movement;authentication_mode=OSA";
         private const string QueryLayerBuilderExe = "QueryLayerBuilder.exe";
 
         private AnimalMovementDataContext Database { get; set; }

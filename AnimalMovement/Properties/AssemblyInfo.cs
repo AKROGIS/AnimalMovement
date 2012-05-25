@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
+//FIXME - Improve efficiency of activating a file.
 //TODO - add animal mortality date to animal table.  Do not create locations after this date.
 //TODO - support and testing of various file formats
 //TODO - 	a) would like to support all data as it is/was delivered to the PI
@@ -10,6 +11,8 @@ using System.Runtime.InteropServices;
 //TODO - need to develop a user interface for managing conflicting fixes
 //TODO - help documents/tutorials
 //TODO - bulk upload (data grid view copy/paste) of multiple animals/collars/deploymnents (optional - sa can do this for PI using SSMS)
+//TODO - Add MS Access readonly interface
+//TODO - Add R statistics interface and adehabitat example
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
