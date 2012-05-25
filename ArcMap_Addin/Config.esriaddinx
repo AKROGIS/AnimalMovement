@@ -1,0 +1,20 @@
+﻿<ESRI.Configuration xmlns="http://schemas.esri.com/Desktop/AddIns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Animal Movements</Name>
+  <AddInID>{7a743a17-871a-419b-bb7a-7bdc33367aa9}</AddInID>
+  <Description>Allows editing the status of animal collar location data in a SQL Server Database</Description>
+  <Version>1.0</Version>
+  <Image>Images\AnimalTrack.png</Image>
+  <Author>Regan Sarwas</Author>
+  <Company>National Park Service</Company>
+  <Date>7/28/2011</Date>
+  <Targets>
+    <Target name="Desktop" version="10.0" />
+  </Targets>
+  <AddIn language="CLR" library="ArcMap_Addin.dll" namespace="ArcMap_Addin">
+    <ArcMap>
+      <Commands>
+        <Button id="National_Park_Service_ArcMap_Addin_AnimalLocationStatusButton" class="AnimalLocationStatusButton" message="Tool to edit the status of the selected animal collar location data in a SQL Server Database." caption="Edit Location Status" tip="Edit status of selected animal collar locations" category="NPS Alaska" image="Images\AnimalTrack16BW.png" />
+      </Commands>
+    </ArcMap>
+  </AddIn>
+</ESRI.Configuration>

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalMovement", "AnimalMov
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryLayerBuilder", "QueryLayerBuilder\QueryLayerBuilder.csproj", "{B1EF3AD5-C73C-4DEA-A603-6B2A68D136EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcMap_Addin", "ArcMap_Addin\ArcMap_Addin.csproj", "{517810C9-BD72-495D-949C-C843FD4835D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,16 @@ Global
 		{B1EF3AD5-C73C-4DEA-A603-6B2A68D136EB}.Release|Mixed Platforms.Build.0 = Release|x86
 		{B1EF3AD5-C73C-4DEA-A603-6B2A68D136EB}.Release|x86.ActiveCfg = Release|x86
 		{B1EF3AD5-C73C-4DEA-A603-6B2A68D136EB}.Release|x86.Build.0 = Release|x86
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{517810C9-BD72-495D-949C-C843FD4835D9}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
