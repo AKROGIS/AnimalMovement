@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using DataModel;
 
 //TODO - Add Region Filter
-//FIXME - layerfile extension .lyr is not being added
 
 namespace AnimalMovement
 {
@@ -187,6 +186,7 @@ namespace AnimalMovement
         private void BuildQueryLayer(string table, string connection)
         {
             saveFileDialog1.Title = table + " Query Layer";
+            saveFileDialog1.DefaultExt = ".lyr";
             saveFileDialog1.ShowDialog(this);
             SaveQueryLayer(table, saveFileDialog1.FileName, connection, BuildSql(table));
         }
