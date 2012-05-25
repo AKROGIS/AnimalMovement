@@ -3,6 +3,8 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//FIXME - Code column is not resizable
+
 namespace AnimalMovement
 {
     internal partial class ProjectsForm : BaseForm
