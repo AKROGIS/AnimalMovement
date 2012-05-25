@@ -1,30 +1,21 @@
 USE [Animal_Movement]
 GO
-/****** Object:  User [NPS\BAMangipane]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE USER [NPS\BAMangipane] FOR LOGIN [NPS\BAMangipane] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  User [NPS\Domain Users]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE USER [NPS\Domain Users] FOR LOGIN [NPS\Domain Users]
 GO
-/****** Object:  User [NPS\JWBurch]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE USER [NPS\JWBurch] FOR LOGIN [NPS\JWBurch] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  User [NPS\KCJoly]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE USER [NPS\KCJoly] FOR LOGIN [NPS\KCJoly] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  User [NPS\RESarwas]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  User [NPS\SDMiller]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\SDMiller] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  Role [Editor]    Script Date: 05/25/2012 13:04:15 ******/
 CREATE ROLE [Editor] AUTHORIZATION [dbo]
 GO
-/****** Object:  Role [Investigator]    Script Date: 05/25/2012 13:04:15 ******/
 CREATE ROLE [Investigator] AUTHORIZATION [dbo]
 GO
-/****** Object:  Table [dbo].[ProjectInvestigators]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -40,7 +31,6 @@ CREATE TABLE [dbo].[ProjectInvestigators](
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Projects]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -61,7 +51,6 @@ CREATE TABLE [dbo].[Projects](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[LookupCollarManufacturers]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -81,7 +70,6 @@ CREATE TABLE [dbo].[LookupCollarManufacturers](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[LookupCollarFileFormats]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -103,7 +91,6 @@ CREATE TABLE [dbo].[LookupCollarFileFormats](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[LookupCollarFileStatus]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -122,7 +109,6 @@ CREATE TABLE [dbo].[LookupCollarFileStatus](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[CollarFiles]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -148,7 +134,6 @@ CREATE TABLE [dbo].[CollarFiles](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[LookupCollarModels]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -165,7 +150,6 @@ CREATE TABLE [dbo].[LookupCollarModels](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Collars]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -192,7 +176,6 @@ CREATE TABLE [dbo].[Collars](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[CollarFixes]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -217,7 +200,6 @@ CREATE TABLE [dbo].[CollarFixes](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  StoredProcedure [dbo].[CollarFixes_Delete]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -239,7 +221,6 @@ BEGIN
 	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
 END
 GO
-/****** Object:  Table [dbo].[LookupGender]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -256,7 +237,6 @@ CREATE TABLE [dbo].[LookupGender](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[LookupSpecies]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -273,7 +253,6 @@ CREATE TABLE [dbo].[LookupSpecies](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Animals]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -296,7 +275,6 @@ CREATE TABLE [dbo].[Animals](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Movements]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -330,7 +308,6 @@ WITH (
 GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
 CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 GO
-/****** Object:  UserDefinedFunction [dbo].[EndOfMovement]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -353,7 +330,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Movement_Delete]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -374,7 +350,6 @@ BEGIN
 	        AND [EndDate] = @NextTime;
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[StartOfOverlappingMovement]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -399,7 +374,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Location_Added]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -436,7 +410,6 @@ BEGIN
 	EXEC [dbo].[Movement_Insert] @Project, @Animal, @Time, @NextTime; 
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[EndOfFollowingConnectedMovement]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -459,7 +432,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[StartOfPriorConnectedMovement]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -482,7 +454,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Location_Deleted]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -507,7 +478,6 @@ BEGIN
 	EXEC [dbo].[Movement_Insert] @Project, @Animal, @PrevTime, @NextTime; 
 END
 GO
-/****** Object:  Table [dbo].[Locations]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -539,7 +509,6 @@ WITH (
 GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
 CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[CollarDeployments]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -565,7 +534,6 @@ CREATE TABLE [dbo].[CollarDeployments](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  View [dbo].[CurrentDeployments]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -577,7 +545,6 @@ FROM         dbo.CollarDeployments
 WHERE     (DeploymentDate < GETDATE()) AND (RetrievalDate > GETDATE() OR
                       RetrievalDate IS NULL)
 GO
-/****** Object:  UserDefinedFunction [dbo].[NextLocationTime]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -602,7 +569,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  View [dbo].[InvalidLocations]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -613,7 +579,6 @@ SELECT     ProjectId, AnimalId, FixDate, Status, Location
 FROM         dbo.Locations
 WHERE     (Status IS NOT NULL)
 GO
-/****** Object:  Trigger [InsteadOfCollarFixesInsert]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -702,7 +667,6 @@ BEGIN
 	DEALLOCATE insf_cursor;
 END
 GO
-/****** Object:  Trigger [InsteadOfCollarFixesDelete]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -775,7 +739,6 @@ BEGIN
 	
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[GetLocationGeography]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -798,7 +761,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  Trigger [AfterCollarDeploymentUpdate]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -866,7 +828,6 @@ BEGIN
 	END
 END
 GO
-/****** Object:  Trigger [AfterCollarDeploymentInsert]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -895,7 +856,6 @@ BEGIN
 			AND (I.RetrievalDate IS NULL OR F.FixDate < I.RetrievalDate)
 END
 GO
-/****** Object:  Trigger [AfterCollarDeploymentDelete]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -920,7 +880,6 @@ BEGIN
 			  AND (D.RetrievalDate IS NULL OR L.FixDate < D.RetrievalDate)
 END
 GO
-/****** Object:  View [dbo].[FixesByLocation]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -936,7 +895,6 @@ FROM         dbo.CollarFixes INNER JOIN
                       (dbo.CollarFixes.FixDate < dbo.CollarDeployments.RetrievalDate OR
                       dbo.CollarDeployments.RetrievalDate IS NULL)
 GO
-/****** Object:  UserDefinedFunction [dbo].[PreviousLocationTime]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -961,7 +919,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  Trigger [UpdateMovementAfterLocationUpdate]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1004,7 +961,6 @@ IF UPDATE ([Status])
 		DEALLOCATE up_cursor;
 	END
 GO
-/****** Object:  Trigger [UpdateMovementAfterLocationInsert]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1038,7 +994,6 @@ BEGIN
 	DEALLOCATE ins_cursor;
 END
 GO
-/****** Object:  Trigger [UpdateMovementAfterLocationDelete]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1088,7 +1043,6 @@ BEGIN
 	DEALLOCATE del_cursor;
 END
 GO
-/****** Object:  Trigger [UpdateLocationAfterCollarFixesUpdate]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1143,7 +1097,6 @@ IF UPDATE ([HiddenBy])
 
 	END
 GO
-/****** Object:  View [dbo].[ValidLocations]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1154,7 +1107,6 @@ SELECT     ProjectId, AnimalId, FixDate, Status, Location
 FROM         dbo.Locations
 WHERE     (Status IS NULL)
 GO
-/****** Object:  StoredProcedure [dbo].[Utility_RethrowError]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1206,7 +1158,6 @@ CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
         @ErrorLine       -- parameter: original error line number.
         );
 GO
-/****** Object:  Table [dbo].[Settings]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1222,7 +1173,6 @@ CREATE TABLE [dbo].[Settings](
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  UserDefinedFunction [dbo].[DoDateRangesOverlap]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1293,7 +1243,6 @@ BEGIN
 	RETURN 1
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[DateTimeToOrdinal]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1316,7 +1265,6 @@ BEGIN
                          @Date)
 END
 GO
-/****** Object:  Table [dbo].[LookupQueryLayerServers]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1330,13 +1278,11 @@ CREATE TABLE [dbo].[LookupQueryLayerServers](
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  UserDefinedFunction [dbo].[LocalTime]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[LocalTime]
 GO
-/****** Object:  View [dbo].[CollarsNotCurrentlyDeployed]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1356,7 +1302,6 @@ FROM         dbo.Collars INNER JOIN
                       dbo.CollarDeployments.CollarId = dbo.CurrentDeployments.CollarId
 WHERE     (dbo.CurrentDeployments.ProjectId IS NULL)
 GO
-/****** Object:  View [dbo].[CollarsNeverDeployed]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1373,7 +1318,6 @@ FROM         dbo.Collars INNER JOIN
                       dbo.Collars.CollarId = dbo.CollarDeployments.CollarId
 WHERE     (dbo.CollarDeployments.CollarId IS NULL)
 GO
-/****** Object:  View [dbo].[CollarsCurrentlyDeployed]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1390,7 +1334,6 @@ FROM         dbo.CollarDeployments INNER JOIN
 WHERE     (dbo.CollarDeployments.DeploymentDate < GETDATE()) AND (dbo.CollarDeployments.RetrievalDate > GETDATE() OR
                       dbo.CollarDeployments.RetrievalDate IS NULL)
 GO
-/****** Object:  UserDefinedFunction [dbo].[ParseFormatC]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
 RETURNS  TABLE (
 	[LineNumber] [int] NULL,
@@ -1419,7 +1362,6 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatC]
 GO
-/****** Object:  UserDefinedFunction [dbo].[ParseFormatB]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
 RETURNS  TABLE (
 	[LineNumber] [int] NULL,
@@ -1441,7 +1383,6 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatB]
 GO
-/****** Object:  UserDefinedFunction [dbo].[ParseFormatA]    Script Date: 05/25/2012 13:04:14 ******/
 CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
 RETURNS  TABLE (
 	[LineNumber] [int] NULL,
@@ -1467,7 +1408,6 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatA]
 GO
-/****** Object:  StoredProcedure [dbo].[ProjectInvestigator_Update]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1530,7 +1470,6 @@ BEGIN
 
 END
 GO
-/****** Object:  StoredProcedure [dbo].[ProjectInvestigator_Insert_SA]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1575,7 +1514,6 @@ BEGIN
 		 VALUES (@Login, @Name, @Email, @Phone);
 END
 GO
-/****** Object:  View [dbo].[AnimalFixesByFile]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1594,7 +1532,6 @@ FROM         dbo.CollarFixes INNER JOIN
                       dbo.Projects ON dbo.CollarDeployments.ProjectId = dbo.Projects.ProjectId
 GROUP BY dbo.Projects.ProjectName, dbo.CollarDeployments.AnimalId, dbo.CollarFixes.FileId, dbo.LookupCollarManufacturers.Name, dbo.CollarFixes.CollarId
 GO
-/****** Object:  StoredProcedure [dbo].[Tests_DoDateRangesOverlap]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1822,7 +1759,6 @@ BEGIN
 	
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Settings_Update]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1871,7 +1807,6 @@ BEGIN
 	END
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Project_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1914,7 +1849,6 @@ BEGIN
 
 END
 GO
-/****** Object:  Table [dbo].[ProjectEditors]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1933,7 +1867,6 @@ CREATE TABLE [dbo].[ProjectEditors](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  StoredProcedure [dbo].[Location_UpdateStatus]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1974,7 +1907,6 @@ BEGIN
 	   AND [FixDate] = @FixDate;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarDeployment_UpdateRetrievalDate]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2076,7 +2008,6 @@ BEGIN
 			     AND DeploymentDate = @DeploymentDate;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarDeployment_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2163,7 +2094,6 @@ BEGIN
 				 nullif(@CollarId,''), nullif(@DeploymentDate,''), nullif(@RetrievalDate,''))
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarDeployment_Delete]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2209,7 +2139,6 @@ BEGIN
 		    AND [DeploymentDate] = @DeploymentDate
 END
 GO
-/****** Object:  Table [dbo].[LookupCollarFileHeaders]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2227,7 +2156,6 @@ CREATE TABLE [dbo].[LookupCollarFileHeaders](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[CollarDataTelonicsStoreOnBoard]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2264,7 +2192,6 @@ CREATE TABLE [dbo].[CollarDataTelonicsStoreOnBoard](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Trigger [UpdateCollarFixesAfterCollarDataTelonicsStoreOnBoardInsert]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2286,7 +2213,6 @@ BEGIN
 
 END
 GO
-/****** Object:  Table [dbo].[CollarDataDebevekFormat]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2319,7 +2245,6 @@ CREATE TABLE [dbo].[CollarDataDebevekFormat](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Trigger [UpdateCollarFixesAfterCollarDataDebevekFormatInsert]    Script Date: 05/25/2012 13:04:15 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2338,7 +2263,6 @@ BEGIN
 		 ON I.FileId = F.FileId
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarFixes_UpdateUnhideFix]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2440,7 +2364,6 @@ BEGIN
 	END CATCH
 END
 GO
-/****** Object:  Table [dbo].[CollarDataTelonicsGen4Condensed]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2480,7 +2403,6 @@ CREATE TABLE [dbo].[CollarDataTelonicsGen4Condensed](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  StoredProcedure [dbo].[CollarFixes_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2550,7 +2472,6 @@ BEGIN
 	-- FIXME: Add other formats 
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarFile_UpdateStatus]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2630,7 +2551,6 @@ BEGIN
 	END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarData_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2680,7 +2600,6 @@ BEGIN
 	
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarFile_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2769,7 +2688,6 @@ BEGIN
 	END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Collar_Update]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2872,7 +2790,6 @@ BEGIN
 
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Collar_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2918,7 +2835,6 @@ BEGIN
 					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''))
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Collar_Delete]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2952,7 +2868,6 @@ BEGIN
 	DELETE FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 END
 GO
-/****** Object:  View [dbo].[StoreOnBoardLocations]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2968,7 +2883,6 @@ FROM         dbo.CollarDataTelonicsStoreOnBoard INNER JOIN
                       dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
                       dbo.CollarFiles ON dbo.CollarDataTelonicsStoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
 GO
-/****** Object:  View [dbo].[AnimalsNotCurrentlyCollared]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2986,7 +2900,6 @@ FROM         dbo.Animals INNER JOIN
                       dbo.CollarDeployments.CollarId = dbo.CurrentDeployments.CollarId
 WHERE     (dbo.CurrentDeployments.ProjectId IS NULL)
 GO
-/****** Object:  View [dbo].[AnimalsNeverCollared]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3000,7 +2913,6 @@ FROM         dbo.Projects INNER JOIN
                       dbo.CollarDeployments ON dbo.Animals.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Animals.AnimalId = dbo.CollarDeployments.AnimalId
 WHERE     (dbo.CollarDeployments.ProjectId IS NULL)
 GO
-/****** Object:  View [dbo].[AnimalsCurrentlyCollared]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3015,7 +2927,6 @@ FROM         dbo.CollarDeployments INNER JOIN
 WHERE     (dbo.CollarDeployments.DeploymentDate < GETDATE()) AND (dbo.CollarDeployments.RetrievalDate > GETDATE() OR
                       dbo.CollarDeployments.RetrievalDate IS NULL)
 GO
-/****** Object:  UserDefinedFunction [dbo].[IsEditor]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3042,7 +2953,6 @@ BEGIN
 	RETURN 0
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarFile_Update]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3141,7 +3051,6 @@ BEGIN
 	END
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Animal_Update]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3220,7 +3129,6 @@ BEGIN
 
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Animal_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3264,7 +3172,6 @@ BEGIN
 
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[GetCollarDataTableName]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3291,7 +3198,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  StoredProcedure [dbo].[CollarFile_Delete]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3361,7 +3267,6 @@ BEGIN
 	
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[NextAnimalId]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3402,7 +3307,6 @@ BEGIN
 	RETURN @id
 END
 GO
-/****** Object:  StoredProcedure [dbo].[ProjectInvestigator_Delete_SA]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3456,7 +3360,6 @@ BEGIN
 	END
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Project_Delete]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3494,7 +3397,6 @@ BEGIN
 	DELETE FROM dbo.Projects WHERE [ProjectId] = @ProjectId
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Editor_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3571,7 +3473,6 @@ BEGIN
 	END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Editor_Delete]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3633,7 +3534,6 @@ BEGIN
 	END
 END
 GO
-/****** Object:  View [dbo].[VelocityVectors]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3644,7 +3544,6 @@ SELECT     ProjectId, AnimalId, StartDate, EndDate, Duration, Distance, Speed, S
 FROM         dbo.Movements
 WHERE     (Distance <> 0)
 GO
-/****** Object:  View [dbo].[NoMovement]    Script Date: 05/25/2012 13:04:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3655,7 +3554,6 @@ SELECT     ProjectId, AnimalId, StartDate, EndDate, Duration, Distance, Speed, S
 FROM         dbo.Movements
 WHERE     (Distance = 0)
 GO
-/****** Object:  StoredProcedure [dbo].[Project_Update]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3732,7 +3630,6 @@ BEGIN
 
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Movement_Insert_Sub]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3795,7 +3692,6 @@ BEGIN
 		 VALUES (@Project, @Animal, @StartTime, @EndTime, @Duration, @Distance, @Speed, @Vector);
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[GetMovementStartGeography]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3818,7 +3714,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  UserDefinedFunction [dbo].[GetMovementEndGeography]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3841,7 +3736,6 @@ BEGIN
 	RETURN @Result
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Movement_Insert]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3875,7 +3769,6 @@ BEGIN
 	END
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Animal_Delete]    Script Date: 05/25/2012 13:04:14 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3909,169 +3802,138 @@ BEGIN
 	DELETE FROM dbo.Animals WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId
 END
 GO
-/****** Object:  Default [DF_CollarFiles_UploadDate]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFiles] ADD  CONSTRAINT [DF_CollarFiles_UploadDate]  DEFAULT (getdate()) FOR [UploadDate]
 GO
-/****** Object:  Default [DF_CollarFiles_UserName]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFiles] ADD  CONSTRAINT [DF_CollarFiles_UserName]  DEFAULT (original_login()) FOR [UserName]
 GO
-/****** Object:  Default [DF_CollarFiles_Status]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFiles] ADD  CONSTRAINT [DF_CollarFiles_Status]  DEFAULT ('I') FOR [Status]
 GO
-/****** Object:  Default [DF_Collars_Manager]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Collars] ADD  CONSTRAINT [DF_Collars_Manager]  DEFAULT (original_login()) FOR [Manager]
 GO
-/****** Object:  Default [DF_Collars_Owner]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Collars] ADD  CONSTRAINT [DF_Collars_Owner]  DEFAULT ('NPS') FOR [Owner]
 GO
-/****** Object:  Default [DF_Projects_PrincipalInvestigator]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Projects] ADD  CONSTRAINT [DF_Projects_PrincipalInvestigator]  DEFAULT (original_login()) FOR [ProjectInvestigator]
 GO
-/****** Object:  Check [CK_LookupCollarFileFormats]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[LookupCollarFileFormats]  WITH CHECK ADD  CONSTRAINT [CK_LookupCollarFileFormats] CHECK  (([HasCollarIdColumn]='Y' OR [HasCollarIdColumn]='N'))
 GO
 ALTER TABLE [dbo].[LookupCollarFileFormats] CHECK CONSTRAINT [CK_LookupCollarFileFormats]
 GO
-/****** Object:  ForeignKey [FK_Animals_Gender]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Gender] FOREIGN KEY([Gender])
 REFERENCES [dbo].[LookupGender] ([Sex])
 GO
 ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Gender]
 GO
-/****** Object:  ForeignKey [FK_Animals_Projects]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Projects] FOREIGN KEY([ProjectId])
 REFERENCES [dbo].[Projects] ([ProjectId])
 GO
 ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Projects]
 GO
-/****** Object:  ForeignKey [FK_Animals_Species]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Species] FOREIGN KEY([Species])
 REFERENCES [dbo].[LookupSpecies] ([Species])
 GO
 ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Species]
 GO
-/****** Object:  ForeignKey [FK_CollarDataDebevekFormat_CollarFiles]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarDataDebevekFormat]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataDebevekFormat_CollarFiles] FOREIGN KEY([FileID])
 REFERENCES [dbo].[CollarFiles] ([FileId])
 GO
 ALTER TABLE [dbo].[CollarDataDebevekFormat] CHECK CONSTRAINT [FK_CollarDataDebevekFormat_CollarFiles]
 GO
-/****** Object:  ForeignKey [FK_CollarDataTelonicsGen4Condensed_CollarFiles]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarDataTelonicsGen4Condensed]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen4Condensed_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsGen4Condensed] CHECK CONSTRAINT [FK_CollarDataTelonicsGen4Condensed_CollarFiles]
 GO
-/****** Object:  ForeignKey [FK_CollarDataTelonicsStoreOnBoard_CollarFiles]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarDataTelonicsStoreOnBoard]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsStoreOnBoard_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsStoreOnBoard] CHECK CONSTRAINT [FK_CollarDataTelonicsStoreOnBoard_CollarFiles]
 GO
-/****** Object:  ForeignKey [FK_CollarDeployments_Animals]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
 GO
 ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Animals]
 GO
-/****** Object:  ForeignKey [FK_CollarDeployments_Collars]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
 REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
 GO
 ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Collars]
 GO
-/****** Object:  ForeignKey [FK_CollarFiles_LookupCollarFileFormats]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupCollarFileFormats] FOREIGN KEY([Format])
 REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
 GO
 ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarFileFormats]
 GO
-/****** Object:  ForeignKey [FK_CollarFiles_LookupCollarFileStatus]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupCollarFileStatus] FOREIGN KEY([Status])
 REFERENCES [dbo].[LookupCollarFileStatus] ([Code])
 GO
 ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarFileStatus]
 GO
-/****** Object:  ForeignKey [FK_CollarFiles_LookupCollarManufacturers]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
 REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
 GO
 ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarManufacturers]
 GO
-/****** Object:  ForeignKey [FK_CollarFiles_Projects]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_Projects] FOREIGN KEY([Project])
 REFERENCES [dbo].[Projects] ([ProjectId])
 GO
 ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_Projects]
 GO
-/****** Object:  ForeignKey [FK_CollarFixes_CollarFiles]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFixes]  WITH CHECK ADD  CONSTRAINT [FK_CollarFixes_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
 GO
 ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_CollarFiles]
 GO
-/****** Object:  ForeignKey [FK_CollarFixes_Collars]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[CollarFixes]  WITH CHECK ADD  CONSTRAINT [FK_CollarFixes_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
 REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
 GO
 ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_Collars]
 GO
-/****** Object:  ForeignKey [FK_Collars_LookupCollarManufacturers]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
 REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
 GO
 ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_LookupCollarManufacturers]
 GO
-/****** Object:  ForeignKey [FK_Collars_LookupCollarModels]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_LookupCollarModels] FOREIGN KEY([CollarModel])
 REFERENCES [dbo].[LookupCollarModels] ([CollarModel])
 GO
 ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_LookupCollarModels]
 GO
-/****** Object:  ForeignKey [FK_Collars_Managers]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_Managers] FOREIGN KEY([Manager])
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_Managers]
 GO
-/****** Object:  ForeignKey [FK_Locations_Animals]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Locations]  WITH CHECK ADD  CONSTRAINT [FK_Locations_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
 GO
 ALTER TABLE [dbo].[Locations] CHECK CONSTRAINT [FK_Locations_Animals]
 GO
-/****** Object:  ForeignKey [FK_Locations_CollarFixes]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Locations]  WITH CHECK ADD  CONSTRAINT [FK_Locations_CollarFixes] FOREIGN KEY([FixId])
 REFERENCES [dbo].[CollarFixes] ([FixId])
 GO
 ALTER TABLE [dbo].[Locations] CHECK CONSTRAINT [FK_Locations_CollarFixes]
 GO
-/****** Object:  ForeignKey [FK_LookupCollarFileFormats_LookupCollarManufacturer]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[LookupCollarFileFormats]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarFileFormats_LookupCollarManufacturer] FOREIGN KEY([CollarManufacturer])
 REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
 GO
 ALTER TABLE [dbo].[LookupCollarFileFormats] CHECK CONSTRAINT [FK_LookupCollarFileFormats_LookupCollarManufacturer]
 GO
-/****** Object:  ForeignKey [FK_CollarFileHeaders_LookupCollarFileFormats]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[LookupCollarFileHeaders]  WITH CHECK ADD  CONSTRAINT [FK_CollarFileHeaders_LookupCollarFileFormats] FOREIGN KEY([FileFormat])
 REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
 GO
 ALTER TABLE [dbo].[LookupCollarFileHeaders] CHECK CONSTRAINT [FK_CollarFileHeaders_LookupCollarFileFormats]
 GO
-/****** Object:  ForeignKey [FK_Movements_Animals]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Movements]  WITH CHECK ADD  CONSTRAINT [FK_Movements_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
 GO
 ALTER TABLE [dbo].[Movements] CHECK CONSTRAINT [FK_Movements_Animals]
 GO
-/****** Object:  ForeignKey [FK_ProjectEditors_Projects]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[ProjectEditors]  WITH CHECK ADD  CONSTRAINT [FK_ProjectEditors_Projects] FOREIGN KEY([ProjectId])
 REFERENCES [dbo].[Projects] ([ProjectId])
 ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[ProjectEditors] CHECK CONSTRAINT [FK_ProjectEditors_Projects]
 GO
-/****** Object:  ForeignKey [FK_Projects_ProjectInvestigators]    Script Date: 05/25/2012 13:04:13 ******/
 ALTER TABLE [dbo].[Projects]  WITH CHECK ADD  CONSTRAINT [FK_Projects_ProjectInvestigators] FOREIGN KEY([ProjectInvestigator])
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO

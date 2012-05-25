@@ -2,6 +2,7 @@ Creating Database Exports using SSMS
 
 CreateDatabase.sql -- Database object
   Right click on Animal_Movement database, select Script Database as -> CREATE To -> File...
+  make sure it is saved as ANSI, not unicode; git diff doesn't grok unicode
 
 
 CreateDatabaseObjects.sql
@@ -12,6 +13,7 @@ CreateDatabaseObjects.sql
   Set Scripting Options
     Save to single ANSI text file
 	Advanced (check these settings - defaults can be set in SSMS Settings)
+	  Include Descriptive Header -> False  (header includes an export date/time which causes unecessary diffs)
 	  Script Extended Properties -> False
 	  Script Object-Level Permissions -> True
 	  Script Indexes -> True
@@ -30,3 +32,4 @@ LookupTableData.sql
     Save to single ANSI text file (should use Unicode, but git can't diff that)
 	Advanced
 		same as above
+		Types of data to script -> Data Only
