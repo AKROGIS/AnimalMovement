@@ -1,0 +1,32 @@
+Creating Database Exports using SSMS
+
+CreateDatabase.sql -- Database object
+  Right click on Animal_Movement database, select Script Database as -> CREATE To -> File...
+
+
+CreateDatabaseObjects.sql
+  Right click on Animal_Movement database, select Tasks -> Generate Scripts...
+  Choose Objects
+    Select specific database objects
+      Select All, except SQL Assemblies
+  Set Scripting Options
+    Save to single ANSI text file
+	Advanced (check these settings - defaults can be set in SSMS Settings)
+	  Script Extended Properties -> False
+	  Script Object-Level Permissions -> True
+	  Script Indexes -> True
+	  Script Triggers -> True
+ 
+
+LookupTableData.sql
+  Right click on Animal_Movement database, select Tasks -> Generate Scripts...
+  Choose Objects
+    Select specific database objects
+      Select only the following tables:
+	    Lookup*
+		ProjectInvestigators
+		Settings
+  Set Scripting Options
+    Save to single ANSI text file (should use Unicode, but git can't diff that)
+	Advanced
+		same as above
