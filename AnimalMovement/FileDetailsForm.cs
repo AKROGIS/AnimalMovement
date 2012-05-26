@@ -5,8 +5,6 @@ using System.Text;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Allow changing filename and collar
-
 namespace AnimalMovement
 {
     internal partial class FileDetailsForm : BaseForm
@@ -49,7 +47,13 @@ namespace AnimalMovement
             StatusTextBox.Text = File.LookupCollarFileStatus.Name;
             UpdateCollarFixes();
             EnableForm();
-            Closebutton.Focus();
+            DoneCancelButton.Focus();
+        }
+
+        private void UpdateDataSource()
+        {
+            File.CollarId = CollarIdTextBox.Text.NullifyIfEmpty();
+            File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
         }
 
         private void UpdateCollarFixes()
@@ -101,10 +105,63 @@ namespace AnimalMovement
             ChangeStatusbutton.Enabled = IsFileEditor;
         }
 
-        private void Closebutton_Click(object sender, EventArgs e)
+
+        private void EditSaveButton_Click(object sender, EventArgs e)
         {
-            Close();
+            //This button is not enabled unless editing is permitted 
+            if (EditSaveButton.Text == "Edit")
+            {
+                // The user wants to edit, Enable form
+                EditSaveButton.Text = "Save";
+                DoneCancelButton.Text = "Cancel";
+                SetEditingControls();
+            }
+            else
+            {
+                //User is saving
+                try
+                {
+                    UpdateDataSource();
+                    Database.SubmitChanges();
+                    OnDatabaseChanged();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Unable to save changes", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                EditSaveButton.Text = "Edit";
+                DoneCancelButton.Text = "Done";
+                SetEditingControls();
+            }
         }
+
+
+        private void DoneCancelButton_Click(object sender, EventArgs e)
+        {
+            if (DoneCancelButton.Text == "Cancel")
+            {
+                DoneCancelButton.Text = "Done";
+                EditSaveButton.Text = "Edit";
+                SetEditingControls();
+                //Reset state from database
+                LoadDataContext();
+            }
+            else
+            {
+                Close();
+            }
+        }
+
+
+        private void SetEditingControls()
+        {
+            bool editModeEnabled = EditSaveButton.Text == "Save";
+            FileNameTextBox.Enabled = editModeEnabled;
+            CollarIdTextBox.Enabled = editModeEnabled && File.Status == 'I';
+            ChangeStatusbutton.Enabled = !editModeEnabled && IsFileEditor;
+        }
+
 
         private void OnDatabaseChanged()
         {
