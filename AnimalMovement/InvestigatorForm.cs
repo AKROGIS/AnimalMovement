@@ -57,7 +57,7 @@ namespace AnimalMovement
 
         private void InvestigatorForm_Load(object sender, EventArgs e)
         {
-            LoadDataSource();
+            LoadDataContext();
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -66,7 +66,7 @@ namespace AnimalMovement
             Properties.Settings.Default.InvestigatorFormSplitterDistance = splitContainer1.SplitterDistance;
         }
 
-        private void LoadDataSource()
+        private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
             Investigator = Database.ProjectInvestigators.First(pi => pi.Login == InvestigatorLogin);
@@ -149,7 +149,7 @@ namespace AnimalMovement
                 {
                     UpdateDataSource();
                     Database.SubmitChanges();
-                    OnDataBaseChanged();
+                    OnDatabaseChanged();
                 }
                 catch (Exception ex)
                 {
@@ -171,7 +171,7 @@ namespace AnimalMovement
                 EditSaveButton.Text = "Edit";
                 SetEditingControls();
                 //Reset state from database
-                LoadDataSource();
+                LoadDataContext();
             }
             else
             {
@@ -216,7 +216,7 @@ namespace AnimalMovement
                                 "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            LoadDataSource();
+            LoadDataContext();
         }
 
         private void InfoProjectButton_Click(object sender, EventArgs e)
@@ -255,7 +255,7 @@ namespace AnimalMovement
                                 "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            LoadDataSource();
+            LoadDataContext();
         }
 
         private void InfoCollarButton_Click(object sender, EventArgs e)
@@ -294,7 +294,7 @@ namespace AnimalMovement
 
         }
 
-        private void OnDataBaseChanged()
+        private void OnDatabaseChanged()
         {
             EventHandler handle = DatabaseChanged;
             if (handle != null)
