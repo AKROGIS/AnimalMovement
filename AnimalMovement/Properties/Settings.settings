@@ -83,7 +83,7 @@
       <Value Profile="(Default)">489, 314</Value>
     </Setting>
     <Setting Name="ChangeInvestigatorFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">285, 142</Value>
+      <Value Profile="(Default)">330, 170</Value>
     </Setting>
     <Setting Name="CollarAnimalFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">284, 131</Value>

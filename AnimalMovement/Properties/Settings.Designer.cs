@@ -324,7 +324,7 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("285, 142")]
+        [global::System.Configuration.DefaultSettingValueAttribute("330, 170")]
         public global::System.Drawing.Size ChangeInvestigatorFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["ChangeInvestigatorFormSize"]));

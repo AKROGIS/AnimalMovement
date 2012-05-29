@@ -67,16 +67,19 @@
             // 
             // LeadComboBox
             // 
+            this.LeadComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.LeadComboBox.FormattingEnabled = true;
             this.LeadComboBox.Location = new System.Drawing.Point(113, 81);
             this.LeadComboBox.Name = "LeadComboBox";
-            this.LeadComboBox.Size = new System.Drawing.Size(160, 21);
+            this.LeadComboBox.Size = new System.Drawing.Size(198, 21);
             this.LeadComboBox.TabIndex = 1;
             // 
             // ChangeButton
             // 
+            this.ChangeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ChangeButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.ChangeButton.Location = new System.Drawing.Point(198, 108);
+            this.ChangeButton.Location = new System.Drawing.Point(236, 112);
             this.ChangeButton.Name = "ChangeButton";
             this.ChangeButton.Size = new System.Drawing.Size(75, 23);
             this.ChangeButton.TabIndex = 6;
@@ -86,8 +89,9 @@
             // 
             // cancelButton
             // 
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(117, 108);
+            this.cancelButton.Location = new System.Drawing.Point(155, 112);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 5;
@@ -100,14 +104,14 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(285, 142);
+            this.ClientSize = new System.Drawing.Size(324, 146);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.ChangeButton);
             this.Controls.Add(this.LeadComboBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "ChangeInvestigatorForm";
             this.Text = "Relinquish Project Lead";
             this.ResumeLayout(false);
