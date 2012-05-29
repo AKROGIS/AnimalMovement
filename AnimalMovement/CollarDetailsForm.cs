@@ -4,6 +4,9 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//FIXME - disable 'Delete' deployment button when there are no deployments
+//TODO - Add list of files to with data for this collar to form
+
 namespace AnimalMovement
 {
     internal partial class CollarDetailsForm : BaseForm

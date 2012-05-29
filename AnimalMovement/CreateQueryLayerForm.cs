@@ -5,7 +5,12 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//FIXME - animals need to be prefixed with project
 //TODO - Add Region Filter
+//TODO - Cleanup/Simplify
+//TODO - Activate or remove the diagnostics layer button
+//TODO - put everything in one group layer (include no movement, hidden locations); remove location/movements checkbox
+//TODO - Test if query returns any results before creating layer file.
 
 namespace AnimalMovement
 {

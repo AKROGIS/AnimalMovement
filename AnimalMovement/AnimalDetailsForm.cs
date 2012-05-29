@@ -3,6 +3,9 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//FIXME - disable 'Delete' deployment button when there are no deployments
+//TODO - Add Fix/Location information on form below deployments
+
 namespace AnimalMovement
 {
     internal partial class AnimalDetailsForm : BaseForm
