@@ -86,7 +86,7 @@
       <Value Profile="(Default)">330, 170</Value>
     </Setting>
     <Setting Name="CollarAnimalFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">284, 131</Value>
+      <Value Profile="(Default)">290, 155</Value>
     </Setting>
     <Setting Name="CollarDetailsFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">483, 357</Value>
@@ -95,7 +95,7 @@
       <Value Profile="(Default)">376, 541</Value>
     </Setting>
     <Setting Name="DeployCollarFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">284, 131</Value>
+      <Value Profile="(Default)">290, 155</Value>
     </Setting>
     <Setting Name="FileContentsFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">427, 440</Value>
