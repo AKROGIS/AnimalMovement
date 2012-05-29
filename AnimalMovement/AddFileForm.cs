@@ -240,7 +240,7 @@ namespace AnimalMovement
             if (CollarMfgrComboBox.SelectedItem != null)
                 data = data.Where(
                 c => c.CollarManufacturer == ((LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem).CollarManufacturer);
-            if (!AllCollarsCheckBox.Checked)
+            if (!AllCollarsCheckBox.Checked && Project != null)
                 data = data.Where(c => c.Manager.Equals(Project.ProjectInvestigator, StringComparison.InvariantCultureIgnoreCase));
             CollarComboBox.DataSource = data.ToList();
         }
