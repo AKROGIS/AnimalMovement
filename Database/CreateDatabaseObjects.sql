@@ -200,6 +200,27 @@ CREATE TABLE [dbo].[CollarFixes](
 GO
 SET ANSI_PADDING OFF
 GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_Collar] ON [dbo].[CollarFixes] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_FileId] ON [dbo].[CollarFixes] 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_FixDate] ON [dbo].[CollarFixes] 
+(
+	[FixDate] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_HiddenBy] ON [dbo].[CollarFixes] 
+(
+	[HiddenBy] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -501,6 +522,11 @@ CREATE TABLE [dbo].[Locations](
 GO
 SET ANSI_PADDING OFF
 GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Locations_FixId] ON [dbo].[Locations] 
+(
+	[FixId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
 CREATE SPATIAL INDEX [SIndex_Locations_Location] ON [dbo].[Locations] 
 (
 	[Location]
@@ -544,6 +570,47 @@ SELECT     dbo.CollarDeployments.*
 FROM         dbo.CollarDeployments
 WHERE     (DeploymentDate < GETDATE()) AND (RetrievalDate > GETDATE() OR
                       RetrievalDate IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a table of conflicting fixes for a specific collar.
+-- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007')
+-- =============================================
+CREATE FUNCTION [dbo].[ConflictingFixes] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT FixId, HiddenBy, FileId, LineNumber, C.FixDate, Lat, Lon
+		FROM CollarFixes AS C
+		INNER JOIN 
+			(SELECT   CollarManufacturer, CollarId, FixDate 
+			 FROM     CollarFixes 
+			 WHERE    CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+			 GROUP BY CollarManufacturer, CollarId, FixDate
+			 HAVING   COUNT(FixDate) > 1) AS D
+		ON  C.CollarManufacturer = D.CollarManufacturer
+		AND C.CollarId = D.CollarId
+		AND C.FixDate = D.FixDate
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[CollarsWithConflictingFixes]
+AS
+SELECT DISTINCT CollarManufacturer, CollarId
+FROM         dbo.CollarFixes
+GROUP BY CollarManufacturer, CollarId, FixDate
+HAVING      (COUNT(FixDate) > 1)
 GO
 SET ANSI_NULLS ON
 GO
@@ -619,41 +686,54 @@ BEGIN
 	
 	
 	DECLARE
+		@HiddenFixId		bigint,
 		@FixId				bigint,
 		@HiddenBy			bigint,
 		@FileId				INT,
 		@LineNumber			INT,
-		@CollarManufacturer CHAR(12),
-		@CollarId			CHAR(12),
-		@FixDate			DATETIME2,
+		@CollarManufacturer VARCHAR(16),
+		@CollarId			VARCHAR(16),
+		@FixDate			DATETIME2(7),
 		@Lat				FLOAT,
 		@Lon				FLOAT;
 	  
 	DECLARE insf_cursor CURSOR FOR 
 		SELECT HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon
 		  FROM inserted
+	-- I cannot select FixId (Identity column) from inserted, because it is set to zero in the cursor
 
 	OPEN insf_cursor;
 
 	FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
-
+	
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		-- Step 1) Hide an equivalent fix if it is not already hidden.
-		-- mark the hidden fix as hidden by 0, since we do not have the id of the hidding fix yet
-		UPDATE CollarFixes SET HiddenBy = 0  --Identity starts at 1, so 0 is a safe marker 
-		 WHERE CollarFixes.HiddenBy IS NULL
-		   AND CollarFixes.CollarManufacturer = @CollarManufacturer
+
+		-- Step 1) Get the id of the fix we will hide (if it is null, then we are not hiding anything)
+		SET @HiddenFixId = NULL  -- The assignment below does not occur if no record is found
+		SELECT @HiddenFixId = FixId FROM CollarFixes
+		 WHERE CollarFixes.CollarManufacturer = @CollarManufacturer
 		   AND CollarFixes.CollarId = @CollarID
 		   AND CollarFixes.FixDate = @FixDate
-		   
-		-- Step 2) Add new fix to table
+		   AND CollarFixes.HiddenBy IS NULL
+		
+		-- Step 2) Add new fix to table (do the insert that fired this trigger)
 		INSERT CollarFixes (HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
 		VALUES (@HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon)
 		SET @FixId = SCOPE_IDENTITY();
-		UPDATE CollarFixes Set HiddenBy = @FixId WHERE HiddenBy = 0;
+
+		-- PRINT N'  FixDate:' + cast(@FixDate as nvarchar(30)) + N';  HiddenFixId:' + isnull(cast(@HiddenFixId as nvarchar(30)), N'null') + N';  NewFixId:' + isnull(cast(@FixId as nvarchar(30)), N'null')
+
+		-- IF @HiddenFixId IS NOT NULL We are temporarily unstable becasue we have two active & conflicting fixes
 		
-		-- Step 3) Add new record to Locations table
+		-- Step3) Hide the hidden fix (the update trigger will remove the associated location)
+		IF @HiddenFixId IS NOT NULL
+		BEGIN
+			UPDATE CollarFixes SET HiddenBy = @FixId WHERE FixId = @HiddenFixId;
+		END
+		
+		
+		-- Step 4) Add new record to Locations table
 		-- This should not create a Location if there is no matching deployment
 		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
 			 SELECT C.ProjectId, C.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
@@ -730,6 +810,7 @@ BEGIN
 		
 		-- Step 4) What ever was hiding the fix being deleted should now be hiding
 		-- the fix that the deleted fix was hiding.
+		-- FIXME - searching the CollarFixes by HiddenBy (even when indexed) is slow
 		UPDATE CollarFixes SET HiddenBy = @HiddenBy WHERE HiddenBy = @FixId;
 
 		FETCH NEXT FROM delf_cursor INTO @FixId;
@@ -3982,6 +4063,8 @@ GO
 GRANT EXECUTE ON [dbo].[ProjectInvestigator_Update] TO [Investigator] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Settings_Update] TO [NPS\Domain Users] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ConflictingFixes] TO [NPS\Domain Users] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[DateTimeToOrdinal] TO [NPS\Domain Users] AS [dbo]
 GO

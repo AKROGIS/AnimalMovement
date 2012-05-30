@@ -13,6 +13,8 @@ SELECT TOP 100 * FROM CollarsNeverDeployed
 SELECT TOP 100 * FROM CollarsNotCurrentlyDeployed
 SELECT TOP 100 * FROM CurrentDeployments
 
+SELECT TOP 100 * FROM CollarsWithConflictingFixes
+
 SELECT TOP 100 * FROM FixesByLocation
 SELECT TOP 100 * FROM InvalidLocations
 SELECT TOP 100 * FROM NoMovement
