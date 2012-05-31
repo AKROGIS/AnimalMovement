@@ -3,7 +3,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//FIXME - disable 'Delete' deployment button when there are no deployments
 //TODO - Move Delete, Retrieve and Info button onto the data grid.
 //TODO - Add Location information on form below deployments
 //TODO - Include spatial properties, centroid, bounding box, MCP
@@ -113,7 +112,7 @@ namespace AnimalMovement
             GroupTextBox.Enabled = editModeEnabled;
             DescriptionTextBox.Enabled = editModeEnabled;
 
-            DeleteDeploymentButton.Enabled = !editModeEnabled && IsAnimalEditor;
+            DeleteDeploymentButton.Enabled = !editModeEnabled && IsAnimalEditor && DeploymentDataGridView.RowCount > 0;
             DeployRetrieveButton.Enabled = !editModeEnabled && IsAnimalEditor;
         }
 

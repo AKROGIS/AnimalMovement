@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//FIXME - disable 'Delete' deployment button when there are no deployments
 //TODO - Move Delete, Retrieve and Info button onto the data grid.
 //TODO - Add list of files with data for this collar, include # of fixes in the file
 //TODO - Double click a file in the list to see file details
@@ -128,7 +127,7 @@ namespace AnimalMovement
             DownloadInfoTextBox.Enabled = editModeEnabled;
             NotesTextBox.Enabled = editModeEnabled;
 
-            DeleteDeploymentButton.Enabled = !editModeEnabled && IsCollarOwner;
+            DeleteDeploymentButton.Enabled = !editModeEnabled && IsCollarOwner && DeploymentDataGridView.RowCount > 0;
             DeployRetrieveButton.Enabled = !editModeEnabled && IsCollarOwner;
         }
 
