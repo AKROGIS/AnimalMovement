@@ -4,7 +4,10 @@ using System.Windows.Forms;
 using DataModel;
 
 //FIXME - disable 'Delete' deployment button when there are no deployments
-//TODO - Add Fix/Location information on form below deployments
+//TODO - Move Delete, Retrieve and Info button onto the data grid.
+//TODO - Add Location information on form below deployments
+//TODO - Include spatial properties, centroid, bounding box, MCP
+//TODO - Double click on a deployment to see Collar details
 
 namespace AnimalMovement
 {

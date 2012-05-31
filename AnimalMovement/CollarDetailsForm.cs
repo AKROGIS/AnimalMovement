@@ -5,7 +5,12 @@ using System.Windows.Forms;
 using DataModel;
 
 //FIXME - disable 'Delete' deployment button when there are no deployments
-//TODO - Add list of files to with data for this collar to form
+//TODO - Move Delete, Retrieve and Info button onto the data grid.
+//TODO - Add list of files with data for this collar, include # of fixes in the file
+//TODO - Double click a file in the list to see file details
+//TODO - Double click on deployment to see animal details (add button too?)
+//TODO - Add list of fix conflicts for this collar, and the ability to change status
+//TODO make these additional information pages collapsible panels or tabs 
 
 namespace AnimalMovement
 {
