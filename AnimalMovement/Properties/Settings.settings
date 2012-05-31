@@ -92,7 +92,7 @@
       <Value Profile="(Default)">483, 357</Value>
     </Setting>
     <Setting Name="CreateQueryLayerFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">376, 541</Value>
+      <Value Profile="(Default)">531, 419</Value>
     </Setting>
     <Setting Name="DeployCollarFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">290, 155</Value>
@@ -128,7 +128,7 @@
       <Value Profile="(Default)">176</Value>
     </Setting>
     <Setting Name="CreateQueryLayerFormSplitter1Distance" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">112</Value>
+      <Value Profile="(Default)">185</Value>
     </Setting>
     <Setting Name="CreateQueryLayerFormSplitter2Distance" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">112</Value>

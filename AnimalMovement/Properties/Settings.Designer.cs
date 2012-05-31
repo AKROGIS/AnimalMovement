@@ -360,7 +360,7 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("376, 541")]
+        [global::System.Configuration.DefaultSettingValueAttribute("531, 419")]
         public global::System.Drawing.Size CreateQueryLayerFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["CreateQueryLayerFormSize"]));
@@ -504,7 +504,7 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("112")]
+        [global::System.Configuration.DefaultSettingValueAttribute("185")]
         public int CreateQueryLayerFormSplitter1Distance {
             get {
                 return ((int)(this["CreateQueryLayerFormSplitter1Distance"]));

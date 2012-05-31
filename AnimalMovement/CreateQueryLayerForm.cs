@@ -6,9 +6,8 @@ using System.Windows.Forms;
 using DataModel;
 
 //TODO - Add Region Filter
-//TODO - Cleanup/Simplify
-//TODO - Activate or remove the diagnostics layer button
-//TODO - put everything in one group layer (include no movement, hidden locations); remove location/movements checkbox
+//TODO - Cleanup and Simplify the form
+//TODO - Put everything in one group layer (include no movement, hidden locations); remove location/movements checkbox
 //TODO - Test if query returns any results before creating layer file.
 
 namespace AnimalMovement
@@ -78,30 +77,6 @@ namespace AnimalMovement
             AnimalsCheckedListBox.DataSource = Animals;
         }
 
-        //private void FilterAnimalsList()
-        //{
-        //    List<Project> projects = null;
-        //    if (ProjectsCheckedListBox.CheckedItems.Count != 0 &&
-        //        ProjectsCheckedListBox.CheckedItems.Count != ProjectsCheckedListBox.Items.Count)
-        //        projects = ProjectsCheckedListBox.CheckedItems.Cast<Project>().ToList();
-
-        //    List<LookupSpecies> species = null;
-        //    if (SpeciesCheckedListBox.CheckedItems.Count != 0 &&
-        //        SpeciesCheckedListBox.CheckedItems.Count != SpeciesCheckedListBox.Items.Count)
-        //        species = SpeciesCheckedListBox.CheckedItems.Cast<LookupSpecies>().ToList();
-
-        //    IEnumerable<Animal> animals = Animals;
-
-        //    if (projects != null)
-        //        animals = animals.Where(a => projects.Contains(a.Project));
-
-        //    if (species != null)
-        //        animals = animals.Where(a => species.Contains(a.LookupSpecies));
-
-        //    AnimalsCheckedListBox.DataSource = animals.ToList();
-        //    AnimalsCheckedListBox.DisplayMember = "AnimalId";
-        //}
-
         private void LoadDefaultDates()
         {
             StartDateTimePicker.Value = DateTime.Now.Date - TimeSpan.FromDays(365);
@@ -149,7 +124,6 @@ namespace AnimalMovement
             ProjectsCheckedListBox.Enabled = FilterByProjectsCheckBox.Checked;
             AllProjectsButton.Enabled = FilterByProjectsCheckBox.Checked;
             ClearProjectsButton.Enabled = FilterByProjectsCheckBox.Checked;
-            //FilterByAnimalsCheckBox.Checked = !FilterByProjectsCheckBox.Checked;
         }
 
         private void FilterBySpeciesCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -157,7 +131,6 @@ namespace AnimalMovement
             SpeciesCheckedListBox.Enabled = FilterBySpeciesCheckBox.Checked;
             AllSpeciesButton.Enabled = FilterBySpeciesCheckBox.Checked;
             ClearSpeciesButton.Enabled = FilterBySpeciesCheckBox.Checked;
-            //FilterByAnimalsCheckBox.Checked = !FilterBySpeciesCheckBox.Checked;
         }
 
         private void FilterByAnimalCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -165,8 +138,6 @@ namespace AnimalMovement
             AnimalsCheckedListBox.Enabled = FilterByAnimalsCheckBox.Checked;
             AllAnimalsButton.Enabled = FilterByAnimalsCheckBox.Checked;
             ClearAnimalsButton.Enabled = FilterByAnimalsCheckBox.Checked;
-            //FilterByProjectsCheckBox.Checked = !FilterByAnimalsCheckBox.Checked;
-            //FilterBySpeciesCheckBox.Checked = !FilterByAnimalsCheckBox.Checked;
         }
 
         private void FilterByDatesCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -216,16 +187,6 @@ namespace AnimalMovement
             var message = "Name:{0}\nFile:{1}\nConnection:{2}\nQuery:{3}\nError:{4}";
             message = String.Format(message, name, path, connection, query, error);
             MessageBox.Show(message, "Layer File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private void ProjectsCheckedListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //FilterAnimalsList();
-        }
-
-        private void SpeciesCheckedListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //FilterAnimalsList();
         }
 
         private string BuildSql(string table)
