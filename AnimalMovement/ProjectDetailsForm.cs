@@ -15,8 +15,6 @@ using System.Linq;
  * when the form is not in edit mode.
  */
 
-//FIXME - Deleting a Active File can take some time.   Increase the timeout, and put up a wait cursor or progress bar
-
 namespace AnimalMovement
 {
     internal partial class ProjectDetailsForm : BaseForm
@@ -253,6 +251,8 @@ namespace AnimalMovement
         {
             foreach (FileListItem item in FilesListBox.SelectedItems.Cast<FileListItem>().Where(item => item.CanDelete))
                 Database.CollarFiles.DeleteOnSubmit(item.File);
+            //Deleting an active file takes time to remove the locations; assume at least one file is active
+            Cursor.Current = Cursors.WaitCursor;
             try
             {
                 Database.SubmitChanges();
@@ -263,6 +263,7 @@ namespace AnimalMovement
                              "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
             SetFileList();
             FilesListBox_SelectedIndexChanged(null, null);

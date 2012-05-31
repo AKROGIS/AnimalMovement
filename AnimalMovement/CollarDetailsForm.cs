@@ -8,7 +8,7 @@ using DataModel;
 //TODO - Add list of files with data for this collar, include # of fixes in the file
 //TODO - Double click a file in the list to see file details
 //TODO - Add list of fix conflicts for this collar, and the ability to change status
-//TODO make these additional information pages collapsible panels or tabs 
+//TODO - make these additional information pages collapsible panels or tabs 
 //TODO - Add Info button to get Animal details (for those who do not know to double click)
 
 namespace AnimalMovement
@@ -138,16 +138,19 @@ namespace AnimalMovement
                 var deployment = (DeploymentDataItem)row.DataBoundItem;
                 Database.CollarDeployments.DeleteOnSubmit(deployment.Deployment);
             }
+            //when we delete a deployment, we may delete locations, which takes time.
+            Cursor.Current = Cursors.WaitCursor;
             try
             {
                 Database.SubmitChanges();
             }
             catch (Exception ex)
             {
-                string msg = "Unable to delete one or more of the selected deploymnets\n" +
+                string msg = "Unable to delete one or more of the selected deployments\n" +
                                 "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
             SetDeploymentDataGrid();
             Deployed = Collar.CollarDeployments.Any(d => d.RetrievalDate == null);
@@ -163,12 +166,14 @@ namespace AnimalMovement
                 if (form.ShowDialog(this) == DialogResult.Cancel)
                     return;
             }
-            else
+            else  //Deploy
             {
                 var form = new DeployCollarForm(Database, Collar, CurrentUser);
                 if (form.ShowDialog(this) == DialogResult.Cancel)
                     return;
             }
+            //when we deploy or retrieve a collar, we may add or delete locations, which takes time.
+            Cursor.Current = Cursors.WaitCursor;
             try
             {
                 Database.SubmitChanges();
@@ -178,8 +183,10 @@ namespace AnimalMovement
                 string msg = "Unable to save the changes.\n" +
                              "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Cursor.Current = Cursors.Default;
                 return;
             }
+            Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
             LoadDataContext();
         }

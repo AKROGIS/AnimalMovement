@@ -4,8 +4,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//FIXME - do activation and other time consuming tasks on a background thread.
-//FIXME - try and speed up file activation
 //TODO - ask to create necessary database records to support file - i.e. collars/animals/deployments
 //TODO - set collarComboBox.selectedItem to null if disabled.  trick is setting back to something meaningful when enabled.
 //TODO - improve validation before create/save
@@ -148,13 +146,9 @@ namespace AnimalMovement
             Database.CollarFiles.InsertOnSubmit(file);
             if (IndependentContext)
             {
-                var cursor = Cursor.Current;
-                Cursor = Cursors.WaitCursor;
-                int timeout = Database.CommandTimeout;
-                Database.CommandTimeout = 1200; //20 minutes
+                Cursor.Current = Cursors.WaitCursor;
                 try
                 {
-                    //FIXME if file is Active, this can cause creation of fixes/locations - increase timeout
                     Database.SubmitChanges();
                 }
                 catch (Exception ex)
@@ -163,12 +157,10 @@ namespace AnimalMovement
                     MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     FileNameTextBox.Focus();
                     UploadButton.Enabled = false;
-                    Cursor = cursor;
-                    Database.CommandTimeout = timeout;
+                    Cursor.Current = Cursors.Default;
                     return;
                 }
-                Cursor = cursor;
-                Database.CommandTimeout = timeout;
+                Cursor.Current = Cursors.Default;
             }
             OnDatabaseChanged();
             DialogResult = DialogResult.OK;

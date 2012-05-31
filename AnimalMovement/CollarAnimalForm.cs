@@ -99,7 +99,6 @@ namespace AnimalMovement
                                         CollarManufacturer = collar.CollarManufacturer,
                                         DeploymentDate = DeployDateTimePicker.Value.Date
                                     };
-            //FIXME deploying a collar can cause creation of fixes/location - Ensure timeout is increases, and put up progress indicator
             Database.CollarDeployments.InsertOnSubmit(deployment);
         }
     }

@@ -67,21 +67,16 @@ namespace AnimalMovement
 
         private void ShowContentsButton_Click(object sender, EventArgs e)
         {
-            var cursor = Cursor.Current;
-            Cursor = Cursors.WaitCursor;
+            Cursor.Current = Cursors.WaitCursor;
             string contents = Encoding.UTF8.GetString(File.Contents.ToArray());
             var form = new FileContentsForm(contents, File.FileName);
-            Cursor = cursor;
+            Cursor.Current = Cursors.Default;
             form.Show(this);
         }
 
         private void ChangeStatusbutton_Click(object sender, EventArgs e)
         {
-            var cursor = Cursor.Current;
-            Cursor = Cursors.WaitCursor;
-            //When changing status, the database can only process about 80 records per second
-            int defaultTimeout = Database.CommandTimeout;
-            Database.CommandTimeout = 1250;  //In seconds, default is 30
+            Cursor.Current = Cursors.WaitCursor;
             try
             {
                 Database.CollarFile_UpdateStatus(File.FileId, File.Status == 'A' ? 'I' : 'A');
@@ -91,11 +86,10 @@ namespace AnimalMovement
                 string msg = "Unable to change the status.\n" +
                              "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Cursor = cursor;
+                Cursor.Current = Cursors.Default;
                 return;
             }
-            Cursor = cursor;
-            Database.CommandTimeout = defaultTimeout;
+            Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
             LoadDataContext();
         }

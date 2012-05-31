@@ -123,16 +123,19 @@ namespace AnimalMovement
                 var deployment = (DeploymentDataItem)row.DataBoundItem;
                 Database.CollarDeployments.DeleteOnSubmit(deployment.Deployment);
             }
+            //when we delete a deployment, we may delete locations, which takes time.
+            Cursor.Current = Cursors.WaitCursor;
             try
             {
                 Database.SubmitChanges();
             }
             catch (Exception ex)
             {
-                string msg = "Unable to delete one or more of the selected deploymnets\n" +
+                string msg = "Unable to delete one or more of the selected deployments\n" +
                                 "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
             SetDeploymentDataGrid();
             Collared = Animal.CollarDeployments.Any(d => d.RetrievalDate == null);
@@ -148,12 +151,14 @@ namespace AnimalMovement
                 if (form.ShowDialog(this) == DialogResult.Cancel)
                     return;
             }
-            else
+            else //Deploy
             {
                 var form = new CollarAnimalForm(Database, Animal, CurrentUser);
                 if (form.ShowDialog(this) == DialogResult.Cancel)
                     return;
             }
+            //when we deploy or retrieve a collar, we may add or delete locations, which takes time.
+            Cursor.Current = Cursors.WaitCursor;
             try
             {
                 Database.SubmitChanges();
@@ -163,8 +168,10 @@ namespace AnimalMovement
                 string msg = "Unable to save the changes.\n" +
                              "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Cursor.Current = Cursors.Default;
                 return;
             }
+            Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
             LoadDataContext();
         }
