@@ -7,7 +7,7 @@ using DataModel;
 //TODO - Move Delete, Retrieve and Info button onto the data grid.
 //TODO - Add Location information on form below deployments
 //TODO - Include spatial properties, centroid, bounding box, MCP
-//TODO - Double click on a deployment to see Collar details
+//TODO - Add Info button to get Collar details (for those who do not know to double click)
 
 namespace AnimalMovement
 {
@@ -218,6 +218,17 @@ namespace AnimalMovement
                 Close();
             }
 
+        }
+
+        private void DeploymentDataGridView_DoubleClick(object sender, EventArgs e)
+        {
+            if (DeploymentDataGridView.CurrentRow == null)
+                return;
+            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
+            if (item == null)
+                return;
+            var form = new CollarDetailsForm(item.Deployment.CollarManufacturer, item.CollarId, CurrentUser);
+            form.Show(this);
         }
 
         private void OnDatabaseChanged()

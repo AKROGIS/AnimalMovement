@@ -102,6 +102,7 @@
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DeploymentDataGridView.Size = new System.Drawing.Size(463, 107);
             this.DeploymentDataGridView.TabIndex = 7;
+            this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.DeploymentDataGridView_DoubleClick);
             // 
             // CollarManufacturerColumn
             // 

@@ -8,9 +8,9 @@ using DataModel;
 //TODO - Move Delete, Retrieve and Info button onto the data grid.
 //TODO - Add list of files with data for this collar, include # of fixes in the file
 //TODO - Double click a file in the list to see file details
-//TODO - Double click on deployment to see animal details (add button too?)
 //TODO - Add list of fix conflicts for this collar, and the ability to change status
 //TODO make these additional information pages collapsible panels or tabs 
+//TODO - Add Info button to get Animal details (for those who do not know to double click)
 
 namespace AnimalMovement
 {
@@ -233,6 +233,17 @@ namespace AnimalMovement
                 Close();
             }
 
+        }
+
+        private void DeploymentDataGridView_DoubleClick(object sender, EventArgs e)
+        {
+            if (DeploymentDataGridView.CurrentRow == null)
+                return;
+            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
+            if (item == null)
+                return;
+            var form = new AnimalDetailsForm(item.Deployment.ProjectId, item.AnimalId, CurrentUser);
+            form.Show(this);
         }
 
         private void OnDatabaseChanged()
