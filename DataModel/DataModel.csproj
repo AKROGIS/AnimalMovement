@@ -37,6 +37,7 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animal.cs" />
     <Compile Include="AnimalMovement.designer.cs">
       <DependentUpon>AnimalMovement.dbml</DependentUpon>
       <DesignTime>True</DesignTime>

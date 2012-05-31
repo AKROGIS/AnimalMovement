@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//FIXME - animals need to be prefixed with project
 //TODO - Add Region Filter
 //TODO - Cleanup/Simplify
 //TODO - Activate or remove the diagnostics layer button
@@ -77,7 +76,6 @@ namespace AnimalMovement
         private void LoadAnimalsList()
         {
             AnimalsCheckedListBox.DataSource = Animals;
-            AnimalsCheckedListBox.DisplayMember = "AnimalId";
         }
 
         //private void FilterAnimalsList()
