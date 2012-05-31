@@ -1,10 +1,10 @@
 ﻿namespace DataModel
 {
-    public partial class Animal
+    public partial class Collar
     {
         public override string ToString()
         {
-            return _ProjectId + "/" + _AnimalId;
+            return _CollarManufacturer + "/" + _CollarId;
         }
     }
 }

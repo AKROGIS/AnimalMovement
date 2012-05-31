@@ -113,11 +113,11 @@ namespace AnimalMovement
 
         private string BuildCollarText(Collar collar)
         {
-            string name = collar.CollarManufacturer.Trim() + "/" + collar.CollarId.Trim();
+            string name = collar.ToString();
             var animals = from deployment in Database.CollarDeployments
                           where deployment.Collar == collar && deployment.RetrievalDate == null
-                          select deployment.ProjectId.Trim() + "/" + deployment.AnimalId.Trim();
-            string animal = animals.FirstOrDefault();
+                          select deployment.Animal;
+            var animal = animals.FirstOrDefault();
             if (animal != null)
                 name += " on " + animal;
             return name;

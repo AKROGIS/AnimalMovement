@@ -124,8 +124,7 @@ namespace AnimalMovement
             var currentCollar = animal.CollarDeployments.FirstOrDefault(cd => cd.RetrievalDate == null);
             return currentCollar == null
                        ? animal.AnimalId
-                       : animal.AnimalId + " (" + currentCollar.CollarManufacturer.Trim() + "/" +
-                         currentCollar.CollarId.Trim() + ")";
+                       : animal.AnimalId + " (" + currentCollar.Collar + ")";
         }
 
         private void SetFileList()
