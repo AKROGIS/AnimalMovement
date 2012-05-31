@@ -15,11 +15,18 @@ namespace SqlServerExtensions
 {
     public class AnimalMovementFunctions
     {
+        private const int FormatC_HeaderLines = 23;
+
         [SqlFunction]
         public static SqlDateTime LocalTime(SqlDateTime utcDateTime)
         {
             return new SqlDateTime(utcDateTime.Value.ToLocalTime());
         }
+
+        //Code - Format
+        //   A - Telonics Store On Board
+        //   B - Ed Debevek's File Format
+        //   C - Telonics Gen4 Condensed Output 
 
         [SqlFunction(
             DataAccess = DataAccessKind.Read,
@@ -101,7 +108,7 @@ namespace SqlServerExtensions
 	                [Error] [nvarchar](250) NULL")]
         public static IEnumerable ParseFormatC(SqlInt32 fileId)
         {
-            return GetLines(fileId, 'C', FormatC_LineSelector, null);
+            return GetLines(fileId, 'C', FormatC_LineSelector, FormatC_ColumnSelector);
         }
 
         private struct Line
@@ -175,6 +182,7 @@ namespace SqlServerExtensions
             if (header == null)
                 return mask;
             string[] columns = header.Split(new[] { '\t', ',' }, 14);
+            // Column 14+ is not well known and is for any and all other data that may be included
             // See Section 2.5 of Argos/Telonics Online Data Conversion, April 2010, Edward M. Debevec
             var wellKnownColumns = new[]
                                        {
@@ -192,6 +200,39 @@ namespace SqlServerExtensions
                 if (columns[fileColumn] != wellKnownColumns[i] &&
                     (wellKnownColumns[i] != "varies" ||
                      !variableColumns[i].Contains(columns[fileColumn])))
+                    continue;
+                mask = mask | 1u << i;
+                fileColumn++;
+            }
+            return mask;
+        }
+
+        internal static uint FormatC_ColumnSelector(StreamReader stream)
+        {
+            uint mask = UInt32.MinValue;
+            if (stream == null)
+                return mask;
+            //skip the junk before the header line
+            for (int i = 0; i < FormatC_HeaderLines-1; i++)
+                stream.ReadLine();
+            string header = stream.ReadLine();
+            if (header == null)
+                return mask;
+            string[] columns = header.Split(new[] { '\t', ',' }, 21);
+            var wellKnownColumns = new[]
+                                       {
+                                "Acquisition Time", "Acquisition Start Time", "Argos Location Class", "Argos Latitude", 
+                                "Argos Longitude", "Argos Altitude", "GPS Fix Attempt", "GPS Latitude", "GPS Longitude", 
+                                "GPS UTM Zone", "GPS UTM Northing", "GPS UTM Easting", "Temperature", "Satellite Uplink", 
+                                "Receive Time", "Satellite Name", "Repetition Count", "Low Voltage", "Mortality", 
+                                "Predeployment Data", "Error"
+                                       };
+            int fileColumn = 0;
+            for (int i = 0; i < wellKnownColumns.Length; i++)
+            {
+                if (columns.Length <= fileColumn)
+                    break;
+                if (columns[fileColumn] != wellKnownColumns[i])
                     continue;
                 mask = mask | 1u << i;
                 fileColumn++;
@@ -219,7 +260,7 @@ namespace SqlServerExtensions
 
         internal static bool FormatC_LineSelector(int lineNumber, string lineText)
         {
-            if (lineNumber <= 23)
+            if (lineNumber <= FormatC_HeaderLines)
                 return false;
             if (string.IsNullOrEmpty(lineText.Trim()))
                 return false;
@@ -297,16 +338,16 @@ namespace SqlServerExtensions
             lineNumber = line.LineNumber;
             int dbColumn = 0;
             int fileColumn = 0;
-            collarId = Include(columnMask, dbColumn++) ? parts[fileColumn++] : SqlString.Null;
-            animalId = Include(columnMask, dbColumn++) ? parts[fileColumn++] : SqlString.Null;
-            species = Include(columnMask, dbColumn++) ? parts[fileColumn++] : SqlString.Null;
-            group = Include(columnMask, dbColumn++) ? parts[fileColumn++] : SqlString.Null;
-            park = Include(columnMask, dbColumn++) ? parts[fileColumn++] : SqlString.Null;
-            fixDate = Include(columnMask, dbColumn++) ? parts[fileColumn++] : SqlString.Null;
-            fixTime = Include(columnMask, dbColumn++) ? parts[fileColumn++] : SqlString.Null;
-            fixMonth = Include(columnMask, dbColumn++) ? Int32.Parse(parts[fileColumn++]) : SqlInt32.Null;
-            fixDay = Include(columnMask, dbColumn++) ? Int32.Parse(parts[fileColumn++]) : SqlInt32.Null;
-            fixYear = Include(columnMask, dbColumn++) ? Int32.Parse(parts[fileColumn++]) : SqlInt32.Null;
+            collarId = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            animalId = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            species = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            group = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            park = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            fixDate = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            fixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            fixMonth = Include(columnMask, dbColumn++) ? NullableInt(parts[fileColumn++]) : SqlInt32.Null;
+            fixDay = Include(columnMask, dbColumn++) ? NullableInt(parts[fileColumn++]) : SqlInt32.Null;
+            fixYear = Include(columnMask, dbColumn++) ? NullableInt(parts[fileColumn++]) : SqlInt32.Null;
             latWgs84 = Include(columnMask, dbColumn++) ? NullableDouble(parts[fileColumn++]) : SqlDouble.Null;
             lonWgs84 = Include(columnMask, dbColumn++) ? NullableDouble(parts[fileColumn++]) : SqlDouble.Null;
             temperature = Include(columnMask, dbColumn) ? NullableDouble(parts[fileColumn++]) : SqlDouble.Null;
@@ -341,30 +382,43 @@ namespace SqlServerExtensions
         {
             var line = (Line)inputObject;
             string[] parts = line.LineText.Split(new[] { '\t', ',' }, 21);
+            uint columnMask = line.ColumnMask;
             lineNumber = line.LineNumber;
-            acquisitionTime = String.IsNullOrEmpty(parts[0]) ? SqlString.Null : parts[0];
-            acquisitionStartTime = String.IsNullOrEmpty(parts[1]) ? SqlString.Null : parts[1];
-            argosLocationClass = String.IsNullOrEmpty(parts[2]) ? SqlString.Null : parts[2];
-            argosLatitude = String.IsNullOrEmpty(parts[3]) ? SqlString.Null : parts[3];
-            argosLongitude = String.IsNullOrEmpty(parts[4]) ? SqlString.Null : parts[4];
-            argosAltitude = String.IsNullOrEmpty(parts[5]) ? SqlString.Null : parts[5];
-            gpsFixAttempt = String.IsNullOrEmpty(parts[6]) ? SqlString.Null : parts[6];
-            gpsLatitude = String.IsNullOrEmpty(parts[7]) ? SqlString.Null : parts[7];
-            gpsLongitude = String.IsNullOrEmpty(parts[8]) ? SqlString.Null : parts[8];
-            gpsUtmZone = String.IsNullOrEmpty(parts[9]) ? SqlString.Null : parts[9];
-            gpsUtmNorthing = String.IsNullOrEmpty(parts[10]) ? SqlString.Null : parts[10];
-            gpsUtmEasting = String.IsNullOrEmpty(parts[11]) ? SqlString.Null : parts[11];
-            temperature = String.IsNullOrEmpty(parts[12]) ? SqlString.Null : parts[12];
-            satelliteUplink = String.IsNullOrEmpty(parts[13]) ? SqlString.Null : parts[13];
-            receiveTime = String.IsNullOrEmpty(parts[14]) ? SqlString.Null : parts[14];
-            satelliteName = String.IsNullOrEmpty(parts[15]) ? SqlString.Null : parts[15];
-            repetitionCount = String.IsNullOrEmpty(parts[16]) ? SqlString.Null : parts[16];
-            lowVoltage = String.IsNullOrEmpty(parts[17]) ? SqlString.Null : parts[17];
-            mortality = String.IsNullOrEmpty(parts[18]) ? SqlString.Null : parts[18];
-            predeploymentData = String.IsNullOrEmpty(parts[19]) ? SqlString.Null : parts[19];
-            error = String.IsNullOrEmpty(parts[20]) ? SqlString.Null : parts[20];
+            int dbColumn = 0;
+            int fileColumn = 0;
+            acquisitionTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            acquisitionStartTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            argosLocationClass = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            argosLatitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            argosLongitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            argosAltitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsFixAttempt = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsLatitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsLongitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsUtmZone = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            gpsUtmNorthing = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            gpsUtmEasting = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            temperature = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            satelliteUplink = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            receiveTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            satelliteName = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            repetitionCount = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            lowVoltage = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            mortality = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            predeploymentData = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            error = Include(columnMask, dbColumn) ? NullableString(parts[fileColumn]) : SqlString.Null;
         }
 
+
+        private static SqlString NullableString(string s)
+        {
+            return String.IsNullOrEmpty(s.Trim()) ? SqlString.Null : s.Trim();
+        }
+
+        internal static SqlInt32 NullableInt(string s)
+        {
+            return String.IsNullOrEmpty(s.Trim()) ? SqlInt32.Null : Int32.Parse(s);
+        }
 
         internal static SqlDouble NullableDouble(string s)
         {
