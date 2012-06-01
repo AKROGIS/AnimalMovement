@@ -42,6 +42,8 @@
             this.GenderComboBox = new System.Windows.Forms.ComboBox();
             this.CreateButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.MortatlityDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.SuspendLayout();
             // 
             // ProjectCodeTextBox
@@ -49,9 +51,9 @@
             this.ProjectCodeTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ProjectCodeTextBox.Enabled = false;
-            this.ProjectCodeTextBox.Location = new System.Drawing.Point(72, 12);
+            this.ProjectCodeTextBox.Location = new System.Drawing.Point(93, 12);
             this.ProjectCodeTextBox.Name = "ProjectCodeTextBox";
-            this.ProjectCodeTextBox.Size = new System.Drawing.Size(195, 20);
+            this.ProjectCodeTextBox.Size = new System.Drawing.Size(249, 20);
             this.ProjectCodeTextBox.TabIndex = 34;
             this.ProjectCodeTextBox.TabStop = false;
             // 
@@ -59,9 +61,9 @@
             // 
             this.AnimalIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.AnimalIdTextBox.Location = new System.Drawing.Point(72, 39);
+            this.AnimalIdTextBox.Location = new System.Drawing.Point(93, 39);
             this.AnimalIdTextBox.Name = "AnimalIdTextBox";
-            this.AnimalIdTextBox.Size = new System.Drawing.Size(195, 20);
+            this.AnimalIdTextBox.Size = new System.Drawing.Size(249, 20);
             this.AnimalIdTextBox.TabIndex = 35;
             this.AnimalIdTextBox.TextChanged += new System.EventHandler(this.AnimalIdTextBox_TextChanged);
             // 
@@ -69,15 +71,15 @@
             // 
             this.GroupTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.GroupTextBox.Location = new System.Drawing.Point(72, 118);
+            this.GroupTextBox.Location = new System.Drawing.Point(93, 144);
             this.GroupTextBox.Name = "GroupTextBox";
-            this.GroupTextBox.Size = new System.Drawing.Size(195, 20);
+            this.GroupTextBox.Size = new System.Drawing.Size(249, 20);
             this.GroupTextBox.TabIndex = 38;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(21, 94);
+            this.label8.Location = new System.Drawing.Point(42, 94);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(45, 13);
             this.label8.TabIndex = 31;
@@ -86,7 +88,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(27, 121);
+            this.label7.Location = new System.Drawing.Point(48, 147);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(39, 13);
             this.label7.TabIndex = 30;
@@ -95,7 +97,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(18, 67);
+            this.label6.Location = new System.Drawing.Point(39, 67);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(48, 13);
             this.label6.TabIndex = 29;
@@ -104,7 +106,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(13, 41);
+            this.label5.Location = new System.Drawing.Point(34, 41);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(53, 13);
             this.label5.TabIndex = 28;
@@ -113,7 +115,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(11, 15);
+            this.label4.Location = new System.Drawing.Point(32, 15);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(55, 13);
             this.label4.TabIndex = 27;
@@ -122,7 +124,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 147);
+            this.label1.Location = new System.Drawing.Point(24, 173);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(63, 13);
             this.label1.TabIndex = 39;
@@ -133,10 +135,10 @@
             this.DescriptionTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.DescriptionTextBox.Location = new System.Drawing.Point(72, 144);
+            this.DescriptionTextBox.Location = new System.Drawing.Point(93, 170);
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
-            this.DescriptionTextBox.Size = new System.Drawing.Size(195, 47);
+            this.DescriptionTextBox.Size = new System.Drawing.Size(249, 75);
             this.DescriptionTextBox.TabIndex = 39;
             // 
             // SpeciesComboBox
@@ -152,9 +154,9 @@
             "Muskox",
             "Sheep",
             "Wolf"});
-            this.SpeciesComboBox.Location = new System.Drawing.Point(72, 64);
+            this.SpeciesComboBox.Location = new System.Drawing.Point(93, 64);
             this.SpeciesComboBox.Name = "SpeciesComboBox";
-            this.SpeciesComboBox.Size = new System.Drawing.Size(195, 21);
+            this.SpeciesComboBox.Size = new System.Drawing.Size(249, 21);
             this.SpeciesComboBox.TabIndex = 36;
             this.SpeciesComboBox.SelectedIndexChanged += new System.EventHandler(this.SpeciesComboBox_SelectedIndexChanged);
             // 
@@ -168,15 +170,15 @@
             "Male",
             "Female",
             "Unknown"});
-            this.GenderComboBox.Location = new System.Drawing.Point(72, 91);
+            this.GenderComboBox.Location = new System.Drawing.Point(93, 91);
             this.GenderComboBox.Name = "GenderComboBox";
-            this.GenderComboBox.Size = new System.Drawing.Size(195, 21);
+            this.GenderComboBox.Size = new System.Drawing.Size(249, 21);
             this.GenderComboBox.TabIndex = 37;
             // 
             // CreateButton
             // 
             this.CreateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.CreateButton.Location = new System.Drawing.Point(192, 197);
+            this.CreateButton.Location = new System.Drawing.Point(267, 251);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(75, 23);
             this.CreateButton.TabIndex = 43;
@@ -188,12 +190,35 @@
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(111, 197);
+            this.cancelButton.Location = new System.Drawing.Point(186, 251);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 42;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(11, 121);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(75, 13);
+            this.label2.TabIndex = 82;
+            this.label2.Text = "Date of death:";
+            // 
+            // MortatlityDateTimePicker
+            // 
+            this.MortatlityDateTimePicker.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.MortatlityDateTimePicker.Checked = false;
+            this.MortatlityDateTimePicker.CustomFormat = " ";
+            this.MortatlityDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.MortatlityDateTimePicker.Location = new System.Drawing.Point(93, 118);
+            this.MortatlityDateTimePicker.Name = "MortatlityDateTimePicker";
+            this.MortatlityDateTimePicker.ShowCheckBox = true;
+            this.MortatlityDateTimePicker.Size = new System.Drawing.Size(249, 20);
+            this.MortatlityDateTimePicker.TabIndex = 81;
+            this.MortatlityDateTimePicker.ValueChanged += new System.EventHandler(this.MortatlityDateTimePicker_ValueChanged);
             // 
             // AddAnimalForm
             // 
@@ -201,7 +226,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(284, 232);
+            this.ClientSize = new System.Drawing.Size(359, 286);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.MortatlityDateTimePicker);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.CreateButton);
             this.Controls.Add(this.GenderComboBox);
@@ -241,5 +268,7 @@
         private System.Windows.Forms.ComboBox GenderComboBox;
         private System.Windows.Forms.Button CreateButton;
         private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.DateTimePicker MortatlityDateTimePicker;
     }
 }

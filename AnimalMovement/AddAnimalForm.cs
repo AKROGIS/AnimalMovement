@@ -100,6 +100,7 @@ namespace AnimalMovement
                 AnimalId = AnimalIdTextBox.Text,
                 LookupGender = (LookupGender)GenderComboBox.SelectedItem,
                 LookupSpecies = (LookupSpecies)SpeciesComboBox.SelectedItem,
+                MortalityDate = MortatlityDateTimePicker.Checked ? MortatlityDateTimePicker.Value : (DateTime?)null,
                 GroupName = GroupTextBox.Text,
                 Description = DescriptionTextBox.Text
             };
@@ -135,11 +136,25 @@ namespace AnimalMovement
                 Settings.SetDefaultSpecies(species.Species);
         }
 
+        private void MortatlityDateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
+            MortatlityDateTimePicker.CustomFormat = MortatlityDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
+        }
+
         private void OnDatabaseChanged()
         {
             EventHandler handle = DatabaseChanged;
             if (handle != null)
                 handle(this, EventArgs.Empty);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            var now = DateTime.Now;
+            MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day);
+            MortatlityDateTimePicker.Checked = false;
+            MortatlityDateTimePicker.CustomFormat = " ";
         }
 
     }

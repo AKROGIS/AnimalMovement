@@ -65,18 +65,7 @@ namespace AnimalMovement
             GenderComboBox.SelectedItem = Animal.LookupGender;
             GroupTextBox.Text = Animal.GroupName;
             DescriptionTextBox.Text = Animal.Description;
-            //FIXME - Add Animal.MortalityDate to the database
-            //if (Animal.MortalityDate == null)
-            //{
-            //    MortatlityDateTimePicker.Checked = false;
-            //    MortatlityDateTimePicker.CustomFormat = " ";
-            //}
-            //else
-            //{
-            //    MortatlityDateTimePicker.Checked = true;
-            //    MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
-            //    MortatlityDateTimePicker.Value = Animal.MortalityDate;
-            //}
+            // The datetime picker is set in the form load override, because it worked better there.
             SetDeploymentDataGrid();
             SetLocationSummary();
             Collared = Animal.CollarDeployments.Any(d => d.RetrievalDate == null);
@@ -131,11 +120,10 @@ namespace AnimalMovement
             Animal.LookupGender = (LookupGender)GenderComboBox.SelectedItem;
             Animal.GroupName = GroupTextBox.Text.NullifyIfEmpty();
             Animal.Description = DescriptionTextBox.Text.NullifyIfEmpty();
-            //FIXME - Add Animal.MortalityDate to the database
-            //if (MortatlityDateTimePicker.Checked)
-            //    Animal.MortalityDate = MortatlityDateTimePicker.Value;
-            //else
-            //    Animal.MortalityDate = null;
+            if (MortatlityDateTimePicker.Checked)
+                Animal.MortalityDate = MortatlityDateTimePicker.Value;
+            else
+                Animal.MortalityDate = null;
         }
 
         private void EnableForm()
@@ -279,6 +267,11 @@ namespace AnimalMovement
             }
         }
 
+        private void MortatlityDateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
+            MortatlityDateTimePicker.CustomFormat = MortatlityDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
+        }
+
         private void OnDatabaseChanged()
         {
             EventHandler handle = DatabaseChanged;
@@ -286,9 +279,23 @@ namespace AnimalMovement
                 handle(this, EventArgs.Empty);
         }
 
-        private void MortatlityDateTimePicker_ValueChanged(object sender, EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
-            MortatlityDateTimePicker.CustomFormat = MortatlityDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
+            base.OnLoad(e);
+            if (Animal.MortalityDate == null)
+            {
+                var now = DateTime.Now;
+                MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day);
+                MortatlityDateTimePicker.Checked = false;
+                MortatlityDateTimePicker.CustomFormat = " ";
+            }
+            else
+            {
+                MortatlityDateTimePicker.Checked = true;
+                MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
+                MortatlityDateTimePicker.Value = Animal.MortalityDate.Value;
+            }
         }
+
     }
 }

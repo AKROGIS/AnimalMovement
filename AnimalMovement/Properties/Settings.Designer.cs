@@ -252,7 +252,7 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("284, 232")]
+        [global::System.Configuration.DefaultSettingValueAttribute("375, 320")]
         public global::System.Drawing.Size AddAnimalFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["AddAnimalFormSize"]));

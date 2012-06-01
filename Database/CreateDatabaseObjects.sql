@@ -310,6 +310,7 @@ CREATE TABLE [dbo].[Animals](
 	[AnimalId] [varchar](16) NOT NULL,
 	[Species] [varchar](32) NULL,
 	[Gender] [char](1) NULL,
+	[MortalityDate] [datetime2](7) NULL,
 	[GroupName] [nvarchar](500) NULL,
 	[Description] [nvarchar](2000) NULL,
  CONSTRAINT [PK_Animals] PRIMARY KEY CLUSTERED 
@@ -3237,8 +3238,8 @@ CREATE PROCEDURE [dbo].[Animal_Update]
 	@ProjectId NVARCHAR(255)= NULL,
 	@AnimalId NVARCHAR(255) = NULL, 
 	@Species NVARCHAR(255) = NULL, 
-	--@Gender NVARCHAR(255) = NULL, 
 	@Gender NCHAR(1) = NULL, 
+	@MortalityDate DATETIME2(7),
 	@GroupName NVARCHAR(255) = NULL, 
 	@Description NVARCHAR(4000) = NULL 
 AS
@@ -3281,6 +3282,8 @@ BEGIN
 		SELECT @Gender = [Gender] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
 	END
 	
+	-- There is no default value for mortality date, since we can't pass '' to express null,
+	
 	IF @GroupName IS NULL
 	BEGIN
 		SELECT @GroupName = [GroupName] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
@@ -3297,6 +3300,7 @@ BEGIN
 	UPDATE dbo.Animals SET [Species] = nullif(@Species,''),
 						   [Gender] = nullif(@Gender,''),
 						   [GroupName] = nullif(@GroupName,''),
+						   [MortalityDate] = @MortalityDate,
 						   [Description] = nullif(@Description,'')
 					 WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
 
@@ -3315,8 +3319,8 @@ CREATE PROCEDURE [dbo].[Animal_Insert]
 	@ProjectId NVARCHAR(255)= NULL,
 	@AnimalId NVARCHAR(255) = NULL, 
 	@Species NVARCHAR(255) = NULL, 
-	--@Gender NVARCHAR(255) = NULL, 
 	@Gender NCHAR(1) = NULL, 
+	@MortalityDate DATETIME2(7) = NULL, 
 	@GroupName NVARCHAR(255) = NULL, 
 	@Description NVARCHAR(4000) = NULL 
 AS
@@ -3339,9 +3343,9 @@ BEGIN
 	END
 	
 	--All other verification is handled by primary/foreign key and column constraints.
-	INSERT INTO dbo.Animals ([ProjectId], [AnimalId], [Species], [Gender], [GroupName], [Description])
+	INSERT INTO dbo.Animals ([ProjectId], [AnimalId], [Species], [Gender], [MortalityDate], [GroupName], [Description])
 		 VALUES (nullif(@ProjectId,''), nullif(@AnimalId,''), nullif(@Species,''), nullif(@Gender,''),
-		         nullif(@GroupName,''), nullif(@Description,''));
+		         @MortalityDate, nullif(@GroupName,''), nullif(@Description,''));
 
 END
 GO

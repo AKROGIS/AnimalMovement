@@ -65,7 +65,7 @@
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
     <Setting Name="AddAnimalFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">284, 232</Value>
+      <Value Profile="(Default)">375, 320</Value>
     </Setting>
     <Setting Name="AddCollarFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">376, 370</Value>

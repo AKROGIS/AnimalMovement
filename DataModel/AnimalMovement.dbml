@@ -8,6 +8,7 @@
       <Column Name="Gender" Type="System.Char" DbType="Char(1)" CanBeNull="true" />
       <Column Name="GroupName" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
       <Column Name="Description" Type="System.String" DbType="NVarChar(2000)" CanBeNull="true" />
+      <Column Name="MortalityDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Association Name="Animal_CollarDeployment" Member="CollarDeployments" ThisKey="ProjectId,AnimalId" OtherKey="ProjectId,AnimalId" Type="CollarDeployment" />
       <Association Name="Project_Animal" Member="Project" ThisKey="ProjectId" OtherKey="ProjectId" Type="Project" IsForeignKey="true" />
       <Association Name="LookupGender_Animal" Member="LookupGender" ThisKey="Gender" OtherKey="Sex" Type="LookupGender" IsForeignKey="true" />
@@ -18,6 +19,7 @@
       <Argument Parameter="animalId" Member="AnimalId" />
       <Argument Parameter="species" Member="Species" />
       <Argument Parameter="gender" Member="Gender" />
+      <Argument Parameter="mortalityDate" Member="MortalityDate" />
       <Argument Parameter="groupName" Member="GroupName" />
       <Argument Parameter="description" Member="Description" />
     </InsertFunction>
@@ -26,6 +28,7 @@
       <Argument Parameter="animalId" Member="AnimalId" Version="Original" />
       <Argument Parameter="species" Member="Species" />
       <Argument Parameter="gender" Member="Gender" />
+      <Argument Parameter="mortalityDate" Member="MortalityDate" />
       <Argument Parameter="groupName" Member="GroupName" />
       <Argument Parameter="description" Member="Description" />
     </UpdateFunction>
@@ -413,24 +416,6 @@
     <Parameter Name="FixId" Parameter="fixId" Type="System.Int64" DbType="BigInt" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId1" Name="dbo.Animal_Insert" Method="Animal_Insert">
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Species" Parameter="species" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Gender" Parameter="gender" Type="System.Char" DbType="Char(1)" />
-    <Parameter Name="GroupName" Parameter="groupName" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
-    <Return Type="System.Int32" />
-  </Function>
-  <Function Id="FunctionId2" Name="dbo.Animal_Update" Method="Animal_Update">
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Species" Parameter="species" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Gender" Parameter="gender" Type="System.Char" DbType="NChar(1)" />
-    <Parameter Name="GroupName" Parameter="groupName" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
-    <Return Type="System.Int32" />
-  </Function>
   <Function Id="FunctionId18" Name="dbo.ProjectInvestigator_Update" Method="ProjectInvestigator_Update">
     <Parameter Name="Login" Parameter="login" Type="System.String" DbType="NVarChar(128)" />
     <Parameter Name="Name" Parameter="name" Type="System.String" DbType="NVarChar(255)" />
@@ -442,6 +427,26 @@
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId1" Name="dbo.Animal_Insert" Method="Animal_Insert">
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Species" Parameter="species" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Gender" Parameter="gender" Type="System.Char" DbType="NChar(1)" />
+    <Parameter Name="MortalityDate" Parameter="mortalityDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="GroupName" Parameter="groupName" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId2" Name="dbo.Animal_Update" Method="Animal_Update">
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Species" Parameter="species" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Gender" Parameter="gender" Type="System.Char" DbType="NChar(1)" />
+    <Parameter Name="MortalityDate" Parameter="mortalityDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="GroupName" Parameter="groupName" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
     <Return Type="System.Int32" />
   </Function>
 </Database>
