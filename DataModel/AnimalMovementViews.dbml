@@ -12,4 +12,30 @@
       <Column Name="[Number of Fixes]" Member="Number_of_Fixes" Type="System.Int32" DbType="Int" CanBeNull="true" />
     </Type>
   </Table>
+  <Function Name="dbo.AnimalLocationSummary" Method="AnimalLocationSummary" IsComposable="true">
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
+    <ElementType Name="AnimalLocationSummaryResult">
+      <Column Name="Count" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="[Left]" Member="Left" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="[Right]" Member="Right" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="Bottom" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="[Top]" Member="Top" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="First" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="Last" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+    </ElementType>
+  </Function>
+  <Function Name="dbo.ConflictingFixes" Method="ConflictingFixes" IsComposable="true">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <ElementType Name="ConflictingFixesResult">
+      <Column Name="FixId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="HiddenBy" Type="System.Int64" DbType="BigInt" CanBeNull="true" />
+      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="LineNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="FixDate" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
+      <Column Name="Lat" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="Lon" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+    </ElementType>
+  </Function>
 </Database>

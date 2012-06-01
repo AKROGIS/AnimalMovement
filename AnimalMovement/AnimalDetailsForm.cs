@@ -4,8 +4,7 @@ using System.Windows.Forms;
 using DataModel;
 
 //TODO - Move Delete, Retrieve and Info button onto the data grid.
-//TODO - Add Location information on form below deployments
-//TODO - Include spatial properties, centroid, bounding box, MCP
+//TODO - Include additional location info: hidden locations, centroid, MCP area, average speed
 //TODO - Add Info button to get Collar details (for those who do not know to double click)
 
 namespace AnimalMovement
@@ -66,9 +65,45 @@ namespace AnimalMovement
             GenderComboBox.SelectedItem = Animal.LookupGender;
             GroupTextBox.Text = Animal.GroupName;
             DescriptionTextBox.Text = Animal.Description;
+            //if (Animal.MortalityDate == null)
+            //{
+            //    MortatlityDateTimePicker.Checked = false;
+            //    MortatlityDateTimePicker.CustomFormat = " ";
+            //}
+            //else
+            //{
+            //    MortatlityDateTimePicker.Checked = true;
+            //    MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
+            //    MortatlityDateTimePicker.Value = Animal.MortalityDate;
+            //}
             SetDeploymentDataGrid();
+            SetLocationSummary();
             Collared = Animal.CollarDeployments.Any(d => d.RetrievalDate == null);
             EnableForm();
+        }
+
+        private void SetLocationSummary()
+        {
+            if (Animal == null)
+                return;
+            var db = new AnimalMovementViewsDataContext();
+            var summary = db.AnimalLocationSummary(Animal.ProjectId, Animal.AnimalId).FirstOrDefault();
+            if (summary == null)
+            {
+                SummaryLabel.Text = "There are NO locations.";
+                TopTextBox.Text = String.Empty;
+                BottomTextBox.Text = String.Empty;
+                LeftTextBox.Text = String.Empty;
+                RightTextBox.Text = String.Empty;
+            }
+            else
+            {
+                SummaryLabel.Text = String.Format("{0} fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last);
+                TopTextBox.Text = String.Format("{0}", summary.Top);
+                BottomTextBox.Text = String.Format("{0}", summary.Bottom);
+                LeftTextBox.Text = String.Format("{0}", summary.Left);
+                RightTextBox.Text = String.Format("{0}", summary.Right);
+            }
         }
 
         private void SetDeploymentDataGrid()
@@ -111,6 +146,7 @@ namespace AnimalMovement
             GenderComboBox.Enabled = editModeEnabled;
             GroupTextBox.Enabled = editModeEnabled;
             DescriptionTextBox.Enabled = editModeEnabled;
+            MortatlityDateTimePicker.Enabled = editModeEnabled;
 
             DeleteDeploymentButton.Enabled = !editModeEnabled && IsAnimalEditor && DeploymentDataGridView.RowCount > 0;
             DeployRetrieveButton.Enabled = !editModeEnabled && IsAnimalEditor;
@@ -242,6 +278,19 @@ namespace AnimalMovement
             EventHandler handle = DatabaseChanged;
             if (handle != null)
                 handle(this, EventArgs.Empty);
+        }
+
+        private void MortatlityDateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
+            if (MortatlityDateTimePicker.Checked)
+            {
+                MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
+            }
+            else
+            {
+                MortatlityDateTimePicker.CustomFormat = " ";
+            }
+                
         }
 
     }
