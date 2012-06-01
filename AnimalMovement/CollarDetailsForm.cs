@@ -131,6 +131,7 @@ namespace AnimalMovement
             EditSaveButton.Enabled = IsCollarOwner;
             DeployRetrieveButton.Text = Deployed ? "Retrieve" : "Deploy";
             SetEditingControls();
+            EnableUnideFixButton();
         }
 
         private void SetEditingControls()
@@ -270,18 +271,6 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void OnDatabaseChanged()
-        {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this, EventArgs.Empty);
-        }
-
-        private void HideFixButton_Click(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         private void FileInfoButton_Click(object sender, EventArgs e)
         {
             if (FilesDataGridView.CurrentRow == null)
@@ -292,6 +281,56 @@ namespace AnimalMovement
             var form = new FileDetailsForm(item.FileId, CurrentUser);
             form.Show(this);
 
+        }
+
+        private void FixConflictsDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableUnideFixButton();
+        }
+
+        private void EnableUnideFixButton()
+        {
+            if (FixConflictsDataGridView.CurrentRow == null)
+            {
+                UnhideFixButton.Enabled = false;
+                return;
+            }
+            var selectedFix = FixConflictsDataGridView.CurrentRow.DataBoundItem as ConflictingFixesResult;
+            if (selectedFix == null)
+            {
+                UnhideFixButton.Enabled = false;
+                return;
+            }
+            bool isEditor = Database.IsFixEditor(selectedFix.FixId, CurrentUser) ?? false;
+            bool isHidden = selectedFix.HiddenBy != null;
+            UnhideFixButton.Enabled = isEditor && isHidden;
+        }
+
+        private void UnhideFixButton_Click(object sender, EventArgs e)
+        {
+            if (FixConflictsDataGridView.CurrentRow == null)
+                return;
+            var selectedFix = FixConflictsDataGridView.CurrentRow.DataBoundItem as ConflictingFixesResult;
+            if (selectedFix == null)
+                return;
+            try
+            {
+                Database.CollarFixes_UpdateUnhideFix(selectedFix.FixId);
+            }
+            catch (Exception ex)
+            {
+                string msg = "Unable to update the fix.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            SetFixesGrid();
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
         }
 
     }

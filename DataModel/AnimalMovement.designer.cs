@@ -465,6 +465,12 @@ namespace DataModel
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, species, gender, mortalityDate, groupName, description);
 			return ((int)(result.ReturnValue));
 		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.IsFixEditor", IsComposable=true)]
+		public System.Nullable<bool> IsFixEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FixId", DbType="BigInt")] System.Nullable<long> fixId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
+		{
+			return ((System.Nullable<bool>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fixId, user).ReturnValue));
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Animals")]

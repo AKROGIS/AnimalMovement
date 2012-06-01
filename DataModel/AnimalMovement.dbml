@@ -449,4 +449,9 @@
     <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
     <Return Type="System.Int32" />
   </Function>
+  <Function Name="dbo.IsFixEditor" Method="IsFixEditor" IsComposable="true">
+    <Parameter Name="FixId" Parameter="fixId" Type="System.Int64" DbType="BigInt" />
+    <Parameter Name="User" Parameter="user" Type="System.String" DbType="NVarChar(128)" />
+    <Return Type="System.Boolean" />
+  </Function>
 </Database>

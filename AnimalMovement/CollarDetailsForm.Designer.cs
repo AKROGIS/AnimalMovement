@@ -65,7 +65,7 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.AnimalInfoButton = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.HideFixButton = new System.Windows.Forms.Button();
+            this.UnhideFixButton = new System.Windows.Forms.Button();
             this.FixConflictsDataGridView = new System.Windows.Forms.DataGridView();
             this.label11 = new System.Windows.Forms.Label();
             this.SummaryLabel = new System.Windows.Forms.Label();
@@ -489,7 +489,7 @@
             // 
             // tabPage3
             // 
-            this.tabPage3.Controls.Add(this.HideFixButton);
+            this.tabPage3.Controls.Add(this.UnhideFixButton);
             this.tabPage3.Controls.Add(this.FixConflictsDataGridView);
             this.tabPage3.Controls.Add(this.label11);
             this.tabPage3.Controls.Add(this.SummaryLabel);
@@ -501,16 +501,16 @@
             this.tabPage3.Text = "Fixes";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // HideFixButton
+            // UnhideFixButton
             // 
-            this.HideFixButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.HideFixButton.Location = new System.Drawing.Point(393, 219);
-            this.HideFixButton.Name = "HideFixButton";
-            this.HideFixButton.Size = new System.Drawing.Size(75, 23);
-            this.HideFixButton.TabIndex = 3;
-            this.HideFixButton.Text = "Unhide Fix";
-            this.HideFixButton.UseVisualStyleBackColor = true;
-            this.HideFixButton.Click += new System.EventHandler(this.HideFixButton_Click);
+            this.UnhideFixButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.UnhideFixButton.Location = new System.Drawing.Point(393, 219);
+            this.UnhideFixButton.Name = "UnhideFixButton";
+            this.UnhideFixButton.Size = new System.Drawing.Size(75, 23);
+            this.UnhideFixButton.TabIndex = 3;
+            this.UnhideFixButton.Text = "Unhide Fix";
+            this.UnhideFixButton.UseVisualStyleBackColor = true;
+            this.UnhideFixButton.Click += new System.EventHandler(this.UnhideFixButton_Click);
             // 
             // FixConflictsDataGridView
             // 
@@ -522,7 +522,7 @@
             this.FixConflictsDataGridView.Name = "FixConflictsDataGridView";
             this.FixConflictsDataGridView.Size = new System.Drawing.Size(459, 155);
             this.FixConflictsDataGridView.TabIndex = 2;
-            this.FixConflictsDataGridView.DoubleClick += new System.EventHandler(this.HideFixButton_Click);
+            this.FixConflictsDataGridView.SelectionChanged += new System.EventHandler(this.FixConflictsDataGridView_SelectionChanged);
             // 
             // label11
             // 
@@ -644,7 +644,7 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label SummaryLabel;
         private System.Windows.Forms.Button AnimalInfoButton;
-        private System.Windows.Forms.Button HideFixButton;
+        private System.Windows.Forms.Button UnhideFixButton;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.DataGridView FilesDataGridView;
         private System.Windows.Forms.Button FileInfoButton;
