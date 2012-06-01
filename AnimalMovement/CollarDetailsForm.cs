@@ -5,8 +5,6 @@ using System.Windows.Forms;
 using DataModel;
 
 //TODO - Move Info and Delete buttons onto the data grid.
-//TODO - Double click a file in the list to see file details
-//TODO - Add the ability to change the status of a fix.
 //TODO - Delay population of hidden tabs until displayed.
 
 namespace AnimalMovement
@@ -281,11 +279,18 @@ namespace AnimalMovement
 
         private void HideFixButton_Click(object sender, EventArgs e)
         {
-
+            throw new NotImplementedException();
         }
 
-        private void FilesDataGridView_DoubleClick(object sender, EventArgs e)
+        private void FileInfoButton_Click(object sender, EventArgs e)
         {
+            if (FilesDataGridView.CurrentRow == null)
+                return;
+            var item = FilesDataGridView.CurrentRow.DataBoundItem as CollarFixesByFileResult;
+            if (item == null)
+                return;
+            var form = new FileDetailsForm(item.FileId, CurrentUser);
+            form.Show(this);
 
         }
 

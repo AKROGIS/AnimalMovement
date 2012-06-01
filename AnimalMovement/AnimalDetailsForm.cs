@@ -65,6 +65,7 @@ namespace AnimalMovement
             GenderComboBox.SelectedItem = Animal.LookupGender;
             GroupTextBox.Text = Animal.GroupName;
             DescriptionTextBox.Text = Animal.Description;
+            //FIXME - Add Animal.MortalityDate to the database
             //if (Animal.MortalityDate == null)
             //{
             //    MortatlityDateTimePicker.Checked = false;
@@ -130,6 +131,11 @@ namespace AnimalMovement
             Animal.LookupGender = (LookupGender)GenderComboBox.SelectedItem;
             Animal.GroupName = GroupTextBox.Text.NullifyIfEmpty();
             Animal.Description = DescriptionTextBox.Text.NullifyIfEmpty();
+            //FIXME - Add Animal.MortalityDate to the database
+            //if (MortatlityDateTimePicker.Checked)
+            //    Animal.MortalityDate = MortatlityDateTimePicker.Value;
+            //else
+            //    Animal.MortalityDate = null;
         }
 
         private void EnableForm()
@@ -282,16 +288,7 @@ namespace AnimalMovement
 
         private void MortatlityDateTimePicker_ValueChanged(object sender, EventArgs e)
         {
-            if (MortatlityDateTimePicker.Checked)
-            {
-                MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
-            }
-            else
-            {
-                MortatlityDateTimePicker.CustomFormat = " ";
-            }
-                
+            MortatlityDateTimePicker.CustomFormat = MortatlityDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
         }
-
     }
 }

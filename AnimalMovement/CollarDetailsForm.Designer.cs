@@ -65,12 +65,13 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.AnimalInfoButton = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.HideFixButton = new System.Windows.Forms.Button();
             this.FixConflictsDataGridView = new System.Windows.Forms.DataGridView();
             this.label11 = new System.Windows.Forms.Label();
             this.SummaryLabel = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.FileInfoButton = new System.Windows.Forms.Button();
             this.FilesDataGridView = new System.Windows.Forms.DataGridView();
-            this.HideFixButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -456,7 +457,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(476, 240);
+            this.tabPage1.Size = new System.Drawing.Size(476, 248);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -470,7 +471,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(476, 240);
+            this.tabPage2.Size = new System.Drawing.Size(476, 248);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Animals";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -499,6 +500,17 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Fixes";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // HideFixButton
+            // 
+            this.HideFixButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.HideFixButton.Location = new System.Drawing.Point(393, 219);
+            this.HideFixButton.Name = "HideFixButton";
+            this.HideFixButton.Size = new System.Drawing.Size(75, 23);
+            this.HideFixButton.TabIndex = 3;
+            this.HideFixButton.Text = "Unhide Fix";
+            this.HideFixButton.UseVisualStyleBackColor = true;
+            this.HideFixButton.Click += new System.EventHandler(this.HideFixButton_Click);
             // 
             // FixConflictsDataGridView
             // 
@@ -533,6 +545,7 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.FileInfoButton);
             this.tabPage4.Controls.Add(this.FilesDataGridView);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
@@ -542,26 +555,28 @@
             this.tabPage4.Text = "Files";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // FileInfoButton
+            // 
+            this.FileInfoButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.FileInfoButton.Location = new System.Drawing.Point(395, 219);
+            this.FileInfoButton.Name = "FileInfoButton";
+            this.FileInfoButton.Size = new System.Drawing.Size(75, 23);
+            this.FileInfoButton.TabIndex = 26;
+            this.FileInfoButton.Text = "Info";
+            this.FileInfoButton.UseVisualStyleBackColor = true;
+            this.FileInfoButton.Click += new System.EventHandler(this.FileInfoButton_Click);
+            // 
             // FilesDataGridView
             // 
+            this.FilesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.FilesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.FilesDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.FilesDataGridView.Location = new System.Drawing.Point(3, 3);
             this.FilesDataGridView.Name = "FilesDataGridView";
-            this.FilesDataGridView.Size = new System.Drawing.Size(470, 242);
+            this.FilesDataGridView.Size = new System.Drawing.Size(467, 210);
             this.FilesDataGridView.TabIndex = 0;
-            this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FilesDataGridView_DoubleClick);
-            // 
-            // HideFixButton
-            // 
-            this.HideFixButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.HideFixButton.Location = new System.Drawing.Point(393, 219);
-            this.HideFixButton.Name = "HideFixButton";
-            this.HideFixButton.Size = new System.Drawing.Size(75, 23);
-            this.HideFixButton.TabIndex = 3;
-            this.HideFixButton.Text = "Unhide Fix";
-            this.HideFixButton.UseVisualStyleBackColor = true;
-            this.HideFixButton.Click += new System.EventHandler(this.HideFixButton_Click);
+            this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);
             // 
             // CollarDetailsForm
             // 
@@ -632,5 +647,6 @@
         private System.Windows.Forms.Button HideFixButton;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.DataGridView FilesDataGridView;
+        private System.Windows.Forms.Button FileInfoButton;
     }
 }
