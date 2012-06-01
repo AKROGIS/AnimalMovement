@@ -80,7 +80,7 @@
       <Value Profile="(Default)">324, 220</Value>
     </Setting>
     <Setting Name="AnimalDetailsFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">489, 314</Value>
+      <Value Profile="(Default)">465, 255</Value>
     </Setting>
     <Setting Name="ChangeInvestigatorFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">330, 170</Value>
@@ -89,7 +89,7 @@
       <Value Profile="(Default)">290, 155</Value>
     </Setting>
     <Setting Name="CollarDetailsFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">483, 357</Value>
+      <Value Profile="(Default)">500, 300</Value>
     </Setting>
     <Setting Name="CreateQueryLayerFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">531, 419</Value>

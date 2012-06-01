@@ -3,9 +3,9 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Move Delete, Retrieve and Info button onto the data grid.
-//TODO - Include additional location info: hidden locations, centroid, MCP area, average speed
-//TODO - Add Info button to get Collar details (for those who do not know to double click)
+//TODO - Move Info, Delete buttons onto the data grid.
+//TODO - Add additional location info: hidden locations, centroid, MCP area, average speed
+//TODO - Delay population of hidden tabs until displayed.
 
 namespace AnimalMovement
 {
@@ -148,8 +148,20 @@ namespace AnimalMovement
             DescriptionTextBox.Enabled = editModeEnabled;
             MortatlityDateTimePicker.Enabled = editModeEnabled;
 
+            CollarInfoButton.Enabled = DeploymentDataGridView.RowCount > 0;
             DeleteDeploymentButton.Enabled = !editModeEnabled && IsAnimalEditor && DeploymentDataGridView.RowCount > 0;
             DeployRetrieveButton.Enabled = !editModeEnabled && IsAnimalEditor;
+        }
+
+        private void CollarInfoButton_Click(object sender, EventArgs e)
+        {
+            if (DeploymentDataGridView.CurrentRow == null)
+                return;
+            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
+            if (item == null)
+                return;
+            var form = new CollarDetailsForm(item.Deployment.CollarManufacturer, item.CollarId, CurrentUser);
+            form.Show(this);
         }
 
         private void DeleteDeploymentButton_Click(object sender, EventArgs e)
@@ -259,18 +271,6 @@ namespace AnimalMovement
             {
                 Close();
             }
-
-        }
-
-        private void DeploymentDataGridView_DoubleClick(object sender, EventArgs e)
-        {
-            if (DeploymentDataGridView.CurrentRow == null)
-                return;
-            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
-            if (item == null)
-                return;
-            var form = new CollarDetailsForm(item.Deployment.CollarManufacturer, item.CollarId, CurrentUser);
-            form.Show(this);
         }
 
         private void OnDatabaseChanged()

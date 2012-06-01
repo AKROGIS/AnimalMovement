@@ -312,7 +312,7 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("489, 314")]
+        [global::System.Configuration.DefaultSettingValueAttribute("465, 255")]
         public global::System.Drawing.Size AnimalDetailsFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["AnimalDetailsFormSize"]));
@@ -348,7 +348,7 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("483, 357")]
+        [global::System.Configuration.DefaultSettingValueAttribute("500, 300")]
         public global::System.Drawing.Size CollarDetailsFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["CollarDetailsFormSize"]));

@@ -57,6 +57,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.MortatlityDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.CollarInfoButton = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.label7 = new System.Windows.Forms.Label();
             this.TopTextBox = new System.Windows.Forms.TextBox();
@@ -75,7 +76,7 @@
             // DeleteDeploymentButton
             // 
             this.DeleteDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.DeleteDeploymentButton.Location = new System.Drawing.Point(247, 212);
+            this.DeleteDeploymentButton.Location = new System.Drawing.Point(275, 164);
             this.DeleteDeploymentButton.Name = "DeleteDeploymentButton";
             this.DeleteDeploymentButton.Size = new System.Drawing.Size(75, 23);
             this.DeleteDeploymentButton.TabIndex = 9;
@@ -86,7 +87,7 @@
             // DeployRetrieveButton
             // 
             this.DeployRetrieveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.DeployRetrieveButton.Location = new System.Drawing.Point(328, 212);
+            this.DeployRetrieveButton.Location = new System.Drawing.Point(356, 164);
             this.DeployRetrieveButton.Name = "DeployRetrieveButton";
             this.DeployRetrieveButton.Size = new System.Drawing.Size(75, 23);
             this.DeployRetrieveButton.TabIndex = 10;
@@ -117,9 +118,9 @@
             this.DeploymentDataGridView.Name = "DeploymentDataGridView";
             this.DeploymentDataGridView.RowHeadersVisible = false;
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.DeploymentDataGridView.Size = new System.Drawing.Size(395, 200);
+            this.DeploymentDataGridView.Size = new System.Drawing.Size(423, 152);
             this.DeploymentDataGridView.TabIndex = 7;
-            this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.DeploymentDataGridView_DoubleClick);
+            this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.CollarInfoButton_Click);
             // 
             // CollarManufacturerColumn
             // 
@@ -193,14 +194,14 @@
             this.ProjectTextBox.MaxLength = 50;
             this.ProjectTextBox.Name = "ProjectTextBox";
             this.ProjectTextBox.ReadOnly = true;
-            this.ProjectTextBox.Size = new System.Drawing.Size(156, 20);
+            this.ProjectTextBox.Size = new System.Drawing.Size(184, 20);
             this.ProjectTextBox.TabIndex = 1;
             // 
             // DoneCancelButton
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(87, 212);
+            this.DoneCancelButton.Location = new System.Drawing.Point(87, 164);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 8;
@@ -213,7 +214,7 @@
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
             this.EditSaveButton.Enabled = false;
-            this.EditSaveButton.Location = new System.Drawing.Point(325, 212);
+            this.EditSaveButton.Location = new System.Drawing.Point(353, 164);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 11;
@@ -237,7 +238,7 @@
             this.GroupTextBox.Location = new System.Drawing.Point(87, 90);
             this.GroupTextBox.MaxLength = 8;
             this.GroupTextBox.Name = "GroupTextBox";
-            this.GroupTextBox.Size = new System.Drawing.Size(313, 20);
+            this.GroupTextBox.Size = new System.Drawing.Size(341, 20);
             this.GroupTextBox.TabIndex = 5;
             // 
             // SpeciesComboBox
@@ -248,7 +249,7 @@
             this.SpeciesComboBox.FormattingEnabled = true;
             this.SpeciesComboBox.Location = new System.Drawing.Point(87, 37);
             this.SpeciesComboBox.Name = "SpeciesComboBox";
-            this.SpeciesComboBox.Size = new System.Drawing.Size(156, 21);
+            this.SpeciesComboBox.Size = new System.Drawing.Size(184, 21);
             this.SpeciesComboBox.TabIndex = 3;
             // 
             // GenderComboBox
@@ -256,7 +257,7 @@
             this.GenderComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.GenderComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.GenderComboBox.FormattingEnabled = true;
-            this.GenderComboBox.Location = new System.Drawing.Point(308, 37);
+            this.GenderComboBox.Location = new System.Drawing.Point(336, 37);
             this.GenderComboBox.Name = "GenderComboBox";
             this.GenderComboBox.Size = new System.Drawing.Size(92, 21);
             this.GenderComboBox.TabIndex = 4;
@@ -279,14 +280,14 @@
             this.DescriptionTextBox.MaxLength = 200;
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
-            this.DescriptionTextBox.Size = new System.Drawing.Size(313, 90);
+            this.DescriptionTextBox.Size = new System.Drawing.Size(341, 42);
             this.DescriptionTextBox.TabIndex = 6;
             // 
             // AnimalIdTextBox
             // 
             this.AnimalIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.AnimalIdTextBox.Enabled = false;
-            this.AnimalIdTextBox.Location = new System.Drawing.Point(308, 11);
+            this.AnimalIdTextBox.Location = new System.Drawing.Point(336, 11);
             this.AnimalIdTextBox.MaxLength = 50;
             this.AnimalIdTextBox.Name = "AnimalIdTextBox";
             this.AnimalIdTextBox.ReadOnly = true;
@@ -306,7 +307,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(257, 40);
+            this.label4.Location = new System.Drawing.Point(285, 40);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(45, 13);
             this.label4.TabIndex = 62;
@@ -316,7 +317,7 @@
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(249, 14);
+            this.label2.Location = new System.Drawing.Point(277, 14);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(53, 13);
             this.label2.TabIndex = 61;
@@ -340,7 +341,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(421, 269);
+            this.tabControl1.Size = new System.Drawing.Size(449, 221);
             this.tabControl1.TabIndex = 79;
             // 
             // tabPage1
@@ -364,7 +365,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(413, 243);
+            this.tabPage1.Size = new System.Drawing.Size(441, 195);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -389,22 +390,34 @@
             this.MortatlityDateTimePicker.Location = new System.Drawing.Point(87, 64);
             this.MortatlityDateTimePicker.Name = "MortatlityDateTimePicker";
             this.MortatlityDateTimePicker.ShowCheckBox = true;
-            this.MortatlityDateTimePicker.Size = new System.Drawing.Size(313, 20);
+            this.MortatlityDateTimePicker.Size = new System.Drawing.Size(341, 20);
             this.MortatlityDateTimePicker.TabIndex = 79;
             this.MortatlityDateTimePicker.ValueChanged += new System.EventHandler(this.MortatlityDateTimePicker_ValueChanged);
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.CollarInfoButton);
             this.tabPage2.Controls.Add(this.DeploymentDataGridView);
             this.tabPage2.Controls.Add(this.DeleteDeploymentButton);
             this.tabPage2.Controls.Add(this.DeployRetrieveButton);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(413, 243);
+            this.tabPage2.Size = new System.Drawing.Size(441, 195);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Collars";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // CollarInfoButton
+            // 
+            this.CollarInfoButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.CollarInfoButton.Location = new System.Drawing.Point(194, 164);
+            this.CollarInfoButton.Name = "CollarInfoButton";
+            this.CollarInfoButton.Size = new System.Drawing.Size(75, 23);
+            this.CollarInfoButton.TabIndex = 11;
+            this.CollarInfoButton.Text = "Info";
+            this.CollarInfoButton.UseVisualStyleBackColor = true;
+            this.CollarInfoButton.Click += new System.EventHandler(this.CollarInfoButton_Click);
             // 
             // tabPage3
             // 
@@ -418,7 +431,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(413, 243);
+            this.tabPage3.Size = new System.Drawing.Size(441, 195);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Locations";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -488,10 +501,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(421, 269);
+            this.ClientSize = new System.Drawing.Size(449, 221);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.MinimumSize = new System.Drawing.Size(437, 303);
+            this.MinimumSize = new System.Drawing.Size(400, 250);
             this.Name = "AnimalDetailsForm";
             this.Text = "Animal Details";
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).EndInit();
@@ -544,6 +557,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox LeftTextBox;
         private System.Windows.Forms.Label SummaryLabel;
+        private System.Windows.Forms.Button CollarInfoButton;
 
     }
 }

@@ -4,12 +4,10 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Move Delete, Retrieve and Info button onto the data grid.
-//TODO - Add list of files with data for this collar, include # of fixes in the file
+//TODO - Move Info and Delete buttons onto the data grid.
 //TODO - Double click a file in the list to see file details
-//TODO - Add list of fix conflicts for this collar, and the ability to change status
-//TODO - make these additional information pages collapsible panels or tabs 
-//TODO - Add Info button to get Animal details (for those who do not know to double click)
+//TODO - Add the ability to change the status of a fix.
+//TODO - Delay population of hidden tabs until displayed.
 
 namespace AnimalMovement
 {
@@ -74,8 +72,30 @@ namespace AnimalMovement
             DownloadInfoTextBox.Text = Collar.DownloadInfo;
             NotesTextBox.Text = Collar.Notes;
             SetDeploymentDataGrid();
+            SetFixesGrid();
+            SetFilesGrid();
             Deployed = Collar.CollarDeployments.Any(d => d.RetrievalDate == null);
             EnableForm();
+        }
+
+        private void SetFilesGrid()
+        {
+            if (Collar == null)
+                return;
+            var db = new AnimalMovementViewsDataContext();
+            FilesDataGridView.DataSource = db.CollarFixesByFile(Collar.CollarManufacturer, Collar.CollarId).ToList();
+        }
+
+        private void SetFixesGrid()
+        {
+            if (Collar == null)
+                return;
+            var db = new AnimalMovementViewsDataContext();
+            FixConflictsDataGridView.DataSource = db.ConflictingFixes(Collar.CollarManufacturer, Collar.CollarId).ToList();
+            var summary = db.CollarFixSummary(Collar.CollarManufacturer, Collar.CollarId).FirstOrDefault();
+            SummaryLabel.Text = summary == null
+                              ? "There are NO fixes."
+                              : String.Format("{0} fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last);
         }
 
         private void SetDeploymentDataGrid()
@@ -127,6 +147,7 @@ namespace AnimalMovement
             DownloadInfoTextBox.Enabled = editModeEnabled;
             NotesTextBox.Enabled = editModeEnabled;
 
+            AnimalInfoButton.Enabled = !editModeEnabled && DeploymentDataGridView.RowCount > 0;
             DeleteDeploymentButton.Enabled = !editModeEnabled && IsCollarOwner && DeploymentDataGridView.RowCount > 0;
             DeployRetrieveButton.Enabled = !editModeEnabled && IsCollarOwner;
         }
@@ -238,10 +259,9 @@ namespace AnimalMovement
             {
                 Close();
             }
-
         }
 
-        private void DeploymentDataGridView_DoubleClick(object sender, EventArgs e)
+        private void AnimalInfoButton_Click(object sender, EventArgs e)
         {
             if (DeploymentDataGridView.CurrentRow == null)
                 return;
@@ -257,6 +277,16 @@ namespace AnimalMovement
             EventHandler handle = DatabaseChanged;
             if (handle != null)
                 handle(this, EventArgs.Empty);
+        }
+
+        private void HideFixButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FilesDataGridView_DoubleClick(object sender, EventArgs e)
+        {
+
         }
 
     }

@@ -81,6 +81,18 @@ namespace DataModel
 		{
 			return this.CreateMethodCallQuery<ConflictingFixesResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId);
 		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFixesByFile", IsComposable=true)]
+		public IQueryable<CollarFixesByFileResult> CollarFixesByFile([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
+		{
+			return this.CreateMethodCallQuery<CollarFixesByFileResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId);
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFixSummary", IsComposable=true)]
+		public IQueryable<CollarFixSummaryResult> CollarFixSummary([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
+		{
+			return this.CreateMethodCallQuery<CollarFixSummaryResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId);
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.AnimalFixesByFile")]
@@ -499,6 +511,148 @@ namespace DataModel
 				if ((this._Lon != value))
 				{
 					this._Lon = value;
+				}
+			}
+		}
+	}
+	
+	public partial class CollarFixesByFileResult
+	{
+		
+		private string _File;
+		
+		private System.Nullable<int> _FixCount;
+		
+		private System.Nullable<System.DateTime> _First;
+		
+		private System.Nullable<System.DateTime> _Last;
+		
+		public CollarFixesByFileResult()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Name="[File]", Storage="_File", DbType="NVarChar(259) NOT NULL", CanBeNull=false)]
+		public string File
+		{
+			get
+			{
+				return this._File;
+			}
+			set
+			{
+				if ((this._File != value))
+				{
+					this._File = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FixCount", DbType="Int")]
+		public System.Nullable<int> FixCount
+		{
+			get
+			{
+				return this._FixCount;
+			}
+			set
+			{
+				if ((this._FixCount != value))
+				{
+					this._FixCount = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_First", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> First
+		{
+			get
+			{
+				return this._First;
+			}
+			set
+			{
+				if ((this._First != value))
+				{
+					this._First = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Last", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> Last
+		{
+			get
+			{
+				return this._Last;
+			}
+			set
+			{
+				if ((this._Last != value))
+				{
+					this._Last = value;
+				}
+			}
+		}
+	}
+	
+	public partial class CollarFixSummaryResult
+	{
+		
+		private System.Nullable<int> _Count;
+		
+		private System.Nullable<System.DateTime> _First;
+		
+		private System.Nullable<System.DateTime> _Last;
+		
+		public CollarFixSummaryResult()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Count", DbType="Int")]
+		public System.Nullable<int> Count
+		{
+			get
+			{
+				return this._Count;
+			}
+			set
+			{
+				if ((this._Count != value))
+				{
+					this._Count = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_First", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> First
+		{
+			get
+			{
+				return this._First;
+			}
+			set
+			{
+				if ((this._First != value))
+				{
+					this._First = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Last", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> Last
+		{
+			get
+			{
+				return this._Last;
+			}
+			set
+			{
+				if ((this._Last != value))
+				{
+					this._Last = value;
 				}
 			}
 		}
