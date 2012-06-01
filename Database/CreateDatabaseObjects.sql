@@ -227,6 +227,31 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a row of fix information for a specific collar.
+-- Example:     SELECT * FROM CollarFixSummary('Telonics', '96007')
+-- =============================================
+CREATE FUNCTION [dbo].[CollarFixSummary] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT  COUNT(*) AS [Count],
+				MIN(FixDate) AS [First],
+				MAX(FixDate) AS [Last]
+		FROM [dbo].[CollarFixes]
+		WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+		GROUP BY CollarManufacturer, CollarId
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
 -- Create date: March 2, 2012
 -- Description:	Deletes the fixes for a CollarFile
 --              Useful when changing status.
@@ -854,6 +879,32 @@ BEGIN
 	                  AND [FixDate] = @Time);
 	RETURN @Result
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a row of location information for a specific animal.
+-- Example:     SELECT * FROM AnimalLocationSummary('LACL_Sheep', '0501')
+-- =============================================
+CREATE FUNCTION [dbo].[AnimalLocationSummary] 
+(
+	@ProjectId	NVARCHAR(255), 
+	@AnimalId	NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT	COUNT(*) as [Count],
+				MIN(Location.Long) as [Left], MAX(Location.Long) as [Right],
+				MIN(Location.Lat) as [Bottom], MAX(Location.Lat) as [Top],
+				MIN(FixDate) AS [First], MAX(FixDate) as [Last]
+		 FROM     [dbo].[Locations]
+		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId
+		 GROUP BY ProjectId, AnimalId
 GO
 SET ANSI_NULLS ON
 GO
@@ -2356,6 +2407,34 @@ BEGIN
 	   FROM inserted as I INNER JOIN CollarFiles as F 
 		 ON I.FileId = F.FileId
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 31, 2012
+-- Description:	Returns a table of files with fixes for a specific collar.
+-- Example:     SELECT * FROM CollarFixesByFile('Telonics', '96007')
+-- =============================================
+CREATE FUNCTION [dbo].[CollarFixesByFile] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT  F.[FileId],
+				F.[FileName]+'.csv' AS [File],
+				COUNT(*) AS [FixCount],
+				MIN(FixDate) AS [First],
+				MAX(FixDate) AS [Last]
+		FROM [dbo].[CollarFixes] AS X INNER JOIN [dbo].[CollarFiles] AS F
+		ON X.FileId = F.FileId
+		WHERE X.CollarManufacturer = @CollarManufacturer AND X.CollarId = @CollarId
+		GROUP BY F.[FileId], F.[FileName]
 GO
 SET ANSI_NULLS ON
 GO
@@ -4076,6 +4155,12 @@ GO
 GRANT EXECUTE ON [dbo].[ProjectInvestigator_Update] TO [Investigator] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Settings_Update] TO [NPS\Domain Users] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[AnimalLocationSummary] TO [NPS\Domain Users] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarFixesByFile] TO [NPS\Domain Users] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarFixSummary] TO [NPS\Domain Users] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[ConflictingFixes] TO [NPS\Domain Users] AS [dbo]
 GO
