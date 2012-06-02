@@ -147,13 +147,6 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SpeciesComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.SpeciesComboBox.FormattingEnabled = true;
-            this.SpeciesComboBox.Items.AddRange(new object[] {
-            "Bear",
-            "Caribou",
-            "Moose",
-            "Muskox",
-            "Sheep",
-            "Wolf"});
             this.SpeciesComboBox.Location = new System.Drawing.Point(93, 64);
             this.SpeciesComboBox.Name = "SpeciesComboBox";
             this.SpeciesComboBox.Size = new System.Drawing.Size(249, 21);
@@ -166,10 +159,6 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GenderComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.GenderComboBox.FormattingEnabled = true;
-            this.GenderComboBox.Items.AddRange(new object[] {
-            "Male",
-            "Female",
-            "Unknown"});
             this.GenderComboBox.Location = new System.Drawing.Point(93, 91);
             this.GenderComboBox.Name = "GenderComboBox";
             this.GenderComboBox.Size = new System.Drawing.Size(249, 21);

@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 //TODO - Add MS Access readonly interface
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Replace the wait cursors with a message box and progress bar
+//TODO - Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
