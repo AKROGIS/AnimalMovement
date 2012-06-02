@@ -114,8 +114,8 @@
             this.RetrieveDateColumn,
             this.DeploymentColumn});
             this.DeploymentDataGridView.Location = new System.Drawing.Point(8, 6);
-            this.DeploymentDataGridView.MultiSelect = false;
             this.DeploymentDataGridView.Name = "DeploymentDataGridView";
+            this.DeploymentDataGridView.ReadOnly = true;
             this.DeploymentDataGridView.RowHeadersVisible = false;
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DeploymentDataGridView.Size = new System.Drawing.Size(423, 152);
@@ -129,6 +129,7 @@
             this.CollarManufacturerColumn.HeaderText = "Manufacturer";
             this.CollarManufacturerColumn.MinimumWidth = 60;
             this.CollarManufacturerColumn.Name = "CollarManufacturerColumn";
+            this.CollarManufacturerColumn.ReadOnly = true;
             this.CollarManufacturerColumn.Width = 95;
             // 
             // CollarIdColumn
@@ -138,6 +139,7 @@
             this.CollarIdColumn.HeaderText = "Collar";
             this.CollarIdColumn.MinimumWidth = 60;
             this.CollarIdColumn.Name = "CollarIdColumn";
+            this.CollarIdColumn.ReadOnly = true;
             this.CollarIdColumn.Width = 60;
             // 
             // ProjectColumn
@@ -183,6 +185,7 @@
             this.DeploymentColumn.DataPropertyName = "Deployment";
             this.DeploymentColumn.HeaderText = "Deployment";
             this.DeploymentColumn.Name = "DeploymentColumn";
+            this.DeploymentColumn.ReadOnly = true;
             this.DeploymentColumn.Visible = false;
             // 
             // ProjectTextBox

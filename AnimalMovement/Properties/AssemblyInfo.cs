@@ -1,13 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//TODO - add animal mortality date to animal table.  Do not create locations after this date.
 //TODO - support and testing of various file formats
 //TODO - 	a) would like to support all data as it is/was delivered to the PI
 //TODO - 	b) would like to support direct download from Argos web services
 //TODO - replication to remote locations.
 //TODO - 	a) Application/input  will all happen on the central server, which will push all data out to remote locations for fast readonly access.
-//TODO - need to develop a user interface for managing conflicting fixes
 //TODO - help documents/tutorials
 //TODO - bulk upload (data grid view copy/paste) of multiple animals/collars/deploymnents (optional - sa can do this for PI using SSMS)
 //TODO - Add MS Access readonly interface

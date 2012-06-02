@@ -81,7 +81,7 @@ namespace AnimalMovement
             if (Collar == null)
                 return;
             var db = new AnimalMovementViewsDataContext();
-            FilesDataGridView.DataSource = db.CollarFixesByFile(Collar.CollarManufacturer, Collar.CollarId).ToList();
+            FilesDataGridView.DataSource = db.CollarFixesByFile(Collar.CollarManufacturer, Collar.CollarId);
         }
 
         private void SetFixesGrid()
@@ -89,7 +89,7 @@ namespace AnimalMovement
             if (Collar == null)
                 return;
             var db = new AnimalMovementViewsDataContext();
-            FixConflictsDataGridView.DataSource = db.ConflictingFixes(Collar.CollarManufacturer, Collar.CollarId).ToList();
+            FixConflictsDataGridView.DataSource = db.ConflictingFixes(Collar.CollarManufacturer, Collar.CollarId);
             var summary = db.CollarFixSummary(Collar.CollarManufacturer, Collar.CollarId).FirstOrDefault();
             SummaryLabel.Text = summary == null
                               ? "There are NO fixes."
@@ -332,6 +332,5 @@ namespace AnimalMovement
             if (handle != null)
                 handle(this, EventArgs.Empty);
         }
-
     }
 }

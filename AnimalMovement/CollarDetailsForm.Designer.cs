@@ -324,8 +324,8 @@
             this.RetrieveDateColumn,
             this.DeploymentColumn});
             this.DeploymentDataGridView.Location = new System.Drawing.Point(6, 6);
-            this.DeploymentDataGridView.MultiSelect = false;
             this.DeploymentDataGridView.Name = "DeploymentDataGridView";
+            this.DeploymentDataGridView.ReadOnly = true;
             this.DeploymentDataGridView.RowHeadersVisible = false;
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DeploymentDataGridView.Size = new System.Drawing.Size(464, 199);
@@ -339,6 +339,7 @@
             this.CollarManufacturerColumn.HeaderText = "Manufacturer";
             this.CollarManufacturerColumn.MinimumWidth = 60;
             this.CollarManufacturerColumn.Name = "CollarManufacturerColumn";
+            this.CollarManufacturerColumn.ReadOnly = true;
             this.CollarManufacturerColumn.Visible = false;
             // 
             // CollarIdColumn
@@ -348,6 +349,7 @@
             this.CollarIdColumn.HeaderText = "Collar";
             this.CollarIdColumn.MinimumWidth = 60;
             this.CollarIdColumn.Name = "CollarIdColumn";
+            this.CollarIdColumn.ReadOnly = true;
             this.CollarIdColumn.Visible = false;
             // 
             // ProjectColumn
@@ -393,6 +395,7 @@
             this.DeploymentColumn.DataPropertyName = "Deployment";
             this.DeploymentColumn.HeaderText = "Deployment";
             this.DeploymentColumn.Name = "DeploymentColumn";
+            this.DeploymentColumn.ReadOnly = true;
             this.DeploymentColumn.Visible = false;
             // 
             // DeployRetrieveButton
@@ -514,12 +517,21 @@
             // 
             // FixConflictsDataGridView
             // 
+            this.FixConflictsDataGridView.AllowUserToAddRows = false;
+            this.FixConflictsDataGridView.AllowUserToDeleteRows = false;
+            this.FixConflictsDataGridView.AllowUserToOrderColumns = true;
+            this.FixConflictsDataGridView.AllowUserToResizeRows = false;
             this.FixConflictsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.FixConflictsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.FixConflictsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.FixConflictsDataGridView.Location = new System.Drawing.Point(9, 58);
+            this.FixConflictsDataGridView.MultiSelect = false;
             this.FixConflictsDataGridView.Name = "FixConflictsDataGridView";
+            this.FixConflictsDataGridView.ReadOnly = true;
+            this.FixConflictsDataGridView.RowHeadersVisible = false;
+            this.FixConflictsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.FixConflictsDataGridView.Size = new System.Drawing.Size(459, 155);
             this.FixConflictsDataGridView.TabIndex = 2;
             this.FixConflictsDataGridView.SelectionChanged += new System.EventHandler(this.FixConflictsDataGridView_SelectionChanged);
@@ -568,12 +580,21 @@
             // 
             // FilesDataGridView
             // 
+            this.FilesDataGridView.AllowUserToAddRows = false;
+            this.FilesDataGridView.AllowUserToDeleteRows = false;
+            this.FilesDataGridView.AllowUserToOrderColumns = true;
+            this.FilesDataGridView.AllowUserToResizeRows = false;
             this.FilesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.FilesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.FilesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.FilesDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.FilesDataGridView.MultiSelect = false;
             this.FilesDataGridView.Name = "FilesDataGridView";
+            this.FilesDataGridView.ReadOnly = true;
+            this.FilesDataGridView.RowHeadersVisible = false;
+            this.FilesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.FilesDataGridView.Size = new System.Drawing.Size(467, 210);
             this.FilesDataGridView.TabIndex = 0;
             this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);

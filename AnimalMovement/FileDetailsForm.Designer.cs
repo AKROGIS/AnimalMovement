@@ -271,6 +271,7 @@
             this.FixInfoDataGridView.AllowUserToAddRows = false;
             this.FixInfoDataGridView.AllowUserToDeleteRows = false;
             this.FixInfoDataGridView.AllowUserToOrderColumns = true;
+            this.FixInfoDataGridView.AllowUserToResizeRows = false;
             this.FixInfoDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -285,8 +286,11 @@
             this.Column4,
             this.Column3});
             this.FixInfoDataGridView.Location = new System.Drawing.Point(13, 177);
+            this.FixInfoDataGridView.MultiSelect = false;
             this.FixInfoDataGridView.Name = "FixInfoDataGridView";
             this.FixInfoDataGridView.ReadOnly = true;
+            this.FixInfoDataGridView.RowHeadersVisible = false;
+            this.FixInfoDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.FixInfoDataGridView.Size = new System.Drawing.Size(463, 134);
             this.FixInfoDataGridView.TabIndex = 12;
             // 
