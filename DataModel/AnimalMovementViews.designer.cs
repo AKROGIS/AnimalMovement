@@ -585,6 +585,8 @@ namespace DataModel
 		
 		private string _File;
 		
+		private string _Status;
+		
 		private System.Nullable<int> _FixCount;
 		
 		private System.Nullable<System.DateTime> _First;
@@ -623,6 +625,22 @@ namespace DataModel
 				if ((this._File != value))
 				{
 					this._File = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Status", DbType="NVarChar(32) NOT NULL", CanBeNull=false)]
+		public string Status
+		{
+			get
+			{
+				return this._Status;
+			}
+			set
+			{
+				if ((this._Status != value))
+				{
+					this._Status = value;
 				}
 			}
 		}
