@@ -34,6 +34,9 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>AnimalTrack.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -245,6 +248,8 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="Images\add.gif" />
+    <Content Include="AnimalTrack.ico" />
+    <Content Include="Images\AnimalTrack.png" />
     <Content Include="Images\GenericAddGreen16.png" />
     <Content Include="Images\GenericBlackAdd16.png" />
     <Content Include="Images\GenericBlackDelete16.png" />
