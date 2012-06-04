@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
+//FIXME - provide better information if the exe cannot find the database
+//FIXME - make sure the connection string in the configuration file work correctly
 //TODO - support and testing of various file formats
 //TODO - 	a) would like to support all data as it is/was delivered to the PI
 //TODO - 	b) would like to support direct download from Argos web services
