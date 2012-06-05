@@ -15,7 +15,7 @@ namespace SqlServerExtensions
 {
     public class AnimalMovementFunctions
     {
-        private const int FormatC_HeaderLines = 23;
+        private static int _formatCHeaderLines = 23;
 
         [SqlFunction]
         public static SqlDateTime LocalTime(SqlDateTime utcDateTime)
@@ -213,8 +213,13 @@ namespace SqlServerExtensions
             if (stream == null)
                 return mask;
             //skip the junk before the header line
-            for (int i = 0; i < FormatC_HeaderLines-1; i++)
-                stream.ReadLine();
+            for (int i = 0; i < _formatCHeaderLines - 1; i++)
+            {
+                // Look for the line that defines where the header actually is
+                var s = stream.ReadLine();
+                if (s != null && s.StartsWith("Headers Row,",StringComparison.OrdinalIgnoreCase))
+                    _formatCHeaderLines = Int32.Parse(s.Replace("Headers Row,",""));
+            }
             string header = stream.ReadLine();
             if (header == null)
                 return mask;
@@ -260,7 +265,7 @@ namespace SqlServerExtensions
 
         internal static bool FormatC_LineSelector(int lineNumber, string lineText)
         {
-            if (lineNumber <= FormatC_HeaderLines)
+            if (lineNumber <= _formatCHeaderLines)
                 return false;
             if (string.IsNullOrEmpty(lineText.Trim()))
                 return false;
