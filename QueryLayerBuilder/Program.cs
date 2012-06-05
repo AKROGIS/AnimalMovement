@@ -13,6 +13,8 @@ namespace QueryLayerBuilder
         [STAThread]
         static int Main(string[] args)
         {
+            //In ArcGIS 10.1, this is called esriLicenseProductCode.esriLicenseProductCodeAdvanced
+            
             if (!LicenseInitializer.InitializeApplication(new [] { esriLicenseProductCode.esriLicenseProductCodeArcInfo },
                                                           new esriLicenseExtensionCode[] { }))
             {
@@ -38,6 +40,10 @@ namespace QueryLayerBuilder
             LicenseInitializer.ShutdownApplication();
             return 0;
         }
+
+        // ESRI.ArcGIS.Carto.FeatureLayerClass has version specific dependencies on ESRI.ArcGIS.Display
+        // which means that this code must be compiled specifically for each version of ArcGIS that it
+        // will run on.
 
         private static ILayer BuildQueryLayer(string connection, string query, string name)
         {
