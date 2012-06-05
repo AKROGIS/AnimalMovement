@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.SqlServer.Server;
 
 // See http://msdn.microsoft.com/en-us/library/ms131103.aspx
@@ -13,6 +14,9 @@ using Microsoft.SqlServer.Server;
 
 namespace SqlServerExtensions
 {
+    //This attribute allows us to write to the static field in a CLR plugin for SQL Server
+    // "Storing to a static field is not allowed in safe assemblies" otherwise
+    [CompilerGenerated]
     public class AnimalMovementFunctions
     {
         private static int _formatCHeaderLines = 23;
