@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 
 //FIXME - provide better information if the exe cannot find the database
-//FIXME - make sure the connection string in the configuration file work correctly
+//FIXME - Deploy the database changes to check mortality date when adding locations
 //TODO - support and testing of various file formats
 //TODO - 	a) would like to support all data as it is/was delivered to the PI
 //TODO - 	b) would like to support direct download from Argos web services
@@ -14,6 +14,11 @@ using System.Runtime.InteropServices;
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Replace the wait cursors with a message box and progress bar
 //TODO - Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
+
+//Deployment Notes:
+//  The connection string for the DataModel.dll (app.config) must be copied in and replace the connection string in the
+//     exe.config file.  Servers with a default instance name, only need the server name
+
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
