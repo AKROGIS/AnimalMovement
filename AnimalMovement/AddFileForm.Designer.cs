@@ -270,7 +270,7 @@
             this.MaximizeBox = false;
             this.MinimumSize = new System.Drawing.Size(300, 298);
             this.Name = "AddFileForm";
-            this.Text = "Add Collar Data File";
+            this.Text = "Upload Collar Data";
             this.statusGroupBox.ResumeLayout(false);
             this.statusGroupBox.PerformLayout();
             this.ResumeLayout(false);

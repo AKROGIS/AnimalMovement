@@ -272,7 +272,7 @@
             this.CollarsListBox.Location = new System.Drawing.Point(3, 24);
             this.CollarsListBox.Name = "CollarsListBox";
             this.CollarsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.CollarsListBox.Size = new System.Drawing.Size(227, 221);
+            this.CollarsListBox.Size = new System.Drawing.Size(229, 221);
             this.CollarsListBox.TabIndex = 1;
             this.CollarsListBox.SelectedIndexChanged += new System.EventHandler(this.CollarsListBox_SelectedIndexChanged);
             this.CollarsListBox.DoubleClick += new System.EventHandler(this.InfoCollarButton_Click);
@@ -336,7 +336,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(350, 350);
             this.Name = "InvestigatorForm";
-            this.Text = "Investigator Details";
+            this.Text = "Project Investigator Details";
             this.Load += new System.EventHandler(this.InvestigatorForm_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();

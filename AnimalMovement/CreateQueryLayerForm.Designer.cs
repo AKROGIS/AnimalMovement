@@ -431,7 +431,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(392, 385);
             this.Name = "CreateQueryLayerForm";
-            this.Text = "CreateQueryLayer";
+            this.Text = "Create Map File";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);

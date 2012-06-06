@@ -34,13 +34,13 @@
             this.AddProjectButton = new System.Windows.Forms.Button();
             this.ShowHideButton = new System.Windows.Forms.Button();
             this.ProjectsGridView = new System.Windows.Forms.DataGridView();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.columnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnLead = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnUnit = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnCode = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnCanDelete = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.ProjectsGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -195,7 +195,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(295, 193);
             this.Name = "ProjectsForm";
-            this.Text = "Animal Movement Projects";
+            this.Text = "Project List";
             this.Load += new System.EventHandler(this.ReviewProjectsForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.ProjectsGridView)).EndInit();
             this.ResumeLayout(false);

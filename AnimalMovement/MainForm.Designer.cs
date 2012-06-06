@@ -67,7 +67,7 @@
             this.ProjectsButton.Name = "ProjectsButton";
             this.ProjectsButton.Size = new System.Drawing.Size(205, 23);
             this.ProjectsButton.TabIndex = 2;
-            this.ProjectsButton.Text = "Manage Projects";
+            this.ProjectsButton.Text = "Project List";
             this.ProjectsButton.UseVisualStyleBackColor = true;
             this.ProjectsButton.Click += new System.EventHandler(this.ProjectsButton_Click);
             // 
@@ -79,7 +79,7 @@
             this.GenerateMapButton.Name = "GenerateMapButton";
             this.GenerateMapButton.Size = new System.Drawing.Size(205, 23);
             this.GenerateMapButton.TabIndex = 4;
-            this.GenerateMapButton.Text = "Generate Map File";
+            this.GenerateMapButton.Text = "Create Map File";
             this.GenerateMapButton.UseVisualStyleBackColor = true;
             this.GenerateMapButton.Click += new System.EventHandler(this.GenerateMapButton_Click);
             // 
@@ -91,7 +91,7 @@
             this.MyProfileButton.Name = "MyProfileButton";
             this.MyProfileButton.Size = new System.Drawing.Size(205, 23);
             this.MyProfileButton.TabIndex = 1;
-            this.MyProfileButton.Text = "My Profile";
+            this.MyProfileButton.Text = "Project Investigator Details";
             this.MyProfileButton.UseVisualStyleBackColor = true;
             this.MyProfileButton.Click += new System.EventHandler(this.MyProfileButton_Click);
             // 
