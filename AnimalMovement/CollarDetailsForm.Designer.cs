@@ -96,7 +96,7 @@
             this.DownloadInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DownloadInfoTextBox.Location = new System.Drawing.Point(90, 111);
-            this.DownloadInfoTextBox.MaxLength = 8;
+            this.DownloadInfoTextBox.MaxLength = 200;
             this.DownloadInfoTextBox.Name = "DownloadInfoTextBox";
             this.DownloadInfoTextBox.Size = new System.Drawing.Size(372, 20);
             this.DownloadInfoTextBox.TabIndex = 9;
@@ -115,7 +115,7 @@
             // 
             this.FrequencyTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.FrequencyTextBox.Location = new System.Drawing.Point(315, 85);
-            this.FrequencyTextBox.MaxLength = 8;
+            this.FrequencyTextBox.MaxLength = 32;
             this.FrequencyTextBox.Name = "FrequencyTextBox";
             this.FrequencyTextBox.Size = new System.Drawing.Size(147, 20);
             this.FrequencyTextBox.TabIndex = 8;
@@ -134,7 +134,7 @@
             this.SerialNumberTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SerialNumberTextBox.Location = new System.Drawing.Point(90, 85);
-            this.SerialNumberTextBox.MaxLength = 8;
+            this.SerialNumberTextBox.MaxLength = 100;
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
             this.SerialNumberTextBox.Size = new System.Drawing.Size(154, 20);
             this.SerialNumberTextBox.TabIndex = 7;
@@ -194,7 +194,6 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.NotesTextBox.Location = new System.Drawing.Point(90, 137);
-            this.NotesTextBox.MaxLength = 200;
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
             this.NotesTextBox.Size = new System.Drawing.Size(372, 68);
@@ -204,7 +203,7 @@
             // 
             this.OwnerTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.OwnerTextBox.Location = new System.Drawing.Point(315, 59);
-            this.OwnerTextBox.MaxLength = 4;
+            this.OwnerTextBox.MaxLength = 100;
             this.OwnerTextBox.Name = "OwnerTextBox";
             this.OwnerTextBox.Size = new System.Drawing.Size(147, 20);
             this.OwnerTextBox.TabIndex = 6;
@@ -225,7 +224,7 @@
             this.AlternativeIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.AlternativeIdTextBox.Location = new System.Drawing.Point(90, 59);
-            this.AlternativeIdTextBox.MaxLength = 8;
+            this.AlternativeIdTextBox.MaxLength = 16;
             this.AlternativeIdTextBox.Name = "AlternativeIdTextBox";
             this.AlternativeIdTextBox.Size = new System.Drawing.Size(154, 20);
             this.AlternativeIdTextBox.TabIndex = 5;

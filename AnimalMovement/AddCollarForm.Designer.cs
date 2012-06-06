@@ -80,7 +80,6 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.NotesTextBox.Location = new System.Drawing.Point(95, 249);
-            this.NotesTextBox.MaxLength = 200;
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
             this.NotesTextBox.Size = new System.Drawing.Size(259, 82);
@@ -91,7 +90,7 @@
             this.OwnerTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.OwnerTextBox.Location = new System.Drawing.Point(95, 119);
-            this.OwnerTextBox.MaxLength = 4;
+            this.OwnerTextBox.MaxLength = 100;
             this.OwnerTextBox.Name = "OwnerTextBox";
             this.OwnerTextBox.Size = new System.Drawing.Size(259, 20);
             this.OwnerTextBox.TabIndex = 14;
@@ -101,7 +100,7 @@
             this.CollarIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarIdTextBox.Location = new System.Drawing.Point(95, 93);
-            this.CollarIdTextBox.MaxLength = 50;
+            this.CollarIdTextBox.MaxLength = 16;
             this.CollarIdTextBox.Name = "CollarIdTextBox";
             this.CollarIdTextBox.Size = new System.Drawing.Size(257, 20);
             this.CollarIdTextBox.TabIndex = 13;
@@ -112,7 +111,7 @@
             this.AlternativeIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.AlternativeIdTextBox.Location = new System.Drawing.Point(95, 145);
-            this.AlternativeIdTextBox.MaxLength = 8;
+            this.AlternativeIdTextBox.MaxLength = 16;
             this.AlternativeIdTextBox.Name = "AlternativeIdTextBox";
             this.AlternativeIdTextBox.Size = new System.Drawing.Size(259, 20);
             this.AlternativeIdTextBox.TabIndex = 15;
@@ -230,7 +229,7 @@
             this.SerialNumberTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SerialNumberTextBox.Location = new System.Drawing.Point(95, 171);
-            this.SerialNumberTextBox.MaxLength = 8;
+            this.SerialNumberTextBox.MaxLength = 100;
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
             this.SerialNumberTextBox.Size = new System.Drawing.Size(259, 20);
             this.SerialNumberTextBox.TabIndex = 16;
@@ -249,7 +248,7 @@
             this.FrequencyTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.FrequencyTextBox.Location = new System.Drawing.Point(95, 197);
-            this.FrequencyTextBox.MaxLength = 8;
+            this.FrequencyTextBox.MaxLength = 32;
             this.FrequencyTextBox.Name = "FrequencyTextBox";
             this.FrequencyTextBox.Size = new System.Drawing.Size(259, 20);
             this.FrequencyTextBox.TabIndex = 17;
@@ -268,7 +267,7 @@
             this.DownloadInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DownloadInfoTextBox.Location = new System.Drawing.Point(95, 223);
-            this.DownloadInfoTextBox.MaxLength = 8;
+            this.DownloadInfoTextBox.MaxLength = 200;
             this.DownloadInfoTextBox.Name = "DownloadInfoTextBox";
             this.DownloadInfoTextBox.Size = new System.Drawing.Size(259, 20);
             this.DownloadInfoTextBox.TabIndex = 18;
