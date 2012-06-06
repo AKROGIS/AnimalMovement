@@ -116,6 +116,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.FileNameTextBox.Enabled = false;
             this.FileNameTextBox.Location = new System.Drawing.Point(58, 38);
+            this.FileNameTextBox.MaxLength = 255;
             this.FileNameTextBox.Name = "FileNameTextBox";
             this.FileNameTextBox.Size = new System.Drawing.Size(162, 20);
             this.FileNameTextBox.TabIndex = 3;
@@ -154,6 +155,7 @@
             this.CollarIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarIdTextBox.Enabled = false;
             this.CollarIdTextBox.Location = new System.Drawing.Point(314, 35);
+            this.CollarIdTextBox.MaxLength = 16;
             this.CollarIdTextBox.Name = "CollarIdTextBox";
             this.CollarIdTextBox.Size = new System.Drawing.Size(162, 20);
             this.CollarIdTextBox.TabIndex = 4;

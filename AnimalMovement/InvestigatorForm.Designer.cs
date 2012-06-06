@@ -107,6 +107,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.PhoneTextBox.Enabled = false;
             this.PhoneTextBox.Location = new System.Drawing.Point(93, 90);
+            this.PhoneTextBox.MaxLength = 100;
             this.PhoneTextBox.Name = "PhoneTextBox";
             this.PhoneTextBox.Size = new System.Drawing.Size(385, 20);
             this.PhoneTextBox.TabIndex = 3;
@@ -117,6 +118,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.EmailTextBox.Enabled = false;
             this.EmailTextBox.Location = new System.Drawing.Point(93, 64);
+            this.EmailTextBox.MaxLength = 200;
             this.EmailTextBox.Name = "EmailTextBox";
             this.EmailTextBox.Size = new System.Drawing.Size(385, 20);
             this.EmailTextBox.TabIndex = 2;
@@ -127,6 +129,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.NameTextBox.Enabled = false;
             this.NameTextBox.Location = new System.Drawing.Point(93, 38);
+            this.NameTextBox.MaxLength = 100;
             this.NameTextBox.Name = "NameTextBox";
             this.NameTextBox.Size = new System.Drawing.Size(385, 20);
             this.NameTextBox.TabIndex = 1;
