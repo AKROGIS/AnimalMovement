@@ -48,16 +48,16 @@
             this.AddEditorButton = new System.Windows.Forms.Button();
             this.DeleteEditorButton = new System.Windows.Forms.Button();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.FilesListBox = new System.Windows.Forms.ListBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.AddFilesButton = new System.Windows.Forms.Button();
-            this.DeleteFilesButton = new System.Windows.Forms.Button();
-            this.InfoFilesButton = new System.Windows.Forms.Button();
             this.AnimalsListBox = new System.Windows.Forms.ListBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.AddAnimalButton = new System.Windows.Forms.Button();
             this.DeleteAnimalsButton = new System.Windows.Forms.Button();
             this.InfoAnimalsButton = new System.Windows.Forms.Button();
+            this.FilesListBox = new System.Windows.Forms.ListBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.AddFilesButton = new System.Windows.Forms.Button();
+            this.DeleteFilesButton = new System.Windows.Forms.Button();
+            this.InfoFilesButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -72,7 +72,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(408, 15);
+            this.label4.Location = new System.Drawing.Point(376, 15);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(35, 13);
             this.label4.TabIndex = 6;
@@ -109,7 +109,7 @@
             // 
             this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(414, 41);
+            this.label8.Location = new System.Drawing.Point(382, 41);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(29, 13);
             this.label8.TabIndex = 10;
@@ -122,16 +122,16 @@
             this.InvestigatorTextBox.Enabled = false;
             this.InvestigatorTextBox.Location = new System.Drawing.Point(86, 38);
             this.InvestigatorTextBox.Name = "InvestigatorTextBox";
-            this.InvestigatorTextBox.Size = new System.Drawing.Size(261, 20);
+            this.InvestigatorTextBox.Size = new System.Drawing.Size(229, 20);
             this.InvestigatorTextBox.TabIndex = 3;
             // 
             // UnitTextBox
             // 
             this.UnitTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UnitTextBox.Enabled = false;
-            this.UnitTextBox.Location = new System.Drawing.Point(449, 38);
+            this.UnitTextBox.Location = new System.Drawing.Point(417, 38);
             this.UnitTextBox.Name = "UnitTextBox";
-            this.UnitTextBox.Size = new System.Drawing.Size(69, 20);
+            this.UnitTextBox.Size = new System.Drawing.Size(101, 20);
             this.UnitTextBox.TabIndex = 6;
             // 
             // DescriptionTextBox
@@ -152,16 +152,16 @@
             this.ProjectNameTextBox.Enabled = false;
             this.ProjectNameTextBox.Location = new System.Drawing.Point(86, 12);
             this.ProjectNameTextBox.Name = "ProjectNameTextBox";
-            this.ProjectNameTextBox.Size = new System.Drawing.Size(316, 20);
+            this.ProjectNameTextBox.Size = new System.Drawing.Size(284, 20);
             this.ProjectNameTextBox.TabIndex = 1;
             // 
             // ProjectCodeTextBox
             // 
             this.ProjectCodeTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ProjectCodeTextBox.Enabled = false;
-            this.ProjectCodeTextBox.Location = new System.Drawing.Point(449, 12);
+            this.ProjectCodeTextBox.Location = new System.Drawing.Point(417, 12);
             this.ProjectCodeTextBox.Name = "ProjectCodeTextBox";
-            this.ProjectCodeTextBox.Size = new System.Drawing.Size(69, 20);
+            this.ProjectCodeTextBox.Size = new System.Drawing.Size(101, 20);
             this.ProjectCodeTextBox.TabIndex = 2;
             // 
             // EditInvestigatorButton
@@ -170,7 +170,7 @@
             this.EditInvestigatorButton.Enabled = false;
             this.EditInvestigatorButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.EditInvestigatorButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
-            this.EditInvestigatorButton.Location = new System.Drawing.Point(353, 36);
+            this.EditInvestigatorButton.Location = new System.Drawing.Point(321, 36);
             this.EditInvestigatorButton.Name = "EditInvestigatorButton";
             this.EditInvestigatorButton.Size = new System.Drawing.Size(24, 24);
             this.EditInvestigatorButton.TabIndex = 4;
@@ -185,7 +185,7 @@
             this.InvestigatorDetailsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InvestigatorDetailsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InvestigatorDetailsButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InvestigatorDetailsButton.Location = new System.Drawing.Point(378, 34);
+            this.InvestigatorDetailsButton.Location = new System.Drawing.Point(346, 35);
             this.InvestigatorDetailsButton.Name = "InvestigatorDetailsButton";
             this.InvestigatorDetailsButton.Size = new System.Drawing.Size(24, 24);
             this.InvestigatorDetailsButton.TabIndex = 5;
@@ -299,90 +299,22 @@
             // 
             // splitContainer2.Panel1
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.FilesListBox);
+            this.splitContainer2.Panel1.Controls.Add(this.AnimalsListBox);
             this.splitContainer2.Panel1.Controls.Add(this.label3);
-            this.splitContainer2.Panel1.Controls.Add(this.AddFilesButton);
-            this.splitContainer2.Panel1.Controls.Add(this.DeleteFilesButton);
-            this.splitContainer2.Panel1.Controls.Add(this.InfoFilesButton);
+            this.splitContainer2.Panel1.Controls.Add(this.AddAnimalButton);
+            this.splitContainer2.Panel1.Controls.Add(this.DeleteAnimalsButton);
+            this.splitContainer2.Panel1.Controls.Add(this.InfoAnimalsButton);
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.AnimalsListBox);
+            this.splitContainer2.Panel2.Controls.Add(this.FilesListBox);
             this.splitContainer2.Panel2.Controls.Add(this.label2);
-            this.splitContainer2.Panel2.Controls.Add(this.AddAnimalButton);
-            this.splitContainer2.Panel2.Controls.Add(this.DeleteAnimalsButton);
-            this.splitContainer2.Panel2.Controls.Add(this.InfoAnimalsButton);
+            this.splitContainer2.Panel2.Controls.Add(this.AddFilesButton);
+            this.splitContainer2.Panel2.Controls.Add(this.DeleteFilesButton);
+            this.splitContainer2.Panel2.Controls.Add(this.InfoFilesButton);
             this.splitContainer2.Size = new System.Drawing.Size(360, 213);
             this.splitContainer2.SplitterDistance = 180;
             this.splitContainer2.TabIndex = 0;
-            // 
-            // FilesListBox
-            // 
-            this.FilesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.FilesListBox.FormattingEnabled = true;
-            this.FilesListBox.IntegralHeight = false;
-            this.FilesListBox.Location = new System.Drawing.Point(3, 15);
-            this.FilesListBox.Name = "FilesListBox";
-            this.FilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.FilesListBox.Size = new System.Drawing.Size(174, 164);
-            this.FilesListBox.TabIndex = 21;
-            this.FilesListBox.SelectedIndexChanged += new System.EventHandler(this.FilesListBox_SelectedIndexChanged);
-            this.FilesListBox.DoubleClick += new System.EventHandler(this.InfoFilesButton_Click);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, -1);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(28, 13);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Files";
-            // 
-            // AddFilesButton
-            // 
-            this.AddFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.AddFilesButton.Enabled = false;
-            this.AddFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AddFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddFilesButton.Location = new System.Drawing.Point(3, 184);
-            this.AddFilesButton.Margin = new System.Windows.Forms.Padding(0);
-            this.AddFilesButton.Name = "AddFilesButton";
-            this.AddFilesButton.Size = new System.Drawing.Size(24, 24);
-            this.AddFilesButton.TabIndex = 22;
-            this.AddFilesButton.TextAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.AddFilesButton.UseVisualStyleBackColor = true;
-            this.AddFilesButton.Click += new System.EventHandler(this.AddFilesButton_Click);
-            // 
-            // DeleteFilesButton
-            // 
-            this.DeleteFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.DeleteFilesButton.Enabled = false;
-            this.DeleteFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DeleteFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteFilesButton.Location = new System.Drawing.Point(30, 184);
-            this.DeleteFilesButton.Name = "DeleteFilesButton";
-            this.DeleteFilesButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteFilesButton.TabIndex = 23;
-            this.DeleteFilesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.DeleteFilesButton.UseVisualStyleBackColor = true;
-            this.DeleteFilesButton.Click += new System.EventHandler(this.DeleteFilesButton_Click);
-            // 
-            // InfoFilesButton
-            // 
-            this.InfoFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.InfoFilesButton.FlatAppearance.BorderSize = 0;
-            this.InfoFilesButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.InfoFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.InfoFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoFilesButton.Location = new System.Drawing.Point(55, 184);
-            this.InfoFilesButton.Name = "InfoFilesButton";
-            this.InfoFilesButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoFilesButton.TabIndex = 24;
-            this.InfoFilesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.InfoFilesButton.UseVisualStyleBackColor = true;
-            this.InfoFilesButton.Click += new System.EventHandler(this.InfoFilesButton_Click);
             // 
             // AnimalsListBox
             // 
@@ -394,31 +326,32 @@
             this.AnimalsListBox.Location = new System.Drawing.Point(3, 15);
             this.AnimalsListBox.Name = "AnimalsListBox";
             this.AnimalsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.AnimalsListBox.Size = new System.Drawing.Size(170, 164);
-            this.AnimalsListBox.TabIndex = 31;
+            this.AnimalsListBox.Size = new System.Drawing.Size(174, 164);
+            this.AnimalsListBox.TabIndex = 21;
             this.AnimalsListBox.SelectedIndexChanged += new System.EventHandler(this.AnimalsListBox_SelectedIndexChanged);
             this.AnimalsListBox.DoubleClick += new System.EventHandler(this.InfoAnimalsButton_Click);
             // 
-            // label2
+            // label3
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(43, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Animals";
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(3, -1);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(43, 13);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Animals";
             // 
             // AddAnimalButton
             // 
             this.AddAnimalButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddAnimalButton.Enabled = false;
-            this.AddAnimalButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.AddAnimalButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AddAnimalButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
             this.AddAnimalButton.Location = new System.Drawing.Point(3, 184);
+            this.AddAnimalButton.Margin = new System.Windows.Forms.Padding(0);
             this.AddAnimalButton.Name = "AddAnimalButton";
             this.AddAnimalButton.Size = new System.Drawing.Size(24, 24);
-            this.AddAnimalButton.TabIndex = 32;
-            this.AddAnimalButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.AddAnimalButton.TabIndex = 22;
+            this.AddAnimalButton.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             this.AddAnimalButton.UseVisualStyleBackColor = true;
             this.AddAnimalButton.Click += new System.EventHandler(this.AddAnimalButton_Click);
             // 
@@ -428,10 +361,10 @@
             this.DeleteAnimalsButton.Enabled = false;
             this.DeleteAnimalsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteAnimalsButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteAnimalsButton.Location = new System.Drawing.Point(33, 184);
+            this.DeleteAnimalsButton.Location = new System.Drawing.Point(30, 184);
             this.DeleteAnimalsButton.Name = "DeleteAnimalsButton";
             this.DeleteAnimalsButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteAnimalsButton.TabIndex = 33;
+            this.DeleteAnimalsButton.TabIndex = 23;
             this.DeleteAnimalsButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.DeleteAnimalsButton.UseVisualStyleBackColor = true;
             this.DeleteAnimalsButton.Click += new System.EventHandler(this.DeleteAnimalsButton_Click);
@@ -443,13 +376,80 @@
             this.InfoAnimalsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoAnimalsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoAnimalsButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoAnimalsButton.Location = new System.Drawing.Point(58, 184);
+            this.InfoAnimalsButton.Location = new System.Drawing.Point(55, 184);
             this.InfoAnimalsButton.Name = "InfoAnimalsButton";
             this.InfoAnimalsButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoAnimalsButton.TabIndex = 34;
+            this.InfoAnimalsButton.TabIndex = 24;
             this.InfoAnimalsButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.InfoAnimalsButton.UseVisualStyleBackColor = true;
             this.InfoAnimalsButton.Click += new System.EventHandler(this.InfoAnimalsButton_Click);
+            // 
+            // FilesListBox
+            // 
+            this.FilesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.FilesListBox.FormattingEnabled = true;
+            this.FilesListBox.IntegralHeight = false;
+            this.FilesListBox.Location = new System.Drawing.Point(3, 15);
+            this.FilesListBox.Name = "FilesListBox";
+            this.FilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.FilesListBox.Size = new System.Drawing.Size(170, 164);
+            this.FilesListBox.TabIndex = 31;
+            this.FilesListBox.SelectedIndexChanged += new System.EventHandler(this.FilesListBox_SelectedIndexChanged);
+            this.FilesListBox.DoubleClick += new System.EventHandler(this.InfoFilesButton_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(28, 13);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Files";
+            // 
+            // AddFilesButton
+            // 
+            this.AddFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddFilesButton.Enabled = false;
+            this.AddFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.AddFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddFilesButton.Location = new System.Drawing.Point(3, 184);
+            this.AddFilesButton.Name = "AddFilesButton";
+            this.AddFilesButton.Size = new System.Drawing.Size(24, 24);
+            this.AddFilesButton.TabIndex = 32;
+            this.AddFilesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.AddFilesButton.UseVisualStyleBackColor = true;
+            this.AddFilesButton.Click += new System.EventHandler(this.AddFilesButton_Click);
+            // 
+            // DeleteFilesButton
+            // 
+            this.DeleteFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteFilesButton.Enabled = false;
+            this.DeleteFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DeleteFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeleteFilesButton.Location = new System.Drawing.Point(33, 184);
+            this.DeleteFilesButton.Name = "DeleteFilesButton";
+            this.DeleteFilesButton.Size = new System.Drawing.Size(24, 24);
+            this.DeleteFilesButton.TabIndex = 33;
+            this.DeleteFilesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.DeleteFilesButton.UseVisualStyleBackColor = true;
+            this.DeleteFilesButton.Click += new System.EventHandler(this.DeleteFilesButton_Click);
+            // 
+            // InfoFilesButton
+            // 
+            this.InfoFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoFilesButton.FlatAppearance.BorderSize = 0;
+            this.InfoFilesButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.InfoFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoFilesButton.Location = new System.Drawing.Point(58, 184);
+            this.InfoFilesButton.Name = "InfoFilesButton";
+            this.InfoFilesButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoFilesButton.TabIndex = 34;
+            this.InfoFilesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.InfoFilesButton.UseVisualStyleBackColor = true;
+            this.InfoFilesButton.Click += new System.EventHandler(this.InfoFilesButton_Click);
             // 
             // ProjectDetailsForm
             // 
@@ -496,9 +496,9 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ListBox EditorsListBox;
-        private System.Windows.Forms.ListBox AnimalsListBox;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ListBox FilesListBox;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ListBox AnimalsListBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
@@ -507,17 +507,17 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button AddEditorButton;
         private System.Windows.Forms.Button DeleteEditorButton;
-        private System.Windows.Forms.Button DeleteAnimalsButton;
-        private System.Windows.Forms.Button AddAnimalButton;
         private System.Windows.Forms.Button DeleteFilesButton;
         private System.Windows.Forms.Button AddFilesButton;
+        private System.Windows.Forms.Button DeleteAnimalsButton;
+        private System.Windows.Forms.Button AddAnimalButton;
         private System.Windows.Forms.Button InvestigatorDetailsButton;
         private System.Windows.Forms.TextBox InvestigatorTextBox;
         private System.Windows.Forms.Button EditInvestigatorButton;
         private System.Windows.Forms.TextBox UnitTextBox;
         private System.Windows.Forms.TextBox DescriptionTextBox;
-        private System.Windows.Forms.Button InfoFilesButton;
         private System.Windows.Forms.Button InfoAnimalsButton;
+        private System.Windows.Forms.Button InfoFilesButton;
         private System.Windows.Forms.TextBox ProjectNameTextBox;
         private System.Windows.Forms.TextBox ProjectCodeTextBox;
         private System.Windows.Forms.Button EditSaveButton;
