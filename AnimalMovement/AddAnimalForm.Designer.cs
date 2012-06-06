@@ -52,6 +52,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ProjectCodeTextBox.Enabled = false;
             this.ProjectCodeTextBox.Location = new System.Drawing.Point(93, 12);
+            this.ProjectCodeTextBox.MaxLength = 16;
             this.ProjectCodeTextBox.Name = "ProjectCodeTextBox";
             this.ProjectCodeTextBox.Size = new System.Drawing.Size(249, 20);
             this.ProjectCodeTextBox.TabIndex = 34;
@@ -62,6 +63,7 @@
             this.AnimalIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.AnimalIdTextBox.Location = new System.Drawing.Point(93, 39);
+            this.AnimalIdTextBox.MaxLength = 16;
             this.AnimalIdTextBox.Name = "AnimalIdTextBox";
             this.AnimalIdTextBox.Size = new System.Drawing.Size(249, 20);
             this.AnimalIdTextBox.TabIndex = 35;
@@ -72,6 +74,7 @@
             this.GroupTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GroupTextBox.Location = new System.Drawing.Point(93, 144);
+            this.GroupTextBox.MaxLength = 500;
             this.GroupTextBox.Name = "GroupTextBox";
             this.GroupTextBox.Size = new System.Drawing.Size(249, 20);
             this.GroupTextBox.TabIndex = 38;
@@ -136,6 +139,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DescriptionTextBox.Location = new System.Drawing.Point(93, 170);
+            this.DescriptionTextBox.MaxLength = 2000;
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
             this.DescriptionTextBox.Size = new System.Drawing.Size(249, 75);

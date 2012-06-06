@@ -239,7 +239,7 @@
             this.GroupTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GroupTextBox.Location = new System.Drawing.Point(87, 90);
-            this.GroupTextBox.MaxLength = 8;
+            this.GroupTextBox.MaxLength = 500;
             this.GroupTextBox.Name = "GroupTextBox";
             this.GroupTextBox.Size = new System.Drawing.Size(341, 20);
             this.GroupTextBox.TabIndex = 5;
@@ -280,7 +280,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DescriptionTextBox.Location = new System.Drawing.Point(87, 116);
-            this.DescriptionTextBox.MaxLength = 200;
+            this.DescriptionTextBox.MaxLength = 2000;
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
             this.DescriptionTextBox.Size = new System.Drawing.Size(341, 42);
