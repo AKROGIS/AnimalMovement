@@ -121,6 +121,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.InvestigatorTextBox.Enabled = false;
             this.InvestigatorTextBox.Location = new System.Drawing.Point(86, 38);
+            this.InvestigatorTextBox.MaxLength = 128;
             this.InvestigatorTextBox.Name = "InvestigatorTextBox";
             this.InvestigatorTextBox.Size = new System.Drawing.Size(229, 20);
             this.InvestigatorTextBox.TabIndex = 3;
@@ -130,6 +131,7 @@
             this.UnitTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UnitTextBox.Enabled = false;
             this.UnitTextBox.Location = new System.Drawing.Point(417, 38);
+            this.UnitTextBox.MaxLength = 4;
             this.UnitTextBox.Name = "UnitTextBox";
             this.UnitTextBox.Size = new System.Drawing.Size(101, 20);
             this.UnitTextBox.TabIndex = 6;
@@ -140,6 +142,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DescriptionTextBox.Enabled = false;
             this.DescriptionTextBox.Location = new System.Drawing.Point(15, 81);
+            this.DescriptionTextBox.MaxLength = 2000;
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
             this.DescriptionTextBox.Size = new System.Drawing.Size(503, 65);
@@ -151,6 +154,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ProjectNameTextBox.Enabled = false;
             this.ProjectNameTextBox.Location = new System.Drawing.Point(86, 12);
+            this.ProjectNameTextBox.MaxLength = 150;
             this.ProjectNameTextBox.Name = "ProjectNameTextBox";
             this.ProjectNameTextBox.Size = new System.Drawing.Size(284, 20);
             this.ProjectNameTextBox.TabIndex = 1;
@@ -160,6 +164,7 @@
             this.ProjectCodeTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ProjectCodeTextBox.Enabled = false;
             this.ProjectCodeTextBox.Location = new System.Drawing.Point(417, 12);
+            this.ProjectCodeTextBox.MaxLength = 16;
             this.ProjectCodeTextBox.Name = "ProjectCodeTextBox";
             this.ProjectCodeTextBox.Size = new System.Drawing.Size(101, 20);
             this.ProjectCodeTextBox.TabIndex = 2;
