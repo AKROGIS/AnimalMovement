@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 //FIXME - DATABASE - Collar deployment date checking is not working (it is possible to deploy a collar simultaneously)
 //FIXME - DATABASE - Deploy the database changes to check mortality date when adding locations
+//FIXME - DATABASE - Deleting a project with editors does not properly delete the editors (user accounts remains)
 //TODO - DATABASE - Add unit testing.
 //TODO - DATABASE -Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
 
@@ -22,6 +23,7 @@ using System.Runtime.InteropServices;
 //TODO - Add MS Access readonly interface
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Replace the wait cursors with a message box and progress bar
+//TODO - uses a regular expression matcher to check the Debevek Header
 
 //Deployment Notes:
 //  The connection string for the DataModel.dll (app.config) must be copied in and replace the connection string in the
