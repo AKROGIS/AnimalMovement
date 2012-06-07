@@ -26,8 +26,6 @@ LookupTableData.sql
     Select specific database objects
       Select only the following tables:
 	    Lookup*
-		ProjectInvestigators
-		Settings
   Set Scripting Options
     Save to single ANSI text file (should use Unicode, but git can't diff that)
 	Advanced
