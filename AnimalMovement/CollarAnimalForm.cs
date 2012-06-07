@@ -2,6 +2,7 @@
 using System.Linq;
 using DataModel;
 
+//TODO - Pull Animal ID info out of the first tab, and put above the tabs 
 //FIXME - An editor needs access to the collars of the PI of the project they are working on.
 
 namespace AnimalMovement

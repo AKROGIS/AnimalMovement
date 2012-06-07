@@ -1,16 +1,22 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
+//FIXME - DATABASE - Add all columns for the Telonics condensed format, change parser to match.
 //FIXME - DATABASE - Collar deployment date checking is not working (it is possible to deploy a collar simultaneously)
 //FIXME - DATABASE - Deploy the database changes to check mortality date when adding locations
 //FIXME - DATABASE - Deleting a project with editors does not properly delete the editors (user accounts remains)
+//FIXME - DATABASE - Project editors table is not properly related to the projects table.
 //TODO - DATABASE - Add unit testing.
-//TODO - DATABASE -Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
+//TODO - DATABASE - Add table for Telonics tfp files, each records owned by a PI.
+//TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data
+//TODO - DATABASE - Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
+//TODO - DATABASE - Conflicting Fixes needs better support (don't show multiple fixes with same location)
+//TODO - DATABASE - Conflicting Fixes needs better support (don't show fixes hidden by store on board)
 
 //FIXME - provide better information if the exe cannot find the database
 //FIXME - Cannot overwrite an existing layer file (despite giving approval) - generates an exception.
 
-//TODO - Add the Telonics WTF format
+//TODO - Rename the telonics condensed/complete format
 //TODO - Add an ArcGIS tool for creating a mortality date
 //TODO - Consider viewer permission issues - All NPS is too permissive for some PIs
 //TODO - support and testing of various file formats

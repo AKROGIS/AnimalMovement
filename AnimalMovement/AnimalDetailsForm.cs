@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using DataModel;
 
 //TODO - Move Info, Delete buttons onto the data grid.
+//TODO - Allow editing of deployment and retrieval dates
 //TODO - Add additional location info: hidden locations, centroid, MCP area, average speed
 //TODO - Delay population of hidden tabs until displayed.
 

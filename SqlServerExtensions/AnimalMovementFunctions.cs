@@ -228,6 +228,9 @@ namespace SqlServerExtensions
             if (header == null)
                 return mask;
             string[] columns = header.Split(new[] { '\t', ',' }, 21);
+            //FIXME - all possible header text must be in this list,
+            // else the first missing one will advance the pointer to the end of the lists, and then no more columns will be searched for.
+            //TODO - make this generic, so that columns can be in any order.
             var wellKnownColumns = new[]
                                        {
                                 "Acquisition Time", "Acquisition Start Time", "Argos Location Class", "Argos Latitude", 

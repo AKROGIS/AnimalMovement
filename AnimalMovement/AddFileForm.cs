@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//TODO - Increase timeout
 //TODO - ask to create necessary database records to support file - i.e. collars/animals/deployments
 //TODO - set collarComboBox.selectedItem to null if disabled.  trick is setting back to something meaningful when enabled.
 //TODO - improve validation before create/save
