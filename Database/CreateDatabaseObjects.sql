@@ -2,7 +2,11 @@ USE [Animal_Movement]
 GO
 CREATE USER [NPS\BAMangipane] FOR LOGIN [NPS\BAMangipane] WITH DEFAULT_SCHEMA=[dbo]
 GO
+CREATE USER [NPS\BBorg] FOR LOGIN [NPS\BBorg] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\Domain Users] FOR LOGIN [NPS\Domain Users]
+GO
+CREATE USER [NPS\JPLawler] FOR LOGIN [NPS\JPLawler] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\JWBurch] FOR LOGIN [NPS\JWBurch] WITH DEFAULT_SCHEMA=[dbo]
 GO
@@ -11,6 +15,8 @@ GO
 CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\SDMiller] WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER [NPS\TMeier] FOR LOGIN [NPS\TMeier] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE ROLE [Editor] AUTHORIZATION [dbo]
 GO
@@ -3125,13 +3131,17 @@ AS
 	RETURN
 		SELECT  F.[FileId],
 				F.[FileName]+'.csv' AS [File],
-				COUNT(*) AS [FixCount],
+				S.[Name] AS [Status],
+				COUNT(FixDate) AS [FixCount],
 				MIN(FixDate) AS [First],
 				MAX(FixDate) AS [Last]
-		FROM [dbo].[CollarFixes] AS X INNER JOIN [dbo].[CollarFiles] AS F
+		FROM [dbo].[CollarFiles] AS F
+		INNER JOIN [dbo].[LookupCollarFileStatus] AS S
+		ON F.[Status] = S.[Code]
+		LEFT JOIN [dbo].[CollarFixes] AS X
 		ON X.FileId = F.FileId
-		WHERE X.CollarManufacturer = @CollarManufacturer AND X.CollarId = @CollarId
-		GROUP BY F.[FileId], F.[FileName]
+		WHERE F.CollarManufacturer = @CollarManufacturer AND F.CollarId = @CollarId
+		GROUP BY F.[FileId], F.[FileName], S.[Name]
 GO
 SET ANSI_NULLS ON
 GO
@@ -3314,11 +3324,14 @@ BEGIN
 	IF @Format = 'B'  -- Debevek Format
 	BEGIN
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, I.CollarId,
+		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, C.CollarId,
 		        CONVERT(datetime2, I.[FixDate]+ ' ' + ISNULL(I.[FixTime],'')),
 		        I.LatWGS84, I.LonWGS84
-		   FROM dbo.CollarDataDebevekFormat as I INNER JOIN CollarFiles as F 
+		   FROM dbo.CollarDataDebevekFormat as I
+	 INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
+	 INNER JOIN Collars as C 
+			 ON C.AlternativeId = I.CollarID		 
 		  WHERE F.[Status] = 'A'
 		    AND I.FileId = @FileId
 		    AND I.LatWGS84 IS NOT NULL AND I.LonWGS84 IS NOT NULL
@@ -4341,9 +4354,15 @@ EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\RESarwas'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\KCJoly'
 GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\TMeier'
+GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\BAMangipane'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\JWBurch'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\BBorg'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\JPLawler'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'Investigator'
 GO
@@ -4352,6 +4371,8 @@ GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\RESarwas'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\KCJoly'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\TMeier'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\BAMangipane'
 GO
