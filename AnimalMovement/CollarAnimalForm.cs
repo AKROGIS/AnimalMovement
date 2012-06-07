@@ -2,6 +2,8 @@
 using System.Linq;
 using DataModel;
 
+//FIXME - An editor needs access to the collars of the PI of the project they are working on.
+
 namespace AnimalMovement
 {
     internal partial class CollarAnimalForm : BaseForm

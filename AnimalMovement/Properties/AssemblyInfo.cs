@@ -1,8 +1,17 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
+//FIXME - DATABASE - Collar deployment date checking is not working (it is possible to deploy a collar simultaneously)
+//FIXME - DATABASE - Deploy the database changes to check mortality date when adding locations
+//TODO - DATABASE - Add unit testing.
+//TODO - DATABASE -Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
+
 //FIXME - provide better information if the exe cannot find the database
-//FIXME - Deploy the database changes to check mortality date when adding locations
+//FIXME - Cannot overwrite an existing layer file (despite giving approval) - generates an exception.
+
+//TODO - Add the Telonics WTF format
+//TODO - Add an ArcGIS tool for creating a mortality date
+//TODO - Consider viewer permission issues - All NPS is too permissive for some PIs
 //TODO - support and testing of various file formats
 //TODO - 	a) would like to support all data as it is/was delivered to the PI
 //TODO - 	b) would like to support direct download from Argos web services
@@ -13,7 +22,6 @@ using System.Runtime.InteropServices;
 //TODO - Add MS Access readonly interface
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Replace the wait cursors with a message box and progress bar
-//TODO - Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
 
 //Deployment Notes:
 //  The connection string for the DataModel.dll (app.config) must be copied in and replace the connection string in the

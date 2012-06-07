@@ -6,6 +6,7 @@ using DataModel;
 
 //TODO - Move Info and Delete buttons onto the data grid.
 //TODO - Delay population of hidden tabs until displayed.
+//TODO - Debeveck style (multiple collars) file formats do not display in the file list
 
 namespace AnimalMovement
 {

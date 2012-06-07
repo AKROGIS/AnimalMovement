@@ -15,6 +15,8 @@ using System.Linq;
  * when the form is not in edit mode.
  */
 
+//TODO - Show dead animals differently - greyed out, at the bottom of the list, or with a special note
+
 namespace AnimalMovement
 {
     internal partial class ProjectDetailsForm : BaseForm
