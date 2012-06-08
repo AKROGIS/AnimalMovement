@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//FIXME - Needs to work for 10.1 as well.
 //TODO - Add Region Filter
 //TODO - Cleanup and Simplify the form
 //TODO - Put everything in one group layer (include no movement, hidden locations); remove location/movements checkbox

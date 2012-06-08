@@ -13,9 +13,13 @@ namespace QueryLayerBuilder
         [STAThread]
         static int Main(string[] args)
         {
-            //In ArcGIS 10.1, this is called esriLicenseProductCode.esriLicenseProductCodeAdvanced
-            
-            if (!LicenseInitializer.InitializeApplication(new [] { esriLicenseProductCode.esriLicenseProductCodeArcInfo },
+
+#if ARCGIS_10_1            
+            const esriLicenseProductCode productCode = esriLicenseProductCode.esriLicenseProductCodeAdvanced;
+#else
+            const esriLicenseProductCode productCode = esriLicenseProductCode.esriLicenseProductCodeArcInfo;
+#endif
+            if (!LicenseInitializer.InitializeApplication(new [] { productCode },
                                                           new esriLicenseExtensionCode[] { }))
             {
                 Console.WriteLine(LicenseInitializer.LicenseMessage());
