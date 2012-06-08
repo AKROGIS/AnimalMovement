@@ -91,23 +91,53 @@ namespace SqlServerExtensions
                 @"[LineNumber] [int],
 	                [AcquisitionTime] [nvarchar](50) NULL,
 	                [AcquisitionStartTime] [nvarchar](50) NULL,
+	                [Ctn] [nvarchar](50) NULL,
+	                [ArgosId] [nvarchar](50) NULL,
 	                [ArgosLocationClass] [nvarchar](50) NULL,
 	                [ArgosLatitude] [nvarchar](50) NULL,
 	                [ArgosLongitude] [nvarchar](50) NULL,
 	                [ArgosAltitude] [nvarchar](50) NULL,
+	                [GpsFixTime] [nvarchar](50) NULL,
 	                [GpsFixAttempt] [nvarchar](50) NULL,
 	                [GpsLatitude] [nvarchar](50) NULL,
 	                [GpsLongitude] [nvarchar](50) NULL,
 	                [GpsUtmZone] [nvarchar](50) NULL,
 	                [GpsUtmNorthing] [nvarchar](50) NULL,
 	                [GpsUtmEasting] [nvarchar](50) NULL,
+	                [GpsAltitude] [nvarchar](50) NULL,
+	                [GpsSpeed] [nvarchar](50) NULL,
+	                [GpsHeading] [nvarchar](50) NULL,
+	                [GpsHorizontalError] [nvarchar](50) NULL,
+	                [GpsPositionalDilution] [nvarchar](50) NULL,
+	                [GpsHorizontalDilution] [nvarchar](50) NULL,
+	                [GpsSatelliteBitmap] [nvarchar](50) NULL,
+	                [GpsSatelliteCount] [nvarchar](50) NULL,
+	                [GpsNavigationTime] [nvarchar](50) NULL,
+	                [UnderwaterPercentage] [nvarchar](50) NULL,
+	                [DiveCount] [nvarchar](50) NULL,
+	                [AverageDiveDuration] [nvarchar](50) NULL,
+	                [MaximumDiveDuration] [nvarchar](50) NULL,
+	                [LayerPercentage] [nvarchar](50) NULL,
+	                [MaximumDiveDepth] [nvarchar](50) NULL,
+	                [DiveStartTime] [nvarchar](50) NULL,
+	                [DiveDuration] [nvarchar](50) NULL,
+	                [DiveDepth] [nvarchar](50) NULL,
+	                [DiveProfile] [nvarchar](50) NULL,
+	                [ActivityCount] [nvarchar](50) NULL,
 	                [Temperature] [nvarchar](50) NULL,
+	                [RemoteAnalog] [nvarchar](50) NULL,
 	                [SatelliteUplink] [nvarchar](50) NULL,
 	                [ReceiveTime] [nvarchar](50) NULL,
 	                [SatelliteName] [nvarchar](50) NULL,
 	                [RepetitionCount] [nvarchar](50) NULL,
 	                [LowVoltage] [nvarchar](50) NULL,
 	                [Mortality] [nvarchar](50) NULL,
+	                [SaltwaterFailsafe] [nvarchar](50) NULL,
+	                [HaulOut] [nvarchar](50) NULL,
+	                [DigitalInput] [nvarchar](50) NULL,
+	                [MotionDetected] [nvarchar](50) NULL,
+	                [TrapTriggerTime] [nvarchar](50) NULL,
+	                [ReleaseTime] [nvarchar](50) NULL,
 	                [PredeploymentData] [nvarchar](50) NULL,
 	                [Error] [nvarchar](250) NULL")]
         public static IEnumerable ParseFormatC(SqlInt32 fileId)
@@ -119,8 +149,8 @@ namespace SqlServerExtensions
         {
             internal readonly SqlInt32 LineNumber;
             internal readonly string LineText;
-            internal readonly uint ColumnMask;
-            public Line(SqlInt32 lineNumber, string lineText, uint mask)
+            internal readonly UInt64 ColumnMask;
+            public Line(SqlInt32 lineNumber, string lineText, UInt64 mask)
             {
                 LineNumber = lineNumber;
                 LineText = lineText;
@@ -128,7 +158,7 @@ namespace SqlServerExtensions
             }
         }
 
-        private static IEnumerable GetLines(SqlInt32 fileId, char format, Func<int, string, bool> lineSelector, Func<StreamReader, UInt32> columnSelector)
+        private static IEnumerable GetLines(SqlInt32 fileId, char format, Func<int, string, bool> lineSelector, Func<StreamReader, UInt64> columnSelector)
         {
             var resultCollection = new ArrayList();
 
@@ -147,7 +177,7 @@ namespace SqlServerExtensions
                         while (results.Read())
                         {
                             Byte[] bytes = results.GetSqlBytes(0).Buffer;
-                            uint columnMask = UInt32.MaxValue; //Select all
+                            UInt64 columnMask = UInt64.MaxValue; //Select all
                             if (columnSelector != null)
                             {
                                 using (var memoryStream = new MemoryStream(bytes))
@@ -177,9 +207,9 @@ namespace SqlServerExtensions
             return resultCollection;
         }
 
-        internal static uint FormatB_ColumnSelector(StreamReader stream)
+        internal static UInt64 FormatB_ColumnSelector(StreamReader stream)
         {
-            uint mask = UInt32.MinValue;
+            UInt64 mask = UInt64.MinValue;
             if (stream == null)
                 return mask;
             string header = stream.ReadLine();
@@ -211,9 +241,9 @@ namespace SqlServerExtensions
             return mask;
         }
 
-        internal static uint FormatC_ColumnSelector(StreamReader stream)
+        internal static UInt64 FormatC_ColumnSelector(StreamReader stream)
         {
-            uint mask = UInt32.MinValue;
+            UInt64 mask = UInt64.MinValue;
             if (stream == null)
                 return mask;
             //skip the junk before the header line
@@ -227,26 +257,34 @@ namespace SqlServerExtensions
             string header = stream.ReadLine();
             if (header == null)
                 return mask;
-            string[] columns = header.Split(new[] { '\t', ',' }, 21);
-            //FIXME - all possible header text must be in this list,
-            // else the first missing one will advance the pointer to the end of the lists, and then no more columns will be searched for.
-            //TODO - make this generic, so that columns can be in any order.
+            string[] columns = header.Split(new[] { '\t', ',' }, 65);
             var wellKnownColumns = new[]
                                        {
-                                "Acquisition Time", "Acquisition Start Time", "Argos Location Class", "Argos Latitude", 
-                                "Argos Longitude", "Argos Altitude", "GPS Fix Attempt", "GPS Latitude", "GPS Longitude", 
-                                "GPS UTM Zone", "GPS UTM Northing", "GPS UTM Easting", "Temperature", "Satellite Uplink", 
-                                "Receive Time", "Satellite Name", "Repetition Count", "Low Voltage", "Mortality", 
+                                //"Acquisition Time",
+                                //our mask is only 64 bits, and there are 65 possible columns, luckily, the first is guaranteed, so we skip it.
+                                "Acquisition Start Time", "Ctn",
+                                "Argos ID", "Argos Location Class", "Argos Latitude","Argos Longitude", "Argos Altitude", 
+                                "GPS Fix Time","GPS Fix Attempt", "GPS Latitude", "GPS Longitude",
+                                "GPS UTM Zone", "GPS UTM Northing", "GPS UTM Easting", "GPS Altitude", "GPS Speed", "GPS Heading",
+                                "GPS Horizontal Error", "GPS Positional Dilution", "GPS Horizontal Dilution", "GPS Satellite Bitmap",
+                                "GPS Satellite Count", "GPS Navigation Time",
+                                "Underwater Percentage", "Dive Count", "Average Dive Duration", "Maximum Dive Duration", "Layer Percentage",
+                                "Maximum Dive Depth", "Dive Start Time", "Dive Duration", "Dive Depth", "Dive Profile",
+                                "Activity Count", "Temperature", "Remote Analog", "Satellite Uplink", 
+                                "Receive Time", "Satellite Name", "Repetition Count", "Low Voltage", "Mortality",
+                                "Saltwater Failsafe", "Haul out", "Digital Input", "Motion Detected", "Trap Trigger Time", "Release Time",
+                                "Start Unix Time", "Start Year", "Start Month", "Start Day", "Start Hour", "Start Minute", "Start Second",
+                                "Stop Unix Time", "Stop Year", "Stop Month", "Stop Day", "Stop Hour", "Stop Minute", "Stop Second",
                                 "Predeployment Data", "Error"
                                        };
-            int fileColumn = 0;
+            int fileColumn = 1; //Skip the first (0th) column in the header 
             for (int i = 0; i < wellKnownColumns.Length; i++)
             {
                 if (columns.Length <= fileColumn)
                     break;
                 if (columns[fileColumn] != wellKnownColumns[i])
                     continue;
-                mask = mask | 1u << i;
+                mask = mask | 1ul << i;
                 fileColumn++;
             }
             return mask;
@@ -346,7 +384,7 @@ namespace SqlServerExtensions
         {
             var line = (Line)inputObject;
             string[] parts = line.LineText.Split(new[] {'\t', ','}, 14);
-            uint columnMask = line.ColumnMask;
+            UInt64 columnMask = line.ColumnMask;
             lineNumber = line.LineNumber;
             int dbColumn = 0;
             int fileColumn = 0;
@@ -372,52 +410,131 @@ namespace SqlServerExtensions
             out SqlInt32 lineNumber,
             out SqlString acquisitionTime,
             out SqlString acquisitionStartTime,
+            out SqlString ctn,
+            out SqlString argosId,
             out SqlString argosLocationClass,
             out SqlString argosLatitude,
             out SqlString argosLongitude,
             out SqlString argosAltitude,
+            out SqlString gpsFixTime,
             out SqlString gpsFixAttempt,
             out SqlString gpsLatitude,
             out SqlString gpsLongitude,
             out SqlString gpsUtmZone,
             out SqlString gpsUtmNorthing,
             out SqlString gpsUtmEasting,
+            out SqlString gpsAltitude,
+            out SqlString gpsSpeed,
+            out SqlString gpsHeading,
+            out SqlString gpsHorizontalError,
+            out SqlString gpsPositionalDilution,
+            out SqlString gpsHorizontalDilution,
+            out SqlString gpsSatelliteBitmap,
+            out SqlString gpsSatelliteCount,
+            out SqlString gpsNavigationTime,
+            out SqlString underwaterPercentage,
+            out SqlString diveCount,
+            out SqlString averageDiveDuration,
+            out SqlString maximumDiveDuration,
+            out SqlString layerPercentage,
+            out SqlString maximumDiveDepth,
+            out SqlString diveStartTime,
+            out SqlString diveDuration,
+            out SqlString diveDepth,
+            out SqlString diveProfile,
+            out SqlString activityCount,
             out SqlString temperature,
+            out SqlString remoteAnalog,
             out SqlString satelliteUplink,
             out SqlString receiveTime,
             out SqlString satelliteName,
             out SqlString repetitionCount,
             out SqlString lowVoltage,
             out SqlString mortality,
+            out SqlString saltwaterFailsafe,
+            out SqlString haulOut,
+            out SqlString digitalInput,
+            out SqlString motionDetected,
+            out SqlString trapTriggerTime,
+            out SqlString releaseTime,
             out SqlString predeploymentData,
             out SqlString error)
         {
             var line = (Line)inputObject;
-            string[] parts = line.LineText.Split(new[] { '\t', ',' }, 21);
-            uint columnMask = line.ColumnMask;
+            string[] parts = line.LineText.Split(new[] { '\t', ',' }, 65);
+            UInt64 columnMask = line.ColumnMask;
             lineNumber = line.LineNumber;
             int dbColumn = 0;
             int fileColumn = 0;
-            acquisitionTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            acquisitionTime = NullableString(parts[fileColumn++]);
             acquisitionStartTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            ctn = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            argosId = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             argosLocationClass = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             argosLatitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             argosLongitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             argosAltitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsFixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsFixAttempt = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsLatitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsLongitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsUtmZone = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
             gpsUtmNorthing = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
             gpsUtmEasting = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            gpsAltitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsSpeed = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsHeading = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsHorizontalError = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsPositionalDilution = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsHorizontalDilution = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsSatelliteBitmap = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsSatelliteCount = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsNavigationTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            underwaterPercentage = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            diveCount = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            averageDiveDuration = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            maximumDiveDuration = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            layerPercentage = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            maximumDiveDepth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            diveStartTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            diveDuration = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            diveDepth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            diveProfile = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            activityCount = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             temperature = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            remoteAnalog = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             satelliteUplink = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
             receiveTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
             satelliteName = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
             repetitionCount = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
             lowVoltage = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
             mortality = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            predeploymentData = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            saltwaterFailsafe = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            haulOut = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            digitalInput = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            motionDetected = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            trapTriggerTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            releaseTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            for (int i = 0; i < 14; i++)
+                if (Include(columnMask, dbColumn++))
+                    fileColumn++;
+            /*
+            startUnixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            startYear = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            startMonth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            startDay = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            startHour = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            startMinute = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            startSecond = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            stopUnixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            stopYear = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            stopMonth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            stopDay = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            stopHour = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            stopMinute = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            stopSecond = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            */
+            predeploymentData = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             error = Include(columnMask, dbColumn) ? NullableString(parts[fileColumn]) : SqlString.Null;
         }
 
@@ -437,9 +554,9 @@ namespace SqlServerExtensions
             return String.IsNullOrEmpty(s.Trim()) ? SqlDouble.Null : Double.Parse(s);
         }
 
-        internal static bool Include(uint mask, int column)
+        internal static bool Include(UInt64 mask, int column)
         {
-            return (mask & (1 << column)) == (1 << column);
+            return (mask & (1ul << column)) == (1ul << column);
         }
 
     };
