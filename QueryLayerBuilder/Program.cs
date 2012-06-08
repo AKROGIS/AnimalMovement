@@ -63,8 +63,16 @@ namespace QueryLayerBuilder
             ILayerFile layerFile = new LayerFileClass();
             if (layerFile.IsPresent[layerFilePath])
             {
-                Console.WriteLine("Layer file exists.");
-                Environment.Exit(4);
+                //The user gave permission in the file save dialog to replace the existing file.
+                try
+                {
+                    System.IO.File.Delete(layerFilePath);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Unable to overwrite " + layerFilePath + Environment.NewLine + ex.Message);
+                    Environment.Exit(4);
+                }
             }
             layerFile.New(layerFilePath);
             layerFile.ReplaceContents(layer);

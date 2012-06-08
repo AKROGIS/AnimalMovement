@@ -9,6 +9,8 @@ using System.Windows.Forms;
 using System.Data;
 using System.Data.SqlClient;
 
+//TODO - Update the master, not the local replica. Addin should check with the query layers database to get the connection string of the master database.
+
 namespace ArcMap_Addin
 {
     public class AnimalLocationStatusButton : ESRI.ArcGIS.Desktop.AddIns.Button

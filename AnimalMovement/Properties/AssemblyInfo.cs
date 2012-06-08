@@ -12,8 +12,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Conflicting Fixes needs better support (don't show multiple fixes with same location)
 //TODO - DATABASE - Conflicting Fixes needs better support (don't show fixes hidden by store on board)
 
-//FIXME - Cannot overwrite an existing layer file (despite giving approval) - generates an exception.
-
 //TODO - Add lost/disposed date to collar, to filter out 'ignorable' collars
 //TODO - Rename the telonics condensed/complete format
 //TODO - Add an ArcGIS tool for creating a mortality date
