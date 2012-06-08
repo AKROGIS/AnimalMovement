@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Increase timeout
 //TODO - ask to create necessary database records to support file - i.e. collars/animals/deployments
 //TODO - set collarComboBox.selectedItem to null if disabled.  trick is setting back to something meaningful when enabled.
 //TODO - improve validation before create/save
@@ -46,6 +45,7 @@ namespace AnimalMovement
             SetupForm();
         }
 
+        //TODO - Constructor with context is not used (IndependentContext = false) - should be removed
         internal AddFileForm(AnimalMovementDataContext database, Project project, string user)
         {
             IndependentContext = false;
@@ -151,6 +151,7 @@ namespace AnimalMovement
             if (IndependentContext)
             {
                 Cursor.Current = Cursors.WaitCursor;
+                Database.CommandTimeout = 300;
                 try
                 {
                     Database.SubmitChanges();
@@ -162,9 +163,11 @@ namespace AnimalMovement
                     FileNameTextBox.Focus();
                     UploadButton.Text = "Upload";
                     Cursor.Current = Cursors.Default;
+                    Database.CommandTimeout = 30;
                     return;
                 }
                 Cursor.Current = Cursors.Default;
+                Database.CommandTimeout = 30;
             }
             OnDatabaseChanged();
             UploadButton.Text = "Upload";
