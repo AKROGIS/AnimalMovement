@@ -1,6 +1,7 @@
 ﻿using System;
 using DataModel;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace AnimalMovement
 {
@@ -13,13 +14,39 @@ namespace AnimalMovement
             InitializeComponent();
             RestoreWindow();
             _currentUser = GetUserName();
-            EnableMyProfile();
         }
 
-        private void EnableMyProfile()
+        protected override void OnShown(EventArgs e)
         {
+            base.OnShown(e);
+            Application.DoEvents(); //Trick to make sure all the contained controls are drawn before potentially hanging
+            EnableForm();
+        }
+
+        private void EnableForm()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            Application.DoEvents(); // Make sure the wait cursor is shown;
             var db = new AnimalMovementDataContext();
-            MyProfileButton.Visible = db.ProjectInvestigators.Any(pi => pi.Login == _currentUser);
+            try
+            {
+                MyProfileButton.Visible = db.ProjectInvestigators.Any(pi => pi.Login == _currentUser);                
+            }
+            catch (Exception ex)
+            {
+                Cursor.Current = Cursors.Default;
+                MyProfileButton.Text = "Connection Failed";
+                MyProfileButton.Enabled = false;
+                MessageBox.Show(Environment.NewLine + ex.Message + Environment.NewLine +
+                    "Connection String:" + Environment.NewLine + db.Connection.ConnectionString,
+                    "Unable to connect to the database", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            Cursor.Current = Cursors.Default;
+            MyProfileButton.Text = "Project Investigator Details";
+            ProjectsButton.Enabled = true;
+            UploadButton.Enabled = true;
+            GenerateMapButton.Enabled = true;
         }
 
         private static string GetUserName()

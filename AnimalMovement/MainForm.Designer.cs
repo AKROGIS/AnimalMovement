@@ -39,6 +39,7 @@
             // 
             this.UploadButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.UploadButton.Enabled = false;
             this.UploadButton.Location = new System.Drawing.Point(12, 70);
             this.UploadButton.Name = "UploadButton";
             this.UploadButton.Size = new System.Drawing.Size(205, 23);
@@ -51,7 +52,7 @@
             // 
             this.QuitButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.QuitButton.Location = new System.Drawing.Point(12, 159);
+            this.QuitButton.Location = new System.Drawing.Point(12, 142);
             this.QuitButton.Name = "QuitButton";
             this.QuitButton.Size = new System.Drawing.Size(205, 23);
             this.QuitButton.TabIndex = 5;
@@ -63,6 +64,7 @@
             // 
             this.ProjectsButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.ProjectsButton.Enabled = false;
             this.ProjectsButton.Location = new System.Drawing.Point(12, 41);
             this.ProjectsButton.Name = "ProjectsButton";
             this.ProjectsButton.Size = new System.Drawing.Size(205, 23);
@@ -75,6 +77,7 @@
             // 
             this.GenerateMapButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.GenerateMapButton.Enabled = false;
             this.GenerateMapButton.Location = new System.Drawing.Point(12, 99);
             this.GenerateMapButton.Name = "GenerateMapButton";
             this.GenerateMapButton.Size = new System.Drawing.Size(205, 23);
@@ -91,7 +94,7 @@
             this.MyProfileButton.Name = "MyProfileButton";
             this.MyProfileButton.Size = new System.Drawing.Size(205, 23);
             this.MyProfileButton.TabIndex = 1;
-            this.MyProfileButton.Text = "Project Investigator Details";
+            this.MyProfileButton.Text = "Connecting...";
             this.MyProfileButton.UseVisualStyleBackColor = true;
             this.MyProfileButton.Click += new System.EventHandler(this.MyProfileButton_Click);
             // 
@@ -99,7 +102,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(231, 194);
+            this.ClientSize = new System.Drawing.Size(231, 177);
             this.Controls.Add(this.MyProfileButton);
             this.Controls.Add(this.GenerateMapButton);
             this.Controls.Add(this.ProjectsButton);

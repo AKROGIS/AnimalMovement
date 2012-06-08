@@ -12,7 +12,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Conflicting Fixes needs better support (don't show multiple fixes with same location)
 //TODO - DATABASE - Conflicting Fixes needs better support (don't show fixes hidden by store on board)
 
-//FIXME - provide better information if the exe cannot find the database
 //FIXME - Cannot overwrite an existing layer file (despite giving approval) - generates an exception.
 
 //TODO - Add lost/disposed date to collar, to filter out 'ignorable' collars
