@@ -48,7 +48,7 @@
             this.AddEditorButton = new System.Windows.Forms.Button();
             this.DeleteEditorButton = new System.Windows.Forms.Button();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.AnimalsListBox = new System.Windows.Forms.ListBox();
+            this.AnimalsListBox = new ColoredListBox();
             this.label3 = new System.Windows.Forms.Label();
             this.AddAnimalButton = new System.Windows.Forms.Button();
             this.DeleteAnimalsButton = new System.Windows.Forms.Button();
@@ -503,7 +503,7 @@
         private System.Windows.Forms.ListBox EditorsListBox;
         private System.Windows.Forms.ListBox FilesListBox;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ListBox AnimalsListBox;
+        private ColoredListBox AnimalsListBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;

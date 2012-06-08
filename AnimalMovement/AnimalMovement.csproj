@@ -122,6 +122,9 @@
     <Compile Include="FileContentsForm.Designer.cs">
       <DependentUpon>FileContentsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ColoredListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ProjectsForm.cs">
       <SubType>Form</SubType>
     </Compile>

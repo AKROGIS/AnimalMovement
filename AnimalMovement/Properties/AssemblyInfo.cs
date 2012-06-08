@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 //FIXME - provide better information if the exe cannot find the database
 //FIXME - Cannot overwrite an existing layer file (despite giving approval) - generates an exception.
 
+//TODO - Add lost/disposed date to collar, to filter out 'ignorable' collars
 //TODO - Rename the telonics condensed/complete format
 //TODO - Add an ArcGIS tool for creating a mortality date
 //TODO - Consider viewer permission issues - All NPS is too permissive for some PIs

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using DataModel;
 using System.Linq;
@@ -14,8 +15,6 @@ using System.Linq;
  * and disables the edit controls on the lists.  The edit controls on the lists are only enabled
  * when the form is not in edit mode.
  */
-
-//TODO - Show dead animals differently - greyed out, at the bottom of the list, or with a special note
 
 namespace AnimalMovement
 {
@@ -110,23 +109,36 @@ namespace AnimalMovement
 
         private void SetAnimalList()
         {
-            AnimalsListBox.DataSource = from animal in Database.Animals
-                                        where animal.Project == Project
-                                        select new AnimalListItem
-                                        {
-                                            Animal = animal,
-                                            Name = GetName(animal),
-                                            CanDelete = CanDeleteAnimal(animal)
-                                        };
+
+            var query = (from animal in Database.Animals
+                         where animal.Project == Project
+                         //orderby animal.MortalityDate , animal.AnimalId
+                         select new AnimalListItem
+                                    {
+                                        Animal = animal,
+                                        Name = GetName(animal),
+                                        CanDelete = CanDeleteAnimal(animal)
+                                    });
+            var sortedList = query.OrderBy(a => a.Animal.MortalityDate != null).ThenBy(a => a.Animal.AnimalId).ToList();
+            AnimalsListBox.DataSource = sortedList;
             AnimalsListBox.DisplayMember = "Name";
+            AnimalsListBox.ClearItemColors();
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (sortedList[i].Animal.MortalityDate != null)
+                    AnimalsListBox.SetItemColor(i, Color.DarkGray);
+            }
         }
 
         private static string GetName(Animal animal)
         {
             var currentCollar = animal.CollarDeployments.FirstOrDefault(cd => cd.RetrievalDate == null);
-            return currentCollar == null
+            var name   = currentCollar == null
                        ? animal.AnimalId
                        : animal.AnimalId + " (" + currentCollar.Collar + ")";
+            if (animal.MortalityDate != null)
+                name = String.Format("{0} (mort:{1:M/d/yy})", name, animal.MortalityDate);
+            return name;
         }
 
         private void SetFileList()

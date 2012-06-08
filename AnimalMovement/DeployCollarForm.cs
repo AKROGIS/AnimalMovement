@@ -2,6 +2,8 @@
 using System.Linq;
 using DataModel;
 
+//TODO - Do not show dead animals in the animal list
+
 namespace AnimalMovement
 {
     internal partial class DeployCollarForm : BaseForm
