@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//FIXME - DATABASE - Add all columns for the Telonics condensed format, change parser to match.
 //FIXME - DATABASE - Collar deployment date checking is not working (it is possible to deploy a collar simultaneously)
 //FIXME - DATABASE - Deploy the database changes to check mortality date when adding locations
 //FIXME - DATABASE - Deleting a project with editors does not properly delete the editors (user accounts remains)

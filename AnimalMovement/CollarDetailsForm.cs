@@ -4,10 +4,9 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Pull collar ID info out of the first tab, and put above the tabs
 //TODO - Allow editing of deployment and retrieval dates
-//TODO - Move Info and Delete buttons onto the data grid.
 //TODO - Delay population of hidden tabs until displayed.
+//TODO - Move Info and Delete buttons onto the data grid.
 //TODO - Debeveck style (multiple collars) file formats do not display in the file list
 
 namespace AnimalMovement
