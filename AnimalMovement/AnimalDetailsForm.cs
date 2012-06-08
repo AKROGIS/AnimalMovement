@@ -196,7 +196,7 @@ namespace AnimalMovement
             }
             else //Deploy
             {
-                var form = new CollarAnimalForm(Database, Animal, CurrentUser);
+                var form = new CollarAnimalForm(Database, Animal);
                 if (form.ShowDialog(this) == DialogResult.Cancel)
                     return;
             }

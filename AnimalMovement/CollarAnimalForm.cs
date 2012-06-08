@@ -2,7 +2,7 @@
 using System.Linq;
 using DataModel;
 
-//FIXME - An editor needs access to the collars of the PI of the project they are working on.
+//FIXME - collar list should not show those that are currently deployed
 
 namespace AnimalMovement
 {
@@ -11,15 +11,13 @@ namespace AnimalMovement
         private Animal Animal { get; set; }
         private AnimalMovementDataContext Database { get; set; }
         private LookupCollarManufacturer Manufacturer { get; set; }
-        private string CurrentUser { get; set; }
 
-        internal CollarAnimalForm(AnimalMovementDataContext database, Animal animal, string user)
+        internal CollarAnimalForm(AnimalMovementDataContext database, Animal animal)
         {
             InitializeComponent();
             RestoreWindow();
             Database = database;
             Animal = animal;
-            CurrentUser = user;
             LoadForm();
         }
 
@@ -55,7 +53,7 @@ namespace AnimalMovement
         {
             var collarsInMfgr = from collar in Database.Collars
                                 where collar.LookupCollarManufacturer == Manufacturer &&
-                                      collar.Manager == CurrentUser
+                                      (Animal.Project.ProjectInvestigator1 == collar.ProjectInvestigator)
                                 select collar;
             var collars = collarsInMfgr.ToList();
             var collarsDeployed = from deploy in Database.CollarDeployments
