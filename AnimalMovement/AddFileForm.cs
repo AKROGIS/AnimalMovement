@@ -121,6 +121,9 @@ namespace AnimalMovement
 
         private void UploadButton_Click(object sender, EventArgs e)
         {
+            UploadButton.Text = "Working...";
+            UploadButton.Enabled = false;
+            Application.DoEvents();
             byte[] data;
             try
             {
@@ -157,13 +160,15 @@ namespace AnimalMovement
                     Database.CollarFiles.DeleteOnSubmit(file);
                     MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     FileNameTextBox.Focus();
-                    UploadButton.Enabled = false;
+                    UploadButton.Text = "Upload";
                     Cursor.Current = Cursors.Default;
                     return;
                 }
                 Cursor.Current = Cursors.Default;
             }
             OnDatabaseChanged();
+            UploadButton.Text = "Upload";
+            FileNameTextBox.Text = String.Empty;
             DialogResult = DialogResult.OK;
         }
 
