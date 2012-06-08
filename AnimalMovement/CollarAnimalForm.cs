@@ -2,7 +2,6 @@
 using System.Linq;
 using DataModel;
 
-//FIXME - collar list should not show those that are currently deployed
 
 namespace AnimalMovement
 {
@@ -52,9 +51,12 @@ namespace AnimalMovement
         private void LoadCollarList()
         {
             var collarsInMfgr = from collar in Database.Collars
-                                where collar.LookupCollarManufacturer == Manufacturer &&
-                                      (Animal.Project.ProjectInvestigator1 == collar.ProjectInvestigator)
-                                select collar;
+                                join deployment in Database.CollarDeployments
+                                  on collar equals deployment.Collar into deployments
+                               where collar.LookupCollarManufacturer == Manufacturer &&
+                                     (Animal.Project.ProjectInvestigator1 == collar.ProjectInvestigator) &&
+                                     deployments.All(d => d.RetrievalDate != null)
+                              select collar;
             var collars = collarsInMfgr.ToList();
             var collarsDeployed = from deploy in Database.CollarDeployments
                                      where deploy.RetrievalDate == null
