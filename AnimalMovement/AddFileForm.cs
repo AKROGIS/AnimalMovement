@@ -23,7 +23,6 @@ namespace AnimalMovement
     internal partial class AddFileForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
-        private bool IndependentContext { get; set; }
         private string CurrentUser { get; set; }
         private string ProjectId { get; set; }
         private Project Project { get; set; }
@@ -32,25 +31,13 @@ namespace AnimalMovement
 
         internal AddFileForm(string user)
         {
-            IndependentContext = true;
             CurrentUser = user;
             SetupForm();
         }
 
         internal AddFileForm(string projectId, string user)
         {
-            IndependentContext = true;
             ProjectId = projectId;
-            CurrentUser = user;
-            SetupForm();
-        }
-
-        //TODO - Constructor with context is not used (IndependentContext = false) - should be removed
-        internal AddFileForm(AnimalMovementDataContext database, Project project, string user)
-        {
-            IndependentContext = false;
-            Database = database;
-            Project = project ;
             CurrentUser = user;
             SetupForm();
         }
@@ -67,13 +54,12 @@ namespace AnimalMovement
         {
             if (ProjectId == null)
                 ProjectId = Settings.GetDefaultProject();
-            if (IndependentContext)
-            {
-                Database = new AnimalMovementDataContext();
-                //Weirdness: Project points into our datacontext, which gets changed
-                //when we requery the projects table, so setting it here doen't work
-                //Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);
-            }
+
+            Database = new AnimalMovementDataContext();
+            //Weirdness: Project points into our datacontext, which gets changed
+            //when we requery the projects table, so setting it here doen't work
+            //Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);
+
             if (Database == null || CurrentUser == null)
             {
                 MessageBox.Show("Insufficent information to initialize form.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -123,7 +109,9 @@ namespace AnimalMovement
         {
             UploadButton.Text = "Working...";
             UploadButton.Enabled = false;
+            Cursor.Current = Cursors.WaitCursor;
             Application.DoEvents();
+
             byte[] data;
             try
             {
@@ -134,7 +122,6 @@ namespace AnimalMovement
                 string msg = "The file cannot be read.\nSystem Message:\n"+ex.Message;
                 MessageBox.Show(msg, "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 FileNameTextBox.Focus();
-                UploadButton.Enabled = false;
                 return;
             }
             var file = new CollarFile
@@ -148,27 +135,25 @@ namespace AnimalMovement
                     Contents = data
                 };
             Database.CollarFiles.InsertOnSubmit(file);
-            if (IndependentContext)
+
+            Database.CommandTimeout = 300;
+            try
             {
-                Cursor.Current = Cursors.WaitCursor;
-                Database.CommandTimeout = 300;
-                try
-                {
-                    Database.SubmitChanges();
-                }
-                catch (Exception ex)
-                {
-                    Database.CollarFiles.DeleteOnSubmit(file);
-                    MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    FileNameTextBox.Focus();
-                    UploadButton.Text = "Upload";
-                    Cursor.Current = Cursors.Default;
-                    Database.CommandTimeout = 30;
-                    return;
-                }
+                Database.SubmitChanges();
+            }
+            catch (Exception ex)
+            {
+                Database.CollarFiles.DeleteOnSubmit(file);
+                MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FileNameTextBox.Focus();
+                UploadButton.Text = "Upload";
                 Cursor.Current = Cursors.Default;
                 Database.CommandTimeout = 30;
+                return;
             }
+            Cursor.Current = Cursors.Default;
+            Database.CommandTimeout = 30;
+
             OnDatabaseChanged();
             UploadButton.Text = "Upload";
             FileNameTextBox.Text = String.Empty;
