@@ -2,7 +2,6 @@
 using System.Linq;
 using DataModel;
 
-//TODO - Do not show dead animals in the animal list
 
 namespace AnimalMovement
 {
@@ -56,7 +55,7 @@ namespace AnimalMovement
 
         private void LoadAnimalList()
         {
-            var animalsInProject = (from animal in Project.Animals select animal);
+            var animalsInProject = (from animal in Project.Animals where animal.MortalityDate == null select animal);
             var animalsWithCollars = from deploy in Database.CollarDeployments
                                      where deploy.RetrievalDate == null
                                      select deploy.Animal;
