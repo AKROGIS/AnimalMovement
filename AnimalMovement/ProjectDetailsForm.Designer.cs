@@ -53,7 +53,7 @@
             this.AddAnimalButton = new System.Windows.Forms.Button();
             this.DeleteAnimalsButton = new System.Windows.Forms.Button();
             this.InfoAnimalsButton = new System.Windows.Forms.Button();
-            this.FilesListBox = new System.Windows.Forms.ListBox();
+            this.FilesListBox = new ColoredListBox();
             this.label2 = new System.Windows.Forms.Label();
             this.AddFilesButton = new System.Windows.Forms.Button();
             this.DeleteFilesButton = new System.Windows.Forms.Button();
@@ -501,7 +501,7 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ListBox EditorsListBox;
-        private System.Windows.Forms.ListBox FilesListBox;
+        private ColoredListBox FilesListBox;
         private System.Windows.Forms.Label label2;
         private ColoredListBox AnimalsListBox;
         private System.Windows.Forms.Label label3;

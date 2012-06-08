@@ -143,7 +143,7 @@ namespace AnimalMovement
 
         private void SetFileList()
         {
-            FilesListBox.DataSource = from file in Database.CollarFiles
+            var query =  from file in Database.CollarFiles
                                       where file.Project1 == Project
                                       select new FileListItem
                                       {
@@ -151,7 +151,15 @@ namespace AnimalMovement
                                           Name = file.FileName + " (" + file.Status + ")",
                                           CanDelete = true
                                       };
+            var sortedList = query.OrderBy(f => f.File.Status).ThenByDescending(f => f.File.UploadDate).ToList();
+            FilesListBox.DataSource = sortedList;
             FilesListBox.DisplayMember = "Name";
+            FilesListBox.ClearItemColors();
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (sortedList[i].File.Status == 'I')
+                    FilesListBox.SetItemColor(i, Color.DarkGray);
+            }
         }
 
         private bool CanDeleteAnimal(Animal animal)
