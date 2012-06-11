@@ -357,16 +357,6 @@
     <Parameter Name="Value" Parameter="value" Type="System.String" DbType="NVarChar(500)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId17" Name="dbo.Editor_Delete" Method="Editor_Delete">
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Editor" Parameter="editor" Type="System.String" DbType="NVarChar(128)" />
-    <Return Type="System.Int32" />
-  </Function>
-  <Function Id="FunctionId16" Name="dbo.Editor_Insert" Method="Editor_Insert">
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Editor" Parameter="editor" Type="System.String" DbType="NVarChar(128)" />
-    <Return Type="System.Int32" />
-  </Function>
   <Function Name="dbo.Location_UpdateStatus" Method="Location_UpdateStatus">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
@@ -453,5 +443,15 @@
     <Parameter Name="FixId" Parameter="fixId" Type="System.Int64" DbType="BigInt" />
     <Parameter Name="User" Parameter="user" Type="System.String" DbType="NVarChar(128)" />
     <Return Type="System.Boolean" />
+  </Function>
+  <Function Id="FunctionId17" Name="dbo.ProjectEditor_Delete" Method="ProjectEditor_Delete">
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Editor" Parameter="editor" Type="System.String" DbType="NVarChar(128)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId16" Name="dbo.ProjectEditor_Insert" Method="ProjectEditor_Insert">
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Editor" Parameter="editor" Type="System.String" DbType="NVarChar(128)" />
+    <Return Type="System.Int32" />
   </Function>
 </Database>

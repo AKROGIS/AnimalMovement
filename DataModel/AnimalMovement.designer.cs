@@ -285,12 +285,12 @@ namespace DataModel
 		
 		private void InsertProjectEditor(ProjectEditor obj)
 		{
-			this.Editor_Insert(obj.ProjectId, obj.Editor);
+			this.ProjectEditor_Insert(obj.ProjectId, obj.Editor);
 		}
 		
 		private void DeleteProjectEditor(ProjectEditor obj)
 		{
-			this.Editor_Delete(obj.ProjectId, obj.Editor);
+			this.ProjectEditor_Delete(obj.ProjectId, obj.Editor);
 		}
 		
 		private void UpdateProjectInvestigator(ProjectInvestigator obj)
@@ -360,20 +360,6 @@ namespace DataModel
 		public int Settings_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Key", DbType="NVarChar(30)")] string key, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Value", DbType="NVarChar(500)")] string value)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), key, value);
-			return ((int)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Editor_Delete")]
-		public int Editor_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Editor", DbType="NVarChar(128)")] string editor)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, editor);
-			return ((int)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Editor_Insert")]
-		public int Editor_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Editor", DbType="NVarChar(128)")] string editor)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, editor);
 			return ((int)(result.ReturnValue));
 		}
 		
@@ -470,6 +456,20 @@ namespace DataModel
 		public System.Nullable<bool> IsFixEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FixId", DbType="BigInt")] System.Nullable<long> fixId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
 		{
 			return ((System.Nullable<bool>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fixId, user).ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ProjectEditor_Delete")]
+		public int ProjectEditor_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Editor", DbType="NVarChar(128)")] string editor)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, editor);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ProjectEditor_Insert")]
+		public int ProjectEditor_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Editor", DbType="NVarChar(128)")] string editor)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, editor);
+			return ((int)(result.ReturnValue));
 		}
 	}
 	

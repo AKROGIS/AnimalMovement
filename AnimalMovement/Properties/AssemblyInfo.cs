@@ -64,4 +64,4 @@ using System.Runtime.InteropServices;
 // Do not use the auto update of assembly versions, it cuases a reset of settings each time
 // and it isn't really visible.  Update the file version each time a new exe is published. 
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.1")]
+[assembly: AssemblyFileVersion("1.0.0.2")]
