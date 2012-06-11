@@ -3,8 +3,6 @@ using System.Runtime.InteropServices;
 
 //FIXME - DATABASE - Collar deployment date checking is not working (it is possible to deploy a collar simultaneously)
 //FIXME - DATABASE - Deploy the database changes to check mortality date when adding locations
-//FIXME - DATABASE - Deleting a project with editors does not properly delete the editors (user accounts remains)
-//FIXME - DATABASE - Project editors table is not properly related to the projects table.
 //TODO - DATABASE - Add unit testing.
 //TODO - DATABASE - Add table for Telonics tfp files, each records owned by a PI.
 //TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data

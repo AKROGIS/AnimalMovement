@@ -26,41 +26,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[ProjectInvestigators](
-	[Login] [sysname] NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Email] [nvarchar](200) NOT NULL,
-	[Phone] [nvarchar](100) NOT NULL,
- CONSTRAINT [PK_ProjectInvestigators] PRIMARY KEY CLUSTERED 
-(
-	[Login] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Projects](
-	[ProjectId] [varchar](16) NOT NULL,
-	[ProjectName] [nvarchar](150) NOT NULL,
-	[ProjectInvestigator] [sysname] NOT NULL,
-	[UnitCode] [char](4) NULL,
-	[Description] [nvarchar](2000) NULL,
- CONSTRAINT [PK_Projects] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarManufacturers](
@@ -92,6 +57,41 @@ CREATE TABLE [dbo].[LookupCollarFileFormats](
  CONSTRAINT [PK_CollarFileFormats] PRIMARY KEY CLUSTERED 
 (
 	[Code] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ProjectInvestigators](
+	[Login] [sysname] NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Email] [nvarchar](200) NOT NULL,
+	[Phone] [nvarchar](100) NOT NULL,
+ CONSTRAINT [PK_ProjectInvestigators] PRIMARY KEY CLUSTERED 
+(
+	[Login] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Projects](
+	[ProjectId] [varchar](16) NOT NULL,
+	[ProjectName] [nvarchar](150) NOT NULL,
+	[ProjectInvestigator] [sysname] NOT NULL,
+	[UnitCode] [char](4) NULL,
+	[Description] [nvarchar](2000) NULL,
+ CONSTRAINT [PK_Projects] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
@@ -505,6 +505,255 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE FUNCTION [dbo].[PreviousLocationTime] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [FixDate] 
+					 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [Status] IS NULL
+					  AND [FixDate] < @Time
+			     ORDER BY [FixDate] DESC);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[InvalidLocations]
+AS
+SELECT     ProjectId, AnimalId, FixDate, Status, Location
+FROM         dbo.Locations
+WHERE     (Status IS NOT NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
+ON [dbo].[CollarFixes] 
+INSTEAD OF INSERT AS
+BEGIN
+	SET NOCOUNT ON;
+	-- inserted is a virtual table of inserted fixes.
+	-- Multiple fixes can be inserted at once. inserted is not updateable.
+	
+	--Logic for adding a SINGLE CollarFix
+	--  1) If the new fix has the same collar id/fixdate as an existing unhidden fix
+	--     then hide the existing fix, else nothing.  hiding the fix will trigger
+	--     a removal of the cooresponding location.
+	--  2) Add a location for the new fix.
+	--
+	-- Can I add multiple fixes in one operation?
+	--   For step 2, yes, as there is no changes to the fixes table.
+	--   For Step 1, NO!
+	--   Consider adding three fixes, 1,2,3 which have the same fixdate.
+	--   two must be hidden, and one must be unhidden.  This is ambiguous
+	--   when the fixes are inserted 'simultaneously'.  In order to maintain
+	--   the chaining of fixes hiding one another, they must be processed
+	--   sequentially.
+
+	-- Another problem:
+	--   We may need to modify some of the fixes in the inserted set.
+	--   We cannot modify the virtual 'inserted' table.  Therefore some of
+	--   our state will be in the CollarFixes table, and some in the inserted
+	--   table.  This is very difficult to manage.
+	
+	-- Solution:
+	--  Use a cursor to insert fixes one by one
+	--  Use a 'instead of insert' trigger to cure the problem with
+	--  modifying the virtual inserted table
+	
+	
+	DECLARE
+		@HiddenFixId		bigint,
+		@FixId				bigint,
+		@HiddenBy			bigint,
+		@FileId				INT,
+		@LineNumber			INT,
+		@CollarManufacturer VARCHAR(16),
+		@CollarId			VARCHAR(16),
+		@FixDate			DATETIME2(7),
+		@Lat				FLOAT,
+		@Lon				FLOAT;
+	  
+	DECLARE insf_cursor CURSOR FOR 
+		SELECT HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon
+		  FROM inserted
+	-- I cannot select FixId (Identity column) from inserted, because it is set to zero in the cursor
+
+	OPEN insf_cursor;
+
+	FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
+	
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		-- Step 1) Get the id of the fix we will hide (if it is null, then we are not hiding anything)
+		SET @HiddenFixId = NULL  -- The assignment below does not occur if no record is found
+		SELECT @HiddenFixId = FixId FROM CollarFixes
+		 WHERE CollarFixes.CollarManufacturer = @CollarManufacturer
+		   AND CollarFixes.CollarId = @CollarID
+		   AND CollarFixes.FixDate = @FixDate
+		   AND CollarFixes.HiddenBy IS NULL
+		
+		-- Step 2) Add new fix to table (do the insert that fired this trigger)
+		INSERT CollarFixes (HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+		VALUES (@HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon)
+		SET @FixId = SCOPE_IDENTITY();
+
+		-- PRINT N'  FixDate:' + cast(@FixDate as nvarchar(30)) + N';  HiddenFixId:' + isnull(cast(@HiddenFixId as nvarchar(30)), N'null') + N';  NewFixId:' + isnull(cast(@FixId as nvarchar(30)), N'null')
+
+		-- IF @HiddenFixId IS NOT NULL We are temporarily unstable becasue we have two active & conflicting fixes
+		
+		-- Step3) Hide the hidden fix (the update trigger will remove the associated location)
+		IF @HiddenFixId IS NOT NULL
+		BEGIN
+			UPDATE CollarFixes SET HiddenBy = @FixId WHERE FixId = @HiddenFixId;
+		END
+		
+		
+		-- Step 4) Add new record to Locations table
+		-- This should not create a Location if there is no matching deployment
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT C.ProjectId, C.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
+			   FROM CollarDeployments as C 
+--       INNER JOIN dbo.Animals AS A
+-- 	             ON A.ProjectId = C.ProjectId
+--		    	AND A.AnimalId = C.AnimalId
+			  WHERE C.CollarManufacturer = @CollarManufacturer AND C.CollarId = @CollarId
+				AND C.DeploymentDate <= @FixDate AND (C.RetrievalDate IS NULL OR @FixDate <= C.RetrievalDate)
+--	    	    AND @FixDate < A.MortalityDate OR A.MortalityDate IS NULL
+
+		FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
+	END
+	CLOSE insf_cursor;
+	DEALLOCATE insf_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[InsteadOfCollarFixesDelete] 
+ON [dbo].[CollarFixes] 
+INSTEAD OF DELETE AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- deleted is a virtual table of fixes that are to be deleted.
+	-- Multiple fixes can be deleted at once. deleted is not updateable.
+
+	--Logic for removing a SINGLE CollarFix
+	--  1) If the fix is hidden do nothing else remove the related location
+	--  2) If this fix hides another fix (that is not being deleted)
+	--		 then Replace hiddenby on hidden fix with hiddenby from deleted/hiding fix
+	--       else do nothing.  Changing hiddenby will trigger changes to Locations
+	--  3) Delete the fixes
+	--  step 1 must be done before step 2, else there may be overlapping fixes
+	--    which will cause a integrity error in the Locations table.
+	
+	-- Can I delete multiple fixes in one operation?
+	--   For step 1, yes, as there is no changes to the fixes table.
+	--   For step 2, NO!
+	--   For step 3, Yes.
+	--   Consider three fixes, 1,2,3 where 2 hides 1 and 3 hides 2.
+	--   If I delete 2 and 3 at the same time, then there is no easy way to
+	--   unwind the hidden-ness of fix 1 in a bulk operation.
+	--   If it is done sequentially: removing 3 unhides 2 then removing 2 unhides 1
+	--   alternatively, removing 2 first makes 1 hidden by 3, then removing 3 unhides 1.
+	
+	-- Step 1) remove record from Locations table
+	DELETE L FROM Locations as L
+	   INNER JOIN deleted as D
+			   ON L.FixId = D.FixId
+		    WHERE D.HiddenBy is NULL
+
+	DECLARE
+		@FixId    bigint,
+		@HiddenBy bigint;
+	  
+	DECLARE delf_cursor CURSOR FOR 
+		SELECT [FixId] FROM deleted;
+
+	OPEN delf_cursor;
+
+	FETCH NEXT FROM delf_cursor INTO @FixId;
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		-- must be done in this order to maintain uniqueness of CollarId/FixDate/HiddenBy Tuple
+		
+		-- Step 2) Get the Id of the Fix that hid this fix
+		-- get hiddenby from CollarFixes, not deleted, since previous records may
+		-- have CollarFixes.
+		SET @HiddenBy = (Select HiddenBy from CollarFixes where FixId = @FixId)
+		
+		-- Step 3) Delete the requested Fix
+		DELETE CollarFixes WHERE FixId = @FixId
+		
+		-- Step 4) What ever was hiding the fix being deleted should now be hiding
+		-- the fix that the deleted fix was hiding.
+		-- FIXME - searching the CollarFixes by HiddenBy (even when indexed) is slow
+		UPDATE CollarFixes SET HiddenBy = @HiddenBy WHERE HiddenBy = @FixId;
+
+		FETCH NEXT FROM delf_cursor INTO @FixId;
+	END
+	CLOSE delf_cursor;
+	DEALLOCATE delf_cursor;
+	
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[GetLocationGeography]
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS GEOGRAPHY
+AS
+BEGIN
+	DECLARE @Result GEOGRAPHY
+	SET @Result = (SELECT [Location] 
+	                 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [FixDate] = @Time);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[FixesByLocation]
+AS
+SELECT     dbo.CollarFixes.FixDate
+FROM         dbo.CollarFixes INNER JOIN
+                      dbo.Locations ON dbo.CollarFixes.FixDate = dbo.Locations.FixDate INNER JOIN
+                      dbo.CollarDeployments ON dbo.CollarFixes.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
+                      dbo.Locations.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Locations.AnimalId = dbo.CollarDeployments.AnimalId AND 
+                      dbo.CollarFixes.CollarId = dbo.CollarDeployments.CollarId AND dbo.CollarFixes.FixDate > dbo.CollarDeployments.DeploymentDate AND 
+                      (dbo.CollarFixes.FixDate < dbo.CollarDeployments.RetrievalDate OR
+                      dbo.CollarDeployments.RetrievalDate IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: May 30, 2012
@@ -776,231 +1025,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[InvalidLocations]
-AS
-SELECT     ProjectId, AnimalId, FixDate, Status, Location
-FROM         dbo.Locations
-WHERE     (Status IS NOT NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
-ON [dbo].[CollarFixes] 
-INSTEAD OF INSERT AS
-BEGIN
-	SET NOCOUNT ON;
-	-- inserted is a virtual table of inserted fixes.
-	-- Multiple fixes can be inserted at once. inserted is not updateable.
-	
-	--Logic for adding a SINGLE CollarFix
-	--  1) If the new fix has the same collar id/fixdate as an existing unhidden fix
-	--     then hide the existing fix, else nothing.  hiding the fix will trigger
-	--     a removal of the cooresponding location.
-	--  2) Add a location for the new fix.
-	--
-	-- Can I add multiple fixes in one operation?
-	--   For step 2, yes, as there is no changes to the fixes table.
-	--   For Step 1, NO!
-	--   Consider adding three fixes, 1,2,3 which have the same fixdate.
-	--   two must be hidden, and one must be unhidden.  This is ambiguous
-	--   when the fixes are inserted 'simultaneously'.  In order to maintain
-	--   the chaining of fixes hiding one another, they must be processed
-	--   sequentially.
-
-	-- Another problem:
-	--   We may need to modify some of the fixes in the inserted set.
-	--   We cannot modify the virtual 'inserted' table.  Therefore some of
-	--   our state will be in the CollarFixes table, and some in the inserted
-	--   table.  This is very difficult to manage.
-	
-	-- Solution:
-	--  Use a cursor to insert fixes one by one
-	--  Use a 'instead of insert' trigger to cure the problem with
-	--  modifying the virtual inserted table
-	
-	
-	DECLARE
-		@HiddenFixId		bigint,
-		@FixId				bigint,
-		@HiddenBy			bigint,
-		@FileId				INT,
-		@LineNumber			INT,
-		@CollarManufacturer VARCHAR(16),
-		@CollarId			VARCHAR(16),
-		@FixDate			DATETIME2(7),
-		@Lat				FLOAT,
-		@Lon				FLOAT;
-	  
-	DECLARE insf_cursor CURSOR FOR 
-		SELECT HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon
-		  FROM inserted
-	-- I cannot select FixId (Identity column) from inserted, because it is set to zero in the cursor
-
-	OPEN insf_cursor;
-
-	FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
-	
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-
-		-- Step 1) Get the id of the fix we will hide (if it is null, then we are not hiding anything)
-		SET @HiddenFixId = NULL  -- The assignment below does not occur if no record is found
-		SELECT @HiddenFixId = FixId FROM CollarFixes
-		 WHERE CollarFixes.CollarManufacturer = @CollarManufacturer
-		   AND CollarFixes.CollarId = @CollarID
-		   AND CollarFixes.FixDate = @FixDate
-		   AND CollarFixes.HiddenBy IS NULL
-		
-		-- Step 2) Add new fix to table (do the insert that fired this trigger)
-		INSERT CollarFixes (HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		VALUES (@HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon)
-		SET @FixId = SCOPE_IDENTITY();
-
-		-- PRINT N'  FixDate:' + cast(@FixDate as nvarchar(30)) + N';  HiddenFixId:' + isnull(cast(@HiddenFixId as nvarchar(30)), N'null') + N';  NewFixId:' + isnull(cast(@FixId as nvarchar(30)), N'null')
-
-		-- IF @HiddenFixId IS NOT NULL We are temporarily unstable becasue we have two active & conflicting fixes
-		
-		-- Step3) Hide the hidden fix (the update trigger will remove the associated location)
-		IF @HiddenFixId IS NOT NULL
-		BEGIN
-			UPDATE CollarFixes SET HiddenBy = @FixId WHERE FixId = @HiddenFixId;
-		END
-		
-		
-		-- Step 4) Add new record to Locations table
-		-- This should not create a Location if there is no matching deployment
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT C.ProjectId, C.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
-			   FROM CollarDeployments as C 
---       INNER JOIN dbo.Animals AS A
--- 	             ON A.ProjectId = C.ProjectId
---		    	AND A.AnimalId = C.AnimalId
-			  WHERE C.CollarManufacturer = @CollarManufacturer AND C.CollarId = @CollarId
-				AND C.DeploymentDate <= @FixDate AND (C.RetrievalDate IS NULL OR @FixDate <= C.RetrievalDate)
---	    	    AND @FixDate < A.MortalityDate OR A.MortalityDate IS NULL
-
-		FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
-	END
-	CLOSE insf_cursor;
-	DEALLOCATE insf_cursor;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[InsteadOfCollarFixesDelete] 
-ON [dbo].[CollarFixes] 
-INSTEAD OF DELETE AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- deleted is a virtual table of fixes that are to be deleted.
-	-- Multiple fixes can be deleted at once. deleted is not updateable.
-
-	--Logic for removing a SINGLE CollarFix
-	--  1) If the fix is hidden do nothing else remove the related location
-	--  2) If this fix hides another fix (that is not being deleted)
-	--		 then Replace hiddenby on hidden fix with hiddenby from deleted/hiding fix
-	--       else do nothing.  Changing hiddenby will trigger changes to Locations
-	--  3) Delete the fixes
-	--  step 1 must be done before step 2, else there may be overlapping fixes
-	--    which will cause a integrity error in the Locations table.
-	
-	-- Can I delete multiple fixes in one operation?
-	--   For step 1, yes, as there is no changes to the fixes table.
-	--   For step 2, NO!
-	--   For step 3, Yes.
-	--   Consider three fixes, 1,2,3 where 2 hides 1 and 3 hides 2.
-	--   If I delete 2 and 3 at the same time, then there is no easy way to
-	--   unwind the hidden-ness of fix 1 in a bulk operation.
-	--   If it is done sequentially: removing 3 unhides 2 then removing 2 unhides 1
-	--   alternatively, removing 2 first makes 1 hidden by 3, then removing 3 unhides 1.
-	
-	-- Step 1) remove record from Locations table
-	DELETE L FROM Locations as L
-	   INNER JOIN deleted as D
-			   ON L.FixId = D.FixId
-		    WHERE D.HiddenBy is NULL
-
-	DECLARE
-		@FixId    bigint,
-		@HiddenBy bigint;
-	  
-	DECLARE delf_cursor CURSOR FOR 
-		SELECT [FixId] FROM deleted;
-
-	OPEN delf_cursor;
-
-	FETCH NEXT FROM delf_cursor INTO @FixId;
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-
-		-- must be done in this order to maintain uniqueness of CollarId/FixDate/HiddenBy Tuple
-		
-		-- Step 2) Get the Id of the Fix that hid this fix
-		-- get hiddenby from CollarFixes, not deleted, since previous records may
-		-- have CollarFixes.
-		SET @HiddenBy = (Select HiddenBy from CollarFixes where FixId = @FixId)
-		
-		-- Step 3) Delete the requested Fix
-		DELETE CollarFixes WHERE FixId = @FixId
-		
-		-- Step 4) What ever was hiding the fix being deleted should now be hiding
-		-- the fix that the deleted fix was hiding.
-		-- FIXME - searching the CollarFixes by HiddenBy (even when indexed) is slow
-		UPDATE CollarFixes SET HiddenBy = @HiddenBy WHERE HiddenBy = @FixId;
-
-		FETCH NEXT FROM delf_cursor INTO @FixId;
-	END
-	CLOSE delf_cursor;
-	DEALLOCATE delf_cursor;
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[GetLocationGeography]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS GEOGRAPHY
-AS
-BEGIN
-	DECLARE @Result GEOGRAPHY
-	SET @Result = (SELECT [Location] 
-	                 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [FixDate] = @Time);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[FixesByLocation]
-AS
-SELECT     dbo.CollarFixes.FixDate
-FROM         dbo.CollarFixes INNER JOIN
-                      dbo.Locations ON dbo.CollarFixes.FixDate = dbo.Locations.FixDate INNER JOIN
-                      dbo.CollarDeployments ON dbo.CollarFixes.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
-                      dbo.Locations.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Locations.AnimalId = dbo.CollarDeployments.AnimalId AND 
-                      dbo.CollarFixes.CollarId = dbo.CollarDeployments.CollarId AND dbo.CollarFixes.FixDate > dbo.CollarDeployments.DeploymentDate AND 
-                      (dbo.CollarFixes.FixDate < dbo.CollarDeployments.RetrievalDate OR
-                      dbo.CollarDeployments.RetrievalDate IS NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE FUNCTION [dbo].[NextLocationTime] 
 (
 	@Project VARCHAR(16)   = NULL, 
@@ -1066,6 +1090,52 @@ CREATE SPATIAL INDEX [SIndex_Movements_Shape] ON [dbo].[Movements]
 WITH (
 GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
 CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [StartDate] 
+					 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [EndDate] = @Time);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[StartOfOverlappingMovement] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [StartDate]
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [StartDate] < @Time
+	                  AND [EndDate] > @Time
+	             ORDER BY [StartDate] DESC);
+	RETURN @Result
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -1466,76 +1536,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [StartDate] 
-					 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [EndDate] = @Time);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[StartOfOverlappingMovement] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [StartDate]
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [StartDate] < @Time
-	                  AND [EndDate] > @Time
-	             ORDER BY [StartDate] DESC);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[PreviousLocationTime] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [FixDate] 
-					 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [Status] IS NULL
-					  AND [FixDate] < @Time
-			     ORDER BY [FixDate] DESC);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE VIEW [dbo].[VelocityVectors]
 AS
 SELECT     ProjectId, AnimalId, StartDate, EndDate, Duration, Distance, Speed, Shape
@@ -1607,6 +1607,19 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[LookupQueryLayerServers](
+	[Location] [nvarchar](128) NOT NULL,
+	[Connection] [nvarchar](255) NOT NULL,
+ CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
+(
+	[Location] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[Settings](
 	[Username] [sysname] NOT NULL,
 	[Key] [nvarchar](30) NOT NULL,
@@ -1615,19 +1628,6 @@ CREATE TABLE [dbo].[Settings](
 (
 	[Username] ASC,
 	[Key] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[LookupQueryLayerServers](
-	[Location] [nvarchar](128) NOT NULL,
-	[Connection] [nvarchar](255) NOT NULL,
- CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
-(
-	[Location] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
@@ -1722,11 +1722,6 @@ BEGIN
                                  112), -- format 112 (yyyymmdd) is deterministic
                          @Date)
 END
-GO
-CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[LocalTime]
 GO
 SET ANSI_NULLS ON
 GO
@@ -1880,6 +1875,221 @@ FROM         dbo.CollarFixes INNER JOIN
                       dbo.LookupCollarManufacturers ON dbo.CollarFixes.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer LEFT OUTER JOIN
                       dbo.Projects ON dbo.CollarDeployments.ProjectId = dbo.Projects.ProjectId
 GROUP BY dbo.Projects.ProjectName, dbo.CollarDeployments.AnimalId, dbo.CollarFixes.FileId, dbo.LookupCollarManufacturers.Name, dbo.CollarFixes.CollarId
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 11, 2012
+-- Description:	Updates a project investigator
+-- =============================================
+CREATE PROCEDURE [dbo].[ProjectInvestigator_Update] 
+	@Login sysname       = NULL,
+	@Name  NVARCHAR(255) = NULL, 
+	@Email NVARCHAR(255) = NULL, 
+	@Phone NVARCHAR(255) = NULL 
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	IF @Login IS NULL
+		SET @Login = ORIGINAL_LOGIN();
+
+	-- Verify this is an existing project investigator
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'There is no project investigator with a login of ' + @Login + '.';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+	
+	-- You must be the ProjectInvestigator to update the ProjectInvestigator
+	IF @Login <> ORIGINAL_LOGIN()
+	BEGIN
+		DECLARE @message2 nvarchar(100) = 'You can only update your own record.';
+		RAISERROR(@message2, 18, 0)
+		RETURN 1
+	END
+	
+	-- If a parameter is not provided, use the existing value.
+	-- (to put null in a field the user will need to pass an empty string)
+	IF @Name IS NULL
+	BEGIN
+		SELECT @Name = [Name] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+	END
+	
+	IF @Email IS NULL
+	BEGIN
+		SELECT @Email = [Email] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+	END
+	
+	IF @Phone IS NULL
+	BEGIN
+		SELECT @Phone = [Phone] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+	END
+	
+	-- Do the update, replacing empty strings with NULLs
+	UPDATE [dbo].[ProjectInvestigators] SET [Name]	= nullif(@Name,''),
+											[Email] = nullif(@Email,''),
+											[Phone] = nullif(@Phone,'')
+									  WHERE [Login] = @Login
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
+	@Login sysname, 
+	@Name  NVARCHAR(255), 
+	@Email NVARCHAR(255),
+	@Phone NVARCHAR(255)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	-- This can only be run be the Sysadmin
+	-- This script is mostly to remind the SA of the steps, so there is no error checking.
+
+	-- create a login
+	IF NOT EXISTS (select 1 from sys.server_principals where name = @Login)
+	BEGIN
+		EXEC ('CREATE LOGIN [' + @Login + '] FROM WINDOWS')
+	END
+
+	-- create a db user
+	IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Login)
+	BEGIN
+		EXEC ('CREATE USER ['  + @Login + ']') --  LOGIN defaults to the same name
+	END
+
+	-- Add the user to the Investigator role
+	IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
+				   INNER JOIN sys.database_principals AS P1  
+				   ON U.member_principal_id = P1.principal_id
+				   INNER JOIN sys.database_principals AS P2 
+				   ON U.role_principal_id = p2.principal_id 
+				   WHERE p1.name = @Login AND p2.name = 'Investigator' )
+	BEGIN
+		EXEC sp_addrolemember 'Investigator', @Login
+	END
+
+	-- Add the user to the Investigator table
+	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
+		 VALUES (@Login, @Name, @Email, @Phone);
+END
+GO
+CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[AcquisitionTime] [nvarchar](50) NULL,
+	[AcquisitionStartTime] [nvarchar](50) NULL,
+	[Ctn] [nvarchar](50) NULL,
+	[ArgosId] [nvarchar](50) NULL,
+	[ArgosLocationClass] [nvarchar](50) NULL,
+	[ArgosLatitude] [nvarchar](50) NULL,
+	[ArgosLongitude] [nvarchar](50) NULL,
+	[ArgosAltitude] [nvarchar](50) NULL,
+	[GpsFixTime] [nvarchar](50) NULL,
+	[GpsFixAttempt] [nvarchar](50) NULL,
+	[GpsLatitude] [nvarchar](50) NULL,
+	[GpsLongitude] [nvarchar](50) NULL,
+	[GpsUtmZone] [nvarchar](50) NULL,
+	[GpsUtmNorthing] [nvarchar](50) NULL,
+	[GpsUtmEasting] [nvarchar](50) NULL,
+	[GpsAltitude] [nvarchar](50) NULL,
+	[GpsSpeed] [nvarchar](50) NULL,
+	[GpsHeading] [nvarchar](50) NULL,
+	[GpsHorizontalError] [nvarchar](50) NULL,
+	[GpsPositionalDilution] [nvarchar](50) NULL,
+	[GpsHorizontalDilution] [nvarchar](50) NULL,
+	[GpsSatelliteBitmap] [nvarchar](50) NULL,
+	[GpsSatelliteCount] [nvarchar](50) NULL,
+	[GpsNavigationTime] [nvarchar](50) NULL,
+	[UnderwaterPercentage] [nvarchar](50) NULL,
+	[DiveCount] [nvarchar](50) NULL,
+	[AverageDiveDuration] [nvarchar](50) NULL,
+	[MaximumDiveDuration] [nvarchar](50) NULL,
+	[LayerPercentage] [nvarchar](50) NULL,
+	[MaximumDiveDepth] [nvarchar](50) NULL,
+	[DiveStartTime] [nvarchar](50) NULL,
+	[DiveDuration] [nvarchar](50) NULL,
+	[DiveDepth] [nvarchar](50) NULL,
+	[DiveProfile] [nvarchar](50) NULL,
+	[ActivityCount] [nvarchar](50) NULL,
+	[Temperature] [nvarchar](50) NULL,
+	[RemoteAnalog] [nvarchar](50) NULL,
+	[SatelliteUplink] [nvarchar](50) NULL,
+	[ReceiveTime] [nvarchar](50) NULL,
+	[SatelliteName] [nvarchar](50) NULL,
+	[RepetitionCount] [nvarchar](50) NULL,
+	[LowVoltage] [nvarchar](50) NULL,
+	[Mortality] [nvarchar](50) NULL,
+	[SaltwaterFailsafe] [nvarchar](50) NULL,
+	[HaulOut] [nvarchar](50) NULL,
+	[DigitalInput] [nvarchar](50) NULL,
+	[MotionDetected] [nvarchar](50) NULL,
+	[TrapTriggerTime] [nvarchar](50) NULL,
+	[ReleaseTime] [nvarchar](50) NULL,
+	[PredeploymentData] [nvarchar](50) NULL,
+	[Error] [nvarchar](250) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatC]
+GO
+CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[CollarID] [nvarchar](255) NULL,
+	[AnimalId] [nvarchar](255) NULL,
+	[Species] [nvarchar](255) NULL,
+	[Group] [nvarchar](255) NULL,
+	[Park] [nvarchar](255) NULL,
+	[FixDate] [nvarchar](255) NULL,
+	[FixTime] [nvarchar](255) NULL,
+	[FixMonth] [int] NULL,
+	[FixDay] [int] NULL,
+	[FixYear] [int] NULL,
+	[LatWGS84] [float] NULL,
+	[LonWGS84] [float] NULL,
+	[Temperature] [float] NULL,
+	[Other] [nvarchar](255) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatB]
+GO
+CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[Fix #] [nvarchar](50) NULL,
+	[Date] [nchar](10) NULL,
+	[Time] [nchar](8) NULL,
+	[Fix Status] [nvarchar](50) NULL,
+	[Status Text] [nvarchar](150) NULL,
+	[Velocity East(m s)] [nvarchar](50) NULL,
+	[Velocity North(m s)] [nvarchar](50) NULL,
+	[Velocity Up(m s)] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[Altitude(m)] [nvarchar](50) NULL,
+	[PDOP] [nvarchar](50) NULL,
+	[HDOP] [nvarchar](50) NULL,
+	[VDOP] [nvarchar](50) NULL,
+	[TDOP] [nvarchar](50) NULL,
+	[Temperature Sensor(deg )] [nvarchar](50) NULL,
+	[Activity Sensor] [nvarchar](50) NULL,
+	[Satellite Data] [nvarchar](150) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatA]
+GO
+CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[LocalTime]
 GO
 SET ANSI_NULLS ON
 GO
@@ -2108,169 +2318,45 @@ BEGIN
 	
 END
 GO
-CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[AcquisitionTime] [nvarchar](50) NULL,
-	[AcquisitionStartTime] [nvarchar](50) NULL,
-	[Ctn] [nvarchar](50) NULL,
-	[ArgosId] [nvarchar](50) NULL,
-	[ArgosLocationClass] [nvarchar](50) NULL,
-	[ArgosLatitude] [nvarchar](50) NULL,
-	[ArgosLongitude] [nvarchar](50) NULL,
-	[ArgosAltitude] [nvarchar](50) NULL,
-	[GpsFixTime] [nvarchar](50) NULL,
-	[GpsFixAttempt] [nvarchar](50) NULL,
-	[GpsLatitude] [nvarchar](50) NULL,
-	[GpsLongitude] [nvarchar](50) NULL,
-	[GpsUtmZone] [nvarchar](50) NULL,
-	[GpsUtmNorthing] [nvarchar](50) NULL,
-	[GpsUtmEasting] [nvarchar](50) NULL,
-	[GpsAltitude] [nvarchar](50) NULL,
-	[GpsSpeed] [nvarchar](50) NULL,
-	[GpsHeading] [nvarchar](50) NULL,
-	[GpsHorizontalError] [nvarchar](50) NULL,
-	[GpsPositionalDilution] [nvarchar](50) NULL,
-	[GpsHorizontalDilution] [nvarchar](50) NULL,
-	[GpsSatelliteBitmap] [nvarchar](50) NULL,
-	[GpsSatelliteCount] [nvarchar](50) NULL,
-	[GpsNavigationTime] [nvarchar](50) NULL,
-	[UnderwaterPercentage] [nvarchar](50) NULL,
-	[DiveCount] [nvarchar](50) NULL,
-	[AverageDiveDuration] [nvarchar](50) NULL,
-	[MaximumDiveDuration] [nvarchar](50) NULL,
-	[LayerPercentage] [nvarchar](50) NULL,
-	[MaximumDiveDepth] [nvarchar](50) NULL,
-	[DiveStartTime] [nvarchar](50) NULL,
-	[DiveDuration] [nvarchar](50) NULL,
-	[DiveDepth] [nvarchar](50) NULL,
-	[DiveProfile] [nvarchar](50) NULL,
-	[ActivityCount] [nvarchar](50) NULL,
-	[Temperature] [nvarchar](50) NULL,
-	[RemoteAnalog] [nvarchar](50) NULL,
-	[SatelliteUplink] [nvarchar](50) NULL,
-	[ReceiveTime] [nvarchar](50) NULL,
-	[SatelliteName] [nvarchar](50) NULL,
-	[RepetitionCount] [nvarchar](50) NULL,
-	[LowVoltage] [nvarchar](50) NULL,
-	[Mortality] [nvarchar](50) NULL,
-	[SaltwaterFailsafe] [nvarchar](50) NULL,
-	[HaulOut] [nvarchar](50) NULL,
-	[DigitalInput] [nvarchar](50) NULL,
-	[MotionDetected] [nvarchar](50) NULL,
-	[TrapTriggerTime] [nvarchar](50) NULL,
-	[ReleaseTime] [nvarchar](50) NULL,
-	[PredeploymentData] [nvarchar](50) NULL,
-	[Error] [nvarchar](250) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatC]
-GO
-CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[CollarID] [nvarchar](255) NULL,
-	[AnimalId] [nvarchar](255) NULL,
-	[Species] [nvarchar](255) NULL,
-	[Group] [nvarchar](255) NULL,
-	[Park] [nvarchar](255) NULL,
-	[FixDate] [nvarchar](255) NULL,
-	[FixTime] [nvarchar](255) NULL,
-	[FixMonth] [int] NULL,
-	[FixDay] [int] NULL,
-	[FixYear] [int] NULL,
-	[LatWGS84] [float] NULL,
-	[LonWGS84] [float] NULL,
-	[Temperature] [float] NULL,
-	[Other] [nvarchar](255) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatB]
-GO
-CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[Fix #] [nvarchar](50) NULL,
-	[Date] [nchar](10) NULL,
-	[Time] [nchar](8) NULL,
-	[Fix Status] [nvarchar](50) NULL,
-	[Status Text] [nvarchar](150) NULL,
-	[Velocity East(m s)] [nvarchar](50) NULL,
-	[Velocity North(m s)] [nvarchar](50) NULL,
-	[Velocity Up(m s)] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[Altitude(m)] [nvarchar](50) NULL,
-	[PDOP] [nvarchar](50) NULL,
-	[HDOP] [nvarchar](50) NULL,
-	[VDOP] [nvarchar](50) NULL,
-	[TDOP] [nvarchar](50) NULL,
-	[Temperature Sensor(deg )] [nvarchar](50) NULL,
-	[Activity Sensor] [nvarchar](50) NULL,
-	[Satellite Data] [nvarchar](150) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatA]
-GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
--- Create date: April 11, 2012
--- Description:	Updates a project investigator
+-- Create date: March 28, 2012
+-- Description:	Adds a new project to the database.
 -- =============================================
-CREATE PROCEDURE [dbo].[ProjectInvestigator_Update] 
-	@Login sysname       = NULL,
-	@Name  NVARCHAR(255) = NULL, 
-	@Email NVARCHAR(255) = NULL, 
-	@Phone NVARCHAR(255) = NULL 
+CREATE PROCEDURE [dbo].[Project_Insert] 
+	@ProjectId NVARCHAR(255)= NULL,
+	@ProjectName NVARCHAR(255) = NULL, 
+	@ProjectInvestigator sysname = NULL, 
+	@UnitCode NVARCHAR(255) = NULL, 
+	@Description NVARCHAR(4000) = NULL 
 AS
 BEGIN
 	SET NOCOUNT ON;
-	
-	IF @Login IS NULL
-		SET @Login = ORIGINAL_LOGIN();
 
-	-- Verify this is an existing project investigator
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login)
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+		
+	--default PI is the calling user
+	IF nullif(@ProjectInvestigator,'') IS NULL
 	BEGIN
-		DECLARE @message1 nvarchar(100) = 'There is no project investigator with a login of ' + @Login + '.';
+		SET @ProjectInvestigator = @Caller;
+	END
+
+	-- If the caller is not a PI then error and return
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a project';
 		RAISERROR(@message1, 18, 0)
 		RETURN 1
 	END
-	
-	-- You must be the ProjectInvestigator to update the ProjectInvestigator
-	IF @Login <> ORIGINAL_LOGIN()
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'You can only update your own record.';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
-	
-	-- If a parameter is not provided, use the existing value.
-	-- (to put null in a field the user will need to pass an empty string)
-	IF @Name IS NULL
-	BEGIN
-		SELECT @Name = [Name] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	IF @Email IS NULL
-	BEGIN
-		SELECT @Email = [Email] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	IF @Phone IS NULL
-	BEGIN
-		SELECT @Phone = [Phone] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	-- Do the update, replacing empty strings with NULLs
-	UPDATE [dbo].[ProjectInvestigators] SET [Name]	= nullif(@Name,''),
-											[Email] = nullif(@Email,''),
-											[Phone] = nullif(@Phone,'')
-									  WHERE [Login] = @Login
+
+	INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
+		 VALUES (nullif(@ProjectId,''), nullif(@ProjectName,''), nullif(@ProjectInvestigator,''),
+		         nullif(@UnitCode,''), nullif(@Description,''))
 
 END
 GO
@@ -2278,45 +2364,18 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
-	@Login sysname, 
-	@Name  NVARCHAR(255), 
-	@Email NVARCHAR(255),
-	@Phone NVARCHAR(255)
-AS
-BEGIN
-	SET NOCOUNT ON
-
-	-- This can only be run be the Sysadmin
-	-- This script is mostly to remind the SA of the steps, so there is no error checking.
-
-	-- create a login
-	IF NOT EXISTS (select 1 from sys.server_principals where name = @Login)
-	BEGIN
-		EXEC ('CREATE LOGIN [' + @Login + '] FROM WINDOWS')
-	END
-
-	-- create a db user
-	IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Login)
-	BEGIN
-		EXEC ('CREATE USER ['  + @Login + ']') --  LOGIN defaults to the same name
-	END
-
-	-- Add the user to the Investigator role
-	IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
-				   INNER JOIN sys.database_principals AS P1  
-				   ON U.member_principal_id = P1.principal_id
-				   INNER JOIN sys.database_principals AS P2 
-				   ON U.role_principal_id = p2.principal_id 
-				   WHERE p1.name = @Login AND p2.name = 'Investigator' )
-	BEGIN
-		EXEC sp_addrolemember 'Investigator', @Login
-	END
-
-	-- Add the user to the Investigator table
-	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
-		 VALUES (@Login, @Name, @Email, @Phone);
-END
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarFileHeaders](
+	[Header] [nvarchar](450) NOT NULL,
+	[FileFormat] [char](1) NOT NULL,
+ CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
+(
+	[Header] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -2778,245 +2837,6 @@ BEGIN
 		RAISERROR(@message2, 18, 0)
 		RETURN 1
 	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 28, 2012
--- Description:	Adds a new project to the database.
--- =============================================
-CREATE PROCEDURE [dbo].[Project_Insert] 
-	@ProjectId NVARCHAR(255)= NULL,
-	@ProjectName NVARCHAR(255) = NULL, 
-	@ProjectInvestigator sysname = NULL, 
-	@UnitCode NVARCHAR(255) = NULL, 
-	@Description NVARCHAR(4000) = NULL 
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-		
-	--default PI is the calling user
-	IF nullif(@ProjectInvestigator,'') IS NULL
-	BEGIN
-		SET @ProjectInvestigator = @Caller;
-	END
-
-	-- If the caller is not a PI then error and return
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a project';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-
-	INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
-		 VALUES (nullif(@ProjectId,''), nullif(@ProjectName,''), nullif(@ProjectInvestigator,''),
-		         nullif(@UnitCode,''), nullif(@Description,''))
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarFileHeaders](
-	[Header] [nvarchar](450) NOT NULL,
-	[FileFormat] [char](1) NOT NULL,
- CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
-(
-	[Header] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 2, 2012
--- Description:	Updates a Collar
--- =============================================
-CREATE PROCEDURE [dbo].[Collar_Update] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL, 
-	@CollarModel NVARCHAR(255) = NULL, 
-	@Manager sysname = NULL, 
-	@Owner NVARCHAR(255) = NULL, 
-	@AlternativeId NVARCHAR(255) = NULL, 
-	@SerialNumber NVARCHAR(255) = NULL, 
-	@Frequency FLOAT = NULL, 
-	@DownloadInfo NVARCHAR(255) = NULL, 
-	@Notes NVARCHAR(max) = NULL 
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Verify this is an existing collar
-	-- Otherwise, the update will silently succeed, which could be confusing.
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId)
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-		
-	-- Validate permission for this operation
-	-- The caller must be the Manager of the collar
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manger of this collar ('+@CollarManufacturer+'/'+@CollarId+') to update it.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- If a parameter is not provided, use the existing value.
-	-- (to put null in a field the user will need to pass an empty string)
-	IF @CollarModel IS NULL
-	BEGIN
-		SELECT @CollarModel = [CollarModel] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Manager IS NULL
-	BEGIN
-		SELECT @Manager = [Manager] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Owner IS NULL
-	BEGIN
-		SELECT @Owner = [Owner] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @AlternativeId IS NULL
-	BEGIN
-		SELECT @AlternativeId = [AlternativeId] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @SerialNumber IS NULL
-	BEGIN
-		SELECT @SerialNumber = [SerialNumber] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Frequency IS NULL
-	BEGIN
-		SELECT @Frequency = [Frequency] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @DownloadInfo IS NULL
-	BEGIN
-		SELECT @DownloadInfo = [DownloadInfo] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Notes IS NULL
-	BEGIN
-		SELECT @Notes = [Notes] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	-- Do the update, replacing empty strings with NULLs
-	-- All other verification is handled by primary/foreign key and column constraints.
-
-	UPDATE dbo.Collars SET [CollarModel] = nullif(@CollarModel,''),
-						   [Manager] = nullif(@Manager,''),
-						   [Owner] = nullif(@Owner,''),
-						   [AlternativeId] = nullif(@AlternativeId,''),
-						   [SerialNumber] = nullif(@SerialNumber,''),
-						   [Frequency] = nullif(@Frequency,0),
-						   [DownloadInfo] = nullif(@DownloadInfo,''),
-						   [Notes] = nullif(@Notes,'')
-					 WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 2, 2012
--- Description:	Adds a new Collar.
--- =============================================
-CREATE PROCEDURE [dbo].[Collar_Insert] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL, 
-	@CollarModel NVARCHAR(255) = NULL, 
-	@Owner NVARCHAR(255) = NULL, 
-	@AlternativeId NVARCHAR(255) = NULL, 
-	@SerialNumber NVARCHAR(255) = NULL, 
-	@Frequency FLOAT = NULL, 
-	@DownloadInfo NVARCHAR(255) = NULL, 
-	@Notes NVARCHAR(max) = NULL 
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- If the caller is not a PI then error and return
-	-- This is enforced by the defaults and referential integrity,
-	-- but this makes the returned error message much easier to interpret.
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a collar';
-		RAISERROR(@message1, 18, 0)
-		RETURN
-	END
-	
-	--All other verification is handled by primary/foreign key and column constraints.
-	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Owner],  
-							 [AlternativeId], [SerialNumber], [Frequency], [DownloadInfo], [Notes])
-			 VALUES (nullif(@CollarManufacturer,''), nullif(@CollarId,''), nullif(@CollarModel,''),
-					 nullif(@Owner,''), nullif(@AlternativeId,''), nullif(@SerialNumber,''),
-					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''))
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 2, 2012
--- Description:	Delete a collar
--- =============================================
-CREATE PROCEDURE [dbo].[Collar_Delete] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the Manager of the collar
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manger of this collar ('+@CollarManufacturer+'/'+@CollarId+') to delete it.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- deleting a non-existing collar will silently succeed.
-	-- All other verification is handled by primary/foreign key and column constraints.
-	DELETE FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 END
 GO
 SET ANSI_NULLS ON
@@ -3635,49 +3455,102 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[IsEditor] 
-(
-	@Project VARCHAR(32)   = NULL, 
-	@User sysname = NULL
-)
-RETURNS BIT
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 2, 2012
+-- Description:	Updates a Collar
+-- =============================================
+CREATE PROCEDURE [dbo].[Collar_Update] 
+	@CollarManufacturer NVARCHAR(255)= NULL,
+	@CollarId NVARCHAR(255) = NULL, 
+	@CollarModel NVARCHAR(255) = NULL, 
+	@Manager sysname = NULL, 
+	@Owner NVARCHAR(255) = NULL, 
+	@AlternativeId NVARCHAR(255) = NULL, 
+	@SerialNumber NVARCHAR(255) = NULL, 
+	@Frequency FLOAT = NULL, 
+	@DownloadInfo NVARCHAR(255) = NULL, 
+	@Notes NVARCHAR(max) = NULL 
 AS
 BEGIN
-	-- Check that @User is in the Investigator or the Editor Role
-	IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
-												   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
-		RETURN 0
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Verify this is an existing collar
+	-- Otherwise, the update will silently succeed, which could be confusing.
+	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId)
+	BEGIN
+		DECLARE @message2 nvarchar(100) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+		
+	-- Validate permission for this operation
+	-- The caller must be the Manager of the collar
+	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manger of this collar ('+@CollarManufacturer+'/'+@CollarId+') to update it.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- If a parameter is not provided, use the existing value.
+	-- (to put null in a field the user will need to pass an empty string)
+	IF @CollarModel IS NULL
+	BEGIN
+		SELECT @CollarModel = [CollarModel] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
 	
-	--Check that the users is either an editor or the PI on the project
-	IF EXISTS( SELECT 1 FROM dbo.Projects AS P 
-				LEFT JOIN dbo.ProjectEditors AS E ON P.ProjectId = E.ProjectId 
-				WHERE P.ProjectId = @Project
-				  AND (E.Editor = @User OR P.ProjectInvestigator = @User))
-		RETURN 1
-	RETURN 0
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[IsFixEditor] 
-(
-	@FixId BIGINT = NULL, 
-	@User sysname = NULL
-)
-RETURNS BIT
-AS
-BEGIN
-	DECLARE @Result BIT
+	IF @Manager IS NULL
+	BEGIN
+		SELECT @Manager = [Manager] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
 	
-		SELECT @Result = [dbo].[IsEditor]([f].[Project], @User)
-		  FROM [dbo].[CollarFixes] AS [x]
-	INNER JOIN [dbo].[CollarFiles] AS [f]
-			ON [x].[FileId] = [f].[FileId]
-		 WHERE [x].[FixId] = @FixId;
-		 
-	RETURN @Result
+	IF @Owner IS NULL
+	BEGIN
+		SELECT @Owner = [Owner] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @AlternativeId IS NULL
+	BEGIN
+		SELECT @AlternativeId = [AlternativeId] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @SerialNumber IS NULL
+	BEGIN
+		SELECT @SerialNumber = [SerialNumber] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @Frequency IS NULL
+	BEGIN
+		SELECT @Frequency = [Frequency] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @DownloadInfo IS NULL
+	BEGIN
+		SELECT @DownloadInfo = [DownloadInfo] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @Notes IS NULL
+	BEGIN
+		SELECT @Notes = [Notes] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	-- Do the update, replacing empty strings with NULLs
+	-- All other verification is handled by primary/foreign key and column constraints.
+
+	UPDATE dbo.Collars SET [CollarModel] = nullif(@CollarModel,''),
+						   [Manager] = nullif(@Manager,''),
+						   [Owner] = nullif(@Owner,''),
+						   [AlternativeId] = nullif(@AlternativeId,''),
+						   [SerialNumber] = nullif(@SerialNumber,''),
+						   [Frequency] = nullif(@Frequency,0),
+						   [DownloadInfo] = nullif(@DownloadInfo,''),
+						   [Notes] = nullif(@Notes,'')
+					 WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+
 END
 GO
 SET ANSI_NULLS ON
@@ -3686,12 +3559,57 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Deletes an animal
+-- Create date: April 2, 2012
+-- Description:	Adds a new Collar.
 -- =============================================
-CREATE PROCEDURE [dbo].[Animal_Delete] 
-	@ProjectId nvarchar(255) = NULL,
-	@AnimalId nvarchar(255) = NULL
+CREATE PROCEDURE [dbo].[Collar_Insert] 
+	@CollarManufacturer NVARCHAR(255)= NULL,
+	@CollarId NVARCHAR(255) = NULL, 
+	@CollarModel NVARCHAR(255) = NULL, 
+	@Owner NVARCHAR(255) = NULL, 
+	@AlternativeId NVARCHAR(255) = NULL, 
+	@SerialNumber NVARCHAR(255) = NULL, 
+	@Frequency FLOAT = NULL, 
+	@DownloadInfo NVARCHAR(255) = NULL, 
+	@Notes NVARCHAR(max) = NULL 
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- If the caller is not a PI then error and return
+	-- This is enforced by the defaults and referential integrity,
+	-- but this makes the returned error message much easier to interpret.
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a collar';
+		RAISERROR(@message1, 18, 0)
+		RETURN
+	END
+	
+	--All other verification is handled by primary/foreign key and column constraints.
+	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Owner],  
+							 [AlternativeId], [SerialNumber], [Frequency], [DownloadInfo], [Notes])
+			 VALUES (nullif(@CollarManufacturer,''), nullif(@CollarId,''), nullif(@CollarModel,''),
+					 nullif(@Owner,''), nullif(@AlternativeId,''), nullif(@SerialNumber,''),
+					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''))
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 2, 2012
+-- Description:	Delete a collar
+-- =============================================
+CREATE PROCEDURE [dbo].[Collar_Delete] 
+	@CollarManufacturer NVARCHAR(255)= NULL,
+	@CollarId NVARCHAR(255) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -3700,17 +3618,17 @@ BEGIN
 	DECLARE @Caller sysname = ORIGINAL_LOGIN();
 
 	-- Validate permission for this operation
-	-- The caller must be able to edit this project
-	IF NOT EXISTS (SELECT 1 WHERE [dbo].[IsEditor](@ProjectId, @Caller) = 1)
+	-- The caller must be the Manager of the collar
+	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
 	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete an animal.';
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manger of this collar ('+@CollarManufacturer+'/'+@CollarId+') to delete it.';
 		RAISERROR(@message1, 18, 0)
 		RETURN (1)
 	END
 
-	-- deleting a non-existing animal will silently succeed.
+	-- deleting a non-existing collar will silently succeed.
 	-- All other verification is handled by primary/foreign key and column constraints.
-	DELETE FROM dbo.Animals WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId
+	DELETE FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 END
 GO
 SET ANSI_NULLS ON
@@ -3888,11 +3806,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 27, 2012
--- Description:	Removes an editor from a project
--- =============================================
 CREATE PROCEDURE [dbo].[Editor_Delete] 
 	@ProjectId nvarchar(255) = Null,
 	@Editor sysname  = Null
@@ -3923,26 +3836,199 @@ BEGIN
 	-- This is the key step from the applications standpoint
 	DELETE FROM [dbo].[ProjectEditors] WHERE ProjectId = @ProjectId AND Editor = @Editor
 	
-	-- If this Editor is still an editor (on this or other projects), then do nothing more
-	IF EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE Editor = @Editor)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[AfterProjectEditorDelete] 
+ON [dbo].[ProjectEditors] 
+AFTER DELETE AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE
+		@ProjectId nvarchar(255) = Null,
+		@Editor sysname  = Null
+	
+	-- Loop over all the editors to be deleted, and
+	-- if 1) they are the not a PI, and
+	--    2) they will no longer have a presense in the Editors table,
+	-- then drop them from the DB
+	
+	DECLARE del_cursor CURSOR FOR 
+		SELECT [ProjectId], [Editor] FROM deleted
+
+	OPEN del_cursor;
+
+	FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		-- If this Editor is a project investigator, then do nothing more
+		IF EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Editor)
+		BEGIN
+			FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
+			CONTINUE
+		END
+
+		-- If this Editor is still an editor (on this or other projects after deleting), then do nothing more
+		IF EXISTS(select 1 from [dbo].[ProjectEditors] AS E
+					where not exists
+					     (select * from deleted as D where D.ProjectId = E.ProjectId AND D.Editor = E.Editor)
+					 AND Editor = @Editor)
+		BEGIN
+			FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
+			CONTINUE
+		END
+		
+		-- This editor is not an editor on any projects, so remove the user from the database
+		-- This will also, obviously, remove them from the Editor role
+		-- If this fails, the user will still have permissions to run the stored procedures,
+		--  however the application should stop them because they are not in the
+		--  ProjectEditor table
+		IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @Editor)
+			EXEC ('DROP USER ['  + @Editor + ']') --  LOGIN defaults to the same name
+
+		FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;		
+	END
+	CLOSE del_cursor;
+	DEALLOCATE del_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 27, 2012
+-- Description:	Removes an Investigator from the database
+-- =============================================
+CREATE PROCEDURE [dbo].[ProjectInvestigator_Delete_SA] 
+	@Investigator sysname = Null
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- This can only be run be the Sysadmin
+	-- This script is mostly to remind the SA of the steps, so there is no error checking.
+
+	-- Remove the user to the Investigator table
+	DELETE FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Investigator;
+
+	-- Remove the user from the Investigator role
+	EXEC sp_droprolemember 'Investigator', @Investigator
+	
+	-- remove the user from the db, unless they are an editor
+	IF EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE [Editor] = @Investigator)
 	BEGIN
 		RETURN
 	END
+	EXEC ('DROP USER ['  + @Investigator + ']')
 
-	-- If this Editor is a project investigator, then do nothing more
-	IF EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Editor)
+	-- remove the login (if it is not used anywhere else)	
+	-- If the editor login does not map to a user on have any other databases, then remove the login
+	DECLARE	@cmd nvarchar(500) = 'USE ?; IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = ''' + @Investigator + ''') raiserror('''',18,0)'
+	DECLARE @Found int = 0
+	begin try
+		EXEC sp_MSforeachdb @cmd;
+	end try
+	BEGIN CATCH
+		SET @Found = 1
+	END CATCH
+
+	IF @Found = 0
 	BEGIN
-		RETURN
+		-- make sure the login does not have a server role
+		IF NOT EXISTS (select 1 from sys.server_role_members AS R INNER JOIN sys.server_principals AS P 
+					   ON R.member_principal_id = P.principal_id where P.name = @Investigator)
+		BEGIN
+			EXEC ('DROP LOGIN ['  + @Investigator + ']')
+		END
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[IsEditor] 
+(
+	@Project VARCHAR(32)   = NULL, 
+	@User sysname = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	-- Check that @User is in the Investigator or the Editor Role
+	IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
+												   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
+		RETURN 0
+	
+	--Check that the users is either an editor or the PI on the project
+	IF EXISTS( SELECT 1 FROM dbo.Projects AS P 
+				LEFT JOIN dbo.ProjectEditors AS E ON P.ProjectId = E.ProjectId 
+				WHERE P.ProjectId = @Project
+				  AND (E.Editor = @User OR P.ProjectInvestigator = @User))
+		RETURN 1
+	RETURN 0
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[IsFixEditor] 
+(
+	@FixId BIGINT = NULL, 
+	@User sysname = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	DECLARE @Result BIT
+	
+		SELECT @Result = [dbo].[IsEditor]([f].[Project], @User)
+		  FROM [dbo].[CollarFixes] AS [x]
+	INNER JOIN [dbo].[CollarFiles] AS [f]
+			ON [x].[FileId] = [f].[FileId]
+		 WHERE [x].[FixId] = @FixId;
+		 
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Deletes an animal
+-- =============================================
+CREATE PROCEDURE [dbo].[Animal_Delete] 
+	@ProjectId nvarchar(255) = NULL,
+	@AnimalId nvarchar(255) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be able to edit this project
+	IF NOT EXISTS (SELECT 1 WHERE [dbo].[IsEditor](@ProjectId, @Caller) = 1)
+	BEGIN
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete an animal.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
 	END
 
-	-- This editor is not an editor on any projects, so remove the user from the database
-	-- This will also, obviously, remove them from the Editor role
-	-- If this fails, the user will still have permissions to run the stored procedures,
-	--  however the application should stop them because they are not in the
-	--  ProjectEditor table
-	BEGIN
-		EXEC ('DROP USER ['  + @Editor + ']') --  LOGIN defaults to the same name
-	END
+	-- deleting a non-existing animal will silently succeed.
+	-- All other verification is handled by primary/foreign key and column constraints.
+	DELETE FROM dbo.Animals WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId
 END
 GO
 SET ANSI_NULLS ON
@@ -4084,53 +4170,164 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 27, 2012
--- Description:	Removes an Investigator from the database
--- =============================================
-CREATE PROCEDURE [dbo].[ProjectInvestigator_Delete_SA] 
-	@Investigator sysname = Null
+CREATE PROCEDURE [dbo].[Test_ProjectEditor_DeleteTrigger] 
 AS
 BEGIN
-	SET NOCOUNT ON;
-
-	-- This can only be run be the Sysadmin
-	-- This script is mostly to remind the SA of the steps, so there is no error checking.
-
-	-- Remove the user to the Investigator table
-	DELETE FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Investigator;
-
-	-- Remove the user from the Investigator role
-	EXEC sp_droprolemember 'Investigator', @Investigator
+	SET NOCOUNT ON
 	
-	-- remove the user from the db, unless they are an editor
-	IF EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE [Editor] = @Investigator)
-	BEGIN
-		RETURN
-	END
-	EXEC ('DROP USER ['  + @Investigator + ']')
+	DECLARE
+			@sa nvarchar(16) = 'sa',
+			@p1 nvarchar(16) = 'p1',
+			@p2 nvarchar(16) = 'p2',
+			@e1 sysname  = 'NPS\JLPiercy',
+			@e2 sysname  = 'NPS\JJCusick',
+			@msg nvarchar(255) = null
+			
+	-- This test must be run as SA, since others cannot operate on table directly
+	-- This test the integrity of the tables underlying the Store Procedures available to users.
+	-- Also SA can check user tables
 
-	-- remove the login (if it is not used anywhere else)	
-	-- If the editor login does not map to a user on have any other databases, then remove the login
-	DECLARE	@cmd nvarchar(500) = 'USE ?; IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = ''' + @Investigator + ''') raiserror('''',18,0)'
-	DECLARE @Found int = 0
-	begin try
-		EXEC sp_MSforeachdb @cmd;
-	end try
-	BEGIN CATCH
-		SET @Found = 1
-	END CATCH
-
-	IF @Found = 0
+	IF ORIGINAL_LOGIN() <> @sa
 	BEGIN
-		-- make sure the login does not have a server role
-		IF NOT EXISTS (select 1 from sys.server_role_members AS R INNER JOIN sys.server_principals AS P 
-					   ON R.member_principal_id = P.principal_id where P.name = @Investigator)
-		BEGIN
-			EXEC ('DROP LOGIN ['  + @Investigator + ']')
-		END
+		PRINT 'You must be the sa to run this test'
+		RETURN 1
 	END
+
+	-- Add the sa is a project investigator
+	IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @sa)
+	BEGIN
+		INSERT [dbo].[ProjectInvestigators] ([Login],[Name],[Email],[Phone]) VALUES (@sa,@sa,@sa,@sa)
+	END
+
+	-- Make sure test projects/editors do not exist
+	DELETE Projects Where ProjectId in (@p1, @p2)
+	DELETE ProjectEditors Where Editor in (@e1, @e2)
+	IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @e1)
+		EXEC ('DROP USER ['  + @e1 + ']')
+	IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @e2)
+		EXEC ('DROP USER ['  + @e2 + ']')
+
+	-- Create clean test projects
+	INSERT Projects (ProjectId, ProjectName, ProjectInvestigator) VALUES (@p1, @p1, @sa)
+	INSERT Projects (ProjectId, ProjectName, ProjectInvestigator) VALUES (@p2, @p2, @sa)
+
+	-- Add Project Editors
+	EXEC [dbo].[Editor_Insert] @p1, @e1
+	EXEC [dbo].[Editor_Insert] @p2, @e1
+	EXEC [dbo].[Editor_Insert] @p2, @e2
+
+
+	-- Check that the editors exist and are in the editor role
+	SELECT 1 from sys.database_role_members as M 
+		     INNER JOIN sys.database_principals AS U  
+		     ON M.member_principal_id = U.principal_id
+		     INNER JOIN sys.database_principals AS R 
+		     ON M.role_principal_id = R.principal_id 
+		     WHERE R.name = 'Editor' AND U.name in (@e1, @e2)
+	IF (@@ROWCOUNT <> 2)
+	BEGIN
+		PRINT 'Unable to initialize test'
+		RETURN 1
+	END
+	
+
+	-- Do tests
+	PRINT 'ProjectEditor_DeleteTrigger Tests'
+	PRINT '  Start with p1,e1 ; p2,e1 ; p2,e2'
+	
+	-- Test1
+	--Action
+	DELETE ProjectEditors where ProjectId = @p1 AND Editor = @e1
+	--Test
+	SET @msg = 'Failed (e1 or e2 is not in editor role)'
+	SELECT 1 from sys.database_role_members as M 
+		     INNER JOIN sys.database_principals AS U  
+		     ON M.member_principal_id = U.principal_id
+		     INNER JOIN sys.database_principals AS R 
+		     ON M.role_principal_id = R.principal_id 
+		     WHERE R.name = 'Editor' AND U.name in (@e1, @e2)
+	IF (@@ROWCOUNT = 2)
+		SET @msg = 'Passed'
+	--Report
+	SET @msg = '  Test1: delete p1,e1: ' + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[Editor_Insert] @p1, @e1
+
+	-- Test2
+	--Action
+	DELETE ProjectEditors where ProjectId = @p2
+	--Test
+	SET @msg = 'Failed (e2 is a user, or e1 is not in editor role)'
+	IF NOT EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @e2)
+	   AND EXISTS (SELECT 1 from sys.database_role_members as M 
+		     INNER JOIN sys.database_principals AS U  
+		     ON M.member_principal_id = U.principal_id
+		     INNER JOIN sys.database_principals AS R 
+		     ON M.role_principal_id = R.principal_id 
+		     WHERE R.name = 'Editor' AND U.name = @e1)
+		SET @msg = 'Passed'
+	--Report
+	SET @msg = '  Test2: delete p2, *: ' + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[Editor_Insert] @p2, @e1
+	EXEC [dbo].[Editor_Insert] @p2, @e2
+	
+	-- Test3
+	--Action
+	DELETE ProjectEditors where (ProjectId = @p1 AND Editor = @e1) OR (ProjectId = @p2 AND Editor = @e2)
+	--Test
+	SET @msg = 'Failed (e2 is a user, or e1 is not in editor role)'
+	IF NOT EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @e2)
+	   AND EXISTS (SELECT 1 from sys.database_role_members as M 
+		     INNER JOIN sys.database_principals AS U  
+		     ON M.member_principal_id = U.principal_id
+		     INNER JOIN sys.database_principals AS R 
+		     ON M.role_principal_id = R.principal_id 
+		     WHERE R.name = 'Editor' AND U.name = @e1)
+		SET @msg = 'Passed'
+	--Report
+	SET @msg = '  Test3: delete p1,e1 and p2,e2: ' + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[Editor_Insert] @p1, @e1
+	EXEC [dbo].[Editor_Insert] @p2, @e2
+	
+	-- Test4
+	--Action
+	DELETE ProjectEditors where Editor = @e1
+	--Test
+	SET @msg = 'Failed (e1 is a user, or e2 is not in editor role)'
+	IF NOT EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @e1)
+	   AND EXISTS (SELECT 1 from sys.database_role_members as M 
+		     INNER JOIN sys.database_principals AS U  
+		     ON M.member_principal_id = U.principal_id
+		     INNER JOIN sys.database_principals AS R 
+		     ON M.role_principal_id = R.principal_id 
+		     WHERE R.name = 'Editor' AND U.name = @e2)
+		SET @msg = 'Passed'
+	--Report
+	SET @msg = '  Test4: delete *, e1: ' + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[Editor_Insert] @p1, @e1
+	EXEC [dbo].[Editor_Insert] @p2, @e1
+	
+	
+	
+	-- Clean up
+	PRINT '  Cleaning up'
+	DELETE Projects Where ProjectId in (@p1, @p2)
+	DELETE ProjectEditors Where Editor in (@e1, @e2)
+	IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @e1)
+		EXEC ('DROP USER ['  + @e1 + ']')
+	IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @e2)
+		EXEC ('DROP USER ['  + @e2 + ']')
+
+	-- Remove the sa from project investigator
+	DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @sa
+	
 END
 GO
 SET ANSI_NULLS ON
