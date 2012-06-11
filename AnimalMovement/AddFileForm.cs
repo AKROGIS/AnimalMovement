@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//TODO - Deal with Telonics format with extra commas on header line, and on 3rd line
 //TODO - ask to create necessary database records to support file - i.e. collars/animals/deployments
 //TODO - set collarComboBox.selectedItem to null if disabled.  trick is setting back to something meaningful when enabled.
 //TODO - improve validation before create/save
