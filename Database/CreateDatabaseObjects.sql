@@ -4578,7 +4578,6 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Procedure:   Editor_Delete
 -- Author:		Regan Sarwas
 -- Create date: March 27, 2012
 -- Description:	Removes an editor from a project

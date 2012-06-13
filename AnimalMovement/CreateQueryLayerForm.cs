@@ -121,6 +121,8 @@ namespace AnimalMovement
 
         private void FilterByProjectCheckBox_CheckedChanged(object sender, EventArgs e)
         {
+            if (!FilterByProjectsCheckBox.Checked)
+                ClearProjectsButton.PerformClick();
             ProjectsCheckedListBox.Enabled = FilterByProjectsCheckBox.Checked;
             AllProjectsButton.Enabled = FilterByProjectsCheckBox.Checked;
             ClearProjectsButton.Enabled = FilterByProjectsCheckBox.Checked;
@@ -128,6 +130,8 @@ namespace AnimalMovement
 
         private void FilterBySpeciesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
+            if (!FilterBySpeciesCheckBox.Checked)
+                ClearSpeciesButton.PerformClick();
             SpeciesCheckedListBox.Enabled = FilterBySpeciesCheckBox.Checked;
             AllSpeciesButton.Enabled = FilterBySpeciesCheckBox.Checked;
             ClearSpeciesButton.Enabled = FilterBySpeciesCheckBox.Checked;
@@ -135,6 +139,8 @@ namespace AnimalMovement
 
         private void FilterByAnimalCheckBox_CheckedChanged(object sender, EventArgs e)
         {
+            if (!FilterByAnimalsCheckBox.Checked)
+                ClearAnimalsButton.PerformClick();
             AnimalsCheckedListBox.Enabled = FilterByAnimalsCheckBox.Checked;
             AllAnimalsButton.Enabled = FilterByAnimalsCheckBox.Checked;
             ClearAnimalsButton.Enabled = FilterByAnimalsCheckBox.Checked;
