@@ -626,15 +626,18 @@ BEGIN
 		
 		-- Step 4) Add new record to Locations table
 		-- This should not create a Location if there is no matching deployment
+		-- The new fix is never hidden.
+		-- there must be zero or one deployment/animal for this fixdate
 		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
 			 SELECT C.ProjectId, C.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
 			   FROM CollarDeployments as C 
---       INNER JOIN dbo.Animals AS A
--- 	             ON A.ProjectId = C.ProjectId
---		    	AND A.AnimalId = C.AnimalId
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = C.ProjectId
+		    	AND A.AnimalId = C.AnimalId
 			  WHERE C.CollarManufacturer = @CollarManufacturer AND C.CollarId = @CollarId
-				AND C.DeploymentDate <= @FixDate AND (C.RetrievalDate IS NULL OR @FixDate <= C.RetrievalDate)
---	    	    AND @FixDate < A.MortalityDate OR A.MortalityDate IS NULL
+				AND C.DeploymentDate <= @FixDate
+				AND (C.RetrievalDate IS NULL OR @FixDate <= C.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR @FixDate <= A.MortalityDate)
 
 		FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
 	END
@@ -706,7 +709,14 @@ BEGIN
 		-- Step 4) What ever was hiding the fix being deleted should now be hiding
 		-- the fix that the deleted fix was hiding.
 		-- FIXME - searching the CollarFixes by HiddenBy (even when indexed) is slow
-		UPDATE CollarFixes SET HiddenBy = @HiddenBy WHERE HiddenBy = @FixId;
+		-- PROBLEM - unhiding a fix creates a location, thereby prohibiting the deletion of the fix
+		-- SOLUTION - do not unhide fixes in the deleted list  
+		UPDATE C SET HiddenBy = @HiddenBy
+		  FROM CollarFixes AS C
+     LEFT JOIN deleted as D
+		    ON D.FixId = C.FixId
+		 WHERE C.HiddenBy = @FixId
+		   AND D.FixId IS NULL;
 
 		FETCH NEXT FROM delf_cursor INTO @FixId;
 	END
@@ -1354,6 +1364,26 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE VIEW [dbo].[VelocityVectors]
+AS
+SELECT     ProjectId, AnimalId, StartDate, EndDate, Duration, Distance, Speed, Shape
+FROM         dbo.Movements
+WHERE     (Distance <> 0)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ValidLocations]
+AS
+SELECT     ProjectId, AnimalId, FixDate, Status, Location
+FROM         dbo.Locations
+WHERE     (Status IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TRIGGER [dbo].[UpdateMovementAfterLocationUpdate] 
 ON [dbo].[Locations]
 AFTER UPDATE AS
@@ -1490,6 +1520,7 @@ IF UPDATE ([HiddenBy])
 
 		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
 		-- deleted/inserted are tables, since multiple records can be changed at once.
+		-- All updated rows are included, even those that didn't update hiddenby
 		
 		-- Basic logic for a changing a SINGLE CollarFix:
 		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
@@ -1505,52 +1536,31 @@ IF UPDATE ([HiddenBy])
 		-- if HiddenBy goes from NULL to NOT NULL then
 		-- remove record from Locations table
 		DELETE L FROM Locations as L
-		   --INNER JOIN CollarDeployments AS C 
-				   --ON C.ProjectId = L.ProjectId AND C.AnimalId = L.AnimalId
 		   INNER JOIN deleted as D
-				 --ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
 				   ON L.FixId = D.FixId
 		   INNER JOIN inserted as I
 				   ON L.FixId = I.FixId
 				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
-				  AND L.FixDate = D.FixDate
 		
 		-- if HiddenBy goes from NOT NULL to NULL then
-		-- Add new record to Locations table
+		-- Add new record to Locations table, if FixDate is acceptable 
 		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
 			 SELECT C.ProjectId, C.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
-			   FROM inserted as I INNER JOIN CollarDeployments as C
-				 ON C.CollarManufacturer = I.CollarManufacturer AND C.CollarId = I.CollarId
+			   FROM inserted as I
 		 INNER JOIN deleted as D
 				 ON D.FixId = I.FixId
---       INNER JOIN dbo.Animals AS A
--- 	             ON A.ProjectId = C.ProjectId
---		    	AND A.AnimalId = C.AnimalId
+		 INNER JOIN dbo.CollarDeployments as C
+				 ON C.CollarManufacturer = I.CollarManufacturer
+				AND C.CollarId = I.CollarId
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = C.ProjectId
+		    	AND A.AnimalId = C.AnimalId
 			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
-			    AND C.DeploymentDate <= I.FixDate AND (C.RetrievalDate IS NULL OR I.FixDate <= C.RetrievalDate)
---	    	    AND I.FixDate < A.MortalityDate OR A.MortalityDate IS NULL
+			    AND C.DeploymentDate <= I.FixDate
+			    AND (C.RetrievalDate IS NULL OR I.FixDate <= C.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
 
 	END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[VelocityVectors]
-AS
-SELECT     ProjectId, AnimalId, StartDate, EndDate, Duration, Distance, Speed, Shape
-FROM         dbo.Movements
-WHERE     (Distance <> 0)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ValidLocations]
-AS
-SELECT     ProjectId, AnimalId, FixDate, Status, Location
-FROM         dbo.Locations
-WHERE     (Status IS NULL)
 GO
 SET ANSI_NULLS ON
 GO
@@ -1602,21 +1612,6 @@ CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
         @ErrorProcedure, -- parameter: original error procedure name.
         @ErrorLine       -- parameter: original error line number.
         );
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Settings](
-	[Username] [sysname] NOT NULL,
-	[Key] [nvarchar](30) NOT NULL,
-	[Value] [nvarchar](500) NULL,
- CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
-(
-	[Username] ASC,
-	[Key] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
 GO
 SET ANSI_NULLS ON
 GO
@@ -1794,136 +1789,6 @@ BEGIN
 
 	-- Do tests
 	PRINT 'Locations DeleteTrigger Tests'
-	PRINT '  Start with xxx'
-	
-	-- Test1
-	--Action
-	--Test
-	--Report
-	SET @msg = '  Test1: xxx: ' + @msg
-	PRINT @msg
-	--Reset
-
-	
-	-- Clean up
-	PRINT '  Cleaning up'
-
-	-- Remove the sa from project investigator
-	DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @sa
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: June 11, 2012
--- Description:	Test the ProjectEditor DeleteTrigger
--- =============================================
-CREATE PROCEDURE [dbo].[Test_Trigger_CollarFixes_Update] 
-AS
-BEGIN
-	SET NOCOUNT ON
-	
-	DECLARE
-			@sa nvarchar(16) = 'sa',
-			@msg nvarchar(255) = null
-			
-	-- This test must be run as SA, since others cannot operate on table directly
-	-- This test the integrity of the tables underlying the Store Procedures available to users.
-	-- Also SA can check user tables
-
-	IF ORIGINAL_LOGIN() <> @sa
-	BEGIN
-		PRINT 'You must be the sa to run this test'
-		RETURN 1
-	END
-
-	-- Add the sa is a project investigator
-	IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @sa)
-	BEGIN
-		INSERT [dbo].[ProjectInvestigators] ([Login],[Name],[Email],[Phone]) VALUES (@sa,@sa,@sa,@sa)
-	END
-
-	-- Setup for test
-	-- Check initial conditions
-	SELECT 1 from CollarFixes
-	IF (@@ROWCOUNT <> 2)
-	BEGIN
-		PRINT 'Unable to initialize test'
-		RETURN 1
-	END
-	
-
-	-- Do tests
-	PRINT 'CollarFixes UpdateTrigger Tests'
-	PRINT '  Start with xxx'
-	
-	-- Test1
-	--Action
-	--Test
-	--Report
-	SET @msg = '  Test1: xxx: ' + @msg
-	PRINT @msg
-	--Reset
-
-	
-	-- Clean up
-	PRINT '  Cleaning up'
-
-	-- Remove the sa from project investigator
-	DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @sa
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: June 11, 2012
--- Description:	Test the ProjectEditor DeleteTrigger
--- =============================================
-CREATE PROCEDURE [dbo].[Test_Trigger_CollarFixes_Insert] 
-AS
-BEGIN
-	SET NOCOUNT ON
-	
-	DECLARE
-			@sa nvarchar(16) = 'sa',
-			@msg nvarchar(255) = null
-			
-	-- This test must be run as SA, since others cannot operate on table directly
-	-- This test the integrity of the tables underlying the Store Procedures available to users.
-	-- Also SA can check user tables
-
-	IF ORIGINAL_LOGIN() <> @sa
-	BEGIN
-		PRINT 'You must be the sa to run this test'
-		RETURN 1
-	END
-
-	-- Add the sa is a project investigator
-	IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @sa)
-	BEGIN
-		INSERT [dbo].[ProjectInvestigators] ([Login],[Name],[Email],[Phone]) VALUES (@sa,@sa,@sa,@sa)
-	END
-
-	-- Setup for test
-	-- Check initial conditions
-	SELECT 1 from CollarFixes
-	IF (@@ROWCOUNT <> 2)
-	BEGIN
-		PRINT 'Unable to initialize test'
-		RETURN 1
-	END
-	
-
-	-- Do tests
-	PRINT 'CollarFixes InsertTrigger Tests'
 	PRINT '  Start with xxx'
 	
 	-- Test1
@@ -2272,6 +2137,21 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[Settings](
+	[Username] [sysname] NOT NULL,
+	[Key] [nvarchar](30) NOT NULL,
+	[Value] [nvarchar](500) NULL,
+ CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
+(
+	[Username] ASC,
+	[Key] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[LookupQueryLayerServers](
 	[Location] [nvarchar](128) NOT NULL,
 	[Connection] [nvarchar](255) NOT NULL,
@@ -2433,6 +2313,108 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE FUNCTION [dbo].[NextAnimalId] 
+(
+	@ProjectId VARCHAR(32)   = NULL 
+)
+RETURNS VARCHAR(16)
+AS
+BEGIN
+	-- Check that project exists
+	IF NOT EXISTS( SELECT 1 FROM Projects WHERE ProjectId = @ProjectId)
+	BEGIN
+			-- You can't raise errors in a function, so you can either do an illegal operation to
+			-- stop the process, or in may case I will just return a safe result
+			RETURN NULL
+	END
+	
+	DECLARE @Year CHAR(2)
+	DECLARE @Count int
+	DECLARE @Id VARCHAR(16)
+
+	--Get the prefix for the current year (i.e. 2012 -> '12')
+	SELECT @Year  = SUBSTRING(CONVERT(CHAR(4),YEAR(GETDATE())),3,2)
+	SELECT @Count =	convert(varchar(10),(max(id) + 1))
+	  from (select case WHEN ISNUMERIC(SUBSTRING(AnimalId, 3, 9)) = 1
+	                    then convert(int,SUBSTRING(AnimalId, 3, 9))
+	                    ELSE 0 END as id
+	          from Animals
+	         where ProjectId = @ProjectId AND AnimalId LIKE @Year+'%') as t
+	if (@Count < 100)
+		SELECT @Id = @Year + REPLACE(STR(@Count, 2, 0), ' ', '0')
+	else
+		SELECT @Id = @Year + REPLACE(STR(@Count, 6, 0), ' ', '')
+	If @Id is null
+		SET @Id = @Year + '01'
+	RETURN @id
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AnimalsNotCurrentlyCollared]
+AS
+SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
+                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
+FROM         dbo.Animals INNER JOIN
+                      dbo.CollarDeployments ON dbo.Animals.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Animals.AnimalId = dbo.CollarDeployments.AnimalId INNER JOIN
+                      dbo.Projects ON dbo.Animals.ProjectId = dbo.Projects.ProjectId LEFT OUTER JOIN
+                      dbo.CurrentDeployments ON dbo.CollarDeployments.ProjectId = dbo.CurrentDeployments.ProjectId AND 
+                      dbo.CollarDeployments.AnimalId = dbo.CurrentDeployments.AnimalId AND 
+                      dbo.CollarDeployments.CollarManufacturer = dbo.CurrentDeployments.CollarManufacturer AND 
+                      dbo.CollarDeployments.CollarId = dbo.CurrentDeployments.CollarId
+WHERE     (dbo.CurrentDeployments.ProjectId IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AnimalsNeverCollared]
+AS
+SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
+                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
+FROM         dbo.Projects INNER JOIN
+                      dbo.Animals ON dbo.Projects.ProjectId = dbo.Animals.ProjectId LEFT OUTER JOIN
+                      dbo.CollarDeployments ON dbo.Animals.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Animals.AnimalId = dbo.CollarDeployments.AnimalId
+WHERE     (dbo.CollarDeployments.ProjectId IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AnimalsCurrentlyCollared]
+AS
+SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
+                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
+FROM         dbo.CollarDeployments INNER JOIN
+                      dbo.Animals ON dbo.CollarDeployments.ProjectId = dbo.Animals.ProjectId AND dbo.CollarDeployments.AnimalId = dbo.Animals.AnimalId INNER JOIN
+                      dbo.Projects ON dbo.Animals.ProjectId = dbo.Projects.ProjectId
+WHERE     (dbo.CollarDeployments.DeploymentDate < GETDATE()) AND (dbo.CollarDeployments.RetrievalDate > GETDATE() OR
+                      dbo.CollarDeployments.RetrievalDate IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AnimalFixesByFile]
+AS
+SELECT     dbo.CollarFixes.FileId, dbo.LookupCollarManufacturers.Name AS Manufacturer, dbo.CollarFixes.CollarId, dbo.Projects.ProjectName AS Project, 
+                      dbo.CollarDeployments.AnimalId, MIN(dbo.CollarFixes.FixDate) AS [First Fix], MAX(dbo.CollarFixes.FixDate) AS [Last Fix], COUNT(dbo.CollarFixes.FixDate) 
+                      AS [Number of Fixes]
+FROM         dbo.CollarFixes INNER JOIN
+                      dbo.CollarDeployments ON dbo.CollarFixes.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
+                      dbo.CollarFixes.CollarId = dbo.CollarDeployments.CollarId AND dbo.CollarFixes.FixDate > dbo.CollarDeployments.DeploymentDate AND 
+                      (dbo.CollarFixes.FixDate < dbo.CollarDeployments.RetrievalDate OR
+                      dbo.CollarDeployments.RetrievalDate IS NULL) INNER JOIN
+                      dbo.LookupCollarManufacturers ON dbo.CollarFixes.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer LEFT OUTER JOIN
+                      dbo.Projects ON dbo.CollarDeployments.ProjectId = dbo.Projects.ProjectId
+GROUP BY dbo.Projects.ProjectName, dbo.CollarDeployments.AnimalId, dbo.CollarFixes.FileId, dbo.LookupCollarManufacturers.Name, dbo.CollarFixes.CollarId
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: April 11, 2012
@@ -2534,212 +2516,6 @@ BEGIN
 	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
 		 VALUES (@Login, @Name, @Email, @Phone);
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[NextAnimalId] 
-(
-	@ProjectId VARCHAR(32)   = NULL 
-)
-RETURNS VARCHAR(16)
-AS
-BEGIN
-	-- Check that project exists
-	IF NOT EXISTS( SELECT 1 FROM Projects WHERE ProjectId = @ProjectId)
-	BEGIN
-			-- You can't raise errors in a function, so you can either do an illegal operation to
-			-- stop the process, or in may case I will just return a safe result
-			RETURN NULL
-	END
-	
-	DECLARE @Year CHAR(2)
-	DECLARE @Count int
-	DECLARE @Id VARCHAR(16)
-
-	--Get the prefix for the current year (i.e. 2012 -> '12')
-	SELECT @Year  = SUBSTRING(CONVERT(CHAR(4),YEAR(GETDATE())),3,2)
-	SELECT @Count =	convert(varchar(10),(max(id) + 1))
-	  from (select case WHEN ISNUMERIC(SUBSTRING(AnimalId, 3, 9)) = 1
-	                    then convert(int,SUBSTRING(AnimalId, 3, 9))
-	                    ELSE 0 END as id
-	          from Animals
-	         where ProjectId = @ProjectId AND AnimalId LIKE @Year+'%') as t
-	if (@Count < 100)
-		SELECT @Id = @Year + REPLACE(STR(@Count, 2, 0), ' ', '0')
-	else
-		SELECT @Id = @Year + REPLACE(STR(@Count, 6, 0), ' ', '')
-	If @Id is null
-		SET @Id = @Year + '01'
-	RETURN @id
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AnimalsNotCurrentlyCollared]
-AS
-SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
-                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
-FROM         dbo.Animals INNER JOIN
-                      dbo.CollarDeployments ON dbo.Animals.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Animals.AnimalId = dbo.CollarDeployments.AnimalId INNER JOIN
-                      dbo.Projects ON dbo.Animals.ProjectId = dbo.Projects.ProjectId LEFT OUTER JOIN
-                      dbo.CurrentDeployments ON dbo.CollarDeployments.ProjectId = dbo.CurrentDeployments.ProjectId AND 
-                      dbo.CollarDeployments.AnimalId = dbo.CurrentDeployments.AnimalId AND 
-                      dbo.CollarDeployments.CollarManufacturer = dbo.CurrentDeployments.CollarManufacturer AND 
-                      dbo.CollarDeployments.CollarId = dbo.CurrentDeployments.CollarId
-WHERE     (dbo.CurrentDeployments.ProjectId IS NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AnimalsNeverCollared]
-AS
-SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
-                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
-FROM         dbo.Projects INNER JOIN
-                      dbo.Animals ON dbo.Projects.ProjectId = dbo.Animals.ProjectId LEFT OUTER JOIN
-                      dbo.CollarDeployments ON dbo.Animals.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Animals.AnimalId = dbo.CollarDeployments.AnimalId
-WHERE     (dbo.CollarDeployments.ProjectId IS NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AnimalsCurrentlyCollared]
-AS
-SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
-                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
-FROM         dbo.CollarDeployments INNER JOIN
-                      dbo.Animals ON dbo.CollarDeployments.ProjectId = dbo.Animals.ProjectId AND dbo.CollarDeployments.AnimalId = dbo.Animals.AnimalId INNER JOIN
-                      dbo.Projects ON dbo.Animals.ProjectId = dbo.Projects.ProjectId
-WHERE     (dbo.CollarDeployments.DeploymentDate < GETDATE()) AND (dbo.CollarDeployments.RetrievalDate > GETDATE() OR
-                      dbo.CollarDeployments.RetrievalDate IS NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AnimalFixesByFile]
-AS
-SELECT     dbo.CollarFixes.FileId, dbo.LookupCollarManufacturers.Name AS Manufacturer, dbo.CollarFixes.CollarId, dbo.Projects.ProjectName AS Project, 
-                      dbo.CollarDeployments.AnimalId, MIN(dbo.CollarFixes.FixDate) AS [First Fix], MAX(dbo.CollarFixes.FixDate) AS [Last Fix], COUNT(dbo.CollarFixes.FixDate) 
-                      AS [Number of Fixes]
-FROM         dbo.CollarFixes INNER JOIN
-                      dbo.CollarDeployments ON dbo.CollarFixes.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
-                      dbo.CollarFixes.CollarId = dbo.CollarDeployments.CollarId AND dbo.CollarFixes.FixDate > dbo.CollarDeployments.DeploymentDate AND 
-                      (dbo.CollarFixes.FixDate < dbo.CollarDeployments.RetrievalDate OR
-                      dbo.CollarDeployments.RetrievalDate IS NULL) INNER JOIN
-                      dbo.LookupCollarManufacturers ON dbo.CollarFixes.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer LEFT OUTER JOIN
-                      dbo.Projects ON dbo.CollarDeployments.ProjectId = dbo.Projects.ProjectId
-GROUP BY dbo.Projects.ProjectName, dbo.CollarDeployments.AnimalId, dbo.CollarFixes.FileId, dbo.LookupCollarManufacturers.Name, dbo.CollarFixes.CollarId
-GO
-CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[AcquisitionTime] [nvarchar](50) NULL,
-	[AcquisitionStartTime] [nvarchar](50) NULL,
-	[Ctn] [nvarchar](50) NULL,
-	[ArgosId] [nvarchar](50) NULL,
-	[ArgosLocationClass] [nvarchar](50) NULL,
-	[ArgosLatitude] [nvarchar](50) NULL,
-	[ArgosLongitude] [nvarchar](50) NULL,
-	[ArgosAltitude] [nvarchar](50) NULL,
-	[GpsFixTime] [nvarchar](50) NULL,
-	[GpsFixAttempt] [nvarchar](50) NULL,
-	[GpsLatitude] [nvarchar](50) NULL,
-	[GpsLongitude] [nvarchar](50) NULL,
-	[GpsUtmZone] [nvarchar](50) NULL,
-	[GpsUtmNorthing] [nvarchar](50) NULL,
-	[GpsUtmEasting] [nvarchar](50) NULL,
-	[GpsAltitude] [nvarchar](50) NULL,
-	[GpsSpeed] [nvarchar](50) NULL,
-	[GpsHeading] [nvarchar](50) NULL,
-	[GpsHorizontalError] [nvarchar](50) NULL,
-	[GpsPositionalDilution] [nvarchar](50) NULL,
-	[GpsHorizontalDilution] [nvarchar](50) NULL,
-	[GpsSatelliteBitmap] [nvarchar](50) NULL,
-	[GpsSatelliteCount] [nvarchar](50) NULL,
-	[GpsNavigationTime] [nvarchar](50) NULL,
-	[UnderwaterPercentage] [nvarchar](50) NULL,
-	[DiveCount] [nvarchar](50) NULL,
-	[AverageDiveDuration] [nvarchar](50) NULL,
-	[MaximumDiveDuration] [nvarchar](50) NULL,
-	[LayerPercentage] [nvarchar](50) NULL,
-	[MaximumDiveDepth] [nvarchar](50) NULL,
-	[DiveStartTime] [nvarchar](50) NULL,
-	[DiveDuration] [nvarchar](50) NULL,
-	[DiveDepth] [nvarchar](50) NULL,
-	[DiveProfile] [nvarchar](50) NULL,
-	[ActivityCount] [nvarchar](50) NULL,
-	[Temperature] [nvarchar](50) NULL,
-	[RemoteAnalog] [nvarchar](50) NULL,
-	[SatelliteUplink] [nvarchar](50) NULL,
-	[ReceiveTime] [nvarchar](50) NULL,
-	[SatelliteName] [nvarchar](50) NULL,
-	[RepetitionCount] [nvarchar](50) NULL,
-	[LowVoltage] [nvarchar](50) NULL,
-	[Mortality] [nvarchar](50) NULL,
-	[SaltwaterFailsafe] [nvarchar](50) NULL,
-	[HaulOut] [nvarchar](50) NULL,
-	[DigitalInput] [nvarchar](50) NULL,
-	[MotionDetected] [nvarchar](50) NULL,
-	[TrapTriggerTime] [nvarchar](50) NULL,
-	[ReleaseTime] [nvarchar](50) NULL,
-	[PredeploymentData] [nvarchar](50) NULL,
-	[Error] [nvarchar](250) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatC]
-GO
-CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[CollarID] [nvarchar](255) NULL,
-	[AnimalId] [nvarchar](255) NULL,
-	[Species] [nvarchar](255) NULL,
-	[Group] [nvarchar](255) NULL,
-	[Park] [nvarchar](255) NULL,
-	[FixDate] [nvarchar](255) NULL,
-	[FixTime] [nvarchar](255) NULL,
-	[FixMonth] [int] NULL,
-	[FixDay] [int] NULL,
-	[FixYear] [int] NULL,
-	[LatWGS84] [float] NULL,
-	[LonWGS84] [float] NULL,
-	[Temperature] [float] NULL,
-	[Other] [nvarchar](255) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatB]
-GO
-CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[Fix #] [nvarchar](50) NULL,
-	[Date] [nchar](10) NULL,
-	[Time] [nchar](8) NULL,
-	[Fix Status] [nvarchar](50) NULL,
-	[Status Text] [nvarchar](150) NULL,
-	[Velocity East(m s)] [nvarchar](50) NULL,
-	[Velocity North(m s)] [nvarchar](50) NULL,
-	[Velocity Up(m s)] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[Altitude(m)] [nvarchar](50) NULL,
-	[PDOP] [nvarchar](50) NULL,
-	[HDOP] [nvarchar](50) NULL,
-	[VDOP] [nvarchar](50) NULL,
-	[TDOP] [nvarchar](50) NULL,
-	[Temperature Sensor(deg )] [nvarchar](50) NULL,
-	[Activity Sensor] [nvarchar](50) NULL,
-	[Satellite Data] [nvarchar](150) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatA]
 GO
 SET ANSI_NULLS ON
 GO
@@ -2968,47 +2744,109 @@ BEGIN
 	
 END
 GO
-SET ANSI_NULLS ON
+CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[AcquisitionTime] [nvarchar](50) NULL,
+	[AcquisitionStartTime] [nvarchar](50) NULL,
+	[Ctn] [nvarchar](50) NULL,
+	[ArgosId] [nvarchar](50) NULL,
+	[ArgosLocationClass] [nvarchar](50) NULL,
+	[ArgosLatitude] [nvarchar](50) NULL,
+	[ArgosLongitude] [nvarchar](50) NULL,
+	[ArgosAltitude] [nvarchar](50) NULL,
+	[GpsFixTime] [nvarchar](50) NULL,
+	[GpsFixAttempt] [nvarchar](50) NULL,
+	[GpsLatitude] [nvarchar](50) NULL,
+	[GpsLongitude] [nvarchar](50) NULL,
+	[GpsUtmZone] [nvarchar](50) NULL,
+	[GpsUtmNorthing] [nvarchar](50) NULL,
+	[GpsUtmEasting] [nvarchar](50) NULL,
+	[GpsAltitude] [nvarchar](50) NULL,
+	[GpsSpeed] [nvarchar](50) NULL,
+	[GpsHeading] [nvarchar](50) NULL,
+	[GpsHorizontalError] [nvarchar](50) NULL,
+	[GpsPositionalDilution] [nvarchar](50) NULL,
+	[GpsHorizontalDilution] [nvarchar](50) NULL,
+	[GpsSatelliteBitmap] [nvarchar](50) NULL,
+	[GpsSatelliteCount] [nvarchar](50) NULL,
+	[GpsNavigationTime] [nvarchar](50) NULL,
+	[UnderwaterPercentage] [nvarchar](50) NULL,
+	[DiveCount] [nvarchar](50) NULL,
+	[AverageDiveDuration] [nvarchar](50) NULL,
+	[MaximumDiveDuration] [nvarchar](50) NULL,
+	[LayerPercentage] [nvarchar](50) NULL,
+	[MaximumDiveDepth] [nvarchar](50) NULL,
+	[DiveStartTime] [nvarchar](50) NULL,
+	[DiveDuration] [nvarchar](50) NULL,
+	[DiveDepth] [nvarchar](50) NULL,
+	[DiveProfile] [nvarchar](50) NULL,
+	[ActivityCount] [nvarchar](50) NULL,
+	[Temperature] [nvarchar](50) NULL,
+	[RemoteAnalog] [nvarchar](50) NULL,
+	[SatelliteUplink] [nvarchar](50) NULL,
+	[ReceiveTime] [nvarchar](50) NULL,
+	[SatelliteName] [nvarchar](50) NULL,
+	[RepetitionCount] [nvarchar](50) NULL,
+	[LowVoltage] [nvarchar](50) NULL,
+	[Mortality] [nvarchar](50) NULL,
+	[SaltwaterFailsafe] [nvarchar](50) NULL,
+	[HaulOut] [nvarchar](50) NULL,
+	[DigitalInput] [nvarchar](50) NULL,
+	[MotionDetected] [nvarchar](50) NULL,
+	[TrapTriggerTime] [nvarchar](50) NULL,
+	[ReleaseTime] [nvarchar](50) NULL,
+	[PredeploymentData] [nvarchar](50) NULL,
+	[Error] [nvarchar](250) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatC]
 GO
-SET QUOTED_IDENTIFIER ON
+CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[CollarID] [nvarchar](255) NULL,
+	[AnimalId] [nvarchar](255) NULL,
+	[Species] [nvarchar](255) NULL,
+	[Group] [nvarchar](255) NULL,
+	[Park] [nvarchar](255) NULL,
+	[FixDate] [nvarchar](255) NULL,
+	[FixTime] [nvarchar](255) NULL,
+	[FixMonth] [int] NULL,
+	[FixDay] [int] NULL,
+	[FixYear] [int] NULL,
+	[LatWGS84] [float] NULL,
+	[LonWGS84] [float] NULL,
+	[Temperature] [float] NULL,
+	[Other] [nvarchar](255) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatB]
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 28, 2012
--- Description:	Adds a new project to the database.
--- =============================================
-CREATE PROCEDURE [dbo].[Project_Insert] 
-	@ProjectId NVARCHAR(255)= NULL,
-	@ProjectName NVARCHAR(255) = NULL, 
-	@ProjectInvestigator sysname = NULL, 
-	@UnitCode NVARCHAR(255) = NULL, 
-	@Description NVARCHAR(4000) = NULL 
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-		
-	--default PI is the calling user
-	IF nullif(@ProjectInvestigator,'') IS NULL
-	BEGIN
-		SET @ProjectInvestigator = @Caller;
-	END
-
-	-- If the caller is not a PI then error and return
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a project';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-
-	INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
-		 VALUES (nullif(@ProjectId,''), nullif(@ProjectName,''), nullif(@ProjectInvestigator,''),
-		         nullif(@UnitCode,''), nullif(@Description,''))
-
-END
+CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[Fix #] [nvarchar](50) NULL,
+	[Date] [nchar](10) NULL,
+	[Time] [nchar](8) NULL,
+	[Fix Status] [nvarchar](50) NULL,
+	[Status Text] [nvarchar](150) NULL,
+	[Velocity East(m s)] [nvarchar](50) NULL,
+	[Velocity North(m s)] [nvarchar](50) NULL,
+	[Velocity Up(m s)] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[Altitude(m)] [nvarchar](50) NULL,
+	[PDOP] [nvarchar](50) NULL,
+	[HDOP] [nvarchar](50) NULL,
+	[VDOP] [nvarchar](50) NULL,
+	[TDOP] [nvarchar](50) NULL,
+	[Temperature Sensor(deg )] [nvarchar](50) NULL,
+	[Activity Sensor] [nvarchar](50) NULL,
+	[Satellite Data] [nvarchar](150) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatA]
 GO
 SET ANSI_NULLS ON
 GO
@@ -3056,6 +2894,48 @@ BEGIN
 		RAISERROR(@message2, 18, 0)
 		RETURN 1
 	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 28, 2012
+-- Description:	Adds a new project to the database.
+-- =============================================
+CREATE PROCEDURE [dbo].[Project_Insert] 
+	@ProjectId NVARCHAR(255)= NULL,
+	@ProjectName NVARCHAR(255) = NULL, 
+	@ProjectInvestigator sysname = NULL, 
+	@UnitCode NVARCHAR(255) = NULL, 
+	@Description NVARCHAR(4000) = NULL 
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+		
+	--default PI is the calling user
+	IF nullif(@ProjectInvestigator,'') IS NULL
+	BEGIN
+		SET @ProjectInvestigator = @Caller;
+	END
+
+	-- If the caller is not a PI then error and return
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a project';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+
+	INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
+		 VALUES (nullif(@ProjectId,''), nullif(@ProjectName,''), nullif(@ProjectInvestigator,''),
+		         nullif(@UnitCode,''), nullif(@Description,''))
+
 END
 GO
 SET ANSI_NULLS ON
@@ -3968,7 +3848,7 @@ BEGIN
 	BEGIN
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
 		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
-		        CONVERT(datetime2, I.[Date]+ ' ' + I.[Time]),
+		        CONVERT(datetime2, I.[Date]+ ' ' + ISNULL(I.[Time],'')),
 		        CONVERT(float, I.Latitude), CONVERT(float, I.Longitude) - 360.0
 		   FROM dbo.CollarDataTelonicsStoreOnBoard as I INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
@@ -4350,104 +4230,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- ===============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Updates the Status of a CollarFile
--- ===============================================
-CREATE PROCEDURE [dbo].[CollarFile_Update] 
-	@FileId INT  = NULL, 
-	@FileName NVARCHAR(255) = NULL,
-	@CollarId NVARCHAR(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get some information about the file to update
-	DECLARE @Status CHAR;
-	DECLARE @CollarManufacturer NVARCHAR(255);
-	DECLARE @OldFileName NVARCHAR(255);
-	DECLARE @OldCollarId NVARCHAR(255);
-	DECLARE @ProjectId NVARCHAR(255);
-	 SELECT @Status = [Status],
-		    @CollarManufacturer = [CollarManufacturer],
-		    @OldFileName = [FileName],
-		    @OldCollarId = [CollarId],
-		    @ProjectId = [Project]
-	   FROM [dbo].[CollarFiles]
-	  WHERE [FileId] = @FileId;
-
-	IF @Status IS NULL
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'Invalid parameter: (' + @FileId + ') was not found in the CollarFiles table';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
-	-- If OldStatus was found, then Project is guaranteed.
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor of the project ('+@ProjectId+') to update this file.';
-			RAISERROR(@message4, 18, 0)
-			RETURN 1
-		END
-	END
-	
-	-- Change the file name;  this should never fail.
-	IF @FileName IS NOT NULL AND @FileName <> @OldFileName
-	BEGIN
-		BEGIN TRY
-			UPDATE [dbo].[CollarFiles] SET [FileName] = @FileName WHERE [FileId] = @FileId; 
-		END TRY
-		BEGIN CATCH
-			EXEC [dbo].[Utility_RethrowError]
-			RETURN 1
-		END CATCH
-	END
-
-	
-	-- Can we update the CollarId?
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND @Status = 'A'
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Unable to change the collar of an active file.  Change the status and try again.';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-	-- If the collar was provided, make sure it is a valid collar
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND
-	   NOT EXISTS (SELECT 1 FROM [dbo].[Collars] WHERE [CollarManufacturer] = @CollarManufacturer
-												   AND [CollarId] = @CollarId)
-	BEGIN
-		DECLARE @message3 nvarchar(100) = 'Invalid parameter: CollarId (' + @CollarId + ') was not found in the Collars table';
-		RAISERROR(@message3, 18, 0)
-		RETURN 1
-	END
-
-	-- Update CollarId; This should never fail
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId
-	BEGIN
-		BEGIN TRY
-			UPDATE [dbo].[CollarFiles] SET [CollarId] = @CollarId WHERE [FileId] = @FileId; 
-		END TRY
-		BEGIN CATCH
-			EXEC [dbo].[Utility_RethrowError]
-			RETURN 1
-		END CATCH
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 27, 2012
@@ -4618,6 +4400,104 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- ===============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Updates the Status of a CollarFile
+-- ===============================================
+CREATE PROCEDURE [dbo].[CollarFile_Update] 
+	@FileId INT  = NULL, 
+	@FileName NVARCHAR(255) = NULL,
+	@CollarId NVARCHAR(255) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Get some information about the file to update
+	DECLARE @Status CHAR;
+	DECLARE @CollarManufacturer NVARCHAR(255);
+	DECLARE @OldFileName NVARCHAR(255);
+	DECLARE @OldCollarId NVARCHAR(255);
+	DECLARE @ProjectId NVARCHAR(255);
+	 SELECT @Status = [Status],
+		    @CollarManufacturer = [CollarManufacturer],
+		    @OldFileName = [FileName],
+		    @OldCollarId = [CollarId],
+		    @ProjectId = [Project]
+	   FROM [dbo].[CollarFiles]
+	  WHERE [FileId] = @FileId;
+
+	IF @Status IS NULL
+	BEGIN
+		DECLARE @message2 nvarchar(100) = 'Invalid parameter: (' + @FileId + ') was not found in the CollarFiles table';
+		RAISERROR(@message2, 18, 0)
+		RETURN 1
+	END
+	-- If OldStatus was found, then Project is guaranteed.
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be the PI or editor on the project
+	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
+		BEGIN
+			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor of the project ('+@ProjectId+') to update this file.';
+			RAISERROR(@message4, 18, 0)
+			RETURN 1
+		END
+	END
+	
+	-- Change the file name;  this should never fail.
+	IF @FileName IS NOT NULL AND @FileName <> @OldFileName
+	BEGIN
+		BEGIN TRY
+			UPDATE [dbo].[CollarFiles] SET [FileName] = @FileName WHERE [FileId] = @FileId; 
+		END TRY
+		BEGIN CATCH
+			EXEC [dbo].[Utility_RethrowError]
+			RETURN 1
+		END CATCH
+	END
+
+	
+	-- Can we update the CollarId?
+	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND @Status = 'A'
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Unable to change the collar of an active file.  Change the status and try again.';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+	
+	-- If the collar was provided, make sure it is a valid collar
+	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND
+	   NOT EXISTS (SELECT 1 FROM [dbo].[Collars] WHERE [CollarManufacturer] = @CollarManufacturer
+												   AND [CollarId] = @CollarId)
+	BEGIN
+		DECLARE @message3 nvarchar(100) = 'Invalid parameter: CollarId (' + @CollarId + ') was not found in the Collars table';
+		RAISERROR(@message3, 18, 0)
+		RETURN 1
+	END
+
+	-- Update CollarId; This should never fail
+	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId
+	BEGIN
+		BEGIN TRY
+			UPDATE [dbo].[CollarFiles] SET [CollarId] = @CollarId WHERE [FileId] = @FileId; 
+		END TRY
+		BEGIN CATCH
+			EXEC [dbo].[Utility_RethrowError]
+			RETURN 1
+		END CATCH
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
@@ -4649,6 +4529,1222 @@ BEGIN
 
 	DELETE FROM dbo.ProjectEditors WHERE [ProjectId] = @ProjectId
 	DELETE FROM dbo.Projects WHERE [ProjectId] = @ProjectId
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: June 13, 2012
+-- Description:	Test the CollarFixes UpdateTrigger
+-- =============================================
+CREATE PROCEDURE [dbo].[Test_Trigger_CollarFixes_Update] 
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	DECLARE
+			@sa nvarchar(16) = 'sa',
+			@project nvarchar(16) = 'p1__',
+			@animal nvarchar(16) = 'a1__',
+			@mfgr nvarchar(16) = 'Telonics',
+			@model nvarchar(16) = 'TelonicsGen4',
+			@collar nvarchar(16) = 'c1__',
+			@file nvarchar(16) = 'f1__',
+			@format nvarchar(16) = 'A', -- Store on board format
+			@test nvarchar(255) = null,
+			@msg nvarchar(255) = null,
+			@fileid int,
+			@fix1 bigint,
+			@fix2 bigint,
+			@fix3 bigint,
+			@fix4 bigint,
+			@fix_l bigint
+			
+	-- This test must be run as SA, since others cannot operate on table directly
+	-- This test the integrity of the tables underlying the Store Procedures available to users.
+	-- Also SA can check user tables
+
+	IF ORIGINAL_LOGIN() <> @sa
+	BEGIN
+		PRINT 'You must be the sa to run this test'
+		RETURN 1
+	END
+
+/*
+	-- Clean up mess if previous test failed; need to find and set the file id first
+	SET @fileid = 140
+	EXEC [dbo].[CollarFile_Delete] @fileid
+	DELETE CollarDeployments Where [ProjectId] = @project 
+	DELETE Collars where CollarManufacturer = @mfgr and CollarId = @collar
+	Delete Animals where ProjectId = @project -- SP checks if user is in role, which sa is not
+	EXEC [dbo].[Project_Delete] @project
+	return 1
+*/
+
+	--Check to make sure we are not going to overwrite any data
+	IF EXISTS (SELECT 1 from Projects Where [ProjectId] = @project)
+    OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	BEGIN
+		PRINT 'Aborting tests.  Existing data conflicts with test data.'
+		RETURN 1
+	END
+	
+	-- Add the sa is a project investigator
+	IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @sa)
+	BEGIN
+		INSERT [dbo].[ProjectInvestigators] ([Login],[Name],[Email],[Phone]) VALUES (@sa,@sa,@sa,@sa)
+	END
+
+
+	-- Setup for test
+	EXEC [dbo].[Project_Insert] @project, @project, @sa
+	EXEC [dbo].[Animal_Insert] @project, @animal
+	EXEC [dbo].[Collar_Insert] @mfgr, @collar, @model ,@sa
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-10 12:00'
+	-- do not use the [dbo].[CollarFile_Insert] because it calls 
+	-- [dbo].[CollarData_Insert] which tries to read the binary contents field to populate fixes
+	-- EXEC [dbo].[CollarFile_Insert] @file, @project, @mfgr, @collar,'A','I',NULL,@fileid
+	INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
+		 VALUES (@file, @project, @mfgr, @collar, @format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
+	SET @fileid = SCOPE_IDENTITY();
+
+	-- Check initial conditions
+	IF    NOT EXISTS (SELECT 1 from Animals Where [ProjectId] = @project AND [AnimalId] = @animal) 
+       OR NOT EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	   OR NOT EXISTS (SELECT 1 from CollarFiles Where [FileId] = @FileId)
+	   OR NOT EXISTS (SELECT 1 from CollarDeployments Where [ProjectId] = @project)
+	   OR     EXISTS (SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	   OR     EXISTS (SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal)
+	   OR     EXISTS (SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal)
+	BEGIN
+		PRINT 'Test data not initialized properly'
+		RETURN 1
+	END
+	
+
+	-- Do tests
+	PRINT 'CollarFixes UpdateTrigger Tests'
+	
+	-- Test1
+	-- Mortality is null and retrieval date is null
+	SET @test = '  Test1: (3 hide 2): '
+	--Action
+	Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @fileid
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
+		        (@fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
+		        (@fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available')
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	
+	SELECT @fix1 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 1
+	SELECT @fix2 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 2
+	SELECT @fix3 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 3
+
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 3
+		SET @msg = @msg + ' Not 3 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+		
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix2 AND HiddenBy = @fix3)
+		SET @msg = @msg + ' fix 2 not hidden by fix 3'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+		
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix3 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	
+	
+	-- Test1a
+	SET @test = '  Test1a: Unhide 2 (2 hide 3): '
+	--Action
+	EXEC [dbo].[CollarFixes_UpdateUnhideFix] @fix2
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 3
+		SET @msg = @msg + ' Not 3 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 3 not hidden by fix 2'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix2 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	
+	
+	
+	
+	
+	
+	-- Test2
+	-- Mortality is null and retrieval date is null
+	SET @test = '  Test2: (4 hide 3 hide 2): '
+	--Action
+	Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @fileid
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
+		        (@fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
+		        (@fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
+		        (@fileid, 4, '2012-05-12', '60.4', '-154.4', 'Fix Available')
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	
+	SELECT @fix1 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 1
+	SELECT @fix2 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 2
+	SELECT @fix3 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 3
+	SELECT @fix4 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 4
+
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 4
+		SET @msg = @msg + ' Not 4 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix2 AND HiddenBy = @fix3)
+		SET @msg = @msg + ' fix 2 not hidden by fix 3'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+		
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix4 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	
+	
+	-- Test2a
+	SET @test = '  Test2a: Unhide 2 (2 hide 4 hide 3): '
+	--Action
+	EXEC [dbo].[CollarFixes_UpdateUnhideFix] @fix2
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 4
+		SET @msg = @msg + ' Not 4 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix4 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 4 not hidden by fix 2'
+	
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix2 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	
+	
+	-- Test2b
+	SET @test = '  Test2b: Unhide 4 (4 hide 3 hide 2): '
+	--Action
+	EXEC [dbo].[CollarFixes_UpdateUnhideFix] @fix4
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 4
+		SET @msg = @msg + ' Not 4 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix2 AND HiddenBy = @fix3)
+		SET @msg = @msg + ' fix 2 not hidden by fix 3'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+		
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix4 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	
+	
+	
+	
+	
+	
+	-- Test3
+	-- Mortality is not null (after hidden)  and retrieval date is null
+	SET @test = '  Test3: Mort after hidden (4 hide 3 hide 2): '
+	--Action
+	EXEC [dbo].[Animal_Update] @project, @animal, null, null, '2012-05-12 12:00'
+	Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @fileid
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
+		        (@fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
+		        (@fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
+		        (@fileid, 4, '2012-05-12', '60.4', '-154.4', 'Fix Available'),
+		        (@fileid, 5, '2012-05-13', '60.5', '-154.5', 'Fix Available')
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	
+	SELECT @fix1 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 1
+	SELECT @fix2 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 2
+	SELECT @fix3 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 3
+	SELECT @fix4 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 4
+
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix2 AND HiddenBy = @fix3)
+		SET @msg = @msg + ' fix 2 not hidden by fix 3'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+		
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix4 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	
+	
+	-- Test3a
+	SET @test = '  Test3a: Mort after hidden; Unhide 2 (2 hide 4 hide 3): '
+	--Action
+	EXEC [dbo].[CollarFixes_UpdateUnhideFix] @fix2
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix4 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 4 not hidden by fix 2'
+	
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix2 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+
+
+
+
+
+
+	-- Test4
+	-- Mortality is not null and retrieval date is null
+	SET @test = '  Test4: Mort before hidden (4 hide 3 hide 2): '
+	--Action
+	EXEC [dbo].[Animal_Update] @project, @animal, null, null, '2012-05-11 12:00'
+	Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @fileid
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
+		        (@fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
+		        (@fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
+		        (@fileid, 4, '2012-05-12', '60.4', '-154.4', 'Fix Available'),
+		        (@fileid, 5, '2012-05-13', '60.5', '-154.5', 'Fix Available')
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	
+	SELECT @fix1 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 1
+	SELECT @fix2 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 2
+	SELECT @fix3 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 3
+	SELECT @fix4 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 4
+
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 0
+		SET @msg = @msg + ' Not 0 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix2 AND HiddenBy = @fix3)
+		SET @msg = @msg + ' fix 2 not hidden by fix 3'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+		
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	
+	
+	-- Test4a
+	SET @test = '  Test4a: Mort before hidden; Unhide 2 (2 hide 4 hide 3): '
+	--Action
+	EXEC [dbo].[CollarFixes_UpdateUnhideFix] @fix2
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 0
+		SET @msg = @msg + ' Not 0 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix4 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 4 not hidden by fix 2'
+	
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	EXEC [dbo].[Animal_Update] @project, @animal, null, null, null
+	
+	
+	
+	
+	
+	
+	-- Test5
+	-- Mortality is null and retrieval date is not null (after hidden)
+	SET @test = '  Test5: Retrieve after hidden (4 hide 3 hide 2): '
+	--Action
+	EXEC [dbo].[CollarDeployment_UpdateRetrievalDate] @project, @animal, @mfgr, @collar, '2012-05-10 12:00', '2012-05-12 12:00'
+	Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @fileid
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
+		        (@fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
+		        (@fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
+		        (@fileid, 4, '2012-05-12', '60.4', '-154.4', 'Fix Available'),
+		        (@fileid, 5, '2012-05-13', '60.5', '-154.5', 'Fix Available')
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	
+	SELECT @fix1 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 1
+	SELECT @fix2 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 2
+	SELECT @fix3 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 3
+	SELECT @fix4 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 4
+
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix2 AND HiddenBy = @fix3)
+		SET @msg = @msg + ' fix 2 not hidden by fix 3'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+		
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix4 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	
+	
+	-- Test5a
+	SET @test = '  Test5a: Retrieve after hidden; Unhide 2 (2 hide 4 hide 3): '
+	--Action
+	EXEC [dbo].[CollarFixes_UpdateUnhideFix] @fix2
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix4 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 4 not hidden by fix 2'
+	
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix2 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+
+
+
+
+
+
+	-- Test6
+	-- Mortality is null and retrieval date is not null (before hidden)
+	SET @test = '  Test6: Retrieve before hidden (4 hide 3 hide 2): '
+	--Action
+	EXEC [dbo].[CollarDeployment_UpdateRetrievalDate] @project, @animal, @mfgr, @collar, '2012-05-10 12:00', '2012-05-11 12:00'
+	Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @fileid
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
+		        (@fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
+		        (@fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
+		        (@fileid, 4, '2012-05-12', '60.4', '-154.4', 'Fix Available'),
+		        (@fileid, 5, '2012-05-13', '60.5', '-154.5', 'Fix Available')
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	
+	SELECT @fix1 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 1
+	SELECT @fix2 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 2
+	SELECT @fix3 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 3
+	SELECT @fix4 = FixId FROM CollarFixes Where [FileId] = @fileid AND [LineNumber] = 4
+
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 0
+		SET @msg = @msg + ' Not 0 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix2 AND HiddenBy = @fix3)
+		SET @msg = @msg + ' fix 2 not hidden by fix 3'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+		
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	
+	
+	-- Test6a
+	SET @test = '  Test6a: Retrieve before hidden; Unhide 2 (2 hide 4 hide 3): '
+	--Action
+	EXEC [dbo].[CollarFixes_UpdateUnhideFix] @fix2
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 0
+		SET @msg = @msg + ' Not 0 movements'
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix4 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 4 not hidden by fix 2'
+	
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix3 AND HiddenBy = @fix4)
+		SET @msg = @msg + ' fix 3 not hidden by fix 4'
+	
+	SELECT @fix_l = MIN([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' First location is based on wrong fix'
+
+	SELECT @fix_l = MAX([FixId]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @fix1 <> @fix_l
+		SET @msg = @msg + ' Last location is based on wrong fix'
+	
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	EXEC [dbo].[CollarDeployment_UpdateRetrievalDate] @project, @animal, @mfgr, @collar, '2012-05-10 12:00', null
+
+
+
+		
+	-- Clean up
+	PRINT '  Cleaning up'
+	EXEC [dbo].[CollarFile_Delete] @fileid
+	DELETE CollarDeployments Where [ProjectId] = @project 
+	EXEC [dbo].[Collar_Delete] @mfgr, @collar
+	Delete Animals where ProjectId = @project -- SP checks if user is in role, which sa is not
+	EXEC [dbo].[Project_Delete] @project
+
+	-- Check that cleanup worked
+	IF    EXISTS (SELECT 1 from Animals Where [ProjectId] = @project AND [AnimalId] = @animal) 
+       OR EXISTS (SELECT 1 from Projects Where [ProjectId] = @project)
+       OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	   OR EXISTS (SELECT 1 from CollarDeployments Where [ProjectId] = @project)
+	   OR EXISTS (SELECT 1 from CollarFiles Where [FileId] = @fileid)
+	   OR EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] = @fileid)
+	   OR EXISTS (SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	   OR EXISTS (SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal)
+	   OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal)
+	BEGIN
+		PRINT 'Test data not completely removed'
+		RETURN 1
+	END
+
+	-- Remove the sa from project investigator
+	DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @sa
+	
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: June 13, 2012
+-- Description:	Test the CollarFixes InsertTrigger
+-- =============================================
+CREATE PROCEDURE [dbo].[Test_Trigger_CollarFixes_Insert] 
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	DECLARE
+			@sa nvarchar(16) = 'sa',
+			@project nvarchar(16) = 'p1__',
+			@animal nvarchar(16) = 'a1__',
+			@mfgr nvarchar(16) = 'Telonics',
+			@model nvarchar(16) = 'TelonicsGen4',
+			@collar nvarchar(16) = 'c1__',
+			@file nvarchar(16) = 'f1__',
+			@format nvarchar(16) = 'A', -- Store on board format
+			@test nvarchar(255) = null,
+			@msg nvarchar(255) = null,
+			@fileid int,
+			@date datetime2,
+			@fix1 bigint,
+			@fix2 bigint
+			
+	-- This test must be run as SA, since others cannot operate on table directly
+	-- This test the integrity of the tables underlying the Store Procedures available to users.
+	-- Also SA can check user tables
+
+	IF ORIGINAL_LOGIN() <> @sa
+	BEGIN
+		PRINT 'You must be the sa to run this test'
+		RETURN 1
+	END
+
+/*
+	-- Clean up mess if previous test failed; need to find and set the file id first
+	SET @fileid = 133
+	EXEC [dbo].[CollarFile_Delete] @fileid
+	DELETE CollarDeployments Where [ProjectId] = @project 
+	DELETE Collars where CollarManufacturer = @mfgr and CollarId = @collar
+	Delete Animals where ProjectId = @project -- SP checks if user is in role, which sa is not
+	EXEC [dbo].[Project_Delete] @project
+	return 1
+*/
+
+	--Check to make sure we are not going to overwrite any data
+	IF EXISTS (SELECT 1 from Projects Where [ProjectId] = @project)
+    OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	BEGIN
+		PRINT 'Aborting tests.  Existing data conflicts with test data.'
+		RETURN 1
+	END
+	
+	-- Add the sa is a project investigator
+	IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @sa)
+	BEGIN
+		INSERT [dbo].[ProjectInvestigators] ([Login],[Name],[Email],[Phone]) VALUES (@sa,@sa,@sa,@sa)
+	END
+
+
+	-- Setup for test
+	EXEC [dbo].[Project_Insert] @project, @project, @sa
+	EXEC [dbo].[Animal_Insert] @project, @animal
+	EXEC [dbo].[Collar_Insert] @mfgr, @collar, @model ,@sa
+	-- do not use the [dbo].[CollarFile_Insert] because it calls 
+	-- [dbo].[CollarData_Insert] which tries to read the binary contents field to populate fixes
+	-- EXEC [dbo].[CollarFile_Insert] @file, @project, @mfgr, @collar,'A','I',NULL,@fileid
+	INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
+		 VALUES (@file, @project, @mfgr, @collar, @format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
+	SET @fileid = SCOPE_IDENTITY();
+	-- Load multiple Fixes Manually into the collar data table
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
+		        (@fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
+		        (@fileid, 3, '2012-05-13', '60.3', '-154.3', 'Fix Available'),
+		        (@fileid, 4, '2012-05-14', '60.4', '-154.4', 'Fix Available'),
+		        (@fileid, 5, '2012-05-15', '60.5', '-154.5', 'Fix Available'),
+		        (@fileid, 6, '2012-05-16', '60.6', '-154.6', 'Fix Available');
+
+	-- Check initial conditions
+	IF    NOT EXISTS (SELECT 1 from Animals Where [ProjectId] = @project AND [AnimalId] = @animal) 
+       OR NOT EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	   OR NOT EXISTS (SELECT 1 from CollarFiles Where [FileId] = @FileId)
+	   OR NOT EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] = @fileid)
+	   OR     EXISTS (SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	   OR     EXISTS (SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal)
+	   OR     EXISTS (SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal)
+	BEGIN
+		PRINT 'Test data not initialized properly'
+		RETURN 1
+	END
+	
+
+	-- Do tests
+	PRINT 'CollarFixes InsertTrigger Tests'
+		
+	-- Test1
+	SET @test = '  Test1: Add Fixes, no deployment: '
+	--Action
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 0
+		SET @msg = @msg + ' Not 0 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 0
+		SET @msg = @msg + ' Not 0 movements'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	
+	-- Test2
+	SET @test = '  Test2: 6 Fixes, Deployment starts after first fix: '
+	--Action
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-11 12:00'
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 4
+		SET @msg = @msg + ' Not 4 movements'
+	SELECT @date = MIN([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-12'
+		SET @msg = @msg + ' First location has wrong date'
+	SELECT @date = MAX([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-16'
+		SET @msg = @msg + ' Last location has wrong date'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-11 12:00'
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	
+	
+	-- Test3
+	SET @test = '  Test3: 6 Fixes, Deployment starts after first fix end before last fix: '
+	--Action
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-11 12:00', '2012-05-15 12:00'
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 4
+		SET @msg = @msg + ' Not 4 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 3
+		SET @msg = @msg + ' Not 3 movements'
+	SELECT @date = MIN([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-12'
+		SET @msg = @msg + ' First location has wrong date'
+	SELECT @date = MAX([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-15'
+		SET @msg = @msg + ' Last location has wrong date'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-11 12:00'
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	
+	
+	-- Test4
+	SET @test = '  Test4: 6 Fixes, Deployment after last fix: '
+	--Action
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-20 12:00', '2012-05-25 12:00'
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 0
+		SET @msg = @msg + ' Not 0 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 0
+		SET @msg = @msg + ' Not 0 movements'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-20 12:00'
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	
+	
+	-- Test5
+	SET @test = '  Test5: 2 Deployment before and after middle fixes: '
+	--Action
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-05 12:00', '2012-05-12 12:00'
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-14 12:00', '2012-05-25 12:00'
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 4
+		SET @msg = @msg + ' Not 4 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	-- TODO, debateable whether there should be 2 or 3 movements.  With 3 the deployments are linked
+	IF @@ROWCOUNT <> 3
+		SET @msg = @msg + ' Not 3 movements'
+	SELECT @date = MIN([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-11'
+		SET @msg = @msg + ' First location has wrong date'
+	SELECT @date = MAX([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-16'
+		SET @msg = @msg + ' Last location has wrong date'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-05 12:00'
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-14 12:00'
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	
+	
+	-- Test6
+	SET @test = '  Test6: Mortality before Deployment ends: '
+	--Action
+	EXEC [dbo].[Animal_Update] @project, @animal,null,null,'2012-05-15 12:00'
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-11 12:00'
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 4
+		SET @msg = @msg + ' Not 4 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 3
+		SET @msg = @msg + ' Not 3 movements'
+	SELECT @date = MIN([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-12'
+		SET @msg = @msg + ' First location has wrong date'
+	SELECT @date = MAX([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-15'
+		SET @msg = @msg + ' Last location has wrong date'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-11 12:00'
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	EXEC [dbo].[Animal_Update] @project, @animal,null,null,null
+	
+	
+	-- Test7
+	SET @test = '  Test7: Mortality after deployment ends: '
+	--Action
+	EXEC [dbo].[Animal_Update] @project, @animal,null,null,'2012-05-15 12:00'
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-11 12:00', '2012-05-14 12:00'
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 3
+		SET @msg = @msg + ' Not 3 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 movements'
+	SELECT @date = MIN([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-12'
+		SET @msg = @msg + ' First location has wrong date'
+	SELECT @date = MAX([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-14'
+		SET @msg = @msg + ' Last location has wrong date'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-11 12:00'
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	EXEC [dbo].[Animal_Update] @project, @animal,null,null,null
+
+	
+	-- Test8
+	SET @test = '  Test8: Hide first with new fix: '
+	--Action
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 7, '2012-05-11', '60.7', '-154.7', 'Fix Available')
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-10 12:00'
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 7
+		SET @msg = @msg + ' Not 7 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 5
+		SET @msg = @msg + ' Not 5 movements'
+	SELECT @date = MIN([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-11'
+		SET @msg = @msg + ' First location has wrong date'
+	SELECT @date = MAX([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-16'
+		SET @msg = @msg + ' Last location has wrong date'
+	SELECT @fix1 = MIN([FixId]) FROM CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	SELECT @fix2 = MAX([FixId]) FROM CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix1 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' last fix is not hiding first fix'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-10 12:00'
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+
+	
+	-- Test9
+	SET @test = '  Test9: Hide 1w/2; 2w/4; 3w/5 5w/6: '
+	--Action
+	Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @fileid
+	INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+		 VALUES (@fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
+		        (@fileid, 2, '2012-05-11', '60.2', '-154.2', 'Fix Available'),
+		        (@fileid, 3, '2012-05-13', '60.3', '-154.3', 'Fix Available'),
+		        (@fileid, 4, '2012-05-11', '60.4', '-154.4', 'Fix Available'),
+		        (@fileid, 5, '2012-05-13', '60.5', '-154.5', 'Fix Available'),
+		        (@fileid, 6, '2012-05-13', '60.6', '-154.6', 'Fix Available');
+	EXEC [dbo].[CollarDeployment_Insert] @project, @animal, @mfgr, @collar, '2012-05-10 12:00'
+	EXEC [dbo].[CollarFixes_Insert] @fileid, @format
+	--Test
+	SET @msg = ''
+	SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	IF @@ROWCOUNT <> 6
+		SET @msg = @msg + ' Not 6 fixes'
+	SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 2
+		SET @msg = @msg + ' Not 2 locations'
+	SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @@ROWCOUNT <> 1
+		SET @msg = @msg + ' Not 1 movements'
+	SELECT @date = MIN([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-11'
+		SET @msg = @msg + ' First location has wrong date'
+	SELECT @date = MAX([FixDate]) FROM Locations Where [ProjectId] = @project AND [AnimalId] = @animal
+	IF @date <> '2012-05-13'
+		SET @msg = @msg + ' Last location has wrong date'
+	
+	SELECT @fix1 = MIN([FixId]) FROM CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar
+	SET @fix2 = @fix1 + 1
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix1 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 2 not hiding fix 1'
+	
+	SET @fix1 = @fix1 + 1
+	SET @fix2 = @fix1 + 2
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix1 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 4 not hiding fix 2'
+	
+	SET @fix1 = @fix1 + 1
+	SET @fix2 = @fix1 + 2
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix1 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 5 not hiding fix 3'
+	
+	SET @fix1 = @fix1 + 2
+	SET @fix2 = @fix1 + 1
+	IF NOT EXISTS (SELECT 1 FROM CollarFixes where FixId = @fix1 AND HiddenBy = @fix2)
+		SET @msg = @msg + ' fix 6 not hiding fix 5'
+	IF @msg = ''
+		SET @msg = 'Passed'
+	ELSE
+		SET @msg = 'Failed' + @msg
+	--Report
+	SET @msg = @test + @msg
+	PRINT @msg
+	--Reset
+	EXEC [dbo].[CollarDeployment_Delete] @project, @animal, @mfgr, @collar, '2012-05-10 12:00'
+	EXEC [dbo].[CollarFixes_Delete] @fileid
+	
+	
+		
+	-- Clean up
+	PRINT '  Cleaning up'
+	EXEC [dbo].[CollarFile_Delete] @fileid
+	DELETE CollarDeployments Where [ProjectId] = @project 
+	EXEC [dbo].[Collar_Delete] @mfgr, @collar
+	Delete Animals where ProjectId = @project -- SP checks if user is in role, which sa is not
+	EXEC [dbo].[Project_Delete] @project
+
+	-- Check that cleanup worked
+	IF    EXISTS (SELECT 1 from Animals Where [ProjectId] = @project AND [AnimalId] = @animal) 
+       OR EXISTS (SELECT 1 from Projects Where [ProjectId] = @project)
+       OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	   OR EXISTS (SELECT 1 from CollarDeployments Where [ProjectId] = @project)
+	   OR EXISTS (SELECT 1 from CollarFiles Where [FileId] = @fileid)
+	   OR EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] = @fileid)
+	   OR EXISTS (SELECT 1 from CollarFixes Where [FileId] = @fileid AND [CollarManufacturer] = @mfgr AND [CollarId] = @collar)
+	   OR EXISTS (SELECT 1 from Locations Where [ProjectId] = @project AND [AnimalId] = @animal)
+	   OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @project AND [AnimalId] = @animal)
+	BEGIN
+		PRINT 'Test data not completely removed'
+		RETURN 1
+	END
+
+	-- Remove the sa from project investigator
+	DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @sa
+	
 END
 GO
 SET ANSI_NULLS ON
