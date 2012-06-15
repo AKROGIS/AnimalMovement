@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//FIXME - DATABASE - Collar deployment date checking is not working (it is possible to deploy a collar simultaneously)
+//TODO - DATABASE - Move collar deployment date checking from Stored procedure to trigger to protect against SA and to allow bulk uploading.
 //TODO - DATABASE - Add unit testing.
 //TODO - DATABASE - Add table for Telonics tfp files, each records owned by a PI.
 //TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data
