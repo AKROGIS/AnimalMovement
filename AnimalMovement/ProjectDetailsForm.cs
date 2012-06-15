@@ -128,6 +128,7 @@ namespace AnimalMovement
                 if (sortedList[i].Animal.MortalityDate != null)
                     AnimalsListBox.SetItemColor(i, Color.DarkGray);
             }
+            AnimalListLabel.Text = sortedList.Count < 5 ? "Animals" : String.Format("Animals ({0})", sortedList.Count);
         }
 
         private static string GetName(Animal animal)
@@ -160,6 +161,7 @@ namespace AnimalMovement
                 if (sortedList[i].File.Status == 'I')
                     FilesListBox.SetItemColor(i, Color.DarkGray);
             }
+            FilesListLabel.Text = sortedList.Count < 5 ? "Files" : String.Format("Files ({0})", sortedList.Count);
         }
 
         private bool CanDeleteAnimal(Animal animal)

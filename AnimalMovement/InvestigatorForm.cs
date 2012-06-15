@@ -80,7 +80,7 @@ namespace AnimalMovement
 
         private void LoadCollarList()
         {
-            CollarsListBox.DataSource = from collar in Database.Collars
+            var query = from collar in Database.Collars
                                         where collar.ProjectInvestigator == Investigator
                                         orderby collar.CollarManufacturer , collar.CollarId
                                         select new CollarListItem
@@ -89,12 +89,15 @@ namespace AnimalMovement
                                                        Name = BuildCollarText(collar),
                                                        CanDelete = CanDeleteCollar(collar)
                                                    };
+            var sortedList = query.ToList();
+            CollarsListBox.DataSource = sortedList;
             CollarsListBox.DisplayMember = "Name";
+            CollarsListLabel.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
         }
 
         private void LoadProjectList()
         {
-            ProjectsListBox.DataSource = from project in Database.Projects
+            var query = from project in Database.Projects
                                          where project.ProjectInvestigator1 == Investigator
                                          select new ProjectListItem
                                                     {
@@ -102,7 +105,10 @@ namespace AnimalMovement
                                                         Name = project.ProjectName + " (" + project.ProjectId + ")",
                                                         CanDelete = !project.Animals.Any() && !project.CollarFiles.Any()
                                                     };
+            var sortedList = query.OrderBy(p => p.Name).ToList();
+            ProjectsListBox.DataSource = sortedList;
             ProjectsListBox.DisplayMember = "Name";
+            ProjectsListLabel.Text = sortedList.Count < 5 ? "Projects" : String.Format("Projects ({0})", sortedList.Count);
         }
 
         private bool CanDeleteCollar(Collar collar)

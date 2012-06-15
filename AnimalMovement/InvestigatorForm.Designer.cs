@@ -45,9 +45,9 @@
             this.DeleteCollarsButton = new System.Windows.Forms.Button();
             this.AddCollarButton = new System.Windows.Forms.Button();
             this.ProjectsListBox = new System.Windows.Forms.ListBox();
-            this.label6 = new System.Windows.Forms.Label();
+            this.ProjectsListLabel = new System.Windows.Forms.Label();
             this.CollarsListBox = new System.Windows.Forms.ListBox();
-            this.label7 = new System.Windows.Forms.Label();
+            this.CollarsListLabel = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -256,14 +256,14 @@
             this.ProjectsListBox.SelectedIndexChanged += new System.EventHandler(this.ProjectsListBox_SelectedIndexChanged);
             this.ProjectsListBox.DoubleClick += new System.EventHandler(this.InfoProjectButton_Click);
             // 
-            // label6
+            // ProjectsListLabel
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 8);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(45, 13);
-            this.label6.TabIndex = 36;
-            this.label6.Text = "Projects";
+            this.ProjectsListLabel.AutoSize = true;
+            this.ProjectsListLabel.Location = new System.Drawing.Point(3, 8);
+            this.ProjectsListLabel.Name = "ProjectsListLabel";
+            this.ProjectsListLabel.Size = new System.Drawing.Size(45, 13);
+            this.ProjectsListLabel.TabIndex = 36;
+            this.ProjectsListLabel.Text = "Projects";
             // 
             // CollarsListBox
             // 
@@ -275,19 +275,19 @@
             this.CollarsListBox.Location = new System.Drawing.Point(3, 24);
             this.CollarsListBox.Name = "CollarsListBox";
             this.CollarsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.CollarsListBox.Size = new System.Drawing.Size(229, 221);
+            this.CollarsListBox.Size = new System.Drawing.Size(231, 221);
             this.CollarsListBox.TabIndex = 1;
             this.CollarsListBox.SelectedIndexChanged += new System.EventHandler(this.CollarsListBox_SelectedIndexChanged);
             this.CollarsListBox.DoubleClick += new System.EventHandler(this.InfoCollarButton_Click);
             // 
-            // label7
+            // CollarsListLabel
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(3, 8);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(38, 13);
-            this.label7.TabIndex = 34;
-            this.label7.Text = "Collars";
+            this.CollarsListLabel.AutoSize = true;
+            this.CollarsListLabel.Location = new System.Drawing.Point(3, 8);
+            this.CollarsListLabel.Name = "CollarsListLabel";
+            this.CollarsListLabel.Size = new System.Drawing.Size(38, 13);
+            this.CollarsListLabel.TabIndex = 34;
+            this.CollarsListLabel.Text = "Collars";
             // 
             // splitContainer1
             // 
@@ -300,7 +300,7 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.ProjectsListBox);
-            this.splitContainer1.Panel1.Controls.Add(this.label6);
+            this.splitContainer1.Panel1.Controls.Add(this.ProjectsListLabel);
             this.splitContainer1.Panel1.Controls.Add(this.InfoProjectButton);
             this.splitContainer1.Panel1.Controls.Add(this.AddProjectButton);
             this.splitContainer1.Panel1.Controls.Add(this.DeleteProjectsButton);
@@ -310,7 +310,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.CollarsListBox);
             this.splitContainer1.Panel2.Controls.Add(this.InfoCollarButton);
-            this.splitContainer1.Panel2.Controls.Add(this.label7);
+            this.splitContainer1.Panel2.Controls.Add(this.CollarsListLabel);
             this.splitContainer1.Panel2.Controls.Add(this.DeleteCollarsButton);
             this.splitContainer1.Panel2.Controls.Add(this.AddCollarButton);
             this.splitContainer1.Panel2MinSize = 100;
@@ -371,9 +371,9 @@
         private System.Windows.Forms.Button DeleteCollarsButton;
         private System.Windows.Forms.Button AddCollarButton;
         private System.Windows.Forms.ListBox ProjectsListBox;
-        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label ProjectsListLabel;
         private System.Windows.Forms.ListBox CollarsListBox;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label CollarsListLabel;
         private System.Windows.Forms.SplitContainer splitContainer1;
     }
 }

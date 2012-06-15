@@ -48,13 +48,13 @@
             this.AddEditorButton = new System.Windows.Forms.Button();
             this.DeleteEditorButton = new System.Windows.Forms.Button();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.AnimalsListBox = new ColoredListBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.AnimalsListBox = new AnimalMovement.ColoredListBox();
+            this.AnimalListLabel = new System.Windows.Forms.Label();
             this.AddAnimalButton = new System.Windows.Forms.Button();
             this.DeleteAnimalsButton = new System.Windows.Forms.Button();
             this.InfoAnimalsButton = new System.Windows.Forms.Button();
-            this.FilesListBox = new ColoredListBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.FilesListBox = new AnimalMovement.ColoredListBox();
+            this.FilesListLabel = new System.Windows.Forms.Label();
             this.AddFilesButton = new System.Windows.Forms.Button();
             this.DeleteFilesButton = new System.Windows.Forms.Button();
             this.InfoFilesButton = new System.Windows.Forms.Button();
@@ -305,7 +305,7 @@
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.Controls.Add(this.AnimalsListBox);
-            this.splitContainer2.Panel1.Controls.Add(this.label3);
+            this.splitContainer2.Panel1.Controls.Add(this.AnimalListLabel);
             this.splitContainer2.Panel1.Controls.Add(this.AddAnimalButton);
             this.splitContainer2.Panel1.Controls.Add(this.DeleteAnimalsButton);
             this.splitContainer2.Panel1.Controls.Add(this.InfoAnimalsButton);
@@ -313,7 +313,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.FilesListBox);
-            this.splitContainer2.Panel2.Controls.Add(this.label2);
+            this.splitContainer2.Panel2.Controls.Add(this.FilesListLabel);
             this.splitContainer2.Panel2.Controls.Add(this.AddFilesButton);
             this.splitContainer2.Panel2.Controls.Add(this.DeleteFilesButton);
             this.splitContainer2.Panel2.Controls.Add(this.InfoFilesButton);
@@ -326,6 +326,7 @@
             this.AnimalsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.AnimalsListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.AnimalsListBox.FormattingEnabled = true;
             this.AnimalsListBox.IntegralHeight = false;
             this.AnimalsListBox.Location = new System.Drawing.Point(3, 15);
@@ -336,14 +337,14 @@
             this.AnimalsListBox.SelectedIndexChanged += new System.EventHandler(this.AnimalsListBox_SelectedIndexChanged);
             this.AnimalsListBox.DoubleClick += new System.EventHandler(this.InfoAnimalsButton_Click);
             // 
-            // label3
+            // AnimalListLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, -1);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(43, 13);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Animals";
+            this.AnimalListLabel.AutoSize = true;
+            this.AnimalListLabel.Location = new System.Drawing.Point(3, -1);
+            this.AnimalListLabel.Name = "AnimalListLabel";
+            this.AnimalListLabel.Size = new System.Drawing.Size(43, 13);
+            this.AnimalListLabel.TabIndex = 4;
+            this.AnimalListLabel.Text = "Animals";
             // 
             // AddAnimalButton
             // 
@@ -394,6 +395,7 @@
             this.FilesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.FilesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.FilesListBox.FormattingEnabled = true;
             this.FilesListBox.IntegralHeight = false;
             this.FilesListBox.Location = new System.Drawing.Point(3, 15);
@@ -404,14 +406,14 @@
             this.FilesListBox.SelectedIndexChanged += new System.EventHandler(this.FilesListBox_SelectedIndexChanged);
             this.FilesListBox.DoubleClick += new System.EventHandler(this.InfoFilesButton_Click);
             // 
-            // label2
+            // FilesListLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(28, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Files";
+            this.FilesListLabel.AutoSize = true;
+            this.FilesListLabel.Location = new System.Drawing.Point(3, 0);
+            this.FilesListLabel.Name = "FilesListLabel";
+            this.FilesListLabel.Size = new System.Drawing.Size(28, 13);
+            this.FilesListLabel.TabIndex = 2;
+            this.FilesListLabel.Text = "Files";
             // 
             // AddFilesButton
             // 
@@ -502,9 +504,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ListBox EditorsListBox;
         private ColoredListBox FilesListBox;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label FilesListLabel;
         private ColoredListBox AnimalsListBox;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label AnimalListLabel;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;

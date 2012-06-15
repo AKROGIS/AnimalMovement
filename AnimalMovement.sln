@@ -70,7 +70,6 @@ Global
 		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
 		{FA959BF8-BE00-4BBE-A3B0-27AC4CB631DB}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
