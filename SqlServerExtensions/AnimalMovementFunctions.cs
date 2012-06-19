@@ -251,8 +251,8 @@ namespace SqlServerExtensions
             {
                 // Look for the line that defines where the header actually is
                 var s = stream.ReadLine();
-                if (s != null && s.StartsWith("Headers Row,",StringComparison.OrdinalIgnoreCase))
-                    _formatCHeaderLines = Int32.Parse(s.Replace("Headers Row,",""));
+                if (s != null && s.StartsWith("Headers Row",StringComparison.OrdinalIgnoreCase))
+                    _formatCHeaderLines = Int32.Parse(s.Split(new[] { '\t', ',' }, 3)[1]);      
             }
             string header = stream.ReadLine();
             if (header == null)

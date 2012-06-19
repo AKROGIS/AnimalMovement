@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Deal with Telonics format with extra commas on 3rd line
 //TODO - Check to see if this file has been uploaded before (allowed but confusing) - could be slow.
 //TODO - Provide better error messages when uploading files fails
 
