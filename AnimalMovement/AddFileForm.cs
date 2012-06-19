@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Check to see if this file has been uploaded before (allowed but confusing) - could be slow.
 //TODO - Provide better error messages when uploading files fails
 
 /*
@@ -102,6 +101,9 @@ namespace AnimalMovement
 
         private void UploadButton_Click(object sender, EventArgs e)
         {
+            if (AbortBecauseDuplicate())
+                return;
+
             UploadButton.Text = "Working...";
             UploadButton.Enabled = false;
             Cursor.Current = Cursors.WaitCursor;
@@ -150,6 +152,20 @@ namespace AnimalMovement
             UploadButton.Text = "Upload";
             FileNameTextBox.Text = String.Empty;
             DialogResult = DialogResult.OK;
+        }
+
+        private bool AbortBecauseDuplicate()
+        {
+            if (!Database.CollarFiles.Any(f =>
+                f.Project1 == Project &&
+                f.FileName == System.IO.Path.GetFileNameWithoutExtension(FileNameTextBox.Text) &&
+                f.LookupCollarFileFormat == (LookupCollarFileFormat)FormatComboBox.SelectedItem &&
+                f.LookupCollarManufacturer == (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem
+                ))
+                return false;
+            var result = MessageBox.Show(this, "It appears this file has already been uploaded.  Are you sure you want to proceed?",
+                "Duplicate file", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            return result != DialogResult.Yes;
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
