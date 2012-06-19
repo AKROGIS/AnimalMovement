@@ -8,6 +8,7 @@ using DataModel;
 //TODO - Delay population of hidden tabs until displayed.
 //TODO - Move Info and Delete buttons onto the data grid.
 //TODO - Debeveck style (multiple collars) file formats do not display in the file list
+//TODO - Conflicting Fixes needs better support (don't show multiple fixes with same location or fixes hidden by store on board)
 
 namespace AnimalMovement
 {

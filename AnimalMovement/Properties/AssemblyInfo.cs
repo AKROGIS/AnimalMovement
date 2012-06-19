@@ -1,29 +1,24 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//TODO - DATABASE - Move collar deployment date checking from Stored procedure to trigger to protect against SA and to allow bulk uploading.
-//TODO - DATABASE - Add unit testing.
-//TODO - DATABASE - Add table for Telonics tfp files, each records owned by a PI.
-//TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data
 //TODO - DATABASE - Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
-//TODO - DATABASE - Conflicting Fixes needs better support (don't show multiple fixes with same location)
-//TODO - DATABASE - Conflicting Fixes needs better support (don't show fixes hidden by store on board)
+//TODO - DATABASE - Add table for Telonics tfp files, each record owned by a PI.
+//TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data
+//TODO - DATABASE - Add lost/disposed date to collar, to filter out 'ignorable' collars
+//TODO - DATABASE - Move collar deployment date checking from Stored procedure to trigger to protect against SA and to allow bulk uploading.
+//TODO - DATABASE - Add more unit testing.
 
-//TODO - Add lost/disposed date to collar, to filter out 'ignorable' collars
-//TODO - Rename the telonics condensed/complete format
-//TODO - Add an ArcGIS tool for creating a mortality date
+//TODO - Replace the wait cursors with a message box and progress bar
 //TODO - Consider viewer permission issues - All NPS is too permissive for some PIs
-//TODO - support and testing of various file formats
-//TODO - 	a) would like to support all data as it is/was delivered to the PI
-//TODO - 	b) would like to support direct download from Argos web services
-//TODO - replication to remote locations.
+//TODO - Support other file formats
+//TODO - 	a) support data as it is/was delivered to the PI
+//TODO - 	b) support direct download from Argos web services
+//TODO - Replication to remote locations.
 //TODO - 	a) Application/input  will all happen on the central server, which will push all data out to remote locations for fast readonly access.
 //TODO - help documents/tutorials
 //TODO - bulk upload (data grid view copy/paste) of multiple animals/collars/deploymnents (optional - sa can do this for PI using SSMS)
 //TODO - Add MS Access readonly interface
 //TODO - Add R statistics interface and adehabitat example
-//TODO - Replace the wait cursors with a message box and progress bar
-//TODO - uses a regular expression matcher to check the Debevek Header
 
 //Deployment Notes:
 //  The connection string for the DataModel.dll (app.config) must be copied in and replace the connection string in the

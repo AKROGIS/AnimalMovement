@@ -4,14 +4,10 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//TODO - Use a regular expression matcher to check the Debevek Header
 //TODO - Deal with Telonics format with extra commas on header line, and on 3rd line
-//TODO - ask to create necessary database records to support file - i.e. collars/animals/deployments
-//TODO - set collarComboBox.selectedItem to null if disabled.  trick is setting back to something meaningful when enabled.
-//TODO - improve validation before create/save
-//TODO - validate file format
 //TODO - Check to see if this file has been uploaded before (allowed but confusing) - could be slow.
-//TODO - provide a progress indicator for large files
-//TODO - provide better error messages when uploading invalid files
+//TODO - Provide better error messages when uploading files fails
 
 /*
  * The collar list displays the following:
