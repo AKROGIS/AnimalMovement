@@ -137,7 +137,6 @@ namespace AnimalMovement
                 };
             Database.CollarFiles.InsertOnSubmit(file);
 
-            Database.CommandTimeout = 300;
             try
             {
                 Database.SubmitChanges();
@@ -149,11 +148,9 @@ namespace AnimalMovement
                 FileNameTextBox.Focus();
                 UploadButton.Text = "Upload";
                 Cursor.Current = Cursors.Default;
-                Database.CommandTimeout = 30;
                 return;
             }
             Cursor.Current = Cursors.Default;
-            Database.CommandTimeout = 30;
 
             OnDatabaseChanged();
             UploadButton.Text = "Upload";

@@ -43,6 +43,7 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Include="AnimalMovementDataContext.cs" />
     <Compile Include="AnimalMovementViews.designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -33,5 +33,14 @@ namespace DataModel.Properties {
                 return ((string)(this["Animal_MovementConnectionString"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int CommandTimeout {
+            get {
+                return ((int)(this["CommandTimeout"]));
+            }
+        }
     }
 }
