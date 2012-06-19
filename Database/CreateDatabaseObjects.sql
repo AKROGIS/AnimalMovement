@@ -3156,7 +3156,8 @@ AS
 		ON F.[Status] = S.[Code]
 		LEFT JOIN [dbo].[CollarFixes] AS X
 		ON X.FileId = F.FileId
-		WHERE F.CollarManufacturer = @CollarManufacturer AND F.CollarId = @CollarId
+		WHERE (F.CollarManufacturer = @CollarManufacturer AND F.CollarId = @CollarId)
+		   OR (X.CollarManufacturer = @CollarManufacturer AND X.CollarId = @CollarId)
 		GROUP BY F.[FileId], F.[FileName], S.[Name]
 GO
 SET ANSI_NULLS ON
