@@ -4,8 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Use a regular expression matcher to check the Debevek Header
-//TODO - Deal with Telonics format with extra commas on header line, and on 3rd line
+//TODO - Deal with Telonics format with extra commas on 3rd line
 //TODO - Check to see if this file has been uploaded before (allowed but confusing) - could be slow.
 //TODO - Provide better error messages when uploading files fails
 
@@ -173,8 +172,15 @@ namespace AnimalMovement
         {
             string fileHeader = System.IO.File.ReadLines(path).First().Trim();
             var db = new SettingsDataContext();
-            var header = db.LookupCollarFileHeaders.FirstOrDefault(h => h.Header == fileHeader);
-            char code = header != null ? header.FileFormat : '?';
+            char code = '?';
+            foreach (var header in db.LookupCollarFileHeaders)
+            {
+                if (fileHeader.StartsWith(header.Header, StringComparison.OrdinalIgnoreCase))
+                {
+                    code = header.FileFormat;
+                    break;
+                }
+            }
             return Database.LookupCollarFileFormats.FirstOrDefault(f => f.Code == code);
         }
 

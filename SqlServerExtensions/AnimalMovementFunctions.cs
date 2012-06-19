@@ -224,7 +224,7 @@ namespace SqlServerExtensions
                                            "FixYear", "LatWGS84", "LonWGS84", "Temperature"
                                        };
             var variableColumns = new Dictionary<int, List<string>>(2);
-            variableColumns[1] = new List<string> { "MooseNo", "WolfNo", "CaribouNo", "MuskOx" };
+            variableColumns[1] = new List<string> { "MooseNo", "WolfNo", "CaribouNo", "MuskoxNo" };
             variableColumns[3] = new List<string> { "Location", "Pack" };
             int fileColumn = 0;
             for (int i = 0; i < wellKnownColumns.Length; i++)
