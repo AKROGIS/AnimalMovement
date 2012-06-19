@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
@@ -8,13 +9,13 @@ using DataModel;
 //TODO - Add Region Filter
 //TODO - Cleanup and Simplify the form
 //TODO - Put everything in one group layer (include no movement, hidden locations); remove location/movements checkbox
-//TODO - Test if query returns any results before creating layer file.
 
 namespace AnimalMovement
 {
     internal partial class CreateQueryLayerForm : BaseForm
     {
-        private const string ConnectionTemplate = @"dbclient=sqlserver;serverinstance={0};database=Animal_Movement;authentication_mode=OSA";
+        private const string ArcMapConnectionTemplate = @"dbclient=sqlserver;serverinstance={0};database=Animal_Movement;authentication_mode=OSA";
+        private const string SqlConnectionTemplate = @"Data Source={0};Initial Catalog=Animal_Movement;Integrated Security=True";
         private const string QueryLayerBuilderExe = "QueryLayerBuilder.exe";
 
         private AnimalMovementDataContext Database { get; set; }
@@ -156,19 +157,42 @@ namespace AnimalMovement
 
         private void GenerateButton_Click(object sender, EventArgs e)
         {
-            string connection = String.Format(ConnectionTemplate, DatabaseComboBox.SelectedValue);
+            string arcMapConnectionString = String.Format(ArcMapConnectionTemplate, DatabaseComboBox.SelectedValue);
+            string predicate = BuildPredicate("Locations");
+            if (!String.IsNullOrEmpty(predicate))
+            {
+                var sql = @"SELECT TOP 1 1 FROM [dbo].[Locations]
+                        INNER JOIN Animals ON Locations.ProjectId = Animals.ProjectId AND Locations.AnimalId = Animals.AnimalId
+                        INNER JOIN Projects ON Animals.ProjectId = Projects.ProjectId WHERE " +
+                        predicate;
+
+                string connectionString = String.Format(SqlConnectionTemplate, DatabaseComboBox.SelectedValue);
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    var command = new SqlCommand(sql, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (!reader.HasRows)
+                    {
+                        MessageBox.Show(this, "There are no locations in the database that meet your criteria.  Please try again.",
+                                        "No Results", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+            }
             if (CreateLocationsCheckBox.Checked)
-                BuildQueryLayer("Locations", connection);
+                BuildQueryLayer("Locations", arcMapConnectionString, predicate);
             if (CreateMovementsCheckBox.Checked)
-                BuildQueryLayer("Movements", connection);
+                BuildQueryLayer("Movements", arcMapConnectionString, BuildPredicate("Movements"));
         }
 
-        private void BuildQueryLayer(string table, string connection)
+        private void BuildQueryLayer(string table, string connection, string predicate)
         {
             saveFileDialog1.Title = table + " Query Layer";
             saveFileDialog1.DefaultExt = ".lyr";
-            saveFileDialog1.ShowDialog(this);
-            SaveQueryLayer(table, saveFileDialog1.FileName, connection, BuildSql(table));
+            if (saveFileDialog1.ShowDialog(this) == DialogResult.OK)
+                SaveQueryLayer(table, saveFileDialog1.FileName, connection, BuildSql(table, predicate));
         }
 
         private static void SaveQueryLayer(string name, string path, string connection, string query)
@@ -195,46 +219,62 @@ namespace AnimalMovement
             MessageBox.Show(message, "Layer File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private string BuildSql(string table)
+        private static string BuildSql(string table, string predicate)
+        {
+            string sql;
+            switch (table)
+            {
+                case "Locations":
+                    sql =
+                        @"SELECT [Locations].[ProjectId], [Locations].[AnimalId], [Locations].[FixDate], [Locations].[Location] AS [Shape], [Locations].[Status], [Projects].[UnitCode], [Animals].[Species], [Animals].[Gender], [Animals].[GroupName]
+                        FROM  [Animal_Movement].[dbo].[Locations]
+                        INNER JOIN Animals ON Locations.ProjectId = Animals.ProjectId AND Locations.AnimalId = Animals.AnimalId
+                        INNER JOIN Projects ON Animals.ProjectId = Projects.ProjectId";
+                    return String.IsNullOrEmpty(predicate) ? sql : sql + " WHERE " + predicate;
+                case "Movements":
+                    sql =
+                      @"SELECT [Movements].[ProjectId], [Movements].[AnimalId], [Movements].[StartDate], [Movements].[EndDate], [Movements].[Duration], [Movements].[Distance], [Movements].[Speed], [Movements].[Shape], [Projects].[UnitCode], [Animals].[Species], [Animals].[Gender], [Animals].[GroupName]
+                      FROM  [Animal_Movement].[dbo].[Movements]
+                      INNER JOIN Animals ON Movements.ProjectId = Animals.ProjectId AND Movements.AnimalId = Animals.AnimalId
+                      INNER JOIN Projects ON Animals.ProjectId = Projects.ProjectId";
+                    return String.IsNullOrEmpty(predicate) ? sql : sql + " WHERE " + predicate;
+                default:
+                    throw new ArgumentOutOfRangeException("table", table, "Table name is not recognized");
+            }
+        }
+
+        private string BuildPredicate(string table)
         {
 
             var animal = String.Format(BuildAnimalPredicate() ?? "", "[Projects].[ProjectId]", "[Animals].[AnimalId]");
             var project = String.Format(BuildProjectPredicate() ?? "", "[Projects].[ProjectId]");
             var species = String.Format(BuildSpeciesPredicate() ?? "", "[Animals].[Species]");
             string date;
-            string sqlStart;
             string sqlEnd;
-            if (table == "Locations")
+            switch (table)
             {
-                date = String.Format(BuildDatePredicate() ?? "", "[Locations].[FixDate]", "[Locations].[FixDate]");
-                sqlStart =
-                    @"SELECT [Locations].[ProjectId], [Locations].[AnimalId], [Locations].[FixDate], [Locations].[Location] AS [Shape], [Locations].[Status], [Projects].[UnitCode], [Animals].[Species], [Animals].[Gender], [Animals].[GroupName]
-                      FROM  [Animal_Movement].[dbo].[Locations]
-                      INNER JOIN Animals ON Locations.ProjectId = Animals.ProjectId AND Locations.AnimalId = Animals.AnimalId
-                      INNER JOIN Projects ON Animals.ProjectId = Projects.ProjectId";
-                sqlEnd = String.Empty;
+                case "Locations":
+                    date = String.Format(BuildDatePredicate() ?? "", "[Locations].[FixDate]", "[Locations].[FixDate]");
+                    sqlEnd = String.Empty;
+                    break;
+                case "Movements":
+                    date = String.Format(BuildDatePredicate() ?? "", "[Movements].[StartDate]", "[Movements].[EndDate]");
+                    sqlEnd = "Distance <> 0";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("table", table, "Table name is not recognized");
             }
-            else //(table == "Movements")
-            {
-                date = String.Format(BuildDatePredicate() ?? "", "[Movements].[StartDate]", "[Movements].[EndDate]");
-                sqlStart =
-                    @"SELECT [Movements].[ProjectId], [Movements].[AnimalId], [Movements].[StartDate], [Movements].[EndDate], [Movements].[Duration], [Movements].[Distance], [Movements].[Speed], [Movements].[Shape], [Projects].[UnitCode], [Animals].[Species], [Animals].[Gender], [Animals].[GroupName]
-                      FROM  [Animal_Movement].[dbo].[Movements]
-                      INNER JOIN Animals ON Movements.ProjectId = Animals.ProjectId AND Movements.AnimalId = Animals.AnimalId
-                      INNER JOIN Projects ON Animals.ProjectId = Projects.ProjectId";
-                sqlEnd = "Distance <> 0";
-            }
-            var notList = new [] {"" /*animals*/, "" /*project*/ , "" /*species*/, "" /*date*/};
-            var opList = new [] { /*animals*/ " AND ", /*project*/ " AND ", /*species*/ " AND ", /*date*/ " AND " /*sqlEnd*/ };
-            var predList = new [] {animal, project, species, date};
-            for (int i = predList.Length -1; i >= 0; i--)
+            var notList = new[] { "" /*animals*/, "" /*project*/ , "" /*species*/, "" /*date*/};
+            var opList = new[] { /*animals*/ " AND ", /*project*/ " AND ", /*species*/ " AND ", /*date*/ " AND " /*sqlEnd*/ };
+            var predList = new[] { animal, project, species, date };
+            for (int i = predList.Length - 1; i >= 0; i--)
             {
                 if (string.IsNullOrEmpty(predList[i]))
                     continue;
                 var p = notList[i] + predList[i];
                 sqlEnd = (sqlEnd == String.Empty) ? p : p + opList[i] + sqlEnd;
             }
-            return (sqlEnd == String.Empty) ? sqlStart : sqlStart + " WHERE " + sqlEnd;
+            return sqlEnd;
         }
 
         private string BuildAnimalPredicate()
