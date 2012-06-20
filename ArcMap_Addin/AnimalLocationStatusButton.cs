@@ -9,8 +9,6 @@ using System.Windows.Forms;
 using System.Data;
 using System.Data.SqlClient;
 
-//TODO - Update the master, not the local replica. Addin should check with the query layers database to get the connection string of the master database.
-
 namespace ArcMap_Addin
 {
     public class AnimalLocationStatusButton : ESRI.ArcGIS.Desktop.AddIns.Button
@@ -186,8 +184,9 @@ namespace ArcMap_Addin
             
             var connectionProperties = GetProperties(((IDataset)actionLayer).Workspace.ConnectionProperties);
 
+            string localServer = connectionProperties["SERVERINSTANCE"];
             string connectionString = string.Format("server={0};Database={1};",
-                                                    connectionProperties["SERVERINSTANCE"],
+                                                    localServer,
                                                     connectionProperties["DATABASE"]);
             if (connectionProperties["AUTHENTICATION_MODE"] == "OSA")
                 connectionString += "Trusted_Connection=True;";
@@ -196,6 +195,23 @@ namespace ArcMap_Addin
                                     string.Format("User Id={0};Password={1};", 
                                     connectionProperties["USER"], 
                                     connectionProperties["PASSWORD"]);
+
+            //Connect to the local server to find the master server, and change the connection string appropriately
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var cmd = new SqlCommand("SELECT [Connection] FROM [Animal_Movement].[dbo].[LookupQueryLayerServers] WHERE [Location] = 'AKRO'", connection))
+                {
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        var masterServer = (string)reader["Connection"];
+                        connectionString = connectionString.Replace(localServer, masterServer);
+                    }
+                }
+            }
+
             return connectionString;
         }
 
