@@ -6,9 +6,9 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Add Region Filter
+//TODO - Add Region Filter ?
 //TODO - Cleanup and Simplify the form
-//TODO - Put everything in one group layer (include no movement, hidden locations); remove location/movements checkbox
+//TODO - Provide better default symbology for generated layer file
 
 namespace AnimalMovement
 {
@@ -172,27 +172,29 @@ namespace AnimalMovement
                     SqlDataReader reader = command.ExecuteReader();
                     if (!reader.HasRows)
                     {
-                        MessageBox.Show(this, "There are no locations in the database that meet your criteria.  Please try again.",
-                                        "No Results", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
+                        var result = MessageBox.Show(this, "There are no locations in the database that meet your criteria.  Are you sure you want to create this layer file?",
+                                        "No Results", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                        if (result != DialogResult.Yes)
+                            return;
                     }
                 }
             }
-            if (CreateLocationsCheckBox.Checked)
-                BuildQueryLayer("Locations", arcMapConnectionString, predicate);
-            if (CreateMovementsCheckBox.Checked)
-                BuildQueryLayer("Movements", arcMapConnectionString, predicate);
+
+            GenerateButton.Enabled = false;
+            GenerateButton.Text = "Working...";
+            BuildQueryLayer(arcMapConnectionString, predicate);
+            Close();
         }
 
-        private void BuildQueryLayer(string table, string connection, string predicate)
+        private void BuildQueryLayer(string connection, string predicate)
         {
-            saveFileDialog1.Title = table + " Query Layer";
+            saveFileDialog1.Title = "ArcMap Query Layer";
             saveFileDialog1.DefaultExt = ".lyr";
             if (saveFileDialog1.ShowDialog(this) == DialogResult.OK)
-                SaveQueryLayer(table, saveFileDialog1.FileName, connection, BuildSql(table, predicate));
+                SaveQueryLayer(saveFileDialog1.FileName, connection, predicate);
         }
 
-        private static void SaveQueryLayer(string name, string path, string connection, string query)
+        private static void SaveQueryLayer(string path, string connection, string query)
         {
             string exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             if (exeDir == null)
@@ -202,34 +204,18 @@ namespace AnimalMovement
             }
             string exe = System.IO.Path.Combine(exeDir, QueryLayerBuilderExe);
 
-            string arguments = "\"" + name + "\" \"" + path + "\" \"" + connection + "\" \"" + query + "\"";
+            string arguments = "Multiple \"" + path + "\" \"" + connection + "\" \"" + query + "\"";
             var process = new Process();
-            var processStartInfo = new ProcessStartInfo(exe, arguments) { UseShellExecute = false, RedirectStandardError = true };
+            var processStartInfo = new ProcessStartInfo(exe, arguments) { CreateNoWindow = true, UseShellExecute = false, RedirectStandardError = true };
             process.StartInfo = processStartInfo;
             process.Start();
             string error = process.StandardError.ReadToEnd();
             process.WaitForExit();
             if (process.ExitCode == 0)
                 return;
-            var message = "Name:{0}\nFile:{1}\nConnection:{2}\nQuery:{3}\nError:{4}";
-            message = String.Format(message, name, path, connection, query, error);
-            MessageBox.Show(message, "Layer File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private static string BuildSql(string table, string predicate)
-        {
-            string sql;
-            switch (table)
-            {
-                case "Locations":
-                    sql = "SELECT * FROM [ValidLocations]";
-                    return String.IsNullOrEmpty(predicate) ? sql : sql + " WHERE " + predicate.Replace("EndLocalDateTime", "LocalDateTime");
-                case "Movements":
-                    sql = "SELECT * FROM [VelocityVectors]";
-                    return String.IsNullOrEmpty(predicate) ? sql : sql + " WHERE " + predicate;
-                default:
-                    throw new ArgumentOutOfRangeException("table", table, "Table name is not recognized");
-            }
+            var message = "File:{0}\nConnection:{1}\nQuery:{2}\nError:{3}";
+            message = String.Format(message, path, connection, query, error);
+            MessageBox.Show(message, "Error Creating Map File", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private string BuildPredicate()

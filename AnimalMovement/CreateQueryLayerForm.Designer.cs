@@ -38,8 +38,6 @@
             this.label7 = new System.Windows.Forms.Label();
             this.UseEarliestDateCheckBox = new System.Windows.Forms.CheckBox();
             this.UseLatestDateCheckBox = new System.Windows.Forms.CheckBox();
-            this.CreateLocationsCheckBox = new System.Windows.Forms.CheckBox();
-            this.CreateMovementsCheckBox = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.FilterByDatesCheckBox = new System.Windows.Forms.CheckBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -80,7 +78,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 227);
+            this.label4.Location = new System.Drawing.Point(6, 258);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(58, 13);
             this.label4.TabIndex = 3;
@@ -89,7 +87,7 @@
             // GenerateButton
             // 
             this.GenerateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.GenerateButton.Location = new System.Drawing.Point(392, 350);
+            this.GenerateButton.Location = new System.Drawing.Point(392, 354);
             this.GenerateButton.Name = "GenerateButton";
             this.GenerateButton.Size = new System.Drawing.Size(110, 23);
             this.GenerateButton.TabIndex = 7;
@@ -113,7 +111,7 @@
             this.StartDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
             this.StartDateTimePicker.Enabled = false;
             this.StartDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.StartDateTimePicker.Location = new System.Drawing.Point(67, 224);
+            this.StartDateTimePicker.Location = new System.Drawing.Point(67, 255);
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.Size = new System.Drawing.Size(328, 20);
             this.StartDateTimePicker.TabIndex = 20;
@@ -125,7 +123,7 @@
             this.EndDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
             this.EndDateTimePicker.Enabled = false;
             this.EndDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.EndDateTimePicker.Location = new System.Drawing.Point(67, 250);
+            this.EndDateTimePicker.Location = new System.Drawing.Point(67, 281);
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.Size = new System.Drawing.Size(328, 20);
             this.EndDateTimePicker.TabIndex = 21;
@@ -134,7 +132,7 @@
             // 
             this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(9, 252);
+            this.label7.Location = new System.Drawing.Point(9, 283);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(55, 13);
             this.label7.TabIndex = 22;
@@ -145,7 +143,7 @@
             this.UseEarliestDateCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.UseEarliestDateCheckBox.AutoSize = true;
             this.UseEarliestDateCheckBox.Enabled = false;
-            this.UseEarliestDateCheckBox.Location = new System.Drawing.Point(401, 226);
+            this.UseEarliestDateCheckBox.Location = new System.Drawing.Point(401, 257);
             this.UseEarliestDateCheckBox.Name = "UseEarliestDateCheckBox";
             this.UseEarliestDateCheckBox.Size = new System.Drawing.Size(82, 17);
             this.UseEarliestDateCheckBox.TabIndex = 23;
@@ -158,37 +156,13 @@
             this.UseLatestDateCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.UseLatestDateCheckBox.AutoSize = true;
             this.UseLatestDateCheckBox.Enabled = false;
-            this.UseLatestDateCheckBox.Location = new System.Drawing.Point(401, 252);
+            this.UseLatestDateCheckBox.Location = new System.Drawing.Point(401, 283);
             this.UseLatestDateCheckBox.Name = "UseLatestDateCheckBox";
             this.UseLatestDateCheckBox.Size = new System.Drawing.Size(77, 17);
             this.UseLatestDateCheckBox.TabIndex = 24;
             this.UseLatestDateCheckBox.Text = "Use Latest";
             this.UseLatestDateCheckBox.UseVisualStyleBackColor = true;
             this.UseLatestDateCheckBox.CheckedChanged += new System.EventHandler(this.FilterByDatesCheckBox_CheckedChanged);
-            // 
-            // CreateLocationsCheckBox
-            // 
-            this.CreateLocationsCheckBox.AutoSize = true;
-            this.CreateLocationsCheckBox.Checked = true;
-            this.CreateLocationsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CreateLocationsCheckBox.Location = new System.Drawing.Point(71, 33);
-            this.CreateLocationsCheckBox.Name = "CreateLocationsCheckBox";
-            this.CreateLocationsCheckBox.Size = new System.Drawing.Size(99, 17);
-            this.CreateLocationsCheckBox.TabIndex = 25;
-            this.CreateLocationsCheckBox.Text = "Location Points";
-            this.CreateLocationsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // CreateMovementsCheckBox
-            // 
-            this.CreateMovementsCheckBox.AutoSize = true;
-            this.CreateMovementsCheckBox.Checked = true;
-            this.CreateMovementsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CreateMovementsCheckBox.Location = new System.Drawing.Point(176, 33);
-            this.CreateMovementsCheckBox.Name = "CreateMovementsCheckBox";
-            this.CreateMovementsCheckBox.Size = new System.Drawing.Size(104, 17);
-            this.CreateMovementsCheckBox.TabIndex = 26;
-            this.CreateMovementsCheckBox.Text = "Movement Lines";
-            this.CreateMovementsCheckBox.UseVisualStyleBackColor = true;
             // 
             // groupBox1
             // 
@@ -203,10 +177,10 @@
             this.groupBox1.Controls.Add(this.EndDateTimePicker);
             this.groupBox1.Controls.Add(this.UseEarliestDateCheckBox);
             this.groupBox1.Controls.Add(this.label7);
-            this.groupBox1.Location = new System.Drawing.Point(12, 60);
+            this.groupBox1.Location = new System.Drawing.Point(12, 33);
             this.groupBox1.MinimumSize = new System.Drawing.Size(351, 240);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(490, 278);
+            this.groupBox1.Size = new System.Drawing.Size(490, 309);
             this.groupBox1.TabIndex = 31;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Filter By";
@@ -215,7 +189,7 @@
             // 
             this.FilterByDatesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.FilterByDatesCheckBox.AutoSize = true;
-            this.FilterByDatesCheckBox.Location = new System.Drawing.Point(6, 207);
+            this.FilterByDatesCheckBox.Location = new System.Drawing.Point(6, 238);
             this.FilterByDatesCheckBox.Name = "FilterByDatesCheckBox";
             this.FilterByDatesCheckBox.Size = new System.Drawing.Size(54, 17);
             this.FilterByDatesCheckBox.TabIndex = 32;
@@ -244,7 +218,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Panel2MinSize = 228;
-            this.splitContainer1.Size = new System.Drawing.Size(483, 175);
+            this.splitContainer1.Size = new System.Drawing.Size(483, 206);
             this.splitContainer1.SplitterDistance = 185;
             this.splitContainer1.TabIndex = 30;
             // 
@@ -252,7 +226,7 @@
             // 
             this.AllProjectsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AllProjectsButton.Enabled = false;
-            this.AllProjectsButton.Location = new System.Drawing.Point(3, 149);
+            this.AllProjectsButton.Location = new System.Drawing.Point(3, 180);
             this.AllProjectsButton.Name = "AllProjectsButton";
             this.AllProjectsButton.Size = new System.Drawing.Size(50, 23);
             this.AllProjectsButton.TabIndex = 17;
@@ -264,7 +238,7 @@
             // 
             this.ClearProjectsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ClearProjectsButton.Enabled = false;
-            this.ClearProjectsButton.Location = new System.Drawing.Point(132, 149);
+            this.ClearProjectsButton.Location = new System.Drawing.Point(132, 180);
             this.ClearProjectsButton.Name = "ClearProjectsButton";
             this.ClearProjectsButton.Size = new System.Drawing.Size(50, 23);
             this.ClearProjectsButton.TabIndex = 18;
@@ -280,9 +254,10 @@
             this.ProjectsCheckedListBox.CheckOnClick = true;
             this.ProjectsCheckedListBox.Enabled = false;
             this.ProjectsCheckedListBox.FormattingEnabled = true;
+            this.ProjectsCheckedListBox.IntegralHeight = false;
             this.ProjectsCheckedListBox.Location = new System.Drawing.Point(3, 20);
             this.ProjectsCheckedListBox.Name = "ProjectsCheckedListBox";
-            this.ProjectsCheckedListBox.Size = new System.Drawing.Size(179, 124);
+            this.ProjectsCheckedListBox.Size = new System.Drawing.Size(179, 155);
             this.ProjectsCheckedListBox.TabIndex = 16;
             // 
             // FilterByProjectsCheckBox
@@ -317,7 +292,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.FilterByAnimalsCheckBox);
             this.splitContainer2.Panel2.Controls.Add(this.ClearAnimalsButton);
             this.splitContainer2.Panel2MinSize = 112;
-            this.splitContainer2.Size = new System.Drawing.Size(294, 175);
+            this.splitContainer2.Size = new System.Drawing.Size(294, 206);
             this.splitContainer2.SplitterDistance = 112;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -329,16 +304,17 @@
             this.SpeciesCheckedListBox.CheckOnClick = true;
             this.SpeciesCheckedListBox.Enabled = false;
             this.SpeciesCheckedListBox.FormattingEnabled = true;
+            this.SpeciesCheckedListBox.IntegralHeight = false;
             this.SpeciesCheckedListBox.Location = new System.Drawing.Point(3, 20);
             this.SpeciesCheckedListBox.Name = "SpeciesCheckedListBox";
-            this.SpeciesCheckedListBox.Size = new System.Drawing.Size(106, 124);
+            this.SpeciesCheckedListBox.Size = new System.Drawing.Size(106, 155);
             this.SpeciesCheckedListBox.TabIndex = 8;
             // 
             // AllSpeciesButton
             // 
             this.AllSpeciesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AllSpeciesButton.Enabled = false;
-            this.AllSpeciesButton.Location = new System.Drawing.Point(3, 149);
+            this.AllSpeciesButton.Location = new System.Drawing.Point(3, 180);
             this.AllSpeciesButton.Name = "AllSpeciesButton";
             this.AllSpeciesButton.Size = new System.Drawing.Size(50, 23);
             this.AllSpeciesButton.TabIndex = 9;
@@ -350,7 +326,7 @@
             // 
             this.ClearSpeciesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ClearSpeciesButton.Enabled = false;
-            this.ClearSpeciesButton.Location = new System.Drawing.Point(59, 149);
+            this.ClearSpeciesButton.Location = new System.Drawing.Point(59, 180);
             this.ClearSpeciesButton.Name = "ClearSpeciesButton";
             this.ClearSpeciesButton.Size = new System.Drawing.Size(50, 23);
             this.ClearSpeciesButton.TabIndex = 10;
@@ -377,16 +353,17 @@
             this.AnimalsCheckedListBox.CheckOnClick = true;
             this.AnimalsCheckedListBox.Enabled = false;
             this.AnimalsCheckedListBox.FormattingEnabled = true;
+            this.AnimalsCheckedListBox.IntegralHeight = false;
             this.AnimalsCheckedListBox.Location = new System.Drawing.Point(3, 20);
             this.AnimalsCheckedListBox.Name = "AnimalsCheckedListBox";
-            this.AnimalsCheckedListBox.Size = new System.Drawing.Size(172, 124);
+            this.AnimalsCheckedListBox.Size = new System.Drawing.Size(172, 155);
             this.AnimalsCheckedListBox.TabIndex = 12;
             // 
             // AllAnimalsButton
             // 
             this.AllAnimalsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AllAnimalsButton.Enabled = false;
-            this.AllAnimalsButton.Location = new System.Drawing.Point(3, 149);
+            this.AllAnimalsButton.Location = new System.Drawing.Point(3, 180);
             this.AllAnimalsButton.Name = "AllAnimalsButton";
             this.AllAnimalsButton.Size = new System.Drawing.Size(50, 23);
             this.AllAnimalsButton.TabIndex = 13;
@@ -409,7 +386,7 @@
             // 
             this.ClearAnimalsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ClearAnimalsButton.Enabled = false;
-            this.ClearAnimalsButton.Location = new System.Drawing.Point(125, 149);
+            this.ClearAnimalsButton.Location = new System.Drawing.Point(125, 180);
             this.ClearAnimalsButton.Name = "ClearAnimalsButton";
             this.ClearAnimalsButton.Size = new System.Drawing.Size(50, 23);
             this.ClearAnimalsButton.TabIndex = 14;
@@ -421,10 +398,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(515, 385);
+            this.ClientSize = new System.Drawing.Size(515, 389);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.CreateMovementsCheckBox);
-            this.Controls.Add(this.CreateLocationsCheckBox);
             this.Controls.Add(this.DatabaseComboBox);
             this.Controls.Add(this.GenerateButton);
             this.Controls.Add(this.label1);
@@ -471,8 +446,6 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.CheckBox UseEarliestDateCheckBox;
         private System.Windows.Forms.CheckBox UseLatestDateCheckBox;
-        private System.Windows.Forms.CheckBox CreateLocationsCheckBox;
-        private System.Windows.Forms.CheckBox CreateMovementsCheckBox;
         private System.Windows.Forms.CheckBox FilterBySpeciesCheckBox;
         private System.Windows.Forms.CheckBox FilterByProjectsCheckBox;
         private System.Windows.Forms.CheckBox FilterByAnimalsCheckBox;
