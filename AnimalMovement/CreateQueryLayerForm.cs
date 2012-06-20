@@ -158,13 +158,10 @@ namespace AnimalMovement
         private void GenerateButton_Click(object sender, EventArgs e)
         {
             string arcMapConnectionString = String.Format(ArcMapConnectionTemplate, DatabaseComboBox.SelectedValue);
-            string predicate = BuildPredicate("Locations");
+            string predicate = BuildPredicate();
             if (!String.IsNullOrEmpty(predicate))
             {
-                var sql = @"SELECT TOP 1 1 FROM [dbo].[Locations]
-                        INNER JOIN Animals ON Locations.ProjectId = Animals.ProjectId AND Locations.AnimalId = Animals.AnimalId
-                        INNER JOIN Projects ON Animals.ProjectId = Projects.ProjectId WHERE " +
-                        predicate;
+                var sql = "SELECT TOP 1 1 FROM [dbo].[ValidLocations] WHERE " + predicate.Replace("EndLocalDateTime", "LocalDateTime");
 
                 string connectionString = String.Format(SqlConnectionTemplate, DatabaseComboBox.SelectedValue);
                 using (var connection = new SqlConnection(connectionString))
@@ -184,7 +181,7 @@ namespace AnimalMovement
             if (CreateLocationsCheckBox.Checked)
                 BuildQueryLayer("Locations", arcMapConnectionString, predicate);
             if (CreateMovementsCheckBox.Checked)
-                BuildQueryLayer("Movements", arcMapConnectionString, BuildPredicate("Movements"));
+                BuildQueryLayer("Movements", arcMapConnectionString, predicate);
         }
 
         private void BuildQueryLayer(string table, string connection, string predicate)
@@ -225,45 +222,24 @@ namespace AnimalMovement
             switch (table)
             {
                 case "Locations":
-                    sql =
-                        @"SELECT [Locations].[ProjectId], [Locations].[AnimalId], [Locations].[FixDate], [Locations].[Location] AS [Shape], [Locations].[Status], [Projects].[UnitCode], [Animals].[Species], [Animals].[Gender], [Animals].[GroupName]
-                        FROM  [Animal_Movement].[dbo].[Locations]
-                        INNER JOIN Animals ON Locations.ProjectId = Animals.ProjectId AND Locations.AnimalId = Animals.AnimalId
-                        INNER JOIN Projects ON Animals.ProjectId = Projects.ProjectId";
-                    return String.IsNullOrEmpty(predicate) ? sql : sql + " WHERE " + predicate;
+                    sql = "SELECT * FROM [ValidLocations]";
+                    return String.IsNullOrEmpty(predicate) ? sql : sql + " WHERE " + predicate.Replace("EndLocalDateTime", "LocalDateTime");
                 case "Movements":
-                    sql =
-                      @"SELECT [Movements].[ProjectId], [Movements].[AnimalId], [Movements].[StartDate], [Movements].[EndDate], [Movements].[Duration], [Movements].[Distance], [Movements].[Speed], [Movements].[Shape], [Projects].[UnitCode], [Animals].[Species], [Animals].[Gender], [Animals].[GroupName]
-                      FROM  [Animal_Movement].[dbo].[Movements]
-                      INNER JOIN Animals ON Movements.ProjectId = Animals.ProjectId AND Movements.AnimalId = Animals.AnimalId
-                      INNER JOIN Projects ON Animals.ProjectId = Projects.ProjectId";
+                    sql = "SELECT * FROM [VelocityVectors]";
                     return String.IsNullOrEmpty(predicate) ? sql : sql + " WHERE " + predicate;
                 default:
                     throw new ArgumentOutOfRangeException("table", table, "Table name is not recognized");
             }
         }
 
-        private string BuildPredicate(string table)
+        private string BuildPredicate()
         {
 
-            var animal = String.Format(BuildAnimalPredicate() ?? "", "[Projects].[ProjectId]", "[Animals].[AnimalId]");
-            var project = String.Format(BuildProjectPredicate() ?? "", "[Projects].[ProjectId]");
-            var species = String.Format(BuildSpeciesPredicate() ?? "", "[Animals].[Species]");
-            string date;
-            string sqlEnd;
-            switch (table)
-            {
-                case "Locations":
-                    date = String.Format(BuildDatePredicate() ?? "", "[Locations].[FixDate]", "[Locations].[FixDate]");
-                    sqlEnd = String.Empty;
-                    break;
-                case "Movements":
-                    date = String.Format(BuildDatePredicate() ?? "", "[Movements].[StartDate]", "[Movements].[EndDate]");
-                    sqlEnd = "Distance <> 0";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("table", table, "Table name is not recognized");
-            }
+            var animal = String.Format(BuildAnimalPredicate() ?? "", "[ProjectId]", "[AnimalId]");
+            var project = String.Format(BuildProjectPredicate() ?? "", "[ProjectId]");
+            var species = String.Format(BuildSpeciesPredicate() ?? "", "[Species]");
+            string date = String.Format(BuildDatePredicate() ?? "", "[LocalDateTime]", "[EndLocalDateTime]");
+            string sqlEnd = String.Empty;
             var notList = new[] { "" /*animals*/, "" /*project*/ , "" /*species*/, "" /*date*/};
             var opList = new[] { /*animals*/ " AND ", /*project*/ " AND ", /*species*/ " AND ", /*date*/ " AND " /*sqlEnd*/ };
             var predList = new[] { animal, project, species, date };

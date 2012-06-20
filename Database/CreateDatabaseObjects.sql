@@ -529,16 +529,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[InvalidLocations]
-AS
-SELECT     ProjectId, AnimalId, FixDate, Status, Location
-FROM         dbo.Locations
-WHERE     (Status IS NOT NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
 ON [dbo].[CollarFixes] 
 INSTEAD OF INSERT AS
@@ -1104,16 +1094,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[NoMovement]
-AS
-SELECT     ProjectId, AnimalId, StartDate, EndDate, Duration, Distance, Speed, Shape
-FROM         dbo.Movements
-WHERE     (Distance = 0)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE FUNCTION [dbo].[EndOfMovement]
 (
 	@Project VARCHAR(32)   = NULL, 
@@ -1540,26 +1520,6 @@ IF UPDATE ([HiddenBy])
 	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
 
 	END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[VelocityVectors]
-AS
-SELECT     ProjectId, AnimalId, StartDate, EndDate, Duration, Distance, Speed, Shape
-FROM         dbo.Movements
-WHERE     (Distance <> 0)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ValidLocations]
-AS
-SELECT     ProjectId, AnimalId, FixDate, Status, Location
-FROM         dbo.Locations
-WHERE     (Status IS NULL)
 GO
 SET ANSI_NULLS ON
 GO
@@ -2097,6 +2057,87 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE VIEW [dbo].[VelocityVectors]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          --,M.[StartDate]
+          --,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(M.[StartDate]) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          ,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance <> 0
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ValidLocations]
+AS
+    SELECT L.FixId
+		  ,L.ProjectId
+          ,L.AnimalId
+          --,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(L.[FixDate]) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          --,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[NoMovement]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          --,M.[StartDate]
+          --,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(M.[StartDate]) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          --,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance = 0
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[NextAnimalId] 
 (
 	@ProjectId VARCHAR(32)   = NULL 
@@ -2132,6 +2173,31 @@ BEGIN
 		SET @Id = @Year + '01'
 	RETURN @id
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[InvalidLocations]
+AS
+    SELECT L.FixId
+		  ,L.ProjectId
+          ,L.AnimalId
+          --,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(L.[FixDate]) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NOT NULL
 GO
 SET ANSI_NULLS ON
 GO
