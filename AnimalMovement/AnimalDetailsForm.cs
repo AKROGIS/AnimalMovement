@@ -119,8 +119,8 @@ namespace AnimalMovement
         {
             Animal.LookupSpecies = (LookupSpecies)SpeciesComboBox.SelectedItem;
             Animal.LookupGender = (LookupGender)GenderComboBox.SelectedItem;
-            Animal.GroupName = GroupTextBox.Text.NullifyIfEmpty();
-            Animal.Description = DescriptionTextBox.Text.NullifyIfEmpty();
+            Animal.GroupName = GroupTextBox.Text;
+            Animal.Description = DescriptionTextBox.Text;
             if (MortatlityDateTimePicker.Checked)
                 Animal.MortalityDate = MortatlityDateTimePicker.Value;
             else

@@ -172,9 +172,9 @@ namespace AnimalMovement
 
         private void UpdateDataSource()
         {
-            Project.Description = DescriptionTextBox.Text.NullifyIfEmpty();
-            Project.UnitCode = UnitTextBox.Text.NullifyIfEmpty();
-            Project.ProjectName = ProjectNameTextBox.Text.NullifyIfEmpty();
+            Project.Description = DescriptionTextBox.Text;
+            Project.UnitCode = UnitTextBox.Text;
+            Project.ProjectName = ProjectNameTextBox.Text;
         }
 
         private void EnableForm()

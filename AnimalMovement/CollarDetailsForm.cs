@@ -120,12 +120,12 @@ namespace AnimalMovement
         {
             Collar.ProjectInvestigator = (ProjectInvestigator)ManagerComboBox.SelectedItem;
             Collar.LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem;
-            Collar.AlternativeId = AlternativeIdTextBox.Text.NullifyIfEmpty();
-            Collar.Owner = DownloadInfoTextBox.Text.NullifyIfEmpty();
-            Collar.SerialNumber = DownloadInfoTextBox.Text.NullifyIfEmpty();
-            Collar.Frequency = DownloadInfoTextBox.Text.DoubleOrNull();
-            Collar.DownloadInfo = DownloadInfoTextBox.Text.NullifyIfEmpty();
-            Collar.Notes = NotesTextBox.Text.NullifyIfEmpty();
+            Collar.AlternativeId = AlternativeIdTextBox.Text;
+            Collar.Owner = OwnerTextBox.Text;
+            Collar.SerialNumber = SerialNumberTextBox.Text;
+            Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull() ?? 0;
+            Collar.DownloadInfo = DownloadInfoTextBox.Text;
+            Collar.Notes = NotesTextBox.Text;
         }
 
         private void EnableForm()
