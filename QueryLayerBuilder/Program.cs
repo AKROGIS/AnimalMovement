@@ -119,7 +119,7 @@ namespace QueryLayerBuilder
         private static ILayer BuildSpecialQueryLayer(string name, string connection, string predicate)
         {
             esriGeometryType geometryType = esriGeometryType.esriGeometryPoint;
-            const string oidFields = "ProjectId,AnimalId,LocalDateTime";
+            string oidFields = "ProjectId,AnimalId,FixDate";
             const int srid = 4326;
             string query;
 
@@ -137,10 +137,12 @@ namespace QueryLayerBuilder
                     query = "SELECT * FROM VelocityVectors " +
                             (String.IsNullOrEmpty(predicate) ? "" : "WHERE " + predicate);
                     geometryType = esriGeometryType.esriGeometryPolyline;
+                    oidFields = "ProjectId,AnimalId,LocalDateTime";
                     break;
                 case "No Movement Points":
                     query = "SELECT * FROM NoMovement " +
                             (String.IsNullOrEmpty(predicate) ? "" : "WHERE " + predicate);
+                    oidFields = "ProjectId,AnimalId,LocalDateTime";
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("name", name, "Unknown layer name");

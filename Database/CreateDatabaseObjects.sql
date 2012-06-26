@@ -2088,9 +2088,9 @@ GO
 CREATE VIEW [dbo].[ValidLocations]
 AS
     SELECT L.FixId
-		  ,L.ProjectId
+          ,L.ProjectId
           ,L.AnimalId
-          --,L.[FixDate]
+          ,L.[FixDate]
           ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
           ,YEAR(L.[FixDate]) as [Year]
           ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
@@ -2181,9 +2181,9 @@ GO
 CREATE VIEW [dbo].[InvalidLocations]
 AS
     SELECT L.FixId
-		  ,L.ProjectId
+          ,L.ProjectId
           ,L.AnimalId
-          --,L.[FixDate]
+          ,L.[FixDate]
           ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
           ,YEAR(L.[FixDate]) as [Year]
           ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
