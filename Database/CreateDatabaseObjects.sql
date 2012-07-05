@@ -1,5 +1,13 @@
 USE [Animal_Movement]
 GO
+CREATE USER [INPAKROMS53AIS\repl_distribution] FOR LOGIN [INPAKROMS53AIS\repl_distribution] WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER [INPAKROMS53AIS\repl_logreader] FOR LOGIN [INPAKROMS53AIS\repl_logreader] WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER [INPAKROMS53AIS\repl_merge] FOR LOGIN [INPAKROMS53AIS\repl_merge] WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER [INPAKROMS53AIS\repl_snapshot] FOR LOGIN [INPAKROMS53AIS\repl_snapshot] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\BAMangipane] FOR LOGIN [NPS\BAMangipane] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\BBorg] FOR LOGIN [NPS\BBorg] WITH DEFAULT_SCHEMA=[dbo]
@@ -21,6 +29,10 @@ GO
 CREATE ROLE [Editor] AUTHORIZATION [dbo]
 GO
 CREATE ROLE [Investigator] AUTHORIZATION [dbo]
+GO
+CREATE ROLE [MSReplPAL_7_1] AUTHORIZATION [dbo]
+GO
+CREATE ROLE [MStran_PAL_role] AUTHORIZATION [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -122,7 +134,7 @@ GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarFiles](
-	[FileId] [int] IDENTITY(1,1) NOT NULL,
+	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[FileName] [nvarchar](255) NOT NULL,
 	[UploadDate] [datetime2](7) NOT NULL,
 	[Project] [varchar](16) NOT NULL,
@@ -189,7 +201,7 @@ GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarFixes](
-	[FixId] [bigint] IDENTITY(1,1) NOT NULL,
+	[FixId] [bigint] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[HiddenBy] [bigint] NULL,
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
@@ -1689,6 +1701,7 @@ GO
 CREATE TABLE [dbo].[LookupQueryLayerServers](
 	[Location] [nvarchar](128) NOT NULL,
 	[Connection] [nvarchar](255) NOT NULL,
+	[Database] [sysname] NULL,
  CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
 (
 	[Location] ASC
@@ -7446,4 +7459,10 @@ GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\JWBurch'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\JPLawler'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'MSReplPAL_7_1', @membername=N'INPAKROMS53AIS\repl_distribution'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'MStran_PAL_role', @membername=N'INPAKROMS53AIS\repl_distribution'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'MStran_PAL_role', @membername=N'MSReplPAL_7_1'
 GO

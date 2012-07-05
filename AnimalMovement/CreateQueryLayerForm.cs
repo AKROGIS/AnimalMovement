@@ -14,8 +14,8 @@ namespace AnimalMovement
 {
     internal partial class CreateQueryLayerForm : BaseForm
     {
-        private const string ArcMapConnectionTemplate = @"dbclient=sqlserver;serverinstance={0};database=Animal_Movement;authentication_mode=OSA";
-        private const string SqlConnectionTemplate = @"Data Source={0};Initial Catalog=Animal_Movement;Integrated Security=True";
+        private const string ArcMapConnectionTemplate = @"dbclient=sqlserver;serverinstance={0};database={1};authentication_mode=OSA";
+        private const string SqlConnectionTemplate = @"Data Source={0};Initial Catalog={1};Integrated Security=True";
         private const string QueryLayerBuilderExe = "QueryLayerBuilder.exe";
 
         private AnimalMovementDataContext Database { get; set; }
@@ -58,7 +58,7 @@ namespace AnimalMovement
             var db = new SettingsDataContext();
             DatabaseComboBox.DataSource = db.LookupQueryLayerServers;
             DatabaseComboBox.DisplayMember = "Location";
-            DatabaseComboBox.ValueMember = "Connection";
+            //DatabaseComboBox.ValueMember = "Connection";
         }
 
         private void LoadProjectsList()
@@ -157,13 +157,14 @@ namespace AnimalMovement
 
         private void GenerateButton_Click(object sender, EventArgs e)
         {
-            string arcMapConnectionString = String.Format(ArcMapConnectionTemplate, DatabaseComboBox.SelectedValue);
+            var server = (LookupQueryLayerServer)DatabaseComboBox.SelectedItem;
+            string arcMapConnectionString = String.Format(ArcMapConnectionTemplate, server.Connection, server.Database);
             string predicate = BuildPredicate();
             if (!String.IsNullOrEmpty(predicate))
             {
                 var sql = "SELECT TOP 1 1 FROM [dbo].[ValidLocations] WHERE " + predicate.Replace("EndLocalDateTime", "LocalDateTime");
 
-                string connectionString = String.Format(SqlConnectionTemplate, DatabaseComboBox.SelectedValue);
+                string connectionString = String.Format(SqlConnectionTemplate, server.Connection, server.Database);
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();

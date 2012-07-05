@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Animal_Movement" Class="SettingsDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKRO39088\SQL2008R2;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
+  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKROMS53AIS;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Settings" Member="Settings">
     <Type Name="Setting">
       <Column Name="Username" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
@@ -21,6 +21,7 @@
     <Type Name="LookupQueryLayerServer">
       <Column Name="Location" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="Connection" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="[Database]" Member="Database" Type="System.String" DbType="NVarChar(128)" CanBeNull="true" />
     </Type>
   </Table>
   <Function Id="FunctionId1" Name="dbo.Settings_Update" Method="Settings_Update">

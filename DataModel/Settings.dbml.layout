@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 12, 8.5" name="Settings">
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11.875, 8.5" name="Settings">
   <DataContextMoniker Name="/SettingsDataContext" />
   <nestedChildShapes>
     <classShape Id="07dde576-6b05-4a9a-8e99-b197ea26fef6" absoluteBounds="6.125, 3.625, 2, 1.3862939453125">
@@ -14,10 +14,10 @@
         <elementListCompartment Id="00c838a9-deb0-49ec-b6e8-6c005d483157" absoluteBounds="9.64, 2.96, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="eed475ad-505a-4cc0-8aa4-93f08d3789b1" absoluteBounds="9.75, 5.875, 2, 1.1939925130208333">
+    <classShape Id="4f745177-b318-4a32-bd78-0108c0b752bc" absoluteBounds="9.625, 5.25, 2, 1.3862939453125">
       <DataClassMoniker Name="/SettingsDataContext/LookupQueryLayerServer" />
       <nestedChildShapes>
-        <elementListCompartment Id="6c058166-510c-4bae-bf22-d479690a0fb2" absoluteBounds="9.765, 6.335, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="c3f2acb4-8434-4040-a4c2-30c720c6109f" absoluteBounds="9.64, 5.71, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
   </nestedChildShapes>
