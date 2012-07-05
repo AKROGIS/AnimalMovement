@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Animal_Movement" Class="AnimalMovementDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKRO39088\SQL2008R2;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
+  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKROMS53AIS;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Animals" Member="Animals">
     <Type Name="Animal">
       <Column Name="ProjectId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="AnimalId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="Species" Type="System.String" DbType="VarChar(32)" CanBeNull="true" />
-      <Column Name="Gender" Type="System.Char" DbType="Char(1)" CanBeNull="true" />
+      <Column Name="Gender" Type="System.String" DbType="varchar(7)" CanBeNull="true" />
       <Column Name="GroupName" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
       <Column Name="Description" Type="System.String" DbType="NVarChar(2000)" CanBeNull="true" />
       <Column Name="MortalityDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
@@ -224,7 +224,7 @@
   </Table>
   <Table Name="dbo.LookupGender" Member="LookupGenders">
     <Type Name="LookupGender">
-      <Column Name="Sex" Type="System.Char" DbType="Char(1) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Sex" Type="System.String" DbType="varchar(7) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Association Name="LookupGender_Animal" Member="Animals" ThisKey="Sex" OtherKey="Gender" Type="Animal" />
     </Type>
   </Table>
@@ -419,26 +419,6 @@
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId1" Name="dbo.Animal_Insert" Method="Animal_Insert">
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Species" Parameter="species" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Gender" Parameter="gender" Type="System.Char" DbType="NChar(1)" />
-    <Parameter Name="MortalityDate" Parameter="mortalityDate" Type="System.DateTime" DbType="DateTime2" />
-    <Parameter Name="GroupName" Parameter="groupName" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
-    <Return Type="System.Int32" />
-  </Function>
-  <Function Id="FunctionId2" Name="dbo.Animal_Update" Method="Animal_Update">
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Species" Parameter="species" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Gender" Parameter="gender" Type="System.Char" DbType="NChar(1)" />
-    <Parameter Name="MortalityDate" Parameter="mortalityDate" Type="System.DateTime" DbType="DateTime2" />
-    <Parameter Name="GroupName" Parameter="groupName" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
-    <Return Type="System.Int32" />
-  </Function>
   <Function Name="dbo.IsFixEditor" Method="IsFixEditor" IsComposable="true">
     <Parameter Name="FixId" Parameter="fixId" Type="System.Int64" DbType="BigInt" />
     <Parameter Name="User" Parameter="user" Type="System.String" DbType="NVarChar(128)" />
@@ -452,6 +432,26 @@
   <Function Id="FunctionId16" Name="dbo.ProjectEditor_Insert" Method="ProjectEditor_Insert">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Editor" Parameter="editor" Type="System.String" DbType="NVarChar(128)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId1" Name="dbo.Animal_Insert" Method="Animal_Insert">
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Species" Parameter="species" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Gender" Parameter="gender" Type="System.String" DbType="NVarChar(7)" />
+    <Parameter Name="MortalityDate" Parameter="mortalityDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="GroupName" Parameter="groupName" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId2" Name="dbo.Animal_Update" Method="Animal_Update">
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Species" Parameter="species" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Gender" Parameter="gender" Type="System.String" DbType="NVarChar(7)" />
+    <Parameter Name="MortalityDate" Parameter="mortalityDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="GroupName" Parameter="groupName" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
     <Return Type="System.Int32" />
   </Function>
 </Database>

@@ -388,7 +388,7 @@ GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupGender](
-	[Sex] [char](1) NOT NULL,
+	[Sex] [varchar](7) NOT NULL,
  CONSTRAINT [PK_LookupSex] PRIMARY KEY CLUSTERED 
 (
 	[Sex] ASC
@@ -423,7 +423,7 @@ CREATE TABLE [dbo].[Animals](
 	[ProjectId] [varchar](16) NOT NULL,
 	[AnimalId] [varchar](16) NOT NULL,
 	[Species] [varchar](32) NULL,
-	[Gender] [char](1) NULL,
+	[Gender] [varchar](7) NOT NULL,
 	[MortalityDate] [datetime2](7) NULL,
 	[GroupName] [nvarchar](500) NULL,
 	[Description] [nvarchar](2000) NULL,
@@ -2873,7 +2873,7 @@ CREATE PROCEDURE [dbo].[Animal_Update]
 	@ProjectId NVARCHAR(255)= NULL,
 	@AnimalId NVARCHAR(255) = NULL, 
 	@Species NVARCHAR(255) = NULL, 
-	@Gender NCHAR(1) = NULL, 
+	@Gender NVARCHAR(7) = NULL, 
 	@MortalityDate DATETIME2(7),
 	@GroupName NVARCHAR(255) = NULL, 
 	@Description NVARCHAR(4000) = NULL 
@@ -2954,7 +2954,7 @@ CREATE PROCEDURE [dbo].[Animal_Insert]
 	@ProjectId NVARCHAR(255)= NULL,
 	@AnimalId NVARCHAR(255) = NULL, 
 	@Species NVARCHAR(255) = NULL, 
-	@Gender NCHAR(1) = NULL, 
+	@Gender NVARCHAR(7) = NULL, 
 	@MortalityDate DATETIME2(7) = NULL, 
 	@GroupName NVARCHAR(255) = NULL, 
 	@Description NVARCHAR(4000) = NULL 
@@ -7247,6 +7247,7 @@ ALTER TABLE [dbo].[LookupCollarFileFormats] CHECK CONSTRAINT [CK_LookupCollarFil
 GO
 ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Gender] FOREIGN KEY([Gender])
 REFERENCES [dbo].[LookupGender] ([Sex])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Gender]
 GO

@@ -200,13 +200,13 @@ namespace DataModel
 		
 		private void InsertAnimal(Animal obj)
 		{
-			this.Animal_Insert(obj.ProjectId, obj.AnimalId, obj.Species, ((System.Nullable<char>)(obj.Gender)), ((System.Nullable<System.DateTime>)(obj.MortalityDate)), obj.GroupName, obj.Description);
+			this.Animal_Insert(obj.ProjectId, obj.AnimalId, obj.Species, obj.Gender, ((System.Nullable<System.DateTime>)(obj.MortalityDate)), obj.GroupName, obj.Description);
 		}
 		
 		private void UpdateAnimal(Animal obj)
 		{
 			Animal original = ((Animal)(Animals.GetOriginalEntityState(obj)));
-			this.Animal_Update(original.ProjectId, original.AnimalId, obj.Species, ((System.Nullable<char>)(obj.Gender)), ((System.Nullable<System.DateTime>)(obj.MortalityDate)), obj.GroupName, obj.Description);
+			this.Animal_Update(original.ProjectId, original.AnimalId, obj.Species, obj.Gender, ((System.Nullable<System.DateTime>)(obj.MortalityDate)), obj.GroupName, obj.Description);
 		}
 		
 		private void DeleteAnimal(Animal obj)
@@ -438,20 +438,6 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Insert")]
-		public int Animal_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Species", DbType="NVarChar(255)")] string species, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Gender", DbType="NChar(1)")] System.Nullable<char> gender, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="MortalityDate", DbType="DateTime2")] System.Nullable<System.DateTime> mortalityDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="GroupName", DbType="NVarChar(255)")] string groupName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Description", DbType="NVarChar(4000)")] string description)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, species, gender, mortalityDate, groupName, description);
-			return ((int)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Update")]
-		public int Animal_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Species", DbType="NVarChar(255)")] string species, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Gender", DbType="NChar(1)")] System.Nullable<char> gender, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="MortalityDate", DbType="DateTime2")] System.Nullable<System.DateTime> mortalityDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="GroupName", DbType="NVarChar(255)")] string groupName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Description", DbType="NVarChar(4000)")] string description)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, species, gender, mortalityDate, groupName, description);
-			return ((int)(result.ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.IsFixEditor", IsComposable=true)]
 		public System.Nullable<bool> IsFixEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FixId", DbType="BigInt")] System.Nullable<long> fixId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
 		{
@@ -471,6 +457,20 @@ namespace DataModel
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, editor);
 			return ((int)(result.ReturnValue));
 		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Insert")]
+		public int Animal_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Species", DbType="NVarChar(255)")] string species, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Gender", DbType="NVarChar(7)")] string gender, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="MortalityDate", DbType="DateTime2")] System.Nullable<System.DateTime> mortalityDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="GroupName", DbType="NVarChar(255)")] string groupName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Description", DbType="NVarChar(4000)")] string description)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, species, gender, mortalityDate, groupName, description);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Update")]
+		public int Animal_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Species", DbType="NVarChar(255)")] string species, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Gender", DbType="NVarChar(7)")] string gender, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="MortalityDate", DbType="DateTime2")] System.Nullable<System.DateTime> mortalityDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="GroupName", DbType="NVarChar(255)")] string groupName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Description", DbType="NVarChar(4000)")] string description)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, species, gender, mortalityDate, groupName, description);
+			return ((int)(result.ReturnValue));
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Animals")]
@@ -485,7 +485,7 @@ namespace DataModel
 		
 		private string _Species;
 		
-		private System.Nullable<char> _Gender;
+		private string _Gender;
 		
 		private string _GroupName;
 		
@@ -511,7 +511,7 @@ namespace DataModel
     partial void OnAnimalIdChanged();
     partial void OnSpeciesChanging(string value);
     partial void OnSpeciesChanged();
-    partial void OnGenderChanging(System.Nullable<char> value);
+    partial void OnGenderChanging(string value);
     partial void OnGenderChanged();
     partial void OnGroupNameChanging(string value);
     partial void OnGroupNameChanged();
@@ -598,8 +598,8 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Gender", DbType="Char(1)")]
-		public System.Nullable<char> Gender
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Gender", DbType="varchar(7)")]
+		public string Gender
 		{
 			get
 			{
@@ -756,7 +756,7 @@ namespace DataModel
 					}
 					else
 					{
-						this._Gender = default(Nullable<char>);
+						this._Gender = default(string);
 					}
 					this.SendPropertyChanged("LookupGender");
 				}
@@ -3019,7 +3019,7 @@ namespace DataModel
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
 		
-		private char _Sex;
+		private string _Sex;
 		
 		private EntitySet<Animal> _Animals;
 		
@@ -3027,7 +3027,7 @@ namespace DataModel
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
     partial void OnCreated();
-    partial void OnSexChanging(char value);
+    partial void OnSexChanging(string value);
     partial void OnSexChanged();
     #endregion
 		
@@ -3037,8 +3037,8 @@ namespace DataModel
 			OnCreated();
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sex", DbType="Char(1) NOT NULL", IsPrimaryKey=true)]
-		public char Sex
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sex", DbType="varchar(7) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string Sex
 		{
 			get
 			{

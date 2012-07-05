@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//TODO - DATABASE - Fix database to use Male/Female/Unknown in LookupGender instead of M/F/U
 //TODO - DATABASE - Add table for Telonics tfp files, each record owned by a PI.
 //TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data
 //TODO - DATABASE - Add lost/disposed date to collar, to filter out 'ignorable' collars
@@ -58,4 +57,4 @@ using System.Runtime.InteropServices;
 // Do not use the auto update of assembly versions, it cuases a reset of settings each time
 // and it isn't really visible.  Update the file version each time a new exe is published. 
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.6")]
+[assembly: AssemblyFileVersion("1.0.0.7")]
