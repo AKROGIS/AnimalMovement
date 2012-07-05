@@ -184,7 +184,11 @@ namespace ArcMap_Addin
             
             var connectionProperties = GetProperties(((IDataset)actionLayer).Workspace.ConnectionProperties);
 
+#if ARCGIS_10_1            
+            string localServer = connectionProperties["SERVER"];
+#else
             string localServer = connectionProperties["SERVERINSTANCE"];
+#endif
             string localDatabase = connectionProperties["DATABASE"];
             string connectionString = string.Format("server={0};Database={1};",
                                                     localServer,
