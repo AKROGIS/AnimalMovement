@@ -2,11 +2,11 @@
   <Name>Animal Movements</Name>
   <AddInID>{7a743a17-871a-419b-bb7a-7bdc33367aa9}</AddInID>
   <Description>Allows editing the status of animal collar location data in a SQL Server Database</Description>
-  <Version>1.0.1</Version>
+  <Version>1.0.2</Version>
   <Image>Images\AnimalTrack.png</Image>
   <Author>Regan Sarwas</Author>
   <Company>National Park Service</Company>
-  <Date>6/19/2012</Date>
+  <Date>7/5/2012</Date>
   <Targets>
     <Target name="Desktop" version="10.0" />
   </Targets>
