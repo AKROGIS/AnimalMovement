@@ -185,9 +185,10 @@ namespace ArcMap_Addin
             var connectionProperties = GetProperties(((IDataset)actionLayer).Workspace.ConnectionProperties);
 
             string localServer = connectionProperties["SERVERINSTANCE"];
+            string localDatabase = connectionProperties["DATABASE"];
             string connectionString = string.Format("server={0};Database={1};",
                                                     localServer,
-                                                    connectionProperties["DATABASE"]);
+                                                    localDatabase);
             if (connectionProperties["AUTHENTICATION_MODE"] == "OSA")
                 connectionString += "Trusted_Connection=True;";
             else
@@ -200,14 +201,15 @@ namespace ArcMap_Addin
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                using (var cmd = new SqlCommand("SELECT [Connection] FROM [Animal_Movement].[dbo].[LookupQueryLayerServers] WHERE [Location] = 'AKRO'", connection))
+                using (var cmd = new SqlCommand("SELECT [Connection],[Database] FROM [dbo].[LookupQueryLayerServers] WHERE [Location] = 'AKRO'", connection))
                 {
                     SqlDataReader reader = cmd.ExecuteReader();
                     if (reader.HasRows)
                     {
                         reader.Read();
                         var masterServer = (string)reader["Connection"];
-                        connectionString = connectionString.Replace(localServer, masterServer);
+                        var masterDatabase = (string)reader["Database"];
+                        connectionString = connectionString.Replace(localServer, masterServer).Replace(localDatabase, masterDatabase);
                     }
                 }
             }
