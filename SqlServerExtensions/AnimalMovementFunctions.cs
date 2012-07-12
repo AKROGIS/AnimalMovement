@@ -145,6 +145,25 @@ namespace SqlServerExtensions
             return GetLines(fileId, 'C', FormatC_LineSelector, FormatC_ColumnSelector);
         }
 
+        [SqlFunction(
+            DataAccess = DataAccessKind.Read,
+            FillRowMethodName = "FormatD_FillRow",
+            TableDefinition =
+                @"[LineNumber] [int],
+	                [TXDate] [nvarchar](50) NULL,
+	                [TXTime] [nvarchar](50) NULL,
+	                [PTTID] [nvarchar](50) NULL,
+	                [FixNum] [nvarchar](50) NULL,
+	                [FixQual] [nvarchar](50) NULL,
+	                [FixDate] [nvarchar](50) NULL,
+	                [FixTime] [nvarchar](50) NULL,
+	                [Longitude] [nvarchar](50) NULL,
+	                [Latitude] [nvarchar](50) NULL")]
+        public static IEnumerable ParseFormatD(SqlInt32 fileId)
+        {
+            return GetLines(fileId, 'D', FormatD_LineSelector, null);
+        }
+
         private struct Line
         {
             internal readonly SqlInt32 LineNumber;
@@ -311,6 +330,15 @@ namespace SqlServerExtensions
         internal static bool FormatC_LineSelector(int lineNumber, string lineText)
         {
             if (lineNumber <= _formatCHeaderLines)
+                return false;
+            if (string.IsNullOrEmpty(lineText.Trim()))
+                return false;
+            return true;
+        }
+
+        internal static bool FormatD_LineSelector(int lineNumber, string lineText)
+        {
+            if (lineNumber == 1)
                 return false;
             if (string.IsNullOrEmpty(lineText.Trim()))
                 return false;
@@ -539,9 +567,79 @@ namespace SqlServerExtensions
         }
 
 
+        public static void FormatD_FillRow(
+            object inputObject,
+            out SqlInt32 lineNumber,
+            out SqlString txDate,
+            out SqlString txTime,
+            out SqlString pttid,
+            out SqlString fixNum,
+            out SqlString fixQual,
+            out SqlString fixDate,
+            out SqlString fixTime,
+            out SqlString longitude,
+            out SqlString latitude)
+        {
+            var line = (Line)inputObject;
+            string[] parts = line.LineText.Split(new[] { '\t', ',' });
+            lineNumber = line.LineNumber;
+            int fileColumn = 0;
+            txDate = NullableString(parts[fileColumn++]);
+            txTime = NullableString(parts[fileColumn++]);
+            pttid = NullableString(parts[fileColumn++]);
+            fixNum = NullableString(parts[fileColumn++]);
+            fixQual = NullableString(parts[fileColumn++]);
+            fixDate = NullableString(parts[fileColumn++]);
+            fixTime = NullableString(parts[fileColumn++]);
+            // Lat/Long are either signed, or have alpha (N,S,E,W) suffix - user options
+            // Convert to signed, so database can assume they are a number.
+            string lon = parts[fileColumn++];
+            string lat = parts[fileColumn];
+            if (String.IsNullOrEmpty(lon))
+            {
+                longitude = SqlString.Null;
+            }
+            else
+            {
+                switch (lon.Last())
+                {
+                    case 'W':
+                        longitude = "-" + lon.Substring(0, lon.Length - 1);
+                        break;
+                    case 'E':
+                        longitude = lon.Substring(0, lon.Length - 1);
+                        break;
+                    default:
+                        longitude = lon;
+                        break;
+                }
+            }
+            if (String.IsNullOrEmpty(lat))
+            {
+                latitude = SqlString.Null;
+            }
+            else
+            {
+                switch (lat.Last())
+                {
+                    case 'S':
+                        latitude = "-" + lat.Substring(0, lat.Length - 1);
+                        break;
+                    case 'N':
+                        latitude = lat.Substring(0, lat.Length - 1);
+                        break;
+                    default:
+                        latitude = lat;
+                        break;
+                }
+            }
+        }
+
+
         private static SqlString NullableString(string s)
         {
-            return String.IsNullOrEmpty(s.Trim()) ? SqlString.Null : s.Trim();
+            var t = s.Trim();
+            return String.IsNullOrEmpty(t) ? SqlString.Null : t;
         }
 
         internal static SqlInt32 NullableInt(string s)
