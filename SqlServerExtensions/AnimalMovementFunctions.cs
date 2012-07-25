@@ -35,11 +35,11 @@ namespace SqlServerExtensions
         [SqlFunction(
             DataAccess = DataAccessKind.Read,
             FillRowMethodName = "FormatA_FillRow",
-            TableDefinition = 
+            TableDefinition =
                 @"[LineNumber] [int],
 	            [Fix #] [nvarchar](50),
-	            [Date] [nchar](10),
-	            [Time] [nchar](8),
+	            [Date] [nvarchar](50),
+	            [Time] [nvarchar](50),
 	            [Fix Status] [nvarchar](50),
 	            [Status Text] [nvarchar](150),
 	            [Velocity East(m s)] [nvarchar](50),
@@ -54,7 +54,7 @@ namespace SqlServerExtensions
 	            [TDOP] [nvarchar](50),
 	            [Temperature Sensor(deg )] [nvarchar](50),
 	            [Activity Sensor] [nvarchar](50),
-	            [Satellite Data] [nvarchar](150)" )]
+	            [Satellite Data] [nvarchar](150)")]
         public static IEnumerable ParseFormatA(SqlInt32 fileId)
         {
             return GetLines(fileId, 'A', FormatA_LineSelector, null);
