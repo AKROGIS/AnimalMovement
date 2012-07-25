@@ -81,14 +81,6 @@ import os
 import arcpy
 
 
-def IsFloat(something):
-    try:
-        float(something)
-    except (ValueError, TypeError):
-        return False
-    return True
-
-
 def GetUDRaster(features, smoothingFactor, cellSize = None):
     cellSize, searchRadius = SetupRaster(features, smoothingFactor, cellSize)
     return GetProbabilityRaster(features, cellSize, searchRadius)
@@ -97,10 +89,10 @@ def GetUDRaster(features, smoothingFactor, cellSize = None):
 def SetupRaster(features, smoothingFactor, cellSize = None):
     envelope = arcpy.Describe(features).Extent
     maxDivisions = 2000
-    if not IsFloat(cellSize):
-        cellSize =  GetCellSize(envelope, maxDivisions)
-    else:
+    try:
         cellSize = float(cellSize) # all parameters from ArcToolbox are text 
+    except (ValueError, TypeError):
+        cellSize =  GetCellSize(envelope, maxDivisions)
     # FIXME explain why r=2*h
     searchRadius = 2 * smoothingFactor
     buffer = searchRadius + cellSize
