@@ -20,6 +20,8 @@ CREATE USER [NPS\JWBurch] FOR LOGIN [NPS\JWBurch] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\KCJoly] FOR LOGIN [NPS\KCJoly] WITH DEFAULT_SCHEMA=[dbo]
 GO
+CREATE USER [NPS\MLJohnson] FOR LOGIN [NPS\MLJohnson] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\SDMiller] WITH DEFAULT_SCHEMA=[dbo]
@@ -481,6 +483,7 @@ GO
 -- Create date: May 30, 2012
 -- Description:	Returns a table of conflicting fixes for a specific collar.
 -- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007')
+-- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations 
 -- =============================================
 CREATE FUNCTION [dbo].[ConflictingFixes] 
 (
@@ -494,8 +497,10 @@ AS
 		FROM CollarFixes AS C
 		INNER JOIN 
 			(SELECT   CollarManufacturer, CollarId, FixDate 
-			 FROM     CollarFixes 
-			 WHERE    CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+			 FROM
+				(SELECT DISTINCT CollarManufacturer, CollarId, FixDate, Lat, Lon
+				 FROM CollarFixes
+			     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId) AS T
 			 GROUP BY CollarManufacturer, CollarId, FixDate
 			 HAVING   COUNT(FixDate) > 1) AS D
 		ON  C.CollarManufacturer = D.CollarManufacturer
@@ -7531,6 +7536,8 @@ GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\JPLawler'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'Investigator'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\MLJohnson'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\SDMiller'
 GO

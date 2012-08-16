@@ -31,3 +31,11 @@ LookupTableData.sql
 	Advanced
 		same as above
 		Types of data to script -> Data Only
+
+Set personal settings in SSMS Tools -> Options
+ under SQL Server Object Explorer -> Scripting
+  set Include descriptive Headers to False
+  set Script extended properties to False
+  set script permissions to True
+  set Script indexes to True
+  set script triggers to True
