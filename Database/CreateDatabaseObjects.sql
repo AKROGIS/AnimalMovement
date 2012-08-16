@@ -3403,20 +3403,87 @@ BEGIN
 	-- Only use FixStatus = Good.
 	-- Exception:  If Fix #1 has been declared Bad, fixes 2-6  must be considered Bad as well even if their status is listed as Good.
 	-- This is necessary since fixes 2-6 are reconstructed using information in Fix #1.
-
-	-- FIXME - Implement the previous exception.
 	
 	-- Date format is YYYY.MM.DD; Time Format is HH:MM, unless there is GPS error information then HH:MM:SS
 	-- Lat/Long are decimal degrees with 4 decimal places, and are either signed, or have alpha (N,S,E,W) suffix - user options
 	-- Lat/Long with Alpha suffix in source file are converted to signed prefix by parser during insert to CollarData table 
 	
 	BEGIN
+		-- find valid packages (sequential fixes 1-6 at a specific date/time)
+		-- turns out transmission date/time is not a unique identifier - there are multiple packages during a transmission.
+		-- need to identify fixes 2-6 that need to be eliminated by location in file; i.e. do not
+		-- add lines 2-6 after a bad fix 1.
+		-- caution: in a package fixes 2 to 6 are optional. 
+		
+		-- step 1 find line numbers for valid first fixes
+		SELECT LineNumber INTO #ValidFirstFix  
+		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3]
+		  WHERE FileId = @FileId and FixNum = 1 and FixQual = 'Good'
+		  
+		-- step 2 find line numbers associated with a good first fixes
+		/*
+		SELECT C.LineNumber INTO #ValidLines  
+		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+		  INNER JOIN  #ValidFirstFix AS F
+		    ON (C.LineNumber = F.LineNumber)
+		    OR (C.LineNumber = F.LineNumber+1 AND C.FixNum = 2)
+		    OR (C.LineNumber = F.LineNumber+2 AND C.FixNum = 3)
+		    OR (C.LineNumber = F.LineNumber+3 AND C.FixNum = 4)
+		    OR (C.LineNumber = F.LineNumber+4 AND C.FixNum = 5)
+		    OR (C.LineNumber = F.LineNumber+5 AND C.FixNum = 6)
+		  WHERE C.FileId = @FileId
+		*/
+		
+	-- By my observations, if any fix is bad, then all subsequent fixes in that package (1-6) are suspect,
+	-- and should be eliminated, hence the new logic below:
+	
+		SELECT LineNumber INTO #ValidLines FROM #ValidFirstFix  
+
+		SELECT C.LineNumber INTO #ValidSecondFix  
+		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+		  INNER JOIN  #ValidFirstFix AS F
+		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 2)
+		  WHERE FileId = @FileId and FixQual <> 'Bad'
+		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidSecondFix  
+
+		SELECT C.LineNumber INTO #ValidThirdFix  
+		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+		  INNER JOIN  #ValidSecondFix AS F
+		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 3)
+		  WHERE FileId = @FileId and FixQual <> 'Bad'
+		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidThirdFix  
+
+		SELECT C.LineNumber INTO #ValidFourthFix  
+		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+		  INNER JOIN  #ValidThirdFix AS F
+		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 4)
+		  WHERE FileId = @FileId and FixQual <> 'Bad'
+		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidFourthFix  
+
+		SELECT C.LineNumber INTO #ValidFifthFix  
+		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+		  INNER JOIN  #ValidFourthFix AS F
+		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 5)
+		  WHERE FileId = @FileId and FixQual <> 'Bad'
+		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidFifthFix  
+
+		SELECT C.LineNumber INTO #ValidSixthFix  
+		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+		  INNER JOIN  #ValidFifthFix AS F
+		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 6)
+		  WHERE FileId = @FileId and FixQual <> 'Bad'
+		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidSixthFix  
+		
+		-- step 3 add valid fixes to the fixes table.
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
 		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
 		        CONVERT(datetime2, I.[FixDate]+ ' ' + ISNULL(I.[FixTime],'')),
 		        CONVERT(float, I.Latitude), CONVERT(float, I.Longitude)
-		   FROM dbo.CollarDataTelonicsGen3 as I INNER JOIN CollarFiles as F 
+		   FROM dbo.CollarDataTelonicsGen3 as I
+		     INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
+		     INNER JOIN #ValidLines AS V
+		     ON I.LineNumber = V.LineNumber
 		  WHERE F.[Status] = 'A'
 		    AND I.FileId = @FileId
 		    AND I.[FixQual] = 'Good'
