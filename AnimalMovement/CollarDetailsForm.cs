@@ -95,7 +95,9 @@ namespace AnimalMovement
             var summary = db.CollarFixSummary(Collar.CollarManufacturer, Collar.CollarId).FirstOrDefault();
             SummaryLabel.Text = summary == null
                               ? "There are NO fixes."
-                              : String.Format("{0} fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last);
+                              : (summary.Count == summary.Unique
+                                 ? String.Format("{0} fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last)
+                                 : String.Format("{3}/{0} unique/total fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last, summary.Unique));
         }
 
         private void SetDeploymentDataGrid()

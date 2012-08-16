@@ -250,21 +250,40 @@ GO
 -- Create date: May 30, 2012
 -- Description:	Returns a row of fix information for a specific collar.
 -- Example:     SELECT * FROM CollarFixSummary('Telonics', '96007')
+-- Modified:    Aug 16, 2012, added Unique field
 -- =============================================
 CREATE FUNCTION [dbo].[CollarFixSummary] 
 (
 	@CollarManufacturer NVARCHAR(255), 
 	@CollarId           NVARCHAR(255)
 )
-RETURNS TABLE 
+RETURNS @summary TABLE
+(
+	[Count] int,
+	[Unique] int,
+	[First] datetime2,
+	[Last] datetime2
+) 
 AS
+BEGIN
+	DECLARE @temp int;
+	
+	SELECT @temp = 1 
+	FROM [dbo].[CollarFixes]
+	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+	GROUP BY FixDate
+	
+	INSERT @summary
+	SELECT  COUNT(*) AS [Count],
+			@@ROWCOUNT AS [Unique],
+			MIN(FixDate) AS [First],
+			MAX(FixDate) AS [Last]
+	FROM [dbo].[CollarFixes]
+	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+	GROUP BY CollarManufacturer, CollarId
+	
 	RETURN
-		SELECT  COUNT(*) AS [Count],
-				MIN(FixDate) AS [First],
-				MAX(FixDate) AS [Last]
-		FROM [dbo].[CollarFixes]
-		WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-		GROUP BY CollarManufacturer, CollarId
+END
 GO
 SET ANSI_NULLS ON
 GO
