@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label10 = new System.Windows.Forms.Label();
             this.DownloadInfoTextBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -62,6 +63,8 @@
             this.DeleteDeploymentButton = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label12 = new System.Windows.Forms.Label();
+            this.DisposalDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.AnimalInfoButton = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -72,8 +75,7 @@
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.FileInfoButton = new System.Windows.Forms.Button();
             this.FilesDataGridView = new System.Windows.Forms.DataGridView();
-            this.label12 = new System.Windows.Forms.Label();
-            this.DisposalDateTimePicker = new System.Windows.Forms.DateTimePicker();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -92,6 +94,7 @@
             this.label10.Size = new System.Drawing.Size(79, 13);
             this.label10.TabIndex = 53;
             this.label10.Text = "Download Info:";
+            this.toolTip1.SetToolTip(this.label10, "Instructions on downloading collar data from mfgr (currently not used)");
             // 
             // DownloadInfoTextBox
             // 
@@ -102,6 +105,7 @@
             this.DownloadInfoTextBox.Name = "DownloadInfoTextBox";
             this.DownloadInfoTextBox.Size = new System.Drawing.Size(378, 20);
             this.DownloadInfoTextBox.TabIndex = 9;
+            this.toolTip1.SetToolTip(this.DownloadInfoTextBox, "Instructions on downloading collar data from mfgr (currently not used)");
             // 
             // label9
             // 
@@ -130,6 +134,7 @@
             this.label8.Size = new System.Drawing.Size(76, 13);
             this.label8.TabIndex = 49;
             this.label8.Text = "Serial Number:";
+            this.toolTip1.SetToolTip(this.label8, "For Telonics collars this is the same as the ID (optional)");
             // 
             // SerialNumberTextBox
             // 
@@ -140,6 +145,7 @@
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
             this.SerialNumberTextBox.Size = new System.Drawing.Size(154, 20);
             this.SerialNumberTextBox.TabIndex = 7;
+            this.toolTip1.SetToolTip(this.SerialNumberTextBox, "For Telonics collars this is the same as the ID (optional)");
             // 
             // label7
             // 
@@ -150,6 +156,7 @@
             this.label7.Size = new System.Drawing.Size(41, 13);
             this.label7.TabIndex = 47;
             this.label7.Text = "Owner:";
+            this.toolTip1.SetToolTip(this.label7, "This should be an organization (NPS, FWS, USGS, AKF&G,  etc)");
             // 
             // label6
             // 
@@ -159,6 +166,7 @@
             this.label6.Size = new System.Drawing.Size(72, 13);
             this.label6.TabIndex = 46;
             this.label6.Text = "Alternative Id:";
+            this.toolTip1.SetToolTip(this.label6, "For Telonics collars this is the Argos Id");
             // 
             // ManagerComboBox
             // 
@@ -170,6 +178,7 @@
             this.ManagerComboBox.Name = "ManagerComboBox";
             this.ManagerComboBox.Size = new System.Drawing.Size(154, 21);
             this.ManagerComboBox.TabIndex = 3;
+            this.toolTip1.SetToolTip(this.ManagerComboBox, "If you assign this collar to another PI you will not be able to edit it.");
             // 
             // ModelComboBox
             // 
@@ -180,6 +189,7 @@
             this.ModelComboBox.Name = "ModelComboBox";
             this.ModelComboBox.Size = new System.Drawing.Size(153, 21);
             this.ModelComboBox.TabIndex = 4;
+            this.toolTip1.SetToolTip(this.ModelComboBox, "Required, but currently not used.");
             // 
             // label3
             // 
@@ -209,6 +219,7 @@
             this.OwnerTextBox.Name = "OwnerTextBox";
             this.OwnerTextBox.Size = new System.Drawing.Size(153, 20);
             this.OwnerTextBox.TabIndex = 6;
+            this.toolTip1.SetToolTip(this.OwnerTextBox, "This should be an organization (NPS, FWS, USGS, AKF&G,  etc)");
             // 
             // CollarIdTextBox
             // 
@@ -230,6 +241,7 @@
             this.AlternativeIdTextBox.Name = "AlternativeIdTextBox";
             this.AlternativeIdTextBox.Size = new System.Drawing.Size(154, 20);
             this.AlternativeIdTextBox.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.AlternativeIdTextBox, "For Telonics collars this is the Argos Id");
             // 
             // label5
             // 
@@ -249,6 +261,7 @@
             this.label4.Size = new System.Drawing.Size(39, 13);
             this.label4.TabIndex = 36;
             this.label4.Text = "Model:";
+            this.toolTip1.SetToolTip(this.label4, "Required, but currently not used.");
             // 
             // label2
             // 
@@ -268,6 +281,7 @@
             this.label1.Size = new System.Drawing.Size(52, 13);
             this.label1.TabIndex = 34;
             this.label1.Text = "Manager:";
+            this.toolTip1.SetToolTip(this.label1, "If you assign this collar to another PI you will not be able to edit it.");
             // 
             // DoneCancelButton
             // 
@@ -466,6 +480,32 @@
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(8, 88);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(76, 13);
+            this.label12.TabIndex = 82;
+            this.label12.Text = "Disposal Date:";
+            this.toolTip1.SetToolTip(this.label12, "The date the collar was lost, destroyed, or retired");
+            // 
+            // DisposalDateTimePicker
+            // 
+            this.DisposalDateTimePicker.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.DisposalDateTimePicker.Checked = false;
+            this.DisposalDateTimePicker.CustomFormat = " ";
+            this.DisposalDateTimePicker.Enabled = false;
+            this.DisposalDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.DisposalDateTimePicker.Location = new System.Drawing.Point(90, 85);
+            this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
+            this.DisposalDateTimePicker.ShowCheckBox = true;
+            this.DisposalDateTimePicker.Size = new System.Drawing.Size(378, 20);
+            this.DisposalDateTimePicker.TabIndex = 81;
+            this.toolTip1.SetToolTip(this.DisposalDateTimePicker, "The date the collar was lost, destroyed, or retired");
+            this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.AnimalInfoButton);
@@ -475,7 +515,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(476, 215);
+            this.tabPage2.Size = new System.Drawing.Size(476, 282);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Animals";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -500,7 +540,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(476, 215);
+            this.tabPage3.Size = new System.Drawing.Size(476, 282);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Fixes";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -563,7 +603,7 @@
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(476, 215);
+            this.tabPage4.Size = new System.Drawing.Size(476, 282);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Files";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -599,30 +639,6 @@
             this.FilesDataGridView.Size = new System.Drawing.Size(462, 172);
             this.FilesDataGridView.TabIndex = 0;
             this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(8, 88);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(76, 13);
-            this.label12.TabIndex = 82;
-            this.label12.Text = "Disposal Date:";
-            // 
-            // DisposalDateTimePicker
-            // 
-            this.DisposalDateTimePicker.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.DisposalDateTimePicker.Checked = false;
-            this.DisposalDateTimePicker.CustomFormat = " ";
-            this.DisposalDateTimePicker.Enabled = false;
-            this.DisposalDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.DisposalDateTimePicker.Location = new System.Drawing.Point(90, 85);
-            this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
-            this.DisposalDateTimePicker.ShowCheckBox = true;
-            this.DisposalDateTimePicker.Size = new System.Drawing.Size(378, 20);
-            this.DisposalDateTimePicker.TabIndex = 81;
-            this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
             // 
             // CollarDetailsForm
             // 
@@ -701,5 +717,6 @@
         private System.Windows.Forms.Button FileInfoButton;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.DateTimePicker DisposalDateTimePicker;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
