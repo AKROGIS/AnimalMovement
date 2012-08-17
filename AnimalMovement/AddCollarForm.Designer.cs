@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.cancelButton = new System.Windows.Forms.Button();
             this.CreateButton = new System.Windows.Forms.Button();
             this.NotesTextBox = new System.Windows.Forms.TextBox();
@@ -50,6 +51,7 @@
             this.FrequencyTextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.DownloadInfoTextBox = new System.Windows.Forms.TextBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // cancelButton
@@ -94,6 +96,7 @@
             this.OwnerTextBox.Name = "OwnerTextBox";
             this.OwnerTextBox.Size = new System.Drawing.Size(259, 20);
             this.OwnerTextBox.TabIndex = 14;
+            this.toolTip1.SetToolTip(this.OwnerTextBox, "This should be an organization (NPS, FWS, USGS, AKF&G,  etc)");
             // 
             // CollarIdTextBox
             // 
@@ -104,6 +107,8 @@
             this.CollarIdTextBox.Name = "CollarIdTextBox";
             this.CollarIdTextBox.Size = new System.Drawing.Size(257, 20);
             this.CollarIdTextBox.TabIndex = 13;
+            this.toolTip1.SetToolTip(this.CollarIdTextBox, "Unique identifier provided by manufacturer.\r\nFor Telonics this is the CTN number." +
+        "");
             this.CollarIdTextBox.TextChanged += new System.EventHandler(this.CollarIdTextBox_TextChanged);
             // 
             // AlternativeIdTextBox
@@ -115,6 +120,7 @@
             this.AlternativeIdTextBox.Name = "AlternativeIdTextBox";
             this.AlternativeIdTextBox.Size = new System.Drawing.Size(259, 20);
             this.AlternativeIdTextBox.TabIndex = 15;
+            this.toolTip1.SetToolTip(this.AlternativeIdTextBox, "For Telonics collars this is the Argos Id");
             // 
             // label5
             // 
@@ -133,6 +139,7 @@
             this.label4.Size = new System.Drawing.Size(39, 13);
             this.label4.TabIndex = 14;
             this.label4.Text = "Model:";
+            this.toolTip1.SetToolTip(this.label4, "Required, but currently not used.");
             // 
             // label2
             // 
@@ -142,6 +149,8 @@
             this.label2.Size = new System.Drawing.Size(48, 13);
             this.label2.TabIndex = 13;
             this.label2.Text = "Collar Id:";
+            this.toolTip1.SetToolTip(this.label2, "Unique identifier provided by manufacturer.\r\nFor Telonics this is the CTN number." +
+        "");
             // 
             // label1
             // 
@@ -151,6 +160,7 @@
             this.label1.Size = new System.Drawing.Size(52, 13);
             this.label1.TabIndex = 12;
             this.label1.Text = "Manager:";
+            this.toolTip1.SetToolTip(this.label1, "If you assign this collar to another PI you will not be able to edit it.");
             // 
             // ManufacturerComboBox
             // 
@@ -183,6 +193,7 @@
             this.ModelComboBox.Name = "ModelComboBox";
             this.ModelComboBox.Size = new System.Drawing.Size(259, 21);
             this.ModelComboBox.TabIndex = 12;
+            this.toolTip1.SetToolTip(this.ModelComboBox, "Required, but currently not used.");
             this.ModelComboBox.SelectedIndexChanged += new System.EventHandler(this.ModelComboBox_SelectedIndexChanged);
             // 
             // ManagerComboBox
@@ -195,6 +206,7 @@
             this.ManagerComboBox.Name = "ManagerComboBox";
             this.ManagerComboBox.Size = new System.Drawing.Size(259, 21);
             this.ManagerComboBox.TabIndex = 10;
+            this.toolTip1.SetToolTip(this.ManagerComboBox, "If you assign this collar to another PI you will not be able to edit it.");
             this.ManagerComboBox.SelectedIndexChanged += new System.EventHandler(this.ManagerComboBox_SelectedIndexChanged);
             // 
             // label6
@@ -205,6 +217,7 @@
             this.label6.Size = new System.Drawing.Size(72, 13);
             this.label6.TabIndex = 26;
             this.label6.Text = "Alternative Id:";
+            this.toolTip1.SetToolTip(this.label6, "For Telonics collars this is the Argos Id");
             // 
             // label7
             // 
@@ -214,6 +227,7 @@
             this.label7.Size = new System.Drawing.Size(41, 13);
             this.label7.TabIndex = 27;
             this.label7.Text = "Owner:";
+            this.toolTip1.SetToolTip(this.label7, "This should be an organization (NPS, FWS, USGS, AKF&G,  etc)");
             // 
             // label8
             // 
@@ -223,6 +237,7 @@
             this.label8.Size = new System.Drawing.Size(76, 13);
             this.label8.TabIndex = 29;
             this.label8.Text = "Serial Number:";
+            this.toolTip1.SetToolTip(this.label8, "For Telonics collars this is the same as the ID (optional)");
             // 
             // SerialNumberTextBox
             // 
@@ -233,6 +248,7 @@
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
             this.SerialNumberTextBox.Size = new System.Drawing.Size(259, 20);
             this.SerialNumberTextBox.TabIndex = 16;
+            this.toolTip1.SetToolTip(this.SerialNumberTextBox, "For Telonics collars this is the same as the ID (optional)");
             // 
             // label9
             // 
@@ -261,6 +277,7 @@
             this.label10.Size = new System.Drawing.Size(79, 13);
             this.label10.TabIndex = 33;
             this.label10.Text = "Download Info:";
+            this.toolTip1.SetToolTip(this.label10, "Instructions on downloading collar data from mfgr (currently not used)");
             // 
             // DownloadInfoTextBox
             // 
@@ -271,6 +288,7 @@
             this.DownloadInfoTextBox.Name = "DownloadInfoTextBox";
             this.DownloadInfoTextBox.Size = new System.Drawing.Size(259, 20);
             this.DownloadInfoTextBox.TabIndex = 18;
+            this.toolTip1.SetToolTip(this.DownloadInfoTextBox, "Instructions on downloading collar data from mfgr (currently not used)");
             // 
             // AddCollarForm
             // 
@@ -334,6 +352,7 @@
         private System.Windows.Forms.TextBox FrequencyTextBox;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox DownloadInfoTextBox;
+        private System.Windows.Forms.ToolTip toolTip1;
 
     }
 }
