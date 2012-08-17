@@ -54,6 +54,8 @@ namespace AnimalMovement
                                 join deployment in Database.CollarDeployments
                                   on collar equals deployment.Collar into deployments
                                where collar.LookupCollarManufacturer == Manufacturer &&
+                                     //skip this check since we can deploy a disposed collar as long as deployDate < DisposalDate
+                                     //collar.DisposalDate == null &&
                                      (Animal.Project.ProjectInvestigator1 == collar.ProjectInvestigator) &&
                                      deployments.All(d => d.RetrievalDate != null)
                               select collar;

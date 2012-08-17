@@ -46,7 +46,7 @@
             this.AddCollarButton = new System.Windows.Forms.Button();
             this.ProjectsListBox = new System.Windows.Forms.ListBox();
             this.ProjectsListLabel = new System.Windows.Forms.Label();
-            this.CollarsListBox = new System.Windows.Forms.ListBox();
+            this.CollarsListBox = new AnimalMovement.ColoredListBox();
             this.CollarsListLabel = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -372,7 +372,7 @@
         private System.Windows.Forms.Button AddCollarButton;
         private System.Windows.Forms.ListBox ProjectsListBox;
         private System.Windows.Forms.Label ProjectsListLabel;
-        private System.Windows.Forms.ListBox CollarsListBox;
+        private ColoredListBox CollarsListBox;
         private System.Windows.Forms.Label CollarsListLabel;
         private System.Windows.Forms.SplitContainer splitContainer1;
     }

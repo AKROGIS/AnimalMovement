@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//TODO - DATABASE - convert all dates to UTC (database should store all dates in UTC)
+//TODO - DATABASE - Convert all dates to UTC (database should store all dates in UTC)
+//TODO - DATABASE - Add business logic to ensure that all Deployments.Collar.DeploymentDate < Collar.DisposalDate
+//TODO - DATABASE - Add logic to limit collar fixes to those before the Collar.DisposalDate
 //TODO - DATABASE - Add table for Telonics tfp files, each record owned by a PI.
 //TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data
-//TODO - DATABASE - Add lost/disposed date to collar, to filter out 'ignorable' collars
 //TODO - DATABASE - Move collar deployment date checking from Stored procedure to trigger to protect against SA and to allow bulk uploading.
 //TODO - DATABASE - Add more unit testing.
 
@@ -59,4 +60,4 @@ using System.Runtime.InteropServices;
 // Do not use the auto update of assembly versions, it cuases a reset of settings each time
 // and it isn't really visible.  Update the file version each time a new exe is published. 
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.7")]
+[assembly: AssemblyFileVersion("1.0.0.8")]

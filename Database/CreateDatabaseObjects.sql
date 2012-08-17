@@ -187,6 +187,7 @@ CREATE TABLE [dbo].[Collars](
 	[Frequency] [float] NULL,
 	[DownloadInfo] [varchar](200) NULL,
 	[Notes] [nvarchar](max) NULL,
+	[DisposalDate] [datetime2](7) NULL,
  CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
 (
 	[CollarManufacturer] ASC,
@@ -3629,7 +3630,8 @@ CREATE PROCEDURE [dbo].[Collar_Update]
 	@SerialNumber NVARCHAR(255) = NULL, 
 	@Frequency FLOAT = NULL, 
 	@DownloadInfo NVARCHAR(255) = NULL, 
-	@Notes NVARCHAR(max) = NULL 
+	@Notes NVARCHAR(max) = NULL,
+	@DisposalDate DATETIME2(7) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -3650,7 +3652,7 @@ BEGIN
 	-- The caller must be the Manager of the collar
 	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
 	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manger of this collar ('+@CollarManufacturer+'/'+@CollarId+') to update it.';
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manager of this collar ('+@CollarManufacturer+'/'+@CollarId+') to update it.';
 		RAISERROR(@message1, 18, 0)
 		RETURN (1)
 	END
@@ -3707,7 +3709,8 @@ BEGIN
 						   [SerialNumber] = nullif(@SerialNumber,''),
 						   [Frequency] = nullif(@Frequency,0),
 						   [DownloadInfo] = nullif(@DownloadInfo,''),
-						   [Notes] = nullif(@Notes,'')
+						   [Notes] = nullif(@Notes,''),
+						   [DisposalDate] = @DisposalDate
 					 WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 
 END
@@ -3730,7 +3733,8 @@ CREATE PROCEDURE [dbo].[Collar_Insert]
 	@SerialNumber NVARCHAR(255) = NULL, 
 	@Frequency FLOAT = NULL, 
 	@DownloadInfo NVARCHAR(255) = NULL, 
-	@Notes NVARCHAR(max) = NULL 
+	@Notes NVARCHAR(max) = NULL,
+	@DisposalDate DATETIME2(7) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -3751,10 +3755,10 @@ BEGIN
 	
 	--All other verification is handled by primary/foreign key and column constraints.
 	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Owner],  
-							 [AlternativeId], [SerialNumber], [Frequency], [DownloadInfo], [Notes])
+							 [AlternativeId], [SerialNumber], [Frequency], [DownloadInfo], [Notes], [DisposalDate])
 			 VALUES (nullif(@CollarManufacturer,''), nullif(@CollarId,''), nullif(@CollarModel,''),
 					 nullif(@Owner,''), nullif(@AlternativeId,''), nullif(@SerialNumber,''),
-					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''))
+					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''), @DisposalDate)
 END
 GO
 SET ANSI_NULLS ON

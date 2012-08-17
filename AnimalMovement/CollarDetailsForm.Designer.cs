@@ -72,6 +72,8 @@
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.FileInfoButton = new System.Windows.Forms.Button();
             this.FilesDataGridView = new System.Windows.Forms.DataGridView();
+            this.label12 = new System.Windows.Forms.Label();
+            this.DisposalDateTimePicker = new System.Windows.Forms.DateTimePicker();
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -85,7 +87,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(7, 88);
+            this.label10.Location = new System.Drawing.Point(7, 114);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(79, 13);
             this.label10.TabIndex = 53;
@@ -95,7 +97,7 @@
             // 
             this.DownloadInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.DownloadInfoTextBox.Location = new System.Drawing.Point(90, 85);
+            this.DownloadInfoTextBox.Location = new System.Drawing.Point(90, 111);
             this.DownloadInfoTextBox.MaxLength = 200;
             this.DownloadInfoTextBox.Name = "DownloadInfoTextBox";
             this.DownloadInfoTextBox.Size = new System.Drawing.Size(378, 20);
@@ -193,10 +195,10 @@
             this.NotesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.NotesTextBox.Location = new System.Drawing.Point(90, 111);
+            this.NotesTextBox.Location = new System.Drawing.Point(90, 137);
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
-            this.NotesTextBox.Size = new System.Drawing.Size(378, 67);
+            this.NotesTextBox.Size = new System.Drawing.Size(378, 108);
             this.NotesTextBox.TabIndex = 10;
             // 
             // OwnerTextBox
@@ -232,7 +234,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(48, 114);
+            this.label5.Location = new System.Drawing.Point(48, 140);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(38, 13);
             this.label5.TabIndex = 37;
@@ -271,7 +273,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(90, 184);
+            this.DoneCancelButton.Location = new System.Drawing.Point(90, 251);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 20;
@@ -284,7 +286,7 @@
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
             this.EditSaveButton.Enabled = false;
-            this.EditSaveButton.Location = new System.Drawing.Point(393, 184);
+            this.EditSaveButton.Location = new System.Drawing.Point(393, 251);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 26;
@@ -431,11 +433,13 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 33);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(484, 241);
+            this.tabControl1.Size = new System.Drawing.Size(484, 308);
             this.tabControl1.TabIndex = 54;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.label12);
+            this.tabPage1.Controls.Add(this.DisposalDateTimePicker);
             this.tabPage1.Controls.Add(this.NotesTextBox);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.DoneCancelButton);
@@ -457,7 +461,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(476, 215);
+            this.tabPage1.Size = new System.Drawing.Size(476, 282);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -596,11 +600,35 @@
             this.FilesDataGridView.TabIndex = 0;
             this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(8, 88);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(76, 13);
+            this.label12.TabIndex = 82;
+            this.label12.Text = "Disposal Date:";
+            // 
+            // DisposalDateTimePicker
+            // 
+            this.DisposalDateTimePicker.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.DisposalDateTimePicker.Checked = false;
+            this.DisposalDateTimePicker.CustomFormat = " ";
+            this.DisposalDateTimePicker.Enabled = false;
+            this.DisposalDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.DisposalDateTimePicker.Location = new System.Drawing.Point(90, 85);
+            this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
+            this.DisposalDateTimePicker.ShowCheckBox = true;
+            this.DisposalDateTimePicker.Size = new System.Drawing.Size(378, 20);
+            this.DisposalDateTimePicker.TabIndex = 81;
+            this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
+            // 
             // CollarDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 274);
+            this.ClientSize = new System.Drawing.Size(484, 341);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.ManufacturerTextBox);
             this.Controls.Add(this.label3);
@@ -671,5 +699,7 @@
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.DataGridView FilesDataGridView;
         private System.Windows.Forms.Button FileInfoButton;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.DateTimePicker DisposalDateTimePicker;
     }
 }

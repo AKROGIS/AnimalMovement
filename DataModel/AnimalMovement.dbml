@@ -151,6 +151,7 @@
       <Column Name="Frequency" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="DownloadInfo" Type="System.String" DbType="VarChar(200)" CanBeNull="true" />
       <Column Name="Notes" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="DisposalDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Association Name="Collar_CollarDeployment" Member="CollarDeployments" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarDeployment" />
       <Association Name="Collar_CollarFix" Member="CollarFixes" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarFix" />
       <Association Name="LookupCollarManufacturer_Collar" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
@@ -167,6 +168,7 @@
       <Argument Parameter="frequency" Member="Frequency" />
       <Argument Parameter="downloadInfo" Member="DownloadInfo" />
       <Argument Parameter="notes" Member="Notes" />
+      <Argument Parameter="disposalDate" Member="DisposalDate" />
     </InsertFunction>
     <UpdateFunction FunctionId="FunctionId14">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" Version="Original" />
@@ -179,6 +181,7 @@
       <Argument Parameter="frequency" Member="Frequency" />
       <Argument Parameter="downloadInfo" Member="DownloadInfo" />
       <Argument Parameter="notes" Member="Notes" />
+      <Argument Parameter="disposalDate" Member="DisposalDate" />
     </UpdateFunction>
     <DeleteFunction FunctionId="FunctionId15">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" Version="Original" />
@@ -300,6 +303,7 @@
     <Parameter Name="Frequency" Parameter="frequency" Type="System.Double" DbType="Float" />
     <Parameter Name="DownloadInfo" Parameter="downloadInfo" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Notes" Parameter="notes" Type="System.String" DbType="NVarChar(MAX)" />
+    <Parameter Name="DisposalDate" Parameter="disposalDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
   <Function Id="FunctionId14" Name="dbo.Collar_Update" Method="Collar_Update">
@@ -313,6 +317,7 @@
     <Parameter Name="Frequency" Parameter="frequency" Type="System.Double" DbType="Float" />
     <Parameter Name="DownloadInfo" Parameter="downloadInfo" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Notes" Parameter="notes" Type="System.String" DbType="NVarChar(MAX)" />
+    <Parameter Name="DisposalDate" Parameter="disposalDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
   <Function Id="FunctionId12" Name="dbo.CollarDeployment_Delete" Method="CollarDeployment_Delete">

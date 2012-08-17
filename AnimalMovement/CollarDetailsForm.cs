@@ -128,6 +128,10 @@ namespace AnimalMovement
             Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull() ?? 0;
             Collar.DownloadInfo = DownloadInfoTextBox.Text;
             Collar.Notes = NotesTextBox.Text;
+            if (DisposalDateTimePicker.Checked)
+                Collar.DisposalDate = DisposalDateTimePicker.Value;
+            else
+                Collar.DisposalDate = null;
         }
 
         private void EnableForm()
@@ -147,6 +151,7 @@ namespace AnimalMovement
             OwnerTextBox.Enabled = editModeEnabled;
             SerialNumberTextBox.Enabled = editModeEnabled;
             FrequencyTextBox.Enabled = editModeEnabled;
+            DisposalDateTimePicker.Enabled = editModeEnabled;
             DownloadInfoTextBox.Enabled = editModeEnabled;
             NotesTextBox.Enabled = editModeEnabled;
 
@@ -330,11 +335,35 @@ namespace AnimalMovement
             SetFixesGrid();
         }
 
+        private void DisposalDateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
+            DisposalDateTimePicker.CustomFormat = DisposalDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
+        }
+
         private void OnDatabaseChanged()
         {
             EventHandler handle = DatabaseChanged;
             if (handle != null)
                 handle(this, EventArgs.Empty);
         }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (Collar.DisposalDate == null)
+            {
+                var now = DateTime.Now;
+                DisposalDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day);
+                DisposalDateTimePicker.Checked = false;
+                DisposalDateTimePicker.CustomFormat = " ";
+            }
+            else
+            {
+                DisposalDateTimePicker.Checked = true;
+                DisposalDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
+                DisposalDateTimePicker.Value = Collar.DisposalDate.Value;
+            }
+        }
+
     }
 }
