@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using DataModel;
 using System.Linq;
@@ -82,16 +83,22 @@ namespace AnimalMovement
         {
             var query = from collar in Database.Collars
                                         where collar.ProjectInvestigator == Investigator
-                                        orderby collar.CollarManufacturer , collar.CollarId
+                                        //orderby collar.CollarManufacturer , collar.CollarId
                                         select new CollarListItem
                                                    {
                                                        Collar = collar,
                                                        Name = BuildCollarText(collar),
                                                        CanDelete = CanDeleteCollar(collar)
                                                    };
-            var sortedList = query.ToList();
+            var sortedList = query.OrderBy(c => c.Collar.DisposalDate != null).ThenBy(c => c.Collar.CollarManufacturer).ThenBy(c => c.Collar.CollarId).ToList();
             CollarsListBox.DataSource = sortedList;
             CollarsListBox.DisplayMember = "Name";
+            CollarsListBox.ClearItemColors();
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (sortedList[i].Collar.DisposalDate != null)
+                    CollarsListBox.SetItemColor(i, Color.DarkGray);
+            }
             CollarsListLabel.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
         }
 
@@ -126,6 +133,8 @@ namespace AnimalMovement
             var animal = animals.FirstOrDefault();
             if (animal != null)
                 name += " on " + animal;
+            if (collar.DisposalDate != null)
+                name = String.Format("{0} (disp:{1:M/d/yy})", name, collar.DisposalDate);
             return name;
         }
 
@@ -227,14 +236,9 @@ namespace AnimalMovement
 
         private void InfoProjectButton_Click(object sender, EventArgs e)
         {
-            var savedIndex = ProjectsListBox.SelectedIndex;
             var project = ((ProjectListItem)ProjectsListBox.SelectedItem).Project;
             var form = new ProjectDetailsForm(project.ProjectId, CurrentUser);
-            form.DatabaseChanged += (o, args) =>
-            {
-                LoadProjectList();
-                ProjectsListBox.SelectedIndex = savedIndex;
-            };
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }
 
@@ -266,14 +270,9 @@ namespace AnimalMovement
 
         private void InfoCollarButton_Click(object sender, EventArgs e)
         {
-            var savedIndex = ProjectsListBox.SelectedIndex;
             var collar = ((CollarListItem)CollarsListBox.SelectedItem).Collar;
             var form = new CollarDetailsForm(collar.CollarManufacturer, collar.CollarId, CurrentUser);
-            form.DatabaseChanged += (o, args) =>
-            {
-                LoadCollarList();
-                CollarsListBox.SelectedIndex = savedIndex;
-            };
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }
 
