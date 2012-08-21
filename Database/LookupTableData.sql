@@ -27,6 +27,7 @@ INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [D
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [TableName], [HasCollarIdColumn]) VALUES (N'C', N'Telonics', N'Telonics Gen4 Condensed Output', N'This is the output file from the Telonics convertor', N'CollarDataTelonicsGen4Condensed', N'N')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [TableName], [HasCollarIdColumn]) VALUES (N'D', N'Telonics', N'Telonics Gen3', N' Output from the ADC-T03 software', N'CollarDataTelonicsGen3', N'N')
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat]) VALUES (N'CollarID,', N'B')
+INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat]) VALUES (N'Fix #	Date	Time	Fix Status	Status Text	Velocity East(m/s)	Velocity North(m/s)	Velocity Up(m/s)	Latitude	Longitude	Altitude(m)	PDOP	HDOP	VDOP	TDOP	Temperature Sensor(deg.)	Activity Sensor	Satellite Data', N'A')
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat]) VALUES (N'Fix #,Date,Time,Fix Status,Status Text,Velocity East(m/s),Velocity North(m/s),Velocity Up(m/s),Latitude,Longitude,Altitude(m),PDOP,HDOP,VDOP,TDOP,Temperature Sensor(deg.),Activity Sensor,Satellite Data,', N'A')
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat]) VALUES (N'Telonics Data Report', N'C')
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat]) VALUES (N'TXDate,TXTime,PTTID,FixNum,FixQual,FixDate,FixTime,Longitude,Latitude', N'D')
