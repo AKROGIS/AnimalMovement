@@ -2083,8 +2083,8 @@ GO
 CREATE VIEW [dbo].[AnimalFixesByFile]
 AS
 SELECT     dbo.CollarFixes.FileId, dbo.LookupCollarManufacturers.Name AS Manufacturer, dbo.CollarFixes.CollarId, dbo.Projects.ProjectName AS Project, 
-                      dbo.CollarDeployments.AnimalId, MIN(dbo.CollarFixes.FixDate) AS [First Fix], MAX(dbo.CollarFixes.FixDate) AS [Last Fix], COUNT(dbo.CollarFixes.FixDate) 
-                      AS [Number of Fixes]
+           dbo.CollarDeployments.AnimalId, dbo.LocalTime(MIN(dbo.CollarFixes.FixDate)) AS [First Fix],
+           dbo.LocalTime(MAX(dbo.CollarFixes.FixDate)) AS [Last Fix], COUNT(dbo.CollarFixes.FixDate) AS [Number of Fixes]
 FROM         dbo.CollarFixes INNER JOIN
                       dbo.CollarDeployments ON dbo.CollarFixes.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
                       dbo.CollarFixes.CollarId = dbo.CollarDeployments.CollarId AND dbo.CollarFixes.FixDate > dbo.CollarDeployments.DeploymentDate AND 

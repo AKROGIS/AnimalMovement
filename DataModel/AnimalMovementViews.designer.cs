@@ -393,7 +393,7 @@ namespace DataModel
 		
 		private int _LineNumber;
 		
-		private System.DateTime _FixDate;
+		private System.Nullable<System.DateTime> _LocalFixTime;
 		
 		private double _Lat;
 		
@@ -467,18 +467,18 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FixDate", DbType="DateTime2 NOT NULL")]
-		public System.DateTime FixDate
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LocalFixTime", DbType="DateTime")]
+		public System.Nullable<System.DateTime> LocalFixTime
 		{
 			get
 			{
-				return this._FixDate;
+				return this._LocalFixTime;
 			}
 			set
 			{
-				if ((this._FixDate != value))
+				if ((this._LocalFixTime != value))
 				{
-					this._FixDate = value;
+					this._LocalFixTime = value;
 				}
 			}
 		}

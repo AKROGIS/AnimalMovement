@@ -33,7 +33,7 @@
       <Column Name="HiddenBy" Type="System.Int64" DbType="BigInt" CanBeNull="true" />
       <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="LineNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="FixDate" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
+      <Column Name="LocalFixTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
       <Column Name="Lat" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Column Name="Lon" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
     </ElementType>
