@@ -12,13 +12,13 @@ namespace AnimalMovement
             InitializeComponent();
             RestoreWindow();
             Deployment = deployment;
-            RetrievalDateTimePicker.Value = DateTime.Now;
+            RetrievalDateTimePicker.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 12, 0, 0);
             EnableForm();
         }
 
         private void EnableForm()
         {
-            CreateButton.Enabled = RetrievalDateTimePicker.Value > Deployment.DeploymentDate;
+            CreateButton.Enabled = RetrievalDateTimePicker.Value.ToUniversalTime() > Deployment.DeploymentDate;
         }
 
         private void RetrievalDateTimePicker_ValueChanged(object sender, EventArgs e)
@@ -28,7 +28,7 @@ namespace AnimalMovement
 
         private void CreateButton_Click(object sender, EventArgs e)
         {
-            Deployment.RetrievalDate = RetrievalDateTimePicker.Value;
+            Deployment.RetrievalDate = RetrievalDateTimePicker.Value.ToUniversalTime();
         }
     }
 }

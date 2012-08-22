@@ -100,7 +100,7 @@ namespace AnimalMovement
                 AnimalId = AnimalIdTextBox.Text,
                 LookupGender = (LookupGender)GenderComboBox.SelectedItem,
                 LookupSpecies = (LookupSpecies)SpeciesComboBox.SelectedItem,
-                MortalityDate = MortatlityDateTimePicker.Checked ? MortatlityDateTimePicker.Value : (DateTime?)null,
+                MortalityDate = MortatlityDateTimePicker.Checked ? MortatlityDateTimePicker.Value.ToUniversalTime() : (DateTime?)null,
                 GroupName = GroupTextBox.Text,
                 Description = DescriptionTextBox.Text
             };
@@ -152,7 +152,7 @@ namespace AnimalMovement
         {
             base.OnLoad(e);
             var now = DateTime.Now;
-            MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day);
+            MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
             MortatlityDateTimePicker.Checked = false;
             MortatlityDateTimePicker.CustomFormat = " ";
         }

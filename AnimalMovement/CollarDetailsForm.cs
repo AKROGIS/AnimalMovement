@@ -112,8 +112,8 @@ namespace AnimalMovement
                             CollarId = d.CollarId,
                             Project = d.Animal.Project.ProjectName,
                             AnimalId = d.AnimalId,
-                            DeploymentDate = d.DeploymentDate,
-                            RetrievalDate = d.RetrievalDate,
+                            DeploymentDate = d.DeploymentDate.ToLocalTime(),
+                            RetrievalDate = d.RetrievalDate.HasValue ? d.RetrievalDate.Value.ToLocalTime() : (DateTime?)null,
                             Deployment = d,
                         };
         }
@@ -129,7 +129,7 @@ namespace AnimalMovement
             Collar.DownloadInfo = DownloadInfoTextBox.Text;
             Collar.Notes = NotesTextBox.Text;
             if (DisposalDateTimePicker.Checked)
-                Collar.DisposalDate = DisposalDateTimePicker.Value;
+                Collar.DisposalDate = DisposalDateTimePicker.Value.ToUniversalTime();
             else
                 Collar.DisposalDate = null;
         }
@@ -353,7 +353,7 @@ namespace AnimalMovement
             if (Collar.DisposalDate == null)
             {
                 var now = DateTime.Now;
-                DisposalDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day);
+                DisposalDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
                 DisposalDateTimePicker.Checked = false;
                 DisposalDateTimePicker.CustomFormat = " ";
             }
@@ -361,7 +361,7 @@ namespace AnimalMovement
             {
                 DisposalDateTimePicker.Checked = true;
                 DisposalDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
-                DisposalDateTimePicker.Value = Collar.DisposalDate.Value;
+                DisposalDateTimePicker.Value = Collar.DisposalDate.Value.ToLocalTime();
             }
         }
 

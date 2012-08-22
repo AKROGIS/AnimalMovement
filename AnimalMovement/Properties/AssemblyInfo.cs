@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Move collar deployment date checking from Stored procedure to trigger to protect against SA and to allow bulk uploading.
 //TODO - DATABASE - Add more unit testing.
 
-//TODO - Once database dates are converted to UTC, make all forms show UTC dates as local time.
 //TODO - Replace the wait cursors with a message box and progress bar
 //TODO - Consider viewer permission issues - All NPS is too permissive for some PIs
 //TODO - Support other file formats

@@ -134,7 +134,7 @@ namespace AnimalMovement
             if (animal != null)
                 name += " on " + animal;
             if (collar.DisposalDate != null)
-                name = String.Format("{0} (disp:{1:M/d/yy})", name, collar.DisposalDate);
+                name = String.Format("{0} (disp:{1:M/d/yy})", name, collar.DisposalDate.Value.ToLocalTime());
             return name;
         }
 

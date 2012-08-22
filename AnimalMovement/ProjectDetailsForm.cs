@@ -138,7 +138,7 @@ namespace AnimalMovement
                        ? animal.AnimalId
                        : animal.AnimalId + " (" + currentCollar.Collar + ")";
             if (animal.MortalityDate != null)
-                name = String.Format("{0} (mort:{1:M/d/yy})", name, animal.MortalityDate);
+                name = String.Format("{0} (mort:{1:M/d/yy})", name, animal.MortalityDate.Value.ToLocalTime());
             return name;
         }
 

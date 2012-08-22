@@ -109,8 +109,8 @@ namespace AnimalMovement
                             CollarId = d.CollarId,
                             Project = d.Animal.Project.ProjectName,
                             AnimalId = d.AnimalId,
-                            DeploymentDate = d.DeploymentDate,
-                            RetrievalDate = d.RetrievalDate,
+                            DeploymentDate = d.DeploymentDate.ToLocalTime(),
+                            RetrievalDate = d.RetrievalDate.HasValue ? d.RetrievalDate.Value.ToLocalTime() : (DateTime?)null,
                             Deployment = d,
                         };
         }
@@ -122,7 +122,7 @@ namespace AnimalMovement
             Animal.GroupName = GroupTextBox.Text;
             Animal.Description = DescriptionTextBox.Text;
             if (MortatlityDateTimePicker.Checked)
-                Animal.MortalityDate = MortatlityDateTimePicker.Value;
+                Animal.MortalityDate = MortatlityDateTimePicker.Value.ToUniversalTime();
             else
                 Animal.MortalityDate = null;
         }
@@ -286,7 +286,7 @@ namespace AnimalMovement
             if (Animal.MortalityDate == null)
             {
                 var now = DateTime.Now;
-                MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day);
+                MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
                 MortatlityDateTimePicker.Checked = false;
                 MortatlityDateTimePicker.CustomFormat = " ";
             }
@@ -294,7 +294,7 @@ namespace AnimalMovement
             {
                 MortatlityDateTimePicker.Checked = true;
                 MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
-                MortatlityDateTimePicker.Value = Animal.MortalityDate.Value;
+                MortatlityDateTimePicker.Value = Animal.MortalityDate.Value.ToLocalTime();
             }
         }
 

@@ -79,13 +79,13 @@ namespace AnimalMovement
         private void EnableForm()
         {
             //Can only pick from animals that the CurrentUser can edit
-            DeployButton.Enabled = ProjectComboBox.SelectedItem != null && AnimalComboBox.SelectedItem != null && CollarAndAnimalFreeOnDate(DeployDateTimePicker.Value);
+            DeployButton.Enabled = ProjectComboBox.SelectedItem != null && AnimalComboBox.SelectedItem != null && CollarAndAnimalFreeOnDate(DeployDateTimePicker.Value.ToUniversalTime());
         }
 
-        private bool CollarAndAnimalFreeOnDate(DateTime dateTime)
+        private bool CollarAndAnimalFreeOnDate(DateTime utcDateTime)
         {
             var animal = (Animal)AnimalComboBox.SelectedItem;
-            return !Database.CollarDeployments.Any(d => d.DeploymentDate < dateTime && dateTime < d.RetrievalDate && (d.Animal == animal || d.Collar == Collar));
+            return !Database.CollarDeployments.Any(d => d.DeploymentDate < utcDateTime && utcDateTime < d.RetrievalDate && (d.Animal == animal || d.Collar == Collar));
         }
 
         private void CreateButton_Click(object sender, EventArgs e)
@@ -98,7 +98,7 @@ namespace AnimalMovement
                                         ProjectId = animal.ProjectId,
                                         CollarId = Collar.CollarId,
                                         CollarManufacturer = Collar.CollarManufacturer,
-                                        DeploymentDate = DeployDateTimePicker.Value.Date
+                                        DeploymentDate = DeployDateTimePicker.Value.Date.ToUniversalTime()
                                     };
             Database.CollarDeployments.InsertOnSubmit(deployment);
         }
