@@ -576,7 +576,7 @@ AS
 				MIN(Location.Lat) as [Bottom], MAX(Location.Lat) as [Top],
 				MIN(FixDate) AS [First], MAX(FixDate) as [Last]
 		 FROM     [dbo].[Locations]
-		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId
+		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
 		 GROUP BY ProjectId, AnimalId
 GO
 SET ANSI_NULLS ON
