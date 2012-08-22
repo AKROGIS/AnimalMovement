@@ -248,50 +248,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a row of fix information for a specific collar.
--- Example:     SELECT * FROM CollarFixSummary('Telonics', '96007')
--- Modified:    Aug 16, 2012, added Unique field
--- =============================================
-CREATE FUNCTION [dbo].[CollarFixSummary] 
-(
-	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255)
-)
-RETURNS @summary TABLE
-(
-	[Count] int,
-	[Unique] int,
-	[First] datetime2,
-	[Last] datetime2
-) 
-AS
-BEGIN
-	DECLARE @temp int;
-	
-	SELECT @temp = 1 
-	FROM [dbo].[CollarFixes]
-	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-	GROUP BY FixDate
-	
-	INSERT @summary
-	SELECT  COUNT(*) AS [Count],
-			@@ROWCOUNT AS [Unique],
-			MIN(FixDate) AS [First],
-			MAX(FixDate) AS [Last]
-	FROM [dbo].[CollarFixes]
-	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-	GROUP BY CollarManufacturer, CollarId
-	
-	RETURN
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
 -- Create date: March 2, 2012
 -- Description:	Deletes the fixes for a CollarFile
 --              Useful when changing status.
@@ -498,39 +454,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a table of conflicting fixes for a specific collar.
--- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007')
--- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations 
--- =============================================
-CREATE FUNCTION [dbo].[ConflictingFixes] 
-(
-	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255)
-)
-RETURNS TABLE 
-AS
-	RETURN
-		SELECT FixId, HiddenBy, FileId, LineNumber, C.FixDate, Lat, Lon
-		FROM CollarFixes AS C
-		INNER JOIN 
-			(SELECT   CollarManufacturer, CollarId, FixDate 
-			 FROM
-				(SELECT DISTINCT CollarManufacturer, CollarId, FixDate, Lat, Lon
-				 FROM CollarFixes
-			     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId) AS T
-			 GROUP BY CollarManufacturer, CollarId, FixDate
-			 HAVING   COUNT(FixDate) > 1) AS D
-		ON  C.CollarManufacturer = D.CollarManufacturer
-		AND C.CollarId = D.CollarId
-		AND C.FixDate = D.FixDate
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE VIEW [dbo].[CollarsWithConflictingFixes]
 AS
 SELECT DISTINCT CollarManufacturer, CollarId
@@ -552,32 +475,6 @@ FROM         dbo.CollarFixes INNER JOIN
                       dbo.CollarFixes.CollarId = dbo.CollarDeployments.CollarId AND dbo.CollarFixes.FixDate > dbo.CollarDeployments.DeploymentDate AND 
                       (dbo.CollarFixes.FixDate < dbo.CollarDeployments.RetrievalDate OR
                       dbo.CollarDeployments.RetrievalDate IS NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a row of location information for a specific animal.
--- Example:     SELECT * FROM AnimalLocationSummary('LACL_Sheep', '0501')
--- =============================================
-CREATE FUNCTION [dbo].[AnimalLocationSummary] 
-(
-	@ProjectId	NVARCHAR(255), 
-	@AnimalId	NVARCHAR(255)
-)
-RETURNS TABLE 
-AS
-	RETURN
-		SELECT	COUNT(*) as [Count],
-				MIN(Location.Long) as [Left], MAX(Location.Long) as [Right],
-				MIN(Location.Lat) as [Bottom], MAX(Location.Lat) as [Top],
-				MIN(FixDate) AS [First], MAX(FixDate) as [Last]
-		 FROM     [dbo].[Locations]
-		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
-		 GROUP BY ProjectId, AnimalId
 GO
 SET ANSI_NULLS ON
 GO
@@ -1881,6 +1778,109 @@ RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[LocalTime]
 GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a table of conflicting fixes for a specific collar.
+-- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007')
+-- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations 
+-- =============================================
+CREATE FUNCTION [dbo].[ConflictingFixes] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT FixId, HiddenBy, FileId, LineNumber, dbo.LocalTime(C.FixDate) AS LocalFixTime, Lat, Lon
+		FROM CollarFixes AS C
+		INNER JOIN 
+			(SELECT   CollarManufacturer, CollarId, FixDate 
+			 FROM
+				(SELECT DISTINCT CollarManufacturer, CollarId, FixDate, Lat, Lon
+				 FROM CollarFixes
+			     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId) AS T
+			 GROUP BY CollarManufacturer, CollarId, FixDate
+			 HAVING   COUNT(FixDate) > 1) AS D
+		ON  C.CollarManufacturer = D.CollarManufacturer
+		AND C.CollarId = D.CollarId
+		AND C.FixDate = D.FixDate
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a row of fix information for a specific collar.
+-- Example:     SELECT * FROM CollarFixSummary('Telonics', '96007')
+-- Modified:    Aug 16, 2012, added Unique field
+-- =============================================
+CREATE FUNCTION [dbo].[CollarFixSummary] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS @summary TABLE
+(
+	[Count] int,
+	[Unique] int,
+	[First] datetime2,
+	[Last] datetime2
+) 
+AS
+BEGIN
+	DECLARE @temp int;
+	
+	SELECT @temp = 1 
+	FROM [dbo].[CollarFixes]
+	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+	GROUP BY FixDate
+	
+	INSERT @summary
+	SELECT  COUNT(*) AS [Count],
+			@@ROWCOUNT AS [Unique],
+			dbo.LocalTime(MIN(FixDate)) AS [First],
+			dbo.LocalTime(MAX(FixDate)) AS [Last]
+	FROM [dbo].[CollarFixes]
+	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+	GROUP BY CollarManufacturer, CollarId
+	
+	RETURN
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a row of location information for a specific animal.
+-- Example:     SELECT * FROM AnimalLocationSummary('LACL_Sheep', '0501')
+-- =============================================
+CREATE FUNCTION [dbo].[AnimalLocationSummary] 
+(
+	@ProjectId	NVARCHAR(255), 
+	@AnimalId	NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT	COUNT(*) as [Count],
+				MIN(Location.Long) as [Left], MAX(Location.Long) as [Right],
+				MIN(Location.Lat) as [Bottom], MAX(Location.Lat) as [Top],
+				dbo.LocalTime(MIN(FixDate)) AS [First], dbo.LocalTime(MAX(FixDate)) as [Last]
+		 FROM     [dbo].[Locations]
+		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
+		 GROUP BY ProjectId, AnimalId
+GO
 CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
@@ -3077,8 +3077,8 @@ AS
 				F.[FileName]+'.csv' AS [File],
 				S.[Name] AS [Status],
 				COUNT(FixDate) AS [FixCount],
-				MIN(FixDate) AS [First],
-				MAX(FixDate) AS [Last]
+				dbo.LocalTime(MIN(FixDate)) AS [First],
+				dbo.LocalTime(MAX(FixDate)) AS [Last]
 		FROM [dbo].[CollarFiles] AS F
 		INNER JOIN [dbo].[LookupCollarFileStatus] AS S
 		ON F.[Status] = S.[Code]
