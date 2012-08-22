@@ -779,6 +779,188 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TRIGGER [dbo].[UpdateMovementAfterLocationUpdate] 
+ON [dbo].[Locations]
+AFTER UPDATE AS
+IF UPDATE ([Status])
+	BEGIN
+		SET NOCOUNT ON;
+		DECLARE
+			@Project   VARCHAR(32),
+			@Animal    VARCHAR(32),
+			@Time      DATETIME2,
+			@OldStatus CHAR(1),
+			@NewStatus CHAR(1);
+		  
+		-- In an update, the old row is in 'deleted', and the new row is in 'inserted'.
+
+		DECLARE up_cursor CURSOR FOR 
+			SELECT [ProjectId], [AnimalId], [FixDate], [Status] FROM deleted ORDER BY [ProjectId], [AnimalId], [FixDate];
+
+		OPEN up_cursor;
+
+		FETCH NEXT FROM up_cursor INTO @Project, @Animal, @Time, @OldStatus;
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			SET @NewStatus = (SELECT [Status] FROM inserted WHERE [ProjectId] = @Project AND [AnimalId] = @Animal AND [FixDate] = @Time);
+			
+			IF @OldStatus IS NULL and @NewStatus IS NOT NULL
+				EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
+			
+			IF @OldStatus IS NOT NULL and @NewStatus IS NULL
+				EXEC [dbo].[Location_Added] @Project, @Animal, @Time; 
+			
+			FETCH NEXT FROM up_cursor INTO @Project, @Animal, @Time, @OldStatus;
+		END
+		CLOSE up_cursor;
+		DEALLOCATE up_cursor;
+	END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[UpdateMovementAfterLocationInsert] 
+ON [dbo].[Locations] 
+AFTER INSERT AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE
+		@Project VARCHAR(32),
+		@Animal  VARCHAR(32),
+		@Time    DATETIME2;
+	  
+	DECLARE ins_cursor CURSOR FOR 
+		SELECT [ProjectId], [AnimalId], [FixDate]
+		  FROM inserted
+		 WHERE [Status] IS NULL  -- Inserting a location with a non-null status will not change the movements
+	  ORDER BY [ProjectId], [AnimalId], [FixDate];
+
+	OPEN ins_cursor;
+
+	FETCH NEXT FROM ins_cursor INTO @Project, @Animal, @Time;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		EXEC [dbo].[Location_Added] @Project, @Animal, @Time ;
+		FETCH NEXT FROM ins_cursor INTO @Project, @Animal, @Time;
+	END
+	CLOSE ins_cursor;
+	DEALLOCATE ins_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Microsoft Says: We do not recommend using cursors in triggers because they could potentially reduce performance. 
+--                 To design a trigger that affects multiple rows, use rowset-based logic instead of cursors
+-- However, the rowset based logic was too difficult to manage:
+--   Because I think procedurally, and I needed to break the problem up into procedures to understand/code, however
+--   while I can put a function in rowset logic, a function cannot use an INSERT/DELETE
+--   while I can put an INSERT/DELETE in a stored procedure, I can't put a stored procedure in rowset logic.
+--   Therefore I need to abandon my procedure based thinking, or I can use cursors. 
+--   Example rowset logic with multi-column key in deleted and inserted virtual tables
+--     DELETE m from [dbo].[Movement] as m inner join deleted as d on m.AnimalID = d.AnimalID and (d.fixdate = m.startdate or d.fixdate = m.enddate);
+--     SELECT * FROM Movements as m Where Exists(Select 1 from inserted as i where i.AnimalID = m.AnimalID and (i.FixDate = m.StartDate or i.FixDate = m.EndDate)) 
+
+-- I do not delete all movements in one operation (possible and faster),
+--   because it is too hard to then figure out how to close all possible gaps
+--   with new movements - the new locations may be in sequence, or random.
+
+
+CREATE TRIGGER [dbo].[UpdateMovementAfterLocationDelete] 
+ON [dbo].[Locations] 
+AFTER DELETE AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE
+		@Project VARCHAR(32),
+		@Animal  VARCHAR(32),
+		@Time    DATETIME2;
+	  
+	DECLARE del_cursor CURSOR FOR 
+		SELECT [ProjectId], [AnimalId], [FixDate]
+		  FROM deleted
+		 WHERE [Status] IS NULL  --Deleting a location with a non-null status will not change the movements
+	  ORDER BY [ProjectId], [AnimalId], [FixDate];
+
+	OPEN del_cursor;
+
+	FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
+		FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
+	END
+	CLOSE del_cursor;
+	DEALLOCATE del_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[UpdateLocationAfterCollarFixesUpdate] 
+ON [dbo].[CollarFixes]
+AFTER UPDATE AS
+IF UPDATE ([HiddenBy])
+	-- HiddenBy is the only field that is allowed to be updated (all other changes must
+	-- be done with a delete/insert.  This is managed with permissions on the table and
+	-- the functionality of permitted stored procedures
+	BEGIN
+		SET NOCOUNT ON;
+
+		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
+		-- deleted/inserted are tables, since multiple records can be changed at once.
+		-- All updated rows are included, even those that didn't update hiddenby
+		
+		-- Basic logic for a changing a SINGLE CollarFix:
+		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
+		--   if HiddenBy goes from NOT NULL to NULL then add new record to Locations table
+		
+		-- Can I change multiple fixes at once?
+		--  Yes.  Since changes to CollarFixes are managed, and only done by routines
+		--        that honor the requirements of the HiddenBy relationship between
+		--        records in the table, I do not need to worry about how these changes
+		--        effect other records in the table.  I only need to manage the changes
+		--        to the locations table.
+		
+		-- if HiddenBy goes from NULL to NOT NULL then
+		-- remove record from Locations table
+		DELETE L FROM Locations as L
+		   INNER JOIN deleted as D
+				   ON L.FixId = D.FixId
+		   INNER JOIN inserted as I
+				   ON L.FixId = I.FixId
+				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
+		
+		-- if HiddenBy goes from NOT NULL to NULL then
+		-- Add new record to Locations table, if FixDate is acceptable 
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT C.ProjectId, C.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
+			   FROM inserted as I
+		 INNER JOIN deleted as D
+				 ON D.FixId = I.FixId
+		 INNER JOIN dbo.CollarDeployments as C
+				 ON C.CollarManufacturer = I.CollarManufacturer
+				AND C.CollarId = I.CollarId
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = C.ProjectId
+		    	AND A.AnimalId = C.AnimalId
+			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
+			    AND C.DeploymentDate <= I.FixDate
+			    AND (C.RetrievalDate IS NULL OR I.FixDate <= C.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
+
+	END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
 (
 	@Project VARCHAR(16)   = NULL, 
@@ -1380,234 +1562,54 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TRIGGER [dbo].[UpdateMovementAfterLocationUpdate] 
-ON [dbo].[Locations]
-AFTER UPDATE AS
-IF UPDATE ([Status])
-	BEGIN
-		SET NOCOUNT ON;
-		DECLARE
-			@Project   VARCHAR(32),
-			@Animal    VARCHAR(32),
-			@Time      DATETIME2,
-			@OldStatus CHAR(1),
-			@NewStatus CHAR(1);
-		  
-		-- In an update, the old row is in 'deleted', and the new row is in 'inserted'.
-
-		DECLARE up_cursor CURSOR FOR 
-			SELECT [ProjectId], [AnimalId], [FixDate], [Status] FROM deleted ORDER BY [ProjectId], [AnimalId], [FixDate];
-
-		OPEN up_cursor;
-
-		FETCH NEXT FROM up_cursor INTO @Project, @Animal, @Time, @OldStatus;
-
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			SET @NewStatus = (SELECT [Status] FROM inserted WHERE [ProjectId] = @Project AND [AnimalId] = @Animal AND [FixDate] = @Time);
-			
-			IF @OldStatus IS NULL and @NewStatus IS NOT NULL
-				EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
-			
-			IF @OldStatus IS NOT NULL and @NewStatus IS NULL
-				EXEC [dbo].[Location_Added] @Project, @Animal, @Time; 
-			
-			FETCH NEXT FROM up_cursor INTO @Project, @Animal, @Time, @OldStatus;
-		END
-		CLOSE up_cursor;
-		DEALLOCATE up_cursor;
-	END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[UpdateMovementAfterLocationInsert] 
-ON [dbo].[Locations] 
-AFTER INSERT AS
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: June 15, 2012
+-- Description:	Test the CollarDeployments DeleteTrigger
+-- =============================================
+CREATE PROCEDURE [dbo].[Test_Trigger_CollarDeployments_Delete] 
+AS
 BEGIN
-	SET NOCOUNT ON;
-	DECLARE
-		@Project VARCHAR(32),
-		@Animal  VARCHAR(32),
-		@Time    DATETIME2;
-	  
-	DECLARE ins_cursor CURSOR FOR 
-		SELECT [ProjectId], [AnimalId], [FixDate]
-		  FROM inserted
-		 WHERE [Status] IS NULL  -- Inserting a location with a non-null status will not change the movements
-	  ORDER BY [ProjectId], [AnimalId], [FixDate];
+	SET NOCOUNT ON
+	
+	PRINT 'Test_Trigger_CollarDeployments_Delete'
+	PRINT '  See Test_Trigger_CollarDeployments_Insert'
 
-	OPEN ins_cursor;
-
-	FETCH NEXT FROM ins_cursor INTO @Project, @Animal, @Time;
-
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		EXEC [dbo].[Location_Added] @Project, @Animal, @Time ;
-		FETCH NEXT FROM ins_cursor INTO @Project, @Animal, @Time;
-	END
-	CLOSE ins_cursor;
-	DEALLOCATE ins_cursor;
 END
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- Microsoft Says: We do not recommend using cursors in triggers because they could potentially reduce performance. 
---                 To design a trigger that affects multiple rows, use rowset-based logic instead of cursors
--- However, the rowset based logic was too difficult to manage:
---   Because I think procedurally, and I needed to break the problem up into procedures to understand/code, however
---   while I can put a function in rowset logic, a function cannot use an INSERT/DELETE
---   while I can put an INSERT/DELETE in a stored procedure, I can't put a stored procedure in rowset logic.
---   Therefore I need to abandon my procedure based thinking, or I can use cursors. 
---   Example rowset logic with multi-column key in deleted and inserted virtual tables
---     DELETE m from [dbo].[Movement] as m inner join deleted as d on m.AnimalID = d.AnimalID and (d.fixdate = m.startdate or d.fixdate = m.enddate);
---     SELECT * FROM Movements as m Where Exists(Select 1 from inserted as i where i.AnimalID = m.AnimalID and (i.FixDate = m.StartDate or i.FixDate = m.EndDate)) 
-
--- I do not delete all movements in one operation (possible and faster),
---   because it is too hard to then figure out how to close all possible gaps
---   with new movements - the new locations may be in sequence, or random.
-
-
-CREATE TRIGGER [dbo].[UpdateMovementAfterLocationDelete] 
-ON [dbo].[Locations] 
-AFTER DELETE AS
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: June 11, 2012
+-- Description:	Test the Animals UpdateTrigger
+-- =============================================
+CREATE PROCEDURE [dbo].[Test_Trigger_Animals_Update] 
+AS
 BEGIN
-	SET NOCOUNT ON;
-	DECLARE
-		@Project VARCHAR(32),
-		@Animal  VARCHAR(32),
-		@Time    DATETIME2;
-	  
-	DECLARE del_cursor CURSOR FOR 
-		SELECT [ProjectId], [AnimalId], [FixDate]
-		  FROM deleted
-		 WHERE [Status] IS NULL  --Deleting a location with a non-null status will not change the movements
-	  ORDER BY [ProjectId], [AnimalId], [FixDate];
+	SET NOCOUNT ON
+	
+	PRINT 'Test_Trigger_Animals_Update'
+	PRINT '  Test not written yet'
 
-	OPEN del_cursor;
-
-	FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
-
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
-		FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
-	END
-	CLOSE del_cursor;
-	DEALLOCATE del_cursor;
 END
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TRIGGER [dbo].[UpdateLocationAfterCollarFixesUpdate] 
-ON [dbo].[CollarFixes]
-AFTER UPDATE AS
-IF UPDATE ([HiddenBy])
-	-- HiddenBy is the only field that is allowed to be updated (all other changes must
-	-- be done with a delete/insert.  This is managed with permissions on the table and
-	-- the functionality of permitted stored procedures
-	BEGIN
-		SET NOCOUNT ON;
-
-		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
-		-- deleted/inserted are tables, since multiple records can be changed at once.
-		-- All updated rows are included, even those that didn't update hiddenby
-		
-		-- Basic logic for a changing a SINGLE CollarFix:
-		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
-		--   if HiddenBy goes from NOT NULL to NULL then add new record to Locations table
-		
-		-- Can I change multiple fixes at once?
-		--  Yes.  Since changes to CollarFixes are managed, and only done by routines
-		--        that honor the requirements of the HiddenBy relationship between
-		--        records in the table, I do not need to worry about how these changes
-		--        effect other records in the table.  I only need to manage the changes
-		--        to the locations table.
-		
-		-- if HiddenBy goes from NULL to NOT NULL then
-		-- remove record from Locations table
-		DELETE L FROM Locations as L
-		   INNER JOIN deleted as D
-				   ON L.FixId = D.FixId
-		   INNER JOIN inserted as I
-				   ON L.FixId = I.FixId
-				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
-		
-		-- if HiddenBy goes from NOT NULL to NULL then
-		-- Add new record to Locations table, if FixDate is acceptable 
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT C.ProjectId, C.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
-			   FROM inserted as I
-		 INNER JOIN deleted as D
-				 ON D.FixId = I.FixId
-		 INNER JOIN dbo.CollarDeployments as C
-				 ON C.CollarManufacturer = I.CollarManufacturer
-				AND C.CollarId = I.CollarId
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = C.ProjectId
-		    	AND A.AnimalId = C.AnimalId
-			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
-			    AND C.DeploymentDate <= I.FixDate
-			    AND (C.RetrievalDate IS NULL OR I.FixDate <= C.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
-
-	END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- Create the stored procedure to generate an error using 
--- RAISERROR. The original error information is used to
--- construct the msg_str for RAISERROR.
--- must be called from a CATCH block
--- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
-CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
-    -- Return if there is no error information to retrieve.
-    IF ERROR_NUMBER() IS NULL
-        RETURN;
-
-    DECLARE 
-        @ErrorMessage    NVARCHAR(4000),
-        @ErrorNumber     INT,
-        @ErrorSeverity   INT,
-        @ErrorState      INT,
-        @ErrorLine       INT,
-        @ErrorProcedure  NVARCHAR(200);
-
-    -- Assign variables to error-handling functions that 
-    -- capture information for RAISERROR.
-    SELECT 
-        @ErrorNumber = ERROR_NUMBER(),
-        @ErrorSeverity = ERROR_SEVERITY(),
-        @ErrorState = ERROR_STATE(),
-        @ErrorLine = ERROR_LINE(),
-        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
-
-    -- Build the message string that will contain original
-    -- error information.
-    SELECT @ErrorMessage = 
-        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
-            'Message: '+ ERROR_MESSAGE();
-
-    -- Raise an error: msg_str parameter of RAISERROR will contain
-    -- the original error information.
-    RAISERROR 
-        (
-        @ErrorMessage, 
-        @ErrorSeverity, 
-        1,               
-        @ErrorNumber,    -- parameter: original error number.
-        @ErrorSeverity,  -- parameter: original error severity.
-        @ErrorState,     -- parameter: original error state.
-        @ErrorProcedure, -- parameter: original error procedure name.
-        @ErrorLine       -- parameter: original error line number.
-        );
+CREATE TABLE [dbo].[Settings](
+	[Username] [sysname] NOT NULL,
+	[Key] [nvarchar](30) NOT NULL,
+	[Value] [nvarchar](500) NULL,
+ CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
+(
+	[Username] ASC,
+	[Key] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
 GO
 SET ANSI_NULLS ON
 GO
@@ -1670,54 +1672,52 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: June 15, 2012
--- Description:	Test the CollarDeployments DeleteTrigger
--- =============================================
-CREATE PROCEDURE [dbo].[Test_Trigger_CollarDeployments_Delete] 
-AS
-BEGIN
-	SET NOCOUNT ON
-	
-	PRINT 'Test_Trigger_CollarDeployments_Delete'
-	PRINT '  See Test_Trigger_CollarDeployments_Insert'
+-- Create the stored procedure to generate an error using 
+-- RAISERROR. The original error information is used to
+-- construct the msg_str for RAISERROR.
+-- must be called from a CATCH block
+-- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
+CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
+    -- Return if there is no error information to retrieve.
+    IF ERROR_NUMBER() IS NULL
+        RETURN;
 
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: June 11, 2012
--- Description:	Test the Animals UpdateTrigger
--- =============================================
-CREATE PROCEDURE [dbo].[Test_Trigger_Animals_Update] 
-AS
-BEGIN
-	SET NOCOUNT ON
-	
-	PRINT 'Test_Trigger_Animals_Update'
-	PRINT '  Test not written yet'
+    DECLARE 
+        @ErrorMessage    NVARCHAR(4000),
+        @ErrorNumber     INT,
+        @ErrorSeverity   INT,
+        @ErrorState      INT,
+        @ErrorLine       INT,
+        @ErrorProcedure  NVARCHAR(200);
 
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Settings](
-	[Username] [sysname] NOT NULL,
-	[Key] [nvarchar](30) NOT NULL,
-	[Value] [nvarchar](500) NULL,
- CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
-(
-	[Username] ASC,
-	[Key] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
+    -- Assign variables to error-handling functions that 
+    -- capture information for RAISERROR.
+    SELECT 
+        @ErrorNumber = ERROR_NUMBER(),
+        @ErrorSeverity = ERROR_SEVERITY(),
+        @ErrorState = ERROR_STATE(),
+        @ErrorLine = ERROR_LINE(),
+        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
+
+    -- Build the message string that will contain original
+    -- error information.
+    SELECT @ErrorMessage = 
+        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
+            'Message: '+ ERROR_MESSAGE();
+
+    -- Raise an error: msg_str parameter of RAISERROR will contain
+    -- the original error information.
+    RAISERROR 
+        (
+        @ErrorMessage, 
+        @ErrorSeverity, 
+        1,               
+        @ErrorNumber,    -- parameter: original error number.
+        @ErrorSeverity,  -- parameter: original error severity.
+        @ErrorState,     -- parameter: original error state.
+        @ErrorProcedure, -- parameter: original error procedure name.
+        @ErrorLine       -- parameter: original error line number.
+        );
 GO
 SET ANSI_NULLS ON
 GO
@@ -1880,6 +1880,11 @@ CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[LocalTime]
+GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
 GO
 SET ANSI_NULLS ON
 GO
