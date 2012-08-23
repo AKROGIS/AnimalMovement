@@ -15,7 +15,16 @@ SELECT TOP 100 * FROM CurrentDeployments
 
 SELECT TOP 100 * FROM CollarsWithConflictingFixes
 
+SELECT TOP 100 * FROM ERROR_CollarsWithOverlappingDeployments
+SELECT TOP 100 * FROM ERROR_FixesWhichShouldBeLocations
+SELECT TOP 100 * FROM ERROR_LocationsAfterAnimalsMortality
+SELECT TOP 100 * FROM ERROR_LocationsOutsideBoundsOfDeployments
+
 SELECT TOP 100 * FROM FixesByLocation
+
+SELECT TOP 100 * FROM FixesNotHiddenInDeployment
+SELECT TOP 100 * FROM FixesNotHiddenAndNotDeployed
+
 SELECT TOP 100 * FROM InvalidLocations
 SELECT TOP 100 * FROM NoMovement
 SELECT TOP 100 * FROM ValidLocations
