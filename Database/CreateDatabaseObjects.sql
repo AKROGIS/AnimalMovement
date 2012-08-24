@@ -1654,22 +1654,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[xxHiddenLocations](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
-	[FixId] [bigint] NOT NULL,
-	[Status] [char](1) NULL
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- Create the stored procedure to generate an error using 
 -- RAISERROR. The original error information is used to
 -- construct the msg_str for RAISERROR.
