@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//TODO - DATABASE - Convert all dates to UTC (database should store all dates in UTC)
 //TODO - DATABASE - Add business logic to ensure that all Deployments.Collar.DeploymentDate < Collar.DisposalDate
 //TODO - DATABASE - Add logic to limit collar fixes to those before the Collar.DisposalDate
 //TODO - DATABASE - Add table for Telonics tfp files, each record owned by a PI.
