@@ -3716,6 +3716,7 @@ BEGIN
 		    AND I.FileId = @FileId
 		    AND I.GpsLatitude IS NOT NULL AND I.GpsLongitude IS NOT NULL
 		    AND I.[AcquisitionTime] IS NOT NULL
+		    AND I.[AcquisitionTime] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
 	END
 	
 	IF @Format = 'D'  -- Telonics Gen3 Format
