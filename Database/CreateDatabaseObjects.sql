@@ -3692,6 +3692,18 @@ BEGIN
 		    AND I.[FixDate] IS NOT NULL
 	END
 	
+	/*
+	The use of AquisitionTime and not GpsFixTime is confusing, but apperantly correct
+	of the 810,428 records collected as of 8/23/2012,
+	GpsFixDate is non null in only 9205 records (GpsFixattempt = Succeeded(2D) or Succeeded(3D))
+	In those cases, GpsFixDate == AcquisitionTime
+	AcquisitionTime is never null when GpsFixAttempt == Succeed (110,090 records),
+	but is null when GpsFixAttemp == Failed (71 records)
+	
+	There are some cases where Acquisition time is bogus (in the future),
+	I've manually hidden those locations, but I'm not sure the correct strategy.
+	*/
+	
 	IF @Format = 'C'  -- Telonics Gen4 Condensed Convertor Format
 	BEGIN
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
