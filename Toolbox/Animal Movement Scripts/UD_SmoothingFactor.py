@@ -190,9 +190,9 @@ def Minimize(func, h, points):
     h1 = Search(func, allSquaredDistances, n, h, min_percent, max_percent, step_percent)
     if h1 <= min_percent * h or h1 >= max_percent * h:
         # then it is the min or max value checked
-        msg = "Cross Validation using "+func.__name__+" failed to minimize, using hRef."
+        msg = "Cross Validation using "+func.__name__+" failed to minimize, using 0.7 * hRef."
         arcpy.AddWarning(msg)
-        return h
+        return 0.7*h
 #    return h1
     #print h1
     h2 = Search(func, allSquaredDistances, n, h1, 0.89, 1.11, 0.01)
