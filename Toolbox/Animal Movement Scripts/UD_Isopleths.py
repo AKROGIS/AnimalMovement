@@ -101,7 +101,7 @@ def CreateIsopleths(isopleths, raster1, lineFc, polyFc, donutFc):
     
     #raster = 101 - arcpy.sa.Slice(raster1,100,"EQUAL_INTERVAL")
     if lineFc:   
-        arcpy.sa.ContourList(raster, lineFc, isopleths)
+        arcpy.sa.ContourList(raster1, lineFc, isopleths)
         if polyFc:
             IsoplethLinesToPolygons(lineFc, polyFc)
         if donutFc:
@@ -110,7 +110,7 @@ def CreateIsopleths(isopleths, raster1, lineFc, polyFc, donutFc):
         tmpLayer = "in_memory\IsoplethPolylines"
         if arcpy.Exists(tmpLayer):
             arcpy.Delete_management(tmpLayer)
-        arcpy.sa.ContourList(raster, tmpLayer, isopleths)
+        arcpy.sa.ContourList(raster1, tmpLayer, isopleths)
         if polyFc:
             IsoplethLinesToPolygons(tmpLayer, polyFc)
         if donutFc:

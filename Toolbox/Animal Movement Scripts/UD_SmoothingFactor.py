@@ -82,6 +82,7 @@ import sys
 import os
 import arcpy
 import numpy
+import math
 
 def GetPoints(pointsFeature, shapeName = None):
     points = []
@@ -101,6 +102,7 @@ def DistancesSquared(points):
     allSquaredDistances = []
     n = len(points)
     for i in range(n):
+        #for j in range(i+1, n):  #unique set of distances dij = dji is faster; however produces different LSCV
         for j in range(n):
             if i == j:
                 continue
@@ -113,7 +115,7 @@ def DistancesSquared(points):
 # Cross Validation function for h.
 # approximates(?) the mean integrated square error (MISE) between the true density function and the kde
 # we want the h that returns the minimum CV
-def CV(allDistancesSquared, n, h):
+def LSCV(allDistancesSquared, n, h):
     term1 = 1.0 / (math.pi * n * h * h)
     term2a = 1.0 / (4.0 * math.pi)
     term2b = -1.0 / (4.0 * h * h)
@@ -156,11 +158,11 @@ def BCV2(allDistancesSquared, n, h):
     #print "BCV2", h, result
     return result
 
-def Search(func, allSquaredDistances, n, h_ref, min_percent, max_percent, step):
+def Search(func, allSquaredDistances, n, h_ref, min_percent, max_percent, step_percent):
 
     h_min = min_percent * h_ref
     h_max = max_percent * h_ref
-    h_step = step  * h_ref
+    h_step = step_percent * h_ref
 
     h_res = h_max
     minErr = func(allSquaredDistances, n, h_max)
@@ -182,8 +184,11 @@ def Minimize(func, h, points):
     
     allSquaredDistances = DistancesSquared(points)
 
-    h1 = Search(func, allSquaredDistances, n, h, 0.05, 2.0, 0.1)
-    if h1 < 0.10 * h or h1 > 1.91 * h:
+    min_percent = 0.05
+    max_percent = 2.00
+    step_percent = 0.10
+    h1 = Search(func, allSquaredDistances, n, h, min_percent, max_percent, step_percent)
+    if h1 <= min_percent * h or h1 >= max_percent * h:
         # then it is the min or max value checked
         msg = "Cross Validation using "+func.__name__+" failed to minimize, using hRef."
         arcpy.AddWarning(msg)

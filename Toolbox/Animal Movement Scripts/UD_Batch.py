@@ -155,9 +155,9 @@ def GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmetho
     return hList
 
 def ChooseSmoothingFactor(hList, hRefToUse):
-    if hRefToUse.lower() != "minimum":
+    if hRefToUse.lower() == "minimum":
         return min(hList)
-    if hRefToUse.lower() != "maximum":
+    if hRefToUse.lower() == "maximum":
         return max(hList)
     return numpy.average(hList)
 
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     if hRefmethod.lower() == "fixed":
         hList = [fixedHRef for eachItem in uniqueValues]
     else:
-        hList = GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmethod, fixedHRef, modifier, proportionAmount)
+        hList = GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmethod, modifier, proportionAmount)
         if hRefToUse.lower() != "bydataset":
             h = ChooseSmoothingFactor(hList, hRefToUse)
             arcpy.AddMessage("Using h = " + str(h) +" ("+hRefToUse+")")
