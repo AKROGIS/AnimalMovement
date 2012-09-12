@@ -3,7 +3,7 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Allow editing of deployment and retrieval dates
+//FIXME - Allow editing of deployment and retrieval dates
 //TODO - Delay population of hidden tabs until displayed.
 //TODO - Move Info and Delete buttons onto the data grid.
 //TODO - Add additional location info: hidden locations, centroid, MCP area, average speed

@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using DataModel;
 
 //TODO - Provide better error messages when uploading files fails
+//TODO - File browser should allow csv, tsc, and dat files by default
+//FIXME - do not assume the file extension is CSV in saving or reporting
 
 /*
  * The collar list displays the following:

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - Allow editing of deployment and retrieval dates
+//FIXME - Allow editing of deployment and retrieval dates
 //TODO - Delay population of hidden tabs until displayed.
 //TODO - Move Info and Delete buttons onto the data grid.
 //TODO - Conflicting Fixes needs better support (don't show fixes hidden by store on board)

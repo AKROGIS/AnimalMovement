@@ -2,6 +2,7 @@
 using System.Linq;
 using DataModel;
 
+//FIXME - allow inputing the retrieval date (allows a historic collar to be deployed before another collar)
 
 namespace AnimalMovement
 {

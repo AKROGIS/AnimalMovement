@@ -9,7 +9,8 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Add more unit testing.
 
 //TODO - Replace the wait cursors with a message box and progress bar
-//TODO - Consider viewer permission issues - All NPS is too permissive for some PIs
+//TODO - Add a warning (consent to monitoring) message at start up.
+//TODO - How do I add this warning to a layer file??
 //TODO - Support other file formats
 //TODO - 	a) support data as it is/was delivered to the PI
 //TODO - 	b) support direct download from Argos web services
