@@ -12,6 +12,7 @@ namespace AnimalMovement
         private const string FilterKey = "filter_projects";
         private const string SpeciesKey = "species";
         private const string FormatKey = "file_format";
+        private const string ParameterFormatKey = "parameter_file_format";
         private const string ModelKey = "collar_model";
         private const string ManufacturerKey = "collar_manufacturer";
 
@@ -35,6 +36,12 @@ namespace AnimalMovement
         internal static char? GetDefaultFileFormat()
         {
             string format = GetUsersDefault(FormatKey);
+            return format == null ? (char?)null : format[0];
+        }
+
+        internal static char? GetDefaultParameterFileFormat()
+        {
+            string format = GetUsersDefault(ParameterFormatKey);
             return format == null ? (char?)null : format[0];
         }
 
@@ -70,6 +77,11 @@ namespace AnimalMovement
         internal static void SetDefaultFileFormat(char format)
         {
             SetUsersDefault(FormatKey, format.ToString(CultureInfo.InvariantCulture));
+        }
+
+        internal static void SetDefaultParameterFileFormat(char format)
+        {
+            SetUsersDefault(ParameterFormatKey, format.ToString(CultureInfo.InvariantCulture));
         }
 
         internal static void SetDefaultCollarModel(string model)

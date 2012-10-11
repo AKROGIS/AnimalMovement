@@ -42,16 +42,24 @@ namespace AnimalMovement
             public bool CanDelete { get; set; }
             public Collar Collar { get; set; }
         }
+
+        class FileListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public CollarParameterFile File { get; set; }
+        }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
         internal InvestigatorForm(string investigator, string user)
         {
             InitializeComponent();
             RestoreWindow();
-            splitContainer1.SplitterDistance = Properties.Settings.Default.InvestigatorFormSplitterDistance;
+            splitContainer1.SplitterDistance = Properties.Settings.Default.InvestigatorFormSplitter1Distance;
+            splitContainer2.SplitterDistance = Properties.Settings.Default.InvestigatorFormSplitter2Distance;
             CurrentUser = user;
             InvestigatorLogin = investigator;
-            IsMyProfile = user.ToLower() == investigator.ToLower();
+            IsMyProfile = String.Equals(user, investigator, StringComparison.InvariantCultureIgnoreCase);
             EditSaveButton.Enabled = IsMyProfile;
             SetEditingControls();
         }
@@ -64,7 +72,8 @@ namespace AnimalMovement
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            Properties.Settings.Default.InvestigatorFormSplitterDistance = splitContainer1.SplitterDistance;
+            Properties.Settings.Default.InvestigatorFormSplitter1Distance = splitContainer1.SplitterDistance;
+            Properties.Settings.Default.InvestigatorFormSplitter2Distance = splitContainer2.SplitterDistance;
         }
 
         private void LoadDataContext()
@@ -77,45 +86,7 @@ namespace AnimalMovement
             PhoneTextBox.Text = Investigator.Phone;
             LoadProjectList();
             LoadCollarList();
-        }
-
-        private void LoadCollarList()
-        {
-            var query = from collar in Database.Collars
-                                        where collar.ProjectInvestigator == Investigator
-                                        //orderby collar.CollarManufacturer , collar.CollarId
-                                        select new CollarListItem
-                                                   {
-                                                       Collar = collar,
-                                                       Name = BuildCollarText(collar),
-                                                       CanDelete = CanDeleteCollar(collar)
-                                                   };
-            var sortedList = query.OrderBy(c => c.Collar.DisposalDate != null).ThenBy(c => c.Collar.CollarManufacturer).ThenBy(c => c.Collar.CollarId).ToList();
-            CollarsListBox.DataSource = sortedList;
-            CollarsListBox.DisplayMember = "Name";
-            CollarsListBox.ClearItemColors();
-            for (int i = 0; i < sortedList.Count; i++)
-            {
-                if (sortedList[i].Collar.DisposalDate != null)
-                    CollarsListBox.SetItemColor(i, Color.DarkGray);
-            }
-            CollarsListLabel.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
-        }
-
-        private void LoadProjectList()
-        {
-            var query = from project in Database.Projects
-                                         where project.ProjectInvestigator1 == Investigator
-                                         select new ProjectListItem
-                                                    {
-                                                        Project = project,
-                                                        Name = project.ProjectName + " (" + project.ProjectId + ")",
-                                                        CanDelete = !project.Animals.Any() && !project.CollarFiles.Any()
-                                                    };
-            var sortedList = query.OrderBy(p => p.Name).ToList();
-            ProjectsListBox.DataSource = sortedList;
-            ProjectsListBox.DisplayMember = "Name";
-            ProjectsListLabel.Text = sortedList.Count < 5 ? "Projects" : String.Format("Projects ({0})", sortedList.Count);
+            LoadFileList();
         }
 
         private bool CanDeleteCollar(Collar collar)
@@ -203,9 +174,29 @@ namespace AnimalMovement
             PhoneTextBox.Enabled = editModeEnabled;
             AddCollarButton.Enabled = !editModeEnabled && IsMyProfile;
             AddProjectButton.Enabled = !editModeEnabled && IsMyProfile;
+            AddFileButton.Enabled = !editModeEnabled && IsMyProfile;
             //Set the Delete/Info buttons based on what is selected
             CollarsListBox_SelectedIndexChanged(null, null);
             ProjectsListBox_SelectedIndexChanged(null, null);
+            FilesListBox_SelectedIndexChanged(null, null);
+        }
+
+        #region Project List
+
+        private void LoadProjectList()
+        {
+            var query = from project in Database.Projects
+                        where project.ProjectInvestigator1 == Investigator
+                        select new ProjectListItem
+                        {
+                            Project = project,
+                            Name = project.ProjectName + " (" + project.ProjectId + ")",
+                            CanDelete = !project.Animals.Any() && !project.CollarFiles.Any()
+                        };
+            var sortedList = query.OrderBy(p => p.Name).ToList();
+            ProjectsListBox.DataSource = sortedList;
+            ProjectsListBox.DisplayMember = "Name";
+            ProjectsListLabel.Text = sortedList.Count < 5 ? "Projects" : String.Format("Projects ({0})", sortedList.Count);
         }
 
         private void AddProjectButton_Click(object sender, EventArgs e)
@@ -240,6 +231,45 @@ namespace AnimalMovement
             var form = new ProjectDetailsForm(project.ProjectId, CurrentUser);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
+        }
+
+        private void ProjectsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            InfoProjectButton.Enabled = false;
+            DeleteProjectsButton.Enabled = false;
+            if (EditSaveButton.Text == "Save")
+                return;
+            InfoProjectButton.Enabled = ProjectsListBox.SelectedItems.Count == 1;
+            if (IsMyProfile && ProjectsListBox.SelectedItems.Cast<ProjectListItem>().Any(item => item.CanDelete))
+                DeleteProjectsButton.Enabled = true;
+
+        }
+
+        #endregion
+
+        #region Collar List
+
+        private void LoadCollarList()
+        {
+            var query = from collar in Database.Collars
+                        where collar.ProjectInvestigator == Investigator
+                        //orderby collar.CollarManufacturer , collar.CollarId
+                        select new CollarListItem
+                        {
+                            Collar = collar,
+                            Name = BuildCollarText(collar),
+                            CanDelete = CanDeleteCollar(collar)
+                        };
+            var sortedList = query.OrderBy(c => c.Collar.DisposalDate != null).ThenBy(c => c.Collar.CollarManufacturer).ThenBy(c => c.Collar.CollarId).ToList();
+            CollarsListBox.DataSource = sortedList;
+            CollarsListBox.DisplayMember = "Name";
+            CollarsListBox.ClearItemColors();
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (sortedList[i].Collar.DisposalDate != null)
+                    CollarsListBox.SetItemColor(i, Color.DarkGray);
+            }
+            CollarsListLabel.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
         }
 
         private void AddCollarButton_Click(object sender, EventArgs e)
@@ -287,17 +317,73 @@ namespace AnimalMovement
                 DeleteCollarsButton.Enabled = true;
         }
 
-        private void ProjectsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        #endregion
+
+        #region Parameter File List
+
+        private void LoadFileList()
         {
-            InfoProjectButton.Enabled = false;
-            DeleteProjectsButton.Enabled = false;
+            var query = from file in Database.CollarParameterFiles
+                        where file.ProjectInvestigator == Investigator
+                        select new FileListItem
+                        {
+                            File = file,
+                            Name = file.FileName,
+                            CanDelete = true
+                        };
+            var sortedList = query.OrderBy(f => f.Name).ToList();
+            FilesListBox.DataSource = sortedList;
+            FilesListBox.DisplayMember = "Name";
+            FilesListLabel.Text = sortedList.Count < 5 ? "Collar Parameter Files" : String.Format("Collar Parameter Files ({0})", sortedList.Count);
+        }
+
+        private void AddFileButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddCollarParameterFileForm(CurrentUser);
+            //Adding projects in this context is not supported.
+            //var form = newAddProjectForm(Database, CurrentUser);
+            if (form.ShowDialog(this) != DialogResult.Cancel)
+                LoadFileList();
+        }
+
+        private void DeleteFilesButton_Click(object sender, EventArgs e)
+        {
+            foreach (FileListItem item in FilesListBox.SelectedItems.Cast<FileListItem>().Where(item => item.CanDelete))
+                Database.CollarParameterFiles.DeleteOnSubmit(item.File);
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (Exception ex)
+            {
+                string msg = "Unable to delete one or more of the selected files\n" +
+                                "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            LoadDataContext();
+        }
+
+        private void InfoFileButton_Click(object sender, EventArgs e)
+        {
+            var file = ((FileListItem)FilesListBox.SelectedItem).File;
+            var form = new CollarParameterFileDetailsForm(file.FileId, CurrentUser);
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.Show(this);
+        }
+
+        private void FilesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            InfoFileButton.Enabled = false;
+            DeleteFilesButton.Enabled = false;
             if (EditSaveButton.Text == "Save")
                 return;
-            InfoProjectButton.Enabled = ProjectsListBox.SelectedItems.Count == 1;
-            if (IsMyProfile && ProjectsListBox.SelectedItems.Cast<ProjectListItem>().Any(item => item.CanDelete))
-                DeleteProjectsButton.Enabled = true;
+            InfoFileButton.Enabled = FilesListBox.SelectedItems.Count == 1;
+            if (IsMyProfile && FilesListBox.SelectedItems.Cast<FileListItem>().Any(item => item.CanDelete))
+                DeleteFilesButton.Enabled = true;
 
         }
+
+        #endregion
 
         private void OnDatabaseChanged()
         {

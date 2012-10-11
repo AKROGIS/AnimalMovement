@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Animal_Movement" Class="AnimalMovementDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKROMS53AIS;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
+  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKRO39088;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Animals" Member="Animals">
     <Type Name="Animal">
       <Column Name="ProjectId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
@@ -154,6 +154,7 @@
       <Column Name="DisposalDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Association Name="Collar_CollarDeployment" Member="CollarDeployments" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarDeployment" />
       <Association Name="Collar_CollarFix" Member="CollarFixes" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarFix" />
+      <Association Name="Collar_CollarParameter" Member="CollarParameters" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarParameter" />
       <Association Name="LookupCollarManufacturer_Collar" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
       <Association Name="LookupCollarModel_Collar" Member="LookupCollarModel" ThisKey="CollarModel" OtherKey="CollarModel" Type="LookupCollarModel" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_Collar" Member="ProjectInvestigator" ThisKey="Manager" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
@@ -217,6 +218,7 @@
       <Association Name="LookupCollarManufacturer_CollarFile" Member="CollarFiles" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="CollarFile" />
       <Association Name="LookupCollarManufacturer_Collar" Member="Collars" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="Collar" />
       <Association Name="LookupCollarManufacturer_LookupCollarFileFormat" Member="LookupCollarFileFormats" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarFileFormat" />
+      <Association Name="LookupCollarManufacturer_LookupCollarParameterFileFormat" Member="LookupCollarParameterFileFormats" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarParameterFileFormat" />
     </Type>
   </Table>
   <Table Name="dbo.LookupCollarModels" Member="LookupCollarModels">
@@ -260,6 +262,7 @@
       <Column Name="Phone" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
       <Association Name="ProjectInvestigator_Project" Member="Projects" ThisKey="Login" OtherKey="ProjectInvestigator" Type="Project" />
       <Association Name="ProjectInvestigator_Collar" Member="Collars" ThisKey="Login" OtherKey="Manager" Type="Collar" />
+      <Association Name="ProjectInvestigator_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Login" OtherKey="Owner" Type="CollarParameterFile" />
     </Type>
     <UpdateFunction FunctionId="FunctionId18">
       <Argument Parameter="login" Member="Login" Version="Original" />
@@ -281,6 +284,41 @@
       <Column Name="Lon" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
       <Association Name="CollarFile_CollarFix" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
       <Association Name="Collar_CollarFix" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CollarParameters" Member="CollarParameters">
+    <Type Name="CollarParameter">
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="StartDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="EndDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Association Name="Collar_CollarParameter" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" />
+      <Association Name="CollarParameterFile_CollarParameter" Member="CollarParameterFile" ThisKey="FileId" OtherKey="FileId" Type="CollarParameterFile" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.LookupCollarParameterFileFormats" Member="LookupCollarParameterFileFormats">
+    <Type Name="LookupCollarParameterFileFormat">
+      <Column Name="Code" Type="System.Char" DbType="Char(1) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Association Name="LookupCollarParameterFileFormat_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Code" OtherKey="Format" Type="CollarParameterFile" />
+      <Association Name="LookupCollarManufacturer_LookupCollarParameterFileFormat" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CollarParameterFiles" Member="CollarParameterFiles">
+    <Type Name="CollarParameterFile">
+      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Owner" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="FileName" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="Format" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
+      <Column Name="UploadDate" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
+      <Column Name="UploadUser" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="Contents" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Association Name="CollarParameterFile_CollarParameter" Member="CollarParameters" ThisKey="FileId" OtherKey="FileId" Type="CollarParameter" />
+      <Association Name="LookupCollarParameterFileFormat_CollarParameterFile" Member="LookupCollarParameterFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarParameterFileFormat" IsForeignKey="true" />
+      <Association Name="ProjectInvestigator_CollarParameterFile" Member="ProjectInvestigator" ThisKey="Owner" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
     </Type>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">

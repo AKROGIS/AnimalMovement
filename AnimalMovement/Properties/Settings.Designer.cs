@@ -457,13 +457,13 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("231")]
-        public int InvestigatorFormSplitterDistance {
+        [global::System.Configuration.DefaultSettingValueAttribute("147")]
+        public int InvestigatorFormSplitter1Distance {
             get {
-                return ((int)(this["InvestigatorFormSplitterDistance"]));
+                return ((int)(this["InvestigatorFormSplitter1Distance"]));
             }
             set {
-                this["InvestigatorFormSplitterDistance"] = value;
+                this["InvestigatorFormSplitter1Distance"] = value;
             }
         }
         
@@ -512,6 +512,66 @@ namespace AnimalMovement.Properties {
             }
             set {
                 this["CreateQueryLayerFormSplitter2Distance"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("297")]
+        public int InvestigatorFormSplitter2Distance {
+            get {
+                return ((int)(this["InvestigatorFormSplitter2Distance"]));
+            }
+            set {
+                this["InvestigatorFormSplitter2Distance"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point CollarParameterFileDetailsFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["CollarParameterFileDetailsFormLocation"]));
+            }
+            set {
+                this["CollarParameterFileDetailsFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("508, 300")]
+        public global::System.Drawing.Size CollarParameterFileDetailsFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["CollarParameterFileDetailsFormSize"]));
+            }
+            set {
+                this["CollarParameterFileDetailsFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point AddCollarParameterFileFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["AddCollarParameterFileFormLocation"]));
+            }
+            set {
+                this["AddCollarParameterFileFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300, 166")]
+        public global::System.Drawing.Size AddCollarParameterFileFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["AddCollarParameterFileFormSize"]));
+            }
+            set {
+                this["AddCollarParameterFileFormSize"] = value;
             }
         }
     }
