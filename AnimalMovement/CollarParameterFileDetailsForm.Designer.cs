@@ -103,7 +103,7 @@
             // 
             // ShowContentsButton
             // 
-            this.ShowContentsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.ShowContentsButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.ShowContentsButton.Location = new System.Drawing.Point(186, 231);
             this.ShowContentsButton.Name = "ShowContentsButton";
             this.ShowContentsButton.Size = new System.Drawing.Size(116, 23);

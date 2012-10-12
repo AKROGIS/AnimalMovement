@@ -8,6 +8,7 @@ namespace AnimalMovement
 {
     internal static class Settings
     {
+        // When adding new persistent settings, remember to modify the dbo.Settings_Update stored procedure
         private const string ProjectKey = "project";
         private const string FilterKey = "filter_projects";
         private const string SpeciesKey = "species";
