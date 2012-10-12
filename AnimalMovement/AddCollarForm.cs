@@ -3,6 +3,8 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+// FIXME - The PI/Manager in the form is not written to the database.  The DB Insert SP always assumes the user is the PI/Owner
+
 namespace AnimalMovement
 {
     internal partial class AddCollarForm : BaseForm
