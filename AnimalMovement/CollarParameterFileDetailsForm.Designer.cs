@@ -44,9 +44,11 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.FileNameTextBox = new System.Windows.Forms.TextBox();
-            this.CollarManufacturerColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CollarColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CollarManufacturerColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CollarParameterFileColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.StartDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.EndDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).BeginInit();
@@ -87,9 +89,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.CollarsDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.CollarManufacturerColumn,
+            this.CollarColumn,
             this.CollarIdColumn,
+            this.CollarManufacturerColumn,
             this.FileIdColumn,
+            this.CollarParameterFileColumn,
             this.StartDateColumn,
             this.EndDateColumn});
             this.CollarsDataGridView.Location = new System.Drawing.Point(17, 95);
@@ -227,6 +231,25 @@
             this.FileNameTextBox.Size = new System.Drawing.Size(162, 20);
             this.FileNameTextBox.TabIndex = 51;
             // 
+            // CollarColumn
+            // 
+            this.CollarColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.CollarColumn.DataPropertyName = "Collar";
+            this.CollarColumn.HeaderText = "Collar";
+            this.CollarColumn.Name = "CollarColumn";
+            this.CollarColumn.ReadOnly = true;
+            this.CollarColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
+            // CollarIdColumn
+            // 
+            this.CollarIdColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.CollarIdColumn.DataPropertyName = "CollarId";
+            this.CollarIdColumn.HeaderText = "CollarId";
+            this.CollarIdColumn.MinimumWidth = 70;
+            this.CollarIdColumn.Name = "CollarIdColumn";
+            this.CollarIdColumn.ReadOnly = true;
+            this.CollarIdColumn.Visible = false;
+            // 
             // CollarManufacturerColumn
             // 
             this.CollarManufacturerColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
@@ -235,16 +258,8 @@
             this.CollarManufacturerColumn.MinimumWidth = 80;
             this.CollarManufacturerColumn.Name = "CollarManufacturerColumn";
             this.CollarManufacturerColumn.ReadOnly = true;
+            this.CollarManufacturerColumn.Visible = false;
             this.CollarManufacturerColumn.Width = 95;
-            // 
-            // CollarIdColumn
-            // 
-            this.CollarIdColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.CollarIdColumn.DataPropertyName = "CollarId";
-            this.CollarIdColumn.HeaderText = "Collar";
-            this.CollarIdColumn.MinimumWidth = 70;
-            this.CollarIdColumn.Name = "CollarIdColumn";
-            this.CollarIdColumn.ReadOnly = true;
             // 
             // FileIdColumn
             // 
@@ -253,6 +268,14 @@
             this.FileIdColumn.Name = "FileIdColumn";
             this.FileIdColumn.ReadOnly = true;
             this.FileIdColumn.Visible = false;
+            // 
+            // CollarParameterFileColumn
+            // 
+            this.CollarParameterFileColumn.DataPropertyName = "CollarParameterFile";
+            this.CollarParameterFileColumn.HeaderText = "File";
+            this.CollarParameterFileColumn.Name = "CollarParameterFileColumn";
+            this.CollarParameterFileColumn.ReadOnly = true;
+            this.CollarParameterFileColumn.Visible = false;
             // 
             // StartDateColumn
             // 
@@ -321,9 +344,11 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox FileNameTextBox;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CollarManufacturerColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CollarColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn CollarIdColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CollarManufacturerColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileIdColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CollarParameterFileColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn StartDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn EndDateColumn;
 
