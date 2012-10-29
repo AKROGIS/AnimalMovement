@@ -140,5 +140,11 @@
     <Setting Name="AddCollarParameterFileFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">300, 166</Value>
     </Setting>
+    <Setting Name="AddFolderFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AddFolderFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">284, 317</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

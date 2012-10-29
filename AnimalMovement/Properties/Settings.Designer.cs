@@ -574,5 +574,29 @@ namespace AnimalMovement.Properties {
                 this["AddCollarParameterFileFormSize"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point AddFolderFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["AddFolderFormLocation"]));
+            }
+            set {
+                this["AddFolderFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("284, 317")]
+        public global::System.Drawing.Size AddFolderFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["AddFolderFormSize"]));
+            }
+            set {
+                this["AddFolderFormSize"] = value;
+            }
+        }
     }
 }

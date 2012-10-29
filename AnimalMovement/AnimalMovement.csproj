@@ -117,6 +117,12 @@
     <Compile Include="CollarParameterFileDetailsForm.Designer.cs">
       <DependentUpon>CollarParameterFileDetailsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddFolderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddFolderForm.Designer.cs">
+      <DependentUpon>AddFolderForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="CreateQueryLayerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -213,6 +219,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CollarParameterFileDetailsForm.resx">
       <DependentUpon>CollarParameterFileDetailsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddFolderForm.resx">
+      <DependentUpon>AddFolderForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CreateQueryLayerForm.resx">
       <DependentUpon>CreateQueryLayerForm.cs</DependentUpon>
