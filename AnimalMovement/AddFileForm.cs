@@ -8,6 +8,8 @@ using DataModel;
 //TODO - File browser should allow csv, tsc, and dat files by default
 //FIXME - do not assume the file extension is CSV in saving or reporting
 
+//Loading a whole folder
+
 /*
  * The collar list displays the following:
  * if all is selected,  all collars (regardless of owner) for the chosen manufacturer are shown.
