@@ -7566,6 +7566,7 @@ ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Ani
 GO
 ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
 REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Collars]
 GO
