@@ -57,11 +57,6 @@ namespace DataModel
     partial void InsertLookupCollarParameterFileFormat(LookupCollarParameterFileFormat instance);
     partial void UpdateLookupCollarParameterFileFormat(LookupCollarParameterFileFormat instance);
     partial void DeleteLookupCollarParameterFileFormat(LookupCollarParameterFileFormat instance);
-    partial void UpdateCollarParameterFile(CollarParameterFile instance);
-    partial void DeleteCollarParameterFile(CollarParameterFile instance);
-    partial void InsertCollarParameter(CollarParameter instance);
-    partial void UpdateCollarParameter(CollarParameter instance);
-    partial void DeleteCollarParameter(CollarParameter instance);
     #endregion
 		
 		public AnimalMovementDataContext() : 
@@ -338,6 +333,35 @@ namespace DataModel
 			obj.FileId = p1.GetValueOrDefault();
 		}
 		
+		private void UpdateCollarParameterFile(CollarParameterFile obj)
+		{
+			CollarParameterFile original = ((CollarParameterFile)(CollarParameterFiles.GetOriginalEntityState(obj)));
+			this.CollarParameterFile_Update(obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), ((System.Nullable<int>)(original.FileId)));
+		}
+		
+		private void DeleteCollarParameterFile(CollarParameterFile obj)
+		{
+			CollarParameterFile original = ((CollarParameterFile)(CollarParameterFiles.GetOriginalEntityState(obj)));
+			this.CollarParameterFile_Delete(((System.Nullable<int>)(original.FileId)));
+		}
+		
+		private void InsertCollarParameter(CollarParameter obj)
+		{
+			this.CollarParameter_Insert(obj.CollarManufacturer, obj.CollarId, ((System.Nullable<int>)(obj.FileId)), ((System.Nullable<System.DateTime>)(obj.StartDate)), ((System.Nullable<System.DateTime>)(obj.EndDate)));
+		}
+		
+		private void UpdateCollarParameter(CollarParameter obj)
+		{
+			CollarParameter original = ((CollarParameter)(CollarParameters.GetOriginalEntityState(obj)));
+			this.CollarParameter_Update(original.CollarManufacturer, original.CollarId, ((System.Nullable<int>)(original.FileId)), ((System.Nullable<System.DateTime>)(obj.StartDate)), ((System.Nullable<System.DateTime>)(obj.EndDate)));
+		}
+		
+		private void DeleteCollarParameter(CollarParameter obj)
+		{
+			CollarParameter original = ((CollarParameter)(CollarParameters.GetOriginalEntityState(obj)));
+			this.CollarParameter_Delete(original.CollarManufacturer, original.CollarId, ((System.Nullable<int>)(original.FileId)));
+		}
+		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Delete")]
 		public int Animal_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId)
 		{
@@ -516,6 +540,41 @@ namespace DataModel
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, contents, fileId);
 			fileId = ((System.Nullable<int>)(result.GetParameterValue(4)));
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameter_Delete")]
+		public int CollarParameter_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, fileId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameter_Insert")]
+		public int CollarParameter_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, fileId, startDate, endDate);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameter_Update")]
+		public int CollarParameter_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, fileId, startDate, endDate);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameterFile_Delete")]
+		public int CollarParameterFile_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameterFile_Update")]
+		public int CollarParameterFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, fileId);
 			return ((int)(result.ReturnValue));
 		}
 	}
