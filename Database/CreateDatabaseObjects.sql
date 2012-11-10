@@ -2680,7 +2680,7 @@ BEGIN
 		RAISERROR(@message1, 18, 0)
 		RETURN 1
 	END
-	IF @Key in ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format', 'collar_model', 'othervalidkeys...') --Add valid keys to this list
+	IF @Key in ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format', 'collar_model', 'parameter_file_format', 'othervalidkeys...') --Add valid keys to this list
 	BEGIN
 		BEGIN TRY
 			BEGIN TRAN
