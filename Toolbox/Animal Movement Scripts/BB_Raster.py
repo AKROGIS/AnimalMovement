@@ -189,6 +189,16 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
     else:
         mobilityVarianceField = None
     spatialRef = spatialReference
+    if arcpy.Describe(fixesLayer).spatialReference != spatialReference:
+        #FIXME - ESRI BUG - reprojection does not work if the data is in a FGDB and a sort order is given.
+        sort = ''
+        msg = "Due to a bug in ArcGIS 10, data cannot be both sorted and projected on the fly. "
+        msg += "Since a projection is required for your data sorting is turned off. "
+        msg += "This is OK for data in the Animal Movements Database, however other data "
+        msg += "must be correctly pre-sorted by date or you will get incorrect results. "
+        msg += "If you can't guarantee pre-sorted data, then reproject your data first."
+        print(msg)
+        arcpy.AddWarning(msg)
     
     results = {}
     #print groupingFields, dateFieldDelimited
@@ -603,20 +613,20 @@ if __name__ == "__main__":
         arcpy.AddError("Location layer cannot be found. Quitting.")
         sys.exit()
 
-    if spatialReference == None:
+    if not spatialReference or not spatialReference.name:
         spatialReference = arcpy.env.outputCoordinateSystem
         
-    if spatialReference == None:
+    if not spatialReference or not spatialReference.name:
         spatialReference = arcpy.Describe(fixesLayer).spatialReference
 
-    if spatialReference == None:
+    if not spatialReference or not spatialReference.name:
         print("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
         arcpy.AddError("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
         sys.exit()
         
     if spatialReference.type != 'Projected':
-        print("The fixes layer is not a projected coordinate system, or you have not provided one. Quitting.")
-        arcpy.AddError("The fixes layer is not a projected coordinate system, or you have not provided one. Quitting.")
+        print("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+        arcpy.AddError("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
         sys.exit()
         
     #
