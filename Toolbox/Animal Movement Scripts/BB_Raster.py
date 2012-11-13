@@ -380,7 +380,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                         maxTime = delta
             extents = arcpy.Extent(xmin, ymin, xmax, ymax)
 
-            #print "Got extents"
+            #print "Got extents",xmin, ymin, xmax, ymax
            
             #Get LocationalVariance
             if not locationVarianceField:
@@ -399,6 +399,8 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                     if fix[3] > maxLocationVariance:
                         maxLocationVariance = fix[3]
 
+            #print "maxLocationVariance",maxLocationVariance
+            
             #Get MobilityVariance
             if not mobilityVarianceField:
                 if IsFloat(mobilityVarianceConstant):
@@ -406,8 +408,13 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                 else:
                     print "  Calculating most likely mobility variance..."
                     arcpy.AddMessage("  Calculating most likely mobility variance...")
-                    guess = 10000.0 #FIXME, should depend on fix data, i.e. max velocity or such.
-                    mobilityVariance = Brownian.MobilityVariance(fixes, guess)
+                    #FIXME, guess and scalefactor should depend on fix data,
+                    # i.e number of fixes, estimate of Vm, max velocity or such.
+                    # The method Brownian.MobilityVariance() will validate and adjust
+                    # as necessary, but using good estimates reduces computation.
+                    guess = 1000000.0
+                    scaleFactor = 1e10
+                    mobilityVariance = Brownian.MobilityVariance(fixes, guess, scaleFactor)
                     arcpy.AddMessage("  Got mobility variance of %.2f" % mobilityVariance)
                 for fix in fixes:
                     fix[4] = mobilityVariance
@@ -545,9 +552,9 @@ if __name__ == "__main__":
     test = False
     if test:
         #fixesLayer = r"C:\tmp\test2.gdb\migrate"
-        fixesLayer = r"C:\tmp\test2.gdb\a925winter"
+        fixesLayer = r"C:\tmp\LACL_Wolves.gdb\LC0906"
         #fixesLayer = r"C:\tmp\test2.gdb\bbtest"
-        rasterName = r"C:\tmp\kd_test\bb_test4.tif"
+        rasterName = r"C:\tmp\LACL_Wolves.gdb\LC0906_bb2"
         dateFieldName = "FixDate"
         groupingFieldNames = ""
         cellSizeConstant = "1000"
@@ -556,6 +563,9 @@ if __name__ == "__main__":
         locationVarianceConstant = None
         mobilityVarianceFieldName = ""
         mobilityVarianceConstant = ""
+        sr = arcpy.SpatialReference()
+        sr.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        spatialReference = sr
 
     testHorne = False
     if testHorne:

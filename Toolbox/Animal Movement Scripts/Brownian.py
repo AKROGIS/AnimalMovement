@@ -123,7 +123,7 @@ def IntegratePathFast(gridX, gridY, startX, startY, startV, endX, endY, endV, T,
     #return sum(values) / intervals  # about 2 seconds faster for 2172600 segments
 
 
-def EvaulateGridPoint(gridX, gridY, fixes, intervals):
+def EvaluateGridPoint(gridX, gridY, fixes, intervals):
     """Return the probability of finding an animal at location (gridX, gridY) by
     adding up the probablity functions for all the paths between fixes.
     fixes is a list of fixes where each fix has the following elements:
@@ -163,7 +163,7 @@ def CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, searchArea=
     """Build a brownian bridge grid by dividing the extents into
     square cells of size cellSize.  The grid is a list of rows.  Each
     row is a list of cell value.  Each row is built left to right, and the
-    rows are built top to bottom.  See the EvaulateGridPoint() for details
+    rows are built top to bottom.  See the EvaluateGridPoint() for details
     on the remaining parameters."""
     
     if progressor is not None:
@@ -183,12 +183,12 @@ def CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, searchArea=
         row = []
         for x in frange(xMin, xMax, cellSize):
             if searchArea is None:
-                cell = EvaulateGridPoint(x, y, fixes, intervals)
+                cell = EvaluateGridPoint(x, y, fixes, intervals)
                 #cell = 1
             else:
                 point.X, point.Y = x, y
                 if searchArea.contains(point):
-                    cell = EvaulateGridPoint(x, y, fixes, intervals)
+                    cell = EvaluateGridPoint(x, y, fixes, intervals)
                     #cell = 1
                 else:
                     cell = 0
@@ -210,7 +210,7 @@ def CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, searchArea=
 ### Routines for estimating the mobility variance
 ###
     
-def CVL(fixes, lowerBound, upperBound, step):
+def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
     """Return a list (with step number of items).  Each item is a tuple of
     (variance, likelihood).  Variances in the list are equally distributed between
     lowerBound to upperBound. The likelihood is based on Equation 7 in Horne, et al
@@ -230,13 +230,14 @@ def CVL(fixes, lowerBound, upperBound, step):
     in the adehabitat code, each group of three is considered.  This code uses
     the second approach."""
     
+    #print "In CVL(); len(fixes) =", len(fixes), "lowerBound =",lowerBound, "upperBound =",upperBound, "step =", step, "scaleFactor =", scaleFactor   
+
     if len(fixes) < 3:
         raise ValueError, "Not enough fixes provided"
 
-    # See discussion below on the need for a scale factor.
-    scaleFactor = 1e4 * len(fixes)
     results = []    
     for vm in frange(lowerBound, (upperBound + step), step):
+        #print "vm = ",vm
         likelihood = 1
         for i in range(1, (len(fixes) - 1)):
             #times
@@ -266,40 +267,65 @@ def CVL(fixes, lowerBound, upperBound, step):
             v = T * a * (1 - a) * vm  +  (1-a)**2 * prevV  +  a**2 * nextV
             
             #distanceSquared = ((thisX - meanX)**2 + (thisY - meanY)**2)
-            #print thisX,meanX,thisY,meanY
-            #print distanceSquared, T, a, vm, prevV, v
+            #print "thisX =",thisX,"thisY =",thisY,"meanX =",meanX,"meanY =",meanY, "v =", v
+            #print "distanceSquared =",distanceSquared, "T =", T, "a =", a, "vm =", vm, "prevV =", prevV, "nextV =", nextV,
 
             # (thisX, thisY) = Zi = location at which to get value of PDF
             normal = Horne2dNormal(thisX, thisY, meanX, meanY, v)
-            #print normal, likelihood
+            #print "normal =",normal
             
-            # The normal is typically very small on the order of 1e-4 to 1e-9
+            # The normal is typically very small (the total area under the normal curve = 1.0)
             # the scale factor keeps the product from decaying to zero with a
             # large number of fixes.  Since the likelihoods are relative, the
-            # scale factor will not alter the relative likelihood of the vms
+            # scale factor will not alter the relative likelihood of the Vm
             likelihood *= (normal * scaleFactor)
+            #print "likelihood =",likelihood
+            if likelihood == 0:
+                break
+
         results.append((vm, likelihood))
     return results
 
 
-def BestV(fixes, minV, maxV, steps):
-    """Return the mobility variance between minV and maxV with the highest likelihood.
+def BestV(fixes, minV, maxV, steps, scaleFactor):
+    """ Returns a boolean flag and a result.  The boolean flag indicates if
+    the scale factor was appropriate and the result is valid.  If the flag is false,
+    a negative result indicates to the caller that the scaleFactor was too small,
+    otherwise the scale factor was too large.  If the flag is true, this method
+    returns the mobility variance between minV and maxV with the highest likelihood.
+    The scalefactor is used to keep the likelihood from decaying to zero.
     See the CVL() method for a description of likelihood.  steps is the number of
     values to try between minV and maxV.  The precision of the mobility variance
     is proportional to the number of steps.   The time to compute is proportional to
     the number of fixes times the number of steps."""
-    
+
+    #print "In BestV() len(fixes) =",len(fixes), "minV =",minV, "maxV =",maxV, "steps =",steps, "scaleFactor =",scaleFactor
+
     stepSize = float(maxV - minV) / steps
-    likelihoods = CVL(fixes, minV, maxV, stepSize)
+    likelihoods = CVL(fixes, minV, maxV, stepSize, scaleFactor)
+
+    #if all the likelihoods are 0, then the scaleFactor is too small
+    total = sum([v[1] for v in likelihoods]) #sum up the likelihoods
+    #print "total =", total
+    if total == 0:
+        return False, -1
+    
+    #if any of the likelihoods are infinity, then the scaleFactor is too large
+    anyInfinities = filter(math.isinf, [v[1] for v in likelihoods])
+    #print "anyInfinities =", anyInfinities
+    if anyInfinities:
+        return False, 1
+    
+    #print "scale factor is good" 
     result = (0,0)
     for pair in likelihoods:
         #print "v", pair[0], "likelihood", pair[1]
         if pair[1] > result[1]:
             result = pair
-    return result[0]
+    return True, result[0]
 
 
-def MobilityVariance(fixes, maxGuess, steps = 10, error = 0.001):
+def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps = 10, error = 0.001):
     """Return the most likely mobility variance for the set of fixes.  See CVL() for
     a description of the mobility variance likelihood.
     This generate step results between zero and maxGuess.  If the best guess is near
@@ -312,23 +338,58 @@ def MobilityVariance(fixes, maxGuess, steps = 10, error = 0.001):
     if there is no upper bound on the variance.  The graph of liklihood at suitable
     resolution should be reviewed to correctly identify the true solution."""
 
-    maxV = maxGuess    
-    result = BestV(fixes, 0, maxV, steps)
+    #print "In MobilityVariance(), len(fixes) =",len(fixes),"maxGuess =",maxGuess,"steps =", "scaleFactorGuess =", scaleFactorGuess, steps,"error =",error 
+
+    ### FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME ###
+    ###
+    ### potential problems:
+    ###  a factor of ten being too coarse and scalefactor oscilates
+    ###    i.e 1e8 has all zero, but 1e9 has infinity.
+    ###  selected scale factor too close to the 'edge'
+    ###    i.e. refining or increasing the maxV requires a rework of the scalefactor
+    ###
+    ### FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME ###
+    
+    maxV = maxGuess
+    #Make a first guess
+    scaleFactor = scaleFactorGuess
+    scaleFactorUnknown = True
+    while scaleFactorUnknown:
+        success,result = BestV(fixes, 0, maxV, steps, scaleFactor)
+        print "success =",success, "scaleFactorUnknown =",scaleFactorUnknown, "scaleFactor =", scaleFactor
+        if success:
+            scaleFactorUnknown = False
+        else:
+            if result < 0:
+                scaleFactor = scaleFactor * 10.0
+            else:
+                scaleFactor = scaleFactor / 10.0
+        ###FIXME - check previous results, and make sure we are not oscillating
+    
+    print "success =",success, "scaleFactorUnknown =",scaleFactorUnknown, "scaleFactor =", scaleFactor
+    
     gap = float(maxV - 0)/steps
 
-#    print result, "+/-", gap
+#    print result, "+/-", gap, "scaleFactor =", scaleFactor
 #    sys.exit()
     
     #make sure the guess was big enough.  keep doubling until we get it
     #FIXME - we may keep doubling until we throw a math exception.  Check and bail.
     while result > maxV - gap:
         maxV = maxV * 2
-        result = BestV(fixes, 0, maxV, steps)
+        success,result = BestV(fixes, 0, maxV, steps, scaleFactor)
+        if not success:
+            raise ValueError
+            ###FIXME, check success and adjust scalefactor
         gap = float(maxV - 0)/steps
         #print result, "+/-", gap
+    
     #keep zeroing in on the previous result until we have good resolution
     while gap > error:
-        result = BestV(fixes, max (0,result-gap), result+gap, steps)
+        success,result = BestV(fixes, max (0,result-gap), result+gap, steps, scaleFactor)
+        if not success:
+            raise ValueError
+            ###FIXME, check success and adjust scalefactor
         gap = 2 * gap / steps
         #print result, "+/-", gap
     return result
