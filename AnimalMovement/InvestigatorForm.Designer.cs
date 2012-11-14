@@ -286,7 +286,7 @@
             this.CollarsListBox.Location = new System.Drawing.Point(3, 24);
             this.CollarsListBox.Name = "CollarsListBox";
             this.CollarsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.CollarsListBox.Size = new System.Drawing.Size(144, 222);
+            this.CollarsListBox.Size = new System.Drawing.Size(142, 222);
             this.CollarsListBox.TabIndex = 1;
             this.CollarsListBox.SelectedIndexChanged += new System.EventHandler(this.CollarsListBox_SelectedIndexChanged);
             this.CollarsListBox.DoubleClick += new System.EventHandler(this.InfoCollarButton_Click);
@@ -362,7 +362,7 @@
             this.FilesListBox.Location = new System.Drawing.Point(3, 24);
             this.FilesListBox.Name = "FilesListBox";
             this.FilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.FilesListBox.Size = new System.Drawing.Size(153, 222);
+            this.FilesListBox.Size = new System.Drawing.Size(151, 222);
             this.FilesListBox.TabIndex = 35;
             this.FilesListBox.SelectedIndexChanged += new System.EventHandler(this.FilesListBox_SelectedIndexChanged);
             this.FilesListBox.DoubleClick += new System.EventHandler(this.InfoFileButton_Click);
