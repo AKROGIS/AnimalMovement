@@ -178,6 +178,7 @@
       <DependentUpon>RetrieveCollarForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="TpfFile.cs" />
     <EmbeddedResource Include="AddAnimalForm.resx">
       <DependentUpon>AddAnimalForm.cs</DependentUpon>
       <SubType>Designer</SubType>
