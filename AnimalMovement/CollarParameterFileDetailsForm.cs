@@ -5,6 +5,12 @@ using System.Text;
 using System.Windows.Forms;
 using DataModel;
 
+//TODO - Enable Add/Edit/Delete for parameter assignments and date ranges
+//TODO - Enable edit of parameter file type
+//TODO - Implement Psuedo PPF files (i.e. Buck's interval data w/o ppf file)
+//FIXME - Contents of PPF files is binary, Save as does not work
+//FIXME - Save As when viewing file contents should not add the csv extension
+
 namespace AnimalMovement
 {
     internal partial class CollarParameterFileDetailsForm : BaseForm

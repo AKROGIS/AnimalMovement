@@ -3,6 +3,10 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//TODO - When loading multiple files, do not cancel remainder of files if you skip a file
+//TODO - Reload project Investigator form after add parameter file adds a collar
+//TODO - Reload project Investigator form after add parameter file loads multiple files, but one has a problem
+
 namespace AnimalMovement
 {
     internal partial class AddCollarParameterFileForm : BaseForm

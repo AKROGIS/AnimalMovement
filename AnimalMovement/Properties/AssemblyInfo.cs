@@ -7,7 +7,16 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data
 //TODO - DATABASE - Move collar deployment date checking from Stored procedure to trigger to protect against SA and to allow bulk uploading.
 //TODO - DATABASE - Add more unit testing.
+//TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
+//TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
 
+//TODO - Provide some global QAQC tools - I.e. show all collars with conflict in the last x days
+//TODO - Provide some global QAQC tools - I.e. show all collars with multiple parameter files
+//TODO - Provide some global QAQC tools - I.e. show files with overlapping fix dates
+//TODO - build tool to visualize deployments (i.e. show a graphical time line of animals & collars)
+//TODO - Create a Mortality Layer
+//TODO - Create a layer of last location (or locations)
+//TODO - Create a simple location layer, create a table of animal data, and join in ArcMap
 //TODO - Replace the wait cursors with a message box and progress bar
 //TODO - Add a warning (consent to monitoring) message at start up.
 //TODO - How do I add this warning to a layer file??
