@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
+//TODO - DATABASE - rename table CollarDataTelonicsGen4Condensed to CollarDataTelonicsGen4
 //TODO - DATABASE - Add business logic to ensure that all Deployments.Collar.DeploymentDate < Collar.DisposalDate
 //TODO - DATABASE - Add logic to limit collar fixes to those before the Collar.DisposalDate
 //TODO - DATABASE - Add table for Telonics tfp files, each record owned by a PI.
