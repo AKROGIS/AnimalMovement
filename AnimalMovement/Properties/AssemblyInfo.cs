@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 //TODO - Provide some global QAQC tools - I.e. show all collars with conflict in the last x days
 //TODO - Provide some global QAQC tools - I.e. show all collars with multiple parameter files
 //TODO - Provide some global QAQC tools - I.e. show files with overlapping fix dates
+//TODO - Provide some global QAQC tools - I.e. show collars that do not have a TPF or PPF file
 //TODO - build tool to visualize deployments (i.e. show a graphical time line of animals & collars)
 //TODO - Create a Mortality Layer
 //TODO - Create a layer of last location (or locations)
