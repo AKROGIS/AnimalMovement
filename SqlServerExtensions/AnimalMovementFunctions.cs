@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -40,14 +39,12 @@ namespace SqlServerExtensions
 
         #region SQL Server Table Value Functions
         //Code - Format
-        //   A - Telonics Store On Board
+        //   A - Telonics Store On Board Format
         //   B - Ed Debevek's File Format
-        //   C - Telonics Gen4 Output 
-        //   D - Telonics Gen3 Output 
-        //   E - Argos email/webservice for Telonics Gen4 collars 
-        //   F - Argos email/webservice for Telonics Gen3 collars 
+        //   C - Telonics Gen4 File Format
+        //   D - Telonics Gen3 File Format
 
-        // Telonics Store on board format
+        // A - Telonics Store On Board Format
 
         [SqlFunction(
             DataAccess = DataAccessKind.Read,
@@ -78,7 +75,7 @@ namespace SqlServerExtensions
         }
 
 
-        // Ed Debevek file format
+        // B - Ed Debevek's File Format
 
         [SqlFunction(
             DataAccess = DataAccessKind.Read,
@@ -105,7 +102,7 @@ namespace SqlServerExtensions
         }
 
 
-        // Telonics Gen 4 file format
+        // C - Telonics Gen4 File Format
 
         [SqlFunction(
             DataAccess = DataAccessKind.Read,
@@ -169,7 +166,7 @@ namespace SqlServerExtensions
         }
 
 
-        // Telonics Gen 3 file format
+        // D - Telonics Gen3 File Format
 
         [SqlFunction(
             DataAccess = DataAccessKind.Read,
@@ -190,90 +187,6 @@ namespace SqlServerExtensions
             return GetLines(fileId, 'D', FormatD_LineSelector, null);
         }
 
-
-        // Email format is the same as Gen 3 and Gen4, except
-        // how getlines fills the lines enumerator.
-
-        [SqlFunction(
-            DataAccess = DataAccessKind.Read,
-            FillRowMethodName = "FormatC_FillRow",
-            TableDefinition =
-                @"[LineNumber] [int],
-	                [AcquisitionTime] [nvarchar](50) NULL,
-	                [AcquisitionStartTime] [nvarchar](50) NULL,
-	                [Ctn] [nvarchar](50) NULL,
-	                [ArgosId] [nvarchar](50) NULL,
-	                [ArgosLocationClass] [nvarchar](50) NULL,
-	                [ArgosLatitude] [nvarchar](50) NULL,
-	                [ArgosLongitude] [nvarchar](50) NULL,
-	                [ArgosAltitude] [nvarchar](50) NULL,
-	                [GpsFixTime] [nvarchar](50) NULL,
-	                [GpsFixAttempt] [nvarchar](50) NULL,
-	                [GpsLatitude] [nvarchar](50) NULL,
-	                [GpsLongitude] [nvarchar](50) NULL,
-	                [GpsUtmZone] [nvarchar](50) NULL,
-	                [GpsUtmNorthing] [nvarchar](50) NULL,
-	                [GpsUtmEasting] [nvarchar](50) NULL,
-	                [GpsAltitude] [nvarchar](50) NULL,
-	                [GpsSpeed] [nvarchar](50) NULL,
-	                [GpsHeading] [nvarchar](50) NULL,
-	                [GpsHorizontalError] [nvarchar](50) NULL,
-	                [GpsPositionalDilution] [nvarchar](50) NULL,
-	                [GpsHorizontalDilution] [nvarchar](50) NULL,
-	                [GpsSatelliteBitmap] [nvarchar](50) NULL,
-	                [GpsSatelliteCount] [nvarchar](50) NULL,
-	                [GpsNavigationTime] [nvarchar](50) NULL,
-	                [UnderwaterPercentage] [nvarchar](50) NULL,
-	                [DiveCount] [nvarchar](50) NULL,
-	                [AverageDiveDuration] [nvarchar](50) NULL,
-	                [MaximumDiveDuration] [nvarchar](50) NULL,
-	                [LayerPercentage] [nvarchar](50) NULL,
-	                [MaximumDiveDepth] [nvarchar](50) NULL,
-	                [DiveStartTime] [nvarchar](50) NULL,
-	                [DiveDuration] [nvarchar](50) NULL,
-	                [DiveDepth] [nvarchar](50) NULL,
-	                [DiveProfile] [nvarchar](50) NULL,
-	                [ActivityCount] [nvarchar](50) NULL,
-	                [Temperature] [nvarchar](50) NULL,
-	                [RemoteAnalog] [nvarchar](50) NULL,
-	                [SatelliteUplink] [nvarchar](50) NULL,
-	                [ReceiveTime] [nvarchar](50) NULL,
-	                [SatelliteName] [nvarchar](50) NULL,
-	                [RepetitionCount] [nvarchar](50) NULL,
-	                [LowVoltage] [nvarchar](50) NULL,
-	                [Mortality] [nvarchar](50) NULL,
-	                [SaltwaterFailsafe] [nvarchar](50) NULL,
-	                [HaulOut] [nvarchar](50) NULL,
-	                [DigitalInput] [nvarchar](50) NULL,
-	                [MotionDetected] [nvarchar](50) NULL,
-	                [TrapTriggerTime] [nvarchar](50) NULL,
-	                [ReleaseTime] [nvarchar](50) NULL,
-	                [PredeploymentData] [nvarchar](50) NULL,
-	                [Error] [nvarchar](250) NULL")]
-        public static IEnumerable ParseFormatE(SqlInt32 fileId)
-        {
-            return ConvertEmailToGen4Lines(fileId, 'E', FormatC_LineSelector, FormatC_ColumnSelector);
-        }
-
-        [SqlFunction(
-            DataAccess = DataAccessKind.Read,
-            FillRowMethodName = "FormatD_FillRow",
-            TableDefinition =
-                @"[LineNumber] [int],
-	                [TXDate] [nvarchar](50) NULL,
-	                [TXTime] [nvarchar](50) NULL,
-	                [PTTID] [nvarchar](50) NULL,
-	                [FixNum] [nvarchar](50) NULL,
-	                [FixQual] [nvarchar](50) NULL,
-	                [FixDate] [nvarchar](50) NULL,
-	                [FixTime] [nvarchar](50) NULL,
-	                [Longitude] [nvarchar](50) NULL,
-	                [Latitude] [nvarchar](50) NULL")]
-        public static IEnumerable ParseFormatF(SqlInt32 fileId)
-        {
-            return ConvertEmailToGen3Lines(fileId, 'F', FormatD_LineSelector, null);
-        }
-
 #endregion
 
         private struct Line
@@ -289,6 +202,33 @@ namespace SqlServerExtensions
             }
         }
 
+        private static IEnumerable GetLines(SqlInt32 fileId, char format, Func<int, string, bool> lineSelector, Func<StreamReader, UInt64> columnSelector)
+        {
+            Byte[] bytes = GetFileContents("CollarFiles", fileId, format);
+            var resultCollection = new ArrayList();
+            UInt64 columnMask = UInt64.MaxValue; //Select all
+            if (columnSelector != null)
+            {
+                using (var memoryStream = new MemoryStream(bytes))
+                using (var reader = new StreamReader(memoryStream))
+                {
+                    columnMask = columnSelector(reader);
+                }
+            }
+            int lineNumber = 1;
+            using (var memoryStream = new MemoryStream(bytes))
+            using (var reader = new StreamReader(memoryStream))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (lineSelector(lineNumber, line))
+                        resultCollection.Add(new Line(lineNumber, line, columnMask));
+                    lineNumber++;
+                }
+            }
+            return resultCollection;
+        }
 
         private static Byte[] GetFileContents(string table, SqlInt32 fileId, char format)
         {
@@ -314,201 +254,6 @@ namespace SqlServerExtensions
                 }
             }
             return bytes;
-        }
-
-
-        private static IEnumerable ConvertEmailToGen3Lines(SqlInt32 fileId, char format, Func<int, string, bool> lineSelector, Func<StreamReader, UInt64> columnSelector)
-        {
-            var resultCollection = new ArrayList();
-            Byte[] bytes = GetFileContents("CollarFiles", fileId, format);
-            //FIXME - implement this code
-            //Save file to disk with temp name
-            //Ensure PPT files are avaialble to ADC-T03
-            //Setup ADC-T03 (input/output folders)
-            //Run ADC-T03
-            //For each file in output folder
-            //  read the bytes
-            //  parse the bytes similar to getlines() and add the results to the collection
-                resultCollection.AddRange(GetLines2(lineSelector, columnSelector, bytes));
-            return resultCollection;
-        }
-
-        private static IEnumerable ConvertEmailToGen4Lines(SqlInt32 fileId, char format, Func<int, string, bool> lineSelector, Func<StreamReader, UInt64> columnSelector)
-        {
-            var resultCollection = new ArrayList();
-            // Get the file to process from the database
-            Byte[] data = GetFileContents("CollarFiles", fileId, format);
-
-            //get the settings
-            //commandLine is a format string for the contents of a Windows command.  It has one parameter
-            //  {0} the full path of the XML batch settings
-            var commandLine = GetSystemSetting("tdc_commandline");
-            //argosLine is a format string with 1 parameter for full path of input file;  there can be multiple argosLines in the batch settings
-            var argosLine = GetSystemSetting("tpf_batchsettings_argosline");
-            //batchSettings - is a format string for an XML file with the following parameters
-            // {0} is one or more argosLines
-            // {1} is the full path of the TPF file
-            // {2} is the full path of a folder for the output files
-            // {3} is the full path of a file of the log file - can be the empty string if no log is needed
-            var batchSettings = GetSystemSetting("tpf_batchsettings");
-
-            //create temp files for the input files
-            string dataFilePath = Path.GetTempFileName();
-            string tpfFilePath = Path.GetTempFileName();
-            string batchFilePath = Path.GetTempFileName();
-            string logFilePath = Path.GetTempFileName();
-
-            //create a temp folder for the output files
-            string outputFolder = GetNewTempDirectory();
-
-            //Save input data to the filesystem
-            File.WriteAllBytes(dataFilePath, data);
-
-            string error = String.Empty;
-            foreach (var tpfFileId in GetPotentialCollarParameterFiles('A', fileId))
-            {
-                //TODO implement a permanent folder on the server which has all the TPF files, then just check that the TPF file exists
-                //  Teh following would only need to be implemented if it did not exist
-                //Get the TPF file from the database, and save it to the filesystem
-                Byte[] tpfData = GetFileContents("CollarParameterFiles", tpfFileId, 'A');
-                File.WriteAllBytes(tpfFilePath, tpfData);
-
-                //  Create the input batch file
-                //    the batch file can have multiple argos input files, but only one tfp file
-                //    we only process one file at a time
-                batchSettings = String.Format(batchSettings, String.Format(argosLine, dataFilePath), tpfFilePath, outputFolder,
-                                              logFilePath);
-                File.WriteAllText(batchFilePath, batchSettings);
-
-                //  Run TDC
-                //commandLine = String.Format(commandLine, batchFilePath);
-                
-                var p = Process.Start(new ProcessStartInfo
-                    {
-                        FileName = commandLine,
-                        Arguments = "/batch:" + batchFilePath,
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                        RedirectStandardError = true
-                    });
-                error += p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                
-                //TODO - check the log file
-                //TODO - How do we return warnings/diagnostics from a TVF
-                // for each output file created by TDC, parse the bytes similar to getlines() and add the results to the collection
-                int startingLine = 1;
-                foreach (var path in Directory.GetFiles(outputFolder))
-                {
-                    var file = Path.Combine(outputFolder, path);
-                    Byte[] bytes = File.ReadAllBytes(file);
-                    var lines = GetLines2(lineSelector, columnSelector, bytes, startingLine);
-                    resultCollection.AddRange(lines);
-                    startingLine += lines.Count;
-                    //File.Delete(file);
-                }
-            }
-
-            //cleanup temp files/folders
-            File.Delete(logFilePath);
-            File.Delete(tpfFilePath);
-            File.Delete(dataFilePath);
-            File.Delete(batchFilePath);
-            //Directory.Delete(outputFolder);
-
-            return resultCollection;
-        }
-
-        public static SqlInt32[] GetPotentialCollarParameterFiles(char format, SqlInt32 fileId)
-        {
-            var files = new List<SqlInt32>();
-
-            using (var connection = new SqlConnection("context connection=true"))
-            {
-                connection.Open();
-
-                const string sql = "SELECT * FROM [dbo].[PotentialCollarParameterFilesForFormatAndCollarFile](@Format, @FileId)";
-
-                using (var command = new SqlCommand(sql, connection))
-                {
-                    command.Parameters.Add(new SqlParameter("@Format", SqlDbType.Char) { Value = format });
-                    command.Parameters.Add(new SqlParameter("@FileId", SqlDbType.Int) { Value = fileId });
-
-                    using (SqlDataReader results = command.ExecuteReader())
-                    {
-                        while (results.Read())
-                        {
-                            files.Add(results.GetSqlInt32(0));
-                        }
-                    }
-                }
-            }
-            return files.ToArray();
-        }
-
-        public static string GetNewTempDirectory()
-        {
-            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(tempDirectory);
-            return tempDirectory;
-        }
-
-        private static string GetSystemSetting(SqlString key)
-        {
-            string setting = null;
-
-            using (var connection = new SqlConnection("context connection=true"))
-            {
-                connection.Open();
-
-                const string sql = "SELECT [Value] FROM [dbo].[Settings] WHERE [Username] = 'system' AND [Key] =  @key";
-                using (var command = new SqlCommand(sql, connection))
-                {
-                    command.Parameters.Add(new SqlParameter("@key", SqlDbType.NVarChar) { Value = key });
-                    using (SqlDataReader results = command.ExecuteReader())
-                    {
-                        while (results.Read())
-                        {
-                            setting = results.GetString(0);
-                        }
-                    }
-                }
-            }
-            return setting;
-        }
-
-
-        private static IEnumerable GetLines(SqlInt32 fileId, char format, Func<int, string, bool> lineSelector, Func<StreamReader, UInt64> columnSelector)
-        {
-            Byte[] bytes = GetFileContents("CollarFiles", fileId, format);
-            return GetLines2(lineSelector, columnSelector, bytes);
-        }
-
-        private static ArrayList GetLines2(Func<int, string, bool> lineSelector, Func<StreamReader, ulong> columnSelector, byte[] bytes, int startingLine = 1)
-        {
-            var resultCollection = new ArrayList();
-            UInt64 columnMask = UInt64.MaxValue; //Select all
-            if (columnSelector != null)
-            {
-                using (var memoryStream = new MemoryStream(bytes))
-                using (var reader = new StreamReader(memoryStream))
-                {
-                    columnMask = columnSelector(reader);
-                }
-            }
-            int lineNumber = startingLine;
-            using (var memoryStream = new MemoryStream(bytes))
-            using (var reader = new StreamReader(memoryStream))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (lineSelector(lineNumber, line))
-                        resultCollection.Add(new Line(lineNumber, line, columnMask));
-                    lineNumber++;
-                }
-            }
-            return resultCollection;
         }
 
         #region Column Selectors
