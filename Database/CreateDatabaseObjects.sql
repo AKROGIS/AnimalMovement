@@ -3583,7 +3583,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[CollarDataTelonicsGen4Condensed](
+CREATE TABLE [dbo].[CollarDataTelonicsGen4](
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
 	[AcquisitionTime] [varchar](50) NULL,
@@ -3637,7 +3637,7 @@ CREATE TABLE [dbo].[CollarDataTelonicsGen4Condensed](
 	[ReleaseTime] [varchar](50) NULL,
 	[PredeploymentData] [varchar](50) NULL,
 	[Error] [varchar](250) NULL,
- CONSTRAINT [PK_CollarDataTelonicsGen4Condensed] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_CollarDataTelonicsGen4] PRIMARY KEY CLUSTERED 
 (
 	[FileId] ASC,
 	[LineNumber] ASC
@@ -3755,7 +3755,7 @@ BEGIN
 		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
 		        CONVERT(datetime2, I.[AcquisitionTime]),
 		        CONVERT(float, I.GpsLatitude), CONVERT(float, I.GpsLongitude)
-		   FROM dbo.CollarDataTelonicsGen4Condensed as I INNER JOIN CollarFiles as F 
+		   FROM dbo.CollarDataTelonicsGen4 as I INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
 		  WHERE F.[Status] = 'A'
 		    AND I.FileId = @FileId
@@ -7816,9 +7816,9 @@ BEGIN
 	IF @Format = 'C'  -- Telonics Gen4 Convertor Format
 	BEGIN
 		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen4Condensed] WHERE [FileId] = @FileId)
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen4] WHERE [FileId] = @FileId)
 		BEGIN
-			INSERT INTO [dbo].[CollarDataTelonicsGen4Condensed] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatC] (@FileId) 
+			INSERT INTO [dbo].[CollarDataTelonicsGen4] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatC] (@FileId) 
 		END
 	END
 	
@@ -7969,10 +7969,10 @@ REFERENCES [dbo].[CollarFiles] ([FileId])
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsGen3] CHECK CONSTRAINT [FK_CollarDataTelonicsGen3_CollarFiles]
 GO
-ALTER TABLE [dbo].[CollarDataTelonicsGen4Condensed]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen4Condensed_CollarFiles] FOREIGN KEY([FileId])
+ALTER TABLE [dbo].[CollarDataTelonicsGen4]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
 GO
-ALTER TABLE [dbo].[CollarDataTelonicsGen4Condensed] CHECK CONSTRAINT [FK_CollarDataTelonicsGen4Condensed_CollarFiles]
+ALTER TABLE [dbo].[CollarDataTelonicsGen4] CHECK CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsStoreOnBoard]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsStoreOnBoard_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
