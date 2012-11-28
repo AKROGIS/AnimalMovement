@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -43,7 +44,8 @@ namespace SqlServerExtensions
         //   B - Ed Debevek's File Format
         //   C - Telonics Gen4 Output 
         //   D - Telonics Gen3 Output 
-        //   E - Argos email/webservice for Telonics Gen3/Gen4 collars 
+        //   E - Argos email/webservice for Telonics Gen4 collars 
+        //   F - Argos email/webservice for Telonics Gen3 collars 
 
         // Telonics Store on board format
 
@@ -248,7 +250,7 @@ namespace SqlServerExtensions
 	                [ReleaseTime] [nvarchar](50) NULL,
 	                [PredeploymentData] [nvarchar](50) NULL,
 	                [Error] [nvarchar](250) NULL")]
-        public static IEnumerable ParseFormatEGen4(SqlInt32 fileId)
+        public static IEnumerable ParseFormatE(SqlInt32 fileId)
         {
             return ConvertEmailToGen4Lines(fileId, 'E', FormatC_LineSelector, FormatC_ColumnSelector);
         }
@@ -267,9 +269,9 @@ namespace SqlServerExtensions
 	                [FixTime] [nvarchar](50) NULL,
 	                [Longitude] [nvarchar](50) NULL,
 	                [Latitude] [nvarchar](50) NULL")]
-        public static IEnumerable ParseFormatEGen3(SqlInt32 fileId)
+        public static IEnumerable ParseFormatF(SqlInt32 fileId)
         {
-            return ConvertEmailToGen3Lines(fileId, 'E', FormatD_LineSelector, null);
+            return ConvertEmailToGen3Lines(fileId, 'F', FormatD_LineSelector, null);
         }
 
 #endregion
@@ -362,7 +364,8 @@ namespace SqlServerExtensions
             //Save input data to the filesystem
             File.WriteAllBytes(dataFilePath, data);
 
-            foreach (var tpfFileId in GetPotentialTpfFiles(fileId))
+            string error = String.Empty;
+            foreach (var tpfFileId in GetPotentialCollarParameterFiles('A', fileId))
             {
                 //TODO implement a permanent folder on the server which has all the TPF files, then just check that the TPF file exists
                 //  Teh following would only need to be implemented if it did not exist
@@ -378,28 +381,45 @@ namespace SqlServerExtensions
                 File.WriteAllText(batchFilePath, batchSettings);
 
                 //  Run TDC
-                commandLine = String.Format(commandLine, batchFilePath);
-                //FIXME - implement this code
-
+                //commandLine = String.Format(commandLine, batchFilePath);
+                
+                var p = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = commandLine,
+                        Arguments = "/batch:" + batchFilePath,
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                        RedirectStandardError = true
+                    });
+                error += p.StandardError.ReadToEnd();
+                p.WaitForExit();
+                
+                //TODO - check the log file
+                //TODO - How do we return warnings/diagnostics from a TVF
                 // for each output file created by TDC, parse the bytes similar to getlines() and add the results to the collection
+                int startingLine = 1;
                 foreach (var path in Directory.GetFiles(outputFolder))
                 {
-                    Byte[] bytes = File.ReadAllBytes(path);
-                    resultCollection.AddRange(GetLines2(lineSelector, columnSelector, bytes));
+                    var file = Path.Combine(outputFolder, path);
+                    Byte[] bytes = File.ReadAllBytes(file);
+                    var lines = GetLines2(lineSelector, columnSelector, bytes, startingLine);
+                    resultCollection.AddRange(lines);
+                    startingLine += lines.Count;
+                    //File.Delete(file);
                 }
             }
 
             //cleanup temp files/folders
-            Directory.Delete(outputFolder, true);
             File.Delete(logFilePath);
             File.Delete(tpfFilePath);
             File.Delete(dataFilePath);
             File.Delete(batchFilePath);
+            //Directory.Delete(outputFolder);
 
             return resultCollection;
         }
 
-        public static SqlInt32[] GetPotentialTpfFiles(SqlInt32 fileId)
+        public static SqlInt32[] GetPotentialCollarParameterFiles(char format, SqlInt32 fileId)
         {
             var files = new List<SqlInt32>();
 
@@ -407,14 +427,12 @@ namespace SqlServerExtensions
             {
                 connection.Open();
 
-                const string sql = "SELECT PF.[FileId] FROM [dbo].[CollarParameterFiles] AS PF" +
-                                   " INNER JOIN [dbo].[Projects] as P ON P.ProjectInvestigator = PF.Owner" +
-                                   " INNER JOIN [dbo].[CollarFiles] AS CF ON P.ProjectId = CF.Project"+
-                                   " WHERE CF.FileId = @fileId;";
+                const string sql = "SELECT * FROM [dbo].[PotentialCollarParameterFilesForFormatAndCollarFile](@Format, @FileId)";
 
                 using (var command = new SqlCommand(sql, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@fileId", SqlDbType.Int) { Value = fileId });
+                    command.Parameters.Add(new SqlParameter("@Format", SqlDbType.Char) { Value = format });
+                    command.Parameters.Add(new SqlParameter("@FileId", SqlDbType.Int) { Value = fileId });
 
                     using (SqlDataReader results = command.ExecuteReader())
                     {
@@ -435,7 +453,7 @@ namespace SqlServerExtensions
             return tempDirectory;
         }
 
-        private static string GetSystemSetting(string key)
+        private static string GetSystemSetting(SqlString key)
         {
             string setting = null;
 
@@ -446,7 +464,7 @@ namespace SqlServerExtensions
                 const string sql = "SELECT [Value] FROM [dbo].[Settings] WHERE [Username] = 'system' AND [Key] =  @key";
                 using (var command = new SqlCommand(sql, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@key", SqlDbType.Text) { Value = key });
+                    command.Parameters.Add(new SqlParameter("@key", SqlDbType.NVarChar) { Value = key });
                     using (SqlDataReader results = command.ExecuteReader())
                     {
                         while (results.Read())
@@ -466,7 +484,7 @@ namespace SqlServerExtensions
             return GetLines2(lineSelector, columnSelector, bytes);
         }
 
-        private static ArrayList GetLines2(Func<int, string, bool> lineSelector, Func<StreamReader, ulong> columnSelector, byte[] bytes)
+        private static ArrayList GetLines2(Func<int, string, bool> lineSelector, Func<StreamReader, ulong> columnSelector, byte[] bytes, int startingLine = 1)
         {
             var resultCollection = new ArrayList();
             UInt64 columnMask = UInt64.MaxValue; //Select all
@@ -478,7 +496,7 @@ namespace SqlServerExtensions
                     columnMask = columnSelector(reader);
                 }
             }
-            int lineNumber = 1;
+            int lineNumber = startingLine;
             using (var memoryStream = new MemoryStream(bytes))
             using (var reader = new StreamReader(memoryStream))
             {
