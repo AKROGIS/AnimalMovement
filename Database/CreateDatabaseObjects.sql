@@ -1546,6 +1546,44 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
+-- Create date: June 15, 2012
+-- Description:	Test the CollarDeployments DeleteTrigger
+-- =============================================
+CREATE PROCEDURE [dbo].[Test_Trigger_CollarDeployments_Delete] 
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	PRINT 'Test_Trigger_CollarDeployments_Delete'
+	PRINT '  See Test_Trigger_CollarDeployments_Insert'
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: June 11, 2012
+-- Description:	Test the Animals UpdateTrigger
+-- =============================================
+CREATE PROCEDURE [dbo].[Test_Trigger_Animals_Update] 
+AS
+BEGIN
+	SET NOCOUNT ON
+	
+	PRINT 'Test_Trigger_Animals_Update'
+	PRINT '  Test not written yet'
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
 -- Create date: June 11, 2012
 -- Description:	Test the Locations UpdateTrigger
 -- =============================================
@@ -1647,44 +1685,6 @@ CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
         @ErrorProcedure, -- parameter: original error procedure name.
         @ErrorLine       -- parameter: original error line number.
         );
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: June 15, 2012
--- Description:	Test the CollarDeployments DeleteTrigger
--- =============================================
-CREATE PROCEDURE [dbo].[Test_Trigger_CollarDeployments_Delete] 
-AS
-BEGIN
-	SET NOCOUNT ON
-	
-	PRINT 'Test_Trigger_CollarDeployments_Delete'
-	PRINT '  See Test_Trigger_CollarDeployments_Insert'
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: June 11, 2012
--- Description:	Test the Animals UpdateTrigger
--- =============================================
-CREATE PROCEDURE [dbo].[Test_Trigger_Animals_Update] 
-AS
-BEGIN
-	SET NOCOUNT ON
-	
-	PRINT 'Test_Trigger_Animals_Update'
-	PRINT '  Test not written yet'
-
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -2313,6 +2313,11 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatA]
 GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2544,11 +2549,6 @@ BEGIN
 	
 END
 GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
-GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2701,6 +2701,48 @@ BEGIN
 		RAISERROR(@message2, 18, 0)
 		RETURN 1
 	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 28, 2012
+-- Description:	Adds a new project to the database.
+-- =============================================
+CREATE PROCEDURE [dbo].[Project_Insert] 
+	@ProjectId NVARCHAR(255)= NULL,
+	@ProjectName NVARCHAR(255) = NULL, 
+	@ProjectInvestigator sysname = NULL, 
+	@UnitCode NVARCHAR(255) = NULL, 
+	@Description NVARCHAR(4000) = NULL 
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+		
+	--default PI is the calling user
+	IF nullif(@ProjectInvestigator,'') IS NULL
+	BEGIN
+		SET @ProjectInvestigator = @Caller;
+	END
+
+	-- If the caller is not a PI then error and return
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a project';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+
+	INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
+		 VALUES (nullif(@ProjectId,''), nullif(@ProjectName,''), nullif(@ProjectInvestigator,''),
+		         nullif(@UnitCode,''), nullif(@Description,''))
+
 END
 GO
 SET ANSI_NULLS ON
@@ -3114,48 +3156,6 @@ BEGIN
 	INSERT INTO dbo.Animals ([ProjectId], [AnimalId], [Species], [Gender], [MortalityDate], [GroupName], [Description])
 		 VALUES (nullif(@ProjectId,''), nullif(@AnimalId,''), nullif(@Species,''), nullif(@Gender,''),
 		         @MortalityDate, nullif(@GroupName,''), nullif(@Description,''));
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 28, 2012
--- Description:	Adds a new project to the database.
--- =============================================
-CREATE PROCEDURE [dbo].[Project_Insert] 
-	@ProjectId NVARCHAR(255)= NULL,
-	@ProjectName NVARCHAR(255) = NULL, 
-	@ProjectInvestigator sysname = NULL, 
-	@UnitCode NVARCHAR(255) = NULL, 
-	@Description NVARCHAR(4000) = NULL 
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-		
-	--default PI is the calling user
-	IF nullif(@ProjectInvestigator,'') IS NULL
-	BEGIN
-		SET @ProjectInvestigator = @Caller;
-	END
-
-	-- If the caller is not a PI then error and return
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a project';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-
-	INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
-		 VALUES (nullif(@ProjectId,''), nullif(@ProjectName,''), nullif(@ProjectInvestigator,''),
-		         nullif(@UnitCode,''), nullif(@Description,''))
 
 END
 GO
@@ -4344,6 +4344,247 @@ BEGIN
 		EXEC [dbo].[Utility_RethrowError]
 		RETURN 1
 	END CATCH
+	
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: November 26, 2012
+-- Description:	Returns a list of collar parameter file ids
+--              that have a specific format and are potentially appropriate for a specified collar file
+-- Example:     SELECT * FROM PotentialCollarParameterFilesForFormatAndCollarFile('A', 123)
+-- =============================================
+CREATE FUNCTION [dbo].[PotentialCollarParameterFilesForFormatAndCollarFile] 
+(
+	@Format CHAR(1), 
+	@FileId INT
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT PF.[FileId]
+		FROM [dbo].[CollarParameterFiles] AS PF
+		INNER JOIN [dbo].[Projects] AS P ON P.ProjectInvestigator = PF.Owner
+		INNER JOIN [dbo].[CollarFiles] AS CF ON P.ProjectId = CF.Project
+		WHERE CF.FileId = @fileId
+		AND PF.Format = @Format
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- ===============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Updates the Status of a CollarFile
+-- ===============================================
+CREATE PROCEDURE [dbo].[CollarFile_Update] 
+	@FileId INT  = NULL, 
+	@FileName NVARCHAR(255) = NULL,
+	@CollarId NVARCHAR(255) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Get some information about the file to update
+	DECLARE @Status CHAR;
+	DECLARE @CollarManufacturer NVARCHAR(255);
+	DECLARE @OldFileName NVARCHAR(255);
+	DECLARE @OldCollarId NVARCHAR(255);
+	DECLARE @ProjectId NVARCHAR(255);
+	 SELECT @Status = [Status],
+		    @CollarManufacturer = [CollarManufacturer],
+		    @OldFileName = [FileName],
+		    @OldCollarId = [CollarId],
+		    @ProjectId = [Project]
+	   FROM [dbo].[CollarFiles]
+	  WHERE [FileId] = @FileId;
+
+	IF @Status IS NULL
+	BEGIN
+		DECLARE @message2 nvarchar(100) = 'Invalid parameter: (' + @FileId + ') was not found in the CollarFiles table';
+		RAISERROR(@message2, 18, 0)
+		RETURN 1
+	END
+	-- If OldStatus was found, then Project is guaranteed.
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be the PI or editor on the project
+	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
+		BEGIN
+			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor of the project ('+@ProjectId+') to update this file.';
+			RAISERROR(@message4, 18, 0)
+			RETURN 1
+		END
+	END
+	
+	-- Change the file name;  this should never fail.
+	IF @FileName IS NOT NULL AND @FileName <> @OldFileName
+	BEGIN
+		BEGIN TRY
+			UPDATE [dbo].[CollarFiles] SET [FileName] = @FileName WHERE [FileId] = @FileId; 
+		END TRY
+		BEGIN CATCH
+			EXEC [dbo].[Utility_RethrowError]
+			RETURN 1
+		END CATCH
+	END
+
+	
+	-- Can we update the CollarId?
+	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND @Status = 'A'
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Unable to change the collar of an active file.  Change the status and try again.';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+	
+	-- If the collar was provided, make sure it is a valid collar
+	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND
+	   NOT EXISTS (SELECT 1 FROM [dbo].[Collars] WHERE [CollarManufacturer] = @CollarManufacturer
+												   AND [CollarId] = @CollarId)
+	BEGIN
+		DECLARE @message3 nvarchar(100) = 'Invalid parameter: CollarId (' + @CollarId + ') was not found in the Collars table';
+		RAISERROR(@message3, 18, 0)
+		RETURN 1
+	END
+
+	-- Update CollarId; This should never fail
+	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId
+	BEGIN
+		BEGIN TRY
+			UPDATE [dbo].[CollarFiles] SET [CollarId] = @CollarId WHERE [FileId] = @FileId; 
+		END TRY
+		BEGIN CATCH
+			EXEC [dbo].[Utility_RethrowError]
+			RETURN 1
+		END CATCH
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 27, 2012
+-- Description:	Adds a new editor to a project
+-- =============================================
+CREATE PROCEDURE [dbo].[ProjectEditor_Insert] 
+	@ProjectId nvarchar(255) = Null,
+	@Editor sysname = Null
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+	
+	--If editor is already an editor on the project, then there is nothing to do, so return
+	IF EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE ProjectId = @ProjectId AND Editor = @Editor)
+	BEGIN
+		RETURN 0
+	END
+	
+	-- If the caller is not the PI for the project, then error and return
+	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator for project (' + @ProjectId + ')';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+	
+	DECLARE @LoginCreated BIT = 0;
+	DECLARE @UserCreated BIT = 0;
+	DECLARE @RoleMemberAdded BIT = 0;
+	
+	BEGIN TRY
+		-- If the Editor is not a database user then add them.
+		IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Editor)
+		BEGIN
+			EXEC ('CREATE USER ['  + @Editor + ']') --  LOGIN defaults to the same name
+			SET @UserCreated = 1
+		END
+			
+		-- If the Editor user does not have the editor role, then add it.
+		IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
+					   INNER JOIN sys.database_principals AS P1  
+					   ON U.member_principal_id = P1.principal_id
+					   INNER JOIN sys.database_principals AS P2 
+					   ON U.role_principal_id = p2.principal_id 
+					   WHERE p1.name = @Editor AND p2.name = 'Editor' )
+		BEGIN
+			--EXEC ('ALTER ROLE Editor ADD MEMBER ['  + @Editor + ']')  --SQL2012 syntax
+			EXEC sp_addrolemember 'Editor', @Editor
+			SET @RoleMemberAdded = 1
+		END
+			
+		-- Add them to the Project Editors table
+		INSERT [dbo].[ProjectEditors] (ProjectId, Editor) VALUES (@ProjectId, @Editor)
+	END TRY
+	BEGIN CATCH
+		-- Roleback operations
+		IF @RoleMemberAdded = 1
+		BEGIN
+			EXEC sp_droprolemember 'Editor', @Editor
+		END
+		IF @UserCreated = 1
+		BEGIN
+			EXEC ('DROP USER ['  + @Editor + ']')
+		END
+		EXEC [dbo].[Utility_RethrowError]
+		RETURN 1
+	END CATCH
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 27, 2012
+-- Description:	Removes an editor from a project
+-- =============================================
+CREATE PROCEDURE [dbo].[ProjectEditor_Delete] 
+	@ProjectId nvarchar(255) = Null,
+	@Editor sysname  = Null
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Permissions only allow Investigators to execute this procedure
+	-- The Invesitigator role has Alter Any User, and Alter Role 'Editor' permissions
+
+	--If editor is not an editor on the project, then there is nothing to do, so return
+	IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE ProjectId = @ProjectId AND Editor = @Editor)
+	BEGIN
+		RETURN
+	END
+		
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+	
+	-- If the caller is not the PI for the project, then error and return
+	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator for project (' + @ProjectId + ')';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+
+	-- This is the key step from the applications standpoint
+	DELETE FROM [dbo].[ProjectEditors] WHERE ProjectId = @ProjectId AND Editor = @Editor
 	
 END
 GO
@@ -7013,221 +7254,6 @@ GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 27, 2012
--- Description:	Adds a new editor to a project
--- =============================================
-CREATE PROCEDURE [dbo].[ProjectEditor_Insert] 
-	@ProjectId nvarchar(255) = Null,
-	@Editor sysname = Null
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-	
-	--If editor is already an editor on the project, then there is nothing to do, so return
-	IF EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE ProjectId = @ProjectId AND Editor = @Editor)
-	BEGIN
-		RETURN 0
-	END
-	
-	-- If the caller is not the PI for the project, then error and return
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator for project (' + @ProjectId + ')';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-	DECLARE @LoginCreated BIT = 0;
-	DECLARE @UserCreated BIT = 0;
-	DECLARE @RoleMemberAdded BIT = 0;
-	
-	BEGIN TRY
-		-- If the Editor is not a database user then add them.
-		IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Editor)
-		BEGIN
-			EXEC ('CREATE USER ['  + @Editor + ']') --  LOGIN defaults to the same name
-			SET @UserCreated = 1
-		END
-			
-		-- If the Editor user does not have the editor role, then add it.
-		IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
-					   INNER JOIN sys.database_principals AS P1  
-					   ON U.member_principal_id = P1.principal_id
-					   INNER JOIN sys.database_principals AS P2 
-					   ON U.role_principal_id = p2.principal_id 
-					   WHERE p1.name = @Editor AND p2.name = 'Editor' )
-		BEGIN
-			--EXEC ('ALTER ROLE Editor ADD MEMBER ['  + @Editor + ']')  --SQL2012 syntax
-			EXEC sp_addrolemember 'Editor', @Editor
-			SET @RoleMemberAdded = 1
-		END
-			
-		-- Add them to the Project Editors table
-		INSERT [dbo].[ProjectEditors] (ProjectId, Editor) VALUES (@ProjectId, @Editor)
-	END TRY
-	BEGIN CATCH
-		-- Roleback operations
-		IF @RoleMemberAdded = 1
-		BEGIN
-			EXEC sp_droprolemember 'Editor', @Editor
-		END
-		IF @UserCreated = 1
-		BEGIN
-			EXEC ('DROP USER ['  + @Editor + ']')
-		END
-		EXEC [dbo].[Utility_RethrowError]
-		RETURN 1
-	END CATCH
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 27, 2012
--- Description:	Removes an editor from a project
--- =============================================
-CREATE PROCEDURE [dbo].[ProjectEditor_Delete] 
-	@ProjectId nvarchar(255) = Null,
-	@Editor sysname  = Null
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Permissions only allow Investigators to execute this procedure
-	-- The Invesitigator role has Alter Any User, and Alter Role 'Editor' permissions
-
-	--If editor is not an editor on the project, then there is nothing to do, so return
-	IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE ProjectId = @ProjectId AND Editor = @Editor)
-	BEGIN
-		RETURN
-	END
-		
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-	
-	-- If the caller is not the PI for the project, then error and return
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator for project (' + @ProjectId + ')';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-
-	-- This is the key step from the applications standpoint
-	DELETE FROM [dbo].[ProjectEditors] WHERE ProjectId = @ProjectId AND Editor = @Editor
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- ===============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Updates the Status of a CollarFile
--- ===============================================
-CREATE PROCEDURE [dbo].[CollarFile_Update] 
-	@FileId INT  = NULL, 
-	@FileName NVARCHAR(255) = NULL,
-	@CollarId NVARCHAR(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get some information about the file to update
-	DECLARE @Status CHAR;
-	DECLARE @CollarManufacturer NVARCHAR(255);
-	DECLARE @OldFileName NVARCHAR(255);
-	DECLARE @OldCollarId NVARCHAR(255);
-	DECLARE @ProjectId NVARCHAR(255);
-	 SELECT @Status = [Status],
-		    @CollarManufacturer = [CollarManufacturer],
-		    @OldFileName = [FileName],
-		    @OldCollarId = [CollarId],
-		    @ProjectId = [Project]
-	   FROM [dbo].[CollarFiles]
-	  WHERE [FileId] = @FileId;
-
-	IF @Status IS NULL
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'Invalid parameter: (' + @FileId + ') was not found in the CollarFiles table';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
-	-- If OldStatus was found, then Project is guaranteed.
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor of the project ('+@ProjectId+') to update this file.';
-			RAISERROR(@message4, 18, 0)
-			RETURN 1
-		END
-	END
-	
-	-- Change the file name;  this should never fail.
-	IF @FileName IS NOT NULL AND @FileName <> @OldFileName
-	BEGIN
-		BEGIN TRY
-			UPDATE [dbo].[CollarFiles] SET [FileName] = @FileName WHERE [FileId] = @FileId; 
-		END TRY
-		BEGIN CATCH
-			EXEC [dbo].[Utility_RethrowError]
-			RETURN 1
-		END CATCH
-	END
-
-	
-	-- Can we update the CollarId?
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND @Status = 'A'
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Unable to change the collar of an active file.  Change the status and try again.';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-	-- If the collar was provided, make sure it is a valid collar
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND
-	   NOT EXISTS (SELECT 1 FROM [dbo].[Collars] WHERE [CollarManufacturer] = @CollarManufacturer
-												   AND [CollarId] = @CollarId)
-	BEGIN
-		DECLARE @message3 nvarchar(100) = 'Invalid parameter: CollarId (' + @CollarId + ') was not found in the Collars table';
-		RAISERROR(@message3, 18, 0)
-		RETURN 1
-	END
-
-	-- Update CollarId; This should never fail
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId
-	BEGIN
-		BEGIN TRY
-			UPDATE [dbo].[CollarFiles] SET [CollarId] = @CollarId WHERE [FileId] = @FileId; 
-		END TRY
-		BEGIN CATCH
-			EXEC [dbo].[Utility_RethrowError]
-			RETURN 1
-		END CATCH
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 27, 2012
 -- Description:	Removes an Investigator from the database
 -- =============================================
 CREATE PROCEDURE [dbo].[ProjectInvestigator_Delete_SA] 
@@ -8138,6 +8164,8 @@ GO
 GRANT EXECUTE ON [dbo].[IsFixEditor] TO [NPS\Domain Users] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[NextAnimalId] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[PotentialCollarParameterFilesForFormatAndCollarFile] TO [NPS\Domain Users] AS [dbo]
 GO
 GRANT ALTER ON ROLE::[Editor] TO [Investigator] AS [dbo]
 GO
