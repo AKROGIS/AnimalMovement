@@ -7810,7 +7810,7 @@ BEGIN
 		END
 	END
 	
-	IF @Format = 'C'  -- Telonics Gen4 Condensed Convertor Format
+	IF @Format = 'C'  -- Telonics Gen4 Convertor Format
 	BEGIN
 		-- only parse the data if it is not already in the file
 		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen4Condensed] WHERE [FileId] = @FileId)
@@ -7819,7 +7819,7 @@ BEGIN
 		END
 	END
 	
-	IF @Format = 'D'  -- Telonics Gen4 Condensed Convertor Format
+	IF @Format = 'D'  -- Telonics Gen3 Convertor Format
 	BEGIN
 		-- only parse the data if it is not already in the file
 		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen3] WHERE [FileId] = @FileId)
