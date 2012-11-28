@@ -3129,7 +3129,7 @@ CREATE PROCEDURE [dbo].[Animal_Insert]
 	@ProjectId NVARCHAR(255)= NULL,
 	@AnimalId NVARCHAR(255) = NULL, 
 	@Species NVARCHAR(255) = NULL, 
-	@Gender NVARCHAR(7) = NULL, 
+	@Gender NVARCHAR(7) = 'Unknown', 
 	@MortalityDate DATETIME2(7) = NULL, 
 	@GroupName NVARCHAR(255) = NULL, 
 	@Description NVARCHAR(4000) = NULL 
@@ -3152,9 +3152,12 @@ BEGIN
 		END
 	END
 	
+	IF @Gender IS NULL OR @Gender = ''
+		SET @Gender = 'Unknown'
+	
 	--All other verification is handled by primary/foreign key and column constraints.
 	INSERT INTO dbo.Animals ([ProjectId], [AnimalId], [Species], [Gender], [MortalityDate], [GroupName], [Description])
-		 VALUES (nullif(@ProjectId,''), nullif(@AnimalId,''), nullif(@Species,''), nullif(@Gender,''),
+		 VALUES (nullif(@ProjectId,''), nullif(@AnimalId,''), nullif(@Species,''), @Gender,
 		         @MortalityDate, nullif(@GroupName,''), nullif(@Description,''));
 
 END
