@@ -16,7 +16,7 @@
     <SGenUseProxyTypes>false</SGenUseProxyTypes>
     <ConnectionString>
     </ConnectionString>
-    <PermissionLevel>3</PermissionLevel>
+    <PermissionLevel>1</PermissionLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
