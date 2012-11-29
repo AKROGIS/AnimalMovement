@@ -1,0 +1,174 @@
+The database relies on a OS account to run aome external processes.
+In particular, the telonic data convertors are required to convert
+the Argos emails (and webservice downloads) into csv-like files
+that can be processed by the database
+
+These instructions document setting up the Windows account, and
+adding it to the database, so that these external processes will
+work correctly.
+
+based on Windows 7, instructions will vary for other versions
+
+
+Add a local user account with no special permissions
+====================================================
+Start Menu -> Control Panel -> Administrative Tools -> Computer Management
+In the Table of contents on the left, select System Tools -> Local Users and Groups -> Users
+Right click in the main window and select New User...
+Fill out the form as follows:
+	User name: sql_proxy
+	Full name: SQL Server Proxy
+	Description: Local account (with Minimal permissions) used by SQL Server to execute external processes requested by non-sysadmin accounts
+	Password: (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
+	User must change password at next logon:  Unchecked
+	User cannot change password: Checked
+	Password never expires: Checked
+	Account is disabled: Unchecked
+	
+	* The user name and password can vary but the values must be consistent with the following steps
+	* Make sure the password meets the Group Policy requirements for the machine
+	* be sure that this user is not included in any groups which may elevate its permissions
+
+The account must be configured with permissions to logon as a batch job .
+This is done with
+Start Menu -> Control Panel -> Administrative Tools -> Local Security Policy
+In the Table of contents on the left, select Security Settings -> Local Policies -> User Rights Assignment
+In the main panel, scroll down to Log on as a batch job.
+double click on Log on as a batch job and add the new account to the authorized users.
+** This may not be possible on a workstation, depending on your domain GPOs **
+
+	
+Install the Argos software on the computer
+==========================================
+This must be done as an administrator
+download info for the programs used:
+   
+TDC:  Telonics Data Convertor - for Gen 4 Argos files (email/web) and datalog (*.tdf)
+	  http://www.telonics.com/software/tdc.php
+      Current version: http://www.telonics.com/software/setup-TDCv2.02.exe
+	  Notes: Should be installed for all users
+			 Device drivers do not need to be installed on the server
+	        
+DU: Download Utility for Gen2 & Gen3 GPS - for Gen3 Datalog files (.tdf)
+	http://www.telonics.com/software/du-3.php
+	Current version: http://www.telonics.com/software/DU-Setup-1.41.exe
+	Note: The username and organization is not important
+	
+ADC-T03: Argos data translator for Gen3 collars
+		 http://www.telonics.com/software/adc-t03.php
+		 Current version: http://www.telonics.com/software/ADC-T03-Setup-4.04.0011.exe
+	     Notes: Should be installed for all users
+			    The username and organization is not important
+
+
+Set up database to use proxy account
+====================================
+using a sysadmin account, issue the following SQL to Sql Server:
+
+-- To allow advanced options to be changed.
+EXEC sp_configure 'show advanced options', 1
+GO
+-- To update the currently configured value for advanced options.
+RECONFIGURE
+GO
+-- To enable the feature.
+EXEC sp_configure 'xp_cmdshell', 1
+GO
+-- To update the currently configured value for this feature.
+RECONFIGURE
+GO
+
+-- To setup the proxy account for non-sysadmin users
+EXEC sp_xp_cmdshell_proxy_account '_MACHINE_\sql_proxy', '_PASSWORD_';
+GO
+
+-- replace _MACHINE_ with the sql server machine name (where the local account was created)
+-- replace _PASSWORD_ with the accounts password
+
+**Note the previous command may fail if run from SQL Server Management studio opened with a
+    user account, not the administrator account.
+	The work around is to issue the following command instead
+
+-- Alternative command to setup the proxy account for non-sysadmin users
+create credential ##xp_cmdshell_proxy_account## with identity = '_MACHINE_\sql_proxy', secret = '_PASSWORD_'
+
+-- replace _MACHINE_ with the sql server machine name (where the local account was created)
+-- replace _PASSWORD_ with the accounts password
+
+-- To disallow advanced options to be changed.
+EXEC sp_configure 'show advanced options', 0
+GO
+-- To update the currently configured value for advanced options.
+RECONFIGURE
+GO
+
+If you ever need to remove this proxy account from SQL server, issue the following command
+
+EXEC sp_xp_cmdshell_proxy_account NULL;
+GO
+
+-- To allow advanced options to be changed.
+EXEC sp_configure 'show advanced options', 1
+GO
+-- To update the currently configured value for advanced options.
+RECONFIGURE
+GO
+-- To disable the cmdshell.
+EXEC sp_configure 'xp_cmdshell', 0
+GO
+-- To update the currently configured value for this feature.
+RECONFIGURE
+GO
+-- To disallow advanced options to be changed.
+EXEC sp_configure 'show advanced options', 0
+GO
+-- To update the currently configured value for advanced options.
+RECONFIGURE
+GO
+
+For more info see xp_cmdshell in the on-line help (just google it)
+
+XP_CMDSHELL can only be run as a sysadmin.  It should stay that way!!!
+do not grant execute permissions to other users.  Instead use a sysadmin
+account to put it in a stored procedure with execute as owner 
+
+
+
+Give the proxy account permissions to database
+==============================================
+The proxy account will try to insert the results of the processing
+back into the database.  For this, it will need to be a valid user
+of the database.
+
+-- Add the login to the instance
+USE [master];
+GO
+CREATE LOGIN [INPAKRO39088\sql_proxy] FROM WINDOWS;
+GO
+-- Add the user to the database
+USE [Animal_Movement]
+Go
+CREATE USER [INPAKRO39088\sql_proxy] FOR LOGIN [INPAKRO39088\sql_proxy];
+GO
+-- Adduser to editor role for permission to execute the insert SPs
+EXEC sp_addrolemember 'Editor', 'INPAKRO39088\sql_proxy'
+GO
+
+
+Configure Account to use Telonics software
+==========================================
+Log on with the new account
+(be sure to check the domain, and use the local machine name if necessary)
+autorize the telonics software for this user
+The Telonics Data Convertor Auth Code is: (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
+The Telonics ADC-T03 Auth Code is: (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
+The Telonics Download Utility Auth code is  (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
+Set up appropriate defaults for the software.
+
+
+Install ArgosProcessor exe in users path
+========================================
+Edit the settings file with connection and application path
+
+
+
