@@ -126,12 +126,14 @@ GO
 RECONFIGURE
 GO
 
-For more info see xp_cmdshell in the on-line help (just google it)
-
 XP_CMDSHELL can only be run as a sysadmin.  It should stay that way!!!
 do not grant execute permissions to other users.  Instead use a sysadmin
 account to put it in a stored procedure with execute as owner 
 
+For more info see xp_cmdshell in the on-line help
+  http://msdn.microsoft.com/en-us/library/ms175046(v=sql.105).aspx
+This link was also helpful:
+  http://www.sqlservercentral.com/Forums/Topic1265656-146-1.aspx#bm1356096
 
 
 Give the proxy account permissions to database
