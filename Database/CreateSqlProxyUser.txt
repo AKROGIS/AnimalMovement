@@ -142,18 +142,20 @@ The proxy account will try to insert the results of the processing
 back into the database.  For this, it will need to be a valid user
 of the database.
 
+-- replace _MACHINE_ with the sql server machine name (where the local account was created)
+
 -- Add the login to the instance
 USE [master];
 GO
-CREATE LOGIN [INPAKRO39088\sql_proxy] FROM WINDOWS;
+CREATE LOGIN [_MACHINE_\sql_proxy] FROM WINDOWS;
 GO
 -- Add the user to the database
 USE [Animal_Movement]
 Go
-CREATE USER [INPAKRO39088\sql_proxy] FOR LOGIN [INPAKRO39088\sql_proxy];
+CREATE USER [_MACHINE_\sql_proxy] FOR LOGIN [_MACHINE_\sql_proxy];
 GO
 -- Adduser to editor role for permission to execute the insert SPs
-EXEC sp_addrolemember 'Editor', 'INPAKRO39088\sql_proxy'
+EXEC sp_addrolemember 'Editor', '_MACHINE_\sql_proxy'
 GO
 
 
