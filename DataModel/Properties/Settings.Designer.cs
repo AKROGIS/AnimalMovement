@@ -26,8 +26,8 @@ namespace DataModel.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=INPAKRO39088;Initial Catalog=Animal_Movement;Integrated Security=True" +
-            "")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=INPAKROMS53ais;Initial Catalog=Animal_Movement;Integrated Security=Tr" +
+            "ue")]
         public string Animal_MovementConnectionString {
             get {
                 return ((string)(this["Animal_MovementConnectionString"]));

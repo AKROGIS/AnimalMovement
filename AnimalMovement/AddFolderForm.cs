@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-//TODO - In duplicate finename warning, give the filename
-//TODO - Provide better error messages when uploading files fails
-//TODO - File browser should allow csv, tsc, and dat files by default
-//FIXME - do not assume the file extension is CSV in saving or reporting
-
-//Loading a whole folder
 
 /*
  * The collar list displays the following:
@@ -19,22 +12,22 @@ using DataModel;
 
 namespace AnimalMovement
 {
-    internal partial class AddFileForm : BaseForm
+    internal partial class AddFolderForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
         private string ProjectId { get; set; }
         private Project Project { get; set; }
-        private List<Collar> AllCollars { get; set; } 
+        private LookupCollarFileFormat Format;
         internal event EventHandler DatabaseChanged;
 
-        internal AddFileForm(string user)
+        internal AddFolderForm(string user)
         {
             CurrentUser = user;
             SetupForm();
         }
 
-        internal AddFileForm(string projectId, string user)
+        internal AddFolderForm(string projectId, string user)
         {
             ProjectId = projectId;
             CurrentUser = user;
@@ -66,7 +59,6 @@ namespace AnimalMovement
                 return;
             }
             //Database.Log = Console.Out;
-            AllCollars = Database.Collars.ToList();
             var query = from p in Database.Projects
                         where p.ProjectInvestigator == CurrentUser ||
                               p.ProjectEditors.Any(u => u.Editor == CurrentUser)
@@ -78,46 +70,40 @@ namespace AnimalMovement
                     : Project = myProjects.FirstOrDefault(p => p.ProjectId == ProjectId);
             ProjectComboBox.DisplayMember = "ProjectName";
             ProjectComboBox.SelectedItem = Project;
-            //CollarComboBox.DataSource will be set to a filtered list once the manufacturer is selected;
-            CollarComboBox.DisplayMember = "CollarId";
-            CollarMfgrComboBox.DataSource = Database.LookupCollarManufacturers;
-            CollarMfgrComboBox.DisplayMember = "Name";
-            SetUpFormatList();
-        }
-
-        private void SetUpFormatList()
-        {
-            char? formatCode = Settings.GetDefaultFileFormat();
-            var query = Database.LookupCollarFileFormats;
-            var formats = query.ToList();
-            FormatComboBox.DataSource = formats;
-            FormatComboBox.DisplayMember = "Name";
-            if (!formatCode.HasValue)
-                return;
-            var format = formats.FirstOrDefault(f => f.Code == formatCode.Value);
-            if (format != null)
-                FormatComboBox.SelectedItem = format;
         }
 
         private void EnableUpload()
         {
-            UploadButton.Enabled = Project != null && !string.IsNullOrEmpty(FileNameTextBox.Text) && FormatComboBox.SelectedItem != null;
+            UploadButton.Enabled = Project != null && !string.IsNullOrEmpty(FileNameTextBox.Text) && Format != null;
         }
 
         private void UploadButton_Click(object sender, EventArgs e)
         {
-            if (AbortBecauseDuplicate())
-                return;
-
             UploadButton.Text = "Working...";
             UploadButton.Enabled = false;
             Cursor.Current = Cursors.WaitCursor;
             Application.DoEvents();
 
+            foreach (var fileName in System.IO.Directory.EnumerateFiles(folderBrowserDialog.SelectedPath))
+            {
+                UploadFile(fileName);
+            }
+
+            Cursor.Current = Cursors.Default;
+            UploadButton.Text = "Upload";
+            FileNameTextBox.Text = String.Empty;
+            DialogResult = DialogResult.OK;
+        }
+
+        private void UploadFile(string filePath)
+        {
+            if (AbortBecauseDuplicate(filePath))
+                return;
+
             byte[] data;
             try
             {
-                data = System.IO.File.ReadAllBytes(FileNameTextBox.Text);
+                data = System.IO.File.ReadAllBytes(filePath);
             }
             catch (Exception ex)
             {
@@ -129,10 +115,10 @@ namespace AnimalMovement
             var file = new CollarFile
                 {
                     Project1 = Project,
-                    FileName = System.IO.Path.GetFileNameWithoutExtension(FileNameTextBox.Text),
-                    LookupCollarFileFormat = (LookupCollarFileFormat)FormatComboBox.SelectedItem,
-                    LookupCollarManufacturer = (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem,
-                    CollarId = CollarComboBox.Enabled ? ((Collar)CollarComboBox.SelectedItem).CollarId : null,
+                    FileName = System.IO.Path.GetFileNameWithoutExtension(filePath),
+                    LookupCollarFileFormat = Format,
+                    LookupCollarManufacturer = Format.LookupCollarManufacturer,
+                    CollarId = GetCollar(filePath),
                     LookupCollarFileStatus = Database.LookupCollarFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
                     Contents = data
                 };
@@ -146,26 +132,27 @@ namespace AnimalMovement
             {
                 Database.CollarFiles.DeleteOnSubmit(file);
                 MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                FileNameTextBox.Focus();
-                UploadButton.Text = "Upload";
-                Cursor.Current = Cursors.Default;
                 return;
             }
-            Cursor.Current = Cursors.Default;
-
             OnDatabaseChanged();
-            UploadButton.Text = "Upload";
-            FileNameTextBox.Text = String.Empty;
-            DialogResult = DialogResult.OK;
         }
 
-        private bool AbortBecauseDuplicate()
+        private string GetCollar(string filePath)
+        {
+            var fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+            if (fileName == null)
+                return null;
+            var collar = fileName.Split('_')[0];
+            return collar;
+        }
+
+        private bool AbortBecauseDuplicate(string filePath)
         {
             if (!Database.CollarFiles.Any(f =>
                 f.Project1 == Project &&
-                f.FileName == System.IO.Path.GetFileNameWithoutExtension(FileNameTextBox.Text) &&
-                f.LookupCollarFileFormat == (LookupCollarFileFormat)FormatComboBox.SelectedItem &&
-                f.LookupCollarManufacturer == (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem
+                f.FileName == System.IO.Path.GetFileNameWithoutExtension(filePath) &&
+                f.LookupCollarFileFormat == Format &&
+                f.LookupCollarManufacturer == Format.LookupCollarManufacturer
                 ))
                 return false;
             var result = MessageBox.Show(this, "It appears this file has already been uploaded.  Are you sure you want to proceed?",
@@ -180,16 +167,20 @@ namespace AnimalMovement
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
-                FileNameTextBox.Text = openFileDialog.FileName;
-                LookupCollarFileFormat format = GuessFileFormat(FileNameTextBox.Text);
-                FormatComboBox.SelectedItem = format;
+                FileNameTextBox.Text = folderBrowserDialog.SelectedPath;
+                var file1 = System.IO.Directory.EnumerateFiles(folderBrowserDialog.SelectedPath).FirstOrDefault();
+                Format = GuessFileFormat(file1);
             }
         }
 
         private LookupCollarFileFormat GuessFileFormat(string path)
         {
+            if (String.IsNullOrEmpty(path))
+            {
+                return null;
+            }
             string fileHeader = System.IO.File.ReadLines(path).First().Trim();
             var db = new SettingsDataContext();
             char code = '?';
@@ -215,40 +206,6 @@ namespace AnimalMovement
             if (Project != null)
                 Settings.SetDefaultProject(Project.ProjectId);
             EnableUpload();
-            RefreshCollarComboBox();
-        }
-
-        private void FormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (FormatComboBox.SelectedItem != null)
-            {
-                var format = (LookupCollarFileFormat)FormatComboBox.SelectedItem;
-                CollarComboBox.Enabled = format.HasCollarIdColumn == 'N';
-                CollarMfgrComboBox.SelectedItem = format.LookupCollarManufacturer;
-                Settings.SetDefaultFileFormat(format.Code);
-            }
-            EnableUpload();
-        }
-
-        private void CollarMfgrComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            RefreshCollarComboBox();
-        }
-
-        private void AllCollarsCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            RefreshCollarComboBox();
-        }
-
-        private void RefreshCollarComboBox()
-        {
-            IEnumerable<Collar> data = AllCollars;
-            if (CollarMfgrComboBox.SelectedItem != null)
-                data = data.Where(
-                c => c.CollarManufacturer == ((LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem).CollarManufacturer);
-            if (!AllCollarsCheckBox.Checked && Project != null)
-                data = data.Where(c => c.Manager.Equals(Project.ProjectInvestigator, StringComparison.InvariantCultureIgnoreCase));
-            CollarComboBox.DataSource = data.ToList();
         }
 
         private void OnDatabaseChanged()

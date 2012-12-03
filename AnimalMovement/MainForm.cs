@@ -46,6 +46,7 @@ namespace AnimalMovement
             MyProfileButton.Text = "Project Investigator Details";
             ProjectsButton.Enabled = true;
             UploadButton.Enabled = true;
+            BulkUploadButton.Enabled = true;
             GenerateMapButton.Enabled = true;
         }
 
@@ -69,6 +70,12 @@ namespace AnimalMovement
         private void UploadButton_Click(object sender, EventArgs e)
         {
             var form = new AddFileForm(_currentUser);
+            form.Show(this);
+        }
+
+        private void BulkUploadButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddFolderForm(_currentUser);
             form.Show(this);
         }
 
