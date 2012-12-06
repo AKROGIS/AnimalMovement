@@ -257,6 +257,8 @@ def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
         hRef = HrefSilverman(points)
     elif hRefmethod.lower() == "gaussian":
         hRef = HrefGaussianApproximation(points)
+    elif not hrefmethod or hrefmethod == "#":
+        hRef = HrefWorton(points)
 
     if hRef == 0:
         arcpy.AddError("No valid hRef method was provided. Quitting.")
