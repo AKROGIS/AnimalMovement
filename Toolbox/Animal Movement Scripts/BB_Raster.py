@@ -1,64 +1,95 @@
-
-#Issues:
-# - Output raster has no spatial reference
-# - Input must be projected (future will support WGS84, with a user selected projection)
-# - If we are calculating a number of rasters that we want to add or compare,
-#     we will need to use a standard extents/cellsize - make this user definable
-# - Grouping does not work (use per group or per dataset extents/cellsize?)
-# - Does not support line feature classes
-# - May not find mobility variance - product may overflow or underflow (to 0)
-# - Optimizing technique may clip the results (I only calculate cells within a buffer distance of the path)
-
-
-
 # ------------------------------------------------------------------------------
 # BB_Raster.py
 # Created: 2011-12-06
 #
 # Title:
-# Brownian Bridge Distribution Raster
+# Create Brownian Bridge Probability Raster
 #
 # Tags:
 # home, range, animal, tracking, telemetry, ecology, probability, utilization, density, mobility, random, walk, location, variance 
 #
 # Summary:
-# Creates a probability density raster based on brownian motion (random walk) bridging temporily adjacent locations.
+# Creates a probablity distribution raster depicting the probability of an animal having been in a cell, based on some locations in time.
 # 
 # Usage:
-# Fixme
+# The probability distribution raster is created using the Brownian Bridge method described in  Analyzing Animal Movements Using Brownian Bridges by Jon S. Horne Et Al, Ecology, Vol 88, No. 9.
+# In brief, the Brownian Bridge method adds the locational variance (GPS error) at the fix locations and the mobility variance (deviation from the straight line path between temporally adjacent fixes using a random walk) to get a probability distribution for the animal's location.
+# If the mobility variance is not provided, it is calclulated as follows: Assume a mobility variance, vm.  For the first three fixes. pretend that fix2 is missing, and calculate the normal distribution at the observed location of fix2 based on the predicted (part way between fix1 and fix3) mean location of fix2.  Do this again for fixes 2,3,4 then 3,4,5 etc until the last 3 fixes.  The product of the normal distributions is the indicator of the likelihood of the assumed mobility variance.
+# This algorithm is computationally expensive.  The time required to process a data set is proportional to the number of cells times the number of locations times the number of integration intervals.  The number of cells is based on the extents of the raster (fixed by the spatial distribution of the locations), and the cell size.  Increasing the integration intervals or decreasing the cell size will increase the time required to obtain a solution, but will also increase the resolution (or detail) available in the results.  In most cases, there is no benefit from adjusting the default value of the integration interval.  If the cell size is omitted, a cell size is chosen that should result in a the ability to deliver a solution in less than a minute.  The program will output the cellsize used.  Future runs can specify a cell size depending on the resolution desired, and the amount of time you are willing to wait to obtain a result.  The processing time increases as the square of the reduction in cell size.  For example, if a cell size of 10000 meters takes 1 minute to run, a cellsize of 5000 meters will takes 4 minutes, a cell size of 1000 meters will take 100 minutes, and a cellsize of 100 meters will take 10,000 minutes (almost 7 days).  Choose your cell size carefully.
+# This tool tried to eliminate unecessary processing by creating a buffer around the animal's straight line path, and assigning a value of zero to cells outside the buffer.  The size of the buffer is based on the variance values, and it will include all likely locations. However, if the data is tightly clustered, the accumulation of overlapping low probabilities at the perifery may appear cropped by this buffer.  Contact the author if you think this is a problem for your analysis. 
+# Issues:
+#	Output raster has no spatial reference
+#	If we are calculating a number of rasters that we want to add or compare we will need to use a standard extents/cellsize - make this user definable
+#	Grouping does not work (use per group or per dataset extents/cellsize?)
+#	Does not support line feature classes
+#	May not find mobility variance - product may overflow or underflow (to 0)
+#	Optimizing technique may clip the results (I only calculate cells within a buffer distance of the path)#
 #
 # Parameter 1:
-# Locations_Layer
-# Fixme
+# Fixes
+# Fixes can be points or lines, but only points are supported at this time.
 #
 # Parameter 2:
-# UD_Raster
-# Fixme
+# Raster
+# The results raster.  A probability distribution raster with values in the range from 0 to 1 indicating the probability of finding the animal in this cell compared with the other cells.  The total of all cells in the raster will equal one.
 #
 # Parameter 3:
-# Smoothing_Factor
-# Fixme
+# Date_Field
+# Field for ordering the fixes for the walk through time.  This is a temporary (in memory only) sort.  The data on disk is not changed.
+#
+# Parameter 4:
+# Grouping_Fields
+# Grouping is not yet implemented.
+# The input dataset must represent only one animal
+# Each unique value (set of values) in the grouping fields will be used to create a separate raster.  These rasters will then be normalized and added to create combined raster. 
+#
+# Parameter 5:
+# Cell_Size_Constant
+# Default cell size will be calculated based on a maximum running time of about 1 minute. You will probably want to run this again with a smaller cell size.
+# The program will provide some guidance on selecting a cell size based on your data.
+# Note: halving the cell size will quadruple the running time.
+#
+# Parameter 6:
+# Integration_Intervals
+# Each segment is divided into this many intervals, for integrating the results along the path. Increasing this number will increase the processing time, but will provide more fine grained results.
+#
+# Parameter 7:
+# Location_Variance_Constant
+# This is the GPS error. A default of 832m is used based on experimental results from Horne, et al (2007) based on Lotex 3300L collars at 48 test sites in Idaho
+#
+# Parameter 8:
+# Location_Variance_Field
+# A field in the database that provides locational variance for each fix
+#
+# Parameter 9:
+# Mobility_Variance_Constant
+# A constant mobility variance value to use for all location points.
+# If this is not provided, a value is estimated based on Horne, et all (2007)
+#
+# Parameter 10:
+# Mobility_Variance_Field
+# A field the provides the mobility variance at each fix
+#
+# Parameter 11:
+# Output_Spatial_Reference
+# Calculations and output must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
 #
 # Scripting Syntax:
-# UD_Raster_AnimalMovement (Locations_Layer, UD_Raster, Smoothing_Factor)
+# BrownianBridgesRaster (Fixes, Raster, Date_Field, Grouping_Fields, Cell_Size_Constant, Integration_Intervals, Location_Variance_Constant, Location_Variance_Field, Mobility_Variance_Constant, Mobility_Variance_Field, Output_Spatial_Reference)
 #
 # Example1:
 # Scripting Example
-# The following example shows how this script can be used in the ArcGIS Python
-# Window. It assumes that the script has been loaded into a toolbox,
-# and the toolbox has been loaded into the active session of ArcGIS.
-# It creates a UD raster with a smoothing factor of 4500
-#  raster = r"C:\tmp\kde.tif"
-#  donuts = r"C:\tmp\test.gdb\ud_donuts"
-#  UD_Raster(4500)
+# The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
+# It creates a brownian probability raster with the default parameters
+#  fixes = r"C:\tmp\test.gdb\fixes"
+#  raster = r"C:\tmp\test.gdb\bb1"
+#  BrownianBridgesRaster (fixes, raster, "FixDate")
 #
 # Example2:
 # Command Line Example
-# The following example shows how the script can be used from the operating
-# system command line. It assumes that the script and the data sources are
-# in the current directory and that the python interpeter is the path.
-# It creates a UD raster with a smoothing factor of 4500
-#  C:\folder> python UD_Raster.py test.gdb\location kde.tif 4500 
+# The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
+# It creates a brownian probability raster with the default parameters and a cell size of 100
+#  C:\folder> BrownianBridgesRaster.py "test.gdb\fixes" "test.gdb\bb1" FixDate # 100
 #
 # Credits:
 # Regan Sarwas, Alaska Region GIS Team, National Park Service
@@ -89,7 +120,6 @@ import arcpy
 import numpy
 import datetime
 import Brownian
-
 
 def IsFloat(something):
     try:

@@ -1,61 +1,93 @@
 # ------------------------------------------------------------------------------
-# UD_Isopleths.py
+# Utilization Distribution.py
 # Created: 2011-10-06
 #
 # Title:
-# Utilization Distribution Isopleths
+# Utilization Distribution
 #
 # Tags:
 # contour, home, range, animal, tracking, telemetry, ecology, kernel, density
 #
 # Summary:
-# Creates polylines and/or polygons based on the requested list of isopleths
-# Input is a probability raster (typically created from the UD_Raster tool)
+# Create the utilization polygons for a single animal
 #
 # Usage:
-# Fixme
+# This tool is the simplified way to call UD_smoothing Factor, UD_Raster, and UD_Isopleths in order.  It does nothing more and nothing less.
+# See those tools for additional information.
 #
 # Parameter 1:
-# Isopleth_Values
-# Fixme
+# Location_Layer
+# Layer name (if in ArcMap) or path to a feature class of points (typically animal locations).  If a layer is used in ArcMap, and features are selected in that layer, only the selected featues are used, otherwise all the features in the layer's definition query are used in the analysis.  If this is a feature class then all the features are used in the analysis.  The distribution of the points should be evaluated to determine the appropriateness of this tool and the correct selection of input parameters.
 #
 # Parameter 2:
-# Raster_Layer
-# Fixme
+# hRef_Method
+# This is the method for calculating hRef, the reference (or base) smoothing factor for each data subset. Selecting the correct smoothing factor is key to meaningful results. Large smoothing factors may over smooth the results, adding area to the UD, and small smoothing factors may result in too much detail, and insufficient area in the UD.
+# Worton: Sqrt( (variation_in_x + variation_in_y)/2) / n^(1/6)
+# Tufto: (Sqrt(variation_in_x + variation_in_y)/2) / n^(1/6)
+# Fixed: User provided constant
+# References:
+# Worton and Tufto make assume about the distribution, correlation and variation of the data that should be verified on your dataset before using these values.
+# Tufto, J., Andersen, R. and Linnell, J. 1996. Habitat use and ecological correlates of home range size in a small cervid: the roe deer. J. Anim. Ecol. 65:715-724.
+# Worton, B.J. 1989. Kernel methods for estimating the utilization distribution in home-range studies. Ecology  70:164-168#
 #
 # Parameter 3:
-# Isopleth_Lines
-# Fixme
+# Fixed_hRef
+# This parameter is required if and only if the hRef Method is "Fixed".  The units of the smoothing factor are the same as the spatial coordinates of the location data.  If the data is unprojected then the the units are decimal degrees (this will probably yield incorrect or distorted results).
 #
 # Parameter 4:
-# Isopleth_Polygons
-# Fixme
+# hRef_Modifier
+# The reference smoothing factor (hRef) can be adjusted in a number of ways to produce the final smoothing factor.
+# None: No adjustment is made; h = hRef
+# Proportion: A percentage of hRef is used. various investigators have suggested different percentages based on the type and distribution of the data under consideration.
+# LSCV: A least squares cross validation is done to select the value between 0.05*hRef and 2.0*hRef that minimizes the LSCV score (Worton1995) between all pairs of points. This function is not guaranteed to work correctly if there are duplicate locations (a warning is issued and duplicate points are offset by a unit amount). In addition, there is no guarantee of a minimum in the range checked (a warning is issued and hRef is used). LSCV is very slow, and is limited to no more than 2000 points in a data subset.
+# BCV2: This is the same as LSCV, except a slightly different scoring function (Sain et. al. 1994) is used.
+# References:
+# Worton, B. J. 1995. Using Monte Carlo simulation to evaluate kernel-based home range estimators. Journal of Wildlife Management 59:794-800.
+# Sain, S. R., K. A Baggerly, and D. W. Scott. 1994. Cross-validation of multivariate densities. Journal of the American Statistical Association 89:807-817
 #
 # Parameter 5:
+# hRef_Proportion
+# This parameter is required if and only if the hRef Modifier is "Proportion". This is a percentage of hRef to use for the final smoothing factor.  Typical values are between .5 (50%) and 1 (100%), although any positive number is acceptable.
+#
+# Parameter 6:
+# Isopleths
+# This is a list of isopleth values separated by commas, semicolons, or whitespace. The values provided should be appropriate for the input raster (integers between 1 and 99 for rasters created with the UD Raster tool).
+#
+# Parameter 7:
+# Isopleth_Lines
+# The name of a new output polyline feature class. One of Lines, Polygons, or Donut_Polygons must be provided.  If this parameter is left blank, no lines will be created. The output feature class will have a field named 'contour' with the value of the isopleth, and one or more features for each isopleth requested that exists in the input raster.  There may be multiple polylines for each isopleth.  Polylines may not close, but they should if the input is a UD Raster from the UD Raster tool.
+# No smoothing is done, and depending on the cell size the output can be very dense (small cell size), or very blocky (large cell size)
+#
+# Parameter 8:
+# Isopleth_Polygons
+# Name of the new output polygon feature class. One of Lines, Polygons, or Donut_Polygons must be provided
+# Contains a polygon for each isopleth.  Each polygon contains the entire are covered by the isopleth. These polygons are overlapping.  The polygons are written to the featureclass with the largest isopleth values first. (for UD analysis, this provides a correctly stacked results set). These polygons are created from the isopleth lines
+#
+# Parameter 9:
 # Isopleth_Donuts
-# Fixme
+# Name of the new output polygon feature class. One of Lines, Polygons, or Donut_Polygons must be provided
+# Contains a polygon for each isopleth range.  Assumes the isopleths are ordered with the largest values containing the most area (so the last range is a donut without a hole). There is no donut for the first range range (i.e. from the universe to the first isopleth). These polygons are created from the lines 
+#
+# Parameter 10:
+# Output_Projection
+# Calculations and output must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
 #
 # Scripting Syntax:
-# UD_Isopleths_AnimalMovement (Isopleth_Values, Raster_Layer, Isopleth_Lines,
-#                              Isopleth_Polygons, Isopleth_Donuts)
+# UtilizationDistribution (Location_Layer, hRef_Method, Fixed_hRef, hRef_Modifier, hRef_Proportion, Isopleths, Isopleth_Lines, Isopleth_Polygons, Isopleth_Donuts, Output_Projection)
 #
 # Example1:
 # Scripting Example
-# The following example shows how this script can be used in the ArcGIS Python
-# Window. It assumes that the script has been loaded into a toolbox,
-# and the toolbox has been loaded into the active session of ArcGIS.
-# It creates the 65%, 90% UD polygons (with holes) in a file geodatabase
-#  raster = r"C:\tmp\kde.tif"
-#  donuts = r"C:\tmp\test.gdb\ud_donuts"
-#  UD_Isopleths("65;90", raster, "", "", donuts)
+# The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
+# It creates the 65%, 90% UD polylines for alla single animal using the smoothing facter as determined by LSCV
+#  fixes = r"C:\tmp\test.gdb\locations"
+#  lines = r"C:\tmp\test.gdb\contours"
+#  UtilizationDistribution_AnimalMovement (fixes, "Worton", "", "LSCV", "", "65;90", lines, "", "")
 #
 # Example2:
 # Command Line Example
-# The following example shows how the script can be used from the operating
-# system command line. It assumes that the script and the data sources are
-# in the current directory and that the python interpeter is the path.
-# It creates the 65%, 90% UD polygons in a file geodatabase
-#  C:\folder> python UD_Isopleths.py "50,90,95" kde.tif # test.gdb\ud_poly # 
+# The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
+# It creates the 65%, 90% UD polylines for alla single animal using the smoothing facter as determined by LSCV
+#  C:\folder> python UtilizationDistribution.py locations.shp Worton # LSCV # "65;90" test.gdb\contours
 #
 # Credits:
 # Regan Sarwas, Alaska Region GIS Team, National Park Service

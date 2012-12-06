@@ -9,14 +9,16 @@
 # contour, home, range, animal, tracking, telemetry, ecology, kernel, density
 #
 # Summary:
-# Creates polylines and/or polygons based on the requested list of isopleths. Input is a probability raster (typically created from the UD_Raster tool)
+# Creates polylines and/or polygons based on the requested list of isopleths. Input is a UD raster (typically created from the UD_Raster tool)
 #
 # Usage:
-# Fixme
+# Either a floating point or integer raster is acceptable as input.  There is no limits on the range of the cell values.
+# The isopleth values provided should be appropriate for the input raster. (Integers between 1 and 99 for rasters created with the UD Raster tool).
+# At least one of the output feature classes (lines, polygons, or donuts) must be requested
 #
 # Parameter 1:
 # Isopleths
-# This is a list of isopleth values separated by commas, semicolons, or whitespace. The values provided should be appropriate for the input raster (integers between 1 and 99 for rasters created with the UD Raster tool).#
+# This is a list of isopleth values separated by commas, semicolons, or whitespace. The values provided should be appropriate for the input raster (integers between 1 and 99 for rasters created with the UD Raster tool).
 #
 # Parameter 2:
 # Raster_Layer
@@ -31,7 +33,7 @@
 # Parameter 4:
 # Polygons (optional)
 # Name of the new output polygon feature class. One of Lines, Polygons, or Donut_Polygons must be provided
-# Contains a polygon for each isopleth.  Each polygon contains the entire are covered by the isopleth. These polygons are overlapping.  The polygons are written to the featureclass with the largest isopleth values first. (for UD analysis, this provides a correctly stacked results set). These polygons are created from the isopleth lines, and  
+# Contains a polygon for each isopleth.  Each polygon contains the entire are covered by the isopleth. These polygons are overlapping.  The polygons are written to the featureclass with the largest isopleth values first. (for UD analysis, this provides a correctly stacked results set). These polygons are created from the isopleth lines 
 #
 # Parameter 5:
 # Donut_Polygons (optional)
@@ -43,9 +45,7 @@
 #
 # Example1:
 # Scripting Example
-# The following example shows how this script can be used in the ArcGIS Python
-# Window. It assumes that the script has been loaded into a toolbox,
-# and the toolbox has been loaded into the active session of ArcGIS.
+# The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
 # It creates the 65%, 90% UD polygons (with holes) in a file geodatabase
 #  raster = r"C:\tmp\kde.tif"
 #  donuts = r"C:\tmp\test.gdb\ud_donuts"
@@ -53,9 +53,7 @@
 #
 # Example2:
 # Command Line Example
-# The following example shows how the script can be used from the operating
-# system command line. It assumes that the script and the data sources are
-# in the current directory and that the python interpeter is the path.
+# The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
 # It creates the 50%, 90% and 95% UD polygons in a file geodatabase
 #  C:\folder> python UD_Isopleths.py "50,90,95" kde.tif # test.gdb\ud_poly # 
 #

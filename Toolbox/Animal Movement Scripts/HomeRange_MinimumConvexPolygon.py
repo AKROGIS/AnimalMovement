@@ -3,28 +3,35 @@
 # Created: 2011-11-08
 #
 # Title:
-# Utilization Distribution Isopleths
+# Minimum Convex Polygon
 #
 # Tags:
-# home, range, animal, movement, area, ecology, location, telemetry, utilization, distribution
+# home, range, animal, movement, area, ecology, location, telemetry, mcp
 #
 # Summary:
 # This tool calculates the minimum convex polygon (MCP) for a data set or a percentage of a data set.  The MCP is the boundary of all the points in the data set such that the boundary is convex, not concave (i.e. every internal angle is less than or equal to 180 degrees).
 #
 # Usage:
-# Fixme
+# The input locations must be points
+# The input locations must be in a projected coordinate system
+# The MCP will be in the input coordinate system
 #
 # Parameter 1:
-# Isopleth_Values
+# Location_Points
 # The set of points to use to develop the MCP.
 # This can be a feature class, or a layer in a map document.  If there is an active selection set on a map layer, then only the selected features will be used.  You can drag and drop from the maps table of contents, or from the file explorer.
 #
 # Parameter 2:
-# Raster_Layer
-# This is the percentage of the points to use when calculating the MCP. Specify 100 percent if you want to use all the location points.  If this is less than 100 percent, then points will be removed based on the removal method until the specified percentage is reached.
-# The input data set is not altered.  Points are not actually removed from Location Points, they are simply excluded from consideration when building the MCP.
+# Output_Features
+# The new feature class for the calculated minimum convex polygon.
 #
 # Parameter 3:
+# Percentage_of_Points
+# This is the percentage of the points to use when calculating the MCP. Specify 100 percent if you want to use all the location points.  If this is less than 100 percent, then points will be removed based on the removal method until the specified percentage is reached.
+# The input data set is not altered.  Points are not actually removed from Location Points, they are simply excluded from consideration when building the MCP.
+# Default is 100%
+#
+# Parameter 4:
 # Removal_Method
 # The removal method only applies if the percentage of points is less than 100.
 # Fixed Mean: Removes points furthest from the mean of all location points.
@@ -34,32 +41,31 @@
 # User Point: Removes points furthest from the point provided.
 # Area Added: The area of the MCP of all remaining points is calculated, then each point on the MCP boundary is considered in turn by calculating the area of the MCP without that point.  The boundary point that contributes the largest increase in area is removed.  This process continues until a sufficient number of points are removed.  This method can be slow if a large number of points are going to be removed.
 #
-# Parameter 4:
+# Parameter 5:
 # User_Point
 # The user point is required and used only if the removal method is 'User Point'.
 # Locations closest to this point are used to calculate the MCP.
 #
+# Parameter 6:
+# Output_Projection
+# Calculations and output must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
+#
 # Scripting Syntax:
-# UD_Isopleths_AnimalMovement (Isopleth_Values, Raster_Layer, Isopleth_Lines,
-#                              Isopleth_Polygons, Isopleth_Donuts)
+# MinimumConvexPolygon (Location_Points, Output_Features, Percentage_of_Points, Removal_Method, User_Point, Output_Projection) 
 #
 # Example1:
 # Scripting Example
-# The following example shows how this script can be used in the ArcGIS Python
-# Window. It assumes that the script has been loaded into a toolbox,
-# and the toolbox has been loaded into the active session of ArcGIS.
-# It creates the 65%, 90% UD polygons (with holes) in a file geodatabase
-#  raster = r"C:\tmp\kde.tif"
-#  donuts = r"C:\tmp\test.gdb\ud_donuts"
-#  UD_Isopleths("65;90", raster, "", "", donuts)
+# The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
+# It creates the MCP without the 3% of the points furthest from a floating median.
+#  fixes = r"C:\tmp\test.gdb\fixes"
+#  mcp = r"C:\tmp\test.gdb\mcp97"
+#  MinimumConvexPolygon (fixes, mcp, "97" "Floating Median", "", "")
 #
 # Example2:
 # Command Line Example
-# The following example shows how the script can be used from the operating
-# system command line. It assumes that the script and the data sources are
-# in the current directory and that the python interpeter is the path.
-# It creates the 65%, 90% UD polygons in a file geodatabase
-#  C:\folder> python UD_Isopleths.py "50,90,95" kde.tif # test.gdb\ud_poly # 
+# The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
+# It creates the MCP without the 5% of the points furthest from a fixed mean.
+#  C:\folder> MinimumConvexPolygon.py test.gdb\fixes test.gdb\mcp95 95
 #
 # Credits:
 # Regan Sarwas, Alaska Region GIS Team, National Park Service

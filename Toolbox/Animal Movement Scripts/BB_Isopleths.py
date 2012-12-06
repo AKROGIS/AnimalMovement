@@ -33,7 +33,7 @@
 # Parameter 4:
 # Polygons (optional)
 # Name of the new output polygon feature class. One of Lines, Polygons, or Donut_Polygons must be provided
-# Contains a polygon for each isopleth.  Each polygon contains the entire are covered by the isopleth. These polygons are overlapping.  The polygons are written to the featureclass with the largest isopleth values first. (for UD analysis, this provides a correctly stacked results set). These polygons are created from the isopleth lines, and  
+# Contains a polygon for each isopleth.  Each polygon contains the entire are covered by the isopleth. These polygons are overlapping.  The polygons are written to the featureclass with the largest isopleth values first. (for UD analysis, this provides a correctly stacked results set). These polygons are created from the isopleth lines
 #
 # Parameter 5:
 # Donut_Polygons (optional)
@@ -45,9 +45,7 @@
 #
 # Example1:
 # Scripting Example
-# The following example shows how this script can be used in the ArcGIS Python
-# Window. It assumes that the script has been loaded into a toolbox,
-# and the toolbox has been loaded into the active session of ArcGIS.
+# The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
 # It creates the 65%, 90% polygons (with holes) in a file geodatabase
 #  raster = r"C:\tmp\bb.tif"
 #  donuts = r"C:\tmp\test.gdb\bb_donuts"
@@ -55,9 +53,7 @@
 #
 # Example2:
 # Command Line Example
-# The following example shows how the script can be used from the operating
-# system command line. It assumes that the script and the data sources are
-# in the current directory and that the python interpeter is the path.
+# The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
 # It creates the 50%, 90% and 95% polygons in a file geodatabase
 #  C:\folder> python BB_Isopleths.py "50,90,95" bb.tif # test.gdb\bb_poly # 
 #

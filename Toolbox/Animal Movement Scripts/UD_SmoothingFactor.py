@@ -12,49 +12,57 @@
 # Calculates the smoothing factor to use with the kernel density estimator
 #
 # Usage:
-# Fixme
+# The reference smoothing factor (href) is also know as hopt, the optimal smoothing factor, and is generally considered to perform poorly compared with the LSCV method (Horne & Garton Smoothing Paramete for Kernel Home-Range Analysis, Journal of Wildlife Management 70(3)
+# LSCV uses the the Warton or Tufto method to set the starting point but both should converge to the same LSCV solution, so the choice is immaterial.
 #
 # Parameter 1:
-# Isopleth_Values
-# Fixme
+# Point_Layer
+# Layer name (if in ArcMap) or path to a feature class of points (typically animal locations).  If a layer is used in ArcMap, and features are selected in that layer, only the selected featues are used, otherwise all the features in the layer's definition query are used in the analysis.  If this is a feature class then all the features are used in the analysis.  The distribution of the points should be evaluated to determine the appropriateness of this tool and the correct selection of input parameters.
 #
 # Parameter 2:
-# Raster_Layer
-# Fixme
+# hRef_Method
+# This is the method for calculating hRef, the reference (or base) smoothing factor for each data subset. Selecting the correct smoothing factor is key to meaningful results. Large smoothing factors may over smooth the results, adding area to the UD, and small smoothing factors may result in too much detail, and insufficient area in the UD.
+# Worton: Sqrt( (variation_in_x + variation_in_y)/2) / n^(1/6)
+# Tufto: (Sqrt(variation_in_x + variation_in_y)/2) / n^(1/6)
+# Worton and Tufto make assume about the distribution, correlation and variation of the data that should be verified on your dataset before using these values.
+# References:
+# Tufto, J., Andersen, R. and Linnell, J. 1996. Habitat use and ecological correlates of home range size in a small cervid: the roe deer. J. Anim. Ecol. 65:715-724.
+# Worton, B.J. 1989. Kernel methods for estimating the utilization distribution in home-range studies. Ecology  70:164-168#
 #
 # Parameter 3:
-# Isopleth_Lines
-# Fixme
+# Modifier
+# The reference smoothing factor (hRef) can be adjusted in a number of ways to produce the final smoothing factor.
+# None: No adjustment is made, the smooth factor = hRef
+# Proportion: A percentage of hRef is used. various investigators have suggested different percentages based on the type and distribution of the data under consideration.
+# LSCV: A least squares cross validation is done to select the value between 0.05*hRef and 2.0*hRef that minimizes the LSCV score (Worton1995) between all pairs of points. This function is not guaranteed to work correctly if there are duplicate locations (a warning is issued and duplicate points are offset by a unit amount). In addition, there is no guarantee of a minimum in the range checked (a warning is issued and hRef is used). LSCV is very slow, and is limited to no more than 2000 points in a data subset.
+# BCV2: This is the same as LSCV, except a slightly different scoring function (Sain et. al. 1994) is used.
+# References:
+# Worton, B. J. 1995. Using Monte Carlo simulation to evaluate kernel-based home range estimators. Journal of Wildlife Management 59:794-800.
+# Sain, S. R., K. A Baggerly, and D. W. Scott. 1994. Cross-validation of multivariate densities. Journal of the American Statistical Association 89:807-817
 #
 # Parameter 4:
-# Isopleth_Polygons
-# Fixme
+# Proportion
+# This parameter is required if and only if the hRef Modifier is "Proportion". This is a percentage of hRef to use for the final smoothing factor.  Typical values are between .5 (50%) and 1 (100%), although any positive number is acceptable.
 #
 # Parameter 5:
-# Isopleth_Donuts
-# Fixme
+# Analysis_Projection
+# Calculations must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
 #
 # Scripting Syntax:
-# UD_Isopleths_AnimalMovement (Isopleth_Values, Raster_Layer, Isopleth_Lines,
-#                              Isopleth_Polygons, Isopleth_Donuts)
+# UDSmoothingFactor (Point_Layer, hRef_Method, Modifier, Proportion, Analysis_Projection)
 #
 # Example1:
 # Scripting Example
-# The following example shows how this script can be used in the ArcGIS Python
-# Window. It assumes that the script has been loaded into a toolbox,
-# and the toolbox has been loaded into the active session of ArcGIS.
-# It creates the 65%, 90% UD polygons (with holes) in a file geodatabase
-#  raster = r"C:\tmp\kde.tif"
-#  donuts = r"C:\tmp\test.gdb\ud_donuts"
-#  UD_Isopleths("65;90", raster, "", "", donuts)
+# The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
+# This calculates the least squares cross validation smoothing factor for the fixes in the shapefile
+#  fixes = r"C:\tmp\locations.shp"
+#  h = UDSmoothingFactor (fixes, "Worton", "LSCV", "")
 #
 # Example2:
 # Command Line Example
-# The following example shows how the script can be used from the operating
-# system command line. It assumes that the script and the data sources are
-# in the current directory and that the python interpeter is the path.
-# It creates the 65%, 90% UD polygons in a file geodatabase
-#  C:\folder> python UD_Isopleths.py "50,90,95" kde.tif # test.gdb\ud_poly # 
+# The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
+# This prints the least squares cross validation smoothing factor for the fixes in the FGDB
+#  C:\folder> python UD_SmoothingFactor.py test.gdb\fixes Worton LSCV 
 #
 # Credits:
 # Regan Sarwas, Alaska Region GIS Team, National Park Service
