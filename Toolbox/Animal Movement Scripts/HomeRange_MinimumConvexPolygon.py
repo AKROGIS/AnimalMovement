@@ -92,6 +92,7 @@
 import arcpy
 import numpy
 import math
+import utils
 
 # We support lists of arcpy.Points(), and lists of (x,y) tuples
 # The arcpy.Points are ~20% faster to load, and create MCPs,
@@ -197,12 +198,12 @@ def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod):
     #This will limit the number of center point recalculations to 50
     #This can be a real time saver for very large datasets.
     pointsRemovedPerIteration = max(1, countOfPointsToRemove/50)
-    arcpy.AddMessage("Removing " + str(countOfPointsToRemove) + " of " + str(len(points)) + " points.")
+    utils.info("Removing " + str(countOfPointsToRemove) + " of " + str(len(points)) + " points.")
     countOfPointsRemoved = 0
     while countOfPointsRemoved < countOfPointsToRemove:
         if countOfPointsRemoved % pointsRemovedPerIteration == 0:
             center = centerMethod(points)
-            arcpy.AddMessage("New Center Point at " + str(center) + ".")
+            utils.info("New Center Point at " + str(center) + ".")
         points = RemovePoints(points, pointsRemovedPerIteration, center)
         countOfPointsRemoved += pointsRemovedPerIteration
     mcp = Mcp(points)
@@ -212,9 +213,9 @@ def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod):
 def FixedCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod):
     points = GetArcpyPoints(locationLayer)
     countOfPointsToRemove = int((1.0 - percentUsed/100.0) * len(points))
-    arcpy.AddMessage("Removing " + str(countOfPointsToRemove) + " of " + str(len(points)) + " points.")
+    utils.info("Removing " + str(countOfPointsToRemove) + " of " + str(len(points)) + " points.")
     center = centerMethod(points)
-    arcpy.AddMessage("Center = " + str(center) + ".")
+    utils.info("Center = " + str(center) + ".")
     points = RemovePoints(points, countOfPointsToRemove, center)
     mcp = Mcp(points)
     arcpy.CopyFeatures_management(mcp, mcpFeatureClass)
@@ -225,7 +226,7 @@ def AddArea(locationLayer, mcpFeatureClass, percentUsed):
     #points = GetPoints(locationLayer)
     points = GetArcpyPoints(locationLayer)
     finalLength = int(0.5 + (percentUsed/100.0) * len(points))
-    arcpy.AddMessage("Removing " + str(len(points) - finalLength) + " of " + str(len(points)) + " points.")
+    utils.info("Removing " + str(len(points) - finalLength) + " of " + str(len(points)) + " points.")
     arcpy.SetProgressor("step", "Finding points to ignore...", 0,len(points) - finalLength, 1)
     while finalLength < len(points):
         points = RemovePointWithMostArea(points)
@@ -287,7 +288,7 @@ def CreateMCP(locationLayer, mcpFeatureClass, percentUsed, removalMethod, userPo
         elif removalMethod == "Fixed_Mean":
             FixedCenter(locationLayer, mcpFeatureClass, percentUsed, MeanPoint)
         else:
-            arcpy.AddWarning("Removal Method was unrecognized. Using Fixed_Mean.")
+            utils.warn("Removal Method was unrecognized. Using Fixed_Mean.")
             FixedCenter(locationLayer, mcpFeatureClass, percentUsed, MeanPoint)
 
 
@@ -297,9 +298,7 @@ if __name__ == "__main__":
 
     status = arcpy.CheckProduct("ArcInfo")
     if status != "Available" and status != "AlreadyInitialized":
-        arcpy.AddError("This tool requires an ArcInfo License.  Quitting.")
-        arcpy.AddError("License check status = " + status)
-        sys.exit()        
+        utils.die("This tool requires an ArcInfo License.  License check status = " + status + ".  Quitting.")
 
     locationLayer = arcpy.GetParameterAsText(0)
     mcpFeatureClass = arcpy.GetParameterAsText(1)
@@ -322,15 +321,13 @@ if __name__ == "__main__":
     try:
         percentUsed = float(percentUsed)
     except ValueError:
-        arcpy.AddError("Percentage of Points was not a valid number. Quitting.")
-        sys.exit()
+        utils.die("Percentage of Points was not a valid number. Quitting.")
     if percentUsed <= 0 or 100 < percentUsed:
-        arcpy.AddWarning("Percentage of Points was outside the range (0,100]. Input truncated to fit.")
+        utils.warn("Percentage of Points was outside the range (0,100]. Input truncated to fit.")
     
     if removalMethod == "User_Point":
         if not userPoint:
-            arcpy.AddError("User Point was not provided. Quitting.")
-            sys.exit()
+            utils.die("User Point was not provided. Quitting.")
         else:
             try:
                 #check for valid point (i.e two float numbers) in "x y"
@@ -338,20 +335,16 @@ if __name__ == "__main__":
                 userPoint = arcpy.Point(float(pts[0]), float(pts[1]))
                 #User_Point uses FixedCenter(), so it must be an arcpy.Point() not (x,y)
             except ValueError:
-                arcpy.AddError("User Point was not valid. Quitting.")
-                sys.exit()
+                utils.die("User Point was not valid. Quitting.")
                 
     if not locationLayer:
-        arcpy.AddError("No location layer was provided. Quitting.")
-        sys.exit()
+        utils.die("No location layer was provided. Quitting.")
         
     if not arcpy.Exists(locationLayer):
-        arcpy.AddError("Location layer cannot be found. Quitting.")
-        sys.exit()
+        utils.die("Location layer cannot be found. Quitting.")
 
     if not mcpFeatureClass:
-        arcpy.AddError("No output requested. Quitting.")
-        sys.exit()
+        utils.die("No output requested. Quitting.")
 
     #
     # Do the work

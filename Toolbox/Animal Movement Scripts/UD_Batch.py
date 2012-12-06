@@ -134,10 +134,10 @@
 # software and aggregate use with other software.
 # ------------------------------------------------------------------------------
 
-import sys
 import os
 import arcpy
 import numpy
+import utils
 
 import UD_SmoothingFactor
 import UD_Raster
@@ -150,7 +150,7 @@ def GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmetho
     hList = []
     for value in uniqueValues:
         query = UD_Isopleths.BuildQuery(locationLayer,subsetIdentifier,value)
-        arcpy.AddMessage("Calculating h for " + query)
+        utils.info("Calculating h for " + query)
         if arcpy.Exists(layer):
             arcpy.Delete_management(layer)
         arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
@@ -178,7 +178,7 @@ def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, 
         hDict[k]=v
     for value in uniqueValues:
         query = UD_Isopleths.BuildQuery(locationLayer,subsetIdentifier,value)
-        arcpy.AddMessage("Creating KDE raster for " + query)
+        utils.info("Creating KDE raster for " + query)
         if arcpy.Exists(layer):
             arcpy.Delete_management(layer)
         arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
@@ -197,7 +197,7 @@ def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, 
                     raster = probRaster
                     n = 1
             else:
-                arcpy.AddWarning("  Raster creation failed, not included in total.")                
+                utils.warn("  Raster creation failed, not included in total.")                
         finally:
             arcpy.Delete_management(layer)
 
@@ -214,8 +214,7 @@ def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, 
 if __name__ == "__main__":
 
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
-        arcpy.AddError("Unable to checkout the Spatial Analyst Extension.  Quitting.")
-        sys.exit()        
+        utils.die("Unable to checkout the Spatial Analyst Extension.  Quitting.")
 
     locationLayer = arcpy.GetParameterAsText(0)
     subsetIdentifier = arcpy.GetParameterAsText(1)
@@ -254,32 +253,26 @@ if __name__ == "__main__":
         try:
             fixedHRef = float(fixedHRef)
         except ValueError:
-            arcpy.AddError("Fixed hRef was not a valid number. Quitting.")
-            sys.exit()
+            utils.die("Fixed hRef was not a valid number. Quitting.")
         
     if modifier.lower() == "proportion":
         try:
             proportionAmount = float(proportionAmount)
         except ValueError:
-            arcpy.AddError("Proportion Amount was not a valid number. Quitting.")
-            sys.exit()
+            utils.die("Proportion Amount was not a valid number. Quitting.")
         
     if not locationLayer:
-        arcpy.AddError("No location layer was provided. Quitting.")
-        sys.exit()
+        utils.die("No location layer was provided. Quitting.")
         
     if not arcpy.Exists(locationLayer):
-        arcpy.AddError("Location layer cannot be found. Quitting.")
-        sys.exit()
+        utils.die("Location layer cannot be found. Quitting.")
 
     if not (isoplethLines or isoplethPolys or isoplethDonuts):
-        arcpy.AddError("No output requested. Quitting.")
-        sys.exit()
+        utils.die("No output requested. Quitting.")
 
     isoplethList = UD_Isopleths.GetIsoplethList(isoplethInput)
     if not isoplethList:
-        arcpy.AddError("List of valid isopleths is empty. Quitting.")
-        sys.exit()
+        utils.die("List of valid isopleths is empty. Quitting.")
 
     saveRasters = (saveRasters.lower() == "true")
     if saveRasters:
@@ -287,15 +280,13 @@ if __name__ == "__main__":
             os.mkdir(rasterFolder) #may throw an exception (thats ok)
         else:
             if not os.path.isdir(rasterFolder):
-                arcpy.AddError(rasterFolder + " is not a folder. Quitting.")
-                sys.exit()
+                utils.die(rasterFolder + " is not a folder. Quitting.")
                 
     uniqueValues = None
     if subsetIdentifier in [field.name for field in arcpy.ListFields(locationLayer)]:
         uniqueValues = UD_Isopleths.GetUniqueValues(locationLayer,subsetIdentifier)
     if not uniqueValues:
-        arcpy.AddError("Could not generate a list of unique values for "+subsetIdentifier+". Quitting.")
-        sys.exit()
+        utils.die("Could not generate a list of unique values for "+subsetIdentifier+". Quitting.")
 
     #
     # Calculate smoothing factor(s)
@@ -306,16 +297,16 @@ if __name__ == "__main__":
         hList = GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmethod, modifier, proportionAmount)
         if hRefToUse.lower() != "bydataset":
             h = ChooseSmoothingFactor(hList, hRefToUse)
-            arcpy.AddMessage("Using h = " + str(h) +" ("+hRefToUse+")")
+            utils.info("Using h = " + str(h) +" ("+hRefToUse+")")
             hList = [h for eachItem in uniqueValues]
     #
     # Create density raster(s)
     #
     gotRaster, raster = BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder)  
     if gotRaster:
-        arcpy.AddMessage("Created the temporary KDE raster")
+        utils.info("Created the temporary KDE raster")
     else:
-        arcpy.AddError("Unable to create KDE raster. Quitting.")
+        utils.die("Unable to create KDE raster. Quitting.")
     #
     # Create isopleths (for total raster only)
     #

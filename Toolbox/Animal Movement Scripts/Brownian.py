@@ -11,23 +11,8 @@
 ### This code is public domain 
 
 import math
-
-def frange(x, y, jump):
-    """Return a range of numbers from x to y by jump increments.
-    It is intended to be a floating point version of range()."""
-
-    if jump == 0:
-        raise ValueError, "jump must be non-zero"
-    if jump > 0:
-        while x < y:
-            yield x
-            x += jump
-    else:
-        while x > y:
-            yield x
-            x += jump
+import utils
             
-
 def Normal(x, mu, v):
     """Probability function for x for a Normal (Gaussian) distribution.
     mu is the mean value of x, and v is the variance of x."""
@@ -179,9 +164,9 @@ def CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, searchArea=
 
     grid = []
     #build the grid from the top down
-    for y in frange(yMax, yMin, -cellSize):
+    for y in utils.frange(yMax, yMin, -cellSize):
         row = []
-        for x in frange(xMin, xMax, cellSize):
+        for x in utils.frange(xMin, xMax, cellSize):
             if searchArea is None:
                 cell = EvaluateGridPoint(x, y, fixes, intervals)
                 #cell = 1
@@ -236,7 +221,7 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
         raise ValueError, "Not enough fixes provided"
 
     results = []    
-    for vm in frange(lowerBound, (upperBound + step), step):
+    for vm in utils.frange(lowerBound, (upperBound + step), step):
         #print "vm = ",vm
         likelihood = 1
         for i in range(1, (len(fixes) - 1)):
@@ -401,9 +386,9 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps = 10, error = 0.00
 ###
 
 def test1():
-    for f in frange(1,2,0.16):
+    for f in utils.frange(1,2,0.16):
         print f
-    for f in frange(3,2,-0.16):
+    for f in utils.frange(3,2,-0.16):
         print f
 
 def test2():

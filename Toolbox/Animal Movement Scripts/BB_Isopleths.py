@@ -82,17 +82,13 @@
 
 import sys
 import arcpy
+import utils
 import UD_Isopleths
-
-def die(msg):
-        arcpy.AddError(msg)
-        print(msg)
-        sys.exit()
 
 if __name__ == "__main__":
 
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
-        die("Unable to checkout the Spatial Analyst Extension.  Quitting.")      
+        utils.die("Unable to checkout the Spatial Analyst Extension.  Quitting.")      
 
     isoplethInput = arcpy.GetParameterAsText(1)
     rasterLayer = arcpy.GetParameterAsText(0)
@@ -112,26 +108,26 @@ if __name__ == "__main__":
     # Input validation
     #
     if not rasterLayer:
-        die("No Brownian Bridge Raster was provided. Quitting.")
+        utils.die("No Brownian Bridge Raster was provided. Quitting.")
 
     if not arcpy.Exists(rasterLayer):
-        die("Brownian Bridge Raster cannot be found. Quitting.")
+        utils.die("Brownian Bridge Raster cannot be found. Quitting.")
         
     try:
         bbRaster = arcpy.sa.Raster(rasterLayer)
     except:
-        die("Brownian Bridge Raster cannot be loaded.\n" + sys.exc_info()[1] + "\n Quitting.")
+        utils.die("Brownian Bridge Raster cannot be loaded.\n" + sys.exc_info()[1] + "\n Quitting.")
         
     if not (isoplethLines or isoplethPolys or isoplethDonuts):
-        die("No output requested. Quitting.")
+        utils.die("No output requested. Quitting.")
 
     try:
         isoplethList = UD_Isopleths.GetIsoplethList(isoplethInput)
     except:
-        die("Unable to interpret the list of isopleths.\n" + sys.exc_info()[1] + "\n Quitting.")
+        utils.die("Unable to interpret the list of isopleths.\n" + sys.exc_info()[1] + "\n Quitting.")
         
     if not isoplethList:
-        die("List of valid isopleths is empty. Quitting.")
+        utils.die("List of valid isopleths is empty. Quitting.")
 
 
     #

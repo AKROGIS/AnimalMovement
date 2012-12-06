@@ -80,8 +80,8 @@
 # ------------------------------------------------------------------------------
 
 import sys
-import os
 import arcpy
+import utils
 
 
 def GetUDRaster(features, smoothingFactor, cellSize = None):
@@ -128,15 +128,13 @@ def GetProbabilityRaster(features, cellSize, searchRadius):
         raster = 101 - arcpy.sa.Slice(kernel,100,"EQUAL_INTERVAL")
         return True, raster
     except:
-        arcpy.AddError(sys.exc_info()[1])
-        return False, None
+        utils.die(sys.exc_info()[1])
 
 
 if __name__ == "__main__":
 
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
-        arcpy.AddError("Unable to checkout the Spatial Analyst Extension.  Quitting.")
-        sys.exit()        
+        utils.die("Unable to checkout the Spatial Analyst Extension.  Quitting.")
 
     locationLayer = arcpy.GetParameterAsText(0)
     rasterName = arcpy.GetParameterAsText(1)
@@ -154,22 +152,18 @@ if __name__ == "__main__":
     # Input validation
     #
     if not rasterName:
-        arcpy.AddError("No output requested. Quitting.")
-        sys.exit()
+        utils.die("No output requested. Quitting.")
 
     try:
         smoothingFactor = float(smoothingFactor)
     except (ValueError, TypeError):
-        arcpy.AddError("Smoothing Factor was not a valid number.")
-        sys.exit()
+        utils.die("Smoothing Factor was not a valid number.")
         
     if not locationLayer:
-        arcpy.AddError("No location layer was provided. Quitting.")
-        sys.exit()
+        utils.die("No location layer was provided. Quitting.")
         
     if not arcpy.Exists(locationLayer):
-        arcpy.AddError("Location layer cannot be found. Quitting.")
-        sys.exit()
+        utils.die("Location layer cannot be found. Quitting.")
 
     #
     # Create density raster(s)

@@ -86,11 +86,10 @@
 # software and aggregate use with other software.
 # ------------------------------------------------------------------------------
 
-import sys
-import os
 import arcpy
 import numpy
 import math
+import utils
 
 def GetPoints(pointsFeature, shapeName = None):
     points = []
@@ -100,11 +99,6 @@ def GetPoints(pointsFeature, shapeName = None):
         shape = row.getValue(shapeName)
         points.append( (shape.getPart().X, shape.getPart().Y) )
     return points
-
-def frange(x, y, jump):
-  while x < y:
-    yield x
-    x += jump
 
 def DistancesSquared(points):
     allSquaredDistances = []
@@ -134,8 +128,8 @@ def LSCV(allDistancesSquared, n, h):
     total = 0.0
     for d in allDistancesSquared:
         if d == 0:
-            arcpy.AddWarning("Warning duplicate locations found, results may be invalid.")
-            arcpy.AddWarning("        Separating the locations by 1 unit.")
+            utils.warn("Warning duplicate locations found, results may be invalid.")
+            utils.warn("        Separating the locations by 1 unit.")
             d = 1
         term2 = term2a * math.exp(d * term2b)
         term3 = term3a * math.exp(d * term3b) 
@@ -154,8 +148,8 @@ def BCV2(allDistancesSquared, n, h):
     total = 0.0
     for d in allDistancesSquared:
         if d == 0:
-            arcpy.AddWarning("Warning duplicate locations found, results may be invalid.")
-            arcpy.AddWarning("        Separating the locations by 1 unit.")
+            utils.warn("Warning duplicate locations found, results may be invalid.")
+            utils.warn("        Separating the locations by 1 unit.")
             d = 1
         D = d/(h*h)
         D2 = D * D
@@ -175,7 +169,7 @@ def Search(func, allSquaredDistances, n, h_ref, min_percent, max_percent, step_p
     h_res = h_max
     minErr = func(allSquaredDistances, n, h_max)
 
-    for h_test in frange(h_min, h_max, h_step):
+    for h_test in utils.frange(h_min, h_max, h_step):
         err = func(allSquaredDistances, n, h_test)
         if (err < minErr):
             minErr = err
@@ -187,7 +181,7 @@ def Minimize(func, h, points):
     if n > 2000:
         raise ValueError("Too many points for Cross Validation, limit is 2000")
         msg = "Too many points for Cross Validation, limit is 2000, using hRef."
-        arcpy.AddWarning(msg)
+        utils.warn(msg)
         return h
     
     allSquaredDistances = DistancesSquared(points)
@@ -199,7 +193,7 @@ def Minimize(func, h, points):
     if h1 <= min_percent * h or h1 >= max_percent * h:
         # then it is the min or max value checked
         msg = "Cross Validation using "+func.__name__+" failed to minimize, using 0.7 * hRef."
-        arcpy.AddWarning(msg)
+        utils.warn(msg)
         return 0.7*h
 #    return h1
     #print h1
@@ -261,8 +255,7 @@ def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
         hRef = HrefWorton(points)
 
     if hRef == 0:
-        arcpy.AddError("No valid hRef method was provided. Quitting.")
-        sys.exit()
+        utils.die("No valid hRef method was provided. Quitting.")
 
     if modifier.lower() == "proportion":
         h = proportionAmount * hRef
@@ -273,8 +266,8 @@ def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
     else:
         h = hRef
 
-    arcpy.AddMessage("hRef (" + hRefmethod + ") = " + str(hRef))    
-    arcpy.AddMessage("Using h = " +  str(h))
+    utils.info("hRef (" + hRefmethod + ") = " + str(hRef))    
+    utils.info("Using h = " +  str(h))
     return h
 
 
@@ -282,8 +275,7 @@ def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
 if __name__ == "__main__":
 
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
-        arcpy.AddError("Unable to checkout the Spatial Analyst Extension.  Quitting.")
-        sys.exit()        
+        utils.die("Unable to checkout the Spatial Analyst Extension.  Quitting.")    
 
     locationLayer = arcpy.GetParameterAsText(0)
     hRefmethod = arcpy.GetParameterAsText(1)
@@ -303,16 +295,13 @@ if __name__ == "__main__":
         try:
             proportionAmount = float(proportionAmount)
         except ValueError:
-            arcpy.AddError("Proportion Amount was not a valid number. Quitting.")
-            sys.exit()
+            utils.die("Proportion Amount was not a valid number. Quitting.")
         
     if not locationLayer:
-        arcpy.AddError("No location layer was provided. Quitting.")
-        sys.exit()
+        utils.die("No location layer was provided. Quitting.")
         
     if not arcpy.Exists(locationLayer):
-        arcpy.AddError("Location layer cannot be found. Quitting.")
-        sys.exit()
+        utils.die("Location layer cannot be found. Quitting.")
 
     points = GetPoints(locationLayer)
     h = GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)

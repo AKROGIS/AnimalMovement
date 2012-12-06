@@ -111,10 +111,9 @@
 # software and aggregate use with other software.
 # ------------------------------------------------------------------------------
 
-import sys
-import os
 import arcpy
 import numpy
+import utils
 
 import UD_SmoothingFactor
 import UD_Raster
@@ -123,8 +122,7 @@ import UD_Isopleths
 if __name__ == "__main__":
 
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
-        arcpy.AddError("Unable to checkout the Spatial Analyst Extension.  Quitting.")
-        sys.exit()        
+        utils.die("Unable to checkout the Spatial Analyst Extension.  Quitting.")
 
     locationLayer = arcpy.GetParameterAsText(0)
     hRefmethod = arcpy.GetParameterAsText(1)
@@ -157,32 +155,26 @@ if __name__ == "__main__":
         try:
             proportionAmount = float(proportionAmount)
         except ValueError:
-            arcpy.AddError("Proportion Amount was not a valid number. Quitting.")
-            sys.exit()
+            utils.die("Proportion Amount was not a valid number. Quitting.")
             
     if hRefmethod.lower() == "fixed":
         try:
             fixedHRef = float(fixedHRef)
         except ValueError:
-            arcpy.AddError("Fixed hRef was not a valid number. Quitting.")
-            sys.exit()
+            utils.die("Fixed hRef was not a valid number. Quitting.")
                 
     if not locationLayer:
-        arcpy.AddError("No location layer was provided. Quitting.")
-        sys.exit()
+        utils.die("No location layer was provided. Quitting.")
         
     if not arcpy.Exists(locationLayer):
-        arcpy.AddError("Location layer cannot be found. Quitting.")
-        sys.exit()
+        utils.die("Location layer cannot be found. Quitting.")
 
     if not (isoplethLines or isoplethPolys or isoplethDonuts):
-        arcpy.AddError("No output requested. Quitting.")
-        sys.exit()
+        utils.die("No output requested. Quitting.")
 
     isoplethList = UD_Isopleths.GetIsoplethList(isoplethInput)
     if not isoplethList:
-        arcpy.AddError("List of valid isopleths is empty. Quitting.")
-        sys.exit()
+        utils.die("List of valid isopleths is empty. Quitting.")
 
     #
     # Calculate smoothing factor
@@ -197,9 +189,9 @@ if __name__ == "__main__":
     #
     gotRaster, raster = UD_Raster.GetUDRaster(locationLayer, h)
     if gotRaster:
-        arcpy.AddMessage("Created the temporary KDE raster")
+        utils.info("Created the temporary KDE raster")
     else:
-        arcpy.AddError("Unable to create KDE raster. Quitting.")   
+        utils.die("Unable to create KDE raster. Quitting.")   
     #
     # Create isopleths
     #

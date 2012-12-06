@@ -79,9 +79,9 @@
 # software and aggregate use with other software.
 # ------------------------------------------------------------------------------
 
-import sys
 import os
 import arcpy
+import utils
 
 def CreateIsopleths(isopleths, raster1, lineFc, polyFc, donutFc):
     """Creates a set of Isopleths as polylines, polygons (entire area of
@@ -131,8 +131,7 @@ def GetIsoplethList(isoplethInput):
     try:
         isoplethList = [float(c) for c in isoplethInput.split()]
     except ValueError:
-        print "Un-recognized character in the isopleth list"
-        sys.exit()
+        utils.die("Un-recognized character in the isopleth list")
 
     isoplethList = [f for f in isoplethList if f > 0 and f < 100]
     isoplethList = list(set(isoplethList)) #remove duplicates
@@ -158,7 +157,7 @@ def IsoplethLinesToPolygons(lineFC, polyFC, fieldname="contour"):
     uniqueValues = GetUniqueValues(lineFC,fieldname)
 
     if not uniqueValues:
-        arcpy.AddWarning("No field named '"+fieldname+"' in "+lineFC)
+        utils.warn("No field named '"+fieldname+"' in "+lineFC)
         return
 
     workspace,featureClass = os.path.split(polyFC)
@@ -212,7 +211,7 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     uniqueValues = GetUniqueValues(lineFC,fieldname)
 
     if not uniqueValues:
-        arcpy.AddWarning("No field named '"+fieldname+"' in "+lineFC)
+        utils.warn("No field named '"+fieldname+"' in "+lineFC)
         return
 
     workspace,featureClass = os.path.split(polyFC)
@@ -307,8 +306,7 @@ def BuildQuery(featureClass,whereField,value):
 if __name__ == "__main__":
 
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
-        arcpy.AddError("Unable to checkout the Spatial Analyst Extension.  Quitting.")
-        sys.exit()        
+        utils.die("Unable to checkout the Spatial Analyst Extension.  Quitting.")
 
     isoplethInput = arcpy.GetParameterAsText(0)
     rasterLayer = arcpy.GetParameterAsText(1)
@@ -328,21 +326,17 @@ if __name__ == "__main__":
     # Input validation
     #
     if not (isoplethLines or isoplethPolys or isoplethDonuts):
-        arcpy.AddError("No output requested. Quitting.")
-        sys.exit()
+        utils.die("No output requested. Quitting.")
 
     isoplethList = GetIsoplethList(isoplethInput)
     if not isoplethList:
-        arcpy.AddError("List of valid isopleths is empty. Quitting.")
-        sys.exit()
+        utils.die("List of valid isopleths is empty. Quitting.")
 
     if not rasterLayer:
-        arcpy.AddError("No raster layer was provided. Quitting.")
-        sys.exit()
+        utils.die("No raster layer was provided. Quitting.")
         
     if not arcpy.Exists(rasterLayer):
-        arcpy.AddError("Raster layer cannot be found. Quitting.")
-        sys.exit()
+        utils.die("Raster layer cannot be found. Quitting.")
 
     #
     # Create isopleths

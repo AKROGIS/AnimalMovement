@@ -115,26 +115,11 @@
 
 import sys
 import math
-import os
 import arcpy
 import numpy
 import datetime
 import Brownian
-
-def IsFloat(something):
-    try:
-        float(something)
-    except (ValueError, TypeError):
-        return False
-    return True
-
-def IsInt(something):
-    try:
-        int(something)
-    except (ValueError, TypeError):
-        return False
-    return True
-
+import utils
 
 def GetGridExtents(featureExtents, varianceLocation, varianceMobility):
     #variance = sigma^2; 3sigma = 99% probability
@@ -227,16 +212,15 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
         msg += "This is OK for data in the Animal Movements Database, however other data "
         msg += "must be correctly pre-sorted by date or you will get incorrect results. "
         msg += "If you can't guarantee pre-sorted data, then reproject your data first."
-        print(msg)
-        arcpy.AddWarning(msg)
+        utils.warn(msg)
     
     results = {}
     #print groupingFields, dateFieldDelimited
     for groupName, whereClaus in GetGroupings(groupingFields, dateFieldDelimited).iteritems():
         #print groupName, whereClaus
-        #arcpy.AddMessage("Where = " + where + " Fields = " + fields + " Sort = " + sort)
+        #utils.info("Where = " + where + " Fields = " + fields + " Sort = " + sort)
         #FIXME - ESRI BUG - reprojection does not work if the data is in a FGDB and a sort order is given.
-        #gp.AddMessage("Spatial Ref = " + spatialRef.Name)
+        #utils.info("Spatial Ref = " + spatialRef.Name)
         fixes = []
         firstTime = None
         #print whereClaus, spatialRef, fields, sort
@@ -256,8 +240,7 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
             fixes.append(fix)
             
         results[groupName] = fixes
-        print "fixes", len(fixes), "first fix:", fixes[0]
-        arcpy.AddMessage("fixes "+ str(len(fixes)) +" first fix: " + str(fixes[0]))
+        utils.info("fixes "+ str(len(fixes)) +" first fix: " + str(fixes[0]))
     return results
     
 
@@ -332,8 +315,7 @@ def CreateBBRaster(extents, cellSize, searchArea, fixes, intervals, spatialRefer
     #grid = Brownian.CreateBBGrid(extents.XMin, extents.XMax, extents.YMin, extents.YMax, cellSize, fixes, intervals, None, None)
     grid = Brownian.CreateBBGrid(extents.XMin, extents.XMax, extents.YMin, extents.YMax, cellSize, fixes, intervals, searchArea, arcpy)
 
-    print "Got Grid", datetime.datetime.now() - start
-    arcpy.AddMessage("Got Grid " + str(datetime.datetime.now() - start))
+    utils.info("Got Grid " + str(datetime.datetime.now() - start))
     start = datetime.datetime.now()
 
     array = numpy.array(grid)
@@ -341,8 +323,7 @@ def CreateBBRaster(extents, cellSize, searchArea, fixes, intervals, spatialRefer
     raster = arcpy.NumPyArrayToRaster(array, lowerLeft, cellSize)
     arcpy.DefineProjection_management(raster,spatialReference)
 
-    print "Got raster", datetime.datetime.now() - start
-    arcpy.AddMessage("Got raster " + str(datetime.datetime.now() - start))
+    utils.info("Got raster " + str(datetime.datetime.now() - start))
     return raster
 
 
@@ -361,11 +342,10 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
 
         start = datetime.datetime.now()
         print "Begin processing Brownian Bridge", start
-        print "Reading features..."
-        arcpy.AddMessage("Reading features...")
+        utils.info("Reading features...")
 
         #Get Intervals
-        if IsInt(intervalsConstant):
+        if utils.IsInt(intervalsConstant):
             intervals = int(intervalsConstant)
         else:
             intervals = 10
@@ -383,8 +363,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
         else:
             raise TypeError, "Features must be points or lines."
 
-        print "Got Fix Sets", datetime.datetime.now() - start
-        arcpy.AddMessage("Got Fix Sets " + str(datetime.datetime.now() - start))
+        utils.info("Got Fix Sets " + str(datetime.datetime.now() - start))
         start = datetime.datetime.now()
 
         for groupName,fixes in fixSets.iteritems():
@@ -395,8 +374,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                 if name == '':
                     raise ValueError, "The feature class does not have two or more fix locations."
                 else:
-                    print("The group named " + groupName + "does not have enough fix locations.  Skipping")
-                    arcpy.AddWarning("The group named " + groupName + "does not have enough fix locations.  Skipping")
+                    utils.warn("The group named " + groupName + "does not have enough fix locations.  Skipping")
                     continue
 
             #Get Extents - based on selection of fixes, not feature class.
@@ -424,7 +402,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
            
             #Get LocationalVariance
             if not locationVarianceField:
-                if IsFloat(locationVarianceConstant):
+                if utils.IsFloat(locationVarianceConstant):
                     locationVariance = float(locationVarianceConstant)
                 else:
                     locationVariance = EstimateLocationVariance()
@@ -443,11 +421,10 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
             
             #Get MobilityVariance
             if not mobilityVarianceField:
-                if IsFloat(mobilityVarianceConstant):
+                if utils.IsFloat(mobilityVarianceConstant):
                     mobilityVariance = float(mobilityVarianceConstant)
                 else:
-                    print "  Calculating most likely mobility variance..."
-                    arcpy.AddMessage("  Calculating most likely mobility variance...")
+                    utils.info("  Calculating most likely mobility variance...")
                     #FIXME, guess and scalefactor should depend on fix data,
                     # i.e number of fixes, estimate of Vm, max velocity or such.
                     # The method Brownian.MobilityVariance() will validate and adjust
@@ -455,7 +432,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                     guess = 1000000.0
                     scaleFactor = 1e10
                     mobilityVariance = Brownian.MobilityVariance(fixes, guess, scaleFactor)
-                    arcpy.AddMessage("  Got mobility variance of %.2f" % mobilityVariance)
+                    utils.info("  Got mobility variance of %.2f" % mobilityVariance)
                 for fix in fixes:
                     fix[4] = mobilityVariance
                 maxMobilityVariance = mobilityVariance
@@ -477,7 +454,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
             overhead = 0.000000429  #per gridpoint
             secondsPerCheck = 0.00051443 #per gridpoint (includes overhead)
             secondsPerCalculation = 0.000002756 #236
-            if IsFloat(cellSizeConstant):
+            if utils.IsFloat(cellSizeConstant):
                 cellSize = float(cellSizeConstant) # all parameters from ArcToolbox are text
             else:
                 #by default, limit the size of the grid to what can be processed in 1 minute.
@@ -489,8 +466,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
 
             searchArea = GetBufferForPath(extents, cellSize, fixes, maxTime)
 
-            print "  Got buffer", datetime.datetime.now() - start
-            arcpy.AddMessage("  Got buffer " + str(datetime.datetime.now() - start))
+            utils.info("  Got buffer " + str(datetime.datetime.now() - start))
             start = datetime.datetime.now()
 
             PrintCellSizeEvaluation(cellSize, maxLocationVariance, maxMobilityVariance)
@@ -498,19 +474,16 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
 
             if not ShouldUseSearchArea(extents, cellSize, searchArea, len(fixes), intervals, secondsPerCheck, secondsPerCalculation):
                 searchArea = None
-                "  Not using a search buffer"
-                arcpy.AddMessage("")
+                utils.info("  Not using a search buffer")
             start = datetime.datetime.now()
             raster = CreateBBRaster(extents, cellSize, searchArea, fixes, intervals, spatialReference)
             newName = GetFixedRasterName(rasterName, groupName)
             if arcpy.Exists(newName):
                 arcpy.Delete_management(newName)
             raster.save(newName)
-            print "Done.", datetime.datetime.now() - start
-            arcpy.AddMessage("Done " + str(datetime.datetime.now() - start))
+            utils.info("Done " + str(datetime.datetime.now() - start))
     except:
-        print(sys.exc_info()[1])
-        arcpy.AddError(sys.exc_info()[1])
+        utils.die(sys.exc_info()[1])
 
 def ShouldUseSearchArea(extents, cellSize, searchArea, nFixes, intervals, secondsPerCheck, secondsPerCalculation):
     timeRatio = secondsPerCheck  / secondsPerCalculation
@@ -521,28 +494,23 @@ def ShouldUseSearchArea(extents, cellSize, searchArea, nFixes, intervals, second
 def PrintCellSizeEvaluation(cellSize, varianceLocation, varianceMobility):
     sigmaLocation = math.sqrt(varianceLocation)
     sigmaMobility = math.sqrt(varianceMobility)
-    print "  Calculated cell size", cellSize
-    arcpy.AddMessage("  Calculated cell size %.2f" % cellSize)
-    print "  To capture detail of location variance, cell size should be between", sigmaLocation/10, sigmaLocation
-    print "  To capture detail of mobility variance, cell size should be between", sigmaMobility/10, sigmaMobility
+    utils.info("  Calculated cell size %.2f" % cellSize)
     upperMinimum = min(sigmaLocation*2, sigmaMobility/2)
     lowerMinimum = min(sigmaLocation/2.5, sigmaMobility/10)
-    print "  Prefered cell size is less than", upperMinimum
-    print "  Prefered cell size is greater than", lowerMinimum
-    arcpy.AddMessage("  Prefered cell size is between %.2f and %.2f"%(lowerMinimum,upperMinimum))
+    #print "  To capture detail of location variance, cell size should be between", sigmaLocation/10, sigmaLocation
+    #print "  To capture detail of mobility variance, cell size should be between", sigmaMobility/10, sigmaMobility
+    utils.info("  Prefered cell size is between %.2f and %.2f"%(lowerMinimum,upperMinimum))
     if cellSize > upperMinimum:
         n = int(cellSize/upperMinimum)
         n = n*n
-        print "  Processing will take",n,"times as long if cell size is", upperMinimum
-        arcpy.AddMessage("  Processing will take %d times as long if cell size is %.2f"%(n,upperMinimum))
+        utils.info("  Processing will take %d times as long if cell size is %.2f"%(n,upperMinimum))
         
 
 def PrintRunTime(extents, cellSize, searchArea, nFixes, intervals, secondsPerCheck, secondsPerCalculation):
     gridArea = (extents.XMax - extents.XMin) * (extents.YMax -extents.YMin)
     searchPercent = searchArea.area/gridArea
     msg = "  Buffer area %.0f, Grid Area %.0f, Percent to search %.2f" % (searchArea.area, gridArea, searchPercent*100)
-    print msg
-    arcpy.AddMessage(msg)
+    utils.info(msg)
     skipPercent = 1 - searchPercent
 
     rows = int( 1 + (extents.YMax - extents.YMin) / cellSize)
@@ -551,8 +519,7 @@ def PrintRunTime(extents, cellSize, searchArea, nFixes, intervals, secondsPerChe
     n = cols * rows * segments * intervals
     
     msg =  "  cols %d, rows %d, segments %d, intervals %d, total %d" %(cols,rows,segments,intervals,n)
-    print msg
-    arcpy.AddMessage(msg)
+    utils.info(msg)
     seconds = cols * rows * (secondsPerCheck + searchPercent * (segments*intervals) * secondsPerCalculation)
     seconds = int(seconds)
     if seconds > 60:
@@ -572,8 +539,7 @@ def PrintRunTime(extents, cellSize, searchArea, nFixes, intervals, secondsPerChe
     else:
         time = "%d seconds" % (seconds)
             
-    print "  Estimated running time",time
-    arcpy.AddMessage("  Estimated running time %s"%time)
+    utils.info("  Estimated running time %s"%time)
 
 if __name__ == "__main__":
 
@@ -629,19 +595,13 @@ if __name__ == "__main__":
     # Input validation
     #
     if not rasterName:
-        print("No output requested. Quitting.")
-        arcpy.AddError("No output requested. Quitting.")
-        sys.exit()
+        utils.die("No output requested. Quitting.")
 
     if not fixesLayer:
-        print("No fixes layer was provided. Quitting.")
-        arcpy.AddError("No fixes layer was provided. Quitting.")
-        sys.exit()
+        utils.die("No fixes layer was provided. Quitting.")
         
     if not arcpy.Exists(fixesLayer):
-        print("Location layer cannot be found. Quitting.")
-        arcpy.AddError("Location layer cannot be found. Quitting.")
-        sys.exit()
+        utils.die("Location layer cannot be found. Quitting.")
 
     if not spatialReference or not spatialReference.name:
         spatialReference = arcpy.env.outputCoordinateSystem
@@ -650,14 +610,10 @@ if __name__ == "__main__":
         spatialReference = arcpy.Describe(fixesLayer).spatialReference
 
     if not spatialReference or not spatialReference.name:
-        print("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
-        arcpy.AddError("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
-        sys.exit()
+        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
         
     if spatialReference.type != 'Projected':
-        print("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
-        arcpy.AddError("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
-        sys.exit()
+        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
         
     #
     # Create brownian bridge raster(s)
