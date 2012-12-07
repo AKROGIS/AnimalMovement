@@ -96,13 +96,13 @@ if __name__ == "__main__":
     isoplethPolys = arcpy.GetParameterAsText(3)
     isoplethDonuts = arcpy.GetParameterAsText(4)
 
-    test = True
+    test = False
     if test:
         isoplethInput = "50,65,90,95"
-        rasterLayer = r"C:\tmp\test.gdb\bb1"
-        isoplethLines = r"C:\tmp\test.gdb\lines"
-        isoplethPolys = r"C:\tmp\test.gdb\polys"
-        isoplethDonuts = r"C:\tmp\test.gdb\donut"
+        rasterLayer = r"C:\tmp\test.gdb\bb9"
+        isoplethLines = r"C:\tmp\test.gdb\lines1"
+        isoplethPolys = r"C:\tmp\test.gdb\polys1"
+        isoplethDonuts = r"C:\tmp\test.gdb\donut1"
 
     #
     # Input validation
