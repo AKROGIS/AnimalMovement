@@ -90,8 +90,8 @@ if __name__ == "__main__":
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
         utils.die("Unable to checkout the Spatial Analyst Extension.  Quitting.")      
 
-    isoplethInput = arcpy.GetParameterAsText(1)
-    rasterLayer = arcpy.GetParameterAsText(0)
+    isoplethInput = arcpy.GetParameterAsText(0)
+    rasterLayer = arcpy.GetParameterAsText(1)
     isoplethLines = arcpy.GetParameterAsText(2)
     isoplethPolys = arcpy.GetParameterAsText(3)
     isoplethDonuts = arcpy.GetParameterAsText(4)
