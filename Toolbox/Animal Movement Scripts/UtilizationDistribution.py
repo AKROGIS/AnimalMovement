@@ -133,7 +133,7 @@ if __name__ == "__main__":
     isoplethLines = arcpy.GetParameterAsText(6)
     isoplethPolys = arcpy.GetParameterAsText(7)
     isoplethDonuts = arcpy.GetParameterAsText(8)
-    #scaleToUnitVariance = arcpy.GetParameterAsText(9)
+    spatialReference =  arcpy.GetParameter(9)
 
     test = False
     if test:
@@ -146,7 +146,8 @@ if __name__ == "__main__":
         isoplethLines = r"C:\tmp\test2.gdb\clines4a"
         isoplethPolys = r"C:\tmp\test2.gdb\cpolys4a"
         isoplethDonuts = r"C:\tmp\test2.gdb\cdonut4a"
-        #scaleToUnitVariance = "False"
+        spatialReference = arcpy.SpatialReference()
+        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
 
     #
     # Input validation
@@ -176,18 +177,39 @@ if __name__ == "__main__":
     if not isoplethList:
         utils.die("List of valid isopleths is empty. Quitting.")
 
+    desc = arcpy.Describe(locationLayer) #Describe() is expensive, so do it only once
+    shapeName = desc.shapeFieldName
+    inputSR = desc.spatialReference
+    usingInputSR = False
+    
+    if not spatialReference or not spatialReference.name:
+        spatialReference = arcpy.env.outputCoordinateSystem
+        
+    if not spatialReference or not spatialReference.name:
+        usingInputSR = True
+        spatialReference = inputSR 
+
+    if not spatialReference or not spatialReference.name:
+        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
+        
+    if spatialReference.type != 'Projected':
+        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+    
+    if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
+        spatialReference = None
+
     #
     # Calculate smoothing factor
     #
     if hRefmethod.lower() == "fixed":
         h = fixedHRef
     else:
-        points = UD_SmoothingFactor.GetPoints(locationLayer)
+        points = utils.GetPoints(locationLayer, spatialReference, shapeName)
         h = UD_SmoothingFactor.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
     #
     # Create density raster
     #
-    gotRaster, raster = UD_Raster.GetUDRaster(locationLayer, h)
+    gotRaster, raster = UD_Raster.GetUDRaster(locationLayer, h, spatialReference)
     if gotRaster:
         utils.info("Created the temporary KDE raster")
     else:

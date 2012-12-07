@@ -102,24 +102,6 @@ import utils
 # with the floating center methods, the opposite is true.
 # For the Add_Area method, arcpy.Points is faster.
 
-def GetArcpyPoints(pointsFeature, shapeName = None):
-    points = []
-    if not shapeName:
-        shapeName = arcpy.Describe(pointsFeature).shapeFieldName
-    for row in arcpy.SearchCursor(pointsFeature):
-        shape = row.getValue(shapeName)
-        points.append(shape.getPart())
-    return points
-
-def GetPoints(pointsFeature, shapeName = None):
-    points = []
-    if not shapeName:
-        shapeName = arcpy.Describe(pointsFeature).shapeFieldName
-    for row in arcpy.SearchCursor(pointsFeature):
-        shape = row.getValue(shapeName)
-        points.append( (shape.getPart().X, shape.getPart().Y) )
-    return points
-
 arcpyPointType = type(arcpy.Point())
 
 
@@ -166,6 +148,15 @@ def SamePoint(point1, point2, eps):
         return abs(point1[0] - point2[0]) < eps and abs(point1[1] - point2[1]) < eps
 
         
+def RemovePoint(points, point, eps):
+    newPoints = []
+    for pt in points:
+        if SamePoint(pt, point, eps):
+            continue
+        newPoints.append(pt)
+    return newPoints
+
+
 def RemovePoints(allPoints, n, center):
     """ returns a copy of the list of allPoints, with the n most distant points from
     center removed."""
@@ -176,6 +167,7 @@ def RemovePoints(allPoints, n, center):
     #Create a list of tuples (distance, pt)
     #if we sort a list of these tuples, they will be in distance order
     #I use the distance squared, since it is easier and just as effective.
+    #correct results are dependent on the points being in projected coordinate system
     distances = [(Distance2(pt,center), pt) for pt in allPoints]
     distances.sort()
     return [item[1] for item in distances[:-n]]
@@ -188,12 +180,13 @@ def Mcp(pointList):
     #only a single geometry works (Polyline or Multipoint is much faster than a Polygon).
     points = arcpy.Multipoint(arcpy.Array(pointList))
     empty = arcpy.Geometry()
+    #correct results are dependent on having arcpy.env.outputCoordinateSystem set
     mcpList = arcpy.MinimumBoundingGeometry_management(points, empty, "CONVEX_HULL", "ALL")
     return mcpList[0]
 
     
-def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod):
-    points = GetPoints(locationLayer)
+def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr = None, shapeName = None):
+    points = utils.GetPoints(locationLayer, sr, shapeName)
     countOfPointsToRemove = int((1.0 - percentUsed/100.0) * len(points))
     #This will limit the number of center point recalculations to 50
     #This can be a real time saver for very large datasets.
@@ -210,8 +203,8 @@ def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod):
     arcpy.CopyFeatures_management(mcp, mcpFeatureClass)
 
     
-def FixedCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod):
-    points = GetArcpyPoints(locationLayer)
+def FixedCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr = None, shapeName = None):
+    points = utils.GetArcpyPoints(locationLayer, sr, shapeName)
     countOfPointsToRemove = int((1.0 - percentUsed/100.0) * len(points))
     utils.info("Removing " + str(countOfPointsToRemove) + " of " + str(len(points)) + " points.")
     center = centerMethod(points)
@@ -221,10 +214,10 @@ def FixedCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod):
     arcpy.CopyFeatures_management(mcp, mcpFeatureClass)
 
 
-def AddArea(locationLayer, mcpFeatureClass, percentUsed):
+def AddArea(locationLayer, mcpFeatureClass, percentUsed, sr = None, shapeName = None):
     #using arcpyPoints here is 8% (143points) to 44% (18407points) faster
-    #points = GetPoints(locationLayer)
-    points = GetArcpyPoints(locationLayer)
+    #points = GetPoints(locationLayer, sr, shapeName)
+    points = utils.GetArcpyPoints(locationLayer, sr, shapeName)
     finalLength = int(0.5 + (percentUsed/100.0) * len(points))
     utils.info("Removing " + str(len(points) - finalLength) + " of " + str(len(points)) + " points.")
     arcpy.SetProgressor("step", "Finding points to ignore...", 0,len(points) - finalLength, 1)
@@ -239,7 +232,7 @@ def RemovePointWithMostArea(allPoints):
     mcp = Mcp(allPoints)
     area = mcp.area
     if not area:
-        raise ValueError("Insufficeint points to calculate an MCP") 
+        raise ValueError("Insufficient points to calculate an MCP") 
     #Assume only 1 part, and only one polygon per part,
     #Assume each polygon has sufficient vertices to remove 1 and still have an area (i.e. 4 or more)
     #The definition of a Minimum Convex Polygon guarantees this so long as there are sufficient points.
@@ -259,37 +252,29 @@ def RemovePointWithMostArea(allPoints):
     return bestPoints
 
 
-def RemovePoint(points, point, eps):
-    newPoints = []
-    for pt in points:
-        if SamePoint(pt, point, eps):
-            continue
-        newPoints.append(pt)
-    return newPoints
-
-    
-def CreateMCP(locationLayer, mcpFeatureClass, percentUsed, removalMethod, userPoint):
+def CreateMCP(locationLayer, mcpFeatureClass, percentUsed, removalMethod, userPoint, sr = None, shapeName = None):
     if percentUsed == 100:
+        #correct results are dependent on having arcpy.env.outputCoordinateSystem set
         arcpy.MinimumBoundingGeometry_management(locationLayer, mcpFeatureClass, 
                                          "CONVEX_HULL", "ALL")
     else:
         if removalMethod == "Area_Added":
-            AddArea(locationLayer, mcpFeatureClass, percentUsed)
+            AddArea(locationLayer, mcpFeatureClass, percentUsed, sr, shapeName)
         elif removalMethod == "User_Point":
             # the lambda function should act like MeanPoint(), except
             # it takes an (unused) list of points and return the constant user point
-            FixedCenter(locationLayer, mcpFeatureClass, percentUsed, (lambda x: userPoint))
+            FixedCenter(locationLayer, mcpFeatureClass, percentUsed, (lambda x: userPoint), sr, shapeName)
         elif removalMethod == "Floating_Mean":
-            FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, MeanPoint)
+            FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, MeanPoint, sr, shapeName)
         elif removalMethod == "Floating_Median":
-            FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, MedianPoint)
+            FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, MedianPoint, sr, shapeName)
         elif removalMethod == "Fixed_Median":
-            FixedCenter(locationLayer, mcpFeatureClass, percentUsed, MedianPoint)
+            FixedCenter(locationLayer, mcpFeatureClass, percentUsed, MedianPoint, sr, shapeName)
         elif removalMethod == "Fixed_Mean":
-            FixedCenter(locationLayer, mcpFeatureClass, percentUsed, MeanPoint)
+            FixedCenter(locationLayer, mcpFeatureClass, percentUsed, MeanPoint, sr, shapeName)
         else:
             utils.warn("Removal Method was unrecognized. Using Fixed_Mean.")
-            FixedCenter(locationLayer, mcpFeatureClass, percentUsed, MeanPoint)
+            FixedCenter(locationLayer, mcpFeatureClass, percentUsed, MeanPoint, sr, shapeName)
 
 
 
@@ -305,16 +290,22 @@ if __name__ == "__main__":
     percentUsed = arcpy.GetParameterAsText(2)
     removalMethod = arcpy.GetParameterAsText(3)
     userPoint = arcpy.GetParameterAsText(4)
+    spatialReference = arcpy.GetParameter(5)
 
     test = False
     if test:
-        #locationLayer = r"C:\tmp\test2.gdb\winter2011"
-        locationLayer = r"C:\tmp\test2.gdb\w2011a0901"
-        mcpFeatureClass = r"C:\tmp\test2.gdb\mcp_area_95_3"
-        percentUsed = "99"
-        removalMethod = "Area_Added" #Fixed_Mean, Fixed_Median, Floating_Mean, Floating_Median, User_Point, Area_Added 
-        userPoint = "-300000 1760000"
-
+        #locationLayer = r"C:\tmp\test.gdb\fix_ll"
+        locationLayer = r"C:\tmp\test.gdb\fix_a_c96"
+        mcpFeatureClass = r"C:\tmp\test.gdb\mcp_100"
+        percentUsed = "100"
+        removalMethod = "Fixed_Mean" #Fixed_Mean, Fixed_Median, Floating_Mean, Floating_Median, User_Point, Area_Added 
+        userPoint = "-123000 1122000"
+        spatialReference = arcpy.SpatialReference()
+        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        #arcpy.env.outputCoordinateSystem = spatialReference
+        arcpy.env.outputCoordinateSystem = None
+        spatialReference = None
+        
     #
     # Input validation
     #
@@ -346,7 +337,40 @@ if __name__ == "__main__":
     if not mcpFeatureClass:
         utils.die("No output requested. Quitting.")
 
+    desc = arcpy.Describe(locationLayer) #Describe() is expensive, so do it only once
+    shapeName = desc.shapeFieldName
+    inputSR = desc.spatialReference
+    usingInputSR = False
+    
+    if not spatialReference or not spatialReference.name:
+        spatialReference = arcpy.env.outputCoordinateSystem
+        
+    if not spatialReference or not spatialReference.name:
+        usingInputSR = True
+        spatialReference = inputSR 
+
+    if not spatialReference or not spatialReference.name:
+        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
+        
+    if spatialReference.type != 'Projected':
+        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+    
+    #I need to set the output Coordinate System, otherwise the geometry creation doesn't get an SR
+    saveSR = arcpy.env.outputCoordinateSystem
+    arcpy.env.outputCoordinateSystem = spatialReference
+
+    # Nullify the spatial reference if we are using the input SR, so the input is not unecessarily reprojected
+    if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
+        spatialReference = None
+
     #
     # Do the work
     #
-    CreateMCP(locationLayer, mcpFeatureClass, percentUsed, removalMethod, userPoint)
+    try:
+        #projected spatial reference is required for doing distance calculations
+        CreateMCP(locationLayer, mcpFeatureClass, percentUsed, removalMethod, userPoint, spatialReference, shapeName)
+    finally:
+        #restore the previous output Coordinate System no matter what happens
+        arcpy.env.outputCoordinateSystem = saveSR
+    
+    

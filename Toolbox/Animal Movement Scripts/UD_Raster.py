@@ -83,13 +83,14 @@ import sys
 import arcpy
 import utils
 
+def GetUDRaster(features, smoothingFactor, sr = None, cellSize = None):
+    cellSize, searchRadius = SetupRaster(features, smoothingFactor, sr, cellSize)
+    return GetProbabilityRaster(features, cellSize, searchRadius, sr)
 
-def GetUDRaster(features, smoothingFactor, cellSize = None):
-    cellSize, searchRadius = SetupRaster(features, smoothingFactor, cellSize)
-    return GetProbabilityRaster(features, cellSize, searchRadius)
 
-
-def SetupRaster(features, smoothingFactor, cellSize = None):
+#FIXME - Add spatial reference
+#FIXME - extents of raster needs to be based on reprojected features
+def SetupRaster(features, smoothingFactor, sr = None, cellSize = None):
     envelope = arcpy.Describe(features).Extent
     maxDivisions = 2000
     try:
@@ -115,7 +116,8 @@ def SetRasterExtents(envelope, buffer):
                                     envelope.ymax+buffer)
 
 
-def GetProbabilityRaster(features, cellSize, searchRadius):
+#FIXME - Add spatial reference
+def GetProbabilityRaster(features, cellSize, searchRadius, sr = None):
     try:
         # if map units are meters, output units are per kmsq; therefore default scaling factor = 1,000,000
         # scaling factor should be large to avoid floating point errors.
@@ -140,13 +142,20 @@ if __name__ == "__main__":
     rasterName = arcpy.GetParameterAsText(1)
     smoothingFactor = arcpy.GetParameterAsText(2)
     cellSize = arcpy.GetParameterAsText(3)
+    spatialReference = arcpy.GetParameter(4)
 
-    test = False
+    test = True
     if test:
-        locationLayer = r"C:\tmp\test2.gdb\w2011a0926"
-        rasterName = r"C:\tmp\kd_test\w2011a901sf4500b.tif"
-        smoothingFactor = "4500"
-        cellSize = ""
+        #locationLayer = r"C:\tmp\test.gdb\fix_ll"
+        locationLayer = r"C:\tmp\test.gdb\fix_a_c96"
+        rasterName = r"C:\tmp\test.gdb\kde_4"
+        smoothingFactor = "8000"
+        cellSize = "700"
+        spatialReference = arcpy.SpatialReference()
+        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        #arcpy.env.outputCoordinateSystem = spatialReference
+        arcpy.env.outputCoordinateSystem = None
+        #spatialReference = None
     
     #
     # Input validation
@@ -164,10 +173,36 @@ if __name__ == "__main__":
         
     if not arcpy.Exists(locationLayer):
         utils.die("Location layer cannot be found. Quitting.")
+        
+    desc = arcpy.Describe(locationLayer) #Describe() is expensive, so do it only once
+    shapeName = desc.shapeFieldName
+    inputSR = desc.spatialReference
+    usingInputSR = False
+    
+    if not spatialReference or not spatialReference.name:
+        spatialReference = arcpy.env.outputCoordinateSystem
+        
+    if not spatialReference or not spatialReference.name:
+        usingInputSR = True
+        spatialReference = inputSR 
+
+    if not spatialReference or not spatialReference.name:
+        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
+        
+    if spatialReference.type != 'Projected':
+        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+    
+    if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
+        spatialReference = None
+
+    if spatialReference:
+        print spatialReference.name
+    else:
+        print "no spatial ref"
 
     #
     # Create density raster(s)
     #
-    gotRaster, raster = GetUDRaster(locationLayer, smoothingFactor, cellSize)
+    gotRaster, raster = GetUDRaster(locationLayer, smoothingFactor, spatialReference, cellSize)
     if gotRaster and rasterName:
         raster.save(rasterName)

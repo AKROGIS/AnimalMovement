@@ -18,12 +18,12 @@
 # This algorithm is computationally expensive.  The time required to process a data set is proportional to the number of cells times the number of locations times the number of integration intervals.  The number of cells is based on the extents of the raster (fixed by the spatial distribution of the locations), and the cell size.  Increasing the integration intervals or decreasing the cell size will increase the time required to obtain a solution, but will also increase the resolution (or detail) available in the results.  In most cases, there is no benefit from adjusting the default value of the integration interval.  If the cell size is omitted, a cell size is chosen that should result in a the ability to deliver a solution in less than a minute.  The program will output the cellsize used.  Future runs can specify a cell size depending on the resolution desired, and the amount of time you are willing to wait to obtain a result.  The processing time increases as the square of the reduction in cell size.  For example, if a cell size of 10000 meters takes 1 minute to run, a cellsize of 5000 meters will takes 4 minutes, a cell size of 1000 meters will take 100 minutes, and a cellsize of 100 meters will take 10,000 minutes (almost 7 days).  Choose your cell size carefully.
 # This tool tried to eliminate unecessary processing by creating a buffer around the animal's straight line path, and assigning a value of zero to cells outside the buffer.  The size of the buffer is based on the variance values, and it will include all likely locations. However, if the data is tightly clustered, the accumulation of overlapping low probabilities at the perifery may appear cropped by this buffer.  Contact the author if you think this is a problem for your analysis. 
 # Issues:
-#	Output raster has no spatial reference
-#	If we are calculating a number of rasters that we want to add or compare we will need to use a standard extents/cellsize - make this user definable
-#	Grouping does not work (use per group or per dataset extents/cellsize?)
-#	Does not support line feature classes
-#	May not find mobility variance - product may overflow or underflow (to 0)
-#	Optimizing technique may clip the results (I only calculate cells within a buffer distance of the path)#
+#    Output raster has no spatial reference
+#    If we are calculating a number of rasters that we want to add or compare we will need to use a standard extents/cellsize - make this user definable
+#    Grouping does not work (use per group or per dataset extents/cellsize?)
+#    Does not support line feature classes
+#    May not find mobility variance - product may overflow or underflow (to 0)
+#    Optimizing technique may clip the results (I only calculate cells within a buffer distance of the path)#
 #
 # Parameter 1:
 # Fixes
@@ -203,8 +203,7 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
         fields += ";" + arcpy.AddFieldDelimiters(features, mobilityVarianceField)
     else:
         mobilityVarianceField = None
-    spatialRef = spatialReference
-    if arcpy.Describe(fixesLayer).spatialReference != spatialReference:
+    if spatialReference.factoryCode != arcpy.Describe(features).spatialReference.factoryCode:
         #FIXME - ESRI BUG - reprojection does not work if the data is in a FGDB and a sort order is given.
         sort = ''
         msg = "Due to a bug in ArcGIS 10, data cannot be both sorted and projected on the fly. "
@@ -224,7 +223,7 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
         fixes = []
         firstTime = None
         #print whereClaus, spatialRef, fields, sort
-        points = arcpy.SearchCursor(features, whereClaus, spatialRef, fields, sort)
+        points = arcpy.SearchCursor(features, whereClaus, spatialReference, fields, sort)
         for point in points:
             fix = [0,0,0,0,0]
             newTime = point.getValue(dateField)
@@ -351,9 +350,9 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
             intervals = 10
                 
         #get a collection of fixes, one for each grouping.
-        describe = arcpy.Describe(features)
-        shapeFieldName = describe.shapeFieldName
-        shapeType = describe.shapeType
+        desc = arcpy.Describe(features)
+        shapeFieldName = desc.shapeFieldName
+        shapeType = desc.shapeType
         if shapeType.lower() == 'polyline':
             fixSets = BuildFixesFromLines(features, shapeFieldName, dateField, groupingFields,
                                           locationVarianceField, mobilityVarianceField, spatialReference)
@@ -557,21 +556,21 @@ if __name__ == "__main__":
 
     test = False
     if test:
-        #fixesLayer = r"C:\tmp\test2.gdb\migrate"
-        fixesLayer = r"C:\tmp\LACL_Wolves.gdb\LC0906"
-        #fixesLayer = r"C:\tmp\test2.gdb\bbtest"
-        rasterName = r"C:\tmp\LACL_Wolves.gdb\LC0906_bb2"
+        fixesLayer = r"C:\tmp\test.gdb\fix_a_c96"
+        rasterName = r"C:\tmp\test.gdb\bb7"
         dateFieldName = "FixDate"
         groupingFieldNames = ""
-        cellSizeConstant = "1000"
+        cellSizeConstant = "#"
         IntegrationIntervalConstant = "#"
-        locationVarianceFieldName = ""
+        locationVarianceFieldName = "#"
         locationVarianceConstant = None
         mobilityVarianceFieldName = ""
         mobilityVarianceConstant = ""
-        sr = arcpy.SpatialReference()
-        sr.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
-        spatialReference = sr
+        spatialReference = arcpy.SpatialReference()
+        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        #arcpy.env.outputCoordinateSystem = spatialReference
+        arcpy.env.outputCoordinateSystem = None
+        spatialReference = None
 
     testHorne = False
     if testHorne:
@@ -594,6 +593,11 @@ if __name__ == "__main__":
     #
     # Input validation
     #
+    if dateFieldName == "#": dateFieldName = None
+    if groupingFieldNames == "#": groupingFieldNames = None
+    if locationVarianceFieldName == "#": locationVarianceFieldName = None
+    if mobilityVarianceFieldName == "#": mobilityVarianceFieldName = None
+    
     if not rasterName:
         utils.die("No output requested. Quitting.")
 
@@ -614,7 +618,7 @@ if __name__ == "__main__":
         
     if spatialReference.type != 'Projected':
         utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
-        
+    
     #
     # Create brownian bridge raster(s)
     #

@@ -91,16 +91,8 @@ import numpy
 import math
 import utils
 
-def GetPoints(pointsFeature, shapeName = None):
-    points = []
-    if not shapeName:
-        shapeName = arcpy.Describe(pointsFeature).shapeFieldName
-    for row in arcpy.SearchCursor(pointsFeature):
-        shape = row.getValue(shapeName)
-        points.append( (shape.getPart().X, shape.getPart().Y) )
-    return points
-
 def DistancesSquared(points):
+    small = 1e-3
     allSquaredDistances = []
     n = len(points)
     for i in range(n):
@@ -111,6 +103,9 @@ def DistancesSquared(points):
             dx = points[j][0] - points[i][0]
             dy = points[j][1] - points[i][1]
             d2 = dx*dx + dy*dy
+            if d2 < small:
+                utils.warn("Distance from %d to %d is too small (%g).  Using %g" % (i,j,d2, small))
+                d2 = small
             allSquaredDistances.append(d2)
     return allSquaredDistances
 
@@ -147,7 +142,7 @@ def BCV2(allDistancesSquared, n, h):
     #print "h",h,"n",n,"term1",term1,"term2",term2
     total = 0.0
     for d in allDistancesSquared:
-        if d == 0:
+        if d == 0.0:
             utils.warn("Warning duplicate locations found, results may be invalid.")
             utils.warn("        Separating the locations by 1 unit.")
             d = 1
@@ -179,10 +174,10 @@ def Search(func, allSquaredDistances, n, h_ref, min_percent, max_percent, step_p
 def Minimize(func, h, points):
     n = len(points)
     if n > 2000:
-        raise ValueError("Too many points for Cross Validation, limit is 2000")
-        msg = "Too many points for Cross Validation, limit is 2000, using hRef."
+        #raise ValueError("Too many points for Cross Validation, limit is 2000")
+        msg = "Too many points for Cross Validation, limit is 2000, using 0.7 * hRef."
         utils.warn(msg)
-        return h
+        return 0.7*h
     
     allSquaredDistances = DistancesSquared(points)
 
@@ -281,16 +276,20 @@ if __name__ == "__main__":
     hRefmethod = arcpy.GetParameterAsText(1)
     modifier = arcpy.GetParameterAsText(2)
     proportionAmount = arcpy.GetParameterAsText(3)
-    scaleToUnitVariance = arcpy.GetParameterAsText(4)
+    spatialReference = arcpy.GetParameter(4)
 
     test = False
     if test:
-        locationLayer = r"C:\tmp\test2.gdb\w2011a0901"
+        locationLayer = r"C:\tmp\test.gdb\fix_ll"
         hRefmethod = "WORTON" #Worton,Tufto,Silverman,Gaussian
         modifier = "NONE" #NONE,PROPORTIONAL,LSCV,BCV2
         proportionAmount = "0.7"
-        scaleToUnitVariance = "False"
-
+        spatialReference = arcpy.SpatialReference()
+        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        #arcpy.env.outputCoordinateSystem = spatialReference
+        arcpy.env.outputCoordinateSystem = None
+        #spatialReference = None
+        
     if modifier.lower() == "proportion":
         try:
             proportionAmount = float(proportionAmount)
@@ -303,8 +302,27 @@ if __name__ == "__main__":
     if not arcpy.Exists(locationLayer):
         utils.die("Location layer cannot be found. Quitting.")
 
-    points = GetPoints(locationLayer)
+    desc = arcpy.Describe(locationLayer) #Describe() is expensive, so do it only once
+    shapeName = desc.shapeFieldName
+    inputSR = desc.spatialReference
+    usingInputSR = False
+    
+    if not spatialReference or not spatialReference.name:
+        spatialReference = arcpy.env.outputCoordinateSystem
+        
+    if not spatialReference or not spatialReference.name:
+        usingInputSR = True
+        spatialReference = inputSR 
+
+    if not spatialReference or not spatialReference.name:
+        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
+        
+    if spatialReference.type != 'Projected':
+        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+    
+    if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
+        spatialReference = None
+            
+    points = utils.GetPoints(locationLayer, spatialReference, shapeName)
     h = GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
     arcpy.SetParameterAsText(4, str(h))
-            
-        
