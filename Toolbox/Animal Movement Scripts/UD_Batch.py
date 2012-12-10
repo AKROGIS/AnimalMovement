@@ -169,40 +169,45 @@ def ChooseSmoothingFactor(hList, hRefToUse):
         return max(hList)
     return numpy.average(hList)
 
-def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, sr = None):
+def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, sr = None, cellSize = None):
     n = 0
     layer = "subsetSelectionForRaster"
-    cellSize, searchRadius = UD_Raster.SetupRaster(locationLayer, max(hList))
-    hDict = {}
-    for k,v in zip(uniqueValues,hList):
-        hDict[k]=v
-    for value in uniqueValues:
-        query = UD_Isopleths.BuildQuery(locationLayer,subsetIdentifier,value)
-        utils.info("Creating KDE raster for " + query)
-        if arcpy.Exists(layer):
-            arcpy.Delete_management(layer)
-        arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
-        try:
-            searchRadius = 2 * hDict[value]
-            gotRaster, probRaster = UD_Raster.GetProbabilityRaster(layer, cellSize, searchRadius, sr)
-            if gotRaster:
-                if saveRasters:
-                    # Save individual probability rasters
-                    name = os.path.join(rasterFolder,"praster_"+str(value)+".tif")
-                    probRaster.save(name)
-                if n:
-                    raster = raster + probRaster
-                    n = n + 1
+    savedState, searchRadius = UD_Raster.SetRasterEnvironment(locationLayer, max(hList), sr, cellSize)
+    try:
+        hDict = {}
+        for k,v in zip(uniqueValues,hList):
+            hDict[k]=v
+        for value in uniqueValues:
+            query = UD_Isopleths.BuildQuery(locationLayer,subsetIdentifier,value)
+            utils.info("Creating KDE raster for " + query)
+            if arcpy.Exists(layer):
+                arcpy.Delete_management(layer)
+            arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
+            try:
+                searchRadius = 2 * hDict[value]
+                gotRaster, probRaster = UD_Raster.GetNormalizedKernelRaster(layer, searchRadius)
+                if gotRaster:
+                    if saveRasters:
+                        # Save individual probability rasters
+                        name = os.path.join(rasterFolder,"praster_"+str(value)+".tif")
+                        probRaster.save(name)
+                    if n:
+                        raster = raster + probRaster
+                        n = n + 1
+                    else:
+                        raster = probRaster
+                        n = 1
                 else:
-                    raster = probRaster
-                    n = 1
-            else:
-                utils.warn("  Raster creation failed, not included in total.")                
-        finally:
-            arcpy.Delete_management(layer)
+                    errorMsg = str(probRaster) # only if gotRaster is False
+                    utils.warn("  Raster creation failed, not included in total. " + errorMsg)                
+            finally:
+                arcpy.Delete_management(layer)
+    finally:
+        UD_Raster.RestoreRasterEnvironment(savedState)
 
     if n == 0:
         return False, None
+    #renormalize from 1 to 100
     raster = arcpy.sa.Slice(raster,100,"EQUAL_INTERVAL")
     if saveRasters:
         name = os.path.join(rasterFolder,"_praster_TOTAL.tif")
@@ -233,21 +238,24 @@ if __name__ == "__main__":
 
     test = False
     if test:
-        locationLayer = r"C:\tmp\test2.gdb\w2011a0901"
+        locationLayer = r"C:\tmp\test.gdb\fix2_ll"
         subsetIdentifier = "AnimalId"
-        hRefmethod = "WORTON" #Worton,Tufto,Silverman,Gaussian
+        hRefmethod = "FIXED" #Fixed,Worton,Tufto,Silverman,Gaussian
         fixedHRef = "4000"
         modifier = "NONE" #NONE,PROPORTIONAL,LSCV,BCV2
         proportionAmount = "0.7"
         hRefToUse = "Average"
+        cellSize =  "#"
         saveRasters = "True"
         rasterFolder = r"C:\tmp\kd_test"
         isoplethInput = "50,65,90,95"
-        isoplethLines = r"C:\tmp\test2.gdb\clines4a"
-        isoplethPolys = r"C:\tmp\test2.gdb\cpolys4a"
-        isoplethDonuts = r"C:\tmp\test2.gdb\cdonut4a"
+        isoplethLines = r"C:\tmp\test.gdb\clines4a"
+        isoplethPolys = r"C:\tmp\test.gdb\cpolys4a"
+        isoplethDonuts = r"C:\tmp\test.gdb\cdonut4a"
         spatialReference = arcpy.SpatialReference()
         spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        #arcpy.env.outputCoordinateSystem = spatialReference
+        arcpy.env.outputCoordinateSystem = None
 
     #
     # Input validation
@@ -326,7 +334,7 @@ if __name__ == "__main__":
     #
     # Create density raster(s)
     #
-    gotRaster, raster = BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, spatialReference)
+    gotRaster, raster = BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, spatialReference, cellSize)
     if gotRaster:
         utils.info("Created the temporary KDE raster")
     else:

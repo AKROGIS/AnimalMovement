@@ -84,53 +84,93 @@ import arcpy
 import utils
 
 def GetUDRaster(features, smoothingFactor, sr = None, cellSize = None):
-    cellSize, searchRadius = SetupRaster(features, smoothingFactor, sr, cellSize)
-    return GetProbabilityRaster(features, cellSize, searchRadius, sr)
-
-
-#FIXME - Add spatial reference
-#FIXME - extents of raster needs to be based on reprojected features
-def SetupRaster(features, smoothingFactor, sr = None, cellSize = None):
-    envelope = arcpy.Describe(features).Extent
-    maxDivisions = 2000
+    savedState, searchRadius = SetRasterEnvironment(features, smoothingFactor, sr, cellSize)
     try:
+        return GetNormalizedKernelRaster(features, searchRadius)
+    finally:
+        RestoreRasterEnvironment(savedState)
+
+
+def SetupRaster(features, smoothingFactor, sr = None, cellSize = None):
+    #Describe() will get the envelope in the feature's Spatial Reference
+    #extent = arcpy.Describe(features).extent
+    #This will return the extent in the environment's Output Spatial Reference
+    mcpList = arcpy.MinimumBoundingGeometry_management(features, arcpy.Geometry(), "ENVELOPE", "ALL")
+    extent = mcpList[0].extent
+    if utils.IsFloat(cellSize):
         cellSize = float(cellSize) # all parameters from ArcToolbox are text 
-    except (ValueError, TypeError):
-        cellSize =  GetCellSize(envelope, maxDivisions)
+    else:
+        cellSize =  DefaultCellSize(extent)
     # FIXME explain why r=2*h
     searchRadius = 2 * smoothingFactor
-    buffer = searchRadius + cellSize
-    SetRasterExtents(envelope, buffer)
-    return cellSize, searchRadius
+    return extent, cellSize, searchRadius
     
 
-def GetCellSize(envelope, maxDivisions):
-    return max(envelope.xmax-envelope.xmin,
-               envelope.ymax-envelope.ymin) / maxDivisions
+def DefaultCellSize(extent):
+    return max(extent.XMax-extent.XMin,
+               extent.YMax-extent.YMin) / 2000.0
 
 
-def SetRasterExtents(envelope, buffer):
-    arcpy.env.extent = arcpy.Extent(envelope.xmin-buffer,
-                                    envelope.ymin-buffer,
-                                    envelope.xmax+buffer,
-                                    envelope.ymax+buffer)
+class SavedState:
+    pass # used as a namespace for saving multiple state values 
+
+def SetRasterEnvironment(features, smoothingFactor, sr = None, cellSize = None):
+    #Save Existing State
+    savedState = SavedState()
+    savedState.cellSize = arcpy.env.cellSize
+    savedState.extent = arcpy.env.extent
+    savedState.sr = arcpy.env.outputCoordinateSystem
+    #Set New State
+    arcpy.env.outputCoordinateSystem = sr
+    #SetupRaster() depends on arcpy.env.outputCoordinateSystem
+    extent, cellSize, searchRadius = SetupRaster(features, smoothingFactor, sr, cellSize)
+    print extent.XMin,extent.YMin, extent.XMax, extent.YMax, cellSize, searchRadius
+    arcpy.env.cellSize = cellSize
+    buffer = searchRadius + cellSize
+    arcpy.env.extent = arcpy.Extent(extent.XMin-buffer,
+                                    extent.YMin-buffer,
+                                    extent.XMax+buffer,
+                                    extent.YMax+buffer)
+    return savedState, searchRadius
+
+def RestoreRasterEnvironment(savedState):
+    arcpy.env.outputCoordinateSystem = savedState.sr
+    arcpy.env.extent = savedState.extent
+    arcpy.env.cellSize = savedState.cellSize
+    
+
+def GetNormalizedKernelRaster(features, searchRadius):
+    gotRaster, raster = GetKernelRaster(features, searchRadius)
+    if gotRaster:
+        return NormalizeRaster(raster, 100)
+    return gotRaster, raster
 
 
-#FIXME - Add spatial reference
-def GetProbabilityRaster(features, cellSize, searchRadius, sr = None):
+def GetKernelRaster(features, searchRadius):
     try:
-        # if map units are meters, output units are per kmsq; therefore default scaling factor = 1,000,000
-        # scaling factor should be large to avoid floating point errors.
         # ESRI uses a quartic approximation to the bivariate normal distribution.
-        # the search radius for quartic does not map to the bandwidth for a ND
+        # the search radius for quartic does not map to the bandwidth for a normal distribution
         populationField = "NONE"
-        scaleFactor = "" #SQUARE_MAP_UNITS, SQUARE_MILES, SQUARE_KILOMETERS, ...
+        cellSize = None #use value set in environment
+        scaleFactor = None #SQUARE_MAP_UNITS, SQUARE_MILES, SQUARE_KILOMETERS, ...
+        # scaling factor should be large to avoid floating point errors.
+        # if map units are meters or feet, output units are per sq_km or sq_miles, respectively; therefore default scaling factor > 1,000,000
+        
         kernel = arcpy.sa.KernelDensity(features, populationField, cellSize, searchRadius, scaleFactor)
-        #classify the results into 100 equal interval bins, and invert (0..100 -> 100..0)
-        raster = 101 - arcpy.sa.Slice(kernel,100,"EQUAL_INTERVAL")
+
+        return True, kernel
+    except:
+        return False, sys.exc_info()[1]
+
+
+def NormalizeRaster(raster, bins):
+    #classify the results into bins equal interval bins, and invert (0..bins -> bins..1)
+    try:
+        raster = (1 + bins) - arcpy.sa.Slice(raster, bins, "EQUAL_INTERVAL")
         return True, raster
     except:
-        utils.die(sys.exc_info()[1])
+        return False, sys.exc_info()[1]
+
 
 
 if __name__ == "__main__":
@@ -144,7 +184,7 @@ if __name__ == "__main__":
     cellSize = arcpy.GetParameterAsText(3)
     spatialReference = arcpy.GetParameter(4)
 
-    test = True
+    test = False
     if test:
         #locationLayer = r"C:\tmp\test.gdb\fix_ll"
         locationLayer = r"C:\tmp\test.gdb\fix_a_c96"
@@ -194,11 +234,6 @@ if __name__ == "__main__":
     
     if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
         spatialReference = None
-
-    if spatialReference:
-        print spatialReference.name
-    else:
-        print "no spatial ref"
 
     #
     # Create density raster(s)
