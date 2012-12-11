@@ -72,8 +72,12 @@
 # Output_Projection
 # Calculations and output must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
 #
+# Parameter 11:
+# Cell_Size
+# The width and height of the cells in the kernel raster (in units of the output coordinate system).  The default is the cell size that will result in a raster with at least 2000 cells in the vertical and horizontal direction.
+#
 # Scripting Syntax:
-# UtilizationDistribution (Location_Layer, hRef_Method, Fixed_hRef, hRef_Modifier, hRef_Proportion, Isopleths, Isopleth_Lines, Isopleth_Polygons, Isopleth_Donuts, Output_Projection)
+# UtilizationDistribution (Location_Layer, hRef_Method, Fixed_hRef, hRef_Modifier, hRef_Proportion, Isopleths, Isopleth_Lines, Isopleth_Polygons, Isopleth_Donuts, Output_Projection, Cell_Size)
 #
 # Example1:
 # Scripting Example
@@ -134,6 +138,7 @@ if __name__ == "__main__":
     isoplethPolys = arcpy.GetParameterAsText(7)
     isoplethDonuts = arcpy.GetParameterAsText(8)
     spatialReference =  arcpy.GetParameter(9)
+    cellSize = arcpy.GetParameterAsText(10)
 
     test = False
     if test:
@@ -148,6 +153,7 @@ if __name__ == "__main__":
         isoplethDonuts = r"C:\tmp\test2.gdb\cdonut4a"
         spatialReference = arcpy.SpatialReference()
         spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        cellSize = ""
 
     #
     # Input validation
@@ -209,7 +215,7 @@ if __name__ == "__main__":
     #
     # Create density raster
     #
-    gotRaster, raster = UD_Raster.GetUDRaster(locationLayer, h, spatialReference)
+    gotRaster, raster = UD_Raster.GetUDRaster(locationLayer, h, spatialReference, cellSize)
     if gotRaster:
         utils.info("Created the temporary KDE raster")
     else:
