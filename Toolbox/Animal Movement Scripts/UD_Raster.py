@@ -160,7 +160,7 @@ def GetKernelRaster(features, searchRadius):
 
         return True, kernel
     except:
-        return False, sys.exc_info()[1]
+        return False, str(sys.exc_info()[1])
 
 
 def NormalizeRaster(raster, bins):
@@ -169,7 +169,7 @@ def NormalizeRaster(raster, bins):
         raster = (1 + bins) - arcpy.sa.Slice(raster, bins, "EQUAL_INTERVAL")
         return True, raster
     except:
-        return False, sys.exc_info()[1]
+        return False, str(sys.exc_info()[1])
 
 
 
@@ -241,3 +241,5 @@ if __name__ == "__main__":
     gotRaster, raster = GetUDRaster(locationLayer, smoothingFactor, spatialReference, cellSize)
     if gotRaster and rasterName:
         raster.save(rasterName)
+    else:
+        utils.die("Unable to create raster: " + raster)
