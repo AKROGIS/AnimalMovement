@@ -32,8 +32,8 @@ namespace QueryLayerBuilder
             }
 
             //args = new[] { "Single", @"C:\tmp\Locations.lyr", @"dbclient=SQLServer;serverinstance=INPAKRO39088\SQL2008R2;database=Animal_Movement;authentication_mode=OSA", "SELECT * FROM Locations" };
-            //args = new[] { "Multiple", @"C:\tmp\LACL_Sheep_0602.lyr", @"dbclient=SQLServer;serverinstance=INPAKRO39088\SQL2008R2;database=Animal_Movement;authentication_mode=OSA", "ProjectId = 'LACL_Sheep' AND AnimalId = '0602'" };
-            //args = new[] { "Prebuilt", @"C:\tmp\Locations.lyr", @"dbclient=SQLServer;serverinstance=INPAKRO39088\SQL2008R2;database=Animal_Movement;authentication_mode=OSA", "ProjectId = 'LACL_Sheep' AND AnimalId = '0602'" };
+            //args = new[] { "Multiple", @"C:\tmp\LACL_wolf_1120.lyr", @"dbclient=SQLServer;serverinstance=INPAKROMS53AIS;database=Animal_Movement;authentication_mode=OSA", "ProjectId = 'LACL_Wolf' AND AnimalId = 'LC1120'" };
+            //args = new[] { "Prebuilt", @"C:\tmp\Template.lyr", @"C:\tmp\Locations.lyr", @"dbclient=SQLServer;serverinstance=INPAKRO39088\SQL2008R2;database=Animal_Movement;authentication_mode=OSA", "ProjectId = 'LACL_Sheep' AND AnimalId = '0602'" };
 
             if (args.Length < 2)
             {
@@ -118,7 +118,7 @@ namespace QueryLayerBuilder
 
         private static ILayer BuildSpecialQueryLayer(string name, string connection, string predicate)
         {
-            esriGeometryType geometryType = esriGeometryType.esriGeometryPoint;
+            var geometryType = esriGeometryType.esriGeometryPoint;
             string oidFields = "ProjectId,AnimalId,FixDate";
             const int srid = 4326;
             string query;
@@ -164,6 +164,7 @@ namespace QueryLayerBuilder
         {
             var factory = new SqlWorkspaceFactoryClass();
             var workspace = factory.OpenFromString(connection, 0);
+            //var workspace = factory.OpenFromFile(@"c:\tmp\AnimalMovement.sde", 0);
             var sqlWorkspace = (ISqlWorkspace)workspace;
             var queryDescription = sqlWorkspace.GetQueryDescription(query);
             if (!String.IsNullOrEmpty(oidFields))
@@ -187,7 +188,7 @@ namespace QueryLayerBuilder
             var layerGroup = new GroupLayerClass();
             foreach (var layer in layers)
             {
-                layerGroup.Add(layer);                
+                layerGroup.Add(layer);
             }
             return layerGroup;
         }
