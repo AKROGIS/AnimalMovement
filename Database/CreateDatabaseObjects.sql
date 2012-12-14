@@ -30,8 +30,6 @@ CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\SDMiller] WITH DEFAULT_SCHEMA=[dbo]
 GO
-CREATE USER [NPS\TMeier] FOR LOGIN [NPS\TMeier] WITH DEFAULT_SCHEMA=[dbo]
-GO
 CREATE ROLE [Editor] AUTHORIZATION [dbo]
 GO
 CREATE ROLE [Investigator] AUTHORIZATION [dbo]
@@ -150,6 +148,7 @@ CREATE TABLE [dbo].[CollarFiles](
 	[Format] [char](1) NOT NULL,
 	[Status] [char](1) NOT NULL,
 	[Contents] [varbinary](max) NOT NULL,
+	[ParentFileId] [int] NULL,
  CONSTRAINT [PK_CollarFiles] PRIMARY KEY CLUSTERED 
 (
 	[FileId] ASC
@@ -4387,12 +4386,14 @@ GO
 -- ===============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
--- Description:	Updates the Status of a CollarFile
+-- Description:	Updates the editable fields of a CollarFile
+--              except Status.  Also see CollarFile_UpdateStatus
 -- ===============================================
 CREATE PROCEDURE [dbo].[CollarFile_Update] 
 	@FileId INT  = NULL, 
 	@FileName NVARCHAR(255) = NULL,
-	@CollarId NVARCHAR(255) = NULL
+	@CollarId NVARCHAR(255) = NULL,
+	@ParentFileId INT = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -4402,22 +4403,23 @@ BEGIN
 	DECLARE @CollarManufacturer NVARCHAR(255);
 	DECLARE @OldFileName NVARCHAR(255);
 	DECLARE @OldCollarId NVARCHAR(255);
+	DECLARE @OldParentFileId INT;
 	DECLARE @ProjectId NVARCHAR(255);
 	 SELECT @Status = [Status],
 		    @CollarManufacturer = [CollarManufacturer],
 		    @OldFileName = [FileName],
 		    @OldCollarId = [CollarId],
+		    @OldParentFileId = [ParentFileId],
 		    @ProjectId = [Project]
 	   FROM [dbo].[CollarFiles]
 	  WHERE [FileId] = @FileId;
 
-	IF @Status IS NULL
+	IF @ProjectId IS NULL
 	BEGIN
-		DECLARE @message2 nvarchar(100) = 'Invalid parameter: (' + @FileId + ') was not found in the CollarFiles table';
+		DECLARE @message2 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
 		RAISERROR(@message2, 18, 0)
 		RETURN 1
 	END
-	-- If OldStatus was found, then Project is guaranteed.
 
 	-- Get the name of the caller
 	DECLARE @Caller sysname = ORIGINAL_LOGIN();
@@ -4470,6 +4472,26 @@ BEGIN
 	BEGIN
 		BEGIN TRY
 			UPDATE [dbo].[CollarFiles] SET [CollarId] = @CollarId WHERE [FileId] = @FileId; 
+		END TRY
+		BEGIN CATCH
+			EXEC [dbo].[Utility_RethrowError]
+			RETURN 1
+		END CATCH
+	END
+	
+	-- If the ParentFileId was provided, make sure it is a valid FileId
+	IF @ParentFileId IS NOT NULL AND
+	   NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @ParentFileId)
+	BEGIN
+		DECLARE @message5 nvarchar(100) = 'Invalid parameter: ParentFileId ' + CAST(@ParentFileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
+		RAISERROR(@message5, 18, 0)
+		RETURN (1)
+	END
+	
+	-- Update ParentFileId; This should never fail
+	BEGIN
+		BEGIN TRY
+			UPDATE [dbo].[CollarFiles] SET [ParentFileId] = @ParentFileId WHERE [FileId] = @FileId; 
 		END TRY
 		BEGIN CATCH
 			EXEC [dbo].[Utility_RethrowError]
@@ -7847,7 +7869,6 @@ GO
 -- Author:		Regan Sarwas
 -- Create date: March 3, 2012
 -- Description:	Adds a new collar file to the database.
---              All files start out as inactive
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarFile_Insert] 
 	@FileName NVARCHAR(255) = NULL,
@@ -7857,6 +7878,7 @@ CREATE PROCEDURE [dbo].[CollarFile_Insert]
 	@Format CHAR = NULL, 
 	@Status CHAR = NULL, 
 	@Contents VARBINARY(max) = NULL,
+	@ParentFileId INT = NULL,
 	@FileId INT OUTPUT
 AS
 BEGIN
@@ -7871,7 +7893,7 @@ BEGIN
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
 		BEGIN
-			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to add an animal.';
+			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to add a collar file.';
 			RAISERROR(@message4, 18, 0)
 			RETURN (1)
 		END
@@ -7907,11 +7929,20 @@ BEGIN
 		RETURN (1)
 	END
 	
-	-- FIXME - add transaction support
+	-- If a ParentFileId was given, make sure it is valid
+	IF @ParentFileId IS NOT NULL AND
+	   NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @ParentFileId)
+	BEGIN
+		DECLARE @message5 nvarchar(100) = 'Invalid parameter: ParentFileId ' + CAST(@ParentFileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
+		RAISERROR(@message5, 18, 0)
+		RETURN (1)
+	END
+	
+	
 	BEGIN TRY
 		BEGIN TRAN
-			INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
-				 VALUES (@FileName, @ProjectId, @CollarManufacturer, @CollarId, @Format, @Status, @Contents)
+			INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents], [ParentFileId])
+				 VALUES (@FileName, @ProjectId, @CollarManufacturer, @CollarId, @Format, @Status, @Contents, @ParentFileId)
 
 			SET @FileId = SCOPE_IDENTITY();
 
