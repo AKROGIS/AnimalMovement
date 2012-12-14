@@ -14,6 +14,8 @@ CREATE USER [NPS\BBorg] FOR LOGIN [NPS\BBorg] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\Domain Users] FOR LOGIN [NPS\Domain Users]
 GO
+CREATE USER [NPS\GColligan] FOR LOGIN [NPS\GColligan] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\JPLawler] FOR LOGIN [NPS\JPLawler] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\JWBurch] FOR LOGIN [NPS\JWBurch] WITH DEFAULT_SCHEMA=[dbo]
@@ -21,6 +23,8 @@ GO
 CREATE USER [NPS\KCJoly] FOR LOGIN [NPS\KCJoly] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\MLJohnson] FOR LOGIN [NPS\MLJohnson] WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER [NPS\PAOwen] FOR LOGIN [NPS\PAOwen] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
@@ -8178,8 +8182,6 @@ EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\RESarwas'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\KCJoly'
 GO
-EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\TMeier'
-GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\BAMangipane'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\JWBurch'
@@ -8192,17 +8194,21 @@ EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'Investigator'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\MLJohnson'
 GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\PAOwen'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\GColligan'
+GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\SDMiller'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\RESarwas'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\KCJoly'
 GO
-EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\TMeier'
-GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\BAMangipane'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\JWBurch'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\BBorg'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\JPLawler'
 GO
