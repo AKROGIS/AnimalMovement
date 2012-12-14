@@ -244,7 +244,7 @@ namespace ArgosProcessor
                     command.Parameters.Add(new SqlParameter("@Format", SqlDbType.Char) {Value = format});
                     command.Parameters.Add(new SqlParameter("@Status", SqlDbType.Char) { Value = status });
                     command.Parameters.Add(new SqlParameter("@Contents", SqlDbType.VarBinary) {Value = content});
-                    //command.Parameters.Add(new SqlParameter("@ParentFileId", SqlDbType.Int) {Value = parentFileId});
+                    command.Parameters.Add(new SqlParameter("@ParentFileId", SqlDbType.Int) {Value = parentFileId});
                     var fileIdParameter = new SqlParameter("@FileId", SqlDbType.Int)
                         {
                             Direction = ParameterDirection.Output
