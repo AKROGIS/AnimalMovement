@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?><Database Name="Animal_Movement" Class="AnimalMovementDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKRO39088;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
+  <Connection Mode="AppSettings" ConnectionString="Data Source=INPAKROMS53ais;Initial Catalog=Animal_Movement;Integrated Security=True" SettingsObjectName="DataModel.Properties.Settings" SettingsPropertyName="Animal_MovementConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.Animals" Member="Animals">
     <Type Name="Animal">
       <Column Name="ProjectId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
@@ -79,6 +79,7 @@
       <Column Name="Format" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
       <Column Name="Status" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
       <Column Name="Contents" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" IsDelayLoaded="true" />
+      <Column Name="ParentFileId" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Association Name="CollarFile_CollarFix" Member="CollarFixes" ThisKey="FileId" OtherKey="FileId" Type="CollarFix" />
       <Association Name="Project_CollarFile" Member="Project1" ThisKey="Project" OtherKey="ProjectId" Type="Project" IsForeignKey="true" />
       <Association Name="LookupCollarFileFormat_CollarFile" Member="LookupCollarFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarFileFormat" IsForeignKey="true" />
@@ -93,12 +94,14 @@
       <Argument Parameter="format" Member="Format" />
       <Argument Parameter="status" Member="Status" />
       <Argument Parameter="contents" Member="Contents" />
+      <Argument Parameter="parentFileId" Member="ParentFileId" />
       <Argument Parameter="fileId" Member="FileId" />
     </InsertFunction>
     <UpdateFunction FunctionId="FunctionId8">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="collarId" Member="CollarId" />
+      <Argument Parameter="parentFileId" Member="ParentFileId" />
     </UpdateFunction>
     <DeleteFunction FunctionId="FunctionId9">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
@@ -419,17 +422,6 @@
     <Parameter Name="RetrievalDate" Parameter="retrievalDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId7" Name="dbo.CollarFile_Insert" Method="CollarFile_Insert">
-    <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
-    <Parameter Name="Status" Parameter="status" Type="System.Char" DbType="Char(1)" />
-    <Parameter Name="Contents" Parameter="contents" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" />
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" Direction="InOut" />
-    <Return Type="System.Int32" />
-  </Function>
   <Function Name="dbo.Settings_Update" Method="Settings_Update">
     <Parameter Name="Key" Parameter="key" Type="System.String" DbType="NVarChar(30)" />
     <Parameter Name="Value" Parameter="value" Type="System.String" DbType="NVarChar(500)" />
@@ -489,12 +481,6 @@
     <Parameter Name="Name" Parameter="name" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Email" Parameter="email" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Phone" Parameter="phone" Type="System.String" DbType="NVarChar(255)" />
-    <Return Type="System.Int32" />
-  </Function>
-  <Function Id="FunctionId8" Name="dbo.CollarFile_Update" Method="CollarFile_Update">
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
   <Function Name="dbo.IsFixEditor" Method="IsFixEditor" IsComposable="true">
@@ -571,6 +557,25 @@
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId7" Name="dbo.CollarFile_Insert" Method="CollarFile_Insert">
+    <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
+    <Parameter Name="Status" Parameter="status" Type="System.Char" DbType="Char(1)" />
+    <Parameter Name="Contents" Parameter="contents" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" />
+    <Parameter Name="ParentFileId" Parameter="parentFileId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" Direction="InOut" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId8" Name="dbo.CollarFile_Update" Method="CollarFile_Update">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="ParentFileId" Parameter="parentFileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
 </Database>
