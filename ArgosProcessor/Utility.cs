@@ -13,6 +13,31 @@ namespace ArgosProcessor
     class Utility
     {
 
+
+        internal static string TpfFolder
+        {
+            get { return Path.Combine(Directory.GetCurrentDirectory(), "tpf"); }
+        }
+
+
+        internal static string PpfFolder
+        {
+            get { return Path.Combine(Directory.GetCurrentDirectory(), "ppf"); }
+        }
+
+
+        internal static string TpfExtension
+        {
+            get { return "tpf"; }
+        }
+
+
+        internal static string PpfExtension
+        {
+            get { return "ppf"; }
+        }
+
+
         private static Byte[] GetContentsOfCollarFile(SqlInt32 fileId)
         {
             return GetFileContents("CollarFiles", fileId);
@@ -52,9 +77,9 @@ namespace ArgosProcessor
         private static void SyncParameterFiles()
         {
             //tpfFile
-            SyncFilesToFolder('A', "tpf", "tpf");
+            SyncFilesToFolder('A', TpfFolder, TpfExtension);
             //ppfFiles
-            SyncFilesToFolder('B', "ppf", "ppf");
+            SyncFilesToFolder('B', PpfFolder, PpfExtension);
         }
 
 
@@ -63,9 +88,10 @@ namespace ArgosProcessor
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
 
-            var dbIds = GetAllCollarParameterFileIdsFromDBForFormat(format);
-            var fileIds = GetAllFileIdsFromFolder(folder);
+            var dbIds = GetAllCollarParameterFileIdsFromDBForFormat(format).ToArray();
+            var fileIds = GetAllFileIdsFromFolder(folder).ToArray();
             var missingIds = dbIds.Except(fileIds);
+            var extraFileIds = fileIds.Except(dbIds);
 
             //Get missing files
             foreach (var id in missingIds)
@@ -74,8 +100,12 @@ namespace ArgosProcessor
                 File.WriteAllBytes(filepath, GetContentsOfCollarParameterFile(id));
             }
 
-            //Remove extra files
-            //TODO
+            //Remove extraneous files
+            foreach (var id in extraFileIds)
+            {
+                string filepath = Path.Combine(folder, id + "." + ext);
+                File.Delete(filepath);
+            }
         }
 
 
@@ -93,52 +123,49 @@ namespace ArgosProcessor
 
         internal static string ProcessArgosDataForTelonicsGen4(SqlInt32 fileId)
         {
-            // Get the file to process from the database and save it to the filesystem
-            string dataFilePath = Path.GetTempFileName();
-            File.WriteAllBytes(dataFilePath, GetContentsOfCollarFile(fileId));
+            // TDC runs with a batch file, which we can create dynamically.
+            //    the batch file can have multiple argos input files, but only one tpf file
+            //    However, we have one argos file that is processed multiple times for each tpf file
+            //    so we need to create and process multiple batch files for this argos file.
 
             //Ensure the parameter files are up to date
             SyncParameterFiles();
 
-            //get the settings
-            //commandLine is a format string for the contents of a Windows command.  It has one parameter
-            //  {0} the full path of the XML batch settings
-            var commandLine = Properties.Settings.Default.tdc_commandline;
-            //argosLine is a format string with 1 parameter for full path of input file;  there can be multiple argosLines in the batch settings
-            var argosLine = Properties.Settings.Default.tpf_batchfile_argosline_template;
-            //batchSettings - is a format string for an XML file with the following parameters
-            // {0} is one or more argosLines
+            // Get the argos file to process from the database and save it to the filesystem
+            var dataFilePath = Path.GetTempFileName();
+            File.WriteAllBytes(dataFilePath, GetContentsOfCollarFile(fileId));
+
+            //Set some settings
+            //tdcExecutable is the full path to the TDC executable file
+            //argosLine is a format string for XML content with the following parameters:
+            // {0} the full path of input file to process
+            //batchTemplate is a format string for XML content with the following parameters:
+            // {0} is one or more argosLine
             // {1} is the full path of the TPF file
             // {2} is the full path of a folder for the output files
             // {3} is the full path of a file of the log file - can be the empty string if no log is needed
+            var tdcExecutable = Properties.Settings.Default.tdc_commandline;
+            var argosLine = Properties.Settings.Default.tpf_batchfile_argosline_template;
+            var argosLines = String.Format(argosLine, dataFilePath);
             var batchTemplate = Properties.Settings.Default.tpf_batchfile_template;
-
-            //string tpfFilePath = Path.GetTempFileName();
-            string batchFilePath = Path.GetTempFileName();
-            string logFilePath = Path.GetTempFileName();
-
-            //create a temp folder for the output files
-            string outputFolder = GetNewTempDirectory();
-
-            string projectId = GetProjectIdFromFileId(fileId);
-
+            var outputFolder = GetNewTempDirectory();
+            var batchFilePath = Path.GetTempFileName();
+            var logFilePath = Path.GetTempFileName();
+            var projectId = GetProjectIdFromFileId(fileId);
             var errors = new StringBuilder();
+
             foreach (var tpfFileId in GetPotentialCollarParameterFiles('A', fileId))
             {
                 //Get the TPF file from the filesystem
-                string tpfFilePath = Path.Combine(Directory.GetCurrentDirectory(), "tpf", tpfFileId + "." + "tpf");
-
-                //  Create the input batch file
-                //    the batch file can have multiple argos input files, but only one tfp file
-                //    we only process one file at a time
-                string batchCommands = String.Format(batchTemplate, String.Format(argosLine, dataFilePath), tpfFilePath, outputFolder,
+                string tpfFilePath = Path.Combine(TpfFolder, tpfFileId + "." + TpfExtension);
+                string batchCommands = String.Format(batchTemplate, argosLines, tpfFilePath, outputFolder,
                                               logFilePath);
                 File.WriteAllText(batchFilePath, batchCommands);
 
                 //  Run TDC
                 var p = Process.Start(new ProcessStartInfo
                 {
-                    FileName = commandLine,
+                    FileName = tdcExecutable,
                     Arguments = "/batch:" + batchFilePath,
                     CreateNoWindow = true,
                     UseShellExecute = false,
@@ -147,44 +174,54 @@ namespace ArgosProcessor
                 errors.AppendLine(p.StandardError.ReadToEnd());
                 p.WaitForExit();
 
-                //TODO - check the log file for errors ???
+                //TODO - check the log file for errors - What does an error look like???
             }
 
             // for each output file created by TDC, send the file to the database
             foreach (var path in Directory.GetFiles(outputFolder))
             {
-                UploadSubFileToDatabase(path, projectId, 'C', fileId);
+                var collarId = GetCollarIdFromTelonicsGen4File(path);
+                UploadSubFileToDatabase(path, projectId, collarId, 'C', fileId);
                 errors.AppendLine("Inserted " + path);
-                //File.Delete(file);
+                File.Delete(path);
             }
 
             //cleanup temp files/folders
-            //File.Delete(logFilePath);
-            //File.Delete(tpfFilePath);
+            File.Delete(logFilePath);
             File.Delete(dataFilePath);
             File.Delete(batchFilePath);
-            //Directory.Delete(outputFolder);
+            Directory.Delete(outputFolder);
             return errors.ToString();
         }
 
 
-        private static void UploadSubFileToDatabase(string path, string projectId, char format, SqlInt32 parentFileId)
+        private static string GetCollarIdFromTelonicsGen4File(string path)
         {
-            if (path == null)
-                throw new NullReferenceException();
+            //Telonics TDC always names the report files as 'CTN_xxx.csv'
+            //While it is valid to use a collarID in the DB that is not the complete Telonics CTN,
+            //  this will cause a problem uploading the TPF files and this module, so we will make it a necessary precondition.
+
+            if (String.IsNullOrEmpty(path))
+                throw new ArgumentException("Invalid (null or empty) path", path);
+            string fileName = Path.GetFileName(path);
+            if (fileName == null)
+                throw new ArgumentException("File does not exist or is inaccessible", path);
+            //Debug.Assert(fileName.Contains('_'),"File name is not properly formated; missing underscore.");  //always true since this is only called on files output from TDC
+            var collarId = fileName.Split('_')[0];
+            //Debug.Assert(CollarIsInDatabase(collarId);"Collar is not in the database"); //Always true since this is a precondition of a valid tpf parameter file
+            return collarId;
+        }
+
+
+        private static void UploadSubFileToDatabase(string path, string projectId, string collarId, char format, SqlInt32 parentFileId)
+        {
+            //Debug.Assert(FileIsInDatabase(ParentFileId), "ParentFile is not in the database"); //Always true since invalid fileid would have failed in caller
+            if (String.IsNullOrEmpty(path))
+                throw new ArgumentException("Invalid (null or empty) path", path);
             string fileName = Path.GetFileName(path);
             byte[] content = File.ReadAllBytes(path);
             if (fileName == null || content == null)
                 throw new ArgumentException("File does not exist, is inaccessible, or empty", path);
-            //Assert - Parent File exists in database (true since invalid fileid would have failed in caller)
-
-            //FIXME - Improve CollarId extraction.  user id '634123' does not equal Telonics Id '634123A'
-            //TODO - Any benefit to using the collar id in the column in the file?
-            //Telonics TDC always names the report files as 'CTN_xxx.csv', since we know this is a TDC output, we cab use that information
-            //However the user may have a different id for this collar.
-            Debug.Assert(fileName.Contains('_'),"File name is not properly formated; missing underscore.");
-            string collarId = fileName.Split('_')[0];
-            //Assert CollarId is in the database - precondition of the valid tpf parameter file
             UploadFileToDatabase(fileName, projectId, "Telonics", collarId, format, 'A', content, parentFileId);
         }
 
@@ -220,20 +257,6 @@ namespace ArgosProcessor
             return fileId;
         }
 
-
-        private static IEnumerable<SqlInt32> GetAllFileIdsFromFolder(string folder)
-        {
-            int id = 0;
-            return from file in GetAllFileNamesFromFolder(folder)
-                   where Int32.TryParse(file, out id)
-                   select (SqlInt32) id;
-        }
-
-
-        private static IEnumerable<string> GetAllFileNamesFromFolder(string path)
-        {
-            return Directory.EnumerateFiles(path).Select(Path.GetFileNameWithoutExtension);
-        }
 
         private static IEnumerable<SqlInt32> GetAllCollarParameterFileIdsFromDBForFormat(char format)
         {
@@ -284,13 +307,6 @@ namespace ArgosProcessor
         }
 
 
-        public static string GetNewTempDirectory()
-        {
-            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(tempDirectory);
-            return tempDirectory;
-        }
-
         private static string GetProjectIdFromFileId(SqlInt32 fileId)
         {
             string projectId = null;
@@ -314,26 +330,26 @@ namespace ArgosProcessor
         }
 
 
-        //private static string GetSystemSetting(SqlString key)
-        //{
-        //    string setting = null;
-        //    using (var connection = new SqlConnection(Properties.Settings.Default.Animal_MovementConnectionString))
-        //    {
-        //        connection.Open();
-        //        const string sql = "SELECT [Value] FROM [dbo].[Settings] WHERE [Username] = 'system' AND [Key] =  @key";
-        //        using (var command = new SqlCommand(sql, connection))
-        //        {
-        //            command.Parameters.Add(new SqlParameter("@key", SqlDbType.NVarChar) { Value = key });
-        //            using (SqlDataReader results = command.ExecuteReader())
-        //            {
-        //                while (results.Read())
-        //                {
-        //                    setting = results.GetString(0);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return setting;
-        //}
+        public static string GetNewTempDirectory()
+        {
+            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempDirectory);
+            return tempDirectory;
+        }
+
+
+        private static IEnumerable<SqlInt32> GetAllFileIdsFromFolder(string folder)
+        {
+            int id = 0;
+            return from file in GetAllFileNamesFromFolder(folder)
+                   where Int32.TryParse(file, out id)
+                   select (SqlInt32)id;
+        }
+
+
+        private static IEnumerable<string> GetAllFileNamesFromFolder(string path)
+        {
+            return Directory.EnumerateFiles(path).Select(Path.GetFileNameWithoutExtension);
+        }
     }
 }
