@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TpfFilesSummerizer", "TpfFi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArgosProcessor", "ArgosProcessor\ArgosProcessor.csproj", "{3192A940-B9C2-475F-934F-FE10944F6B99}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArgosDownloader", "ArgosDownloader\ArgosDownloader.csproj", "{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,16 @@ Global
 		{3192A940-B9C2-475F-934F-FE10944F6B99}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3192A940-B9C2-475F-934F-FE10944F6B99}.Release|x86.ActiveCfg = Release|x86
 		{3192A940-B9C2-475F-934F-FE10944F6B99}.Release|x86.Build.0 = Release|x86
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Debug|x86.ActiveCfg = Debug|x86
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Debug|x86.Build.0 = Debug|x86
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Release|x86.ActiveCfg = Release|x86
+		{08D3E76C-8E33-491E-B8D8-7EBEFF872BEB}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
