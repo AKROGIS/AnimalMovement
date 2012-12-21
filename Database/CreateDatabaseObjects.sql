@@ -3948,6 +3948,119 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Deletes a CollarFile from the database by first removing all dependent records
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFile_Delete] 
+	@FileId int = -1
+WITH EXECUTE AS OWNER -- Needed for dynamic sql
+AS
+BEGIN
+	SET NOCOUNT ON;
+	-- Get the projectId
+	DECLARE @ProjectId NVARCHAR(255) = NULL
+	SELECT @ProjectID = Project FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+
+	IF @ProjectID IS NULL
+	BEGIN
+			DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+@FileId+' in CollarFiles.';
+			RAISERROR(@message1, 18, 0)
+			RETURN (1)
+	END
+	
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be the PI or editor on the project
+	-- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file. 
+	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
+		BEGIN
+			DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete a file.';
+			RAISERROR(@message2, 18, 0)
+			RETURN (1)
+		END
+	END
+
+	-- Do the deleting
+	BEGIN TRY
+		BEGIN TRAN
+
+			-- Recursively delete all the children (subfiles) of this file
+			DECLARE @SubFileId INT;
+			  
+			DECLARE subfile_cursor CURSOR LOCAL FOR 
+				SELECT [FileId] FROM [dbo].[CollarFiles] WHERE [ParentFileId] = @FileId;
+
+			OPEN subfile_cursor;
+				FETCH NEXT FROM subfile_cursor INTO @SubFileId;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					EXEC [dbo].[CollarFile_Delete] @SubFileId;
+					FETCH NEXT FROM subfile_cursor INTO @SubFileId;
+				END
+			CLOSE subfile_cursor;
+			DEALLOCATE subfile_cursor;
+
+			-- Delete locations derived from this file
+			DELETE L FROM dbo.Locations as L
+			   INNER JOIN dbo.CollarFixes as C
+					   ON C.FixID = L.FixId
+					WHERE C.[FileId] = @FileId;
+
+			-- Data from a file may be parsed into different data tables.
+			-- Delete all of the records that are related to this file
+		    -- by finding all the tables that have a relation to the CollarFiles.FileId
+			DECLARE @TableName sysname;
+			DECLARE @FieldName sysname;
+			DECLARE relate_cursor CURSOR LOCAL FOR 
+				SELECT o2.name, c2.name
+				FROM sys.foreign_key_columns fk
+					   JOIN sys.columns c2 
+						 ON fk.parent_column_id = c2.column_id 
+							AND fk.parent_object_id = c2.object_id
+					   JOIN sys.columns c3
+						 ON fk.referenced_column_id = c3.column_id 
+							AND fk.referenced_object_id= c3.object_id
+					   JOIN sys.objects o2 ON fk.parent_object_id = o2.object_id
+					   JOIN sys.objects o3 ON fk.referenced_object_id = o3.object_id
+					   where o3.name = 'CollarFiles' and c3.name = 'FileId'
+
+			OPEN relate_cursor;
+				FETCH NEXT FROM relate_cursor INTO @TableName, @FieldName;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					DECLARE @sql NVARCHAR(500) = N'DELETE FROM ' + @TableName + '  WHERE ' + @FieldName + ' = @file';
+					-- Execute dynamic SQL with parameters
+					EXEC sp_ExecuteSQL @sql, N'@file int', @file = @FileId;
+					FETCH NEXT FROM relate_cursor INTO @TableName, @FieldName;
+				END
+			CLOSE relate_cursor;
+			DEALLOCATE relate_cursor;
+
+			-- Delete this file
+			DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+		COMMIT TRANSACTION
+	END TRY
+	BEGIN CATCH
+		IF XACT_STATE() <> 0
+			ROLLBACK TRANSACTION;
+		EXEC [dbo].[Utility_RethrowError]
+		RETURN 1
+	END CATCH
+	
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE VIEW [dbo].[StoreOnBoardLocations]
 AS
 SELECT     dbo.CollarDataTelonicsStoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
@@ -4282,75 +4395,6 @@ BEGIN
 					   ON C.[Format] = F.[Code]
 				    WHERE C.[FileId] = @FileId);
 	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Deletes a CollarFile from the database by first removing all dependent records
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFile_Delete] 
-	@FileId int = -1
-WITH EXECUTE AS OWNER -- Needed for dynamic sql
-AS
-BEGIN
-	SET NOCOUNT ON;
-	-- Get the projectId
-	DECLARE @ProjectId NVARCHAR(255) = NULL
-	SELECT @ProjectID = Project FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-
-	IF @ProjectID IS NULL
-	BEGIN
-			DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+@FileId+' in CollarFiles.';
-			RAISERROR(@message1, 18, 0)
-			RETURN (1)
-	END
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	-- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file. 
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete a file.';
-			RAISERROR(@message2, 18, 0)
-			RETURN (1)
-		END
-	END
-
-	BEGIN TRY
-		BEGIN TRAN
-			DELETE L FROM dbo.Locations as L
-			   INNER JOIN dbo.CollarFixes as C
-					   ON C.FixID = L.FixId
-					WHERE C.[FileId] = @FileId;
-
-			DELETE FROM [dbo].[CollarFixes] WHERE [FileId] = @FileId;
-
-			DECLARE @TableName sysname = [dbo].[GetCollarDataTableName](@FileId);
-			DECLARE @sql NVARCHAR(500) = N'DELETE FROM ' + @TableName + '  WHERE FileId = @file';
-			
-			-- Execute dynamic SQL with parameters
-			EXEC sp_ExecuteSQL @sql, N'@file int', @file = @FileId;
-			
-			DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-		COMMIT TRANSACTION
-	END TRY
-	BEGIN CATCH
-		IF XACT_STATE() <> 0
-			ROLLBACK TRANSACTION;
-		EXEC [dbo].[Utility_RethrowError]
-		RETURN 1
-	END CATCH
-	
 END
 GO
 SET ANSI_NULLS ON

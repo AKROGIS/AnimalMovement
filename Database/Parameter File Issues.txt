@@ -70,6 +70,14 @@ then a parameter file can be deactivated.
 	)
   order by C.AlternativeId
 
+/* Collars which share an Argos Id */
+    SELECT * FROM Collars
+	 WHERE AlternativeId IN
+           ( SELECT AlternativeId FROM Collars
+		      WHERE AlternativeId IS NOT NULL
+		   GROUP BY AlternativeId
+			 HAVING COUNT(AlternativeId) > 1)
+  ORDER BY AlternativeId
   
 /* Projects/Managers with Gen3 collars */
     SELECT C.Manager, CD.ProjectId, C.AlternativeId --, C.CollarId , C.*
