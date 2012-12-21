@@ -10,7 +10,7 @@ using System.Text;
 
 namespace ArgosProcessor
 {
-    class Utility
+    sealed class Utility
     {
 
 
@@ -175,6 +175,11 @@ namespace ArgosProcessor
                 p.WaitForExit();
 
                 //TODO - check the log file for errors - What does an error look like???
+                    //Batch started at: 2012.12.17 22:04:31
+                    //Processing file: C:\Users\resarwas\AppData\Local\Temp\tmpB158.tmp
+                    //Unable to load the the parameter file: "C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\ArgosProcessor\bin\Debug\tpf\23.tpf".This file may require a newer version of TDC.
+                    //Batch completed at: 2012.12.17 22:32:27
+
             }
 
             // for each output file created by TDC, send the file to the database
@@ -182,7 +187,7 @@ namespace ArgosProcessor
             {
                 var collarId = GetCollarIdFromTelonicsGen4File(path);
                 UploadSubFileToDatabase(path, projectId, collarId, 'C', fileId);
-                errors.AppendLine("Inserted " + path);
+                File.SetAttributes(path, FileAttributes.Normal);  // remove the readonly flag put on files created by TDC.
                 File.Delete(path);
             }
 
@@ -233,10 +238,10 @@ namespace ArgosProcessor
             using (var connection = new SqlConnection(Properties.Settings.Default.Animal_MovementConnectionString))
             {
                 connection.Open();
-                const string sql =
-                    "EXEC CollarFile_Insert @FileName, @ProjectId, @CollarManufacturer, @CollarId, @Format, @Status, @Contents, @FileId";
+                const string sql = "[dbo].[CollarFile_Insert]";
                 using (var command = new SqlCommand(sql, connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.Add(new SqlParameter("@FileName", SqlDbType.NVarChar) {Value = fileName});
                     command.Parameters.Add(new SqlParameter("@ProjectId", SqlDbType.NVarChar) {Value = projectId});
                     command.Parameters.Add(new SqlParameter("@CollarManufacturer", SqlDbType.NVarChar) {Value = collarMfgr});
@@ -245,13 +250,9 @@ namespace ArgosProcessor
                     command.Parameters.Add(new SqlParameter("@Status", SqlDbType.Char) { Value = status });
                     command.Parameters.Add(new SqlParameter("@Contents", SqlDbType.VarBinary) {Value = content});
                     command.Parameters.Add(new SqlParameter("@ParentFileId", SqlDbType.Int) {Value = parentFileId});
-                    var fileIdParameter = new SqlParameter("@FileId", SqlDbType.Int)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                    command.Parameters.Add(fileIdParameter);
+                    command.Parameters.Add(new SqlParameter("@FileId", SqlDbType.Int) { Direction = ParameterDirection.Output});
                     command.ExecuteNonQuery();
-                    fileId = (SqlInt32) fileIdParameter.SqlValue;
+                    fileId = (SqlInt32) command.Parameters[8].SqlValue;
                 }
             }
             return fileId;

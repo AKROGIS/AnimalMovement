@@ -1,0 +1,125 @@
+Two issues with parameter files
+1) A collar may get a new parameter file issued for it.  The new parameter file may have a start date after
+the collar was deployed.  Fixes before this start date will not be fully processed by the new parameter file.
+It is still valid to use this file, however it may not return all the data you expect.  It is possible that both
+the new and the old parameter files describe multiple collars, only one of which has been changed.
+
+For example: file1.tpf has among others collar 123456A (Argos ID 12345) from 2010-01-01 to 2100-01-01, and 
+             file2.tpf has among others collar 123456A (Argos ID 12345) from 2011-01-01 to 2012-01-01
+			 Use file1.tpf to process fixes from 2010, and file2.tpf to process fixes from 2011
+			 However, an Argos data file in early 2011 may have data from both periods, so 
+			 the file will need to be processed by both files.  This is not a problem if the dates
+			 do not overlap - processing the data with both files will add some empty (non-valid) fix
+			 attempts to the database which will be ignored when processing for locations.  When TDC
+			 processes the data it will create two reports 123456A_1_xxx.csv, and 123456A_2_xxx.csv
+			 
+			 If the dates do overlap, then the collar will have duplicate fixes entered in the
+			 database for fixes during the overlapping dates.  This can cause confusion if the
+			 parameters are different.  I.e. collecting temperature with one tpf file, and not the other.
+			 If you are unsure of the fix dates in a file, it is best to process with both files.
+			 If you know that one of the files is better, and the fixes to be processed are in
+			 the time period for that file, then the obsolete tpf file should be de-activated.
+
+			 Conclusion, If the dates do not overlap, always keep both of these files active.
+			 If the dates overlap and if you are unsure of the fixe dates, keep both active.
+			 If the dates overlap, but you are sure you do not have fixes for the "obsolete"
+			 tpf file, then de-activate it.
+
+			 
+2) A collar is is refurbished, and given a new CTN number and a new TPF file, but retains the Argos ID
+
+For Example: file1.tpf contains collar 123456A (Argos ID 12345) from 2009-01-01 to 2100-01-01.
+			 This collar is refurbished at the end of 2010 and returned/redeployed as collar
+			 123456B (still Argos ID 12345) with file2.tpf valid from 2011-01-01 to 2100-01-01.
+			 Note that file1.tpf may have more than one collar described in it.  Those other collars
+			 may still be active and require file1.tpf after the collar has been refurbished.
+			 In this case, if both files are active, the fixes (transmitted by Argos id) will be assigned
+			 to both collars A & B.  This will look like the two collars were in the same place at the same
+			 time. (since they are the same physical collar, this is true).  Since the deployment dates for
+			 the two collars will never overlap (assuming the user remembers to but a retrieval date for
+			 collar A), the animal locations should not get confused.
+			 
+			 Conclusion, when in doubt, leave both collars active, but check the retreival dates
+			 If you know that all the data for a retrieved collar has been processed, then you can deactivate
+			 the old TPF file if it contained only the one file.
+
+To be safe, all parameter files are considered to be active.  This may result in a few cases where there
+are duplicate fixes.  Because data is processed on a parameter file basis, and because parameter files
+may contain multiple collars, and because the dates of the fixes in a data file are not known until a file
+has been processed, it is not generally possible to know which parameter files to use before processing.
+If it is known that all data associated with all collars in a parameter file has been recieved and processed, 
+then a parameter file can be deactivated.
+
+
+
+/*  Argos Ids with multiple parameter files */
+  SELECT C.AlternativeId, C.CollarId, CPF.[FileName]
+  FROM [dbo].[CollarParameters] AS CP
+  INNER JOIN [dbo].[Collars] AS C
+  ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
+  INNER JOIN [dbo].[CollarParameterFiles] AS CPF
+  ON Cp.FileId = CPF.FileId
+  WHERE C.AlternativeId in
+   (
+  	  SELECT C.AlternativeId
+	  FROM [dbo].[CollarParameters] AS CP
+	  INNER JOIN [dbo].[Collars] AS C
+	  ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
+	  GROUP BY C.AlternativeId 
+	  HAVING Count(C.AlternativeId) > 1
+	)
+  order by C.AlternativeId
+
+  
+/* Projects/Managers with Gen3 collars */
+    SELECT C.Manager, CD.ProjectId, C.AlternativeId --, C.CollarId , C.*
+      FROM dbo.CollarDeployments AS CD
+INNER JOIN dbo.Collars AS C
+        ON CD.CollarManufacturer = C.CollarManufacturer AND CD.CollarId = C.CollarId
+     WHERE CD.DeploymentDate < GETDATE()
+       AND (CD.RetrievalDate > GETDATE() OR CD.RetrievalDate IS NULL)
+       AND C.CollarModel = 'TelonicsGen3'
+  ORDER BY C.Manager, CD.ProjectId, C.AlternativeId
+
+
+/* Does a project (or a manager) have any Gen3 collars */
+    SELECT 1
+      FROM dbo.CollarDeployments AS CD
+INNER JOIN dbo.Collars AS C
+        ON CD.CollarManufacturer = C.CollarManufacturer AND CD.CollarId = C.CollarId
+     WHERE CD.DeploymentDate < GETDATE()
+       AND (CD.RetrievalDate > GETDATE() OR CD.RetrievalDate IS NULL)
+       AND C.CollarModel = 'TelonicsGen3'
+       --AND C.Manager = ORIGINAL_LOGIN()
+       --AND C.Manager = 'NPS\KCJoly'
+       AND CD.ProjectId = 'ARCNVSID022'
+
+/* Get the Telonics model (Gen3, Gen4, or NULL) of an Argos Id at a transmission date */
+DECLARE @ArgosId NVARCHAR(20)= '37470';
+DECLARE @TransmissionDate DATETIME2 = '2007-01-01'
+
+    SELECT C.CollarModel
+      FROM Collars AS C
+INNER JOIN CollarDeployments AS CD
+        ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
+     WHERE C.CollarManufacturer = 'Telonics'
+       AND C.AlternativeId = @ArgosId
+       AND CD.DeploymentDate < @TransmissionDate
+       AND (CD.RetrievalDate IS NULL OR @TransmissionDate < CD.RetrievalDate)
+
+	   
+/* Run external command from SQL Server */ 
+USE [Animal_Movement]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ CREATE PROCEDURE [dbo].[RunExternal]
+   WITH EXECUTE AS OWNER
+     AS
+   EXEC xp_cmdshell 'whoami.exe';
+
+GO
+GRANT EXECUTE ON [dbo].[RunExternal] TO [Editor] AS [dbo]
