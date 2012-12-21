@@ -1,0 +1,122 @@
+tpf 106
+model TGW-4580H
+sections.customer.parameters.customer {}
+sections.hardware.parameters.vLowBat 3.00
+sections.units.parameters.ctnList 634657A
+sections.units.parameters.decimalArgosIdList 97605
+sections.units.parameters.hexArgosIdList A110A5F
+sections.units.parameters.actualArgosRepetitionPeriodList 141
+sections.units.parameters.assignedArgosRepetitionPeriodRangeBaseList 140
+sections.units.parameters.assignedArgosRepetitionPeriodRangePercentageList 10
+sections.units.parameters.argosFrequencyList 401631000
+sections.units.parameters.vhfFrequencyList 164443750
+sections.units.parameters.firmwareVersionList {{SECO1173 uGPSI-20 2009.08.04}}
+sections.units.parameters.parameterTimestampList {{2011.02.22 01:34:42 UTC}}
+sections.units.parameters.factoryParametersList {{TGW-4580H 634657A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} -500 7 0 0 1999 {-40 25 70} {{33 3C 3F}} {{50 5C 5F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 23 25 33 35 46 50 50 105 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 160 2044.8 22 -2250 2 5100 4100 21.04008 0}}
+sections.predeployment.parameters.seasonDuration {4 Hours}
+sections.predeployment.parameters.updatePeriod {1 Hour}
+sections.predeployment.parameters.predeployAfterRebootFlag 1
+sections.gps.parameters.fixTimeout 180
+sections.gps.parameters.continuousNavigationMode 0
+sections.gps.parameters.nmeaSentences {}
+sections.gps.parameters.nmeaBaudRate 4800
+sections.gpsSchedule.parameters.schedule {schedule {
+   season {
+      2000.01.01
+      2100.01.01
+      11Hours
+      onPeriod {0 11Hours 11Hours}
+   }
+}
+}
+sections.underwater.parameters.diveQualificationPeriod 5
+sections.underwater.parameters.haulOutTime Disabled
+sections.underwater.parameters.saltwaterFailsafeTime Disabled
+sections.underwater.parameters.pressureMeasurementInterval Disabled
+sections.underwater.parameters.layers {}
+sections.underwater.parameters.numberOfLayers 0
+sections.underwater.parameters.numberOfProfilePoints 0
+sections.underwater.parameters.suppressedDevices {}
+sections.underwaterSchedule.parameters.schedule {schedule {
+}
+}
+sections.activityandmortality.parameters.activityDirection {}
+sections.activityandmortality.parameters.measurementInterval 1
+sections.activityandmortality.parameters.tipSwitchFlag 0
+sections.activityandmortality.parameters.mortalityDirection {1 2 3}
+sections.activityandmortality.parameters.timeInterval {4 Hours}
+sections.activityandmortality.parameters.mortalityThreshold 5
+sections.activitySchedule.parameters.schedule {schedule {
+}
+}
+sections.temperatureSchedule.parameters.schedule {link gpsSchedule}
+sections.argos.parameters.powerLevel 0
+sections.argos.parameters.minimumTransmitTemperature -40
+sections.argos.parameters.messageFields {
+   mortalityFlag {}
+   gpsUpdateTime {946684800 4102444800 1 0 32 32}
+   compressedSuccessfulFixFlags {0 1 1 0 1 1 1 1}
+   compressedFixDelays {0 255 1 0 8 8 1 8}
+   compressedLatitudes {0 2147483647 1024 0 21 21 1 21}
+   compressedLongitudes {0 4294967295 1024 0 22 22 1 22}
+   temperatureUpdateTime {946684800 4102444800 1 0 32 32}
+   compressedTemperatures {0 110 1 0 7 7 1 7}
+   errorDetectionByte {}
+}
+sections.argos.parameters.transmitPartialPagesFlag 0
+sections.argos.parameters.pnSeed 0
+sections.argos.parameters.diveMaximumPages default
+sections.argosSchedule.parameters.schedule {schedule {
+   season {
+      2000.01.01
+      2100.01.01
+      4Days
+      onPeriod {18Hours+30Minutes 5Hours 0}
+   }
+}
+}
+sections.argossatellite.parameters.prediction none
+sections.argossatellite.parameters.location {65.000 -154.000}
+sections.argossatellite.parameters.satellites {METOP-A {1 29499U 06044A   09217.10056015 -.00000274  00000-0 -10530-3 0  8754} {2 29499  98.6830 276.4827 0001051  94.1868 265.9443 14.21497551144964} {NOAA 15} {1 25338U 98030A   09211.03160409 -.00000096  00000-0 -22449-4 0   237} {2 25338  98.5859 199.3041 0009599 296.4579  63.5622 14.24775234582871} {NOAA 16} {1 26536U 00055A   09217.45136821 -.00000247  00000-0 -10836-3 0  5083} {2 26536  99.1767 222.3125 0011202 139.2009 221.0010 14.12526616457253} {NOAA 17} {1 27453U 02032A   09217.39400864  .00000241  00000-0  12299-3 0  5114} {2 27453  98.4801 274.7605 0011270 345.4230  14.6628 14.24082182369755} {NOAA 18} {1 28654U 05018A   09217.39178491  .00000317  00000-0  19967-3 0  9985} {2 28654  98.9073 160.2549 0013605 221.7133 138.2996 14.11276904216893} {NOAA 19} {1 33591U 09005A   09217.38243031  .00000016  00000-0  32440-4 0  2029} {2 33591  98.7464 161.8693 0015152 102.4681 257.8171 14.10976441 25376}}
+sections.argossatellite.parameters.turnOffGPSPredictionAfterNDays Disabled
+sections.vhf.parameters.powerLevel 10
+sections.vhf.parameters.initializationPeriod {15 Minutes}
+sections.vhf.parameters.pulseWidth 15
+sections.vhf.parameters.gpsVhfBeaconControl 1
+sections.vhf.parameters.successfulFixPulsePeriod 1200
+sections.vhf.parameters.unsuccessfulFixPulsePeriod 2000
+sections.vhf.parameters.mortalityVhfBeaconControl 1
+sections.vhf.parameters.mortalityPulsePeriod 850
+sections.vhf.parameters.deadBatteryVhfBeaconControl 1
+sections.vhf.parameters.deadBatteryPulsePeriod 3000
+sections.vhf.parameters.releaseVhfBeaconControl 0
+sections.vhf.parameters.releasePulsePeriod Disabled
+sections.vhf.parameters.rapidOffPeriod 125
+sections.vhfSchedule.parameters.schedule {schedule {
+   season {
+      2000.01.01
+      2100.01.01
+      1Day
+      onPeriod {16Hours 12Hours 0}
+   }
+}
+}
+sections.auxiliarymodes.parameters.resetVhfOnlyPeriodLength {20 Hours}
+sections.auxiliarymodes.parameters.brownOutRecoveryPeriodLength {15 Minutes}
+sections.auxiliarymodes.parameters.brownOutRecoveryUpdateInterval {5 Minutes}
+sections.simulator.parameters.activeVhfMode 0
+sections.simulator.parameters.deploymentDate 2001.01.01
+sections.simulator.parameters.batteryDate {2001.01.01 2001.01.01}
+sections.simulator.parameters.batteryLeakage {0 0}
+sections.simulator.parameters.batteryCapacity {{} {}}
+sections.simulator.parameters.location {}
+sections.simulator.parameters.minimumPassElevation 0
+sections.simulator.parameters.maximumPassElevation 90
+sections.simulator.parameters.environmentTemperature -20
+sections.simulator.parameters.predictPasses 0
+sections.simulator.parameters.underwaterRatio 0
+sections.simulator.parameters.averageTimeToFix 90
+sections.simulator.parameters.transmitSuccessRatio 20
+sections.simulator.parameters.qfpRatio 0
+sections.simulator.parameters.batteryDerateFactor {0 0}
+sections.notes.parameters.notes {}
