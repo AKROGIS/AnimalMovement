@@ -262,14 +262,14 @@ namespace DataModel
 		private void InsertCollarFile(CollarFile obj)
 		{
 			System.Nullable<int> p1 = obj.FileId;
-			this.CollarFile_Insert(obj.FileName, obj.Project, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<char>)(obj.Format)), ((System.Nullable<char>)(obj.Status)), obj.Contents, ref p1);
+			this.CollarFile_Insert(obj.FileName, obj.Project, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<char>)(obj.Format)), ((System.Nullable<char>)(obj.Status)), obj.Contents, ((System.Nullable<int>)(obj.ParentFileId)), ref p1);
 			obj.FileId = p1.GetValueOrDefault();
 		}
 		
 		private void UpdateCollarFile(CollarFile obj)
 		{
 			CollarFile original = ((CollarFile)(CollarFiles.GetOriginalEntityState(obj)));
-			this.CollarFile_Update(((System.Nullable<int>)(original.FileId)), obj.FileName, obj.CollarId);
+			this.CollarFile_Update(((System.Nullable<int>)(original.FileId)), obj.FileName, obj.CollarId, ((System.Nullable<int>)(obj.ParentFileId)));
 		}
 		
 		private void DeleteCollarFile(CollarFile obj)
@@ -411,14 +411,6 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Insert")]
-		public int CollarFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileName, projectId, collarManufacturer, collarId, format, status, contents, fileId);
-			fileId = ((System.Nullable<int>)(result.GetParameterValue(7)));
-			return ((int)(result.ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Settings_Update")]
 		public int Settings_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Key", DbType="NVarChar(30)")] string key, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Value", DbType="NVarChar(500)")] string value)
 		{
@@ -491,13 +483,6 @@ namespace DataModel
 		public int ProjectInvestigator_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Login", DbType="NVarChar(128)")] string login, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Name", DbType="NVarChar(255)")] string name, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Email", DbType="NVarChar(255)")] string email, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Phone", DbType="NVarChar(255)")] string phone)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), login, name, email, phone);
-			return ((int)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Update")]
-		public int CollarFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, fileName, collarId);
 			return ((int)(result.ReturnValue));
 		}
 		
@@ -575,6 +560,21 @@ namespace DataModel
 		public int CollarParameterFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, fileId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Insert")]
+		public int CollarFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ParentFileId", DbType="Int")] System.Nullable<int> parentFileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileName, projectId, collarManufacturer, collarId, format, status, contents, parentFileId, fileId);
+			fileId = ((System.Nullable<int>)(result.GetParameterValue(8)));
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Update")]
+		public int CollarFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ParentFileId", DbType="Int")] System.Nullable<int> parentFileId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, fileName, collarId, parentFileId);
 			return ((int)(result.ReturnValue));
 		}
 	}
@@ -1245,6 +1245,8 @@ namespace DataModel
 		
 		private System.Data.Linq.Link<System.Data.Linq.Binary> _Contents;
 		
+		private System.Nullable<int> _ParentFileId;
+		
 		private EntitySet<CollarFix> _CollarFixes;
 		
 		private EntityRef<Project> _Project1;
@@ -1279,6 +1281,8 @@ namespace DataModel
     partial void OnStatusChanged();
     partial void OnContentsChanging(System.Data.Linq.Binary value);
     partial void OnContentsChanged();
+    partial void OnParentFileIdChanging(System.Nullable<int> value);
+    partial void OnParentFileIdChanged();
     #endregion
 		
 		public CollarFile()
@@ -1503,6 +1507,26 @@ namespace DataModel
 					this._Contents.Value = value;
 					this.SendPropertyChanged("Contents");
 					this.OnContentsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ParentFileId", DbType="Int")]
+		public System.Nullable<int> ParentFileId
+		{
+			get
+			{
+				return this._ParentFileId;
+			}
+			set
+			{
+				if ((this._ParentFileId != value))
+				{
+					this.OnParentFileIdChanging(value);
+					this.SendPropertyChanging();
+					this._ParentFileId = value;
+					this.SendPropertyChanged("ParentFileId");
+					this.OnParentFileIdChanged();
 				}
 			}
 		}

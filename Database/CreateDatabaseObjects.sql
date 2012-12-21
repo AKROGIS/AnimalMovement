@@ -14,6 +14,8 @@ CREATE USER [NPS\BBorg] FOR LOGIN [NPS\BBorg] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\Domain Users] FOR LOGIN [NPS\Domain Users]
 GO
+CREATE USER [NPS\GColligan] FOR LOGIN [NPS\GColligan] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\JPLawler] FOR LOGIN [NPS\JPLawler] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\JWBurch] FOR LOGIN [NPS\JWBurch] WITH DEFAULT_SCHEMA=[dbo]
@@ -22,11 +24,11 @@ CREATE USER [NPS\KCJoly] FOR LOGIN [NPS\KCJoly] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\MLJohnson] FOR LOGIN [NPS\MLJohnson] WITH DEFAULT_SCHEMA=[dbo]
 GO
+CREATE USER [NPS\PAOwen] FOR LOGIN [NPS\PAOwen] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\SDMiller] WITH DEFAULT_SCHEMA=[dbo]
-GO
-CREATE USER [NPS\TMeier] FOR LOGIN [NPS\TMeier] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE ROLE [Editor] AUTHORIZATION [dbo]
 GO
@@ -146,6 +148,7 @@ CREATE TABLE [dbo].[CollarFiles](
 	[Format] [char](1) NOT NULL,
 	[Status] [char](1) NOT NULL,
 	[Contents] [varbinary](max) NOT NULL,
+	[ParentFileId] [int] NULL,
  CONSTRAINT [PK_CollarFiles] PRIMARY KEY CLUSTERED 
 (
 	[FileId] ASC
@@ -3945,6 +3948,119 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Deletes a CollarFile from the database by first removing all dependent records
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFile_Delete] 
+	@FileId int = -1
+WITH EXECUTE AS OWNER -- Needed for dynamic sql
+AS
+BEGIN
+	SET NOCOUNT ON;
+	-- Get the projectId
+	DECLARE @ProjectId NVARCHAR(255) = NULL
+	SELECT @ProjectID = Project FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+
+	IF @ProjectID IS NULL
+	BEGIN
+			DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+@FileId+' in CollarFiles.';
+			RAISERROR(@message1, 18, 0)
+			RETURN (1)
+	END
+	
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be the PI or editor on the project
+	-- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file. 
+	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
+		BEGIN
+			DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete a file.';
+			RAISERROR(@message2, 18, 0)
+			RETURN (1)
+		END
+	END
+
+	-- Do the deleting
+	BEGIN TRY
+		BEGIN TRAN
+
+			-- Recursively delete all the children (subfiles) of this file
+			DECLARE @SubFileId INT;
+			  
+			DECLARE subfile_cursor CURSOR LOCAL FOR 
+				SELECT [FileId] FROM [dbo].[CollarFiles] WHERE [ParentFileId] = @FileId;
+
+			OPEN subfile_cursor;
+				FETCH NEXT FROM subfile_cursor INTO @SubFileId;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					EXEC [dbo].[CollarFile_Delete] @SubFileId;
+					FETCH NEXT FROM subfile_cursor INTO @SubFileId;
+				END
+			CLOSE subfile_cursor;
+			DEALLOCATE subfile_cursor;
+
+			-- Delete locations derived from this file
+			DELETE L FROM dbo.Locations as L
+			   INNER JOIN dbo.CollarFixes as C
+					   ON C.FixID = L.FixId
+					WHERE C.[FileId] = @FileId;
+
+			-- Data from a file may be parsed into different data tables.
+			-- Delete all of the records that are related to this file
+		    -- by finding all the tables that have a relation to the CollarFiles.FileId
+			DECLARE @TableName sysname;
+			DECLARE @FieldName sysname;
+			DECLARE relate_cursor CURSOR LOCAL FOR 
+				SELECT o2.name, c2.name
+				FROM sys.foreign_key_columns fk
+					   JOIN sys.columns c2 
+						 ON fk.parent_column_id = c2.column_id 
+							AND fk.parent_object_id = c2.object_id
+					   JOIN sys.columns c3
+						 ON fk.referenced_column_id = c3.column_id 
+							AND fk.referenced_object_id= c3.object_id
+					   JOIN sys.objects o2 ON fk.parent_object_id = o2.object_id
+					   JOIN sys.objects o3 ON fk.referenced_object_id = o3.object_id
+					   where o3.name = 'CollarFiles' and c3.name = 'FileId'
+
+			OPEN relate_cursor;
+				FETCH NEXT FROM relate_cursor INTO @TableName, @FieldName;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					DECLARE @sql NVARCHAR(500) = N'DELETE FROM ' + @TableName + '  WHERE ' + @FieldName + ' = @file';
+					-- Execute dynamic SQL with parameters
+					EXEC sp_ExecuteSQL @sql, N'@file int', @file = @FileId;
+					FETCH NEXT FROM relate_cursor INTO @TableName, @FieldName;
+				END
+			CLOSE relate_cursor;
+			DEALLOCATE relate_cursor;
+
+			-- Delete this file
+			DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+		COMMIT TRANSACTION
+	END TRY
+	BEGIN CATCH
+		IF XACT_STATE() <> 0
+			ROLLBACK TRANSACTION;
+		EXEC [dbo].[Utility_RethrowError]
+		RETURN 1
+	END CATCH
+	
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE VIEW [dbo].[StoreOnBoardLocations]
 AS
 SELECT     dbo.CollarDataTelonicsStoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
@@ -4287,75 +4403,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Deletes a CollarFile from the database by first removing all dependent records
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFile_Delete] 
-	@FileId int = -1
-WITH EXECUTE AS OWNER -- Needed for dynamic sql
-AS
-BEGIN
-	SET NOCOUNT ON;
-	-- Get the projectId
-	DECLARE @ProjectId NVARCHAR(255) = NULL
-	SELECT @ProjectID = Project FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-
-	IF @ProjectID IS NULL
-	BEGIN
-			DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+@FileId+' in CollarFiles.';
-			RAISERROR(@message1, 18, 0)
-			RETURN (1)
-	END
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	-- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file. 
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete a file.';
-			RAISERROR(@message2, 18, 0)
-			RETURN (1)
-		END
-	END
-
-	BEGIN TRY
-		BEGIN TRAN
-			DELETE L FROM dbo.Locations as L
-			   INNER JOIN dbo.CollarFixes as C
-					   ON C.FixID = L.FixId
-					WHERE C.[FileId] = @FileId;
-
-			DELETE FROM [dbo].[CollarFixes] WHERE [FileId] = @FileId;
-
-			DECLARE @TableName sysname = [dbo].[GetCollarDataTableName](@FileId);
-			DECLARE @sql NVARCHAR(500) = N'DELETE FROM ' + @TableName + '  WHERE FileId = @file';
-			
-			-- Execute dynamic SQL with parameters
-			EXEC sp_ExecuteSQL @sql, N'@file int', @file = @FileId;
-			
-			DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-		COMMIT TRANSACTION
-	END TRY
-	BEGIN CATCH
-		IF XACT_STATE() <> 0
-			ROLLBACK TRANSACTION;
-		EXEC [dbo].[Utility_RethrowError]
-		RETURN 1
-	END CATCH
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
 -- Create date: November 26, 2012
 -- Description:	Returns a list of collar parameter file ids
 --              that have a specific format and are potentially appropriate for a specified collar file
@@ -4383,12 +4430,14 @@ GO
 -- ===============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
--- Description:	Updates the Status of a CollarFile
+-- Description:	Updates the editable fields of a CollarFile
+--              except Status.  Also see CollarFile_UpdateStatus
 -- ===============================================
 CREATE PROCEDURE [dbo].[CollarFile_Update] 
 	@FileId INT  = NULL, 
 	@FileName NVARCHAR(255) = NULL,
-	@CollarId NVARCHAR(255) = NULL
+	@CollarId NVARCHAR(255) = NULL,
+	@ParentFileId INT = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -4398,22 +4447,23 @@ BEGIN
 	DECLARE @CollarManufacturer NVARCHAR(255);
 	DECLARE @OldFileName NVARCHAR(255);
 	DECLARE @OldCollarId NVARCHAR(255);
+	DECLARE @OldParentFileId INT;
 	DECLARE @ProjectId NVARCHAR(255);
 	 SELECT @Status = [Status],
 		    @CollarManufacturer = [CollarManufacturer],
 		    @OldFileName = [FileName],
 		    @OldCollarId = [CollarId],
+		    @OldParentFileId = [ParentFileId],
 		    @ProjectId = [Project]
 	   FROM [dbo].[CollarFiles]
 	  WHERE [FileId] = @FileId;
 
-	IF @Status IS NULL
+	IF @ProjectId IS NULL
 	BEGIN
-		DECLARE @message2 nvarchar(100) = 'Invalid parameter: (' + @FileId + ') was not found in the CollarFiles table';
+		DECLARE @message2 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
 		RAISERROR(@message2, 18, 0)
 		RETURN 1
 	END
-	-- If OldStatus was found, then Project is guaranteed.
 
 	-- Get the name of the caller
 	DECLARE @Caller sysname = ORIGINAL_LOGIN();
@@ -4466,6 +4516,26 @@ BEGIN
 	BEGIN
 		BEGIN TRY
 			UPDATE [dbo].[CollarFiles] SET [CollarId] = @CollarId WHERE [FileId] = @FileId; 
+		END TRY
+		BEGIN CATCH
+			EXEC [dbo].[Utility_RethrowError]
+			RETURN 1
+		END CATCH
+	END
+	
+	-- If the ParentFileId was provided, make sure it is a valid FileId
+	IF @ParentFileId IS NOT NULL AND
+	   NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @ParentFileId)
+	BEGIN
+		DECLARE @message5 nvarchar(100) = 'Invalid parameter: ParentFileId ' + CAST(@ParentFileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
+		RAISERROR(@message5, 18, 0)
+		RETURN (1)
+	END
+	
+	-- Update ParentFileId; This should never fail
+	BEGIN
+		BEGIN TRY
+			UPDATE [dbo].[CollarFiles] SET [ParentFileId] = @ParentFileId WHERE [FileId] = @FileId; 
 		END TRY
 		BEGIN CATCH
 			EXEC [dbo].[Utility_RethrowError]
@@ -7843,7 +7913,6 @@ GO
 -- Author:		Regan Sarwas
 -- Create date: March 3, 2012
 -- Description:	Adds a new collar file to the database.
---              All files start out as inactive
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarFile_Insert] 
 	@FileName NVARCHAR(255) = NULL,
@@ -7853,6 +7922,7 @@ CREATE PROCEDURE [dbo].[CollarFile_Insert]
 	@Format CHAR = NULL, 
 	@Status CHAR = NULL, 
 	@Contents VARBINARY(max) = NULL,
+	@ParentFileId INT = NULL,
 	@FileId INT OUTPUT
 AS
 BEGIN
@@ -7867,7 +7937,7 @@ BEGIN
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
 		BEGIN
-			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to add an animal.';
+			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to add a collar file.';
 			RAISERROR(@message4, 18, 0)
 			RETURN (1)
 		END
@@ -7903,11 +7973,20 @@ BEGIN
 		RETURN (1)
 	END
 	
-	-- FIXME - add transaction support
+	-- If a ParentFileId was given, make sure it is valid
+	IF @ParentFileId IS NOT NULL AND
+	   NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @ParentFileId)
+	BEGIN
+		DECLARE @message5 nvarchar(100) = 'Invalid parameter: ParentFileId ' + CAST(@ParentFileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
+		RAISERROR(@message5, 18, 0)
+		RETURN (1)
+	END
+	
+	
 	BEGIN TRY
 		BEGIN TRAN
-			INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
-				 VALUES (@FileName, @ProjectId, @CollarManufacturer, @CollarId, @Format, @Status, @Contents)
+			INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents], [ParentFileId])
+				 VALUES (@FileName, @ProjectId, @CollarManufacturer, @CollarId, @Format, @Status, @Contents, @ParentFileId)
 
 			SET @FileId = SCOPE_IDENTITY();
 
@@ -8178,8 +8257,6 @@ EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\RESarwas'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\KCJoly'
 GO
-EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\TMeier'
-GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\BAMangipane'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\JWBurch'
@@ -8192,17 +8269,21 @@ EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'Investigator'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\MLJohnson'
 GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\PAOwen'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\GColligan'
+GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\SDMiller'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\RESarwas'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\KCJoly'
 GO
-EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\TMeier'
-GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\BAMangipane'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\JWBurch'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\BBorg'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\JPLawler'
 GO
