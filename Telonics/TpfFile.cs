@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace TpfFilesSummerizer
+namespace Telonics
 {
-    internal class TpfFile
+    public class TpfFile
     {
         private string[] _fileContents;
 
@@ -35,7 +35,7 @@ namespace TpfFilesSummerizer
             get { return Path.GetFileNameWithoutExtension(FilePath); }
         }
 
-        public IEnumerable<Collar> ParseForCollars()
+        public IEnumerable<TpfCollar> ParseForCollars()
         {
             string owner = GetOwner();
             string[] ids = GetIds();
@@ -45,7 +45,7 @@ namespace TpfFilesSummerizer
                 ids.Length != argosIds.Length || 
                 frequencies.Length != argosIds.Length)
                 throw new InvalidOperationException("Indeterminant number of collars in file " + Name);
-            return ids.Select((id, index) => new Collar
+            return ids.Select((id, index) => new TpfCollar
                                             {
                                                 Ctn = id,
                                                 ArgosId = argosIds[index],

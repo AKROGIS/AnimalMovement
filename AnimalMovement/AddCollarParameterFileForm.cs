@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
+using Telonics;
 
 //TODO - When loading multiple files, do not cancel remainder of files if you skip a file
 //TODO - Reload project Investigator form after add parameter file adds a collar
@@ -154,9 +155,9 @@ namespace AnimalMovement
                 return false;
             var tpfFile = new TpfFile(file);
             tpfFile.Load();
-            foreach (TpfFile.Collar tpfCollar in tpfFile.ParseForCollars())
+            foreach (TpfCollar tpfCollar in tpfFile.ParseForCollars())
             {
-                TpfFile.Collar collar1 = tpfCollar;
+                TpfCollar collar1 = tpfCollar;
                 var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == collar1.Ctn);
                 if (collar == null)
                 {
@@ -255,7 +256,7 @@ namespace AnimalMovement
         }
 
 
-        private Collar AddTpfCollar(TpfFile.Collar tpfCollar, ProjectInvestigator owner)
+        private Collar AddTpfCollar(TpfCollar tpfCollar, ProjectInvestigator owner)
         {
             var collar = new Collar
             {

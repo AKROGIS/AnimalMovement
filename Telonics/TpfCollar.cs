@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace TpfFilesSummerizer
+namespace Telonics
 {
-    class Collar
+    public class TpfCollar
     {
         public string Ctn { get; set; }
         public string ArgosId { get; set; }
