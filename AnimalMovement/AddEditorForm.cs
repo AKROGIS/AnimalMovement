@@ -1,5 +1,7 @@
 ﻿using System;
+#if ! NO_ACTIVE_DIRECTORY
 using System.DirectoryServices.AccountManagement;
+#endif
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -134,7 +136,11 @@ namespace AnimalMovement
 
         private void FindButton_Click(object sender, EventArgs e)
         {
-            var context = new PrincipalContext(ContextType.Domain, "nps", "OU=AKR,DC=nps,DC=doi,DC=net");
+#if NO_ACTIVE_DIRECTORY
+			MessageBox.Show("Active Directory Search Disabled.", "Sorry", MessageBoxButtons.OK,
+			                MessageBoxIcon.Information);
+#else
+			var context = new PrincipalContext(ContextType.Domain, "nps", "OU=AKR,DC=nps,DC=doi,DC=net");
             string search = EditorTextBox.Text + "*";
             var principal = new UserPrincipal(context) { Surname = search, Enabled = true };
             var searcher = new PrincipalSearcher { QueryFilter = principal };
@@ -157,6 +163,7 @@ namespace AnimalMovement
                                 MessageBoxIcon.Information);
                 EditorTextBox.Focus();
             }
+#endif
         }
 
         private void EditorTextBox_KeyDown(object sender, KeyEventArgs e)
