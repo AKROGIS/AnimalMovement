@@ -96,6 +96,10 @@ namespace Telonics
 				throw new NotImplementedException();
 			}
 
+			public override string ToString ()
+			{
+				return string.Format ("[ArgosTransmission: ProgramId={0}, PlatformId={1}, DateTime={2}, Message={3}]", ProgramId, PlatformId, DateTime, message);
+			}
 		}
 
 		private class ArgosRecord
@@ -132,6 +136,11 @@ namespace Telonics
 				                          Longitude,
 				                          Latitude);
 				return line;
+			}
+
+			public override string ToString ()
+			{
+				return string.Format ("[ArgosRecord: PlatformId={0}, TransmissionDateTime={1}, FixDateTime={2}, FixNumber={3}, IsBad={4}, Latitude={5}, Longitude={6}]", PlatformId, TransmissionDateTime, FixDateTime, FixNumber, IsBad, Latitude, Longitude);
 			}
 		}
 		
@@ -171,6 +180,11 @@ namespace Telonics
 			{
 				throw new ApplicationException("File has no Transmissions.");
 			}
+		}
+
+		public IEnumerable<string> GetTransmissions()
+		{
+			return GetTransmissions(_lines).Select(t => t.ToString());
 		}
 
 		private IEnumerable<ArgosTransmission> GetTransmissions(List<string> lines)
@@ -216,10 +230,10 @@ namespace Telonics
 
 				else if (platformId != null && transmissionPattern.IsMatch(line))
 				{
-					var tokens = line.Split();
+					var tokens = Regex.Split(line.Trim(), @"\s+");
 					if (tokens.Length == 6 || tokens.Length == 7)
 					{
-						var transmissionDateTime = DateTime.Parse(line);
+						var transmissionDateTime = DateTime.Parse(tokens[0] + " " + tokens[1]);
 						if (PlatformCheckWithDate != null && 
 						    !PlatformCheckWithDate(platformId, transmissionDateTime))
 						{
@@ -237,7 +251,7 @@ namespace Telonics
 				}
 				else if (transmission != null && dataPattern.IsMatch(line))
 				{
-					var tokens = line.Split();
+					var tokens = Regex.Split(line.Trim(), @"\s+");
 					if (tokens.Length == 3 || tokens.Length == 4)
 						transmission.AddRawBytes(tokens);
 				}
