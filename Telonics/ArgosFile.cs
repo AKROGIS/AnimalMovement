@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,9 @@ namespace Telonics
     public class ArgosFile
     {
 		private List<string> _lines;
-		private List<ArgosRecord> _records;
+		private List<ArgosMessage> _messages;
+
+		public Dictionary<string, int> PeriodForPlatform { get; set;}
 
 		public Func<string, Boolean> PlatformCheck {get; set;}
 		public Func<string, DateTime, Boolean> PlatformCheckWithDate {get; set;}
@@ -79,6 +81,7 @@ namespace Telonics
 			public string ProgramId { get; set;}
 			public string PlatformId { get; set;}
 			public DateTime DateTime { get; set;}
+			public int Period {get;set;}
 
 			public void AddRawBytes(IEnumerable<string> byteStrings)
 			{
@@ -88,12 +91,118 @@ namespace Telonics
 					message.Add(Byte.Parse(item));
 			}
 
-			public IEnumerable<ArgosRecord> GetRecords()
+			public ArgosMessage GetMessage()
+			{
+				return new ArgosMessage{
+					PlatformId = PlatformId,
+					TransmissionDateTime = DateTime,
+					Fixes = GetFixes()
+				};
+			}
+
+			private ArgosFix[] GetFixes()
 			{
 				if (message == null)
-					return new ArgosRecord[0];
-				// parse the byte array
-				throw new NotImplementedException();
+					return new ArgosFix[0];
+				
+				//Get the message header
+				bool messageHasGpsData = message.BooleanAt(0);
+				//ignore sensor or error messages
+				if (!messageHasGpsData)
+					return new ArgosFix[0];
+				
+				//Get the absolute Fix
+				byte reportedCrc = message.ByteAt(1,6);
+				byte fixBufferType = message.ByteAt(7,2);
+				uint longitudeBits = message.UInt32At(9,22);
+				double longitude = longitudeBits.ToSignedBinary(22,4);
+				uint latitudeBits = message.UInt32At(31,21);
+				double latitude = latitudeBits.ToSignedBinary(21,4);
+				ushort julian = message.UInt16At(52,9);
+				byte hour = message.ByteAt(61,5);
+				byte minute = message.ByteAt(66,6);
+				DateTime fixDate = CalculateFixDate(DateTime, julian, hour, minute);
+
+				// Cyclical Redundancy Check
+				var crc = new CRC();
+				crc.Update(fixBufferType, 2);
+				crc.Update((int)longitudeBits, 22);
+				crc.Update((int)latitudeBits, 21);
+				crc.Update(julian, 9);
+				crc.Update(hour, 5);
+				crc.Update(minute, 6);
+				bool isBad = crc.Value != reportedCrc;
+
+				var fixes = new List<ArgosFix>();
+				fixes.Add (
+					new ArgosFix {
+						IsBad = isBad,
+						Longitude = longitude,
+						Latitude = latitude,
+						DateTime = fixDate
+					}
+				);
+
+				//Setup for the relative fixes
+				if (fixBufferType < 0 || fixBufferType > 3)
+					throw new InvalidDataException("Argos Message has invalid Fix Buffer Type.");
+				int numberOfRelativeFixes = (new []{0,4,5,6})[fixBufferType];
+				int doubleLength = (new []{0,17,12,9})[fixBufferType];
+				int relativeFixLength = (new []{0,46,36,30})[fixBufferType];
+
+				//Get the relative fixes
+				for (var i = 0; i < numberOfRelativeFixes; i++)
+				{
+					int firstBit = 72 + i * relativeFixLength;
+					reportedCrc = message.ByteAt(firstBit,6);
+					firstBit += 6;
+					longitudeBits = message.UInt32At(firstBit,doubleLength);
+					double longitudeDelta = longitudeBits.ToSignedBinary(doubleLength,4);
+					firstBit += doubleLength;
+					latitudeBits = message.UInt32At(firstBit,doubleLength);
+					double latitudeDelta = latitudeBits.ToSignedBinary(doubleLength,4);
+					firstBit += doubleLength;
+					byte delay = message.ByteAt(firstBit,6);
+					TimeSpan offsetMinutes = TimeSpan.FromMinutes((i+1) * Period - delay);
+
+					// Cyclical Redundancy Check
+					crc = new CRC();
+					crc.Update((int)longitudeBits, doubleLength);
+					crc.Update((int)latitudeBits, doubleLength);
+					crc.Update(delay, 6);
+					isBad = crc.Value != reportedCrc;
+					fixes.Add (
+						new ArgosFix {
+							IsBad = isBad,
+							Longitude = longitude + longitudeDelta,
+							Latitude = latitude + latitudeDelta,
+							DateTime = fixDate - offsetMinutes
+						}
+					);
+				}
+
+				return fixes.ToArray();
+			}
+
+			private DateTime CalculateFixDate (DateTime transmissionDateTime, ushort dayOfYear, byte hour, byte minute)
+			{
+				//The fix message reports how much time has past since the begining of the year,
+				//but it does not report what year the fix occured in.
+				//The transmission and the fix maybe in different years
+				//for example, a fix taken on the 364th day of 2010, but not transmitted until Jan 2, 2011
+
+				//Timespans are from the first day of the year, so we subtract one from the dayOfYear
+				TimeSpan fixTimeSpan = new TimeSpan(dayOfYear - 1, hour, minute, 0, 0);
+				int transYear = transmissionDateTime.Year;
+				TimeSpan transmissionTimeSpan = transmissionDateTime - new DateTime(transYear,1,1,0,0,0);
+				int fixYear; 
+				//The fix must occur before the transmission
+				if (fixTimeSpan < transmissionTimeSpan)
+					fixYear = transYear;
+				else
+					fixYear = transYear - 1;
+				DateTime fixDateTime = new DateTime(fixYear,1,1,0,0,0) + fixTimeSpan;
+				return fixDateTime;
 			}
 
 			public override string ToString ()
@@ -102,54 +211,57 @@ namespace Telonics
 			}
 		}
 
-		private class ArgosRecord
+		private class ArgosMessage
 		{
-			/* Example:
+			/* Examples:
 			 * 2008.03.24,00:57:14,77271,1,Good,2008.03.23,16:00,-150.7335,67.3263
 			 * 2008.03.24,00:57:14,77271,2,Good,2008.03.22,16:00,-150.7079,67.3266
 			 * 2008.03.24,00:57:14,77271,3,Bad,2008.03.21,16:36,-150.7069,67.1897
 			 * 2008.03.24,00:57:14,77271,4,Bad,2008.03.20,16:11,-150.5969,67.1896
 			 * 2008.03.24,00:57:14,77271,5,Bad,2008.03.19,16:25,-150.8698,67.5159
+			 * 
 			 * 2008.03.24,01:04:02,77271,1,Good,2008.03.23,16:00,-150.7335,67.3263
 			 * 2008.03.24,01:04:02,77271,2,Good,2008.03.22,16:00,-150.7079,67.3266
 			 */
 
 			public string PlatformId { get; set;}
 			public DateTime TransmissionDateTime { get; set;}
-			public DateTime FixDateTime { get; set;}
-			public int FixNumber {get;set;}
-			public bool IsBad {get; set;}
-			public double Latitude {get;set;}
-			public double Longitude {get;set;}
+			public ArgosFix[] Fixes {get; set;}
 
 			public string ToTelonicsCsv()
 			{
+				var sb = new StringBuilder();
 				var format = "{0},{1},{2},{3},{4},{5},{6},{7:F4},{8:F4}";
-				var line = String.Format (format,
-				                          TransmissionDateTime.ToString ("yyyy.MM.dd"),
-				                          TransmissionDateTime.ToString ("HH:mm.mm"),
-				                          PlatformId,
-				                          FixNumber,
-				                          (IsBad ? "Bad" : "Good"),
-				                          FixDateTime.ToString ("yyyy.MM.dd"),
-				                          FixDateTime.ToString ("HH:mm"),
-				                          Longitude,
-				                          Latitude);
-				return line;
+				for (var fixNumber = 1; fixNumber <= Fixes.Length; fixNumber++)
+				{
+					var fix = Fixes[fixNumber];
+					var line = String.Format (format,
+					                          TransmissionDateTime.ToString ("yyyy.MM.dd"),
+					                          TransmissionDateTime.ToString ("HH:mm.mm"),
+					                          PlatformId,
+					                          fixNumber,
+					                          (fix.IsBad ? "Bad" : "Good"),
+					                          fix.DateTime.ToString ("yyyy.MM.dd"),
+					                          fix.DateTime.ToString ("HH:mm"),
+					                          fix.Longitude,
+					                          fix.Latitude);
+					sb.AppendLine(line);
+				}
+				return sb.ToString();
 			}
 
 			public override string ToString ()
 			{
-				return string.Format ("[ArgosRecord: PlatformId={0}, TransmissionDateTime={1}, FixDateTime={2}, FixNumber={3}, IsBad={4}, Latitude={5}, Longitude={6}]", PlatformId, TransmissionDateTime, FixDateTime, FixNumber, IsBad, Latitude, Longitude);
+				return string.Format ("[ArgosRecord: PlatformId={0}, TransmissionDateTime={1}, NumberOfFixes={2}]", PlatformId, TransmissionDateTime, Fixes.Length);
 			}
-		}
-		
-		private class ArgosHeader
-		{
 		}
 		
 		private class ArgosFix
 		{
+			public DateTime DateTime { get; set;}
+			public double Latitude {get;set;}
+			public double Longitude {get;set;}
+			public bool IsBad {get; set;}
 		}
 
 		#endregion
@@ -158,9 +270,9 @@ namespace Telonics
 
 		public IEnumerable<string> ToTelonicsCsv()
 		{
-			if (_records == null)
+			if (_messages == null)
 				Parse ();
-			foreach (var record in _records)
+			foreach (var record in _messages)
 				yield return record.ToTelonicsCsv();
 		}
 
@@ -168,15 +280,12 @@ namespace Telonics
 
 		private void Parse()
 		{
-			_records = new List<ArgosRecord>();
+			_messages = new List<ArgosMessage>();
 			foreach(var transmission in GetTransmissions(_lines))
 			{
-				foreach(var record in transmission.GetRecords())
-				{
-					_records.Add(record);
-				}
+				_messages.Add(transmission.GetMessage());
 			}
-			if (_records.Count == 0)
+			if (_messages.Count == 0)
 			{
 				throw new ApplicationException("File has no Transmissions.");
 			}
@@ -244,7 +353,9 @@ namespace Telonics
 						transmission = new ArgosTransmission{
 							ProgramId = programId, 
 							PlatformId = platformId,
-							DateTime = transmissionDateTime};
+							DateTime = transmissionDateTime,
+							Period = PeriodForPlatform[platformId]
+						};
 						transmission.AddRawBytes(tokens.Skip(3));
 						transmissions.Add(transmission);
 					}
@@ -264,6 +375,5 @@ namespace Telonics
 			}
 			return transmissions;
 		}
-
     }
 }
