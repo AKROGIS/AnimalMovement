@@ -8,10 +8,9 @@ namespace Telonics
 	{
 		public static bool BooleanAt(this IEnumerable<byte> data, int bit)
 		{
-			//bit is a ones-based counter from left to right
-			if (bit < 1)
-				throw new IndexOutOfRangeException("Bit index must be greater than 0");
-			bit--; //convert to a zero based index
+			//bit is a zero-based counter from left to right
+			if (bit < 0)
+				throw new IndexOutOfRangeException("Bit index must be greater than or equal to 0");
 			int indexOfByte = bit / 8;
 			int bitInByte = bit % 8;
 			byte mask = 1;
@@ -33,7 +32,7 @@ namespace Telonics
 			if (bitCount > 16)
 				throw new IndexOutOfRangeException("Bit count for a 16 bit integer must be less than 17");
 			string s = GetBitString(data, startBit, bitCount);
-			return Convert.ToByte(s,2);
+			return Convert.ToUInt16(s,2);
 		}
 
 		public static UInt32 UInt32At(this IEnumerable<byte> data, int startBit, int bitCount)
@@ -41,17 +40,16 @@ namespace Telonics
 			if (bitCount > 32)
 				throw new IndexOutOfRangeException("Bit count for a 32 bit integer must be less than 33");
 			string s = GetBitString(data, startBit, bitCount);
-			return Convert.ToByte(s,2);
+			return Convert.ToUInt32(s,2);
 		}
 
 		private static string GetBitString(IEnumerable<byte> data, int startBit, int bitCount)
 		{
-			//startBit is a ones-based counter from left to right
+			//startBit is a zero-based counter from left to right
 			if (bitCount < 1)
 				throw new IndexOutOfRangeException("Bit count must be greater than 0");
-			if (startBit < 1)
-				throw new IndexOutOfRangeException("starting bit index must be greater than 0");
-			startBit--; //convert to a zero based index
+			if (startBit < 0)
+				throw new IndexOutOfRangeException("starting bit index must be greater than or equal to 0");
 			int indexOfFirstByte = startBit / 8;
 			int indexOfLastByte = (startBit + bitCount) / 8;
 			int byteCount = 1 + indexOfLastByte - indexOfFirstByte;

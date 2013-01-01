@@ -109,9 +109,9 @@ namespace Telonics
 					return new ArgosFix[0];
 				
 				//Get the message header
-				bool messageHasGpsData = message.BooleanAt(0);
+				bool messageHasSensorData = message.BooleanAt(0);
 				//ignore sensor or error messages
-				if (!messageHasGpsData)
+				if (messageHasSensorData)
 					return new ArgosFix[0];
 				
 				//Get the absolute Fix
@@ -298,7 +298,16 @@ namespace Telonics
 				_transmissions = GetTransmissions(_lines).ToList();
 			return _transmissions.Select(t => t.ToString());
 		}
-
+		
+		public IEnumerable<string> GetMessages()
+		{
+			if (_transmissions == null)
+				_transmissions = GetTransmissions(_lines).ToList();
+			if (_messages == null)
+				_messages = _transmissions.Select(t => t.GetMessage()).ToList();
+			return _messages.Select(m => m.ToString());
+		}
+		
 		public DateTime FirstTransmission(string platform)
 		{
 			if (_transmissions == null)

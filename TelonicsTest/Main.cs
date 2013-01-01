@@ -15,11 +15,25 @@ namespace TelonicsTest
 
 		public static void TestArgosFile ()
 		{
-			var a = new ArgosFile("/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email");
-			//var o = a.ToTelonicsCsv();
-			var o = a.GetTransmissions();
-			foreach (var s in o)
+			string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email";
+			Console.WriteLine("File {0}", path);
+			var a = new ArgosFile(path);
+			a.PlatformPeriod = (p => TimeSpan.FromMinutes(360));
+			//Console.WriteLine("Transmissions in File");
+			//foreach (var s in a.GetTransmissions())
+			//	Console.WriteLine (s);
+			Console.WriteLine("Messages in File");
+			foreach (var s in a.GetMessages())
 				Console.WriteLine (s);
+			Console.WriteLine("Programs in File");
+			foreach (var p in a.GetPrograms())
+				Console.WriteLine("  {0}",p);
+			Console.WriteLine("Collars in File");
+			foreach (var p in a.GetPlatforms())
+				Console.WriteLine("  {0} Start {1} End {2}",p, a.FirstTransmission(p), a.LastTransmission(p));
+			Console.WriteLine("CSV Output");
+			foreach (var l in a.ToTelonicsCsv())
+				Console.WriteLine(l);
 		}
 
 		/* Simple Test Program for 6-bit CRC generation algorithm for T03 Format. */
