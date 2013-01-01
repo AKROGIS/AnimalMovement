@@ -10,10 +10,10 @@ namespace Telonics
     public class ArgosFile
     {
 		private List<string> _lines;
+		private List<ArgosTransmission> _transmissions;
 		private List<ArgosMessage> _messages;
 
-		public Dictionary<string, int> PeriodForPlatform { get; set;}
-
+		public Func<string, TimeSpan> PlatformPeriod {get; set;}
 		public Func<string, Boolean> PlatformCheck {get; set;}
 		public Func<string, DateTime, Boolean> PlatformCheckWithDate {get; set;}
 
@@ -74,6 +74,9 @@ namespace Telonics
 
 		#region Private classes
 
+		//ArgosTransmission represent the "raw" data obtained from the input file
+		//Once all the raw bytes (AddRawBytes()) have been added, GetMessage() will
+		//return the "processed" transmission.
 		private class ArgosTransmission
 		{
 			private List<Byte> message;
@@ -81,7 +84,7 @@ namespace Telonics
 			public string ProgramId { get; set;}
 			public string PlatformId { get; set;}
 			public DateTime DateTime { get; set;}
-			public int Period {get;set;}
+			public Func<string, TimeSpan> PlatformPeriod {get; set;}
 
 			public void AddRawBytes(IEnumerable<string> byteStrings)
 			{
@@ -162,8 +165,12 @@ namespace Telonics
 					latitudeBits = message.UInt32At(firstBit,doubleLength);
 					double latitudeDelta = latitudeBits.ToSignedBinary(doubleLength,4);
 					firstBit += doubleLength;
+					//Get the time of the relative fixes
 					byte delay = message.ByteAt(firstBit,6);
-					TimeSpan offsetMinutes = TimeSpan.FromMinutes((i+1) * Period - delay);
+					if (PlatformPeriod == null)
+						throw new InvalidDataException("Function to calculate the platform period was not provided.");
+					TimeSpan platformPeriod = PlatformPeriod(PlatformId);
+					TimeSpan timeOffset = TimeSpan.FromMinutes((i+1)*platformPeriod.TotalMinutes);
 
 					// Cyclical Redundancy Check
 					crc = new CRC();
@@ -176,7 +183,7 @@ namespace Telonics
 							IsBad = isBad,
 							Longitude = longitude + longitudeDelta,
 							Latitude = latitude + latitudeDelta,
-							DateTime = fixDate - offsetMinutes
+							DateTime = fixDate - timeOffset + TimeSpan.FromMinutes(delay)
 						}
 					);
 				}
@@ -207,13 +214,17 @@ namespace Telonics
 
 			public override string ToString ()
 			{
-				return string.Format ("[ArgosTransmission: ProgramId={0}, PlatformId={1}, DateTime={2}, Message={3}]", ProgramId, PlatformId, DateTime, message);
+				var msg = String.Join(" ",message.Select(b=>b.ToString())); 
+				return string.Format ("[ArgosTransmission: ProgramId={0}, PlatformId={1}, DateTime={2}, Message={3}]", ProgramId, PlatformId, DateTime, msg);
 			}
 		}
 
+		//ArgosMessages hold the list of fixes in a transmission, and
+		//can be represented as a comma separated values for output.
+		//They are obtained from ArgosTransmission.GetMessage()
 		private class ArgosMessage
 		{
-			/* Examples:
+			/* Example CSV Output  from Telonics Gen3 tools:
 			 * 2008.03.24,00:57:14,77271,1,Good,2008.03.23,16:00,-150.7335,67.3263
 			 * 2008.03.24,00:57:14,77271,2,Good,2008.03.22,16:00,-150.7079,67.3266
 			 * 2008.03.24,00:57:14,77271,3,Bad,2008.03.21,16:36,-150.7069,67.1897
@@ -228,14 +239,14 @@ namespace Telonics
 			public DateTime TransmissionDateTime { get; set;}
 			public ArgosFix[] Fixes {get; set;}
 
-			public string ToTelonicsCsv()
+			public IEnumerable<string> FixesAsCsv()
 			{
-				var sb = new StringBuilder();
-				var format = "{0},{1},{2},{3},{4},{5},{6},{7:F4},{8:F4}";
-				for (var fixNumber = 1; fixNumber <= Fixes.Length; fixNumber++)
+				const string format = "{0},{1},{2},{3},{4},{5},{6},{7:F4},{8:F4}";
+				int fixNumber = 0;
+				foreach (var fix in Fixes)
 				{
-					var fix = Fixes[fixNumber];
-					var line = String.Format (format,
+					fixNumber++;
+					yield return String.Format (format,
 					                          TransmissionDateTime.ToString ("yyyy.MM.dd"),
 					                          TransmissionDateTime.ToString ("HH:mm.mm"),
 					                          PlatformId,
@@ -245,9 +256,7 @@ namespace Telonics
 					                          fix.DateTime.ToString ("HH:mm"),
 					                          fix.Longitude,
 					                          fix.Latitude);
-					sb.AppendLine(line);
 				}
-				return sb.ToString();
 			}
 
 			public override string ToString ()
@@ -255,7 +264,8 @@ namespace Telonics
 				return string.Format ("[ArgosRecord: PlatformId={0}, TransmissionDateTime={1}, NumberOfFixes={2}]", PlatformId, TransmissionDateTime, Fixes.Length);
 			}
 		}
-		
+
+		//ArgosFix are created by ArgosTransmission and obtained from the ArgosMessage
 		private class ArgosFix
 		{
 			public DateTime DateTime { get; set;}
@@ -268,35 +278,41 @@ namespace Telonics
 
 		#region public API
 
-		public IEnumerable<string> ToTelonicsCsv()
+		public IEnumerable<string> GetPrograms()
 		{
-			if (_messages == null)
-				Parse ();
-			foreach (var record in _messages)
-				yield return record.ToTelonicsCsv();
+			if (_transmissions == null)
+				_transmissions = GetTransmissions(_lines).ToList();
+			return _transmissions.Select(t => t.ProgramId).Distinct();
 		}
-
-		#endregion
-
-		private void Parse()
+		
+		public IEnumerable<string> GetPlatforms()
 		{
-			_messages = new List<ArgosMessage>();
-			foreach(var transmission in GetTransmissions(_lines))
-			{
-				_messages.Add(transmission.GetMessage());
-			}
-			if (_messages.Count == 0)
-			{
-				throw new ApplicationException("File has no Transmissions.");
-			}
+			if (_transmissions == null)
+				_transmissions = GetTransmissions(_lines).ToList();
+			return _transmissions.Select(t => t.PlatformId).Distinct();
 		}
 
 		public IEnumerable<string> GetTransmissions()
 		{
-			return GetTransmissions(_lines).Select(t => t.ToString());
+			if (_transmissions == null)
+				_transmissions = GetTransmissions(_lines).ToList();
+			return _transmissions.Select(t => t.ToString());
 		}
 
-		private IEnumerable<ArgosTransmission> GetTransmissions(List<string> lines)
+		public IEnumerable<string> ToTelonicsCsv()
+		{
+			if (_transmissions == null)
+				_transmissions = GetTransmissions(_lines).ToList();
+			if (_messages == null)
+				_messages = _transmissions.Select(t => t.GetMessage()).ToList();
+			return _messages.SelectMany(m => m.FixesAsCsv());
+		}
+		
+		#endregion
+
+		#region private methods
+
+		private IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines)
 		{
 			/* Argos files may be contained in numerous concatenated ASCII email files
 			 * Unidentified lines are ignored.  Transmissions contain a variable number
@@ -354,7 +370,7 @@ namespace Telonics
 							ProgramId = programId, 
 							PlatformId = platformId,
 							DateTime = transmissionDateTime,
-							Period = PeriodForPlatform[platformId]
+							PlatformPeriod = PlatformPeriod
 						};
 						transmission.AddRawBytes(tokens.Skip(3));
 						transmissions.Add(transmission);
@@ -375,5 +391,7 @@ namespace Telonics
 			}
 			return transmissions;
 		}
+
+		#endregion
     }
 }
