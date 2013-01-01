@@ -299,6 +299,26 @@ namespace Telonics
 			return _transmissions.Select(t => t.ToString());
 		}
 
+		public DateTime FirstTransmission(string platform)
+		{
+			if (_transmissions == null)
+				_transmissions = GetTransmissions(_lines).ToList();
+			return (from t in _transmissions
+			        where t.PlatformId == platform
+			        orderby t.DateTime
+			        select t.DateTime).First();
+		}
+		
+		public DateTime LastTransmission(string platform)
+		{
+			if (_transmissions == null)
+				_transmissions = GetTransmissions(_lines).ToList();
+			return (from t in _transmissions
+			        where t.PlatformId == platform
+			        orderby t.DateTime descending
+			        select t.DateTime).First();
+		}
+		
 		public IEnumerable<string> ToTelonicsCsv()
 		{
 			if (_transmissions == null)
@@ -308,7 +328,19 @@ namespace Telonics
 			return _messages.SelectMany(m => m.FixesAsCsv());
 		}
 		
-		#endregion
+		public IEnumerable<string> ToTelonicsCsv(string platform)
+		{
+			if (platform == null)
+				return ToTelonicsCsv();
+
+			if (_transmissions == null)
+				_transmissions = GetTransmissions(_lines).ToList();
+			if (_messages == null)
+				_messages = _transmissions.Select(t => t.GetMessage()).ToList();
+			return _messages.Where(m => m.PlatformId == platform).SelectMany(m => m.FixesAsCsv());
+		}
+		
+#endregion
 
 		#region private methods
 
