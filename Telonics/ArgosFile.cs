@@ -149,7 +149,7 @@ namespace Telonics
 				//Setup for the relative fixes
 				if (fixBufferType < 0 || fixBufferType > 3)
 					throw new InvalidDataException("Argos Message has invalid Fix Buffer Type.");
-				int numberOfRelativeFixes = (new []{0,4,5,6})[fixBufferType];
+				int numberOfRelativeFixes = (new []{0,3,4,5})[fixBufferType];
 				int doubleLength = (new []{0,17,12,9})[fixBufferType];
 				int relativeFixLength = (new []{0,46,36,30})[fixBufferType];
 
@@ -157,6 +157,9 @@ namespace Telonics
 				for (var i = 0; i < numberOfRelativeFixes; i++)
 				{
 					int firstBit = 72 + i * relativeFixLength;
+					int bytesRequired = (firstBit + relativeFixLength + 7)/8; //+7 to round up
+					if (message.Count < bytesRequired)
+						break;
 					reportedCrc = message.ByteAt(firstBit,6);
 					firstBit += 6;
 					longitudeBits = message.UInt32At(firstBit,doubleLength);
@@ -214,8 +217,9 @@ namespace Telonics
 
 			public override string ToString ()
 			{
-				var msg = String.Join(" ",message.Select(b=>b.ToString())); 
-				return string.Format ("[ArgosTransmission: ProgramId={0}, PlatformId={1}, DateTime={2}, Message={3}]", ProgramId, PlatformId, DateTime, msg);
+				var msg = String.Join(" ",message.Select(b=>b.ToString().PadLeft(8,' '))); 
+				var msgb = String.Join(" ",message.Select(b => Convert.ToString(b,2).PadLeft(8,'0'))); 
+				return string.Format ("[ArgosTransmission: ProgramId={0}, PlatformId={1}, DateTime={2}\n  Message={3}\n  Message={4}]", ProgramId, PlatformId, DateTime, msg, msgb);
 			}
 		}
 

@@ -9,21 +9,20 @@ namespace TelonicsTest
 		public static void Main (string[] args)
 		{
 			//TestCrc();
-			TestArgosFile();
-			//TestBits();
+			//TestArgosFile();
+			TestBits();
 		}
 
 		public static void TestArgosFile ()
 		{
-			string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email";
+			//string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email";
+			string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen34moose08-09-2-12.TXT";
 			Console.WriteLine("File {0}", path);
 			var a = new ArgosFile(path);
 			a.PlatformPeriod = (p => TimeSpan.FromMinutes(360));
-			//Console.WriteLine("Transmissions in File");
-			//foreach (var s in a.GetTransmissions())
-			//	Console.WriteLine (s);
-			Console.WriteLine("Messages in File");
-			foreach (var s in a.GetMessages())
+			a.PlatformCheck = (p => p == "77267");
+			Console.WriteLine("Transmissions in File");
+			foreach (var s in a.GetTransmissions())
 				Console.WriteLine (s);
 			Console.WriteLine("Programs in File");
 			foreach (var p in a.GetPrograms())
@@ -31,6 +30,9 @@ namespace TelonicsTest
 			Console.WriteLine("Collars in File");
 			foreach (var p in a.GetPlatforms())
 				Console.WriteLine("  {0} Start {1} End {2}",p, a.FirstTransmission(p), a.LastTransmission(p));
+			Console.WriteLine("Messages in File");
+			foreach (var s in a.GetMessages())
+				Console.WriteLine (s);
 			Console.WriteLine("CSV Output");
 			foreach (var l in a.ToTelonicsCsv())
 				Console.WriteLine(l);
@@ -86,29 +88,35 @@ namespace TelonicsTest
 
 		static void TestBits()
 		{
-			Byte[] bytes = {0,255,123,23,210,3};
+			Byte[] bytes = {127,255,255,255,123,23,210,3,0};
 			string s = "";
 			foreach (var b in bytes)
 			{
 				s = Convert.ToString(b,2).PadLeft(8,'0');
 				Console.WriteLine(s);
 			}
-			Console.WriteLine("Bit at {0} is {1}",8,bytes.BooleanAt(8));
-			Console.WriteLine("Bit at {0} is {1}",9,bytes.BooleanAt(9));
-			Console.WriteLine("Bit at {0} is {1}",17,bytes.BooleanAt(17));
-			Console.WriteLine("Bit at {0} is {1}",18,bytes.BooleanAt(18));
+			Console.WriteLine("Bit at {0} is {1}",0,bytes.BooleanAt(0));
+			Console.WriteLine("Bit at {0} is {1}",1,bytes.BooleanAt(1));
+			Console.WriteLine("Bit at {0} is {1}",31,bytes.BooleanAt(31));
+			Console.WriteLine("Bit at {0} is {1}",32,bytes.BooleanAt(32));
 
-			Console.WriteLine("Byte at {0},{1} is {2}",7, 3, bytes.ByteAt(7,3));
-			Console.WriteLine("Byte at {0},{1} is {2}",8, 3, bytes.ByteAt(8,3));
-			Console.WriteLine("Byte at {0},{1} is {2}",9, 3, bytes.ByteAt(9,3));
-			Console.WriteLine("Byte at {0},{1} is {2}",5, 8, bytes.ByteAt(5,8));
-			Console.WriteLine("UInt16 at {0},{1} is {2}",5, 8, bytes.UInt16At(5,8));
-			Console.WriteLine("Uint32 at {0},{1} is {2}",5, 8, bytes.UInt32At(5,8));
+			Console.WriteLine("Byte at {0},{1} is {2}",0, 3, bytes.ByteAt(0,3));
+			Console.WriteLine("Byte at {0},{1} is {2}",1, 3, bytes.ByteAt(1,3));
+			Console.WriteLine("Byte at {0},{1} is {2}",2, 3, bytes.ByteAt(2,3));
+			Console.WriteLine("Byte at {0},{1} is {2}",37, 8, bytes.ByteAt(37,8));
+			Console.WriteLine("UInt16 at {0},{1} is {2}",37, 16, bytes.UInt16At(37,16));
+			Console.WriteLine("Uint32 at {0},{1} is {2}",37, 32, bytes.UInt32At(37,32));
 
-			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",5, 8, 0, bytes.UInt32At(5,8).ToSignedBinary(8,0));
-			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",5, 8, 2, bytes.UInt32At(5,8).ToSignedBinary(8,2));
-			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",9, 6, 0, bytes.UInt32At(9,6).ToSignedBinary(6,0));
-			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",9, 6, 2, bytes.UInt32At(9,6).ToSignedBinary(6,2));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",0, 22, 4, bytes.UInt32At(0,22).ToSignedBinary(22,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",1, 22, 4, bytes.UInt32At(1,22).ToSignedBinary(22,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",0, 21, 4, bytes.UInt32At(0,21).ToSignedBinary(21,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",1, 21, 4, bytes.UInt32At(1,21).ToSignedBinary(21,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",0, 17, 4, bytes.UInt32At(0,17).ToSignedBinary(17,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",1, 17, 4, bytes.UInt32At(1,17).ToSignedBinary(17,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",0, 12, 4, bytes.UInt32At(0,12).ToSignedBinary(12,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",1, 12, 4, bytes.UInt32At(1,12).ToSignedBinary(12,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",0, 9, 4, bytes.UInt32At(0,9).ToSignedBinary(9,4));
+			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",1, 9, 4, bytes.UInt32At(1,9).ToSignedBinary(9,4));
 		}
 	}
 }
