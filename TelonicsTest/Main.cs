@@ -15,13 +15,16 @@ namespace TelonicsTest
 
 		public static void TestArgosFile ()
 		{
-			//string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email";
-			string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen34moose08-09-2-12.TXT";
-			Console.WriteLine("File {0}", path);
-			var a = new ArgosFile(path);
-			a.PlatformPeriod = (p => TimeSpan.FromMinutes(360));
-			a.IsGen3Platform = (p => p == "77267");
-			Console.WriteLine("Transmissions in File");
+            //const string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email";
+            //const string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen34moose08-09-2-12.TXT";
+            const string path = @"C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\Telonics\SampleFiles\Gen34moose08-09-2-12.TXT";
+            Console.WriteLine("File {0}", path);
+            var a = new ArgosFile(path)
+                {
+                    PlatformPeriod = (p => TimeSpan.FromMinutes(24*60)),
+                    IsGen3Platform = (p => p == "77267")
+                };
+            Console.WriteLine("Transmissions in File");
 			foreach (var s in a.GetTransmissions())
 				Console.WriteLine (s);
 			Console.WriteLine("Programs in File");
@@ -33,9 +36,10 @@ namespace TelonicsTest
 			Console.WriteLine("Messages in File");
 			foreach (var s in a.GetGen3Messages())
 				Console.WriteLine (s);
-			Console.WriteLine("CSV Output");
-			foreach (var l in a.ToGen3TelonicsCsv())
-				Console.WriteLine(l);
+            //Console.WriteLine("CSV Output");
+            //foreach (var l in a.ToGen3TelonicsCsv())
+                //Console.WriteLine(l);
+            System.IO.File.WriteAllLines(@"C:\tmp\reports\77267.txt", a.ToGen3TelonicsCsv());
 		}
 
 		/* Simple Test Program for 6-bit CRC generation algorithm for T03 Format. */
@@ -86,14 +90,13 @@ namespace TelonicsTest
 			Console.WriteLine("Done.");
 		}
 
-		static void TestBits()
+		public static void TestBits()
 		{
 			Byte[] bytes = {127,255,255,255,123,23,210,3,0};
-			string s = "";
-			foreach (var b in bytes)
+		    foreach (var b in bytes)
 			{
-				s = Convert.ToString(b,2).PadLeft(8,'0');
-				Console.WriteLine(s);
+			    var s = Convert.ToString(b,2).PadLeft(8,'0');
+			    Console.WriteLine(s);
 			}
 			Console.WriteLine("Bit at {0} is {1}",0,bytes.BooleanAt(0));
 			Console.WriteLine("Bit at {0} is {1}",1,bytes.BooleanAt(1));

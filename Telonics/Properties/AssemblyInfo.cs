@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Telonics")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Library of tools for using Telonics data and apps")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Telonics Library")]
+[assembly: AssemblyCompany("National Park Service, Alaska")]
+[assembly: AssemblyProduct("Animal Movement")]
 [assembly: AssemblyCopyright("Copyright ©  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

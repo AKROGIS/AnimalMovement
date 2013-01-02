@@ -1,15 +1,14 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 // Information about this assembly is defined by the following attributes. 
 // Change them to the values specific to your project.
 
 [assembly: AssemblyTitle("TelonicsTest")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Test Console for the Telonics Library")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("regan")]
+[assembly: AssemblyCompany("National Park Service, Alaska")]
+[assembly: AssemblyProduct("Animal Movement")]
+[assembly: AssemblyCopyright("Copyright ©  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
