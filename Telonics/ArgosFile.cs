@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.IO;
@@ -84,7 +85,7 @@ namespace Telonics
 			public string ProgramId { get; set;}
 			public string PlatformId { get; set;}
 			public DateTime DateTime { get; set;}
-			public Func<string, TimeSpan> PlatformPeriod {get; set;}
+			public Func<string, TimeSpan> PlatformPeriod { private get; set;}
 
 			public void AddRawBytes(IEnumerable<string> byteStrings)
 			{
@@ -136,18 +137,19 @@ namespace Telonics
 				crc.Update(minute, 6);
 				bool isBad = crc.Value != reportedCrc;
 
-				var fixes = new List<ArgosFix>();
-				fixes.Add (
-					new ArgosFix {
-						IsBad = isBad,
-						Longitude = longitude,
-						Latitude = latitude,
-						DateTime = fixDate
-					}
-				);
+				var fixes = new List<ArgosFix>
+					{
+						new ArgosFix
+							{
+								IsBad = isBad,
+								Longitude = longitude,
+								Latitude = latitude,
+								DateTime = fixDate
+							}
+					};
 
 				//Setup for the relative fixes
-				if (fixBufferType < 0 || fixBufferType > 3)
+				if (fixBufferType > 3)
 					throw new InvalidDataException("Argos Message has invalid Fix Buffer Type.");
 				int numberOfRelativeFixes = (new []{0,3,4,5})[fixBufferType];
 				int doubleLength = (new []{0,17,12,9})[fixBufferType];
@@ -202,7 +204,7 @@ namespace Telonics
 				//for example, a fix taken on the 364th day of 2010, but not transmitted until Jan 2, 2011
 
 				//Timespans are from the first day of the year, so we subtract one from the dayOfYear
-				TimeSpan fixTimeSpan = new TimeSpan(dayOfYear - 1, hour, minute, 0, 0);
+				var fixTimeSpan = new TimeSpan(dayOfYear - 1, hour, minute, 0, 0);
 				int transYear = transmissionDateTime.Year;
 				TimeSpan transmissionTimeSpan = transmissionDateTime - new DateTime(transYear,1,1,0,0,0);
 				int fixYear; 
@@ -217,7 +219,7 @@ namespace Telonics
 
 			public override string ToString ()
 			{
-				var msg = String.Join(" ",message.Select(b=>b.ToString().PadLeft(8,' '))); 
+				var msg = String.Join(" ",message.Select(b=>b.ToString(CultureInfo.InvariantCulture).PadLeft(8,' '))); 
 				var msgb = String.Join(" ",message.Select(b => Convert.ToString(b,2).PadLeft(8,'0'))); 
 				return string.Format ("[ArgosTransmission: ProgramId={0}, PlatformId={1}, DateTime={2}\n  Message={3}\n  Message={4}]", ProgramId, PlatformId, DateTime, msg, msgb);
 			}
@@ -240,8 +242,8 @@ namespace Telonics
 			 */
 
 			public string PlatformId { get; set;}
-			public DateTime TransmissionDateTime { get; set;}
-			public ArgosFix[] Fixes {get; set;}
+			public DateTime TransmissionDateTime { private get; set;}
+			public ArgosFix[] Fixes { private get; set;}
 
 			public IEnumerable<string> FixesAsCsv()
 			{
@@ -413,7 +415,7 @@ namespace Telonics
 						    !IsGen3PlatformOnDate(platformId, transmissionDateTime))
 						{
 							platformId = null;
-							break;
+							continue;
 						}
 
 						transmission = new ArgosTransmission{
