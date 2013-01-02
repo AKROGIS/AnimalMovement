@@ -247,12 +247,17 @@ namespace Telonics
 			{
 				const string format = "{0},{1},{2},{3},{4},{5},{6},{7:F4},{8:F4}";
 				int fixNumber = 0;
+                if (Fixes.Length == 0)
+                    yield return String.Format("{0},{1},{2},{3},{4},,,,",
+                                                TransmissionDateTime.ToString ("yyyy.MM.dd"),
+                                                TransmissionDateTime.ToString ("HH:mm:ss"),
+                                                PlatformId, fixNumber, "Invalid");
 				foreach (var fix in Fixes)
 				{
 					fixNumber++;
 					yield return String.Format (format,
 					                          TransmissionDateTime.ToString ("yyyy.MM.dd"),
-					                          TransmissionDateTime.ToString ("HH:mm.mm"),
+					                          TransmissionDateTime.ToString ("HH:mm:ss"),
 					                          PlatformId,
 					                          fixNumber,
 					                          (fix.IsBad ? "Bad" : "Good"),
