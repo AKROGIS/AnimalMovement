@@ -137,10 +137,10 @@ namespace AnimalMovement
         private void FindButton_Click(object sender, EventArgs e)
         {
 #if NO_ACTIVE_DIRECTORY
-			MessageBox.Show("Active Directory Search Disabled.", "Sorry", MessageBoxButtons.OK,
-			                MessageBoxIcon.Information);
+            MessageBox.Show("Active Directory Search Disabled.", "Sorry", MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
 #else
-			var context = new PrincipalContext(ContextType.Domain, "nps", "OU=AKR,DC=nps,DC=doi,DC=net");
+            var context = new PrincipalContext(ContextType.Domain, "nps", "OU=AKR,DC=nps,DC=doi,DC=net");
             string search = EditorTextBox.Text + "*";
             var principal = new UserPrincipal(context) { Surname = search, Enabled = true };
             var searcher = new PrincipalSearcher { QueryFilter = principal };
