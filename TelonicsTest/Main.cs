@@ -20,7 +20,7 @@ namespace TelonicsTest
 			Console.WriteLine("File {0}", path);
 			var a = new ArgosFile(path);
 			a.PlatformPeriod = (p => TimeSpan.FromMinutes(360));
-			a.PlatformCheck = (p => p == "77267");
+			a.IsGen3Platform = (p => p == "77267");
 			Console.WriteLine("Transmissions in File");
 			foreach (var s in a.GetTransmissions())
 				Console.WriteLine (s);
@@ -31,10 +31,10 @@ namespace TelonicsTest
 			foreach (var p in a.GetPlatforms())
 				Console.WriteLine("  {0} Start {1} End {2}",p, a.FirstTransmission(p), a.LastTransmission(p));
 			Console.WriteLine("Messages in File");
-			foreach (var s in a.GetMessages())
+			foreach (var s in a.GetGen3Messages())
 				Console.WriteLine (s);
 			Console.WriteLine("CSV Output");
-			foreach (var l in a.ToTelonicsCsv())
+			foreach (var l in a.ToGen3TelonicsCsv())
 				Console.WriteLine(l);
 		}
 

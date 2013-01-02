@@ -11,11 +11,11 @@ namespace Telonics
     {
 		private List<string> _lines;
 		private List<ArgosTransmission> _transmissions;
-		private List<ArgosMessage> _messages;
+		private List<ArgosGen3Message> _gen3messages;
 
 		public Func<string, TimeSpan> PlatformPeriod {get; set;}
-		public Func<string, Boolean> PlatformCheck {get; set;}
-		public Func<string, DateTime, Boolean> PlatformCheckWithDate {get; set;}
+		public Func<string, Boolean> IsGen3Platform {get; set;}
+		public Func<string, DateTime, Boolean> IsGen3PlatformOnDate {get; set;}
 
 		#region Constructors and line readers
 
@@ -94,9 +94,9 @@ namespace Telonics
 					message.Add(Byte.Parse(item));
 			}
 
-			public ArgosMessage GetMessage()
+			public ArgosGen3Message GetMessage()
 			{
-				return new ArgosMessage{
+				return new ArgosGen3Message{
 					PlatformId = PlatformId,
 					TransmissionDateTime = DateTime,
 					Fixes = GetFixes()
@@ -226,7 +226,7 @@ namespace Telonics
 		//ArgosMessages hold the list of fixes in a transmission, and
 		//can be represented as a comma separated values for output.
 		//They are obtained from ArgosTransmission.GetMessage()
-		private class ArgosMessage
+		private class ArgosGen3Message
 		{
 			/* Example CSV Output  from Telonics Gen3 tools:
 			 * 2008.03.24,00:57:14,77271,1,Good,2008.03.23,16:00,-150.7335,67.3263
@@ -303,13 +303,13 @@ namespace Telonics
 			return _transmissions.Select(t => t.ToString());
 		}
 		
-		public IEnumerable<string> GetMessages()
+		public IEnumerable<string> GetGen3Messages()
 		{
 			if (_transmissions == null)
 				_transmissions = GetTransmissions(_lines).ToList();
-			if (_messages == null)
-				_messages = _transmissions.Select(t => t.GetMessage()).ToList();
-			return _messages.Select(m => m.ToString());
+			if (_gen3messages == null)
+				_gen3messages = _transmissions.Select(t => t.GetMessage()).ToList();
+			return _gen3messages.Select(m => m.ToString());
 		}
 		
 		public DateTime FirstTransmission(string platform)
@@ -332,25 +332,25 @@ namespace Telonics
 			        select t.DateTime).First();
 		}
 		
-		public IEnumerable<string> ToTelonicsCsv()
+		public IEnumerable<string> ToGen3TelonicsCsv()
 		{
 			if (_transmissions == null)
 				_transmissions = GetTransmissions(_lines).ToList();
-			if (_messages == null)
-				_messages = _transmissions.Select(t => t.GetMessage()).ToList();
-			return _messages.SelectMany(m => m.FixesAsCsv());
+			if (_gen3messages == null)
+				_gen3messages = _transmissions.Select(t => t.GetMessage()).ToList();
+			return _gen3messages.SelectMany(m => m.FixesAsCsv());
 		}
 		
-		public IEnumerable<string> ToTelonicsCsv(string platform)
+		public IEnumerable<string> ToGen3TelonicsCsv(string platform)
 		{
 			if (platform == null)
-				return ToTelonicsCsv();
+				return ToGen3TelonicsCsv();
 
 			if (_transmissions == null)
 				_transmissions = GetTransmissions(_lines).ToList();
-			if (_messages == null)
-				_messages = _transmissions.Select(t => t.GetMessage()).ToList();
-			return _messages.Where(m => m.PlatformId == platform).SelectMany(m => m.FixesAsCsv());
+			if (_gen3messages == null)
+				_gen3messages = _transmissions.Select(t => t.GetMessage()).ToList();
+			return _gen3messages.Where(m => m.PlatformId == platform).SelectMany(m => m.FixesAsCsv());
 		}
 		
 		#endregion
@@ -394,7 +394,7 @@ namespace Telonics
 					programId = line.Substring(0, 5).Trim().TrimStart('0');
 					platformId = line.Substring(6, 6).Trim().TrimStart('0');
 					transmission = null;
-					if (PlatformCheck != null && !PlatformCheck(platformId))
+					if (IsGen3Platform != null && !IsGen3Platform(platformId))
 						platformId = null;
 				}
 
@@ -404,8 +404,8 @@ namespace Telonics
 					if (tokens.Length == 6 || tokens.Length == 7)
 					{
 						var transmissionDateTime = DateTime.Parse(tokens[0] + " " + tokens[1]);
-						if (PlatformCheckWithDate != null && 
-						    !PlatformCheckWithDate(platformId, transmissionDateTime))
+						if (IsGen3PlatformOnDate != null && 
+						    !IsGen3PlatformOnDate(platformId, transmissionDateTime))
 						{
 							platformId = null;
 							break;
