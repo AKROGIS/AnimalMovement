@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Telonics;
 
 namespace TelonicsTest
@@ -11,18 +12,20 @@ namespace TelonicsTest
             //TestCrc();
             TestArgosFile();
             //TestBits();
+            //TestArgosFolder();
         }
 
         public static void TestArgosFile()
         {
             //const string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email";
             //const string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen34moose08-09-2-12.TXT";
-            const string path = @"C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\Telonics\SampleFiles\Gen34moose08-09-2-12.TXT";
+            //const string path = @"C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\Telonics\SampleFiles\Gen34moose08-09-2-12.TXT";
+            const string path = @"C:\tmp\data\buck_wolf_09_14_12_raw_complete.txt";
             Console.WriteLine("File {0}", path);
             var a = new ArgosFile(path)
             {
-                PlatformPeriod = (p => TimeSpan.FromMinutes(24 * 60)),
-                IsGen3Platform = (p => p == "77267")
+                PlatformPeriod = (p => TimeSpan.FromMinutes(25 * 60)),
+                IsGen3Platform = (p => p == "60793")
             };
             Console.WriteLine("Transmissions in File");
             foreach (var s in a.GetTransmissions())
@@ -39,7 +42,33 @@ namespace TelonicsTest
             //Console.WriteLine("CSV Output");
             //foreach (var l in a.ToGen3TelonicsCsv())
             //Console.WriteLine(l);
-            System.IO.File.WriteAllLines(@"C:\tmp\reports\77267.txt", a.ToGen3TelonicsCsv());
+            File.WriteAllLines(@"C:\tmp\reports\60793_09_14_12.txt", a.ToGen3TelonicsCsv());
+        }
+
+        public static void TestArgosFolder()
+        {
+            const string in_path = @"C:\Users\resarwas\Desktop\LACL_Wolf_Location_Data 2012_11_13\LACL_Wolf_Location_Data\Argos_Emails";
+            const string out_path = @"C:\tmp\reports\105421_2012.txt";
+            if (!Directory.Exists(in_path))
+            {
+                Console.Write("Invalid Directory {0}", in_path);
+            }
+            Console.Write("Processing Directory {0}", in_path);
+            using (var f = new StreamWriter(out_path))
+            {
+                foreach (var file in Directory.EnumerateFiles(in_path))
+                {
+                    var path = Path.Combine(in_path, file);
+                    Console.WriteLine("  File {0}", file);
+                    var a = new ArgosFile(path)
+                    {
+                        PlatformPeriod = (p => TimeSpan.FromMinutes(25 * 60)),
+                        IsGen3Platform = (p => p == "105421")
+                    };
+                    foreach (var l in a.ToGen3TelonicsCsv())
+                    f.WriteLine(l);
+                }
+            }
         }
 
         /* Simple Test Program for 6-bit CRC generation algorithm for T03 Format. */
