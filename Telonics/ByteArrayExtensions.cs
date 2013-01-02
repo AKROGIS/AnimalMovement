@@ -73,6 +73,21 @@ namespace Telonics
 			double decimalShift = Math.Pow(10,decimals);
 			return sign * numberWithoutSign / decimalShift;
 		}
+
+		public static double TwosComplement(this UInt32 number, int length, byte decimals)
+		{
+			//signBit is the number of right aligned bits used in the number, the left most of those is the sign bit
+			if (length < 1)
+				throw new IndexOutOfRangeException("Length must be greater than 0");
+			if (32 < length)
+				throw new IndexOutOfRangeException("Length for a 32bit integer must be less than 33");
+			int max = 1 << length-1;
+			int offset = 1 << length;
+			double decimalShift = Math.Pow(10,decimals);
+			if (number >= max)
+				return (number - offset) / decimalShift;
+			return number / decimalShift;
+		}
 	}
 }
 

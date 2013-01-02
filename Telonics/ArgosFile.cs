@@ -118,9 +118,9 @@ namespace Telonics
 				byte reportedCrc = message.ByteAt(1,6);
 				byte fixBufferType = message.ByteAt(7,2);
 				uint longitudeBits = message.UInt32At(9,22);
-				double longitude = longitudeBits.ToSignedBinary(22,4);
+				double longitude = longitudeBits.TwosComplement(22,4);
 				uint latitudeBits = message.UInt32At(31,21);
-				double latitude = latitudeBits.ToSignedBinary(21,4);
+				double latitude = latitudeBits.TwosComplement(21,4);
 				ushort julian = message.UInt16At(52,9);
 				byte hour = message.ByteAt(61,5);
 				byte minute = message.ByteAt(66,6);
@@ -163,10 +163,10 @@ namespace Telonics
 					reportedCrc = message.ByteAt(firstBit,6);
 					firstBit += 6;
 					longitudeBits = message.UInt32At(firstBit,doubleLength);
-					double longitudeDelta = longitudeBits.ToSignedBinary(doubleLength,4);
+					double longitudeDelta = longitudeBits.TwosComplement(doubleLength,4);
 					firstBit += doubleLength;
 					latitudeBits = message.UInt32At(firstBit,doubleLength);
-					double latitudeDelta = latitudeBits.ToSignedBinary(doubleLength,4);
+					double latitudeDelta = latitudeBits.TwosComplement(doubleLength,4);
 					firstBit += doubleLength;
 					//Get the time of the relative fixes
 					byte delay = message.ByteAt(firstBit,6);

@@ -9,8 +9,8 @@ namespace TelonicsTest
 		public static void Main (string[] args)
 		{
 			//TestCrc();
-			//TestArgosFile();
-			TestBits();
+			TestArgosFile();
+			//TestBits();
 		}
 
 		public static void TestArgosFile ()
@@ -117,6 +117,9 @@ namespace TelonicsTest
 			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",1, 12, 4, bytes.UInt32At(1,12).ToSignedBinary(12,4));
 			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",0, 9, 4, bytes.UInt32At(0,9).ToSignedBinary(9,4));
 			Console.WriteLine("SignedBinary at {0},{1}/{2} is {3}",1, 9, 4, bytes.UInt32At(1,9).ToSignedBinary(9,4));
+			Console.WriteLine("TwosComplement at {0},{1}/{2} is {3}",0, 9, 4, bytes.UInt32At(0,9).TwosComplement(9,4));
+			Console.WriteLine("TwosComplement at {0},{1}/{2} is {3}",1, 9, 4, bytes.UInt32At(1,9).TwosComplement(9,4));
+			Console.WriteLine("TwosComplement at {0},{1}/{2} is {3}",63, 9, 4, bytes.UInt32At(63,9).TwosComplement(9,4));
 		}
 	}
 }
