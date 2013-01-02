@@ -353,7 +353,7 @@ namespace Telonics
 			return _messages.Where(m => m.PlatformId == platform).SelectMany(m => m.FixesAsCsv());
 		}
 		
-#endregion
+		#endregion
 
 		#region private methods
 
@@ -380,9 +380,9 @@ namespace Telonics
 
 			var transmissions = new List<ArgosTransmission>();
 
-			var platformPattern = new Regex(@"^([0-9]{5}) ([0-9]{5,6}) ");
-			var transmissionPattern = new Regex(@"^( {5,6})([0-9]{4})-([0-9]{2})-([0-9]{2})");
-			var dataPattern = new Regex(@"^( {35,36})");
+			var platformPattern = new Regex(@"^([0-9]{5}) ([0-9]{5,6}) ", RegexOptions.Compiled);
+			var transmissionPattern = new Regex(@"^( {5,6})([0-9]{4})-([0-9]{2})-([0-9]{2})", RegexOptions.Compiled);
+			var dataPattern = new Regex(@"^( {35,36})", RegexOptions.Compiled);
 
 			string programId = null;
 			string platformId = null;
