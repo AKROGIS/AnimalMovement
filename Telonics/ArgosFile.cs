@@ -115,6 +115,8 @@ namespace Telonics
                 //ignore sensor or error messages
                 if (messageHasSensorData)
                     return new ArgosFix[0];
+                if (message.Count < 9) //72 bits (9 bytes) required for a full absolute fix
+                    return new ArgosFix[0];
 
                 //Get the absolute Fix
                 byte reportedCrc = message.ByteAt(1, 6);
@@ -177,6 +179,7 @@ namespace Telonics
                         throw new InvalidDataException("Function to calculate the platform period was not provided.");
                     TimeSpan platformPeriod = PlatformPeriod(PlatformId);
                     TimeSpan timeOffset = TimeSpan.FromMinutes((i + 1) * platformPeriod.TotalMinutes);
+                    fixDate = fixDate.AddMinutes(-fixDate.Minute); //Round down to the hour
 
                     // Cyclical Redundancy Check
                     crc = new CRC();

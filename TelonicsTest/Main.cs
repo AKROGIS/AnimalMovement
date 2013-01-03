@@ -10,9 +10,9 @@ namespace TelonicsTest
         public static void Main(string[] args)
         {
             //TestCrc();
-            TestArgosFile();
+            //TestArgosFile();
             //TestBits();
-            //TestArgosFolder();
+            TestArgosFolder();
         }
 
         public static void TestArgosFile()
