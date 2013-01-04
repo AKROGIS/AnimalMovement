@@ -140,9 +140,6 @@ namespace Telonics
                 crc.Update(minute, 6);
                 ArgosConditionCode cCode = (crc.Value == reportedCrc) ? ArgosConditionCode.Good : ArgosConditionCode.Bad;
 
-                //If the CRC was good we need to check for values out of range
-                if (cCode == ArgosConditionCode.Good && (julian > 366 || hour > 24 || minute > 60))
-                    fixDate = new DateTime(); //use default to indicate an error
 
                 var fixes = new List<ArgosFix>
                     {
@@ -198,9 +195,9 @@ namespace Telonics
                         //if the 6 bits of delay are all ones the fix could not be acquired
                         if ((delay & 0x3F) == 0x3F)
                             cCode = ArgosConditionCode.Unavailable;
-                        if (delay > 60) //60 min is max delay
-                            delay = 0;
                     }
+                    if (delay > 59) //59 min is max delay
+                        delay = 0;
                     //NOTE: In some cases Unavailable is reported when CRC was bad, but usually not.
 
                     DateTime relFixDate;
@@ -229,6 +226,11 @@ namespace Telonics
                 //but it does not report what year the fix occured in.
                 //The transmission and the fix maybe in different years
                 //for example, a fix taken on the 364th day of 2010, but not transmitted until Jan 2, 2011
+
+                //Check for values out of range
+                //We do not know what year this is in, so we are conservative and us 366
+                if (dayOfYear > 366 || hour > 23 || minute > 59)
+                    return default(DateTime); //use default to indicate an error
 
                 //Timespans are from the first day of the year, so we subtract one from the dayOfYear
                 var fixTimeSpan = new TimeSpan(dayOfYear - 1, hour, minute, 0, 0);
@@ -296,10 +298,10 @@ namespace Telonics
                                                (fix.DateTime == default(DateTime)) ? "Error" : fix.DateTime.ToString("HH:mm"),
                                                fix.ConditionCode == ArgosConditionCode.Unavailable
                                                    ? ""
-                                                   : fix.Longitude.ToString("F4"),
+                                                   : (fix.Longitude < -180 || fix.Longitude > 180) ? "Error" : fix.Longitude.ToString("F4"),
                                                fix.ConditionCode == ArgosConditionCode.Unavailable
                                                    ? ""
-                                                   : fix.Latitude.ToString("F4"));
+                                                   : (fix.Latitude < -90 || fix.Latitude > 90) ? "Error" : fix.Latitude.ToString("F4"));
                 }
             }
 

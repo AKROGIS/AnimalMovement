@@ -48,7 +48,7 @@ namespace TelonicsTest
         public static void TestArgosFolder()
         {
             const string in_path = @"C:\Users\resarwas\Desktop\LACL_Wolf_Location_Data 2012_11_13\LACL_Wolf_Location_Data\Argos_Emails";
-            const string out_path = @"C:\tmp\reports\105421_2012.txt";
+            const string out_path = @"C:\tmp\reports\60793_2012a.txt";
             if (!Directory.Exists(in_path))
             {
                 Console.Write("Invalid Directory {0}", in_path);
@@ -63,7 +63,7 @@ namespace TelonicsTest
                     var a = new ArgosFile(path)
                     {
                         PlatformPeriod = (p => TimeSpan.FromMinutes(25 * 60)),
-                        IsGen3Platform = (p => p == "105421")
+                        IsGen3Platform = (p => p == "60793")
                     };
                     foreach (var l in a.ToGen3TelonicsCsv())
                     f.WriteLine(l);
