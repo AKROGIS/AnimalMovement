@@ -19,13 +19,13 @@ namespace TelonicsTest
         {
             //const string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email";
             //const string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen34moose08-09-2-12.TXT";
-            //const string path = @"C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\Telonics\SampleFiles\Gen34moose08-09-2-12.TXT";
-            const string path = @"C:\tmp\data\buck_wolf_09_14_12_raw_complete.txt";
+            const string path = @"C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\Telonics\SampleFiles\Gen34moose08-09-2-12.TXT";
+            //const string path = @"C:\tmp\data\buck_wolf_09_14_12_raw_complete.txt";
             Console.WriteLine("File {0}", path);
             var a = new ArgosFile(path)
             {
-                PlatformPeriod = (p => TimeSpan.FromMinutes(25 * 60)),
-                IsGen3Platform = (p => p == "60793")
+                PlatformPeriod = (p => TimeSpan.FromMinutes(24 * 60)),
+                IsGen3Platform = (p => p == "77267")
             };
             Console.WriteLine("Transmissions in File");
             foreach (var s in a.GetTransmissions())
@@ -42,7 +42,7 @@ namespace TelonicsTest
             //Console.WriteLine("CSV Output");
             //foreach (var l in a.ToGen3TelonicsCsv())
             //Console.WriteLine(l);
-            File.WriteAllLines(@"C:\tmp\reports\60793_09_14_12.txt", a.ToGen3TelonicsCsv());
+            File.WriteAllLines(@"C:\tmp\reports\77267_2.txt", a.ToGen3TelonicsCsv());
         }
 
         public static void TestArgosFolder()

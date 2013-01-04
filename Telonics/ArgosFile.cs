@@ -116,7 +116,7 @@ namespace Telonics
                 if (messageHasSensorData)
                     return new ArgosFix[0];
                 if (message.Count < 9) //72 bits (9 bytes) required for a full absolute fix
-                    return new ArgosFix[0];
+                    return new [] { new ArgosFix { ConditionCode = ArgosConditionCode.Invalid } };
 
                 //Get the absolute Fix
                 byte reportedCrc = message.ByteAt(1, 6);
@@ -138,13 +138,17 @@ namespace Telonics
                 crc.Update(julian, 9);
                 crc.Update(hour, 5);
                 crc.Update(minute, 6);
-                bool isBad = crc.Value != reportedCrc;
+                ArgosConditionCode cCode = (crc.Value == reportedCrc) ? ArgosConditionCode.Good : ArgosConditionCode.Bad;
+
+                //If the CRC was good we need to check for values out of range
+                if (cCode == ArgosConditionCode.Good && (julian > 366 || hour > 24 || minute > 60))
+                    fixDate = new DateTime(); //use default to indicate an error
 
                 var fixes = new List<ArgosFix>
                     {
                         new ArgosFix
                             {
-                                IsBad = isBad,
+                                ConditionCode = cCode,
                                 Longitude = longitude,
                                 Latitude = latitude,
                                 DateTime = fixDate
@@ -186,14 +190,31 @@ namespace Telonics
                     crc.Update((int)longitudeBits, doubleLength);
                     crc.Update((int)latitudeBits, doubleLength);
                     crc.Update(delay, 6);
-                    isBad = crc.Value != reportedCrc;
+                    cCode = (crc.Value == reportedCrc) ? ArgosConditionCode.Good : ArgosConditionCode.Bad;
+
+                    //If the CRC is good we still need to check for values out of range
+                    if (cCode == ArgosConditionCode.Good)
+                    {
+                        //if the 6 bits of delay are all ones the fix could not be acquired
+                        if ((delay & 0x3F) == 0x3F)
+                            cCode = ArgosConditionCode.Unavailable;
+                        if (delay > 60) //60 min is max delay
+                            delay = 0;
+                    }
+                    //NOTE: In some cases Unavailable is reported when CRC was bad, but usually not.
+
+                    DateTime relFixDate;
+                    if (fixDate == default(DateTime))
+                        relFixDate = new DateTime(); // use default value
+                    else
+                        relFixDate = fixDate - timeOffset + TimeSpan.FromMinutes(delay);
                     fixes.Add(
                         new ArgosFix
                         {
-                            IsBad = isBad,
+                            ConditionCode = cCode,
                             Longitude = longitude + longitudeDelta,
                             Latitude = latitude + latitudeDelta,
-                            DateTime = fixDate - timeOffset + TimeSpan.FromMinutes(delay)
+                            DateTime = relFixDate
                         }
                     );
                 }
@@ -252,7 +273,7 @@ namespace Telonics
 
             public IEnumerable<string> FixesAsCsv()
             {
-                const string format = "{0},{1},{2},{3},{4},{5},{6},{7:F4},{8:F4}";
+                const string format = "{0},{1},{2},{3},{4},{5},{6},{7},{8}";
                 int fixNumber = 0;
                 if (Fixes.Length == 0)
                     yield return String.Format("{0},{1},{2},{3},{4},,,,",
@@ -262,16 +283,22 @@ namespace Telonics
                 foreach (var fix in Fixes)
                 {
                     fixNumber++;
+                    if (fix.ConditionCode == ArgosConditionCode.Invalid)
+                        continue;
                     yield return String.Format(format,
-                                              TransmissionDateTime.ToString("yyyy.MM.dd"),
-                                              TransmissionDateTime.ToString("HH:mm:ss"),
-                                              PlatformId,
-                                              fixNumber,
-                                              (fix.IsBad ? "Bad" : "Good"),
-                                              fix.DateTime.ToString("yyyy.MM.dd"),
-                                              fix.DateTime.ToString("HH:mm"),
-                                              fix.Longitude,
-                                              fix.Latitude);
+                                               TransmissionDateTime.ToString("yyyy.MM.dd"),
+                                               TransmissionDateTime.ToString("HH:mm:ss"),
+                                               PlatformId,
+                                               fixNumber,
+                                               (fix.ConditionCode),
+                                               (fix.DateTime == default(DateTime)) ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
+                                               (fix.DateTime == default(DateTime)) ? "Error" : fix.DateTime.ToString("HH:mm"),
+                                               fix.ConditionCode == ArgosConditionCode.Unavailable
+                                                   ? ""
+                                                   : fix.Longitude.ToString("F4"),
+                                               fix.ConditionCode == ArgosConditionCode.Unavailable
+                                                   ? ""
+                                                   : fix.Latitude.ToString("F4"));
                 }
             }
 
@@ -287,7 +314,7 @@ namespace Telonics
             public DateTime DateTime { get; set; }
             public double Latitude { get; set; }
             public double Longitude { get; set; }
-            public bool IsBad { get; set; }
+            public ArgosConditionCode ConditionCode { get; set; }
         }
 
         #endregion
