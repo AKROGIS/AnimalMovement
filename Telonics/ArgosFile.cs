@@ -116,7 +116,7 @@ namespace Telonics
                 if (messageHasSensorData)
                     return new ArgosFix[0];
                 if (message.Count < 9) //72 bits (9 bytes) required for a full absolute fix
-                    return new [] { new ArgosFix { ConditionCode = ArgosConditionCode.Invalid } };
+                    return new[] {new ArgosFix {ConditionCode = ArgosConditionCode.Invalid}};
 
                 //Get the absolute Fix
                 byte reportedCrc = message.ByteAt(1, 6);
@@ -158,15 +158,15 @@ namespace Telonics
                 //Setup for the relative fixes
                 if (fixBufferType > 3)
                     throw new InvalidDataException("Argos Message has invalid Fix Buffer Type.");
-                int numberOfRelativeFixes = (new[] { 0, 3, 4, 5 })[fixBufferType];
-                int doubleLength = (new[] { 0, 17, 12, 9 })[fixBufferType];
-                int relativeFixLength = (new[] { 0, 46, 36, 30 })[fixBufferType];
+                int numberOfRelativeFixes = (new[] {0, 3, 4, 5})[fixBufferType];
+                int doubleLength = (new[] {0, 17, 12, 9})[fixBufferType];
+                int relativeFixLength = (new[] {0, 46, 36, 30})[fixBufferType];
 
                 //Get the relative fixes
                 for (var i = 0; i < numberOfRelativeFixes; i++)
                 {
-                    int firstBit = 72 + i * relativeFixLength;
-                    int bytesRequired = (firstBit + relativeFixLength + 7) / 8; //+7 to round up
+                    int firstBit = 72 + i*relativeFixLength;
+                    int bytesRequired = (firstBit + relativeFixLength + 7)/8; //+7 to round up
                     if (message.Count < bytesRequired)
                         break;
                     reportedCrc = message.ByteAt(firstBit, 6);
@@ -182,13 +182,13 @@ namespace Telonics
                     if (PlatformPeriod == null)
                         throw new InvalidDataException("Function to calculate the platform period was not provided.");
                     TimeSpan platformPeriod = PlatformPeriod(PlatformId);
-                    TimeSpan timeOffset = TimeSpan.FromMinutes((i + 1) * platformPeriod.TotalMinutes);
+                    TimeSpan timeOffset = TimeSpan.FromMinutes((i + 1)*platformPeriod.TotalMinutes);
                     fixDate = fixDate.AddMinutes(-fixDate.Minute); //Round down to the hour
 
                     // Cyclical Redundancy Check
                     crc = new CRC();
-                    crc.Update((int)longitudeBits, doubleLength);
-                    crc.Update((int)latitudeBits, doubleLength);
+                    crc.Update((int) longitudeBits, doubleLength);
+                    crc.Update((int) latitudeBits, doubleLength);
                     crc.Update(delay, 6);
                     cCode = (crc.Value == reportedCrc) ? ArgosConditionCode.Good : ArgosConditionCode.Bad;
 
@@ -208,6 +208,7 @@ namespace Telonics
                         relFixDate = new DateTime(); // use default value
                     else
                         relFixDate = fixDate - timeOffset + TimeSpan.FromMinutes(delay);
+
                     fixes.Add(
                         new ArgosFix
                         {
