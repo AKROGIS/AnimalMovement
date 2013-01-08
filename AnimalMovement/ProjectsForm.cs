@@ -124,9 +124,7 @@ namespace AnimalMovement
 
         private void ProjectsGridView_SelectionChanged(object sender, EventArgs e)
         {
-            DeleteProjectButton.Enabled = false;
-            if (ProjectsGridView.SelectedRows.Cast<DataGridViewRow>().Any(row => (bool)row.Cells["columnCanDelete"].Value))
-                DeleteProjectButton.Enabled = true;
+            DeleteProjectButton.Enabled = ProjectsGridView.SelectedRows.Cast<DataGridViewRow>().Any(row => (bool)row.Cells["columnCanDelete"].Value);
             InfoProjectButton.Enabled = ProjectsGridView.SelectedRows.Count == 1;
         }
     }
