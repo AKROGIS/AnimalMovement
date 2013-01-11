@@ -6,8 +6,51 @@ using System.Web;
 
 namespace Telonics
 {
+    /// <summary>
+    /// Provides access to data on the Argos Web Server
+    /// </summary>
     static public class ArgosWebSite
     {
+
+        /// <summary>
+        /// Provides the results (in a modified CSV format) from the Argos web server
+        /// This object is immutable, and should only be created by an ArgosWebsite object
+        /// Thhis object encapsulates the representation of the results.
+        /// </summary>
+        public class ArgosWebResult
+        {
+            private readonly string _text;
+
+            //We can't make the constructor private (ArgosWebSite can't create it)
+            //The best we can do is make it internal, and make sure no other methods in the
+            //library call the constructor.
+            internal ArgosWebResult(string text)
+            {
+                if (String.IsNullOrEmpty(text))
+                    throw new ArgumentNullException("text");
+                _text = text;
+            }
+
+            /// <summary>
+            /// Returns the Argos web results as a single string
+            /// </summary>
+            /// <returns>string</returns>
+            public override string ToString()
+            {
+                return _text;
+            }
+
+            /// <summary>
+            /// Returns the Argos web results as an array of UTF8 bytes.
+            /// </summary>
+            /// <returns>Byte Array</returns>
+            public Byte[] ToBytes()
+            {
+                var e = new UTF8Encoding();
+                return e.GetBytes(_text);
+            }
+        }
+
         private const string _argosUrl = @"http://ws-argos.clsamerica.com/argosDws/services/DixService";
 
         //Argos soap request for messages as CSV
@@ -38,39 +81,74 @@ namespace Telonics
 
 
         /// <summary>
-        /// 
+        /// Queries the Argos Web Services, and returns the results for a collar.
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <param name="collar"></param>
-        /// <param name="days"></param>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        static public ArgosWebResult GetCollarAsCsv(string username, string password, string collar, int days, out string error)
+        /// <param name="username">A user name assigned by the Argos Web Service</param>
+        /// <param name="password">The user's password</param>
+        /// <param name="collar">A collar (platform) identifier in the user's account</param>
+        /// <param name="days">Number of days in the past to retrieve (1 to 10)</param>
+        /// <param name="error">Contains any errors encountered; null with no errors</param>
+        /// <returns>Returns the results from the web server.  If null check the error output parameter</returns>
+        static public ArgosWebResult GetCollar(string username, string password, string collar, int days, out string error)
         {
-            //FIXME - parameter checking
+            error = CheckParameters(username, password, collar, days);
+            if (error != null)
+                return null;
             var selector = String.Format(_platform, collar);
             var request = String.Format(_csvRequest, username, password, selector, days);
             return GetCsv(request, out error);
         }
 
         /// <summary>
-        /// 
+        /// Queries the Argos Web Services, and returns the results for a program (collection of collars).
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <param name="program"></param>
-        /// <param name="days"></param>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        static public ArgosWebResult GetProgramAsCsv(string username, string password, string program, int days, out string error)
+        /// <param name="username">A user name assigned by the Argos Web Service</param>
+        /// <param name="password">The user's password</param>
+        /// <param name="program">A program identifier in the user's account</param>
+        /// <param name="days">Number of days in the past to retrieve (1 to 10)</param>
+        /// <param name="error">Contains any errors encountered; null with no errors</param>
+        /// <returns>Returns the results from the web server.  If null check the error output parameter</returns>
+        static public ArgosWebResult GetProgram(string username, string password, string program, int days, out string error)
         {
-            //FIXME - parameter checking
+            error = CheckParameters(username, password, program, days);
+            if (error != null)
+                return null;
             var selector = String.Format(_program, program);
             var request = String.Format(_csvRequest, username, password, selector, days);
             return GetCsv(request, out error);
         }
 
+        static private string CheckParameters(string username, string password, string selector, int days)
+        {
+            string error = null;
+            if (String.IsNullOrEmpty(username))
+                error = "No username provided";
+            if (String.IsNullOrEmpty(password))
+            {
+                const string msg = "No password provided";
+                if (error == null)
+                    error = msg;
+                else
+                    error += "; " + msg;
+            }
+            if (String.IsNullOrEmpty(selector))
+            {
+                const string msg = "No selector (collar or program) was provided";
+                if (error == null)
+                    error = msg;
+                else
+                    error += "; " + msg;
+            }
+            if (days < 1 || days > 10)
+            {
+                const string msg = "Days out of range (1..10)";
+                if (error == null)
+                    error = msg;
+                else
+                    error += "; " + msg;
+            }
+            return error;
+        }
 
         static private ArgosWebResult GetCsv(string request, out string error)
         {

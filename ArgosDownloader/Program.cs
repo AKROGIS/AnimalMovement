@@ -17,7 +17,7 @@ namespace ArgosDownloader
             const string argosId = "37470";
             const int days = 10;
             string errors;
-            ArgosWebResult results = ArgosWebSite.GetCollarAsCsv(username, password, argosId, days, out errors);
+            var results = ArgosWebSite.GetCollar(username, password, argosId, days, out errors);
             if (results == null)
             {
                 Console.WriteLine(errors);
