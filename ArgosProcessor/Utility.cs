@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using DataModel;
 
 namespace ArgosProcessor
 {
@@ -38,39 +39,17 @@ namespace ArgosProcessor
         }
 
 
-        private static Byte[] GetContentsOfCollarFile(SqlInt32 fileId)
+        private static Byte[] GetContentsOfCollarFile(int fileId)
         {
-            return GetFileContents("CollarFiles", fileId);
+            var data = new AnimalMovementDataContext();
+            return data.CollarFiles.First(f => f.FileId == fileId).Contents.ToArray();
         }
 
 
-        private static Byte[] GetContentsOfCollarParameterFile(SqlInt32 fileId)
+        private static Byte[] GetContentsOfCollarParameterFile(int fileId)
         {
-            return GetFileContents("CollarParameterFiles", fileId);
-        }
-
-
-        private static Byte[] GetFileContents(string table, SqlInt32 fileId)
-        {
-            Byte[] bytes = null;
-
-            using (var connection = new SqlConnection(Properties.Settings.Default.Animal_MovementConnectionString))
-            {
-                connection.Open();
-                string sql = "SELECT [Contents] FROM [" + table + "] WHERE [FileId] = @fileId";
-                using (var command = new SqlCommand(sql, connection))
-                {
-                    command.Parameters.Add(new SqlParameter("@fileId", SqlDbType.Int) { Value = fileId });
-                    using (SqlDataReader results = command.ExecuteReader())
-                    {
-                        while (results.Read())
-                        {
-                            bytes = results.GetSqlBytes(0).Buffer;
-                        }
-                    }
-                }
-            }
-            return bytes;
+            var data = new AnimalMovementDataContext();
+            return data.CollarParameterFiles.First(f => f.FileId == fileId).Contents.ToArray();
         }
 
 
@@ -109,19 +88,7 @@ namespace ArgosProcessor
         }
 
 
-        internal static void ProcessArgosDataForTelonicsGen3(SqlInt32 fileId)
-        {
-            //FIXME - implement this code
-            //Save file to disk with temp name
-            //Ensure PPT files are avaialble to ADC-T03
-            //Setup ADC-T03 (input/output folders)
-            //Run ADC-T03
-            //For each file in output folder
-            //  Add the file to the database
-        }
-
-
-        internal static string ProcessArgosDataForTelonicsGen4(SqlInt32 fileId)
+        internal static string ProcessArgosDataForTelonicsGen4(int fileId)
         {
             // TDC runs with a batch file, which we can create dynamically.
             //    the batch file can have multiple argos input files, but only one tpf file
@@ -230,11 +197,10 @@ namespace ArgosProcessor
             UploadFileToDatabase(fileName, projectId, "Telonics", collarId, format, 'A', content, parentFileId);
         }
 
-
-        internal static SqlInt32 UploadFileToDatabase(string fileName, string projectId, string collarMfgr, string collarId,
+        //FIXME - replace by call to DataContext
+        private static void UploadFileToDatabase(string fileName, string projectId, string collarMfgr, string collarId,
                                                       char format, char status, byte[] content, SqlInt32 parentFileId)
         {
-            SqlInt32 fileId;
             using (var connection = new SqlConnection(Properties.Settings.Default.Animal_MovementConnectionString))
             {
                 connection.Open();
@@ -252,16 +218,15 @@ namespace ArgosProcessor
                     command.Parameters.Add(new SqlParameter("@ParentFileId", SqlDbType.Int) {Value = parentFileId});
                     command.Parameters.Add(new SqlParameter("@FileId", SqlDbType.Int) { Direction = ParameterDirection.Output});
                     command.ExecuteNonQuery();
-                    fileId = (SqlInt32) command.Parameters[8].SqlValue;
                 }
             }
-            return fileId;
         }
 
 
-        private static IEnumerable<SqlInt32> GetAllCollarParameterFileIdsFromDBForFormat(char format)
+        //FIXME - replace by call to DataContext
+        private static IEnumerable<int> GetAllCollarParameterFileIdsFromDBForFormat(char format)
         {
-            var files = new List<SqlInt32>();
+            var files = new List<int>();
 
             using (var connection = new SqlConnection(Properties.Settings.Default.Animal_MovementConnectionString))
             {
@@ -274,7 +239,7 @@ namespace ArgosProcessor
                     {
                         while (results.Read())
                         {
-                            files.Add(results.GetSqlInt32(0));
+                            files.Add(results.GetInt32(0));
                         }
                     }
                 }
@@ -282,7 +247,7 @@ namespace ArgosProcessor
             return files;
         }
 
-
+        //FIXME - replace by call to DataContext
         private static IEnumerable<SqlInt32> GetPotentialCollarParameterFiles(char format, SqlInt32 fileId)
         {
             var files = new List<SqlInt32>();
@@ -307,7 +272,7 @@ namespace ArgosProcessor
             return files;
         }
 
-
+        //FIXME - replace by call to DataContext
         private static string GetProjectIdFromFileId(SqlInt32 fileId)
         {
             string projectId = null;
@@ -331,7 +296,7 @@ namespace ArgosProcessor
         }
 
 
-        public static string GetNewTempDirectory()
+        private static string GetNewTempDirectory()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
@@ -339,12 +304,12 @@ namespace ArgosProcessor
         }
 
 
-        private static IEnumerable<SqlInt32> GetAllFileIdsFromFolder(string folder)
+        private static IEnumerable<int> GetAllFileIdsFromFolder(string folder)
         {
             int id = 0;
             return from file in GetAllFileNamesFromFolder(folder)
                    where Int32.TryParse(file, out id)
-                   select (SqlInt32)id;
+                   select id;
         }
 
 
