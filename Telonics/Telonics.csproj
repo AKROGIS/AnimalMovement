@@ -54,10 +54,13 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgosConditionCode.cs" />
     <Compile Include="ArgosFile.cs" />
+    <Compile Include="ArgosWebResult.cs" />
+    <Compile Include="ArgosWebSite.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TpfCollar.cs" />
     <Compile Include="TpfFile.cs" />
