@@ -10,6 +10,10 @@ namespace ArgosDownloader
         //It takes no command line arguments
         private static void Main()
         {
+            // FIXME - Create tables and queries in database to determine what to get from Argos
+            // FIXME -   Need to account for failures and retries
+            // FIXME -   MUST not miss any data (email user if there are issues)
+            // FIXME -   Should not get duplicate data.
             // FIXME - get database connection from config file
             // FIXME - Get input from database
             const string username = "BURCH";
@@ -27,6 +31,7 @@ namespace ArgosDownloader
                 string path = Path.Combine(@"C:\tmp", argosId + ".aws"); //path for the output file
                 File.WriteAllText(path, results.ToString());
             }
+            // FIXME - Add new file type to database for these Argos web results (AWS)
             // FIXME - upload this file to database as type AWS
             // FIXME - update database with success/failure
         }
