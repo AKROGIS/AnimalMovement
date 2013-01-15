@@ -59,7 +59,11 @@
   <ItemGroup>
     <Compile Include="ArgosConditionCode.cs" />
     <Compile Include="ArgosFile.cs" />
+    <Compile Include="ArgosTransmission.cs" />
     <Compile Include="ArgosWebSite.cs" />
+    <Compile Include="Gen3Processor.cs" />
+    <Compile Include="Gen4Processor.cs" />
+    <Compile Include="IProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TpfCollar.cs" />
     <Compile Include="TpfFile.cs" />
