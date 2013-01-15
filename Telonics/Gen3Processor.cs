@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Telonics
 {
-    class Gen3Processor: IProcessor
+    public class Gen3Processor: IProcessor
     {
         public Gen3Processor(TimeSpan period)
         {

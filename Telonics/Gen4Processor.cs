@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Telonics
 {
-    internal class Gen4Processor : IProcessor
+    public class Gen4Processor : IProcessor
     {
         // TDC runs with a batch file, which we can create dynamically.
         //    the batch file can have multiple argos input files, but only one tpf file
