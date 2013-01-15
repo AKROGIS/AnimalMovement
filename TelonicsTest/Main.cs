@@ -23,14 +23,15 @@ namespace TelonicsTest
             //const string path = @"C:\tmp\data\buck_wolf_09_14_12_raw_complete.txt";
             Console.WriteLine("File {0}", path);
 
-			string id = "77267";
-			int hours = 24;
+            const string id = "77267";
+            const int hours = 24;
+            const string out_path = @"C:\tmp\reports\" + id + ".txt";
 
             var a = new ArgosFile(path)
             {
                 //IgnorePlatform = (p => p != id),
-				Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
-				TelonicsId = (i,d) => i
+                Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
+                TelonicsId = (i, d) => i
             };
             Console.WriteLine("Transmissions in File");
             foreach (var s in a.GetTransmissions())
@@ -42,23 +43,23 @@ namespace TelonicsTest
             foreach (var p in a.GetPlatforms())
                 Console.WriteLine("  {0} Start {1} End {2}", p, a.FirstTransmission(p), a.LastTransmission(p));
             Console.WriteLine("Messages in File");
-			foreach (var s in a.ToTelonicsData(id))
+            foreach (var s in a.ToTelonicsData(id))
                 Console.WriteLine(s);
             //Console.WriteLine("CSV Output");
             //foreach (var l in a.ToGen3TelonicsCsv())
             //Console.WriteLine(l);
-			File.WriteAllLines(@"C:\tmp\reports\"+id+".txt", a.ToTelonicsData(id));
+            File.WriteAllLines(out_path, a.ToTelonicsData(id));
         }
 
         public static void TestArgosFolder()
         {
-			string id = "60793";
-			int hours = 25;
-			
-			const string in_path = @"C:\Users\resarwas\Desktop\LACL_Wolf_Location_Data 2012_11_13\LACL_Wolf_Location_Data\Argos_Emails";
-            string out_path = @"C:\tmp\reports\" + id + "_2012a.txt";
+            const string id = "60793";
+            const int hours = 25;
 
-			if (!Directory.Exists(in_path))
+            const string in_path = @"C:\Users\resarwas\Desktop\LACL_Wolf_Location_Data 2012_11_13\LACL_Wolf_Location_Data\Argos_Emails";
+            const string out_path = @"C:\tmp\reports\" + id + "_2012a.txt";
+
+            if (!Directory.Exists(in_path))
             {
                 Console.Write("Invalid Directory {0}", in_path);
             }
@@ -71,11 +72,11 @@ namespace TelonicsTest
                     Console.WriteLine("  File {0}", file);
                     var a = new ArgosFile(path)
                     {
-						//IgnorePlatform = (p => p != id),
-						Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
-						TelonicsId = (i,d) => i
-					};
-					foreach (var l in a.ToTelonicsData(id))
+                        //IgnorePlatform = (p => p != id),
+                        Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
+                        TelonicsId = (i, d) => i
+                    };
+                    foreach (var l in a.ToTelonicsData(id))
                     f.WriteLine(l);
                 }
             }
