@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Telonics;
+using System.Linq;
 
 namespace TelonicsTest
 {
@@ -76,8 +77,17 @@ namespace TelonicsTest
                         Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
                         TelonicsId = (i, d) => i
                     };
-                    foreach (var l in a.ToTelonicsData(id))
-                    f.WriteLine(l);
+                    var lines = new string[0]; 
+                    try
+                    {
+                        lines = a.ToTelonicsData(id).ToArray();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("ERROR: InTelonicsToData(): {0}", ex.Message);
+                    }
+                    foreach (var l in lines)
+                        f.WriteLine(l);
                 }
             }
         }
