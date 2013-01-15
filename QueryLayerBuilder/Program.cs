@@ -17,10 +17,10 @@ namespace QueryLayerBuilder
         static int Main(string[] args)
         {
 
-#if ARCGIS_10_1            
-            const esriLicenseProductCode productCode = esriLicenseProductCode.esriLicenseProductCodeAdvanced;
-#else
+#if ARCGIS_10_0            
             const esriLicenseProductCode productCode = esriLicenseProductCode.esriLicenseProductCodeArcInfo;
+#else
+            const esriLicenseProductCode productCode = esriLicenseProductCode.esriLicenseProductCodeAdvanced;
 #endif
             if (!LicenseInitializer.InitializeApplication(new [] { productCode },
                                                           new esriLicenseExtensionCode[] { }))
