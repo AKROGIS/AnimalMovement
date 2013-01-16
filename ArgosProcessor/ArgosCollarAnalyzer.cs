@@ -8,6 +8,13 @@ namespace ArgosProcessor
 {
     internal class ArgosCollarAnalyzer
     {
+        private HashSet<string> _filePlatforms;
+        private IEnumerable<string> _unknownPlatforms;
+        private IEnumerable<string> _ambiguousPlatforms;
+        private Dictionary<Collar, string> _collarsWithProblems;
+
+
+
         public ArgosFile File { get; private set; }
         public AnimalMovementDataContext Database { get; private set; }
 
@@ -19,6 +26,8 @@ namespace ArgosProcessor
                 throw new ArgumentNullException("database");
             File = file;
             Database = database;
+
+            _filePlatforms = new HashSet<string>(File.GetPlatforms());
 
             var allids = File.GetPlatforms().ToArray();
             var gen3ids = allids.Intersect(from collar in Database.Collars
@@ -41,17 +50,66 @@ namespace ArgosProcessor
             }
         }
 
-        internal string[] GetUnknownPlatforms()
+        internal IEnumerable<string> UnknownPlatforms
         {
-            throw new NotImplementedException();
+            get
+            {
+                if (_unknownPlatforms == null)
+                    DoAnalysis();
+                return _unknownPlatforms;
+            }
         }
 
-        internal string[] GetAmbiguousPlatforms()
+        internal IEnumerable<string> AmbiguousPlatforms
         {
-            throw new NotImplementedException();
+            get
+            {
+                if (_ambiguousPlatforms == null)
+                    DoAnalysis();
+                return _ambiguousPlatforms;
+            }
         }
 
-        internal Dictionary<Collar, string> GetCollarsWithProblems()
+        internal Dictionary<Collar, string> CollarsWithProblems
+        {
+            get
+            {
+                if (_collarsWithProblems == null)
+                    DoAnalysis();
+                return _collarsWithProblems;
+            }
+        }
+
+        internal void DoAnalysis()
+        {
+            _unknownPlatforms = GetUnknownPlatforms();
+            _ambiguousPlatforms = GetAmbiguousPlatforms();
+            _collarsWithProblems = GetCollarsWithProblems();
+        }
+
+
+        private IEnumerable<string> GetUnknownPlatforms()
+        {
+            var databasePlatforms = from collar in Database.Collars
+                                    where collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null
+                                    select collar.AlternativeId;
+            return _filePlatforms.Except(databasePlatforms);
+        }
+
+        private IEnumerable<string> GetAmbiguousPlatforms()
+        {
+            var collarsByArgos = from collar in Database.Collars
+                                 where collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null
+                                 group collar.CollarId by collar.AlternativeId;
+
+            var problems = from grouping in collarsByArgos
+                           where grouping.Count() > 1 && _filePlatforms.Contains(grouping.Key)  && DatesOverlap(grouping)
+                           select grouping.Key;
+            return problems;
+        }
+
+
+        private Dictionary<Collar, string> GetCollarsWithProblems()
         {
             // problems: not Telonics, no parameters,
             throw new NotImplementedException();
@@ -72,6 +130,16 @@ namespace ArgosProcessor
         {
             throw new NotImplementedException();
         }
+
+
+        #region Private Methods
+
+        private bool DatesOverlap(IGrouping<string, string> grouping)
+        {
+            //FIXME - check deployment dates 
+            return true;
+        }
+        #endregion
     }
 }
 
