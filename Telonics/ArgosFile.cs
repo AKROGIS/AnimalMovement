@@ -9,7 +9,18 @@ namespace Telonics
 {
     public class ArgosFile
     {
-        #region Constructors and line readers
+
+        #region Private Fields
+
+        private List<string> _lines;
+        private List<ArgosTransmission> _transmissions;
+        private Dictionary<String, List<ArgosTransmission>> _transmissionsByCtn;  //CTN is the Telonics Id
+
+        #endregion
+
+        #region Public API
+
+        #region Constructors
 
         public ArgosFile(string path)
         {
@@ -38,42 +49,18 @@ namespace Telonics
                 throw new InvalidDataException("stream has no lines");
         }
 
-
-        private void ReadLines(string path)
-        {
-            _lines = File.ReadAllLines(path).ToList();
-        }
-
-        private void ReadLines(Byte[] bytes)
-        {
-            using (var stream = new MemoryStream(bytes, 0, bytes.Length))
-                _lines = ReadLines(stream, Encoding.UTF8).ToList();
-        }
-
-        private void ReadLines(Stream stream)
-        {
-            _lines = ReadLines(stream, Encoding.UTF8).ToList();
-        }
-
-        static IEnumerable<string> ReadLines(Stream stream, Encoding enc)
-        {
-            using (var reader = new StreamReader(stream, enc))
-                while (!reader.EndOfStream)
-                    yield return reader.ReadLine();
-        }
-
         #endregion
 
-        private List<string> _lines;
-        private List<ArgosTransmission> _transmissions;
-        private Dictionary<String, List<ArgosTransmission>> _transmissionsByCtn;  //CTN is the Telonics Id
-
-        #region public API
+        #region Public Properties
 
         public Func<string, Boolean> IgnorePlatform { get; set; }
         public Func<string, DateTime, Boolean> IgnorePlatformOnDate { get; set; }
         public Func<String, DateTime, String> TelonicsId { get; set; }   //PlatformId, Transmission Time, -> Telonics Id (CTN)
         public Func<String, IProcessor> Processor { get; set; } //Telonics Model -> Telonics Processor
+
+        #endregion
+
+        #region Public Methods
 
         public IEnumerable<string> GetPrograms()
         {
@@ -137,7 +124,9 @@ namespace Telonics
         }
         #endregion
 
-        #region private methods
+        #endregion
+
+        #region Private Methods
 
         private IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines)
         {
@@ -238,6 +227,34 @@ namespace Telonics
             }
             return results;
         }
+
+
+        #region Line Readers
+
+        private void ReadLines(string path)
+        {
+            _lines = File.ReadAllLines(path).ToList();
+        }
+
+        private void ReadLines(Byte[] bytes)
+        {
+            using (var stream = new MemoryStream(bytes, 0, bytes.Length))
+                _lines = ReadLines(stream, Encoding.UTF8).ToList();
+        }
+
+        private void ReadLines(Stream stream)
+        {
+            _lines = ReadLines(stream, Encoding.UTF8).ToList();
+        }
+
+        private IEnumerable<string> ReadLines(Stream stream, Encoding enc)
+        {
+            using (var reader = new StreamReader(stream, enc))
+                while (!reader.EndOfStream)
+                    yield return reader.ReadLine();
+        }
+
+        #endregion
 
         #endregion
 

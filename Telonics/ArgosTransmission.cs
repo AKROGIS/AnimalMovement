@@ -5,24 +5,33 @@ using System.Globalization;
 
 namespace Telonics
 {
-    //ArgosTransmission represent the "raw" data obtained from the input file
-    //Once all the raw bytes (AddRawBytes()) have been added, GetMessage() will
-    //return the "processed" transmission.
+
+    /// <summary>
+    /// ArgosTransmission represent a single "raw" Argos transmission
+    /// An ArgosFile contains zero or more Argos Transmissions which are created by the ArgosFile
+    /// </summary>
     public class ArgosTransmission
     {
+
+        #region Private Fields
+        
         private List<Byte> _message;
         private readonly List<string> _lines = new List<string>();
 
-        public string ProgramId { get; set; }
-        public string PlatformId { get; set; }
-        public DateTime DateTime { get; set; }
+        #endregion
 
-        public Byte[] Message
+        #region Internal Properties & Methods
+
+        internal ArgosTransmission()
+        {
+        }
+
+        internal Byte[] Message
         {
             get { return _message.ToArray(); }
         }
 
-        public void AddRawBytes(IEnumerable<string> byteStrings)
+        internal void AddRawBytes(IEnumerable<string> byteStrings)
         {
             if (_message == null)
                 _message = new List<byte>();
@@ -30,11 +39,18 @@ namespace Telonics
                 _message.Add(Byte.Parse(item));
         }
 
-        public void AddLine(string line)
+        internal void AddLine(string line)
         {
             _lines.Add(line);
         }
 
+        #endregion
+
+        #region Public API
+
+        public string ProgramId { get; internal set; }
+        public string PlatformId { get; internal set; }
+        public DateTime DateTime { get; internal set; }
 
 
         public string ToFormatedString()
@@ -48,6 +64,9 @@ namespace Telonics
         {
             return string.Join("\n", _lines);
         }
+
+        #endregion
+
     }
 
 }

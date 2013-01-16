@@ -1,6 +1,6 @@
 ﻿namespace Telonics
 {
-    public enum ArgosConditionCode
+    internal enum ArgosConditionCode
     {
         Bad = 0,
         Good,

@@ -7,19 +7,23 @@ namespace Telonics
 {
     public class Gen3Processor: IProcessor
     {
+        #region Public API
+
         public Gen3Processor(TimeSpan period)
         {
             if (period <= new TimeSpan())
                 throw new ArgumentException("Period for a Gen3 Processor must be greater than zero");
             Period = period;
         }
-        
+
         public TimeSpan Period { get; private set; }
 
         public IEnumerable<string> Process(IEnumerable<ArgosTransmission> transmissions)
         {
             return transmissions.SelectMany(transmission => GetMessage(transmission).FixesAsCsv());
         }
+
+        #endregion
 
         #region Private Classes
 
@@ -90,6 +94,8 @@ namespace Telonics
         }
 
         #endregion
+
+        #region Private Methods
 
         private ArgosGen3Message GetMessage(ArgosTransmission transmission)
         {
@@ -239,5 +245,7 @@ namespace Telonics
             DateTime fixDateTime = new DateTime(fixYear, 1, 1, 0, 0, 0) + fixTimeSpan;
             return fixDateTime;
         }
+
+        #endregion
     }
 }

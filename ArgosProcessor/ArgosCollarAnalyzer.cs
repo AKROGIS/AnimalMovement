@@ -6,7 +6,7 @@ using DataModel;
 
 namespace ArgosProcessor
 {
-    class ArgosCollarAnalyzer
+    internal class ArgosCollarAnalyzer
     {
         public ArgosFile File { get; private set; }
         public AnimalMovementDataContext Database { get; private set; }

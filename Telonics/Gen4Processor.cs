@@ -9,9 +9,8 @@ namespace Telonics
 {
     public class Gen4Processor : IProcessor
     {
-        // TDC runs with a batch file, which we can create dynamically.
-        //    the batch file can have multiple argos input files, but only one tpf file
-        //    we create the processor with a tpf file, so it is set to process input
+
+        #region Private Constants (Default values for public properties)
 
         //tdcExecutable is the full path to the TDC executable file
         //batchTemplate is a format string for XML content with the following parameters:
@@ -30,11 +29,9 @@ namespace Telonics
   <GoogleEarth>false</GoogleEarth>
 </BatchSettings>";
 
-        string TdcExecutable { get; set; }
-        string BatchFileTemplate { get; set; }
-        public Byte[] TpfFile { get; private set; }
+        #endregion
 
-        // Create new processor with defaults for the properties above
+        #region Public API
 
         public Gen4Processor(Byte[] tpfFile)
         {
@@ -43,8 +40,15 @@ namespace Telonics
             BatchFileTemplate = DefaultBatchFileTemplate;
         }
 
+        public Byte[] TpfFile { get; private set; }
+        public string TdcExecutable { get; set; }
+        public string BatchFileTemplate { get; set; }
+
         public IEnumerable<string> Process(IEnumerable<ArgosTransmission> transmissions)
         {
+            if (!File.Exists(TdcExecutable))
+                throw new InvalidOperationException("TDC Execution error - TDC not found at " + TdcExecutable);
+
             // save the tpf file to the file system
             string tpfPath = Path.GetTempFileName();
             File.WriteAllBytes(tpfPath, TpfFile);
@@ -108,12 +112,18 @@ namespace Telonics
             return results;
         }
 
+        #endregion
+
+        #region Private Methods
+
         private static string GetNewTempDirectory()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(tempDirectory);
             return tempDirectory;
         }
+
+        #endregion
     }
 }
 
