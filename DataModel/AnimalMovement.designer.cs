@@ -295,13 +295,13 @@ namespace DataModel
 		
 		private void InsertCollar(Collar obj)
 		{
-			this.Collar_Insert(obj.CollarManufacturer, obj.CollarId, obj.CollarModel, obj.Owner, obj.AlternativeId, obj.SerialNumber, ((System.Nullable<double>)(obj.Frequency)), obj.DownloadInfo, obj.Notes, ((System.Nullable<System.DateTime>)(obj.DisposalDate)));
+			this.Collar_Insert(obj.CollarManufacturer, obj.CollarId, obj.CollarModel, obj.Owner, obj.AlternativeId, obj.SerialNumber, ((System.Nullable<double>)(obj.Frequency)), obj.DownloadInfo, obj.Notes, ((System.Nullable<System.DateTime>)(obj.DisposalDate)), ((System.Nullable<int>)(obj.Gen3Period)));
 		}
 		
 		private void UpdateCollar(Collar obj)
 		{
 			Collar original = ((Collar)(Collars.GetOriginalEntityState(obj)));
-			this.Collar_Update(original.CollarManufacturer, original.CollarId, obj.CollarModel, obj.Manager, obj.Owner, obj.AlternativeId, obj.SerialNumber, ((System.Nullable<double>)(obj.Frequency)), obj.DownloadInfo, obj.Notes, ((System.Nullable<System.DateTime>)(obj.DisposalDate)));
+			this.Collar_Update(original.CollarManufacturer, original.CollarId, obj.CollarModel, obj.Manager, obj.Owner, obj.AlternativeId, obj.SerialNumber, ((System.Nullable<double>)(obj.Frequency)), obj.DownloadInfo, obj.Notes, ((System.Nullable<System.DateTime>)(obj.DisposalDate)), ((System.Nullable<int>)(obj.Gen3Period)));
 		}
 		
 		private void DeleteCollar(Collar obj)
@@ -377,16 +377,16 @@ namespace DataModel
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Collar_Insert")]
-		public int Collar_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarModel", DbType="NVarChar(255)")] string collarModel, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AlternativeId", DbType="NVarChar(255)")] string alternativeId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SerialNumber", DbType="NVarChar(255)")] string serialNumber, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Frequency", DbType="Float")] System.Nullable<double> frequency, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DownloadInfo", DbType="NVarChar(255)")] string downloadInfo, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DisposalDate", DbType="DateTime2")] System.Nullable<System.DateTime> disposalDate)
+		public int Collar_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarModel", DbType="NVarChar(255)")] string collarModel, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AlternativeId", DbType="NVarChar(255)")] string alternativeId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SerialNumber", DbType="NVarChar(255)")] string serialNumber, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Frequency", DbType="Float")] System.Nullable<double> frequency, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DownloadInfo", DbType="NVarChar(255)")] string downloadInfo, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DisposalDate", DbType="DateTime2")] System.Nullable<System.DateTime> disposalDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Gen3Period", DbType="Int")] System.Nullable<int> gen3Period)
 		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, collarModel, owner, alternativeId, serialNumber, frequency, downloadInfo, notes, disposalDate);
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, collarModel, owner, alternativeId, serialNumber, frequency, downloadInfo, notes, disposalDate, gen3Period);
 			return ((int)(result.ReturnValue));
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Collar_Update")]
-		public int Collar_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarModel", DbType="NVarChar(255)")] string collarModel, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Manager", DbType="NVarChar(128)")] string manager, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AlternativeId", DbType="NVarChar(255)")] string alternativeId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SerialNumber", DbType="NVarChar(255)")] string serialNumber, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Frequency", DbType="Float")] System.Nullable<double> frequency, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DownloadInfo", DbType="NVarChar(255)")] string downloadInfo, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DisposalDate", DbType="DateTime2")] System.Nullable<System.DateTime> disposalDate)
+		public int Collar_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarModel", DbType="NVarChar(255)")] string collarModel, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Manager", DbType="NVarChar(128)")] string manager, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AlternativeId", DbType="NVarChar(255)")] string alternativeId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SerialNumber", DbType="NVarChar(255)")] string serialNumber, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Frequency", DbType="Float")] System.Nullable<double> frequency, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DownloadInfo", DbType="NVarChar(255)")] string downloadInfo, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DisposalDate", DbType="DateTime2")] System.Nullable<System.DateTime> disposalDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Gen3Period", DbType="Int")] System.Nullable<int> gen3Period)
 		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, collarModel, manager, owner, alternativeId, serialNumber, frequency, downloadInfo, notes, disposalDate);
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, collarModel, manager, owner, alternativeId, serialNumber, frequency, downloadInfo, notes, disposalDate, gen3Period);
 			return ((int)(result.ReturnValue));
 		}
 		
@@ -2017,6 +2017,8 @@ namespace DataModel
 		
 		private System.Nullable<System.DateTime> _DisposalDate;
 		
+		private System.Nullable<int> _Gen3Period;
+		
 		private EntitySet<CollarDeployment> _CollarDeployments;
 		
 		private EntitySet<CollarFix> _CollarFixes;
@@ -2055,6 +2057,8 @@ namespace DataModel
     partial void OnNotesChanged();
     partial void OnDisposalDateChanging(System.Nullable<System.DateTime> value);
     partial void OnDisposalDateChanged();
+    partial void OnGen3PeriodChanging(System.Nullable<int> value);
+    partial void OnGen3PeriodChanged();
     #endregion
 		
 		public Collar()
@@ -2296,6 +2300,26 @@ namespace DataModel
 					this._DisposalDate = value;
 					this.SendPropertyChanged("DisposalDate");
 					this.OnDisposalDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Gen3Period", DbType="int")]
+		public System.Nullable<int> Gen3Period
+		{
+			get
+			{
+				return this._Gen3Period;
+			}
+			set
+			{
+				if ((this._Gen3Period != value))
+				{
+					this.OnGen3PeriodChanging(value);
+					this.SendPropertyChanging();
+					this._Gen3Period = value;
+					this.SendPropertyChanged("Gen3Period");
+					this.OnGen3PeriodChanged();
 				}
 			}
 		}

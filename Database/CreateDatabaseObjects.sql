@@ -191,6 +191,7 @@ CREATE TABLE [dbo].[Collars](
 	[DownloadInfo] [varchar](200) NULL,
 	[Notes] [nvarchar](max) NULL,
 	[DisposalDate] [datetime2](7) NULL,
+	[Gen3Period] [int] NULL,
  CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
 (
 	[CollarManufacturer] ASC,
@@ -3202,7 +3203,8 @@ CREATE PROCEDURE [dbo].[Collar_Update]
 	@Frequency FLOAT = NULL, 
 	@DownloadInfo NVARCHAR(255) = NULL, 
 	@Notes NVARCHAR(max) = NULL,
-	@DisposalDate DATETIME2(7) = NULL
+	@DisposalDate DATETIME2(7) = NULL,
+	@Gen3Period INT = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -3281,7 +3283,8 @@ BEGIN
 						   [Frequency] = nullif(@Frequency,0),
 						   [DownloadInfo] = nullif(@DownloadInfo,''),
 						   [Notes] = nullif(@Notes,''),
-						   [DisposalDate] = @DisposalDate
+						   [DisposalDate] = @DisposalDate,
+						   [Gen3Period] = @Gen3Period
 					 WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 
 END
@@ -3305,7 +3308,8 @@ CREATE PROCEDURE [dbo].[Collar_Insert]
 	@Frequency FLOAT = NULL, 
 	@DownloadInfo NVARCHAR(255) = NULL, 
 	@Notes NVARCHAR(max) = NULL,
-	@DisposalDate DATETIME2(7) = NULL
+	@DisposalDate DATETIME2(7) = NULL,
+	@Gen3Period INT = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -3326,10 +3330,12 @@ BEGIN
 	
 	--All other verification is handled by primary/foreign key and column constraints.
 	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Owner],  
-							 [AlternativeId], [SerialNumber], [Frequency], [DownloadInfo], [Notes], [DisposalDate])
+							 [AlternativeId], [SerialNumber], [Frequency], [DownloadInfo],
+							 [Notes], [DisposalDate], [Gen3Period])
 			 VALUES (nullif(@CollarManufacturer,''), nullif(@CollarId,''), nullif(@CollarModel,''),
 					 nullif(@Owner,''), nullif(@AlternativeId,''), nullif(@SerialNumber,''),
-					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''), @DisposalDate)
+					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''),
+					 @DisposalDate, @Gen3Period)
 END
 GO
 SET ANSI_NULLS ON
