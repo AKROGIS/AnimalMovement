@@ -93,6 +93,7 @@ namespace ArgosProcessor
                 }
 
                 argos.Processor = analyzer.GetProcessorSelector();
+                argos.CollarFinder = analyzer.GetCollarSelector();
                 foreach (var collar in analyzer.GetValidCollars())
                 {
                     try
@@ -102,7 +103,7 @@ namespace ArgosProcessor
                         {
                             Project = file.Project,
                             FileName = file.FileName + "_" + collar.CollarId,
-                            Format = analyzer.GetCollarFormat(collar),
+                            Format = analyzer.GetFileFormatForCollar(collar),
                             CollarManufacturer = "Telonics",
                             CollarId = collar.CollarId,
                             Status = 'A',
