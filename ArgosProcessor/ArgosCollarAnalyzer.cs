@@ -26,11 +26,12 @@ namespace ArgosProcessor
         private Dictionary<string, List<Byte[]>> _tpfFiles;
         private Dictionary<string, TimeSpan> _gen3periods;
         //FIXME - Should some of these IEnumerables be fixed types to avoid multiple delayed executions
+
         #endregion
 
-        #region 'Public' API
+        #region Public API
 
-        internal ArgosCollarAnalyzer(ArgosFile file, AnimalMovementDataContext database)
+        public ArgosCollarAnalyzer(ArgosFile file, AnimalMovementDataContext database)
         {
             if (file == null)
                 throw new ArgumentNullException("file");
@@ -43,92 +44,47 @@ namespace ArgosProcessor
         }
 
 
-        internal ArgosFile File { get; private set; }
+        public ArgosFile File { get; private set; }
 
 
-        internal AnimalMovementDataContext Database { get; private set; }
+        public AnimalMovementDataContext Database { get; private set; }
 
 
-        internal IEnumerable<string> UnknownPlatforms
+        public IEnumerable<string> UnknownPlatforms
         {
             get { return _unknownPlatforms ?? (_unknownPlatforms = GetUnknownPlatforms()); }
         }
 
 
-        internal IEnumerable<string> AmbiguousPlatforms
+        public IEnumerable<string> AmbiguousPlatforms
         {
             get { return _ambiguousPlatforms ?? (_ambiguousPlatforms = GetAmbiguousPlatforms()); }
         }
 
 
-        internal Dictionary<Collar, string> CollarsWithProblems
+        public Dictionary<Collar, string> CollarsWithProblems
         {
             get { return _collarsWithProblems ?? (_collarsWithProblems = GetCollarsWithProblems()); }
         }
 
 
-        internal IEnumerable<string> GetUnknownPlatforms()
+        public IEnumerable<Collar> ValidCollars
         {
-            if (_unknownPlatforms == null)
-            {
-                var databasePlatforms = from collar in Database.Collars
-                                        where collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null
-                                        select collar.AlternativeId;
-                _unknownPlatforms = _filePlatforms.Except(databasePlatforms);
-            }
-            return _unknownPlatforms;
+            get { return _validCollars ?? (_validCollars = GetValidCollars()); }
         }
 
 
-        internal IEnumerable<string> GetAmbiguousPlatforms()
-        {
-            if (_ambiguousPlatforms == null)
-            {
-                if (_sharedArgosCollars == null)
-                    _sharedArgosCollars = GetCollarsWithSharedArgosId();
-                if (_unambiguousSharedCollars == null)
-                    _unambiguousSharedCollars = GetUnambiguousSharedCollars();
-                var ambiguousCollars = _sharedArgosCollars.Values.SelectMany(c => c).Except(_unambiguousSharedCollars);
-                _ambiguousPlatforms = ambiguousCollars.Select(c => c.AlternativeId);
-            }
-            return _ambiguousPlatforms;
-        }
-
-
-        internal Dictionary<Collar, string> GetCollarsWithProblems()
-        {
-            if (_collarsWithProblems == null)
-            {
-                if (_allUnambiguousCollars == null)
-                    _allUnambiguousCollars = GetAllUnambiguousCollars();
-                _collarsWithProblems = GetCollarsWithProblems(_allUnambiguousCollars);
-            }
-            return _collarsWithProblems;
-        }
-
-
-        internal IEnumerable<Collar> GetValidCollars()
-        {
-            if (_validCollars == null)
-            {
-                if (_allUnambiguousCollars == null)
-                    _allUnambiguousCollars = GetAllUnambiguousCollars();
-                if (_collarsWithProblems == null)
-                    _collarsWithProblems = GetCollarsWithProblems();
-                _validCollars = _allUnambiguousCollars.Except(_collarsWithProblems.Select(e => e.Key));
-            }
-            return _validCollars;
-        }
-
-
-        internal Func<string, DateTime, string> GetCollarSelector()
+        public Func<string, DateTime, string> GetCollarSelector()
         {
             return GetCollarIdFromTransmission;
         }
 
 
-        internal string GetCollarIdFromTransmission(string argosId, DateTime transmissionTime)
+        public string GetCollarIdFromTransmission(string argosId, DateTime transmissionTime)
         {
+            if (String.IsNullOrEmpty(argosId))
+                throw new ArgumentNullException("argosId", "No Argos Id provided when one was expected");
+
             if (_argosCollars == null)
                 _argosCollars = GetCollarsWithoutSharedArgosId();
             if (_argosCollars.ContainsKey(argosId))
@@ -154,17 +110,22 @@ namespace ArgosProcessor
         }
 
 
-        internal Func<string, IProcessor> GetProcessorSelector()
+        public Func<string, IProcessor> GetProcessorSelector()
         {
             return GetProcessorFromTelonicsId;
         }
 
 
-        internal IProcessor GetProcessorFromTelonicsId(string telonicId)
+        public IProcessor GetProcessorFromTelonicsId(string telonicId)
         {
+            if (String.IsNullOrEmpty(telonicId))
+                    throw new ArgumentNullException("telonicId", "No Telonic Id (CTN) provided when one was expected");
 
+            //This will be called multiple times from the client, so cache the dictionary
             if (_processors == null)
                 _processors = InitializeProcessors();
+            if (!_processors.ContainsKey(telonicId))
+                throw new ArgumentOutOfRangeException("telonicId", "Internal Error, No processor for Telonics Id "+ telonicId);
             return _processors[telonicId];
         }
 
@@ -174,8 +135,11 @@ namespace ArgosProcessor
         /// </summary>
         /// <param name="collar">A unique record in the Collars database table </param>
         /// <returns>The primary key (Char) for a unique record in the database table LookupCollarFileFormats</returns>
-        internal char GetFileFormatForCollar(Collar collar)
+        public char GetFileFormatForCollar(Collar collar)
         {
+            if (collar == null)
+                throw new ArgumentNullException("collar", "No collar provided when one was expected");
+
             // Expand this switch as additional models/file formats are supported 
             switch (collar.CollarModel)
             {
@@ -192,6 +156,60 @@ namespace ArgosProcessor
         #endregion
 
         #region Private Methods
+
+        private IEnumerable<string> GetUnknownPlatforms()
+        {
+            if (_unknownPlatforms == null)
+            {
+                var databasePlatforms = from collar in Database.Collars
+                                        where collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null
+                                        select collar.AlternativeId;
+                _unknownPlatforms = _filePlatforms.Except(databasePlatforms);
+            }
+            return _unknownPlatforms;
+        }
+
+
+        private IEnumerable<string> GetAmbiguousPlatforms()
+        {
+            if (_ambiguousPlatforms == null)
+            {
+                if (_sharedArgosCollars == null)
+                    _sharedArgosCollars = GetCollarsWithSharedArgosId();
+                if (_unambiguousSharedCollars == null)
+                    _unambiguousSharedCollars = GetUnambiguousSharedCollars();
+                var ambiguousCollars = _sharedArgosCollars.Values.SelectMany(c => c).Except(_unambiguousSharedCollars);
+                _ambiguousPlatforms = ambiguousCollars.Select(c => c.AlternativeId);
+            }
+            return _ambiguousPlatforms;
+        }
+
+
+        private Dictionary<Collar, string> GetCollarsWithProblems()
+        {
+            if (_collarsWithProblems == null)
+            {
+                if (_allUnambiguousCollars == null)
+                    _allUnambiguousCollars = GetAllUnambiguousCollars();
+                _collarsWithProblems = GetCollarsWithProblems(_allUnambiguousCollars);
+            }
+            return _collarsWithProblems;
+        }
+
+
+        private IEnumerable<Collar> GetValidCollars()
+        {
+            if (_validCollars == null)
+            {
+                if (_allUnambiguousCollars == null)
+                    _allUnambiguousCollars = GetAllUnambiguousCollars();
+                if (_collarsWithProblems == null)
+                    _collarsWithProblems = GetCollarsWithProblems();
+                _validCollars = _allUnambiguousCollars.Except(_collarsWithProblems.Select(e => e.Key));
+            }
+            return _validCollars;
+        }
+
 
         //Get a dictionary yielding a list of Collars with the same Platform Id
         private Dictionary<string, List<Collar>> GetCollarsWithSharedArgosId()
