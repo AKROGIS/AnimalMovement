@@ -13,7 +13,6 @@ namespace ArgosProcessor
         //I have this long collection of private fields to cache results from all methods.
         //various properties and methods use or report these values.  Since this object is
         //immutable, these fields ensure that I only do each database query once.
-        private readonly HashSet<string> _filePlatforms;
         private List<string> _unknownPlatforms;
         private List<string> _ambiguousPlatforms;
         private Dictionary<Collar, string> _collarsWithProblems;
@@ -41,7 +40,7 @@ namespace ArgosProcessor
             File = file;
             Database = database;
 
-            _filePlatforms = new HashSet<string>(File.GetPlatforms());
+            FilePlatforms = new HashSet<string>(File.GetPlatforms());
         }
 
 
@@ -151,6 +150,8 @@ namespace ArgosProcessor
 
         #region Private Properties
 
+        private HashSet<string> FilePlatforms { get; set; }
+
         private Dictionary<string, List<Collar>> ArgosCollars
         {
             get { return _argosCollars ?? (_argosCollars = GetArgosCollars()); }
@@ -205,7 +206,7 @@ namespace ArgosProcessor
             var databasePlatforms = from collar in Database.Collars
                                     where collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null
                                     select collar.AlternativeId;
-            return _filePlatforms.Except(databasePlatforms).ToList();
+            return FilePlatforms.Except(databasePlatforms).ToList();
         }
 
 
@@ -264,7 +265,7 @@ namespace ArgosProcessor
             var argosCollars = from collar in Database.Collars
                                where
                                    collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null &&
-                                   _filePlatforms.Contains(collar.AlternativeId)
+                                   FilePlatforms.Contains(collar.AlternativeId)
                                group collar by collar.AlternativeId;
             return argosCollars.ToDictionary(group => group.Key, group => group.ToList());
         }
