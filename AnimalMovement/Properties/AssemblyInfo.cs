@@ -1,11 +1,8 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//TODO - DATABASE - rename table CollarDataTelonicsGen4Condensed to CollarDataTelonicsGen4
 //TODO - DATABASE - Add business logic to ensure that all Deployments.Collar.DeploymentDate < Collar.DisposalDate
 //TODO - DATABASE - Add logic to limit collar fixes to those before the Collar.DisposalDate
-//TODO - DATABASE - Add table for Telonics tfp files, each record owned by a PI.
-//TODO - DATABASE - Add column in Collars table to reference the tfp file to convert this collars data
 //TODO - DATABASE - Move collar deployment date checking from Stored procedure to trigger to protect against SA and to allow bulk uploading.
 //TODO - DATABASE - Add more unit testing.
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
@@ -14,7 +11,9 @@ using System.Runtime.InteropServices;
 //TODO - Provide some global QAQC tools - I.e. show all collars with conflict in the last x days
 //TODO - Provide some global QAQC tools - I.e. show all collars with multiple parameter files
 //TODO - Provide some global QAQC tools - I.e. show files with overlapping fix dates
-//TODO - Provide some global QAQC tools - I.e. show collars that do not have a TPF or PPF file
+//TODO - Provide some global QAQC tools - I.e. show Telonics collars that do not have a TPF (Gen4) or FixPeriod (Gen3) or do have active PPF file (Gen3)
+//TODO - Provide some global QAQC tools - I.e. show Telonics Gen4 collars that have multiple active TPF files
+//TODO - Provide some global QAQC tools - I.e. show Telonics collars that have duplicate Alternative Id and identical Disposal dates
 //TODO - build tool to visualize deployments (i.e. show a graphical time line of animals & collars)
 //TODO - Create a Mortality Layer
 //TODO - Create a layer of last location (or locations)
