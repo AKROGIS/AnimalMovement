@@ -22,11 +22,9 @@ namespace ArgosProcessor
         private HashSet<Collar> _allUnambiguousCollars;
         private IEnumerable<Collar> _validCollars;
         private IEnumerable<Collar> _unambiguousSharedCollars;
-        private IEnumerable<Collar> _ambiguousCollars;
         private Dictionary<string, IProcessor> _processors;
         private Dictionary<string, List<Byte[]>> _tpfFiles;
         private Dictionary<string, TimeSpan> _gen3periods;
-        private HashSet<string> _gen3withParameterFile;
         //FIXME - Should some of these IEnumerables be fixed types to avoid multiple delayed executions
         #endregion
 
@@ -84,10 +82,16 @@ namespace ArgosProcessor
 
         internal IEnumerable<string> GetAmbiguousPlatforms()
         {
-            //FIXME - wrap with _ambiguousPlatforms
-            if (_ambiguousCollars == null)
-                _ambiguousCollars = GetAmbiguousCollars(); //FIXME - Only call site.  condense
-            return _ambiguousCollars.Select(c => c.AlternativeId);
+            if (_ambiguousPlatforms == null)
+            {
+                if (_sharedArgosCollars == null)
+                    _sharedArgosCollars = GetCollarsWithSharedArgosId();
+                if (_unambiguousSharedCollars == null)
+                    _unambiguousSharedCollars = GetUnambiguousSharedCollars();
+                var ambiguousCollars = _sharedArgosCollars.Values.SelectMany(c => c).Except(_unambiguousSharedCollars);
+                _ambiguousPlatforms = ambiguousCollars.Select(c => c.AlternativeId);
+            }
+            return _ambiguousPlatforms;
         }
 
 
@@ -221,16 +225,6 @@ namespace ArgosProcessor
             foreach (var single in singleton)
                 results[single.Key] = single.First();
             return results;
-        }
-
-
-        private IEnumerable<Collar> GetAmbiguousCollars()
-        {
-            if (_sharedArgosCollars == null)
-                _sharedArgosCollars = GetCollarsWithSharedArgosId();
-            if (_unambiguousSharedCollars == null)
-                _unambiguousSharedCollars = GetUnambiguousSharedCollars();
-            return _sharedArgosCollars.Values.SelectMany(c => c).Except(_unambiguousSharedCollars);
         }
 
 
@@ -372,20 +366,13 @@ namespace ArgosProcessor
 
         private bool HasGen3parameterFile(string telonicId)
         {
-            if (_gen3withParameterFile == null)
-                _gen3withParameterFile = GetGen3ParameterFile();
-            return _gen3withParameterFile.Contains(telonicId);
-        }
-
-        private HashSet<string> GetGen3ParameterFile()
-        {
             if (_allUnambiguousCollars == null)
                 _allUnambiguousCollars = GetAllUnambiguousCollars();
             var query = from parameter in Database.CollarParameters
                         //FIXME - add database field for parameter file status and check here
                         where parameter.CollarParameterFile.Format == 'B' && _allUnambiguousCollars.Contains(parameter.Collar)
                         select parameter.CollarId;
-            return new HashSet<string>(query);
+            return query.Contains(telonicId);
         }
 
         #endregion
