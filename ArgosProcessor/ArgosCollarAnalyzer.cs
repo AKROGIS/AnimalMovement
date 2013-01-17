@@ -17,6 +17,7 @@ namespace ArgosProcessor
         private List<string> _unknownPlatforms;
         private List<string> _ambiguousPlatforms;
         private Dictionary<Collar, string> _collarsWithProblems;
+        private Dictionary<string, List<Collar>> _argosCollars;
         private Dictionary<string, Collar> _uniqueArgosCollars;
         private Dictionary<string, List<Collar>> _sharedArgosCollars;
         private HashSet<Collar> _allUnambiguousCollars;
@@ -150,6 +151,11 @@ namespace ArgosProcessor
 
         #region Private Properties
 
+        private Dictionary<string, List<Collar>> ArgosCollars
+        {
+            get { return _argosCollars ?? (_argosCollars = GetArgosCollars()); }
+        }
+
         private Dictionary<string, Collar> UniqueArgosCollars
         {
             get { return _uniqueArgosCollars ?? (_uniqueArgosCollars = GetUniqueArgosCollars()); }
@@ -252,38 +258,27 @@ namespace ArgosProcessor
         }
 
 
-        //Get a dictionary yielding a single collar for a platform Id
-        private Dictionary<string, Collar> GetUniqueArgosCollars()
+        //Get a dictionary yielding a list of Collars for each Platform Id (most lists will have only one item)
+        private Dictionary<string, List<Collar>> GetArgosCollars()
         {
-            var collarsByArgos = from collar in Database.Collars
-                                 where collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null && _filePlatforms.Contains(collar.AlternativeId)
-                                 group collar by collar.AlternativeId;
-
-            var singleton = from grouping in collarsByArgos
-                           where grouping.Count() == 1 
-                           select grouping;
-            var results = new Dictionary<string, Collar>();
-            foreach (var single in singleton)
-                results[single.Key] = single.First();
-            return results;
+            var argosCollars = from collar in Database.Collars
+                               where
+                                   collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null &&
+                                   _filePlatforms.Contains(collar.AlternativeId)
+                               group collar by collar.AlternativeId;
+            return argosCollars.ToDictionary(group => group.Key, group => group.ToList());
         }
 
-                //FIXME - merge these two methods
 
-        //Get a dictionary yielding a list of Collars with the same Platform Id
+        private Dictionary<string, Collar> GetUniqueArgosCollars()
+        {
+            return ArgosCollars.Where(pair => pair.Value.Count == 1).ToDictionary(pair => pair.Key, pair => pair.Value[0]);
+        }
+
+
         private Dictionary<string, List<Collar>> GetSharedArgosCollars()
         {
-            var collarsByArgos = from collar in Database.Collars
-                                 where collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null && _filePlatforms.Contains(collar.AlternativeId)
-                                 group collar by collar.AlternativeId;
-
-            var groups = from grouping in collarsByArgos
-                            where grouping.Count() > 1
-                            select grouping;
-            var results = new Dictionary<string, List<Collar>>();
-            foreach (var group in groups)
-                results[group.Key] = group.ToList();
-            return results;
+            return ArgosCollars.Where(pair => pair.Value.Count > 1).ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
 
