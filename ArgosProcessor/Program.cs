@@ -68,7 +68,7 @@ namespace ArgosProcessor
                 var argos = new ArgosFile(file.Contents.ToArray());
                 var analyzer = new ArgosCollarAnalyzer(argos, db);
 
-                foreach (var platform in analyzer.GetUnknownPlatforms())
+                foreach (var platform in analyzer.UnknownPlatforms)
                 {
                     string message = String.Format(
                         "WARNING: Platform Id {0} was NOT found in the database. All fixes for this platform will be ignored.",
@@ -76,7 +76,7 @@ namespace ArgosProcessor
                     error.AppendLine(message);
                 }
 
-                foreach (var platform in analyzer.GetAmbiguousPlatforms())
+                foreach (var platform in analyzer.AmbiguousPlatforms)
                 {
                     string message = String.Format(
                         "WARNING: Platform Id {0} is ambiguous in the database. Ambiguous fixes for this platform will be ignored.",
@@ -84,7 +84,7 @@ namespace ArgosProcessor
                     error.AppendLine(message);
                 }
 
-                foreach (var problem in analyzer.GetCollarsWithProblems())
+                foreach (var problem in analyzer.CollarsWithProblems)
                 {
                     string message = String.Format(
                         "WARNING: Collar {0} {1} cannot be processed.  Reason: {2}",
@@ -92,9 +92,9 @@ namespace ArgosProcessor
                     error.AppendLine(message);
                 }
 
-                argos.Processor = analyzer.GetProcessorSelector();
-                argos.CollarFinder = analyzer.GetCollarSelector();
-                foreach (var collar in analyzer.GetValidCollars())
+                argos.Processor = analyzer.ProcessorSelector;
+                argos.CollarFinder = analyzer.CollarSelector;
+                foreach (var collar in analyzer.ValidCollars)
                 {
                     try
                     {
