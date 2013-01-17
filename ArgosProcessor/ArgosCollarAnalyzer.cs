@@ -10,22 +10,21 @@ namespace ArgosProcessor
     {
         #region Private Fields
 
-        //I have this long collection of private fields to cache results from all methods.
-        //various properties and methods use or report these values.  Since this object is
-        //immutable, these fields ensure that I only do each database query once.
+        //These private fields cache results for all the properties.
+        //This object is immutable, so I only need to calculate each property once.
         private List<string> _unknownPlatforms;
         private List<string> _ambiguousPlatforms;
+        private List<Collar> _validCollars;
         private Dictionary<Collar, string> _collarsWithProblems;
         private Dictionary<string, List<Collar>> _argosCollars;
         private Dictionary<string, Collar> _uniqueArgosCollars;
         private Dictionary<string, List<Collar>> _sharedArgosCollars;
-        private HashSet<Collar> _allUnambiguousCollars;
-        private List<Collar> _validCollars;
         private HashSet<Collar> _unambiguousSharedCollars;
+        private HashSet<Collar> _allUnambiguousCollars;
         private Dictionary<string, IProcessor> _processors;
-        private Dictionary<string, List<Byte[]>> _tpfFiles;
-        private Dictionary<string, TimeSpan> _gen3periods;
         private HashSet<string> _telonicGen3CollarsWithParameterFile;
+        private Dictionary<string, TimeSpan> _gen3periods;
+        private Dictionary<string, List<Byte[]>> _tpfFiles;
 
         #endregion
 
@@ -170,7 +169,7 @@ namespace ArgosProcessor
             get { return _sharedArgosCollars ?? (_sharedArgosCollars = GetSharedArgosCollars()); }
         }
 
-        private HashSet<Collar> UnambiguousSharedCollars
+        private IEnumerable<Collar> UnambiguousSharedCollars
         {
             get { return _unambiguousSharedCollars ?? (_unambiguousSharedCollars = GetUnambiguousSharedCollars()); }
         }
@@ -215,8 +214,9 @@ namespace ArgosProcessor
 
         private List<string> GetAmbiguousPlatforms()
         {
-            var ambiguousCollars = SharedArgosCollars.Values.SelectMany(c => c).Except(UnambiguousSharedCollars);
-            return ambiguousCollars.Select(c => c.AlternativeId).ToList();
+            var collars = new HashSet<Collar>(SharedArgosCollars.Values.SelectMany(c => c));
+            collars.ExceptWith(UnambiguousSharedCollars);
+            return collars.Select(c => c.AlternativeId).ToList();
         }
 
 
@@ -322,7 +322,6 @@ namespace ArgosProcessor
         }
 
 
-        //This method should only get called once
         private HashSet<string> GetTelonicGen3CollarsWithParameterFile()
         {
             var query = from parameter in Database.CollarParameters
