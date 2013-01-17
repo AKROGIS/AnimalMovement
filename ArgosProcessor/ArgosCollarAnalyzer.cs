@@ -39,7 +39,6 @@ namespace ArgosProcessor
                 throw new ArgumentNullException("database");
             File = file;
             Database = database;
-
             FilePlatforms = new HashSet<string>(File.GetPlatforms());
         }
 
@@ -68,8 +67,12 @@ namespace ArgosProcessor
 
         public Dictionary<Collar, string> CollarsWithProblems
         {
-            //TODO - should return a copy to prevent corruption by client
-            get { return _collarsWithProblems ?? (_collarsWithProblems = GetCollarsWithProblems()); }
+            get
+            {
+                if (_collarsWithProblems == null)
+                    _collarsWithProblems = GetCollarsWithProblems();
+                return _collarsWithProblems.ToDictionary(pair => pair.Key, pair => pair.Value);
+            }
         }
 
 
