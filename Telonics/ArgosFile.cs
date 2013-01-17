@@ -53,10 +53,18 @@ namespace Telonics
 
         #region Public Properties
 
+        [Obsolete]
         public Func<string, Boolean> IgnorePlatform { get; set; }
+        [Obsolete]
         public Func<string, DateTime, Boolean> IgnorePlatformOnDate { get; set; }
-        public Func<String, DateTime, String> TelonicsId { get; set; }   //PlatformId, Transmission Time, -> Telonics Id (CTN)
-        public Func<String, IProcessor> Processor { get; set; } //Telonics Model -> Telonics Processor
+        /// <summary>
+        /// Function that returns the Telonics ID (CTN Number) for a platformId (ArgosId) and Transmission date/time
+        /// </summary>
+        public Func<String, DateTime, String> CollarFinder { get; set; }
+        /// <summary>
+        /// Function that returns the object that knows how to process Argos transmissions for the given Telonics ID
+        /// </summary>
+        public Func<String, IProcessor> Processor { get; set; }
 
         #endregion
 
@@ -107,7 +115,7 @@ namespace Telonics
         {
             if (_transmissionsByCtn == null)
             {
-                if (TelonicsId == null)
+                if (CollarFinder == null)
                     throw new InvalidOperationException("The TelonicsId function must be defined to call ToTelonicsData()");
                 if (_transmissions == null)
                     _transmissions = GetTransmissions(_lines).ToList();
@@ -220,7 +228,7 @@ namespace Telonics
             var results = new Dictionary<string, List<ArgosTransmission>>();
             foreach (var transmission in transmissions)
             {
-                var ctn = TelonicsId(transmission.PlatformId, transmission.DateTime);
+                var ctn = CollarFinder(transmission.PlatformId, transmission.DateTime);
                 if (!results.ContainsKey(ctn))
                     results[ctn] = new List<ArgosTransmission>();
                 results[ctn].Add(transmission);

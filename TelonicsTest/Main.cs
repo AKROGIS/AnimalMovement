@@ -32,7 +32,7 @@ namespace TelonicsTest
             {
                 //IgnorePlatform = (p => p != id),
                 Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
-                TelonicsId = (i, d) => i
+                CollarFinder = (i, d) => i
             };
             Console.WriteLine("Transmissions in File");
             foreach (var s in a.GetTransmissions())
@@ -75,7 +75,7 @@ namespace TelonicsTest
                     {
                         //IgnorePlatform = (p => p != id),
                         Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
-                        TelonicsId = (i, d) => i
+                        CollarFinder = (i, d) => i
                     };
                     var lines = new string[0]; 
                     try
