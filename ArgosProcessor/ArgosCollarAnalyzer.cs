@@ -375,11 +375,11 @@ namespace ArgosProcessor
                             parameter.CollarParameterFile.Format == 'A' &&
                             AllUnambiguousCollars.Contains(parameter.Collar) &&
                             parameter.CollarParameterFile.Status == 'A'
-                        group parameter.CollarParameterFile.Contents by parameter.Collar.CollarId;
+                        group parameter.CollarParameterFile.Contents.ToArray() by parameter.Collar.CollarId;
 
             var results = new Dictionary<string, List<Byte[]>>();
             foreach (var item in query)
-                results[item.Key] = item.Cast<Byte[]>().ToList();
+                results[item.Key] = item.ToList();
             return results;
         }
 
