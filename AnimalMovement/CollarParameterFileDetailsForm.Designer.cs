@@ -31,6 +31,13 @@
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
             this.CollarsDataGridView = new System.Windows.Forms.DataGridView();
+            this.CollarColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CollarManufacturerColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FileIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CollarParameterFileColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.StartDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.EndDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ShowContentsButton = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -44,13 +51,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.FileNameTextBox = new System.Windows.Forms.TextBox();
-            this.CollarColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CollarManufacturerColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FileIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CollarParameterFileColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.StartDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.EndDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.StatusTextBox = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -58,7 +60,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(16, 231);
+            this.DoneCancelButton.Location = new System.Drawing.Point(16, 271);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 70;
@@ -70,7 +72,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(405, 231);
+            this.EditSaveButton.Location = new System.Drawing.Point(405, 271);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 71;
@@ -96,19 +98,84 @@
             this.CollarParameterFileColumn,
             this.StartDateColumn,
             this.EndDateColumn});
-            this.CollarsDataGridView.Location = new System.Drawing.Point(17, 95);
+            this.CollarsDataGridView.Location = new System.Drawing.Point(17, 118);
             this.CollarsDataGridView.MultiSelect = false;
             this.CollarsDataGridView.Name = "CollarsDataGridView";
             this.CollarsDataGridView.ReadOnly = true;
             this.CollarsDataGridView.RowHeadersVisible = false;
             this.CollarsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.CollarsDataGridView.Size = new System.Drawing.Size(463, 127);
+            this.CollarsDataGridView.Size = new System.Drawing.Size(463, 144);
             this.CollarsDataGridView.TabIndex = 60;
+            // 
+            // CollarColumn
+            // 
+            this.CollarColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.CollarColumn.DataPropertyName = "Collar";
+            this.CollarColumn.HeaderText = "Collar";
+            this.CollarColumn.Name = "CollarColumn";
+            this.CollarColumn.ReadOnly = true;
+            this.CollarColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
+            // CollarIdColumn
+            // 
+            this.CollarIdColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.CollarIdColumn.DataPropertyName = "CollarId";
+            this.CollarIdColumn.HeaderText = "CollarId";
+            this.CollarIdColumn.MinimumWidth = 70;
+            this.CollarIdColumn.Name = "CollarIdColumn";
+            this.CollarIdColumn.ReadOnly = true;
+            this.CollarIdColumn.Visible = false;
+            // 
+            // CollarManufacturerColumn
+            // 
+            this.CollarManufacturerColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.CollarManufacturerColumn.DataPropertyName = "CollarManufacturer";
+            this.CollarManufacturerColumn.HeaderText = "Manufacturer";
+            this.CollarManufacturerColumn.MinimumWidth = 80;
+            this.CollarManufacturerColumn.Name = "CollarManufacturerColumn";
+            this.CollarManufacturerColumn.ReadOnly = true;
+            this.CollarManufacturerColumn.Visible = false;
+            // 
+            // FileIdColumn
+            // 
+            this.FileIdColumn.DataPropertyName = "FileId";
+            this.FileIdColumn.HeaderText = "File Id";
+            this.FileIdColumn.Name = "FileIdColumn";
+            this.FileIdColumn.ReadOnly = true;
+            this.FileIdColumn.Visible = false;
+            // 
+            // CollarParameterFileColumn
+            // 
+            this.CollarParameterFileColumn.DataPropertyName = "CollarParameterFile";
+            this.CollarParameterFileColumn.HeaderText = "File";
+            this.CollarParameterFileColumn.Name = "CollarParameterFileColumn";
+            this.CollarParameterFileColumn.ReadOnly = true;
+            this.CollarParameterFileColumn.Visible = false;
+            // 
+            // StartDateColumn
+            // 
+            this.StartDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.StartDateColumn.DataPropertyName = "StartDate";
+            this.StartDateColumn.HeaderText = "Start Date";
+            this.StartDateColumn.MinimumWidth = 110;
+            this.StartDateColumn.Name = "StartDateColumn";
+            this.StartDateColumn.ReadOnly = true;
+            this.StartDateColumn.Width = 110;
+            // 
+            // EndDateColumn
+            // 
+            this.EndDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.EndDateColumn.DataPropertyName = "EndDate";
+            this.EndDateColumn.HeaderText = "End Date";
+            this.EndDateColumn.MinimumWidth = 110;
+            this.EndDateColumn.Name = "EndDateColumn";
+            this.EndDateColumn.ReadOnly = true;
+            this.EndDateColumn.Width = 110;
             // 
             // ShowContentsButton
             // 
             this.ShowContentsButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.ShowContentsButton.Location = new System.Drawing.Point(186, 231);
+            this.ShowContentsButton.Location = new System.Drawing.Point(186, 271);
             this.ShowContentsButton.Name = "ShowContentsButton";
             this.ShowContentsButton.Size = new System.Drawing.Size(116, 23);
             this.ShowContentsButton.TabIndex = 59;
@@ -231,77 +298,32 @@
             this.FileNameTextBox.Size = new System.Drawing.Size(162, 20);
             this.FileNameTextBox.TabIndex = 51;
             // 
-            // CollarColumn
+            // StatusTextBox
             // 
-            this.CollarColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.CollarColumn.DataPropertyName = "Collar";
-            this.CollarColumn.HeaderText = "Collar";
-            this.CollarColumn.Name = "CollarColumn";
-            this.CollarColumn.ReadOnly = true;
-            this.CollarColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.StatusTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.StatusTextBox.Enabled = false;
+            this.StatusTextBox.Location = new System.Drawing.Point(62, 90);
+            this.StatusTextBox.Name = "StatusTextBox";
+            this.StatusTextBox.Size = new System.Drawing.Size(162, 20);
+            this.StatusTextBox.TabIndex = 72;
             // 
-            // CollarIdColumn
+            // label4
             // 
-            this.CollarIdColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.CollarIdColumn.DataPropertyName = "CollarId";
-            this.CollarIdColumn.HeaderText = "CollarId";
-            this.CollarIdColumn.MinimumWidth = 70;
-            this.CollarIdColumn.Name = "CollarIdColumn";
-            this.CollarIdColumn.ReadOnly = true;
-            this.CollarIdColumn.Visible = false;
-            // 
-            // CollarManufacturerColumn
-            // 
-            this.CollarManufacturerColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.CollarManufacturerColumn.DataPropertyName = "CollarManufacturer";
-            this.CollarManufacturerColumn.HeaderText = "Manufacturer";
-            this.CollarManufacturerColumn.MinimumWidth = 80;
-            this.CollarManufacturerColumn.Name = "CollarManufacturerColumn";
-            this.CollarManufacturerColumn.ReadOnly = true;
-            this.CollarManufacturerColumn.Visible = false;
-            this.CollarManufacturerColumn.Width = 95;
-            // 
-            // FileIdColumn
-            // 
-            this.FileIdColumn.DataPropertyName = "FileId";
-            this.FileIdColumn.HeaderText = "File Id";
-            this.FileIdColumn.Name = "FileIdColumn";
-            this.FileIdColumn.ReadOnly = true;
-            this.FileIdColumn.Visible = false;
-            // 
-            // CollarParameterFileColumn
-            // 
-            this.CollarParameterFileColumn.DataPropertyName = "CollarParameterFile";
-            this.CollarParameterFileColumn.HeaderText = "File";
-            this.CollarParameterFileColumn.Name = "CollarParameterFileColumn";
-            this.CollarParameterFileColumn.ReadOnly = true;
-            this.CollarParameterFileColumn.Visible = false;
-            // 
-            // StartDateColumn
-            // 
-            this.StartDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.StartDateColumn.DataPropertyName = "StartDate";
-            this.StartDateColumn.HeaderText = "Start Date";
-            this.StartDateColumn.MinimumWidth = 110;
-            this.StartDateColumn.Name = "StartDateColumn";
-            this.StartDateColumn.ReadOnly = true;
-            this.StartDateColumn.Width = 110;
-            // 
-            // EndDateColumn
-            // 
-            this.EndDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.EndDateColumn.DataPropertyName = "EndDate";
-            this.EndDateColumn.HeaderText = "End Date";
-            this.EndDateColumn.MinimumWidth = 110;
-            this.EndDateColumn.Name = "EndDateColumn";
-            this.EndDateColumn.ReadOnly = true;
-            this.EndDateColumn.Width = 110;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(14, 93);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(40, 13);
+            this.label4.TabIndex = 73;
+            this.label4.Text = "Status:";
             // 
             // CollarParameterFileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(492, 262);
+            this.ClientSize = new System.Drawing.Size(492, 302);
+            this.Controls.Add(this.StatusTextBox);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
             this.Controls.Add(this.CollarsDataGridView);
@@ -351,6 +373,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn CollarParameterFileColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn StartDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn EndDateColumn;
+        private System.Windows.Forms.TextBox StatusTextBox;
+        private System.Windows.Forms.Label label4;
 
     }
 }

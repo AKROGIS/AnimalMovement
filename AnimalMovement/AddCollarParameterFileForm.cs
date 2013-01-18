@@ -44,6 +44,7 @@ namespace AnimalMovement
             SetupOwnerList();
             SetupFormatList();
             SetupCollarList();
+            SetupStatusList();
         }
 
         private void SetupOwnerList()
@@ -70,6 +71,18 @@ namespace AnimalMovement
             var format = formats.FirstOrDefault(f => f.Code == formatCode.Value);
             if (format != null)
                 FormatComboBox.SelectedItem = format;
+        }
+
+        private void SetupStatusList()
+        {
+            char? statusCode = 'A';
+            var query = Database.LookupCollarFileStatus;
+            var statuses = query.ToList();
+            StatusComboBox.DataSource = statuses;
+            StatusComboBox.DisplayMember = "Name";
+            var status = statuses.FirstOrDefault(s => s.Code == statusCode.Value);
+            if (status != null)
+                StatusComboBox.SelectedItem = status;
         }
 
         private void SetupCollarList()
@@ -238,6 +251,7 @@ namespace AnimalMovement
                 FileName = System.IO.Path.GetFileName(filename),
                 LookupCollarParameterFileFormat = format,
                 ProjectInvestigator = owner,
+                LookupCollarFileStatus = (LookupCollarFileStatus)StatusComboBox.SelectedItem,
                 Contents = data
             };
             Database.CollarParameterFiles.InsertOnSubmit(file);

@@ -2787,6 +2787,8 @@ namespace DataModel
 		
 		private EntitySet<CollarFile> _CollarFiles;
 		
+		private EntitySet<CollarParameterFile> _CollarParameterFiles;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -2802,6 +2804,7 @@ namespace DataModel
 		public LookupCollarFileStatus()
 		{
 			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
+			this._CollarParameterFiles = new EntitySet<CollarParameterFile>(new Action<CollarParameterFile>(this.attach_CollarParameterFiles), new Action<CollarParameterFile>(this.detach_CollarParameterFiles));
 			OnCreated();
 		}
 		
@@ -2878,6 +2881,19 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarFileStatus_CollarParameterFile", Storage="_CollarParameterFiles", ThisKey="Code", OtherKey="Status")]
+		public EntitySet<CollarParameterFile> CollarParameterFiles
+		{
+			get
+			{
+				return this._CollarParameterFiles;
+			}
+			set
+			{
+				this._CollarParameterFiles.Assign(value);
+			}
+		}
+		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -2905,6 +2921,18 @@ namespace DataModel
 		}
 		
 		private void detach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.LookupCollarFileStatus = null;
+		}
+		
+		private void attach_CollarParameterFiles(CollarParameterFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.LookupCollarFileStatus = this;
+		}
+		
+		private void detach_CollarParameterFiles(CollarParameterFile entity)
 		{
 			this.SendPropertyChanging();
 			entity.LookupCollarFileStatus = null;
@@ -4341,6 +4369,8 @@ namespace DataModel
 		
 		private EntitySet<CollarParameter> _CollarParameters;
 		
+		private EntityRef<LookupCollarFileStatus> _LookupCollarFileStatus;
+		
 		private EntityRef<LookupCollarParameterFileFormat> _LookupCollarParameterFileFormat;
 		
 		private EntityRef<ProjectInvestigator> _ProjectInvestigator;
@@ -4370,6 +4400,7 @@ namespace DataModel
 		public CollarParameterFile()
 		{
 			this._CollarParameters = new EntitySet<CollarParameter>(new Action<CollarParameter>(this.attach_CollarParameters), new Action<CollarParameter>(this.detach_CollarParameters));
+			this._LookupCollarFileStatus = default(EntityRef<LookupCollarFileStatus>);
 			this._LookupCollarParameterFileFormat = default(EntityRef<LookupCollarParameterFileFormat>);
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
 			OnCreated();
@@ -4534,6 +4565,10 @@ namespace DataModel
 			{
 				if ((this._Status != value))
 				{
+					if (this._LookupCollarFileStatus.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
 					this.OnStatusChanging(value);
 					this.SendPropertyChanging();
 					this._Status = value;
@@ -4553,6 +4588,40 @@ namespace DataModel
 			set
 			{
 				this._CollarParameters.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarFileStatus_CollarParameterFile", Storage="_LookupCollarFileStatus", ThisKey="Status", OtherKey="Code", IsForeignKey=true)]
+		public LookupCollarFileStatus LookupCollarFileStatus
+		{
+			get
+			{
+				return this._LookupCollarFileStatus.Entity;
+			}
+			set
+			{
+				LookupCollarFileStatus previousValue = this._LookupCollarFileStatus.Entity;
+				if (((previousValue != value) 
+							|| (this._LookupCollarFileStatus.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._LookupCollarFileStatus.Entity = null;
+						previousValue.CollarParameterFiles.Remove(this);
+					}
+					this._LookupCollarFileStatus.Entity = value;
+					if ((value != null))
+					{
+						value.CollarParameterFiles.Add(this);
+						this._Status = value.Code;
+					}
+					else
+					{
+						this._Status = default(char);
+					}
+					this.SendPropertyChanged("LookupCollarFileStatus");
+				}
 			}
 		}
 		

@@ -213,6 +213,7 @@
       <Column Name="Name" Type="System.String" DbType="NVarChar(32) NOT NULL" CanBeNull="false" />
       <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
       <Association Name="LookupCollarFileStatus_CollarFile" Member="CollarFiles" ThisKey="Code" OtherKey="Status" Type="CollarFile" />
+      <Association Name="LookupCollarFileStatus_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Code" OtherKey="Status" Type="CollarParameterFile" />
     </Type>
   </Table>
   <Table Name="dbo.LookupCollarManufacturers" Member="LookupCollarManufacturers">
@@ -315,8 +316,9 @@
       <Association Name="CollarParameterFile_CollarParameter" Member="CollarParameters" ThisKey="FileId" OtherKey="FileId" Type="CollarParameter" />
       <Association Name="LookupCollarParameterFileFormat_CollarParameterFile" Member="LookupCollarParameterFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarParameterFileFormat" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_CollarParameterFile" Member="ProjectInvestigator" ThisKey="Owner" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
+      <Association Name="LookupCollarFileStatus_CollarParameterFile" Member="LookupCollarFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupCollarFileStatus" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId19">
+    <InsertFunction FunctionId="FunctionId22">
       <Argument Parameter="owner" Member="Owner" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="format" Member="Format" />
@@ -324,14 +326,14 @@
       <Argument Parameter="status" Member="Status" />
       <Argument Parameter="fileId" Member="FileId" />
     </InsertFunction>
-    <UpdateFunction FunctionId="FunctionId20">
+    <UpdateFunction FunctionId="FunctionId23">
       <Argument Parameter="owner" Member="Owner" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="format" Member="Format" />
       <Argument Parameter="status" Member="Status" />
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </UpdateFunction>
-    <DeleteFunction FunctionId="FunctionId21">
+    <DeleteFunction FunctionId="FunctionId24">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </DeleteFunction>
   </Table>
@@ -345,21 +347,21 @@
       <Association Name="CollarParameterFile_CollarParameter" Member="CollarParameterFile" ThisKey="FileId" OtherKey="FileId" Type="CollarParameterFile" IsForeignKey="true" />
       <Association Name="Collar_CollarParameter" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId22">
+    <InsertFunction FunctionId="FunctionId19">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
       <Argument Parameter="collarId" Member="CollarId" />
       <Argument Parameter="fileId" Member="FileId" />
       <Argument Parameter="startDate" Member="StartDate" />
       <Argument Parameter="endDate" Member="EndDate" />
     </InsertFunction>
-    <UpdateFunction FunctionId="FunctionId23">
+    <UpdateFunction FunctionId="FunctionId20">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" Version="Original" />
       <Argument Parameter="collarId" Member="CollarId" Version="Original" />
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
       <Argument Parameter="startDate" Member="StartDate" />
       <Argument Parameter="endDate" Member="EndDate" />
     </UpdateFunction>
-    <DeleteFunction FunctionId="FunctionId24">
+    <DeleteFunction FunctionId="FunctionId21">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" Version="Original" />
       <Argument Parameter="collarId" Member="CollarId" Version="Original" />
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
@@ -526,7 +528,7 @@
     <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId19" Name="dbo.CollarParameterFile_Insert" Method="CollarParameterFile_Insert">
+  <Function Id="FunctionId22" Name="dbo.CollarParameterFile_Insert" Method="CollarParameterFile_Insert">
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
@@ -535,21 +537,13 @@
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" Direction="InOut" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId24" Name="dbo.CollarParameter_Delete" Method="CollarParameter_Delete">
+  <Function Id="FunctionId21" Name="dbo.CollarParameter_Delete" Method="CollarParameter_Delete">
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId22" Name="dbo.CollarParameter_Insert" Method="CollarParameter_Insert">
-    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Parameter Name="StartDate" Parameter="startDate" Type="System.DateTime" DbType="DateTime2" />
-    <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
-    <Return Type="System.Int32" />
-  </Function>
-  <Function Id="FunctionId23" Name="dbo.CollarParameter_Update" Method="CollarParameter_Update">
+  <Function Id="FunctionId19" Name="dbo.CollarParameter_Insert" Method="CollarParameter_Insert">
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
@@ -557,11 +551,19 @@
     <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId21" Name="dbo.CollarParameterFile_Delete" Method="CollarParameterFile_Delete">
+  <Function Id="FunctionId20" Name="dbo.CollarParameter_Update" Method="CollarParameter_Update">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="StartDate" Parameter="startDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId24" Name="dbo.CollarParameterFile_Delete" Method="CollarParameterFile_Delete">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId20" Name="dbo.CollarParameterFile_Update" Method="CollarParameterFile_Update">
+  <Function Id="FunctionId23" Name="dbo.CollarParameterFile_Update" Method="CollarParameterFile_Update">
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />

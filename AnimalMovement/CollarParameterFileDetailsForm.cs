@@ -45,6 +45,7 @@ namespace AnimalMovement
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarParameterFileFormat.Name;
+            StatusTextBox.Text = File.LookupCollarFileStatus.Name;
             UserNameTextBox.Text = File.UploadUser;
             UploadDateTextBox.Text = File.UploadDate.ToString(CultureInfo.CurrentCulture);
             OwnerTextBox.Text = File.Owner;

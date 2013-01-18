@@ -40,6 +40,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.CollarLabel = new System.Windows.Forms.Label();
             this.CollarComboBox = new System.Windows.Forms.ComboBox();
+            this.StatusComboBox = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // cancelButton
@@ -144,7 +146,7 @@
             // CollarLabel
             // 
             this.CollarLabel.AutoSize = true;
-            this.CollarLabel.Location = new System.Drawing.Point(9, 95);
+            this.CollarLabel.Location = new System.Drawing.Point(9, 121);
             this.CollarLabel.Name = "CollarLabel";
             this.CollarLabel.Size = new System.Drawing.Size(36, 13);
             this.CollarLabel.TabIndex = 35;
@@ -157,17 +159,39 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.CollarComboBox.FormattingEnabled = true;
-            this.CollarComboBox.Location = new System.Drawing.Point(51, 92);
+            this.CollarComboBox.Location = new System.Drawing.Point(51, 118);
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(310, 21);
             this.CollarComboBox.TabIndex = 36;
             this.CollarComboBox.Visible = false;
+            // 
+            // StatusComboBox
+            // 
+            this.StatusComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.StatusComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.StatusComboBox.FormattingEnabled = true;
+            this.StatusComboBox.Location = new System.Drawing.Point(51, 91);
+            this.StatusComboBox.Name = "StatusComboBox";
+            this.StatusComboBox.Size = new System.Drawing.Size(310, 21);
+            this.StatusComboBox.TabIndex = 38;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(9, 94);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(40, 13);
+            this.label4.TabIndex = 37;
+            this.label4.Text = "Status:";
             // 
             // AddCollarParameterFileForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(373, 180);
+            this.Controls.Add(this.StatusComboBox);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.CollarComboBox);
             this.Controls.Add(this.CollarLabel);
             this.Controls.Add(this.OwnerComboBox);
@@ -201,6 +225,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label CollarLabel;
         private System.Windows.Forms.ComboBox CollarComboBox;
+        private System.Windows.Forms.ComboBox StatusComboBox;
+        private System.Windows.Forms.Label label4;
 
     }
 }
