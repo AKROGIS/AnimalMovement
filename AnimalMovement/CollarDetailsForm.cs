@@ -71,7 +71,7 @@ namespace AnimalMovement
             OwnerTextBox.Text = Collar.Owner;
             SerialNumberTextBox.Text = Collar.SerialNumber;
             FrequencyTextBox.Text = Collar.Frequency.HasValue ?  Collar.Frequency.Value.ToString(CultureInfo.InvariantCulture) : null;
-            DownloadInfoTextBox.Text = Collar.DownloadInfo;
+            PeriodTextBox.Text = Collar.Gen3Period.ToString();
             NotesTextBox.Text = Collar.Notes;
             SetDeploymentDataGrid();
             SetFixesGrid();
@@ -128,7 +128,8 @@ namespace AnimalMovement
             Collar.Owner = OwnerTextBox.Text;
             Collar.SerialNumber = SerialNumberTextBox.Text;
             Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull() ?? 0;
-            Collar.DownloadInfo = DownloadInfoTextBox.Text;
+            int period;
+            Collar.Gen3Period = Int32.TryParse(PeriodTextBox.Text, out period) ? period : (int?)null;
             Collar.Notes = NotesTextBox.Text;
             if (DisposalDateTimePicker.Checked)
                 Collar.DisposalDate = DisposalDateTimePicker.Value.ToUniversalTime();
@@ -154,7 +155,7 @@ namespace AnimalMovement
             SerialNumberTextBox.Enabled = editModeEnabled;
             FrequencyTextBox.Enabled = editModeEnabled;
             DisposalDateTimePicker.Enabled = editModeEnabled;
-            DownloadInfoTextBox.Enabled = editModeEnabled;
+            PeriodTextBox.Enabled = editModeEnabled;
             NotesTextBox.Enabled = editModeEnabled;
 
             AnimalInfoButton.Enabled = !editModeEnabled && DeploymentDataGridView.RowCount > 0;

@@ -104,11 +104,12 @@ namespace AnimalMovement
                 CreateButton.Enabled = false;
                 return;
             }
+            int period;
             var collar = new Collar
                 {
                     AlternativeId = AlternativeIdTextBox.Text.NullifyIfEmpty(),
                     CollarId = CollarIdTextBox.Text.NullifyIfEmpty(),
-                    DownloadInfo = DownloadInfoTextBox.Text.NullifyIfEmpty(),
+                    Gen3Period = Int32.TryParse(PeriodTextBox.Text, out period) ? period : (int?)null,
                     Frequency = FrequencyTextBox.Text.DoubleOrNull(),
                     LookupCollarManufacturer = (LookupCollarManufacturer)ManufacturerComboBox.SelectedItem,
                     LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem,

@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.label10 = new System.Windows.Forms.Label();
-            this.DownloadInfoTextBox = new System.Windows.Forms.TextBox();
+            this.PeriodTextBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.FrequencyTextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -89,23 +89,24 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(7, 114);
+            this.label10.Location = new System.Drawing.Point(251, 88);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(79, 13);
+            this.label10.Size = new System.Drawing.Size(85, 13);
             this.label10.TabIndex = 53;
-            this.label10.Text = "Download Info:";
+            this.label10.Text = "Period (minutes):";
             this.toolTip1.SetToolTip(this.label10, "Instructions on downloading collar data from mfgr (currently not used)");
             // 
-            // DownloadInfoTextBox
+            // PeriodTextBox
             // 
-            this.DownloadInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.PeriodTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.DownloadInfoTextBox.Location = new System.Drawing.Point(90, 111);
-            this.DownloadInfoTextBox.MaxLength = 200;
-            this.DownloadInfoTextBox.Name = "DownloadInfoTextBox";
-            this.DownloadInfoTextBox.Size = new System.Drawing.Size(378, 20);
-            this.DownloadInfoTextBox.TabIndex = 9;
-            this.toolTip1.SetToolTip(this.DownloadInfoTextBox, "Instructions on downloading collar data from mfgr (currently not used)");
+            this.PeriodTextBox.Location = new System.Drawing.Point(342, 85);
+            this.PeriodTextBox.MaxLength = 200;
+            this.PeriodTextBox.Name = "PeriodTextBox";
+            this.PeriodTextBox.Size = new System.Drawing.Size(126, 20);
+            this.PeriodTextBox.TabIndex = 9;
+            this.toolTip1.SetToolTip(this.PeriodTextBox, "Period (in minutes) between fixes.  Only for processing Argos messages from Telon" +
+        "ics Gen 3 collars");
             // 
             // label9
             // 
@@ -205,10 +206,10 @@
             this.NotesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.NotesTextBox.Location = new System.Drawing.Point(90, 137);
+            this.NotesTextBox.Location = new System.Drawing.Point(90, 111);
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
-            this.NotesTextBox.Size = new System.Drawing.Size(378, 108);
+            this.NotesTextBox.Size = new System.Drawing.Size(378, 134);
             this.NotesTextBox.TabIndex = 10;
             // 
             // OwnerTextBox
@@ -246,7 +247,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(48, 140);
+            this.label5.Location = new System.Drawing.Point(48, 114);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(38, 13);
             this.label5.TabIndex = 37;
@@ -461,7 +462,7 @@
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.label10);
             this.tabPage1.Controls.Add(this.label5);
-            this.tabPage1.Controls.Add(this.DownloadInfoTextBox);
+            this.tabPage1.Controls.Add(this.PeriodTextBox);
             this.tabPage1.Controls.Add(this.AlternativeIdTextBox);
             this.tabPage1.Controls.Add(this.label9);
             this.tabPage1.Controls.Add(this.FrequencyTextBox);
@@ -501,7 +502,7 @@
             this.DisposalDateTimePicker.Location = new System.Drawing.Point(90, 85);
             this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
             this.DisposalDateTimePicker.ShowCheckBox = true;
-            this.DisposalDateTimePicker.Size = new System.Drawing.Size(378, 20);
+            this.DisposalDateTimePicker.Size = new System.Drawing.Size(154, 20);
             this.DisposalDateTimePicker.TabIndex = 81;
             this.toolTip1.SetToolTip(this.DisposalDateTimePicker, "The date the collar was lost, destroyed, or retired");
             this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
@@ -672,7 +673,7 @@
         #endregion
 
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox DownloadInfoTextBox;
+        private System.Windows.Forms.TextBox PeriodTextBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox FrequencyTextBox;
         private System.Windows.Forms.Label label8;

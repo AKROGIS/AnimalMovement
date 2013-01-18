@@ -50,7 +50,7 @@
             this.label9 = new System.Windows.Forms.Label();
             this.FrequencyTextBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.DownloadInfoTextBox = new System.Windows.Forms.TextBox();
+            this.PeriodTextBox = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
@@ -272,23 +272,24 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(12, 226);
+            this.label10.Location = new System.Drawing.Point(6, 226);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(79, 13);
+            this.label10.Size = new System.Drawing.Size(85, 13);
             this.label10.TabIndex = 33;
-            this.label10.Text = "Download Info:";
+            this.label10.Text = "Period (minutes):";
             this.toolTip1.SetToolTip(this.label10, "Instructions on downloading collar data from mfgr (currently not used)");
             // 
-            // DownloadInfoTextBox
+            // PeriodTextBox
             // 
-            this.DownloadInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.PeriodTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.DownloadInfoTextBox.Location = new System.Drawing.Point(95, 223);
-            this.DownloadInfoTextBox.MaxLength = 200;
-            this.DownloadInfoTextBox.Name = "DownloadInfoTextBox";
-            this.DownloadInfoTextBox.Size = new System.Drawing.Size(259, 20);
-            this.DownloadInfoTextBox.TabIndex = 18;
-            this.toolTip1.SetToolTip(this.DownloadInfoTextBox, "Instructions on downloading collar data from mfgr (currently not used)");
+            this.PeriodTextBox.Location = new System.Drawing.Point(95, 223);
+            this.PeriodTextBox.MaxLength = 200;
+            this.PeriodTextBox.Name = "PeriodTextBox";
+            this.PeriodTextBox.Size = new System.Drawing.Size(259, 20);
+            this.PeriodTextBox.TabIndex = 18;
+            this.toolTip1.SetToolTip(this.PeriodTextBox, "Period (in minutes) between fixes.  Only for processing Argos messages from Telon" +
+        "ics Gen 3 collars");
             // 
             // AddCollarForm
             // 
@@ -298,7 +299,7 @@
             this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(376, 370);
             this.Controls.Add(this.label10);
-            this.Controls.Add(this.DownloadInfoTextBox);
+            this.Controls.Add(this.PeriodTextBox);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.FrequencyTextBox);
             this.Controls.Add(this.label8);
@@ -351,7 +352,7 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox FrequencyTextBox;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox DownloadInfoTextBox;
+        private System.Windows.Forms.TextBox PeriodTextBox;
         private System.Windows.Forms.ToolTip toolTip1;
 
     }
