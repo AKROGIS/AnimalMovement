@@ -141,6 +141,9 @@ namespace ArgosProcessor
             if (String.IsNullOrEmpty(argosId))
                 throw new ArgumentNullException("argosId", "No Argos Id provided when one was expected");
 
+            if (UnknownPlatforms.Contains(argosId))
+                return null;
+
             if (UniqueArgosCollars.ContainsKey(argosId))
                 return UniqueArgosCollars[argosId].CollarId;
 

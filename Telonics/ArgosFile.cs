@@ -217,6 +217,8 @@ namespace Telonics
             foreach (var transmission in transmissions)
             {
                 var ctn = CollarFinder(transmission.PlatformId, transmission.DateTime);
+                if (ctn == null)
+                    continue;
                 if (!results.ContainsKey(ctn))
                     results[ctn] = new List<ArgosTransmission>();
                 results[ctn].Add(transmission);
