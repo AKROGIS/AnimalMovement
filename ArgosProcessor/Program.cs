@@ -113,8 +113,7 @@ namespace ArgosProcessor
                             CollarId = collar.CollarId,
                             Status = 'A',
                             ParentFileId = id,
-                            Contents = Encoding.UTF8.GetBytes(String.Join("",data)),
-
+                            Contents = Encoding.UTF8.GetBytes(String.Join("\n",data)),
                         };
                         db.CollarFiles.InsertOnSubmit(collarFile);
                         db.SubmitChanges();
