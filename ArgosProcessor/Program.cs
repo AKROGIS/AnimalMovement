@@ -40,7 +40,7 @@ namespace ArgosProcessor
             try
             {
                 var db = new AnimalMovementDataContext();
-#if DEBUG
+#if DEBUGx
             // args[0] is a path to an email file
             string fileName = System.IO.Path.GetFileName(args[0]);
             byte[] content = System.IO.File.ReadAllBytes(args[0]);
@@ -76,23 +76,33 @@ namespace ArgosProcessor
                 foreach (var platform in analyzer.UnknownPlatforms)
                 {
                     string message = String.Format(
-                        "WARNING: Platform Id {0} was NOT found in the database. All fixes for this platform will be ignored.",
+                        "WARNING: Platform {0} will be skipped.  It was NOT found in the database.",
                         platform);
                     error.AppendLine(message);
                 }
 
                 foreach (var platform in analyzer.AmbiguousPlatforms)
                 {
+                    var argosId = platform;  // Use local (not foreach) variable in closure (for compiler version stability)
+                    var collars = from collar in db.Collars
+                                  where collar.AlternativeId == argosId
+                                  select
+                                      String.Format("Collar: {0} DisposalDate: {1}", collar,
+                                                    collar.DisposalDate.HasValue
+                                                        ? collar.DisposalDate.ToString()
+                                                        : "<NULL> (Active)");
                     string message = String.Format(
-                        "WARNING: Platform Id {0} is ambiguous in the database. Ambiguous fixes for this platform will be ignored.",
-                        platform);
+                        "WARNING: Platform {0} will be skipped because it is ambiguous.\n" +
+                        "  Fix this problem by using distinct disposal dates for these collars:\n    {1}",
+                        platform, String.Join("\n    ", collars));
                     error.AppendLine(message);
                 }
 
                 foreach (var problem in analyzer.CollarsWithProblems)
                 {
                     string message = String.Format(
-                        "WARNING: Collar {0} cannot be processed.  Reason: {1}",
+                        "WARNING: Collar {0} cannot be processed.\n" +
+                        "   Reason: {1}",
                         problem.Key, problem.Value);
                     error.AppendLine(message);
                 }
