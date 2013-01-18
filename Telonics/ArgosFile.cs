@@ -53,10 +53,6 @@ namespace Telonics
 
         #region Public Properties
 
-        [Obsolete]
-        public Func<string, Boolean> IgnorePlatform { get; set; }
-        [Obsolete]
-        public Func<string, DateTime, Boolean> IgnorePlatformOnDate { get; set; }
         /// <summary>
         /// Function that returns the Telonics ID (CTN Number) for a platformId (ArgosId) and Transmission date/time
         /// </summary>
@@ -175,8 +171,6 @@ namespace Telonics
                     platformId = line.Substring(6, 6).Trim().TrimStart('0');
                     transmission = null;
                     platformheader = line;
-                    if (IgnorePlatform != null && IgnorePlatform(platformId))
-                        platformId = null;
                 }
 
                 else if (platformId != null && transmissionPattern.IsMatch(line))
@@ -185,12 +179,6 @@ namespace Telonics
                     if (tokens.Length == 6 || tokens.Length == 7)
                     {
                         var transmissionDateTime = DateTime.Parse(tokens[0] + " " + tokens[1]);
-                        if (IgnorePlatformOnDate != null &&
-                            IgnorePlatformOnDate(platformId, transmissionDateTime))
-                        {
-                            platformId = null;
-                            continue;
-                        }
 
                         transmission = new ArgosTransmission
                         {
