@@ -247,7 +247,7 @@ namespace ArgosProcessor
         {
             var collars = new HashSet<Collar>(SharedArgosCollars.Values.SelectMany(c => c));
             collars.ExceptWith(UnambiguousSharedCollars);
-            return collars.Select(c => c.AlternativeId).ToList();
+            return collars.Select(c => c.AlternativeId).Distinct().ToList();
         }
 
 
