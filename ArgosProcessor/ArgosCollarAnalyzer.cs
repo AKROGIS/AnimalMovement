@@ -325,8 +325,10 @@ namespace ArgosProcessor
         private HashSet<string> GetTelonicGen3CollarsWithParameterFile()
         {
             var query = from parameter in Database.CollarParameters
-                        //FIXME - add database field for parameter file status and check here
-                        where parameter.CollarParameterFile.Format == 'B' && AllUnambiguousCollars.Contains(parameter.Collar)
+                        where
+                            parameter.CollarParameterFile.Format == 'B' &&
+                            AllUnambiguousCollars.Contains(parameter.Collar) &&
+                            parameter.CollarParameterFile.Status == 'A'
                         select parameter.CollarId;
             return new HashSet<string>(query);
         }
@@ -344,8 +346,10 @@ namespace ArgosProcessor
         private Dictionary<string, List<Byte[]>> GetTpfFiles()
         {
             var query = from parameter in Database.CollarParameters
-                        //FIXME - add database field for parameter file status and check here
-                        where parameter.CollarParameterFile.Format == 'A' && AllUnambiguousCollars.Contains(parameter.Collar)
+                        where
+                            parameter.CollarParameterFile.Format == 'A' &&
+                            AllUnambiguousCollars.Contains(parameter.Collar) &&
+                            parameter.CollarParameterFile.Status == 'A'
                         group parameter.CollarParameterFile.Contents by parameter.Collar.CollarId;
 
             var results = new Dictionary<string, List<Byte[]>>();

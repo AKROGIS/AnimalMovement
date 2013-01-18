@@ -329,14 +329,14 @@ namespace DataModel
 		private void InsertCollarParameterFile(CollarParameterFile obj)
 		{
 			System.Nullable<int> p1 = obj.FileId;
-			this.CollarParameterFile_Insert(obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), obj.Contents, ref p1);
+			this.CollarParameterFile_Insert(obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), obj.Contents, ((System.Nullable<char>)(obj.Status)), ref p1);
 			obj.FileId = p1.GetValueOrDefault();
 		}
 		
 		private void UpdateCollarParameterFile(CollarParameterFile obj)
 		{
 			CollarParameterFile original = ((CollarParameterFile)(CollarParameterFiles.GetOriginalEntityState(obj)));
-			this.CollarParameterFile_Update(obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), ((System.Nullable<int>)(original.FileId)));
+			this.CollarParameterFile_Update(obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), ((System.Nullable<char>)(obj.Status)), ((System.Nullable<int>)(original.FileId)));
 		}
 		
 		private void DeleteCollarParameterFile(CollarParameterFile obj)
@@ -521,10 +521,10 @@ namespace DataModel
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameterFile_Insert")]
-		public int CollarParameterFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId)
+		public int CollarParameterFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId)
 		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, contents, fileId);
-			fileId = ((System.Nullable<int>)(result.GetParameterValue(4)));
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, contents, status, fileId);
+			fileId = ((System.Nullable<int>)(result.GetParameterValue(5)));
 			return ((int)(result.ReturnValue));
 		}
 		
@@ -557,9 +557,9 @@ namespace DataModel
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameterFile_Update")]
-		public int CollarParameterFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
+		public int CollarParameterFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
 		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, fileId);
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, status, fileId);
 			return ((int)(result.ReturnValue));
 		}
 		
@@ -4337,6 +4337,8 @@ namespace DataModel
 		
 		private System.Data.Linq.Binary _Contents;
 		
+		private char _Status;
+		
 		private EntitySet<CollarParameter> _CollarParameters;
 		
 		private EntityRef<LookupCollarParameterFileFormat> _LookupCollarParameterFileFormat;
@@ -4361,6 +4363,8 @@ namespace DataModel
     partial void OnUploadUserChanged();
     partial void OnContentsChanging(System.Data.Linq.Binary value);
     partial void OnContentsChanged();
+    partial void OnStatusChanging(char value);
+    partial void OnStatusChanged();
     #endregion
 		
 		public CollarParameterFile()
@@ -4515,6 +4519,26 @@ namespace DataModel
 					this._Contents = value;
 					this.SendPropertyChanged("Contents");
 					this.OnContentsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Status", DbType="Char(1) NOT NULL")]
+		public char Status
+		{
+			get
+			{
+				return this._Status;
+			}
+			set
+			{
+				if ((this._Status != value))
+				{
+					this.OnStatusChanging(value);
+					this.SendPropertyChanging();
+					this._Status = value;
+					this.SendPropertyChanged("Status");
+					this.OnStatusChanged();
 				}
 			}
 		}

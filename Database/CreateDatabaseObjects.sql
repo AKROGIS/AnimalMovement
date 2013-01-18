@@ -3385,6 +3385,7 @@ CREATE TABLE [dbo].[CollarParameterFiles](
 	[UploadDate] [datetime2](7) NOT NULL,
 	[UploadUser] [sysname] NOT NULL,
 	[Contents] [varbinary](max) NOT NULL,
+	[Status] [char](1) NOT NULL,
  CONSTRAINT [PK_CollarParameterFiles] PRIMARY KEY CLUSTERED 
 (
 	[FileId] ASC
@@ -4194,6 +4195,7 @@ CREATE PROCEDURE [dbo].[CollarParameterFile_Update]
 	@Owner NVARCHAR(255) = NULL, 
 	@FileName NVARCHAR(255) = NULL,
 	@Format CHAR = NULL, 
+	@Status CHAR = NULL,
 	@FileId INT = NULL
 AS
 BEGIN
@@ -4224,9 +4226,19 @@ BEGIN
 		RETURN (1)
 	END
 
+	IF @Format IS NULL
+	BEGIN
+		SELECT @Format = [Format] FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
+	END
+
+	IF @Status IS NULL
+	BEGIN
+		SELECT @Status = [Status] FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
+	END
+
 
 	-- All other verification is handled by primary/foreign key and column constraints.
-	UPDATE dbo.CollarParameterFiles SET [Owner] = @Owner, [FileName] = @FileName, [Format] = @Format
+	UPDATE dbo.CollarParameterFiles SET [Owner] = @Owner, [FileName] = @FileName, [Format] = @Format, [Status] = @Status
 		 WHERE [FileId] = @FileId
 
 END
@@ -4245,6 +4257,7 @@ CREATE PROCEDURE [dbo].[CollarParameterFile_Insert]
 	@FileName NVARCHAR(255) = NULL,
 	@Format CHAR = NULL, 
 	@Contents VARBINARY(max) = NULL,
+	@Status CHAR = 'A',
 	@FileId INT OUTPUT
 AS
 BEGIN
@@ -4261,8 +4274,8 @@ BEGIN
 	-- The caller must be an editor in the database - handled by execute permissions
 
 	-- All other verification is handled by primary/foreign key and column constraints.
-	INSERT INTO dbo.CollarParameterFiles ([Owner], [FileName], [Format], [Contents])
-		 VALUES (@Owner, @FileName, @Format, @Contents)
+	INSERT INTO dbo.CollarParameterFiles ([Owner], [FileName], [Format], [Contents], [Status])
+		 VALUES (@Owner, @FileName, @Format, @Contents, @Status)
 
 	SET @FileId = SCOPE_IDENTITY();
 
@@ -8119,6 +8132,11 @@ ALTER TABLE [dbo].[CollarFixes]  WITH CHECK ADD  CONSTRAINT [FK_CollarFixes_Coll
 REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
 GO
 ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_Collars]
+GO
+ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupCollarFileStatus] FOREIGN KEY([Status])
+REFERENCES [dbo].[LookupCollarFileStatus] ([Code])
+GO
+ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupCollarFileStatus]
 GO
 ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupParameterFileFormats] FOREIGN KEY([Format])
 REFERENCES [dbo].[LookupCollarParameterFileFormats] ([Code])

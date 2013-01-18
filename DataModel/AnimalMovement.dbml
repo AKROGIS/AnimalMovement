@@ -311,6 +311,7 @@
       <Column Name="UploadDate" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
       <Column Name="UploadUser" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
       <Column Name="Contents" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="Status" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
       <Association Name="CollarParameterFile_CollarParameter" Member="CollarParameters" ThisKey="FileId" OtherKey="FileId" Type="CollarParameter" />
       <Association Name="LookupCollarParameterFileFormat_CollarParameterFile" Member="LookupCollarParameterFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarParameterFileFormat" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_CollarParameterFile" Member="ProjectInvestigator" ThisKey="Owner" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
@@ -320,12 +321,14 @@
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="format" Member="Format" />
       <Argument Parameter="contents" Member="Contents" />
+      <Argument Parameter="status" Member="Status" />
       <Argument Parameter="fileId" Member="FileId" />
     </InsertFunction>
     <UpdateFunction FunctionId="FunctionId20">
       <Argument Parameter="owner" Member="Owner" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="format" Member="Format" />
+      <Argument Parameter="status" Member="Status" />
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </UpdateFunction>
     <DeleteFunction FunctionId="FunctionId21">
@@ -528,6 +531,7 @@
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
     <Parameter Name="Contents" Parameter="contents" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" />
+    <Parameter Name="Status" Parameter="status" Type="System.Char" DbType="Char(1)" />
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" Direction="InOut" />
     <Return Type="System.Int32" />
   </Function>
@@ -561,6 +565,7 @@
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
+    <Parameter Name="Status" Parameter="status" Type="System.Char" DbType="Char(1)" />
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
