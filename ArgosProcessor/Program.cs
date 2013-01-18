@@ -40,11 +40,11 @@ namespace ArgosProcessor
             try
             {
                 var db = new AnimalMovementDataContext();
-#if DEBUGx
-    // Args[0] is a path to an email file
+#if DEBUG
+            // args[0] is a path to an email file
             string fileName = System.IO.Path.GetFileName(args[0]);
             byte[] content = System.IO.File.ReadAllBytes(args[0]);
-            var collarFile = new CollarFile
+            var testFile = new CollarFile
                 {
                     Project = "test",
                     FileName = fileName,
@@ -53,9 +53,10 @@ namespace ArgosProcessor
                     Status = 'A',
                     Contents = content
                 };
-            db.CollarFiles.InsertOnSubmit(collarFile);
+            db.CollarFiles.InsertOnSubmit(testFile);
             db.SubmitChanges();
-            args = new[] { collarFile.FileId.ToString( System.Globalization.CultureInfo.InvariantCulture) };
+            args = new[] { testFile.FileId.ToString( System.Globalization.CultureInfo.InvariantCulture) };
+            error.AppendLine(String.Format("Loaded file {0}, {1}", testFile.FileId, fileName));
 #endif
                 int id;
                 if (args.Length != 1 || !Int32.TryParse(args[0], out id) || id < 1)
@@ -117,12 +118,15 @@ namespace ArgosProcessor
                         };
                         db.CollarFiles.InsertOnSubmit(collarFile);
                         db.SubmitChanges();
+#if DEBUG
+                        error.AppendLine(String.Format("Success: Added collar {0}",collar));
+#endif
                     }
                     catch (Exception ex)
                     {
                         string message = String.Format(
-                            "ERROR: Collar {0} {1} (Argos Id {2}) encountered a problem: {3}",
-                            collar.CollarManufacturer, collar.CollarId, collar.AlternativeId, ex.Message);
+                            "ERROR: Collar {0} (Argos Id {1}) encountered a problem: {2}",
+                            collar, collar.AlternativeId, ex.Message);
                         error.AppendLine(message);
                     }
                 }
