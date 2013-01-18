@@ -4,7 +4,7 @@ namespace Telonics
     /***************************************************************************
      * These are the T03 Format 6-bit CRC routines
      **************************************************************************/
-    internal class CRC
+    public class CRC
     {
         private int _crc;
 

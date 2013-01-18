@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Telonics
 {
-    internal static class ByteArrayExtensions
+    public static class ByteArrayExtensions
     {
         public static bool BooleanAt(this IEnumerable<byte> data, int bit)
         {
