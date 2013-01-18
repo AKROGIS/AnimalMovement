@@ -335,17 +335,9 @@ namespace ArgosProcessor
         private Dictionary<string, TimeSpan> GetGen3Periods()
         {
             var query = from collar in Database.Collars
-                        where collar.CollarModel == "TelonicsGen3" && AllUnambiguousCollars.Contains(collar) && collar.DownloadInfo != null
-                        select new { collar.CollarId, Minutes = collar.DownloadInfo };
-            //FIXME - put new field in database for Gen 3 Period
-            var results = new Dictionary<string, TimeSpan>();
-            foreach (var item in query)
-            {
-                int minutes;
-                if (Int32.TryParse(item.Minutes, out minutes))
-                    results[item.CollarId] = TimeSpan.FromMinutes(minutes);
-            }
-            return results;
+                        where collar.CollarModel == "TelonicsGen3" && AllUnambiguousCollars.Contains(collar) && collar.Gen3Period != null
+                        select collar;
+            return query.ToDictionary(item => item.CollarId, item => TimeSpan.FromMinutes(item.Gen3Period.GetValueOrDefault()));
         }
 
 
