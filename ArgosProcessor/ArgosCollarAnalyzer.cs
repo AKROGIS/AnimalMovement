@@ -377,10 +377,7 @@ namespace ArgosProcessor
                             parameter.CollarParameterFile.Status == 'A'
                         group parameter.CollarParameterFile.Contents.ToArray() by parameter.Collar.CollarId;
 
-            var results = new Dictionary<string, List<Byte[]>>();
-            foreach (var item in query)
-                results[item.Key] = item.ToList();
-            return results;
+            return query.ToDictionary(item => item.Key, item => item.ToList());
         }
 
         #endregion
