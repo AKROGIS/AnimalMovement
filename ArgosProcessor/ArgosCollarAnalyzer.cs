@@ -143,6 +143,8 @@ namespace ArgosProcessor
 
             if (UnknownPlatforms.Contains(argosId))
                 return null;
+            if (AmbiguousPlatforms.Contains(argosId))
+                return null;
 
             if (UniqueArgosCollars.ContainsKey(argosId))
                 return UniqueArgosCollars[argosId].CollarId;
