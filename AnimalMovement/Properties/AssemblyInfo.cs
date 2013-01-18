@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 //TODO - Provide some global QAQC tools - I.e. show Telonics collars that do not have a TPF (Gen4) or FixPeriod (Gen3) or do have active PPF file (Gen3)
 //TODO - Provide some global QAQC tools - I.e. show Telonics Gen4 collars that have multiple active TPF files
 //TODO - Provide some global QAQC tools - I.e. show Telonics collars that have duplicate Alternative Id and identical Disposal dates
+//TODO - If a collar has multiple TPF files, then sort messages by transmission date per TPF, and process separately. (for now, create multiple collars)
 //TODO - build tool to visualize deployments (i.e. show a graphical time line of animals & collars)
 //TODO - Create a Mortality Layer
 //TODO - Create a layer of last location (or locations)
