@@ -30,6 +30,11 @@ namespace ArgosProcessor
 
         #region Public API
 
+        /// <summary>
+        /// Provides the analysis necessary to map Argos email data to the Animal Movements database 
+        /// </summary>
+        /// <param name="file">Argos email file with messages to be processed</param>
+        /// <param name="database">Animal Movement Database Context</param>
         public ArgosCollarAnalyzer(ArgosFile file, AnimalMovementDataContext database)
         {
             if (file == null)
@@ -41,29 +46,43 @@ namespace ArgosProcessor
             FilePlatforms = new HashSet<string>(File.GetPlatforms());
         }
 
-
+        /// <summary>
+        /// Argos email file with messages to be processed
+        /// </summary>
         public ArgosFile File { get; private set; }
 
+        /// <summary>
+        /// Animal Movement Database Context
+        /// </summary>
         public AnimalMovementDataContext Database { get; private set; }
 
+        /// <summary>
+        /// Argos Platform Ids which are in the Argos file, but not the database
+        /// </summary>
         public IEnumerable<string> UnknownPlatforms
         {
             get { return (_unknownPlatforms ?? (_unknownPlatforms = GetUnknownPlatforms())).ToArray(); }
         }
 
-
+        /// <summary>
+        /// Argos Platform Ids which are used in more that once collar with overlapping active (not disposed) dates
+        /// </summary>
         public IEnumerable<string> AmbiguousPlatforms
         {
             get { return (_ambiguousPlatforms ?? (_ambiguousPlatforms = GetAmbiguousPlatforms())).ToArray(); }
         }
 
-
+        /// <summary>
+        /// Database collars that are matched one to one with Platform Ids in the Argos file
+        /// </summary>
         public IEnumerable<Collar> ValidCollars
         {
             get { return (_validCollars ?? (_validCollars = GetValidCollars())).ToArray(); }
         }
 
-
+        /// <summary>
+        /// Dictionary of collars (in Argos file) that have issues, and a description of the issue
+        /// </summary>
         public Dictionary<Collar, string> CollarsWithProblems
         {
             get
@@ -74,13 +93,17 @@ namespace ArgosProcessor
             }
         }
 
-
+        /// <summary>
+        /// Function that the client can use to get a Telonics Id from an Argos Id and a transmission date
+        /// </summary>
         public Func<string, DateTime, string> CollarSelector
         {
             get {return GetCollarIdFromTransmission;}
         }
 
-
+        /// <summary>
+        /// Function that the client can use to get a class that can process the messages for a collar (by Telonics Id)
+        /// </summary>
         public Func<string, IProcessor> ProcessorSelector
         {
             get { return GetProcessorFromTelonicsId; }
@@ -164,6 +187,9 @@ namespace ArgosProcessor
             get { return _uniqueArgosCollars ?? (_uniqueArgosCollars = GetUniqueArgosCollars()); }
         }
 
+        /// <summary>
+        /// Dictionary yielding a list of Collars for each Platform Id (most lists will have only one item)
+        /// </summary>
         private Dictionary<string, List<Collar>> SharedArgosCollars
         {
             get { return _sharedArgosCollars ?? (_sharedArgosCollars = GetSharedArgosCollars()); }
@@ -262,7 +288,6 @@ namespace ArgosProcessor
         }
 
 
-        //Get a dictionary yielding a list of Collars for each Platform Id (most lists will have only one item)
         private Dictionary<string, List<Collar>> GetArgosCollars()
         {
             var argosCollars = from collar in Database.Collars
