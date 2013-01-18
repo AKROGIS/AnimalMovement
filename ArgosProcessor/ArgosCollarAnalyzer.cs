@@ -20,7 +20,7 @@ namespace ArgosProcessor
         private Dictionary<string, Collar> _uniqueArgosCollars;
         private Dictionary<string, List<Collar>> _sharedArgosCollars;
         private HashSet<Collar> _unambiguousSharedCollars;
-        private HashSet<Collar> _allUnambiguousCollars;
+        private List<Collar> _allUnambiguousCollars;
         private Dictionary<string, IProcessor> _processors;
         private HashSet<string> _telonicGen3CollarsWithParameterFile;
         private Dictionary<string, TimeSpan> _gen3periods;
@@ -43,7 +43,7 @@ namespace ArgosProcessor
                 throw new ArgumentNullException("database");
             File = file;
             Database = database;
-            FilePlatforms = new HashSet<string>(File.GetPlatforms());
+            FilePlatforms = File.GetPlatforms().ToList();
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace ArgosProcessor
 
         #region Private Properties
 
-        private HashSet<string> FilePlatforms { get; set; }
+        private List<string> FilePlatforms { get; set; }
 
         private Dictionary<string, List<Collar>> ArgosCollars
         {
@@ -200,7 +200,7 @@ namespace ArgosProcessor
             get { return _unambiguousSharedCollars ?? (_unambiguousSharedCollars = GetUnambiguousSharedCollars()); }
         }
 
-        private HashSet<Collar> AllUnambiguousCollars
+        private List<Collar> AllUnambiguousCollars
         {
             get { return _allUnambiguousCollars ?? (_allUnambiguousCollars = GetAllUnambiguousCollars()); }
         }
@@ -318,9 +318,9 @@ namespace ArgosProcessor
         }
 
 
-        private HashSet<Collar> GetAllUnambiguousCollars()
+        private List<Collar> GetAllUnambiguousCollars()
         {
-            return new HashSet<Collar>(UniqueArgosCollars.Values.Concat(UnambiguousSharedCollars));
+            return UniqueArgosCollars.Values.Concat(UnambiguousSharedCollars).ToList();
         }
 
 
