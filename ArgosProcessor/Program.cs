@@ -92,8 +92,8 @@ namespace ArgosProcessor
                 foreach (var problem in analyzer.CollarsWithProblems)
                 {
                     string message = String.Format(
-                        "WARNING: Collar {0} {1} cannot be processed.  Reason: {2}",
-                        problem.Key.CollarManufacturer, problem.Key.CollarId, problem.Value);
+                        "WARNING: Collar {0} cannot be processed.  Reason: {1}",
+                        problem.Key, problem.Value);
                     error.AppendLine(message);
                 }
 
