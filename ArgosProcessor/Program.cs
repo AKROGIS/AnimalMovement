@@ -30,6 +30,10 @@ namespace ArgosProcessor
         /// This program takes a single command line argument, which is an integer id of a
         /// Argos email file in the database.
         /// </param>
+        /// <remarks>
+        /// The database can only process one file at a time, and it only makes sense for this tool to process a single file
+        /// To process multiple files, the database will call this program multiple times.
+        /// </remarks>
         static void Main(string[] args)
         {
             var error = new StringBuilder();
