@@ -123,7 +123,7 @@ namespace Telonics
             if (processor == null)
                 throw new InvalidOperationException("There is no processor defined for Telonics Id " + telonicsId);
             if (!_transmissionsByCtn.ContainsKey(telonicsId) || _transmissionsByCtn[telonicsId].Count < 1)
-                throw new InvalidOperationException("There are no messages for Telonics Id " + telonicsId);
+                throw new NoMessagesException("There are no messages for Telonics Id " + telonicsId);
             return Processor(telonicsId).Process(_transmissionsByCtn[telonicsId]);
         }
         #endregion
