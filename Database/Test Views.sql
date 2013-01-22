@@ -28,6 +28,14 @@ SELECT TOP 100 * FROM FixesNotHiddenAndNotDeployed
 SELECT TOP 100 * FROM InvalidLocations
 SELECT TOP 100 * FROM NoMovement
 SELECT TOP 100 * FROM ValidLocations
+SELECT TOP 100 * FROM ValidLocationsWithTempAndActivity
 SELECT TOP 100 * FROM VelocityVectors
 
 SELECT TOP 100 * FROM StoreOnBoardLocations
+
+SELECT TOP 100 * FROM WARNING_CollarsWithMultipleParameterFiles
+SELECT TOP 100 * FROM WARNING_TelonicsCollarsMissingArgosId
+SELECT TOP 100 * FROM WARNING_TelonicsCollarsSharingAnArgosId
+SELECT TOP 100 * FROM WARNING_TelonicsGen3CollarsWithActivePpfFile
+SELECT TOP 100 * FROM WARNING_TelonicsGen3CollarsWithoutPeriod
+SELECT TOP 100 * FROM WARNING_TelonicsGenParameterFileMismatch
