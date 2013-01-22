@@ -488,7 +488,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE VIEW [dbo].[FixesNotHiddenAndNotDeployed]
 AS
-SELECT CF.FixId
+SELECT CF.FixId, CF.CollarManufacturer, CF.CollarId, CF.FixDate, CF.Lat, CF.Lon
   FROM CollarFixes as CF
        LEFT JOIN FixesNotHiddenInDeployment AS FD
        ON CF.FixId = FD.FixId
@@ -2372,8 +2372,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE VIEW [dbo].[AnimalsNotCurrentlyCollared]
 AS
-SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
-                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
+SELECT     dbo.Projects.ProjectId, dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.MortalityDate, dbo.Animals.Gender, dbo.Animals.GroupName, 
+                      dbo.Projects.ProjectInvestigator
 FROM         dbo.Animals INNER JOIN
                       dbo.CollarDeployments ON dbo.Animals.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Animals.AnimalId = dbo.CollarDeployments.AnimalId INNER JOIN
                       dbo.Projects ON dbo.Animals.ProjectId = dbo.Projects.ProjectId LEFT OUTER JOIN
@@ -2389,8 +2389,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE VIEW [dbo].[AnimalsNeverCollared]
 AS
-SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
-                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
+SELECT     dbo.Projects.ProjectId, dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName,
+                      dbo.Projects.ProjectInvestigator
 FROM         dbo.Projects INNER JOIN
                       dbo.Animals ON dbo.Projects.ProjectId = dbo.Animals.ProjectId LEFT OUTER JOIN
                       dbo.CollarDeployments ON dbo.Animals.ProjectId = dbo.CollarDeployments.ProjectId AND dbo.Animals.AnimalId = dbo.CollarDeployments.AnimalId
@@ -2402,8 +2402,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE VIEW [dbo].[AnimalsCurrentlyCollared]
 AS
-SELECT     dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName, dbo.Projects.ProjectId, dbo.Projects.ProjectName, 
-                      dbo.Projects.ProjectInvestigator AS UnitCode, dbo.Projects.UnitCode AS PrincipalInvestigator, dbo.Projects.Description
+SELECT     dbo.Projects.ProjectId, dbo.Animals.AnimalId, dbo.Animals.Species, dbo.Animals.Gender, dbo.Animals.GroupName,
+                      dbo.Projects.ProjectInvestigator 
 FROM         dbo.CollarDeployments INNER JOIN
                       dbo.Animals ON dbo.CollarDeployments.ProjectId = dbo.Animals.ProjectId AND dbo.CollarDeployments.AnimalId = dbo.Animals.AnimalId INNER JOIN
                       dbo.Projects ON dbo.Animals.ProjectId = dbo.Projects.ProjectId
