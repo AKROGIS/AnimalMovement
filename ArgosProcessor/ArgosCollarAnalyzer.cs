@@ -276,15 +276,19 @@ namespace ArgosProcessor
                     if (!Gen3periods.ContainsKey(collar.CollarId))
                         results[collar] = "Gen3 Collar does not have a period between fixes specified";
                     else if (TelonicGen3CollarsWithParameterFile.Contains(collar.CollarId))
-                        results[collar] = 
-                                 "Warning: PPF file for this collar is not used. Suggest deactiving the PPF file, or use Telonics ADC-T03 to process this collar";
+                        results[collar] =
+                            "PPF file for this collar is not used.\n" +
+                            "  Suggest 1) deactiving the PPF file\n" +
+                            ",      or 2) use Telonics ADC-T03 to process this collar";
                 }
                 else if (collar.CollarModel == "TelonicsGen4")
                 {
                     if (TpfFiles.ContainsKey(collar.CollarId))
                     {
                         if (TpfFiles[collar.CollarId].Count > 1)
-                            results[collar] = "Gen4 Collar has multiple TPF files.  Suggest creating multiple collars one for each TPF files";
+                            results[collar] = "Gen4 Collar has multiple TPF files.\n" +
+                                              "  Suggest 1) creating multiple collars one for each TPF files\n" +
+                                              "       or 2) make all but one of the TPF files inactive.";
                     }
                     else
                         results[collar] = "Gen4 Collar does not have a TPF file";
