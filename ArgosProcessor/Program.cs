@@ -115,20 +115,20 @@ namespace ArgosProcessor
                     {
                         var data = argos.ToTelonicsData(collar.CollarId);
                         var collarFile = new CollarFile
-                        {
-                            Project = file.Project,
-                            FileName = file.FileName + "_" + collar.CollarId,
-                            Format = analyzer.GetFileFormatForCollar(collar),
-                            CollarManufacturer = "Telonics",
-                            CollarId = collar.CollarId,
-                            Status = 'A',
-                            ParentFileId = id,
-                            Contents = Encoding.UTF8.GetBytes(String.Join("\n",data)),
-                        };
+                            {
+                                Project = file.Project,
+                                FileName = file.FileName + "_" + collar.CollarId,
+                                Format = analyzer.GetFileFormatForCollar(collar),
+                                CollarManufacturer = "Telonics",
+                                CollarId = collar.CollarId,
+                                Status = 'A',
+                                ParentFileId = id,
+                                Contents = Encoding.UTF8.GetBytes(String.Join("\n", data)),
+                            };
                         db.CollarFiles.InsertOnSubmit(collarFile);
                         db.SubmitChanges();
 #if DEBUG
-                        error.AppendLine(String.Format("Success: Added collar {0}",collar));
+                        error.AppendLine(String.Format("Success: Added collar {0}", collar));
 #endif
                     }
                     catch (Exception ex)
