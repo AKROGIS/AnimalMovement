@@ -133,9 +133,16 @@ namespace ArgosProcessor
                     }
                     catch (Exception ex)
                     {
-                        string message = String.Format(
-                            "ERROR: Collar {0} (Argos Id {1}) encountered a problem: {2}",
-                            collar, collar.AlternativeId, ex.Message);
+                        string message;
+                        if (ex is NoMessagesException && analyzer.UnambiguousSharedCollars.Contains(collar))
+                            message = String.Format(
+                                "Notice: Collar {0} (for shared argos Id {1}) had no messages.\n" +
+                                "  This is common for all but one of the collars that share an Argos Id.",
+                                collar, collar.AlternativeId);
+                        else
+                            message = String.Format(
+                                "ERROR: Collar {0} (Argos Id {1}) encountered a problem: {2}",
+                                collar, collar.AlternativeId, ex.Message);
                         error.AppendLine(message);
                     }
                 }

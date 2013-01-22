@@ -81,6 +81,14 @@ namespace ArgosProcessor
         }
 
         /// <summary>
+        /// Collection of collars that are unambiguously share an Argos Id
+        /// </summary>
+        public HashSet<Collar> UnambiguousSharedCollars
+        {
+            get { return _unambiguousSharedCollars ?? (_unambiguousSharedCollars = GetUnambiguousSharedCollars()); }
+        }
+
+        /// <summary>
         /// Dictionary of collars (in Argos file) that have issues, and a description of the issue
         /// </summary>
         public Dictionary<Collar, string> CollarsWithProblems
@@ -198,11 +206,6 @@ namespace ArgosProcessor
         private Dictionary<string, List<Collar>> SharedArgosCollars
         {
             get { return _sharedArgosCollars ?? (_sharedArgosCollars = GetSharedArgosCollars()); }
-        }
-
-        private IEnumerable<Collar> UnambiguousSharedCollars
-        {
-            get { return _unambiguousSharedCollars ?? (_unambiguousSharedCollars = GetUnambiguousSharedCollars()); }
         }
 
         private List<Collar> AllUnambiguousCollars
