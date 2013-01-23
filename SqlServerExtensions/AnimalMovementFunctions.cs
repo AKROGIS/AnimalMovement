@@ -374,7 +374,8 @@ namespace SqlServerExtensions
 
         internal static bool FormatD_LineSelector(int lineNumber, string lineText)
         {
-            if (lineNumber == 1)
+            //The header in this format is optional 
+            if (lineNumber == 1 && lineText.Trim().StartsWith("TXDate,", StringComparison.OrdinalIgnoreCase))
                 return false;
             if (string.IsNullOrEmpty(lineText.Trim()))
                 return false;
