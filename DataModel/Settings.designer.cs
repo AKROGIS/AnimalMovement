@@ -227,6 +227,8 @@ namespace DataModel
 		
 		private char _FileFormat;
 		
+		private string _Regex;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -235,6 +237,8 @@ namespace DataModel
     partial void OnHeaderChanged();
     partial void OnFileFormatChanging(char value);
     partial void OnFileFormatChanged();
+    partial void OnRegexChanging(string value);
+    partial void OnRegexChanged();
     #endregion
 		
 		public LookupCollarFileHeader()
@@ -278,6 +282,26 @@ namespace DataModel
 					this._FileFormat = value;
 					this.SendPropertyChanged("FileFormat");
 					this.OnFileFormatChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Regex", DbType="NVarChar(450)")]
+		public string Regex
+		{
+			get
+			{
+				return this._Regex;
+			}
+			set
+			{
+				if ((this._Regex != value))
+				{
+					this.OnRegexChanging(value);
+					this.SendPropertyChanging();
+					this._Regex = value;
+					this.SendPropertyChanged("Regex");
+					this.OnRegexChanged();
 				}
 			}
 		}

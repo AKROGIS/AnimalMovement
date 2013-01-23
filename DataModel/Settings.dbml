@@ -15,6 +15,7 @@
     <Type Name="LookupCollarFileHeader">
       <Column Name="Header" Type="System.String" DbType="NVarChar(450) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="FileFormat" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
+      <Column Name="Regex" Type="System.String" DbType="NVarChar(450)" CanBeNull="true" />
     </Type>
   </Table>
   <Table Name="dbo.LookupQueryLayerServers" Member="LookupQueryLayerServers">

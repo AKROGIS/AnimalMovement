@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using DataModel;
+using Telonics;
 
 //TODO - In duplicate finename warning, give the filename
 //TODO - Provide better error messages when uploading files fails
@@ -200,7 +202,15 @@ namespace AnimalMovement
                     code = header.FileFormat;
                     break;
                 }
+                if (header.Regex != null)
+                    if (new Regex(header.Regex).IsMatch(fileHeader))
+                    {
+                        code = header.FileFormat;
+                        break;
+                    }
             }
+            if (code == '?' && (new ArgosFile(path)).GetPrograms().Any())
+                code = 'E';
             return Database.LookupCollarFileFormats.FirstOrDefault(f => f.Code == code);
         }
 

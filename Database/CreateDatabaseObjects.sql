@@ -3210,6 +3210,7 @@ GO
 CREATE TABLE [dbo].[LookupCollarFileHeaders](
 	[Header] [nvarchar](450) NOT NULL,
 	[FileFormat] [char](1) NOT NULL,
+	[Regex] [nvarchar](450) NULL,
  CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
 (
 	[Header] ASC
