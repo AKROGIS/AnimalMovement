@@ -18,6 +18,13 @@ namespace DataModel
 
         #region getters
 
+        public static string GetSystemDefault(string key)
+        {
+            var db = new SettingsDataContext();
+            Setting setting = db.Settings.FirstOrDefault(s => s.Username == "system" && s.Key == key);
+            return setting == null ? null : setting.Value;
+        }
+
         public static string GetDefaultProject()
         {
             return GetUsersDefault(ProjectKey);

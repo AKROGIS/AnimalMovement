@@ -340,6 +340,9 @@ namespace ArgosProcessor
         {
             var processors = new Dictionary<string, IProcessor>();
 
+            string tdcExe = Settings.GetSystemDefault("tdc_exe");
+            string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");
+
             foreach (var collar in ValidCollars)
             {
                 switch (collar.CollarModel)
@@ -348,7 +351,12 @@ namespace ArgosProcessor
                         processors[collar.CollarId] = new Gen3Processor(Gen3periods[collar.CollarId]);
                         break;
                     case "TelonicsGen4":
-                        processors[collar.CollarId] = new Gen4Processor(TpfFiles[collar.CollarId].First());
+                        var processor = new Gen4Processor(TpfFiles[collar.CollarId].First());
+                        if (!String.IsNullOrEmpty(tdcExe))
+                            processor.TdcExecutable = tdcExe;
+                        if (!String.IsNullOrEmpty(batchFile))
+                            processor.BatchFileTemplate = batchFile;
+                        processors[collar.CollarId] = processor;
                         break;
                     default:
                         var msg = String.Format("Unsupported model ({0} for collar {1}", collar.CollarModel, collar.CollarId);
