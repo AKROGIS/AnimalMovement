@@ -185,9 +185,13 @@ namespace Telonics
                             ProgramId = programId,
                             PlatformId = platformId,
                             DateTime = transmissionDateTime,
-                            //PlatformPeriod = PlatformPeriod
                         };
-                        transmission.AddLine(platformheader);
+                        if (platformheader != null)
+                        {
+                            //only the first transmission in a group gets the header
+                            transmission.AddLine(platformheader);
+                            platformheader = null;
+                        }
                         transmission.AddLine(line);
                         transmission.AddRawBytes(tokens.Skip(3));
                         transmissions.Add(transmission);
