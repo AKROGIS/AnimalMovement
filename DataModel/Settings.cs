@@ -2,11 +2,10 @@
 using System.Globalization;
 using System.Linq;
 using System.Diagnostics;
-using DataModel;
 
-namespace AnimalMovement
+namespace DataModel
 {
-    internal static class Settings
+    public static class Settings
     {
         // When adding new persistent settings, remember to modify the dbo.Settings_Update stored procedure
         private const string ProjectKey = "project";
@@ -19,39 +18,39 @@ namespace AnimalMovement
 
         #region getters
 
-        internal static string GetDefaultProject()
+        public static string GetDefaultProject()
         {
             return GetUsersDefault(ProjectKey);
         }
 
-        internal static bool GetDefaultProjectFilter()
+        public static bool GetDefaultProjectFilter()
         {
             return GetUsersDefault(FilterKey) == "True";
         }
 
-        internal static string GetDefaultSpecies()
+        public static string GetDefaultSpecies()
         {
             return GetUsersDefault(SpeciesKey);
         }
 
-        internal static char? GetDefaultFileFormat()
+        public static char? GetDefaultFileFormat()
         {
             string format = GetUsersDefault(FormatKey);
             return format == null ? (char?)null : format[0];
         }
 
-        internal static char? GetDefaultParameterFileFormat()
+        public static char? GetDefaultParameterFileFormat()
         {
             string format = GetUsersDefault(ParameterFormatKey);
             return format == null ? (char?)null : format[0];
         }
 
-        internal static string GetDefaultCollarModel()
+        public static string GetDefaultCollarModel()
         {
             return GetUsersDefault(ModelKey);
         }
 
-        internal static string GetDefaultCollarManufacturer()
+        public static string GetDefaultCollarManufacturer()
         {
             return GetUsersDefault(ManufacturerKey);
         }
@@ -60,37 +59,37 @@ namespace AnimalMovement
 
         #region setters
 
-        internal static void SetDefaultProject(string project)
+        public static void SetDefaultProject(string project)
         {
             SetUsersDefault(ProjectKey, project);
         }
 
-        internal static void SetDefaultProjectFilter(bool filter)
+        public static void SetDefaultProjectFilter(bool filter)
         {
             SetUsersDefault(FilterKey, filter.ToString(CultureInfo.InvariantCulture));
         }
 
-        internal static void SetDefaultSpecies(string species)
+        public static void SetDefaultSpecies(string species)
         {
             SetUsersDefault(SpeciesKey, species);
         }
 
-        internal static void SetDefaultFileFormat(char format)
+        public static void SetDefaultFileFormat(char format)
         {
             SetUsersDefault(FormatKey, format.ToString(CultureInfo.InvariantCulture));
         }
 
-        internal static void SetDefaultParameterFileFormat(char format)
+        public static void SetDefaultParameterFileFormat(char format)
         {
             SetUsersDefault(ParameterFormatKey, format.ToString(CultureInfo.InvariantCulture));
         }
 
-        internal static void SetDefaultCollarModel(string model)
+        public static void SetDefaultCollarModel(string model)
         {
             SetUsersDefault(ModelKey, model);
         }
 
-        internal static void SetDefaultCollarManufacturer(string manufacturer)
+        public static void SetDefaultCollarManufacturer(string manufacturer)
         {
             SetUsersDefault(ManufacturerKey, manufacturer);
         }

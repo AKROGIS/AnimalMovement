@@ -206,7 +206,6 @@
     <Compile Include="RetrieveCollarForm.Designer.cs">
       <DependentUpon>RetrieveCollarForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Settings.cs" />
     <EmbeddedResource Include="AddAnimalForm.resx">
       <DependentUpon>AddAnimalForm.cs</DependentUpon>
       <SubType>Designer</SubType>
