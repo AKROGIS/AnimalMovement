@@ -8,5 +8,11 @@
         <elementListCompartment Id="dca2ef59-24f6-49b6-86e0-6dc4255b71c0" absoluteBounds="6.515, 3.46, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
+    <classShape Id="7b95690c-f9af-4ca2-b341-b8f12b145f25" absoluteBounds="3.875, 3, 2, 2.3478011067708335">
+      <DataClassMoniker Name="/AnimalMovementViewsDataContext/DownloadableCollar" />
+      <nestedChildShapes>
+        <elementListCompartment Id="96242d98-fc42-47cd-b4df-3289f6c8a312" absoluteBounds="3.8899999999999997, 3.46, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>
