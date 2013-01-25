@@ -1,6 +1,7 @@
 ﻿using System;
-using System.IO;
 using Telonics;
+using DataModel;
+using System.Linq;
 
 namespace ArgosDownloader
 {
@@ -10,30 +11,52 @@ namespace ArgosDownloader
         //It takes no command line arguments
         private static void Main()
         {
-            // FIXME - Create tables and queries in database to determine what to get from Argos
-            // FIXME -   Need to account for failures and retries
-            // FIXME -   MUST not miss any data (email user if there are issues)
-            // FIXME -   Should not get duplicate data.
-            // FIXME - get database connection from config file
-            // FIXME - Get input from database
-            const string username = "BURCH";
-            const string password = "LOUGAROU";
-            const string argosId = "37470";
-            const int days = 10;
-            string errors;
-            var results = ArgosWebSite.GetCollar(username, password, argosId, days, out errors);
-            if (results == null)
+            //TODO add try/catch loops
+            //TODO email syaadmin on problems; get sysadmin email from db.
+            const int maxDays = 10;
+            const int minDays = 1;
+            var db = new AnimalMovementDataContext();
+            var views = new AnimalMovementViewsDataContext();
+            foreach (var collar in views.DownloadableCollars.Where(c => c.Days == null || c.Days >= minDays))
             {
-                Console.WriteLine(errors);
+                string username = collar.UserName;
+                string password = collar.Password;
+                string argosId = collar.PlatformId;
+                //TODO - message about Days == null or Days > 10
+                //string userEmail = collar.Email;
+                int days = collar.Days ?? maxDays;
+                days = Math.Min(maxDays, days);
+                string errors;
+                int? fileId = null;
+                var results = ArgosWebSite.GetCollar(username, password, argosId, days, out errors);
+                if (results != null)
+                {
+                    var collarFile = new CollarFile
+                    {
+                        Project = collar.ProjectId,
+                        FileName = collar.PlatformId + "_" + DateTime.Now + ".aws",  //TODO simplify date
+                        Format = 'F',
+                        CollarManufacturer = collar.CollarManufacturer,
+                        CollarId = collar.CollarId,
+                        Status = 'A',
+                        Contents = results.ToBytes()
+                    };
+                    // FIXME - Add SQL processor for new AWS (F) file type
+                    db.CollarFiles.InsertOnSubmit(collarFile);
+                    db.SubmitChanges();
+                    fileId = collarFile.FileId;
+                }
+                // write log
+                var log = new ArgosDownload
+                    {
+                        CollarManufacturer = collar.CollarManufacturer,
+                        CollarId = collar.CollarId,
+                        FileId = fileId,
+                        ErrorMessage = errors
+                    };
+                db.ArgosDownloads.InsertOnSubmit(log);
+                db.SubmitChanges();
             }
-            else
-            {
-                string path = Path.Combine(@"C:\tmp", argosId + ".aws"); //path for the output file
-                File.WriteAllText(path, results.ToString());
-            }
-            // FIXME - Add new file type to database for these Argos web results (AWS)
-            // FIXME - upload this file to database as type AWS
-            // FIXME - update database with success/failure
         }
     }
 }
