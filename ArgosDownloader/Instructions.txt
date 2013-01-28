@@ -1,0 +1,56 @@
+﻿Argos Downloader
+================
+
+The Argos Downloader is a console application (no user interface). It is meant
+to be run periodically by a scheduler. It must be run with an account that has
+permissions to the database (more below)
+
+It takes no command line arguments.
+
+It gets a list of Argos collar to download (as well as relevent parameters)
+from the view "DownloadableCollars" in the database specified in the
+connection string in the config file (ArgosDownloader.exe.config).
+
+The program will not write any messages on the console (except as mentioned
+below), or return any code (success or failure) to the shell.
+
+The program will upload any collar data it can download to the CollarFiles
+table, by calling the CollarFile_Insert stored procedure.  It will log success
+(with a new fileId) or failure (with an error message) in the ArgosDownloads
+table by calling the ArgosDownload_Insert stored procedure.  The account that
+runs this program must have execute permission on both these stored
+procedures.  this is most easily done by adding the user account to the Editor
+role in the Animal Movements database.
+
+Any errors or warnings that occur relevant to a specific coller will be
+emailed to the email address of the project investigator (PI) that manages
+the collar.  If the email address for the PI is empty, then the program will
+attempt to send the email to the "system email acount".
+
+Any errors not specifically related to a user, or if there are problems
+sending an email to a user are sent to a "system email acount" (sa).  If the
+program cannot send a email to the sa, then it will try an append the error
+into a log file (ArgosDownloader.log) in the folder with the executable
+ArgosDownloader.exe.  The log file will be created if it doesn't exist.  If
+the program cannot create or write to the log file, it will write to the
+standard output of the console.  If you think there are problems, but you are
+not getting any emails or output in the log file, try running the program
+manually from the command line shell to see if you get any output on the
+console.
+
+In order for emailing to work, the program must have client access to a SMTP
+mail system.  Specifically the program is set up to use the Gmail STMP server,
+so a valid Gmail username and password is required for emailing to work.  The
+usename and password are stored in the database in the Settings table with the
+username of "system" and the keys of "sa_email" and "sa_email_password"
+respectively. If these do not exist, are not set, or are not set to a valid
+gmail account, emailing will not work. Since these credentials are not
+secured (anybody with permission to the database can read the settings table,
+It is highly recommended that you create a new Gmail account specifically
+for this purpose.  You can set up this account to forward email messages to
+your protected email account.
+
+TODO - create a new table "SecureSettings" for these credentials, and remove
+select permissions to all except the user account that will run the
+ArgosDownloader.
+
