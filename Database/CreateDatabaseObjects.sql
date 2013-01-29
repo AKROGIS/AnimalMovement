@@ -4226,6 +4226,63 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataArgosWebService](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[programNumber] [varchar](50) NULL,
+	[platformId] [varchar](50) NULL,
+	[platformType] [varchar](50) NULL,
+	[platformModel] [varchar](50) NULL,
+	[platformName] [varchar](50) NULL,
+	[platformHexId] [varchar](50) NULL,
+	[satellite] [varchar](50) NULL,
+	[bestMsgDate] [varchar](50) NULL,
+	[duration] [varchar](50) NULL,
+	[nbMessage] [varchar](50) NULL,
+	[message120] [varchar](50) NULL,
+	[bestLevel] [varchar](50) NULL,
+	[frequency] [varchar](50) NULL,
+	[locationDate] [varchar](50) NULL,
+	[latitude] [varchar](50) NULL,
+	[longitude] [varchar](50) NULL,
+	[altitude] [varchar](50) NULL,
+	[locationClass] [varchar](50) NULL,
+	[gpsSpeed] [varchar](50) NULL,
+	[gpsHeading] [varchar](50) NULL,
+	[latitude2] [varchar](50) NULL,
+	[longitude2] [varchar](50) NULL,
+	[altitude2] [varchar](50) NULL,
+	[index] [varchar](50) NULL,
+	[nopc] [varchar](50) NULL,
+	[errorRadius] [varchar](50) NULL,
+	[semiMajor] [varchar](50) NULL,
+	[semiMinor] [varchar](50) NULL,
+	[orientation] [varchar](50) NULL,
+	[hdop] [varchar](50) NULL,
+	[bestDate] [varchar](50) NULL,
+	[compression] [varchar](50) NULL,
+	[type] [varchar](50) NULL,
+	[alarm] [varchar](50) NULL,
+	[concatenated] [varchar](50) NULL,
+	[date] [varchar](50) NULL,
+	[level] [varchar](50) NULL,
+	[doppler] [varchar](50) NULL,
+	[rawData] [varchar](500) NULL,
+ CONSTRAINT [PK_CollarDataArgosWebService] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[IsEditor] 
 (
 	@Project VARCHAR(32)   = NULL, 
@@ -8370,6 +8427,11 @@ ALTER TABLE [dbo].[ArgosPrograms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPrograms_
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[ArgosPrograms] CHECK CONSTRAINT [FK_ArgosPrograms_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[CollarDataArgosWebService]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataArgosWebService_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+GO
+ALTER TABLE [dbo].[CollarDataArgosWebService] CHECK CONSTRAINT [FK_CollarDataArgosWebService_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarDataDebevekFormat]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataDebevekFormat_CollarFiles] FOREIGN KEY([FileID])
 REFERENCES [dbo].[CollarFiles] ([FileId])

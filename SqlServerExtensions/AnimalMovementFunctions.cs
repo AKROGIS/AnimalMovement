@@ -43,6 +43,7 @@ namespace SqlServerExtensions
         //   B - Ed Debevek's File Format
         //   C - Telonics Gen4 File Format
         //   D - Telonics Gen3 File Format
+        //   F - Argos WebService CSV File Format (aws)
 
         // A - Telonics Store On Board Format
 
@@ -187,7 +188,59 @@ namespace SqlServerExtensions
             return GetLines(fileId, 'D', FormatD_LineSelector, null);
         }
 
-#endregion
+
+        // F - Argos WebService CSV File Format (aws)
+
+        [SqlFunction(
+    DataAccess = DataAccessKind.Read,
+    FillRowMethodName = "FormatF_FillRow",
+    TableDefinition =
+        @"[LineNumber] [int],
+            [programNumber] [nvarchar](50) NULL,
+            [platformId] [nvarchar](50) NULL,
+            [platformType] [nvarchar](50) NULL,
+            [platformModel] [nvarchar](50) NULL,
+            [platformName] [nvarchar](50) NULL,
+            [platformHexId] [nvarchar](50) NULL,
+            [satellite] [nvarchar](50) NULL,
+            [bestMsgDate] [nvarchar](50) NULL,
+            [duration] [nvarchar](50) NULL,
+            [nbMessage] [nvarchar](50) NULL,
+            [message120] [nvarchar](50) NULL,
+            [bestLevel] [nvarchar](50) NULL,
+            [frequency] [nvarchar](50) NULL,
+            [locationDate] [nvarchar](50) NULL,
+            [latitude] [nvarchar](50) NULL,
+            [longitude] [nvarchar](50) NULL,
+            [altitude] [nvarchar](50) NULL,
+            [locationClass] [nvarchar](50) NULL,
+            [gpsSpeed] [nvarchar](50) NULL,
+            [gpsHeading] [nvarchar](50) NULL,
+            [latitude2] [nvarchar](50) NULL,
+            [longitude2] [nvarchar](50) NULL,
+            [altitude2] [nvarchar](50) NULL,
+            [index] [nvarchar](50) NULL,
+            [nopc] [nvarchar](50) NULL,
+            [errorRadius] [nvarchar](50) NULL,
+            [semiMajor] [nvarchar](50) NULL,
+            [semiMinor] [nvarchar](50) NULL,
+            [orientation] [nvarchar](50) NULL,
+            [hdop] [nvarchar](50) NULL,
+            [bestDate] [nvarchar](50) NULL,
+            [compression] [nvarchar](50) NULL,
+            [type] [nvarchar](50) NULL,
+            [alarm] [nvarchar](50) NULL,
+            [concatenated] [nvarchar](50) NULL,
+            [date] [nvarchar](50) NULL,
+            [level] [nvarchar](50) NULL,
+            [doppler] [nvarchar](50) NULL,
+            [rawData] [nvarchar](500) NULL")]
+        public static IEnumerable ParseFormatF(SqlInt32 fileId)
+        {
+            return GetLines(fileId, 'F', FormatF_LineSelector, null);
+        }
+
+        #endregion
 
         private struct Line
         {
@@ -376,6 +429,16 @@ namespace SqlServerExtensions
         {
             //The header in this format is optional 
             if (lineNumber == 1 && lineText.Trim().StartsWith("TXDate,", StringComparison.OrdinalIgnoreCase))
+                return false;
+            if (string.IsNullOrEmpty(lineText.Trim()))
+                return false;
+            return true;
+        }
+
+        internal static bool FormatF_LineSelector(int lineNumber, string lineText)
+        {
+            //The header in this format is optional 
+            if (lineNumber == 1 && lineText.Trim().StartsWith("\"programNumber\";", StringComparison.OrdinalIgnoreCase))
                 return false;
             if (string.IsNullOrEmpty(lineText.Trim()))
                 return false;
@@ -675,6 +738,97 @@ namespace SqlServerExtensions
                 }
             }
         }
+
+
+        public static void FormatF_FillRow(
+            object inputObject,
+            out SqlInt32 lineNumber,
+            out SqlString programNumber,
+            out SqlString platformId,
+            out SqlString platformType,
+            out SqlString platformModel,
+            out SqlString platformName,
+            out SqlString platformHexId,
+            out SqlString satellite,
+            out SqlString bestMsgDate,
+            out SqlString duration,
+            out SqlString nbMessage,
+            out SqlString message120,
+            out SqlString bestLevel,
+            out SqlString frequency,
+            out SqlString locationDate,
+            out SqlString latitude,
+            out SqlString longitude,
+            out SqlString altitude,
+            out SqlString locationClass,
+            out SqlString gpsSpeed,
+            out SqlString gpsHeading,
+            out SqlString latitude2,
+            out SqlString longitude2,
+            out SqlString altitude2,
+            out SqlString index,
+            out SqlString nopc,
+            out SqlString errorRadius,
+            out SqlString semiMajor,
+            out SqlString semiMinor,
+            out SqlString orientation,
+            out SqlString hdop,
+            out SqlString bestDate,
+            out SqlString compression,
+            out SqlString type,
+            out SqlString alarm,
+            out SqlString concatenated,
+            out SqlString date,
+            out SqlString level,
+            out SqlString doppler,
+            out SqlString rawData)
+        {
+            //format: "aaa";"bbb";"ccc";
+            var line = (Line) inputObject;
+            string[] parts = line.LineText.Split(new[] {"\";\""}, StringSplitOptions.None);
+            lineNumber = line.LineNumber;
+            int column = 0;
+            programNumber = NullableString(parts[column++].TrimStart('"'));
+            platformId = NullableString(parts[column++]);
+            platformType = NullableString(parts[column++]);
+            platformModel = NullableString(parts[column++]);
+            platformName = NullableString(parts[column++]);
+            platformHexId = NullableString(parts[column++]);
+            satellite = NullableString(parts[column++]);
+            bestMsgDate = NullableString(parts[column++]);
+            duration = NullableString(parts[column++]);
+            nbMessage = NullableString(parts[column++]);
+            message120 = NullableString(parts[column++]);
+            bestLevel = NullableString(parts[column++]);
+            frequency = NullableString(parts[column++]);
+            locationDate = NullableString(parts[column++]);
+            latitude = NullableString(parts[column++]);
+            longitude = NullableString(parts[column++]);
+            altitude = NullableString(parts[column++]);
+            locationClass = NullableString(parts[column++]);
+            gpsSpeed = NullableString(parts[column++]);
+            gpsHeading = NullableString(parts[column++]);
+            latitude2 = NullableString(parts[column++]);
+            longitude2 = NullableString(parts[column++]);
+            altitude2 = NullableString(parts[column++]);
+            index = NullableString(parts[column++]);
+            nopc = NullableString(parts[column++]);
+            errorRadius = NullableString(parts[column++]);
+            semiMajor = NullableString(parts[column++]);
+            semiMinor = NullableString(parts[column++]);
+            orientation = NullableString(parts[column++]);
+            hdop = NullableString(parts[column++]);
+            bestDate = NullableString(parts[column++]);
+            compression = NullableString(parts[column++]);
+            type = NullableString(parts[column++]);
+            alarm = NullableString(parts[column++]);
+            concatenated = NullableString(parts[column++]);
+            date = NullableString(parts[column++]);
+            level = NullableString(parts[column++]);
+            doppler = NullableString(parts[column++]);
+            rawData = NullableString(parts[column].TrimEnd(';').TrimEnd('"'));
+        }
+
 
         #endregion
 
