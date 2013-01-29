@@ -2062,6 +2062,52 @@ AS
 		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
 		 GROUP BY ProjectId, AnimalId
 GO
+CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[programNumber] [nvarchar](50) NULL,
+	[platformId] [nvarchar](50) NULL,
+	[platformType] [nvarchar](50) NULL,
+	[platformModel] [nvarchar](50) NULL,
+	[platformName] [nvarchar](50) NULL,
+	[platformHexId] [nvarchar](50) NULL,
+	[satellite] [nvarchar](50) NULL,
+	[bestMsgDate] [nvarchar](50) NULL,
+	[duration] [nvarchar](50) NULL,
+	[nbMessage] [nvarchar](50) NULL,
+	[message120] [nvarchar](50) NULL,
+	[bestLevel] [nvarchar](50) NULL,
+	[frequency] [nvarchar](50) NULL,
+	[locationDate] [nvarchar](50) NULL,
+	[latitude] [nvarchar](50) NULL,
+	[longitude] [nvarchar](50) NULL,
+	[altitude] [nvarchar](50) NULL,
+	[locationClass] [nvarchar](50) NULL,
+	[gpsSpeed] [nvarchar](50) NULL,
+	[gpsHeading] [nvarchar](50) NULL,
+	[latitude2] [nvarchar](50) NULL,
+	[longitude2] [nvarchar](50) NULL,
+	[altitude2] [nvarchar](50) NULL,
+	[index] [nvarchar](50) NULL,
+	[nopc] [nvarchar](50) NULL,
+	[errorRadius] [nvarchar](50) NULL,
+	[semiMajor] [nvarchar](50) NULL,
+	[semiMinor] [nvarchar](50) NULL,
+	[orientation] [nvarchar](50) NULL,
+	[hdop] [nvarchar](50) NULL,
+	[bestDate] [nvarchar](50) NULL,
+	[compression] [nvarchar](50) NULL,
+	[type] [nvarchar](50) NULL,
+	[alarm] [nvarchar](50) NULL,
+	[concatenated] [nvarchar](50) NULL,
+	[date] [nvarchar](50) NULL,
+	[level] [nvarchar](50) NULL,
+	[doppler] [nvarchar](50) NULL,
+	[rawData] [nvarchar](500) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatF]
+GO
 CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
 RETURNS  TABLE (
 	[LineNumber] [int] NULL,
@@ -3662,6 +3708,63 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
+CREATE TABLE [dbo].[CollarDataArgosWebService](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[programNumber] [varchar](50) NULL,
+	[platformId] [varchar](50) NULL,
+	[platformType] [varchar](50) NULL,
+	[platformModel] [varchar](50) NULL,
+	[platformName] [varchar](50) NULL,
+	[platformHexId] [varchar](50) NULL,
+	[satellite] [varchar](50) NULL,
+	[bestMsgDate] [varchar](50) NULL,
+	[duration] [varchar](50) NULL,
+	[nbMessage] [varchar](50) NULL,
+	[message120] [varchar](50) NULL,
+	[bestLevel] [varchar](50) NULL,
+	[frequency] [varchar](50) NULL,
+	[locationDate] [varchar](50) NULL,
+	[latitude] [varchar](50) NULL,
+	[longitude] [varchar](50) NULL,
+	[altitude] [varchar](50) NULL,
+	[locationClass] [varchar](50) NULL,
+	[gpsSpeed] [varchar](50) NULL,
+	[gpsHeading] [varchar](50) NULL,
+	[latitude2] [varchar](50) NULL,
+	[longitude2] [varchar](50) NULL,
+	[altitude2] [varchar](50) NULL,
+	[index] [varchar](50) NULL,
+	[nopc] [varchar](50) NULL,
+	[errorRadius] [varchar](50) NULL,
+	[semiMajor] [varchar](50) NULL,
+	[semiMinor] [varchar](50) NULL,
+	[orientation] [varchar](50) NULL,
+	[hdop] [varchar](50) NULL,
+	[bestDate] [varchar](50) NULL,
+	[compression] [varchar](50) NULL,
+	[type] [varchar](50) NULL,
+	[alarm] [varchar](50) NULL,
+	[concatenated] [varchar](50) NULL,
+	[date] [varchar](50) NULL,
+	[level] [varchar](50) NULL,
+	[doppler] [varchar](50) NULL,
+	[rawData] [varchar](500) NULL,
+ CONSTRAINT [PK_CollarDataArgosWebService] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[CollarDataDebevekFormat](
 	[FileID] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
@@ -3997,7 +4100,25 @@ BEGIN
 		    AND I.[Longitude] <> 'Error' AND I.[Latitude] <> 'Error'
 	END
 	
-	-- FIXME: Add other formats 
+	
+	-- @Format = 'E' -- Telonics email format
+	--    Converted with an external application to formats 'C' and/or 'D'
+	
+	IF @Format = 'F'  -- Argos Web Services Format
+	BEGIN
+		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
+		        CONVERT(datetime2, I.[locationDate]),
+		        CONVERT(float, I.latitude), CONVERT(float, I.longitude)
+		   FROM dbo.CollarDataArgosWebService as I INNER JOIN CollarFiles as F 
+			 ON I.FileId = F.FileId
+		  WHERE F.[Status] = 'A'
+		    AND I.FileId = @FileId
+		    AND I.latitude IS NOT NULL AND I.longitude IS NOT NULL
+		    AND I.[locationDate] IS NOT NULL
+		    AND I.[locationDate] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+	END
+	
 END
 GO
 SET ANSI_NULLS ON
@@ -4221,63 +4342,6 @@ FROM         dbo.ValidLocations AS v INNER JOIN
                       dbo.CollarDataTelonicsGen4 AS g2 ON g1.FileId = g2.FileId AND g1.AcquisitionStartTime = g2.AcquisitionStartTime AND g2.Temperature IS NOT NULL 
                       LEFT OUTER JOIN
                       dbo.CollarDataTelonicsGen4 AS g3 ON g2.FileId = g3.FileId AND g1.AcquisitionStartTime = g3.AcquisitionStartTime AND g3.ActivityCount IS NOT NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataArgosWebService](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[programNumber] [varchar](50) NULL,
-	[platformId] [varchar](50) NULL,
-	[platformType] [varchar](50) NULL,
-	[platformModel] [varchar](50) NULL,
-	[platformName] [varchar](50) NULL,
-	[platformHexId] [varchar](50) NULL,
-	[satellite] [varchar](50) NULL,
-	[bestMsgDate] [varchar](50) NULL,
-	[duration] [varchar](50) NULL,
-	[nbMessage] [varchar](50) NULL,
-	[message120] [varchar](50) NULL,
-	[bestLevel] [varchar](50) NULL,
-	[frequency] [varchar](50) NULL,
-	[locationDate] [varchar](50) NULL,
-	[latitude] [varchar](50) NULL,
-	[longitude] [varchar](50) NULL,
-	[altitude] [varchar](50) NULL,
-	[locationClass] [varchar](50) NULL,
-	[gpsSpeed] [varchar](50) NULL,
-	[gpsHeading] [varchar](50) NULL,
-	[latitude2] [varchar](50) NULL,
-	[longitude2] [varchar](50) NULL,
-	[altitude2] [varchar](50) NULL,
-	[index] [varchar](50) NULL,
-	[nopc] [varchar](50) NULL,
-	[errorRadius] [varchar](50) NULL,
-	[semiMajor] [varchar](50) NULL,
-	[semiMinor] [varchar](50) NULL,
-	[orientation] [varchar](50) NULL,
-	[hdop] [varchar](50) NULL,
-	[bestDate] [varchar](50) NULL,
-	[compression] [varchar](50) NULL,
-	[type] [varchar](50) NULL,
-	[alarm] [varchar](50) NULL,
-	[concatenated] [varchar](50) NULL,
-	[date] [varchar](50) NULL,
-	[level] [varchar](50) NULL,
-	[doppler] [varchar](50) NULL,
-	[rawData] [varchar](500) NULL,
- CONSTRAINT [PK_CollarDataArgosWebService] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -8259,7 +8323,18 @@ BEGIN
 		END
 	END
 	
-	-- FIXME: Add other formats
+	-- @Format = 'E' -- Telonics email format
+	--    Converted with an external application to formats 'C' and/or 'D'
+	
+	IF @Format = 'F'  -- Argos Web Services Format
+	BEGIN
+		-- only parse the data if it is not already in the file
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosWebService] WHERE [FileId] = @FileId)
+		BEGIN
+			INSERT INTO [dbo].[CollarDataArgosWebService] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatF] (@FileId) 
+		END
+	END
+	
 	
 END
 GO
