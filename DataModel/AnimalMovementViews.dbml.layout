@@ -14,5 +14,11 @@
         <elementListCompartment Id="96242d98-fc42-47cd-b4df-3289f6c8a312" absoluteBounds="3.8899999999999997, 3.46, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
+    <classShape Id="55a942e8-0fd1-4b5b-a8c2-c8b07fb06f7e" absoluteBounds="1.625, 3, 2, 2.9247054036458331">
+      <DataClassMoniker Name="/AnimalMovementViewsDataContext/DownloadableAndAnalyzableCollar" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5cd52f6d-89e9-4e4b-9f14-4ec9154c3897" absoluteBounds="1.6399999999999997, 3.46, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>

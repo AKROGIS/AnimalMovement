@@ -78,6 +78,14 @@ namespace DataModel
 			}
 		}
 		
+		public System.Data.Linq.Table<DownloadableAndAnalyzableCollar> DownloadableAndAnalyzableCollars
+		{
+			get
+			{
+				return this.GetTable<DownloadableAndAnalyzableCollar>();
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.AnimalLocationSummary", IsComposable=true)]
 		public IQueryable<AnimalLocationSummaryResult> AnimalLocationSummary([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId)
 		{
@@ -404,6 +412,213 @@ namespace DataModel
 				if ((this._Days != value))
 				{
 					this._Days = value;
+				}
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.DownloadableAndAnalyzableCollars")]
+	public partial class DownloadableAndAnalyzableCollar
+	{
+		
+		private string _ProjectId;
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarId;
+		
+		private string _Email;
+		
+		private string _UserName;
+		
+		private string _Password;
+		
+		private string _PlatformId;
+		
+		private System.Nullable<int> _Days;
+		
+		private string _CollarModel;
+		
+		private System.Nullable<int> _Gen3Period;
+		
+		private System.Data.Linq.Binary _TpfFile;
+		
+		public DownloadableAndAnalyzableCollar()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string ProjectId
+		{
+			get
+			{
+				return this._ProjectId;
+			}
+			set
+			{
+				if ((this._ProjectId != value))
+				{
+					this._ProjectId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					this._CollarManufacturer = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					this._CollarId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Email", DbType="NVarChar(200) NOT NULL", CanBeNull=false)]
+		public string Email
+		{
+			get
+			{
+				return this._Email;
+			}
+			set
+			{
+				if ((this._Email != value))
+				{
+					this._Email = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
+		public string UserName
+		{
+			get
+			{
+				return this._UserName;
+			}
+			set
+			{
+				if ((this._UserName != value))
+				{
+					this._UserName = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Password", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
+		public string Password
+		{
+			get
+			{
+				return this._Password;
+			}
+			set
+			{
+				if ((this._Password != value))
+				{
+					this._Password = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PlatformId", DbType="VarChar(8) NOT NULL", CanBeNull=false)]
+		public string PlatformId
+		{
+			get
+			{
+				return this._PlatformId;
+			}
+			set
+			{
+				if ((this._PlatformId != value))
+				{
+					this._PlatformId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Days", DbType="Int")]
+		public System.Nullable<int> Days
+		{
+			get
+			{
+				return this._Days;
+			}
+			set
+			{
+				if ((this._Days != value))
+				{
+					this._Days = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarModel", DbType="VarChar(24) NOT NULL", CanBeNull=false)]
+		public string CollarModel
+		{
+			get
+			{
+				return this._CollarModel;
+			}
+			set
+			{
+				if ((this._CollarModel != value))
+				{
+					this._CollarModel = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Gen3Period", DbType="Int")]
+		public System.Nullable<int> Gen3Period
+		{
+			get
+			{
+				return this._Gen3Period;
+			}
+			set
+			{
+				if ((this._Gen3Period != value))
+				{
+					this._Gen3Period = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TpfFile", DbType="VarBinary(MAX)", CanBeNull=true, UpdateCheck=UpdateCheck.Never)]
+		public System.Data.Linq.Binary TpfFile
+		{
+			get
+			{
+				return this._TpfFile;
+			}
+			set
+			{
+				if ((this._TpfFile != value))
+				{
+					this._TpfFile = value;
 				}
 			}
 		}
