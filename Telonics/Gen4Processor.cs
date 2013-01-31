@@ -44,7 +44,22 @@ namespace Telonics
         public string TdcExecutable { get; set; }
         public string BatchFileTemplate { get; set; }
 
-        public IEnumerable<string> Process(IEnumerable<ArgosTransmission> transmissions)
+
+        public IEnumerable<string> ProcessEmail(IEnumerable<ArgosTransmission> transmissions)
+        {
+            return ProcessFile(String.Join(Environment.NewLine, transmissions.Select(t => t.ToString())));
+        }
+
+        public IEnumerable<string> ProcessAws(string fileContents)
+        {
+            return ProcessFile(fileContents);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private IEnumerable<string> ProcessFile(string fileContents)
         {
             if (!File.Exists(TdcExecutable))
                 throw new InvalidOperationException("TDC Execution error - TDC not found at " + TdcExecutable);
@@ -55,7 +70,7 @@ namespace Telonics
 
             // write the argos file transmission to the filesystem
             var dataFilePath = Path.GetTempFileName();
-            File.WriteAllLines(dataFilePath, transmissions.Select(t => t.ToString()));
+            File.WriteAllText(dataFilePath, fileContents);
 
             var outputFolder = GetNewTempDirectory();
             var batchFilePath = Path.GetTempFileName();
@@ -66,7 +81,7 @@ namespace Telonics
             File.WriteAllText(batchFilePath, batchCommands);
 
             //  Run TDC with the batch file
-            var p = System.Diagnostics.Process.Start(new ProcessStartInfo
+            var p = Process.Start(new ProcessStartInfo
             {
                 FileName = TdcExecutable,
                 Arguments = "/batch:" + batchFilePath,
@@ -111,10 +126,6 @@ namespace Telonics
 
             return results;
         }
-
-        #endregion
-
-        #region Private Methods
 
         private static string GetNewTempDirectory()
         {

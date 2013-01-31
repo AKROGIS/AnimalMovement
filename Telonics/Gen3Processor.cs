@@ -18,7 +18,12 @@ namespace Telonics
 
         public TimeSpan Period { get; private set; }
 
-        public IEnumerable<string> Process(IEnumerable<ArgosTransmission> transmissions)
+        public IEnumerable<string> ProcessAws(string fileContents)
+        {
+            return ProcessEmail(BuildTransmissions(fileContents));
+        }
+
+        public IEnumerable<string> ProcessEmail(IEnumerable<ArgosTransmission> transmissions)
         {
             return transmissions.SelectMany(transmission => GetMessage(transmission).FixesAsCsv());
         }
@@ -26,6 +31,12 @@ namespace Telonics
         #endregion
 
         #region Private Classes
+
+        private IEnumerable<ArgosTransmission> BuildTransmissions(string awsFile)
+        {
+            throw new NotImplementedException();
+            //return new ArgosTransmission();
+        }
 
         //ArgosMessages hold the list of fixes in a transmission, and
         //can be represented as a comma separated values for output.

@@ -124,7 +124,7 @@ namespace Telonics
                 throw new InvalidOperationException("There is no processor defined for Telonics Id " + telonicsId);
             if (!_transmissionsByCtn.ContainsKey(telonicsId) || _transmissionsByCtn[telonicsId].Count < 1)
                 throw new NoMessagesException("There are no messages for Telonics Id " + telonicsId);
-            return Processor(telonicsId).Process(_transmissionsByCtn[telonicsId]);
+            return Processor(telonicsId).ProcessEmail(_transmissionsByCtn[telonicsId]);
         }
         #endregion
 

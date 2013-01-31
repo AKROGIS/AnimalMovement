@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 using DataModel;
 using Telonics;
 
@@ -30,34 +31,70 @@ namespace ArgosDownloader
                 var views = new AnimalMovementViewsDataContext();
                 _emails = new Dictionary<string, string>();
                 _admin = Settings.GetSystemDefault(EmailKey);
-                foreach (var collar in views.DownloadableCollars.Where(c => c.Days == null || c.Days >= MinDays))
+                foreach (var collar in views.DownloadableAndAnalyzableCollars.Where(c => c.Days == null || c.Days >= MinDays))
                 {
                     var days = Math.Min(MaxDays, collar.Days ?? MaxDays);
                     string errors;
-                    int? fileId = null;
+                    int? firstFileId = null;
+                    int? secondFileId = null;
                     var results = ArgosWebSite.GetCollar(collar.UserName, collar.Password, collar.PlatformId, days,
                                                          out errors);
                     if (results != null)
                     {
                         var collarFile = new CollarFile
-                            {
-                                Project = collar.ProjectId,
-                                FileName = collar.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
-                                Format = 'F',
-                                CollarManufacturer = collar.CollarManufacturer,
-                                CollarId = collar.CollarId,
-                                Status = 'A',
-                                Contents = results.ToBytes()
-                            };
+                        {
+                            Project = collar.ProjectId,
+                            FileName = collar.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
+                            Format = 'F',
+                            CollarManufacturer = collar.CollarManufacturer,
+                            CollarId = collar.CollarId,
+                            Status = 'A',
+                            Contents = results.ToBytes()
+                        };
+                        db.CollarFiles.InsertOnSubmit(collarFile);
                         try
                         {
-                            db.CollarFiles.InsertOnSubmit(collarFile);
                             db.SubmitChanges();
-                            fileId = collarFile.FileId;
+                            firstFileId = collarFile.FileId;
                         }
                         catch (Exception ex)
                         {
-                            errors = "Error writing download to database: " + ex.Message;
+                            errors = "Error writing raw AWS download to database: " + ex.Message;
+                        }
+                        if (firstFileId != null)
+                        {
+                            try
+                            {
+                                var collarFile2 = ProcessAws(collar, firstFileId.Value, results);
+                                db.CollarFiles.InsertOnSubmit(collarFile2);
+                                try
+                                {
+                                    db.SubmitChanges();
+                                    secondFileId = collarFile2.FileId;
+                                }
+                                catch (Exception ex)
+                                {
+                                    errors = "Error writing Gen3/4 output to database: " + ex.Message;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                errors = "Error processing AWS download to Gen3/4: " + ex.Message;
+                            }
+                            if (secondFileId == null)
+                            {
+                                db.CollarFiles.DeleteOnSubmit(collarFile);
+                                try
+                                {
+                                    db.SubmitChanges();
+                                }
+                                catch (Exception ex)
+                                {
+                                    errors += Environment.NewLine + "Error trying to rollback changes: " + ex.Message +
+                                              Environment.NewLine + "The AWS file (id = " + firstFileId +
+                                              ") added to the database could not be removed after a subsequent error.";
+                                }
+                            }
                         }
                     }
                     //log this activity in the database
@@ -66,7 +103,7 @@ namespace ArgosDownloader
                         {
                             CollarManufacturer = collar.CollarManufacturer,
                             CollarId = collar.CollarId,
-                            FileId = fileId,
+                            FileId = secondFileId,
                             ErrorMessage = errors
                         };
                     db.ArgosDownloads.InsertOnSubmit(log);
@@ -80,6 +117,7 @@ namespace ArgosDownloader
                 ReportException(ex);
             }
         }
+
 
         private static void ReportException(Exception ex)
         {
@@ -188,6 +226,65 @@ namespace ArgosDownloader
             {
                 smtp.Send(message);
             }
+        }
+
+        private static CollarFile ProcessAws(DownloadableAndAnalyzableCollar collar, int parentFileId,
+                                             ArgosWebSite.ArgosWebResult results)
+        {
+            CollarFile collarFile;
+            switch (collar.CollarModel)
+            {
+                case "TelonicsGen3":
+                    if (!collar.Gen3Period.HasValue)
+                        throw new InvalidOperationException("Gen3 collar cannot be processed without a period");
+                    var g3processor = new Gen3Processor(TimeSpan.FromMinutes(collar.Gen3Period.Value));
+                    byte[] g3data =
+                        Encoding.UTF8.GetBytes(String.Join(Environment.NewLine,
+                                                           g3processor.ProcessAws(results.ToString())));
+                    collarFile = new CollarFile
+                        {
+                            Project = collar.ProjectId,
+                            FileName =
+                                collar.PlatformId + "_gen3_" + DateTime.Now.ToString("yyyyMMdd") +
+                                ".csv",
+                            Format = 'D',
+                            CollarManufacturer = collar.CollarManufacturer,
+                            CollarId = collar.CollarId,
+                            Status = 'A',
+                            Contents = g3data,
+                            ParentFileId = parentFileId
+                        };
+                    break;
+                case "TelonicsGen4":
+                    var g4processor = new Gen4Processor(collar.TpfFile.ToArray());
+                    string tdcExe = Settings.GetSystemDefault("tdc_exe");
+                    string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");
+                    if (!String.IsNullOrEmpty(tdcExe))
+                        g4processor.TdcExecutable = tdcExe;
+                    if (!String.IsNullOrEmpty(batchFile))
+                        g4processor.BatchFileTemplate = batchFile;
+                    byte[] g4data =
+                        Encoding.UTF8.GetBytes(String.Join(Environment.NewLine,
+                                                           g4processor.ProcessAws(results.ToString())));
+                    collarFile = new CollarFile
+                        {
+                            Project = collar.ProjectId,
+                            FileName =
+                                collar.PlatformId + "_gen4_" + DateTime.Now.ToString("yyyyMMdd") +
+                                ".csv",
+                            Format = 'C',
+                            CollarManufacturer = collar.CollarManufacturer,
+                            CollarId = collar.CollarId,
+                            Status = 'A',
+                            Contents = g4data,
+                            ParentFileId = parentFileId
+                        };
+                    break;
+                default:
+                    var msg = String.Format("Unsupported model ({0} for collar {1}", collar.CollarModel, collar.CollarId);
+                    throw new ArgumentOutOfRangeException(msg);
+            }
+            return collarFile;
         }
     }
 }

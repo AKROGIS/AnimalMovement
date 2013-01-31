@@ -4,6 +4,7 @@ namespace Telonics
 {
     public interface IProcessor
     {
-        IEnumerable<string> Process(IEnumerable<ArgosTransmission> transmissions);
+        IEnumerable<string> ProcessAws(string fileContents);
+        IEnumerable<string> ProcessEmail(IEnumerable<ArgosTransmission> transmissions);
     }
 }
