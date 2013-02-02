@@ -40,13 +40,20 @@ namespace ArgosProcessor
             try
             {
                 var db = new AnimalMovementDataContext();
-#if DEBUGx
+#if DODIR
+                // args[0] is a path to a folder of email files
+                var folder = args[0].ToString();
+                foreach (var email in System.IO.Directory.EnumerateFiles(folder))
+                {
+                    args[0] = System.IO.Path.Combine(folder, email);
+#endif
+#if DOFILE || DODIR
             // args[0] is a path to an email file
             string fileName = System.IO.Path.GetFileName(args[0]);
             byte[] content = System.IO.File.ReadAllBytes(args[0]);
             var testFile = new CollarFile
                 {
-                    Project = "test",
+                    Project = "ARCNVSID022",
                     FileName = fileName,
                     Format = 'E',
                     CollarManufacturer = "Telonics",
@@ -127,7 +134,7 @@ namespace ArgosProcessor
                             };
                         db.CollarFiles.InsertOnSubmit(collarFile);
                         db.SubmitChanges();
-#if DEBUG
+#if VERBOSE
                         error.AppendLine(String.Format("Success: Added collar {0}", collar));
 #endif
                     }
@@ -146,6 +153,9 @@ namespace ArgosProcessor
                         error.AppendLine(message);
                     }
                 }
+#if DODIR
+                }
+#endif
             }
             catch (Exception ex)
             {
@@ -154,6 +164,9 @@ namespace ArgosProcessor
             finally
             {
                 Console.WriteLine(error);
+#if DOFILE || DODIR
+                System.IO.File.AppendAllText("ArgosDownloader.log", error.ToString());
+#endif
             }
         }
     }
