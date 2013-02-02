@@ -24,6 +24,18 @@ LEFT JOIN (SELECT CollarManufacturer, CollarId, FileId FROM CollarFixes GROUP BY
     WHERE F.Format <> 'B' AND (F.CollarManufacturer <> X.CollarManufacturer OR X.CollarId <> F.CollarId)
 
 
+
+-- Collars which are downloadable, but which I cannot analyze
+   SELECT A.*, C.CollarModel, C.Gen3Period
+     FROM DownloadableCollars AS A
+LEFT JOIN DownloadableAndAnalyzableCollars AS B
+       ON A.CollarId = B.CollarId
+LEFT JOIN Collars AS C
+       ON A.CollarId = C.CollarId
+    WHERE B.CollarId IS NULL
+
+
+
 -- Change status of all files in a project
 --   If you only want to change files of a specific format, uncomment the two parts with @Format
 DECLARE @ProjectId varchar(255) = 'ARCNVSID022';
@@ -108,7 +120,7 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 --  If a animal has had multiple deployments, and one deployment has fixes,
 --  and the other does not, this will report a false positive for the
 --  listing the animal with the collar with no fixes 
-    DECLARE @ProjectId varchar(255) = 'GAAR_Moose';
+    DECLARE @ProjectId varchar(255) = 'ARCNVSID022';
      SELECT A.AnimalId, D.CollarId
        FROM Animals AS A
   LEFT JOIN CollarDeployments AS D
@@ -162,3 +174,27 @@ select * from ArgosDownloads where left(CollarId,6) = @rootID
 select * from CollarParameters where left(CollarId,6) = @rootID
 select FileId, CollarId From CollarFixes where left(CollarId,6) = @rootID group by FileId, CollarId
 select * From CollarFiles where left(CollarId,6) = @rootID -- CollarId = @OldID
+
+
+
+-- Preview/Hide the fixes outside a nominal range for a project
+    DECLARE @ProjectId varchar(255) = 'ARCNVSID022';
+    DECLARE @MinLat Real = 65.0;
+    DECLARE @MaxLat Real = 75.0;
+    DECLARE @MinLon Real = -170.0;
+    DECLARE @MaxLon Real = -161.0;
+   
+  -- Preview fixes outside the range
+     SELECT AnimalId, FixDate, Location.Long as Lon, Location.Lat as Lat
+       FROM Locations
+      WHERE ProjectId = @ProjectId
+        AND [Status] IS NULL
+        AND (Location.Long < @MinLon OR @MaxLon < Location.Long OR Location.Lat < @MinLat OR @MaxLat < Location.Lat)
+/*   
+  -- Hide fixes outside the range
+     UPDATE Locations
+        SET [Status] = 'H'
+      WHERE ProjectId = @ProjectId
+        AND [Status] IS NULL
+        AND (Location.Long < @MinLon OR @MaxLon < Location.Long OR Location.Lat < @MinLat OR @MaxLat < Location.Lat)
+*/
