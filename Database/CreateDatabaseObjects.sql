@@ -8631,6 +8631,7 @@ ALTER TABLE [dbo].[ArgosDownloads] CHECK CONSTRAINT [FK_ArgosDownloads_CollarFil
 GO
 ALTER TABLE [dbo].[ArgosDownloads]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDownloads_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
 REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[ArgosDownloads] CHECK CONSTRAINT [FK_ArgosDownloads_Collars]
 GO
@@ -8717,6 +8718,7 @@ ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarFixes]  WITH CHECK ADD  CONSTRAINT [FK_CollarFixes_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
 REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_Collars]
 GO
@@ -8742,6 +8744,7 @@ ALTER TABLE [dbo].[CollarParameters] CHECK CONSTRAINT [FK_CollarParameters_Colla
 GO
 ALTER TABLE [dbo].[CollarParameters]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameters_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
 REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarParameters] CHECK CONSTRAINT [FK_CollarParameters_Collars]
 GO
