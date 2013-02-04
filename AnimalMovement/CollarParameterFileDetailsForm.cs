@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using DataModel;
 
@@ -9,7 +8,6 @@ using DataModel;
 //TODO - Enable editing of file status
 //TODO - Enable edit of parameter file type
 //TODO - add warning about PPF file types not being used - set default to inactive.
-//FIXME - Contents of PPF files is binary, Save as does not work
 //FIXME - Save As when viewing file contents should not add the csv extension
 
 namespace AnimalMovement
@@ -72,8 +70,7 @@ namespace AnimalMovement
         private void ShowContentsButton_Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            string contents = Encoding.UTF8.GetString(File.Contents.ToArray());
-            var form = new FileContentsForm(contents, File.FileName);
+            var form = new FileContentsForm(File.Contents.ToArray(), File.FileName);
             Cursor.Current = Cursors.Default;
             form.Show(this);
         }
