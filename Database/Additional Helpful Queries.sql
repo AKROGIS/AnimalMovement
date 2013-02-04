@@ -10,7 +10,7 @@ LEFT JOIN Collars AS C
        ON F.CollarManufacturer = C.CollarManufacturer AND F.CollarId = C.CollarId
 LEFT JOIN (SELECT CollarManufacturer, CollarId, FileId FROM CollarFixes GROUP BY CollarManufacturer, CollarId, FileId) AS X
        ON F.FileId = X.FileId
-    WHERE F.Format <> 'B' AND C.CollarId IS NULL
+    WHERE F.Format <> 'B' AND C.CollarId IS NULL AND F.CollarId IS NOT NULL
 
 
 -- ERROR Collar mismatch between Files and Fixes
@@ -166,6 +166,8 @@ on D.CollarId = c2.CollarId
  and c1.Manager <> c2.Manager
  order by c1.AlternativeId
 
+
+
 --Show all the records for a root collarId
 DECLARE @rootID varchar(16) = '630028'
 select * from Collars where left(CollarId,6) = @rootID
@@ -198,3 +200,11 @@ select * From CollarFiles where left(CollarId,6) = @rootID -- CollarId = @OldID
         AND [Status] IS NULL
         AND (Location.Long < @MinLon OR @MaxLon < Location.Long OR Location.Lat < @MinLat OR @MaxLat < Location.Lat)
 */
+
+
+
+--Find bad locations based on improbable velocity vectors
+--  The speed, distance are animal dependent.  The duration is dependent on the collar settings
+--  speed is meters/hour, and distance is meters
+--  Use ArcGIS to zoom in on the animal at the time, and use the addin tool to hide invalid locations.
+select * from Movements where ProjectId = 'ARCNVSID022' and (speed > 7500 or duration < .92 or Distance > 40000) order by AnimalId, StartDate
