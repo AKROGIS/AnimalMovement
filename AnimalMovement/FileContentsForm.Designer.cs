@@ -74,7 +74,7 @@
             // 
             // SaveFileDialog
             // 
-            this.SaveFileDialog.DefaultExt = "csv";
+            this.SaveFileDialog.AddExtension = false;
             // 
             // FileContentsForm
             // 

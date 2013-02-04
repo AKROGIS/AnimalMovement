@@ -115,7 +115,7 @@ namespace AnimalMovement
             var file = new CollarFile
                 {
                     Project1 = Project,
-                    FileName = System.IO.Path.GetFileNameWithoutExtension(filePath),
+                    FileName = System.IO.Path.GetFileName(filePath),
                     LookupCollarFileFormat = Format,
                     LookupCollarManufacturer = Format.LookupCollarManufacturer,
                     CollarId = GetCollar(filePath),
@@ -150,7 +150,7 @@ namespace AnimalMovement
         {
             if (!Database.CollarFiles.Any(f =>
                 f.Project1 == Project &&
-                f.FileName == System.IO.Path.GetFileNameWithoutExtension(filePath) &&
+                f.FileName == System.IO.Path.GetFileName(filePath) &&
                 f.LookupCollarFileFormat == Format &&
                 f.LookupCollarManufacturer == Format.LookupCollarManufacturer
                 ))

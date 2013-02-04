@@ -42,7 +42,7 @@ namespace ArgosProcessor
                 var db = new AnimalMovementDataContext();
 #if DODIR
                 // args[0] is a path to a folder of email files
-                var folder = args[0].ToString();
+                var folder = String.Copy(args[0]);
                 foreach (var email in System.IO.Directory.EnumerateFiles(folder))
                 {
                     args[0] = System.IO.Path.Combine(folder, email);
@@ -124,7 +124,7 @@ namespace ArgosProcessor
                         var collarFile = new CollarFile
                             {
                                 Project = file.Project,
-                                FileName = file.FileName + "_" + collar.CollarId,
+                                FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + collar.CollarId + ".csv",
                                 Format = analyzer.GetFileFormatForCollar(collar),
                                 CollarManufacturer = "Telonics",
                                 CollarId = collar.CollarId,

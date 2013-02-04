@@ -86,7 +86,7 @@
             // 
             this.openFileDialog.DefaultExt = "csv";
             this.openFileDialog.FileName = "CollarData";
-            this.openFileDialog.Filter = "CSV File|*.csv|Text Files|*.txt|All Files|*.*";
+            this.openFileDialog.Filter = "CSV File|*.csv|DAT File|*.dat|TSV File|*.tsv|Text Files|*.txt|All Files|*.*";
             // 
             // label2
             // 

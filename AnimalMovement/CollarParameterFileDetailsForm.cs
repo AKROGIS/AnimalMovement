@@ -7,8 +7,7 @@ using DataModel;
 //TODO - Enable Add/Edit/Delete for parameter assignments and date ranges
 //TODO - Enable editing of file status
 //TODO - Enable edit of parameter file type
-//TODO - add warning about PPF file types not being used - set default to inactive.
-//FIXME - Save As when viewing file contents should not add the csv extension
+//TODO - add warning about PPF file types not being used and they are binary
 
 namespace AnimalMovement
 {

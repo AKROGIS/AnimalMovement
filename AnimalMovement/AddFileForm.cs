@@ -8,10 +8,6 @@ using Telonics;
 
 //TODO - In duplicate finename warning, give the filename
 //TODO - Provide better error messages when uploading files fails
-//TODO - File browser should allow csv, tsc, and dat files by default
-//FIXME - do not assume the file extension is CSV in saving or reporting
-
-//Loading a whole folder
 
 /*
  * The collar list displays the following:
@@ -131,7 +127,7 @@ namespace AnimalMovement
             var file = new CollarFile
                 {
                     Project1 = Project,
-                    FileName = System.IO.Path.GetFileNameWithoutExtension(FileNameTextBox.Text),
+                    FileName = System.IO.Path.GetFileName(FileNameTextBox.Text),
                     LookupCollarFileFormat = (LookupCollarFileFormat)FormatComboBox.SelectedItem,
                     LookupCollarManufacturer = (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem,
                     CollarId = CollarComboBox.Enabled ? ((Collar)CollarComboBox.SelectedItem).CollarId : null,
@@ -165,7 +161,7 @@ namespace AnimalMovement
         {
             if (!Database.CollarFiles.Any(f =>
                 f.Project1 == Project &&
-                f.FileName == System.IO.Path.GetFileNameWithoutExtension(FileNameTextBox.Text) &&
+                f.FileName == System.IO.Path.GetFileName(FileNameTextBox.Text) &&
                 f.LookupCollarFileFormat == (LookupCollarFileFormat)FormatComboBox.SelectedItem &&
                 f.LookupCollarManufacturer == (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem
                 ))
