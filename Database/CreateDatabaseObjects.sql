@@ -8739,6 +8739,7 @@ ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFil
 GO
 ALTER TABLE [dbo].[CollarParameters]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameters_CollarParameterFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarParameterFiles] ([FileId])
+ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[CollarParameters] CHECK CONSTRAINT [FK_CollarParameters_CollarParameterFiles]
 GO

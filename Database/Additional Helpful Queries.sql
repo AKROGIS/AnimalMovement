@@ -152,28 +152,6 @@ SELECT [CollarId]
   and c.DisposalDate is null
   order by C.Manager, c.CollarModel, C.AlternativeId
   
- 
- 
-
--- Collars added by RES from TPF files that do not match existing files.
--- Finding and fixing collar names
-select c1.AlternativeId, c1.Manager, c1.CollarId, c2.Manager, c2.CollarId --, F.FileID, D.ProjectId, D.AnimalId
-from Collars as C1
-inner join Collars as C2
-on C1.AlternativeId = C2.AlternativeId and c1.CollarId <> c2.CollarId
-
-/*
-left Join CollarFiles as F
-on F.CollarId = c2.CollarId
-
-left Join CollarDeployments as D
-on D.CollarId = c2.CollarId
-*/
-
- where C1.Manager = 'NPS\resarwas'
- and c1.Manager <> c2.Manager
- order by c1.AlternativeId
-
 
 
 --Show all the records for a root collarId
