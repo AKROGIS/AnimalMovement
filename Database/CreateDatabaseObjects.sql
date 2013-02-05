@@ -7826,7 +7826,7 @@ CREATE VIEW [dbo].[WARNING_TelonicArgosCollarsWithNoPlatform]
 AS
 
 -- Telonics Gen3/4 Argos GPS Collars with no matching record in ArgosPlatforms
-    SELECT C.Manager, C.CollarModel, C.CollarId as CTN, C.AlternativeId as ArgosID, C.Frequency, C.DisposalDate
+    SELECT C.Manager, C.Owner, C.CollarModel, C.CollarId as CTN, C.AlternativeId as ArgosID, C.Frequency, C.DisposalDate
       FROM Collars AS C
  LEFT JOIN ArgosPlatforms AS P
         ON P.PlatformId = C.AlternativeId
@@ -7892,7 +7892,7 @@ SELECT TOP (100) PERCENT
   FROM CollarParameters AS cp
  INNER JOIN CollarParameterFiles AS cpf
     ON cp.FileId = cpf.FileId
- WHERE cpf.Format = 'B' AND cpf.[Status] = 'I'
+ WHERE cpf.Format = 'B' AND cpf.[Status] = 'A'
 GO
 SET ANSI_NULLS ON
 GO

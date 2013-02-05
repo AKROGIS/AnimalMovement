@@ -61,6 +61,14 @@ DEALLOCATE change_status_cursor;
 
 
 
+-- Rename a collar (simple, cannot be used to split a collar into two)
+DECLARE @old varchar(16) = '634657';
+DECLARE @new varchar(16) = @old + 'A';
+UPDATE Collars SET CollarId = @new WHERE CollarId = @old 
+UPDATE CollarFiles SET CollarId = @new WHERE CollarId = @old 
+
+
+
 -- All conflicting fixes for all of a PI's collars
     DECLARE @PI varchar(255) = 'NPS\SDMIller';
      SELECT C.CollarManufacturer, C.CollarId, F.*
