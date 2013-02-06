@@ -3,6 +3,9 @@ Go
 
 -- Test All Views 
 
+-- Get all the Collar data embeded in the uploaded TPF files
+SELECT TOP 100 * FROM AllTpfFileData
+
 -- query for display in Application
 SELECT TOP 100 * FROM AnimalFixesByFile
 

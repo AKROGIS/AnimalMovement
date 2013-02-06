@@ -1580,6 +1580,57 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- Create the stored procedure to generate an error using 
+-- RAISERROR. The original error information is used to
+-- construct the msg_str for RAISERROR.
+-- must be called from a CATCH block
+-- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
+CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
+    -- Return if there is no error information to retrieve.
+    IF ERROR_NUMBER() IS NULL
+        RETURN;
+
+    DECLARE 
+        @ErrorMessage    NVARCHAR(4000),
+        @ErrorNumber     INT,
+        @ErrorSeverity   INT,
+        @ErrorState      INT,
+        @ErrorLine       INT,
+        @ErrorProcedure  NVARCHAR(200);
+
+    -- Assign variables to error-handling functions that 
+    -- capture information for RAISERROR.
+    SELECT 
+        @ErrorNumber = ERROR_NUMBER(),
+        @ErrorSeverity = ERROR_SEVERITY(),
+        @ErrorState = ERROR_STATE(),
+        @ErrorLine = ERROR_LINE(),
+        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
+
+    -- Build the message string that will contain original
+    -- error information.
+    SELECT @ErrorMessage = 
+        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
+            'Message: '+ ERROR_MESSAGE();
+
+    -- Raise an error: msg_str parameter of RAISERROR will contain
+    -- the original error information.
+    RAISERROR 
+        (
+        @ErrorMessage, 
+        @ErrorSeverity, 
+        1,               
+        @ErrorNumber,    -- parameter: original error number.
+        @ErrorSeverity,  -- parameter: original error severity.
+        @ErrorState,     -- parameter: original error state.
+        @ErrorProcedure, -- parameter: original error procedure name.
+        @ErrorLine       -- parameter: original error line number.
+        );
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: June 11, 2012
@@ -1632,57 +1683,6 @@ BEGIN
 	PRINT '  Test not written yet'
 
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- Create the stored procedure to generate an error using 
--- RAISERROR. The original error information is used to
--- construct the msg_str for RAISERROR.
--- must be called from a CATCH block
--- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
-CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
-    -- Return if there is no error information to retrieve.
-    IF ERROR_NUMBER() IS NULL
-        RETURN;
-
-    DECLARE 
-        @ErrorMessage    NVARCHAR(4000),
-        @ErrorNumber     INT,
-        @ErrorSeverity   INT,
-        @ErrorState      INT,
-        @ErrorLine       INT,
-        @ErrorProcedure  NVARCHAR(200);
-
-    -- Assign variables to error-handling functions that 
-    -- capture information for RAISERROR.
-    SELECT 
-        @ErrorNumber = ERROR_NUMBER(),
-        @ErrorSeverity = ERROR_SEVERITY(),
-        @ErrorState = ERROR_STATE(),
-        @ErrorLine = ERROR_LINE(),
-        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
-
-    -- Build the message string that will contain original
-    -- error information.
-    SELECT @ErrorMessage = 
-        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
-            'Message: '+ ERROR_MESSAGE();
-
-    -- Raise an error: msg_str parameter of RAISERROR will contain
-    -- the original error information.
-    RAISERROR 
-        (
-        @ErrorMessage, 
-        @ErrorSeverity, 
-        1,               
-        @ErrorNumber,    -- parameter: original error number.
-        @ErrorSeverity,  -- parameter: original error severity.
-        @ErrorState,     -- parameter: original error state.
-        @ErrorProcedure, -- parameter: original error procedure name.
-        @ErrorLine       -- parameter: original error line number.
-        );
 GO
 SET ANSI_NULLS ON
 GO
@@ -2772,6 +2772,17 @@ BEGIN
 	print '  9  (' + ISNULL(CONVERT(NVARCHAR(32),Year(@StartDate1)),'NULL') +',' + ISNULL(CONVERT(NVARCHAR(32),Year(@EndDate1)),'NULL') + ') TO (' + ISNULL(CONVERT(NVARCHAR(32),Year(@StartDate2)),'NULL') +',' + ISNULL(CONVERT(NVARCHAR(32),Year(@EndDate2)),'NULL') + ') '+ @OVERLAP + '.  ' + @RESULT
 	
 END
+GO
+CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
+RETURNS  TABLE (
+	[FileId] [int] NULL,
+	[CTN] [nvarchar](16) NULL,
+	[Platform] [nvarchar](8) NULL,
+	[Frequency] [float] NULL,
+	[TimeStamp] [datetime2](7) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.TfpSummerizer].[SummarizeTpfFile]
 GO
 CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER
@@ -4412,6 +4423,19 @@ INNER JOIN CollarDeployments AS CD
      WHERE C.CollarModel = 'TelonicsGen4'
        AND C.AlternativeId IS NOT NULL
        AND (CPF.Format IS NULL OR (CPF.Format = 'A' AND CPF.[Status] = 'I'))
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AllTpfFileData]
+AS
+
+-- All TPF Data
+     SELECT T.*, P.[FileName], P.[Status]
+       FROM CollarParameterFiles AS P
+CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
+      WHERE P.Format = 'A'
 GO
 SET ANSI_NULLS ON
 GO

@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="AnimalMovementFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TfpSummerizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Test Scripts\Test.sql">

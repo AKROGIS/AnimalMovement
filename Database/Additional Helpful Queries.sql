@@ -69,6 +69,95 @@ UPDATE CollarFiles SET CollarId = @new WHERE CollarId = @old
 
 
 
+-- Collars in TPF Files not in Collars Table
+   SELECT T.*
+     FROM AllTpfFileData AS T
+LEFT JOIN Collars AS C
+       ON C.CollarModel = 'TelonicsGen4' AND T.CTN = C.CollarId 
+    WHERE C.CollarId IS NULL
+
+-- Telonics Gen4 Collars in Collars table with no TPF File 
+   SELECT C.*
+     FROM Collars AS C
+LEFT JOIN AllTpfFileData AS T
+       ON C.CollarId = T.CTN 
+    WHERE C.CollarModel = 'TelonicsGen4'
+      AND T.CTN IS NULL
+
+-- Collars in TPF Files not in CollarParameters Table
+   SELECT T.*
+     FROM AllTpfFileData AS T
+LEFT JOIN CollarParameters AS C
+       ON T.CTN = C.CollarId AND T.FileId = C.FileId
+    WHERE C.CollarId IS NULL
+
+-- ERROR Collar Parameters with no TPF File 
+   SELECT C.*
+     FROM CollarParameters AS C
+     JOIN CollarParameterFiles AS F
+       ON C.FileId = F.FileId
+LEFT JOIN AllTpfFileData AS T
+       ON C.CollarId = T.CTN AND C.FileId = T.FileId
+    WHERE F.Format = 'A'
+      AND T.CTN IS NULL
+
+-- Duplicate collars in TPF file
+   SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
+     FROM AllTpfFileData AS T
+LEFT JOIN CollarParameters AS P
+       ON T.FileId = P.FileId AND T.CTN = P.CollarId
+    WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
+ ORDER BY T.CTN, T.[Status]
+
+-- ERROR - Duplicate collars in ACTIVE TPF file
+  SELECT CTN, [Platform], [Status], FileId, [FileName]
+    FROM AllTpfFileData
+   WHERE CTN in (SELECT CTN FROM AllTpfFileData WHERE [Status] = 'A' GROUP BY CTN HAVING COUNT(*) > 1)
+ORDER BY CTN
+
+-- ERROR - Mismatch in Collar TPF Data
+    SELECT C.*, T.*
+      FROM Collars AS C
+INNER JOIN AllTpfFileData AS T
+        ON C.CollarId = T.CTN 
+     WHERE C.AlternativeId <> T.[Platform]
+        OR C.Frequency <> T.Frequency
+
+-- TPF TimeStamp check
+   SELECT C.*, T.[TimeStamp], DATEDIFF(day,T.[TimeStamp], C.StartDate) as diff
+     FROM CollarParameters AS C
+     JOIN CollarParameterFiles AS F
+       ON C.FileId = F.FileId
+     JOIN AllTpfFileData AS T
+       ON C.CollarId = T.CTN AND C.FileId = T.FileId
+    WHERE F.Format = 'A'
+      AND (C.StartDate IS NULL OR T.[TimeStamp]<> C.StartDate)
+
+-- Show days between this collars disposal, and the next collars start
+-- Assumes all collars have a Alpha suffix, and that there are no gaps.
+-- if there is an A version, and then a C version with no B version, the results will be incorrect.
+-- Inspect for those manually
+    SELECT C1.CollarId, C1.DisposalDate, C2.NextCollar, P.StartDate, P.EndDate, DATEDIFF(DAY, C1.DisposalDate, P.StartDate) AS [Days]
+      FROM Collars AS C1
+INNER JOIN (SELECT CollarManufacturer, CollarID, LEFT(CollarId,6) + char(ASCII(SUBSTRING(collarId,7,1)) + 1) as NextCollar 
+              FROM Collars
+             WHERE CollarModel = 'TelonicsGen4') AS C2
+        ON C1.CollarManufacturer = C2.CollarManufacturer AND C1.CollarId = C2.CollarId
+INNER JOIN CollarParameters AS P
+        ON C2.CollarManufacturer = P.CollarManufacturer AND C2.NextCollar = P.CollarId
+     WHERE C1.AlternativeId IN (SELECT AlternativeId FROM Collars GROUP BY AlternativeId HAVING COUNT(*) > 1)
+
+-- Show days between this collars disposal, and the next collars start
+-- There should be not be two consecutive NULL disposal Dates.
+-- The disposal date should be the Start Date of the subsequent record
+    SELECT C.AlternativeId, C.CollarId, C.DisposalDate, P.StartDate
+      FROM Collars AS C
+ LEFT JOIN CollarParameters AS P
+        ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+     WHERE C.AlternativeId IN (SELECT AlternativeId FROM Collars GROUP BY AlternativeId HAVING COUNT(*) > 1)
+  ORDER BY C.AlternativeId, C.CollarId
+
+
 -- All conflicting fixes for all of a PI's collars
     DECLARE @PI varchar(255) = 'NPS\SDMIller';
      SELECT C.CollarManufacturer, C.CollarId, F.*

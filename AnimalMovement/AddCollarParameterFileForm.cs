@@ -199,7 +199,7 @@ namespace AnimalMovement
                     MessageBox.Show(msg, "Consistancy Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     continue;
                 }
-                if (!AddCollarParameters(collar, paramFile))
+                if (!AddCollarParameters(collar, paramFile, collar1.TimeStamp))
                 {
                     string msg = String.Format(
                         "The collar: {0} could not be associated with the file: {1}\n" +
@@ -218,7 +218,7 @@ namespace AnimalMovement
             CollarParameterFile paramFile = UploadParameterFile(owner, format, file);
             if (paramFile == null)
                 return false;
-            if (!AddCollarParameters(collar, paramFile))
+            if (!AddCollarParameters(collar, paramFile, null))
             {
                 string msg =
                     "The parameter file was added to the database, but could not be associated with the collar.\n";
@@ -296,12 +296,13 @@ namespace AnimalMovement
         }
 
 
-        private bool AddCollarParameters(Collar collar, CollarParameterFile paramFile)
+        private bool AddCollarParameters(Collar collar, CollarParameterFile paramFile, DateTime? timeStamp)
         {
             var collarParameters = new CollarParameter
             {
                 Collar = collar,
-                CollarParameterFile = paramFile
+                CollarParameterFile = paramFile,
+                StartDate = timeStamp
             };
             Database.CollarParameters.InsertOnSubmit(collarParameters);
 
