@@ -155,13 +155,13 @@ SELECT [CollarId]
 
 
 --Show all the records for a root collarId
-DECLARE @rootID varchar(16) = '630028'
+DECLARE @rootID varchar(16) = '643048'
 select * from Collars where left(CollarId,6) = @rootID
 select * From CollarDeployments where left(CollarId,6) = @rootID
 select * from ArgosDownloads where left(CollarId,6) = @rootID
 select * from CollarParameters where left(CollarId,6) = @rootID
-select FileId, CollarId From CollarFixes where left(CollarId,6) = @rootID group by FileId, CollarId
-select * From CollarFiles where left(CollarId,6) = @rootID -- CollarId = @OldID
+select FileId, CollarId From CollarFixes where left(CollarId,6) = @rootID group by FileId, CollarId order by fileid
+select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where left(CollarId,6) = @rootID  order by fileid
 
 
 

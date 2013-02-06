@@ -2799,7 +2799,7 @@ FROM dbo.Collars AS c1
 	 SELECT     AlternativeId
 	   FROM          dbo.Collars
 	  WHERE CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
-   GROUP BY AlternativeId
+   GROUP BY AlternativeId, DisposalDate
 	 HAVING (COUNT(*) > 1)
   ) AS c2
   ON c1.AlternativeId = c2.AlternativeId
@@ -4614,7 +4614,7 @@ SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
    AND (P.EndDate IS NULL OR getdate() < P.EndDate)
    AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
    AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
-   AND (CPF.Format <> 'B' or CPF.[Status] <> 'A') -- Ignore collars with an active Gen3 PPF file 
+   AND (CPF.FileId IS NULL OR CPF.Format <> 'B' or CPF.[Status] <> 'A') -- Ignore collars with an active Gen3 PPF file 
    AND (C.Gen3Period IS NOT NULL OR (CPF.Format = 'A' AND CPF.[Status] = 'A')) -- Ignore collars without a Gen3 period or and active TPF file
 GO
 SET ANSI_NULLS ON
