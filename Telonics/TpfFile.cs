@@ -2,41 +2,70 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Telonics
 {
     public class TpfFile
     {
-        private string[] _fileContents;
+        #region Private Fields
 
-        public string FilePath { get; private set; }
+        private List<string> _lines;
 
-        public static TpfFile LoadFromPath(string path)
-        {
-            var tpfFile = new TpfFile(path);
-            tpfFile.Load();
-            return tpfFile;
-        }
+        #endregion
+
+        #region Public API
+
+        #region Constructors
 
         public TpfFile(string path)
         {
-            if (path == null)
-                throw new ArgumentNullException("path");
+            if (String.IsNullOrEmpty(path))
+                throw new ArgumentNullException("path", "path must not be null or empty");
+            ReadLines(path);
+            if (_lines.Count == 0)
+                throw new InvalidDataException("File at path has no lines");
             FilePath = path;
         }
 
-        public void Load()
+        public TpfFile(Byte[] bytes)
         {
-            _fileContents = File.ReadAllLines(FilePath);
+            if (bytes == null || bytes.Length == 0)
+                throw new ArgumentNullException("bytes", "byte array must not be null or empty");
+            ReadLines(bytes);
+            if (_lines.Count == 0)
+                throw new InvalidDataException("Byte array has no lines");
         }
+
+        public TpfFile(Stream stream)
+        {
+            if (stream == null)
+                throw new ArgumentNullException("stream", "stream must not be null");
+            ReadLines(stream);
+            if (_lines.Count == 0)
+                throw new InvalidDataException("stream has no lines");
+        }
+
+        #endregion
+
+        #region Public Properties
+
+        public string FilePath { get; private set; }
 
         public string Name
         {
-            get { return Path.GetFileNameWithoutExtension(FilePath); }
+            get { return FilePath == null ? null : Path.GetFileNameWithoutExtension(FilePath); }
         }
 
-        public IEnumerable<TpfCollar> ParseForCollars()
+        #endregion
+
+        #region Public Methods
+
+        public IEnumerable<TpfCollar> GetCollars()
         {
+            if (_lines == null)
+                throw new InvalidOperationException("You must Load() the Tpf file before extracting properties");
+
             string owner = GetOwner();
             string[] ids = GetIds();
             string[] frequencies = GetFrequencies();
@@ -56,6 +85,17 @@ namespace Telonics
                     TpfFile = this
                 });
         }
+
+        public override string ToString()
+        {
+            return Name ?? "TPF File";
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Private Methods
 
         public string GetOwner()
         {
@@ -84,12 +124,7 @@ namespace Telonics
 
         private string GetTpfData(string key)
         {
-            if (key == null)
-                throw new ArgumentNullException("key");
-            if (_fileContents == null)
-                throw new InvalidOperationException("You must Load() the Tpf file before extracting properties");
-
-            var value = from line in _fileContents
+            var value = from line in _lines
                         where line.StartsWith(key + " ")
                         select line.Replace(key + " ", "");
             var data = value.FirstOrDefault();
@@ -117,9 +152,34 @@ namespace Telonics
             throw new FormatException("TimeStamp (" + s + ") in " + Name + " is not in the expected format");
         }
 
-        public override string ToString()
+        #region Line Readers
+
+        private void ReadLines(string path)
         {
-            return Name;
+            _lines = File.ReadAllLines(path).ToList();
         }
+
+        private void ReadLines(Byte[] bytes)
+        {
+            using (var stream = new MemoryStream(bytes, 0, bytes.Length))
+                _lines = ReadLines(stream, Encoding.UTF8).ToList();
+        }
+
+        private void ReadLines(Stream stream)
+        {
+            _lines = ReadLines(stream, Encoding.UTF8).ToList();
+        }
+
+        private IEnumerable<string> ReadLines(Stream stream, Encoding enc)
+        {
+            using (var reader = new StreamReader(stream, enc))
+                while (!reader.EndOfStream)
+                    yield return reader.ReadLine();
+        }
+
+        #endregion
+
+        #endregion
+
     }
 }

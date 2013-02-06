@@ -167,8 +167,7 @@ namespace AnimalMovement
             if (paramFile == null)
                 return false;
             var tpfFile = new TpfFile(file);
-            tpfFile.Load();
-            foreach (TpfCollar tpfCollar in tpfFile.ParseForCollars())
+            foreach (TpfCollar tpfCollar in tpfFile.GetCollars())
             {
                 TpfCollar collar1 = tpfCollar;
                 var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == collar1.Ctn);
