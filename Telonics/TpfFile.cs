@@ -40,19 +40,21 @@ namespace Telonics
             string owner = GetOwner();
             string[] ids = GetIds();
             string[] frequencies = GetFrequencies();
+            string[] timeStamps = GetTimeStamps();
             string[] argosIds = GetArgosIds();
-            if (ids.Length != frequencies.Length || 
-                ids.Length != argosIds.Length || 
+            if (ids.Length != frequencies.Length ||
+                ids.Length != argosIds.Length ||
                 frequencies.Length != argosIds.Length)
                 throw new InvalidOperationException("Indeterminant number of collars in file " + Name);
             return ids.Select((id, index) => new TpfCollar
-                                            {
-                                                Ctn = id,
-                                                ArgosId = argosIds[index],
-                                                Frequency = GetFrequency(frequencies[index]),
-                                                Owner = owner,
-                                                TpfFile = this
-                                            });
+                {
+                    Ctn = id,
+                    ArgosId = argosIds[index],
+                    Frequency = GetFrequency(frequencies[index]),
+                    TimeStamp = GetTimeStamp(timeStamps[3*index] + " " + timeStamps[3*index + 1]),
+                    Owner = owner,
+                    TpfFile = this
+                });
         }
 
         public string GetOwner()
@@ -75,6 +77,11 @@ namespace Telonics
             return GetTpfData("sections.units.parameters.ctnList").Split();
         }
 
+        private string[] GetTimeStamps()
+        {
+            return GetTpfData("sections.units.parameters.parameterTimestampList").Split();
+        }
+
         private string GetTpfData(string key)
         {
             if (key == null)
@@ -90,7 +97,7 @@ namespace Telonics
                 throw new FormatException("No value found for Key: " + key + " not found in file "+ Name);
             if (data[0] == '{')
                 //should read until next '}', but we stop at the newline, and assume the '}' is at the end o fthe line
-                return data.Replace("{","").Replace("}","").Trim();
+                return data.Replace("{", "").Replace("}", "").Trim();
             return data.Trim();
         }
 
@@ -100,6 +107,14 @@ namespace Telonics
             if (Int32.TryParse(s, out f))
                 return f / 1000000.0;
             throw new FormatException("Frequency (" + s + ") in " + Name + " is not in the expected format");
+        }
+
+        private DateTime GetTimeStamp(string s)
+        {
+            DateTime t;
+            if (DateTime.TryParse(s, out t))
+                return new DateTime(t.Ticks, DateTimeKind.Utc);
+            throw new FormatException("TimeStamp (" + s + ") in " + Name + " is not in the expected format");
         }
 
         public override string ToString()
