@@ -55,6 +55,7 @@ namespace Telonics
         public DateTime LocationDateTime { get; internal set; }
         public double Latitude { get; internal set; }
         public double Longitude { get; internal set; }
+        public char LocationClass { get; internal set; }
 
         public IEnumerable<string> Lines
         {
