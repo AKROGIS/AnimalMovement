@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Telonics;
 using System.Linq;
@@ -11,45 +12,79 @@ namespace TelonicsTest
         public static void Main(string[] args)
         {
             //TestCrc();
-            //TestArgosFile();
+            TestArgosEmailFile();
+            TestArgosAwsGen3File();
+            TestArgosAwsGen4File();
             //TestBits();
-            TestArgosFolder();
+            //TestArgosFolder();
         }
 
-        public static void TestArgosFile()
+        public static void TestArgosEmailFile()
         {
-            //const string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen4bou121203 - multiple email";
-            //const string path = "/Users/regan/Projects/AnimalMovement/Telonics/SampleFiles/Gen34moose08-09-2-12.TXT";
             const string path = @"C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\Telonics\SampleFiles\Gen34moose08-09-2-12.TXT";
-            //const string path = @"C:\tmp\data\buck_wolf_09_14_12_raw_complete.txt";
+            const string tpf = @"C:\tmp\AM\GAAR_Moose\TPFs\080711003.tpf";
             Console.WriteLine("File {0}", path);
 
-            const string id = "77267";
-            const int hours = 24;
-            const string out_path = @"C:\tmp\reports\" + id + ".txt";
-
+            var processorDict = new Dictionary<string, IProcessor>
+                {
+                    {"77267", new Gen3Processor(TimeSpan.FromMinutes(24*60))},
+                    {"87744", new Gen4Processor(File.ReadAllBytes(tpf))},
+                };
             var a = new ArgosEmailFile(path)
             {
-                //IgnorePlatform = (p => p != id),
-                Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
+                Processor = (i => processorDict[i]),
                 CollarFinder = (i, d) => i
             };
-            Console.WriteLine("Transmissions in File");
-            foreach (var s in a.GetTransmissions())
+            SummarizeFile(a);
+            foreach (var id in new[] {"77267", "87744"})
+            {
+                Console.WriteLine("Messages for {0} in File", id);
+                foreach (var s in a.ToTelonicsData(id))
+                    Console.WriteLine(s);
+            }
+        }
+
+        public static void TestArgosAwsGen3File()
+        {
+            const string path = @"C:\tmp\AM\Bridget\53478_20130129_Gen3.aws";
+            Console.WriteLine("File {0}", path);
+            var a = new ArgosAwsFile(path)
+            {
+                Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(24 * 60))),
+            };
+            SummarizeFile(a);
+            Console.WriteLine("Messages in File");
+            foreach (var s in a.ToTelonicsData())
                 Console.WriteLine(s);
+        }
+
+
+        public static void TestArgosAwsGen4File()
+        {
+            const string path = @"C:\tmp\AM\data\37470 20121219_231235.aws";
+            const string tpf = @"C:\tmp\AM\John Burch Wolfs\tpfs\101210006A.tpf";
+            Console.WriteLine("File {0}", path);
+            var a = new ArgosAwsFile(path)
+            {
+                Processor = (i => new Gen4Processor(File.ReadAllBytes(tpf))),
+            };
+            SummarizeFile(a);
+            Console.WriteLine("Messages in File");
+            foreach (var s in a.ToTelonicsData())
+                Console.WriteLine(s);
+        }
+
+        private static void SummarizeFile(ArgosFile a)
+        {
+            Console.WriteLine("Transmissions in File");
+            foreach (var t in a.GetTransmissions())
+                Console.WriteLine(t.ToFormatedString());
             Console.WriteLine("Programs in File");
             foreach (var p in a.GetPrograms())
                 Console.WriteLine("  {0}", p);
             Console.WriteLine("Collars in File");
             foreach (var p in a.GetPlatforms())
                 Console.WriteLine("  {0} Start {1} End {2}", p, a.FirstTransmission(p), a.LastTransmission(p));
-            Console.WriteLine("Messages in File");
-            foreach (var s in a.ToTelonicsData(id))
-                Console.WriteLine(s);
-            //Console.WriteLine("CSV Output");
-            //foreach (var l in a.ToGen3TelonicsCsv())
-            //Console.WriteLine(l);
-            File.WriteAllLines(out_path, a.ToTelonicsData(id));
         }
 
         public static void TestArgosFolder()
