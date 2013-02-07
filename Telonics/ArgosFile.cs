@@ -79,11 +79,11 @@ namespace Telonics
             return _transmissions.Select(t => t.PlatformId).Distinct();
         }
 
-        public IEnumerable<string> GetTransmissions()
+        public IEnumerable<ArgosTransmission> GetTransmissions()
         {
             if (_transmissions == null)
                 _transmissions = GetTransmissions(_lines).ToList();
-            return _transmissions.Select(t => t.ToString());
+            return _transmissions.ToArray();
         }
 
         public DateTime FirstTransmission(string platform)

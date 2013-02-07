@@ -79,8 +79,7 @@ namespace Telonics
 
         public override string ToString()
         {
-            //return string.Join("\n", _lines);
-            return ToFormatedString();
+            return string.Join("\n", _lines);
         }
 
         public class ArgosLocation
