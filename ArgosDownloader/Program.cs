@@ -231,6 +231,8 @@ namespace ArgosDownloader
         private static CollarFile ProcessAws(DownloadableAndAnalyzableCollar collar, int parentFileId,
                                              ArgosWebSite.ArgosWebResult results)
         {
+            //TODO - Can I simplify this? Maybe use the ArgosCollarAnalyzer from ArgosProcessor?
+
             CollarFile collarFile;
             switch (collar.CollarModel)
             {

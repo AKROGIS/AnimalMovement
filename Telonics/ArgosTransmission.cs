@@ -52,6 +52,7 @@ namespace Telonics
         public string ProgramId { get; internal set; }
         public string PlatformId { get; internal set; }
         public DateTime DateTime { get; internal set; }
+        public DateTime LocationDateTime { get; internal set; }
         public double Latitude { get; internal set; }
         public double Longitude { get; internal set; }
 
