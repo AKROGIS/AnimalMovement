@@ -45,14 +45,13 @@ namespace Telonics
         public string BatchFileTemplate { get; set; }
 
 
-        public IEnumerable<string> ProcessEmail(IEnumerable<ArgosTransmission> transmissions)
+        //public IEnumerable<string> Process(ArgosFile file)
+        public IEnumerable<string> Process(IEnumerable<ArgosTransmission> transmissions)
         {
-            return ProcessFile(String.Join(Environment.NewLine, transmissions.Select(t => t.ToString())));
-        }
-
-        public IEnumerable<string> ProcessAws(string fileContents)
-        {
-            return ProcessFile(fileContents);
+            //FIXME - Add Header to text when transmissions come from an AWS files
+            //var transmissions = file.Transmissions;
+            string text = String.Join(Environment.NewLine, transmissions.Select(t => t.ToString()));
+            return ProcessFile(text);
         }
 
         #endregion
@@ -81,7 +80,7 @@ namespace Telonics
             File.WriteAllText(batchFilePath, batchCommands);
 
             //  Run TDC with the batch file
-            var p = Process.Start(new ProcessStartInfo
+            var p = System.Diagnostics.Process.Start(new ProcessStartInfo
             {
                 FileName = TdcExecutable,
                 Arguments = "/batch:" + batchFilePath,
