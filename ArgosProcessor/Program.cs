@@ -71,13 +71,24 @@ namespace ArgosProcessor
                     error.AppendLine("ERROR: One and only one positive integer argument is expected.");
                     return;
                 }
-                var file = db.CollarFiles.FirstOrDefault(f => f.FileId == id && f.Format == 'E');
+                var file = db.CollarFiles.FirstOrDefault(f => f.FileId == id && (f.Format == 'E' || f.Format == 'F'));
                 if (file == null)
                 {
-                    error.AppendLine("ERROR: id provided is not an Argos email file in the database.");
+                    error.AppendLine("ERROR: id provided is not an Argos email or AWS file in the database.");
                     return;
                 }
-                var argos = new ArgosFile(file.Contents.ToArray());
+                ArgosFile argos;
+                switch (file.Format)
+                {
+                    case 'E':
+                        argos = new ArgosEmailFile(file.Contents.ToArray());
+                        break;
+                    case 'F':
+                        argos = new ArgosAwsFile(file.Contents.ToArray());
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unrecognized File Format: " + file.Format);
+                }
                 var analyzer = new ArgosCollarAnalyzer(argos, db);
 
                 foreach (var platform in analyzer.UnknownPlatforms)

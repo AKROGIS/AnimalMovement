@@ -205,7 +205,8 @@ namespace AnimalMovement
                         break;
                     }
             }
-            if (code == '?' && (new ArgosFile(path)).GetPrograms().Any())
+            if (code == '?' && (new ArgosEmailFile(path)).GetPrograms().Any())
+                // We already checked for ArgosAwsFile with the header
                 code = 'E';
             return Database.LookupCollarFileFormats.FirstOrDefault(f => f.Code == code);
         }

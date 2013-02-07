@@ -57,7 +57,9 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArgosAwsFile.cs" />
     <Compile Include="ArgosConditionCode.cs" />
+    <Compile Include="ArgosEmailFile.cs" />
     <Compile Include="ArgosFile.cs" />
     <Compile Include="ArgosTransmission.cs" />
     <Compile Include="ArgosWebSite.cs" />

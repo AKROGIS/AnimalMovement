@@ -28,7 +28,7 @@ namespace TelonicsTest
             const int hours = 24;
             const string out_path = @"C:\tmp\reports\" + id + ".txt";
 
-            var a = new ArgosFile(path)
+            var a = new ArgosEmailFile(path)
             {
                 //IgnorePlatform = (p => p != id),
                 Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
@@ -71,7 +71,7 @@ namespace TelonicsTest
                 {
                     var path = Path.Combine(in_path, file);
                     Console.WriteLine("  File {0}", file);
-                    var a = new ArgosFile(path)
+                    var a = new ArgosEmailFile(path)
                     {
                         //IgnorePlatform = (p => p != id),
                         Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
