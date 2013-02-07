@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;  //in mscorlib - For Hex to Byte[]
 
 namespace Telonics
 {
@@ -26,11 +25,6 @@ namespace Telonics
         {
         }
 
-        internal Byte[] Message
-        {
-            get { return _message.ToArray(); }
-        }
-
         internal void AddRawBytes(IEnumerable<string> byteStrings)
         {
             if (_message == null)
@@ -39,7 +33,14 @@ namespace Telonics
                 _message.Add(Byte.Parse(item));
         }
 
-        internal void AddLine(string line)
+        internal void AddHexString(string hexString)
+        {
+            if (_message == null)
+                _message = new List<byte>();
+            _message.AddRange(SoapHexBinary.Parse(hexString).Value); 
+        }
+
+        public void AddLine(string line)
         {
             _lines.Add(line);
         }
@@ -51,13 +52,25 @@ namespace Telonics
         public string ProgramId { get; internal set; }
         public string PlatformId { get; internal set; }
         public DateTime DateTime { get; internal set; }
+        public double Latitude { get; internal set; }
+        public double Longitude { get; internal set; }
 
+        public IEnumerable<string> Lines
+        {
+            get { return _lines.ToArray(); }
+        }
+
+        internal Byte[] Message
+        {
+            get { return _message.ToArray(); }
+        }
 
         public string ToFormatedString()
         {
-            var msg = String.Join(" ", _message.Select(b => b.ToString(CultureInfo.InvariantCulture).PadLeft(8, ' ')));
-            var msgb = String.Join(" ", _message.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
-            return string.Format("[ArgosTransmission: ProgramId={0}, PlatformId={1}, DateTime={2}\n  Message={3}\n  Message={4}]", ProgramId, PlatformId, DateTime, msg, msgb);
+            return
+                string.Format(
+                    "[ArgosTransmission: Platform {0}/{1} at ({2},{3}) at {4}.  Has{5}Telonics GPS message\n", ProgramId,
+                    PlatformId, Longitude, Latitude, DateTime, _message != null ? " " : " no ");
         }
 
         public override string ToString()
