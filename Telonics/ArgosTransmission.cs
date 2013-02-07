@@ -52,10 +52,8 @@ namespace Telonics
         public string ProgramId { get; internal set; }
         public string PlatformId { get; internal set; }
         public DateTime DateTime { get; internal set; }
-        public DateTime LocationDateTime { get; internal set; }
-        public double Latitude { get; internal set; }
-        public double Longitude { get; internal set; }
-        public char LocationClass { get; internal set; }
+        public ArgosLocation Location { get; internal set; }
+
 
         public IEnumerable<string> Lines
         {
@@ -71,13 +69,26 @@ namespace Telonics
         {
             return
                 string.Format(
-                    "[ArgosTransmission: Platform {0}/{1} at ({2},{3}) at {4}.  Has{5}Telonics GPS message\n", ProgramId,
-                    PlatformId, Longitude, Latitude, DateTime, _message != null ? " " : " no ");
+                    "ArgosTransmission for platform {0}/{1} at {2} {3}, and has{4}Telonics GPS message.", ProgramId,
+                    PlatformId, DateTime,
+                    Location == null
+                        ? "has no location"
+                        : String.Format("at ({0},{1})", Location.Longitude, Location.Latitude),
+                    _message != null ? " " : " NO ");
         }
 
         public override string ToString()
         {
-            return string.Join("\n", _lines);
+            //return string.Join("\n", _lines);
+            return ToFormatedString();
+        }
+
+        public class ArgosLocation
+        {
+            public DateTime DateTime { get; internal set; }
+            public double Latitude { get; internal set; }
+            public double Longitude { get; internal set; }
+            public char Class { get; internal set; }
         }
 
         #endregion

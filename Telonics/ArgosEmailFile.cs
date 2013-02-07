@@ -42,6 +42,7 @@ namespace Telonics
             string programId = null;
             string platformId = null;
             string platformheader = null;
+            ArgosTransmission.ArgosLocation location = null;
             ArgosTransmission transmission = null;
             foreach (var line in lines)
             {
@@ -49,6 +50,15 @@ namespace Telonics
                 {
                     programId = line.Substring(0, 5).Trim().TrimStart('0');
                     platformId = line.Substring(6, 6).Trim().TrimStart('0');
+                    location = line.Length < 61
+                                   ? null
+                                   : new ArgosTransmission.ArgosLocation
+                                       {
+                                           DateTime = DateTime.Parse(line.Substring(24, 19)),
+                                           Latitude = Double.Parse(line.Substring(44, 7)),
+                                           Longitude = Double.Parse(line.Substring(52, 8)),
+                                           Class = line[22]
+                                       };
                     transmission = null;
                     platformheader = line;
                 }
@@ -65,6 +75,7 @@ namespace Telonics
                                 ProgramId = programId,
                                 PlatformId = platformId,
                                 DateTime = transmissionDateTime,
+                                Location = location,
                             };
                         if (platformheader != null)
                         {
