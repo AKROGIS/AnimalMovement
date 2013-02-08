@@ -66,6 +66,9 @@ namespace Telonics
 
             // write the argos file transmission to the filesystem
             var dataFilePath = Path.GetTempFileName();
+            //TDC batch mode uses the aws extension to determine file type 
+            if (fileContents.StartsWith("\"programNumber\";\"platformId\";"))
+                dataFilePath = dataFilePath + ".aws";
             File.WriteAllText(dataFilePath, fileContents);
 
             var outputFolder = GetNewTempDirectory();
