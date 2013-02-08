@@ -21,8 +21,8 @@ namespace TelonicsTest
 
         public static void TestArgosEmailFile()
         {
-            const string path = @"C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\Telonics\SampleFiles\Gen34moose08-09-2-12.TXT";
-            const string tpf = @"C:\tmp\AM\GAAR_Moose\TPFs\080711003.tpf";
+            const string path = @"..\..\SampleFiles\Gen34moose08-09-2-12.TXT";
+            const string tpf = @"..\..\SampleFiles\080711003_87744.tpf";
             Console.WriteLine("File {0}", path);
 
             var processorDict = new Dictionary<string, IProcessor>
@@ -46,7 +46,7 @@ namespace TelonicsTest
 
         public static void TestArgosAwsGen3File()
         {
-            const string path = @"C:\tmp\AM\Bridget\53478_20130129_Gen3.aws";
+            const string path = @"..\..\SampleFiles\53478_20130129_Gen3.aws";
             Console.WriteLine("File {0}", path);
             var a = new ArgosAwsFile(path)
             {
@@ -61,8 +61,8 @@ namespace TelonicsTest
 
         public static void TestArgosAwsGen4File()
         {
-            const string path = @"C:\tmp\AM\data\37470 20121219_231235.aws";
-            const string tpf = @"C:\tmp\AM\John Burch Wolfs\tpfs\101210006A.tpf";
+            const string path = @"..\..\SampleFiles\37780 20121219_231239_Gen4.aws";
+            const string tpf = @"..\..\SampleFiles\100628007B_37780.tpf";
             Console.WriteLine("File {0}", path);
             var a = new ArgosAwsFile(path)
             {
@@ -92,7 +92,7 @@ namespace TelonicsTest
             const string id = "60793";
             const int hours = 25;
 
-            const string in_path = @"C:\Users\resarwas\Desktop\LACL_Wolf_Location_Data 2012_11_13\LACL_Wolf_Location_Data\Argos_Emails";
+            const string in_path = @"C:\tmp\Argos_Emails";
             const string out_path = @"C:\tmp\reports\" + id + "_2012a.txt";
 
             if (!Directory.Exists(in_path))

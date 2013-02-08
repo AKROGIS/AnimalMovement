@@ -1,0 +1,115 @@
+tpf 98
+model TGW-4780H
+sections.customer.parameters.customer {KYLE JOLY
+}
+sections.hardware.parameters.vLowBat 3.00
+sections.units.parameters.ctnList {621506A 621507A 621509A 621510A 621511A}
+sections.units.parameters.decimalArgosIdList {87744 87745 87746 87747 87748}
+sections.units.parameters.hexArgosIdList {78AAC00 78AAC13 78AAC26 78AAC35 78AAC4C}
+sections.units.parameters.actualArgosRepetitionPeriodList {200 201 202 203 204}
+sections.units.parameters.assignedArgosRepetitionPeriodRangeBaseList {200 200 200 200 200}
+sections.units.parameters.assignedArgosRepetitionPeriodRangePercentageList {10 10 10 10 10}
+sections.units.parameters.argosFrequencyList {401632000 401634000 401638000 401638000 401642000}
+sections.units.parameters.vhfFrequencyList {167370000 167470000 167505000 167855000 167895000}
+sections.units.parameters.firmwareVersionList {{SECO1124 uGPSI-20 2008.05.20} {SECO1124 uGPSI-20 2008.05.20} {SECO1124 uGPSI-20 2008.05.20} {SECO1124 uGPSI-20 2008.05.20} {SECO1124 uGPSI-20 2008.05.20}}
+sections.units.parameters.parameterTimestampList {{2008.09.24 19:16:18 UTC} {2008.09.24 19:23:35 UTC} {2008.09.24 19:28:16 UTC} {2008.09.24 19:32:15 UTC} {2008.09.24 19:36:07 UTC}}
+sections.units.parameters.factoryParametersList {{TGW-4780H 621506A 300 100 30 5 0 120 54 -250 0 0 0 1999 {-38 25 70} {{40 48 4F}} {{70 77 7F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 25 25 37 35 57 50 61 97 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 159} {TGW-4780H 621507A 300 100 30 5 0 120 38 -250 0 0 0 1999 {-38 25 70} {{40 47 4D}} {{70 78 7F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 25 25 37 35 56 50 61 97 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 159} {TGW-4780H 621509A 300 100 30 5 0 120 66 -250 0 0 0 1999 {-38 25 70} {{40 45 4B}} {{70 76 7E}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 24 25 35 35 54 50 61 97 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 160} {TGW-4780H 621510A 300 100 30 5 0 120 58 -250 0 0 0 1999 {-38 25 70} {{40 46 4C}} {{70 78 7F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 26 25 39 35 60 50 61 97 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 160} {TGW-4780H 621511A 300 100 30 5 0 120 74 -250 0 0 0 1999 {-38 25 70} {{40 48 4F}} {{74 78 7F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 28 25 40 35 61 50 61 97 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 158}}
+sections.predeployment.parameters.seasonDuration {4 hours}
+sections.predeployment.parameters.updatePeriod {1 hour}
+sections.predeployment.parameters.predeployAfterRebootFlag 1
+sections.gps.parameters.fixTimeout 180
+sections.gps.parameters.continuousNavigationMode 0
+sections.gps.parameters.nmeaSentences {}
+sections.gps.parameters.nmeaBaudRate 4800
+sections.gpsSchedule.parameters.schedule {schedule {
+   season {
+      2000.01.01
+      2100.01.01
+      1Day
+      onPeriod {16Hours 1Day 8Hours}
+   }
+}
+}
+sections.underwater.parameters.diveQualificationPeriod 5
+sections.underwater.parameters.haulOutTime Disabled
+sections.underwater.parameters.saltwaterFailsafeTime Disabled
+sections.underwaterSchedule.parameters.schedule {schedule {
+}
+}
+sections.activityandmortality.parameters.activityDirection {}
+sections.activityandmortality.parameters.measurementInterval 1
+sections.activityandmortality.parameters.tipSwitchFlag 0
+sections.activityandmortality.parameters.mortalityDirection {1 2 3}
+sections.activityandmortality.parameters.timeInterval {12 Hours}
+sections.activityandmortality.parameters.mortalityThreshold 5
+sections.activitySchedule.parameters.schedule {schedule {
+}
+}
+sections.temperatureSchedule.parameters.schedule {link gpsSchedule}
+sections.argos.parameters.powerLevel 0
+sections.argos.parameters.minimumTransmitTemperature -40
+sections.argos.parameters.messageFields {
+   gpsUpdateTime {946684800 4102444800 1 0 32 32}
+   compressedSuccessfulFixFlags {0 1 1 0 1 1 1 1}
+   compressedFixDelays {0 255 1 0 8 8 1 8}
+   compressedLatitudes {0 2147483647 1024 0 21 21 1 21}
+   compressedLongitudes {0 4294967295 1024 0 22 22 1 22}
+   temperatureUpdateTime {946684800 4102444800 1 0 32 32}
+   compressedTemperatures {0 110 1 0 7 7 1 7}
+   errorDetectionByte {}}
+sections.argos.parameters.transmitPartialPagesFlag 1
+sections.argos.parameters.numberOfTimesToTransmit 20
+sections.argos.parameters.pnSeed 0
+sections.argosSchedule.parameters.schedule {schedule {
+   season {
+      2008.11.01
+      2100.01.01
+      6Days
+      onPeriod {30Minutes 5Hours 0}
+      onPeriod {18Hours+30Minutes 5Hours 0}
+   }
+}
+}
+sections.argossatellite.parameters.prediction none
+sections.argossatellite.parameters.location {0.000 0.000}
+sections.argossatellite.parameters.satellites {METOP-A {1 29499U 06044A   08207.08579609 -.00000153  00000-0 -50100-4 0  5546} {2 29499  98.7199 265.7081 0001149  89.1355 270.9967 14.21481475 91549} {NOAA 15} {1 25338U 98030A   08206.15772828  .00000095  00000-0  59412-4 0  5543} {2 25338  98.5558 197.0787 0009715 297.8636  62.1604 14.24716242530061} {NOAA 16} {1 26536U 00055A   08206.18368191  .00000069  00000-0  62529-4 0   247} {2 26536  99.1572 196.1728 0011337 119.0850 241.1517 14.12490273403999} {NOAA 17} {1 27453U 02032A   08206.22274123  .00000162  00000-0  88872-4 0   196} {2 27453  98.5316 269.7738 0011764   5.8331 354.3022 14.23990363316072} {NOAA 18} {1 28654U 05018A   08206.20564711 -.00000163  00000-0 -65915-4 0  5157} {2 28654  98.8686 146.6831 0013625 206.1591 153.8900 14.11177879163699}}
+sections.argossatellite.parameters.turnOffGPSPredictionAfterNDays Disabled
+sections.vhf.parameters.powerLevel 10
+sections.vhf.parameters.initializationPeriod {15 Minutes}
+sections.vhf.parameters.pulseWidth 15
+sections.vhf.parameters.gpsVhfBeaconControl 1
+sections.vhf.parameters.successfulFixPulsePeriod 1500
+sections.vhf.parameters.unsuccessfulFixPulsePeriod 2000
+sections.vhf.parameters.mortalityVhfBeaconControl 1
+sections.vhf.parameters.mortalityPulsePeriod 750
+sections.vhf.parameters.deadBatteryVhfBeaconControl 1
+sections.vhf.parameters.deadBatteryPulsePeriod 3000
+sections.vhf.parameters.releaseVhfBeaconControl 0
+sections.vhf.parameters.releasePulsePeriod Disabled
+sections.vhf.parameters.rapidOffPeriod 125
+sections.vhfSchedule.parameters.schedule {schedule {
+   season {
+      2000.01.01
+      2100.01.01
+      1Day
+      onPeriod {16Hours 12Hours 0}
+   }
+}
+}
+sections.auxiliarymodes.parameters.resetVhfOnlyPeriodLength {20 Hours}
+sections.auxiliarymodes.parameters.brownOutRecoveryPeriodLength {15 Minutes}
+sections.auxiliarymodes.parameters.brownOutRecoveryUpdateInterval {5 Minutes}
+sections.simulator.parameters.activeVhfMode 0
+sections.simulator.parameters.deploymentDate 2008.11.01
+sections.simulator.parameters.batteryDate {2008.08.01 2008.08.01}
+sections.simulator.parameters.batteryLeakage {0 0}
+sections.simulator.parameters.batteryCapacity {{} {}}
+sections.simulator.parameters.location {{2008.11.01 00:00:00 UTC} {2009.11.01 00:00:00 UTC} 67.000 -151.000}
+sections.simulator.parameters.minimumPassElevation 0
+sections.simulator.parameters.maximumPassElevation 90
+sections.simulator.parameters.environmentTemperature 0
+sections.simulator.parameters.predictPasses 1
+sections.simulator.parameters.underwaterRatio 0
+sections.simulator.parameters.averageTimeToFix 90
+sections.simulator.parameters.batteryDerateFactor {0 0}
+sections.notes.parameters.notes {{GPS SCHEDULE} {1 GPS POSITION EVERY 8 HOURS BEGINS @ 1600 UTC} {TEMPERATURE ENABLED} {LINKED TO GPS SCHEDULE} {ARGOS SCHEDULE} {TRANSMIT 5 HOURS EVERY} {} {TRANSMIT 5 HOURS ON EVERY } {VHF SCHEDULE} {SUCCESFUL FIX IS 40BPM} {} {UNSUCCESSFUL IS 30BPM} {} {DUTY CYCLE IS 12 HOURS ON EACH DAY ON TIME BEGINS AT 1600 UTC} {COLLAR ADJUSTMENT RANGE} 32-36\"\ CENTER\ POINT\ OF\ 34\" {GPS END OF LIFE } {ESTIMATED AT 2013.05.06} {VHF END OF LIFE SUCCESSFUL} {ESTIMATED AT 2016.02.07} {VHF END OF LIFE MORTALITY} 2013.05.06 {CR-2A RELEASE DATA} {MARCH 15, 2014 @ 1200}}

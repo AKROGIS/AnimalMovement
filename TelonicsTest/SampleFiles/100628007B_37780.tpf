@@ -1,0 +1,127 @@
+tpf 106
+model TGW-4583H
+sections.customer.parameters.customer {JOHN BURCH
+TGW-4583H
+WOLF}
+sections.hardware.parameters.vLowBat 3.00
+sections.units.parameters.ctnList {646208A 646252A 646253A 646401A 646402A 646417A 646418A 646419A 646420A}
+sections.units.parameters.decimalArgosIdList {37630 37779 37780 37781 42947 62050 62052 72495 72496}
+sections.units.parameters.hexArgosIdList {27027E1 120D835 120D84C 120D85F 36F8135 1F88226 1F8824C 89002F2 89AC400}
+sections.units.parameters.actualArgosRepetitionPeriodList {161 162 163 164 165 159 158 157 156}
+sections.units.parameters.assignedArgosRepetitionPeriodRangeBaseList {160 160 160 160 160 160 160 160 160}
+sections.units.parameters.assignedArgosRepetitionPeriodRangePercentageList {10 10 10 10 10 10 10 10 10}
+sections.units.parameters.argosFrequencyList {401632000 401633000 401634000 401635000 401636000 401637000 401638000 401639000 401640000}
+sections.units.parameters.vhfFrequencyList {165850000 164620000 164630000 164640000 165780000 165870000 165890000 165510000 165520000}
+sections.units.parameters.firmwareVersionList {{SECO1228 uGPSI-20 2010.07.01} {SECO1228 uGPSI-20 2010.07.01} {SECO1228 uGPSI-20 2010.07.01} {SECO1228 uGPSI-20 2010.07.01} {SECO1228 uGPSI-20 2010.07.01} {SECO1228 uGPSI-20 2010.07.01} {SECO1228 uGPSI-20 2010.07.01} {SECO1228 uGPSI-20 2010.07.01} {SECO1228 uGPSI-20 2010.07.01}}
+sections.units.parameters.parameterTimestampList {{2010.08.16 18:46:40 UTC} {2010.08.16 18:54:08 UTC} {2010.08.16 18:58:14 UTC} {2010.08.16 19:03:05 UTC} {2010.08.16 19:07:07 UTC} {2010.08.16 19:11:23 UTC} {2010.08.16 19:14:32 UTC} {2010.08.16 19:18:56 UTC} {2010.08.16 19:21:42 UTC}}
+sections.units.parameters.factoryParametersList {{TGW-4583H 646208A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} -250 10 0 0 1999 {-40 25 70} {{41 4A 4F}} {{71 78 7F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 23 25 31 35 49 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 162 2044.8 22 -2250 2 5100 4100 21.04008 0} {TGW-4583H 646252A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} -250 39 0 0 1999 {-40 25 70} {{34 3A 3F}} {{50 5B 5F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 24 25 34 35 49 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 159 2044.8 22 -2250 2 5100 4100 21.04008 0} {TGW-4583H 646253A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} 0 17 0 0 1999 {-40 25 70} {{34 3C 3F}} {{60 68 6F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 24 25 33 35 49 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 158 2044.8 22 -2250 2 5100 4100 21.04008 0} {TGW-4583H 646401A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} -250 23 0 0 1999 {-40 25 70} {{36 3C 3F}} {{53 5D 5F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 22 25 31 35 47 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 159 2044.8 22 -2250 2 5100 4100 21.04008 0} {TGW-4583H 646402A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} -250 6 0 0 1999 {-40 25 70} {{41 4A 4F}} {{60 6B 6F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 24 25 34 35 50 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 160 2044.8 22 -2250 2 5100 4100 21.04008 0} {TGW-4583H 646417A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} -250 2 0 0 1999 {-40 25 70} {{32 38 3F}} {{50 58 5F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 23 25 31 35 46 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 158 2044.8 22 -2250 2 5100 4100 21.04008 0} {TGW-4583H 646418A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} -500 6 0 0 1999 {-40 25 70} {{33 3A 3F}} {{50 58 5F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 25 25 35 35 52 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 162 2044.8 22 -2250 2 5100 4100 21.04008 0} {TGW-4583H 646419A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} 0 4 0 0 1999 {-40 25 70} {{34 3C 3F}} {{60 68 6F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 23 25 31 35 47 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 160 2044.8 22 -2250 2 5100 4100 21.04008 0} {TGW-4583H 646420A 300 100 30 5 0 120 {222 222 222 222 222 222 222 222 222 222 222 219 214 209 205 201 198 194 191 188 185 182 179 177 174 172 170 168 166 164 162 160 158 156 154 152 151 149 147 146 144 143 141 140 138 137 135 134 132 131 130 128 127 126 124 123 122 120 119 118 117 115 114 113 112 111 109 108 107 106 104 103 102 101 100 98 97 96 95 94 92 91 90 89 87 86 85 83 82 81 79 78 77 75 74 73 71 70 68 67 65 64 62 60 59 57 55 53 51 49 47 45 43 41 38 36 33 30 27 23 19 15 11 5 0 0 0 0} -500 4 0 0 1999 {-40 25 70} {{32 38 3F}} {{50 58 5F}} 2014 2014 122 0 3 4 2 7 1 4 8 9 10 11 13 15 17 19 24 25 34 35 50 50 50 89 1 488 3800 3200 3200 2900 60 400 4000 3200 104 213 79 161 2044.8 22 -2250 2 5100 4100 21.04008 0}}
+sections.predeployment.parameters.seasonDuration {4 hours}
+sections.predeployment.parameters.updatePeriod {1 hour}
+sections.predeployment.parameters.predeployAfterRebootFlag 1
+sections.gps.parameters.fixTimeout 180
+sections.gps.parameters.continuousNavigationMode 0
+sections.gps.parameters.nmeaSentences {}
+sections.gps.parameters.nmeaBaudRate 4800
+sections.gpsSchedule.parameters.schedule {schedule {
+   season {
+      2010.01.01
+      2100.01.01
+      1Day
+      onPeriod {16Hours 1Day 1Day}
+   }
+}
+}
+sections.underwater.parameters.diveQualificationPeriod 5
+sections.underwater.parameters.haulOutTime Disabled
+sections.underwater.parameters.saltwaterFailsafeTime Disabled
+sections.underwater.parameters.pressureMeasurementInterval Disabled
+sections.underwater.parameters.layers {}
+sections.underwater.parameters.numberOfLayers 0
+sections.underwater.parameters.numberOfProfilePoints 0
+sections.underwater.parameters.suppressedDevices {}
+sections.underwaterSchedule.parameters.schedule {schedule {
+}
+}
+sections.activityandmortality.parameters.activityDirection {1 2 3}
+sections.activityandmortality.parameters.measurementInterval 60
+sections.activityandmortality.parameters.tipSwitchFlag 0
+sections.activityandmortality.parameters.mortalityDirection {1 2 3}
+sections.activityandmortality.parameters.timeInterval {12 Hours}
+sections.activityandmortality.parameters.mortalityThreshold 5
+sections.activitySchedule.parameters.schedule {schedule {
+   season {
+      2010.01.01
+      2100.01.01
+      6Hours
+      onPeriod {0 6Hours 6Hours}
+   }
+}
+}
+sections.temperatureSchedule.parameters.schedule {link gpsSchedule}
+sections.argos.parameters.powerLevel 0
+sections.argos.parameters.minimumTransmitTemperature -40
+sections.argos.parameters.messageFields {
+   mortalityFlag {}
+   gpsUpdateTime {946684800 4102444800 1 0 32 32}
+   compressedSuccessfulFixFlags {0 1 1 0 1 1 1 1}
+   compressedFixDelays {0 255 1 0 8 8 1 8}
+   compressedLatitudes {0 2147483647 1024 0 21 21 1 21}
+   compressedLongitudes {0 4294967295 1024 0 22 22 1 22}
+   errorDetectionByte {}}
+sections.argos.parameters.transmitPartialPagesFlag 0
+sections.argos.parameters.pnSeed 0
+sections.argos.parameters.diveMaximumPages default
+sections.argosSchedule.parameters.schedule {schedule {
+   season {
+      2010.01.01
+      2100.01.01
+      6Days
+      onPeriod {18Hours+30Minutes 5Hours 0}
+   }
+}
+}
+sections.argossatellite.parameters.prediction none
+sections.argossatellite.parameters.location {65.000 -144.000}
+sections.argossatellite.parameters.satellites {METOP-A {1 29499U 06044A   10173.70387615  .00000114  00000-0  71877-4 0  1404} {2 29499  98.6721 233.1124 0001030  81.2632 278.8666 14.21501463190651} {NOAA 19} {1 33591U 09005A   10173.39368541  .00000402  00000-0  24758-3 0  5773} {2 33591  98.7875 115.4036 0013187 275.2176  84.7486 14.11063346 70640} {NOAA 18} {1 28654U 05018A   10173.40457961  .00000388  00000-0  23905-3 0  3802} {2 28654  98.9490 119.6532 0014961  41.8447 318.3863 14.11367014262170} {NOAA 17} {1 27453U 02032A   10173.33569073 -.00000016  00000-0  11319-4 0  8969} {2 27453  98.4308 223.5729 0012656 120.2024 240.0427 14.24167106415434} {NOAA 16} {1 26536U 00055A   10173.39709428  .00000098  00000-0  78309-4 0  8971} {2 26536  99.1699 190.9880 0009890 326.8958  33.1614 14.12563790502563} {NOAA 15} {1 25338U 98030A   10173.42071484  .00000183  00000-0  96857-4 0  4203} {2 25338  98.6185 160.2508 0011651  62.5899 297.6475 14.24835598629494}}
+sections.argossatellite.parameters.turnOffGPSPredictionAfterNDays Disabled
+sections.vhf.parameters.powerLevel 10
+sections.vhf.parameters.initializationPeriod {15 Minutes}
+sections.vhf.parameters.pulseWidth 15
+sections.vhf.parameters.gpsVhfBeaconControl 1
+sections.vhf.parameters.successfulFixPulsePeriod 1500
+sections.vhf.parameters.unsuccessfulFixPulsePeriod 2000
+sections.vhf.parameters.mortalityVhfBeaconControl 1
+sections.vhf.parameters.mortalityPulsePeriod 750
+sections.vhf.parameters.deadBatteryVhfBeaconControl 1
+sections.vhf.parameters.deadBatteryPulsePeriod 3000
+sections.vhf.parameters.releaseVhfBeaconControl 0
+sections.vhf.parameters.releasePulsePeriod Disabled
+sections.vhf.parameters.rapidOffPeriod 125
+sections.vhfSchedule.parameters.schedule {schedule {
+   season {
+      2010.01.01
+      2100.01.01
+      1Day
+      onPeriod {16Hours 9Hours 0}
+   }
+}
+}
+sections.auxiliarymodes.parameters.resetVhfOnlyPeriodLength {20 Hours}
+sections.auxiliarymodes.parameters.brownOutRecoveryPeriodLength {15 Minutes}
+sections.auxiliarymodes.parameters.brownOutRecoveryUpdateInterval {5 Minutes}
+sections.simulator.parameters.activeVhfMode 0
+sections.simulator.parameters.deploymentDate 2010.11.01
+sections.simulator.parameters.batteryDate {2010.07.01 2010.07.01}
+sections.simulator.parameters.batteryLeakage {0 0}
+sections.simulator.parameters.batteryCapacity {{} {}}
+sections.simulator.parameters.location {}
+sections.simulator.parameters.minimumPassElevation 0
+sections.simulator.parameters.maximumPassElevation 90
+sections.simulator.parameters.environmentTemperature 0
+sections.simulator.parameters.predictPasses 0
+sections.simulator.parameters.underwaterRatio 0
+sections.simulator.parameters.averageTimeToFix 90
+sections.simulator.parameters.transmitSuccessRatio 20
+sections.simulator.parameters.qfpRatio 0
+sections.simulator.parameters.batteryDerateFactor {0 0}
+sections.notes.parameters.notes {{GPS COLLECTION SCHEDULE} {} {} {COLLECT 1 LOCATION PER DAY AT 1600 UTC} {ARGOS SCHEDULE} {} {} TRANSMIT\ EVERY\ SIX\ \(6\)\ DAYS\ FOR\ FIVE\ \(5\)\ HRS\ AT\ 1830\ UTC {VHF BEACON} {} {} ON\ DAILY\ FOR\ NINE\ \(9\)\ HRS\ AT\ 1600\ UTC {} {SUCCESSFUL PULSE RATE - 40 BPM} {} {UNSUCCESSFUL PULSE RATE - 30 BPM} {} {MORTALITY PULSE RATE - 80 BPM - DELAY 12 HRS} {COLLAR ADJUSTMENT RANGE} {} {} {17 TO 22 IN - CENTER @ 20 IN}}
