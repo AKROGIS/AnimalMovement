@@ -161,7 +161,7 @@ INNER JOIN CollarParameters AS P
 -- Collar Deployment Dates for Collars sharing an Argos Id
 --    This needs to be reviewed sequentially for errors and issues.
     SELECT C.AlternativeId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
-           CONVERT(VARCHAR(10), D.RetrievalDate, 103) AS Retrieved,  CONVERT(VARCHAR(10), C.DisposalDate, 103) AS Disposed
+           CONVERT(VARCHAR(10), D.RetrievalDate, 101) AS Retrieved,  CONVERT(VARCHAR(10), C.DisposalDate, 101) AS Disposed
       FROM Collars AS C
  LEFT JOIN CollarDeployments AS D
         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
@@ -170,8 +170,8 @@ INNER JOIN CollarParameters AS P
 
 
 -- ERROR - Collar Deployments that need to be fixed
-    SELECT C.AlternativeId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
-           CONVERT(VARCHAR(10), D.RetrievalDate, 103) AS Retrieved,  CONVERT(VARCHAR(10), C.DisposalDate, 103) AS Disposed
+    SELECT C.Manager, C.AlternativeId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
+           CONVERT(VARCHAR(10), D.RetrievalDate, 101) AS Retrieved,  CONVERT(VARCHAR(10), C.DisposalDate, 101) AS Disposed
       FROM Collars AS C
  LEFT JOIN CollarDeployments AS D
         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
@@ -185,6 +185,24 @@ INNER JOIN CollarParameters AS P
                     OR (D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
            )
   ORDER BY C.AlternativeId, C.CollarId, D.DeploymentDate
+
+
+-- FIXMES - Files on collars with deployment errors
+    SELECT C.AlternativeId, C.CollarId, F.FileId, F.FileName, F.Format, F.Status
+      FROM Collars AS C
+ LEFT JOIN CollarFiles AS F
+        ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+     WHERE C.AlternativeId IN (
+				-- ERROR - Collar deployed after they are disposed
+				SELECT DISTINCT C.AlternativeId
+				  FROM Collars AS C
+			 LEFT JOIN CollarDeployments AS D
+					ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+				 WHERE C.DisposalDate < D.DeploymentDate OR C.DisposalDate < D.RetrievalDate
+                    OR (D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
+           )
+  ORDER BY C.AlternativeId, C.CollarId, F.FileId
+
 
 
 -- All the Email and AWS files that have not been processed 
