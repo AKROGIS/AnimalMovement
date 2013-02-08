@@ -123,7 +123,7 @@ namespace Telonics
                 throw new InvalidOperationException("There is no processor defined for Telonics Id " + telonicsId);
             if (!_transmissionsByCtn.ContainsKey(telonicsId) || _transmissionsByCtn[telonicsId].Count < 1)
                 throw new NoMessagesException("There are no messages for Telonics Id " + telonicsId);
-            return Processor(telonicsId).Process(_transmissionsByCtn[telonicsId]);
+            return Processor(telonicsId).ProcessTransmissions(_transmissionsByCtn[telonicsId],this);
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Telonics
             var processor = Processor("default");
             if (processor == null)
                 throw new InvalidOperationException("There is no default processor defined");
-            return processor.Process(_transmissions);
+            return processor.ProcessTransmissions(_transmissions,this);
         }
 
         #endregion
@@ -148,6 +148,8 @@ namespace Telonics
         #endregion
 
         #region Private Methods
+
+        abstract internal string Header { get; }
 
         abstract protected IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines);
 

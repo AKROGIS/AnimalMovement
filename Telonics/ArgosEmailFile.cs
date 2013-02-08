@@ -12,6 +12,11 @@ namespace Telonics
         public ArgosEmailFile(Byte[] bytes) : base(bytes) { }
         public ArgosEmailFile(Stream stream) : base(stream) { }
 
+        internal override string Header
+        {
+            get { return String.Empty; }
+        }
+
         protected override IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines)
         {
             /* Argos files may be contained in numerous concatenated ASCII email files

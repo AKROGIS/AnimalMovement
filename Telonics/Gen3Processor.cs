@@ -18,7 +18,7 @@ namespace Telonics
 
         public TimeSpan Period { get; private set; }
 
-        public IEnumerable<string> Process(IEnumerable<ArgosTransmission> transmissions)
+        public IEnumerable<string> ProcessTransmissions(IEnumerable<ArgosTransmission> transmissions, ArgosFile file)
         {
             return transmissions.SelectMany(transmission => GetMessage(transmission).FixesAsCsv());
         }

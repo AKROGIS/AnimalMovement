@@ -44,13 +44,10 @@ namespace Telonics
         public string TdcExecutable { get; set; }
         public string BatchFileTemplate { get; set; }
 
-
-        //public IEnumerable<string> Process(ArgosFile file)
-        public IEnumerable<string> Process(IEnumerable<ArgosTransmission> transmissions)
+        public IEnumerable<string> ProcessTransmissions(IEnumerable<ArgosTransmission> transmissions, ArgosFile file)
         {
-            //FIXME - Add Header to text when transmissions come from an AWS files
-            //var transmissions = file.Transmissions;
-            string text = String.Join(Environment.NewLine, transmissions.Select(t => t.ToString()));
+            string text = file.Header ?? "";
+            text += String.Join(Environment.NewLine, transmissions.Select(t => t.ToString()));
             return ProcessFile(text);
         }
 
