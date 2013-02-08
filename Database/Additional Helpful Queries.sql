@@ -158,6 +158,15 @@ INNER JOIN CollarParameters AS P
   ORDER BY C.AlternativeId, C.CollarId
 
 
+-- All the Email and AWS files that have not been processed 
+   SELECT F1.FileId, F1.Format, F1.FileName
+     FROM CollarFiles AS F1
+LEFT JOIN CollarFiles AS F2
+       ON F1.FileId = F2.ParentFileId
+    WHERE F2.FileId IS NULL
+      AND F1.Format IN ('F','E')
+
+
 -- All conflicting fixes for all of a PI's collars
     DECLARE @PI varchar(255) = 'NPS\SDMIller';
      SELECT C.CollarManufacturer, C.CollarId, F.*
