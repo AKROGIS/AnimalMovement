@@ -3982,7 +3982,10 @@ BEGIN
 	 INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
 	 INNER JOIN Collars as C 
-			 ON C.AlternativeId = I.CollarID		 
+			 ON C.AlternativeId = I.CollarID
+	 INNER JOIN CollarDeployments AS D
+			 ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+			AND (I.AnimalId = D.AnimalId OR I.AnimalId = '0' + D.AnimalId)
 		  WHERE F.[Status] = 'A'
 		    AND I.FileId = @FileId
 		    AND I.LatWGS84 IS NOT NULL AND I.LonWGS84 IS NOT NULL
