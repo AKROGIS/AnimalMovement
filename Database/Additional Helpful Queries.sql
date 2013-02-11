@@ -215,7 +215,7 @@ LEFT JOIN CollarFiles AS F2
 
 
 -- All conflicting fixes for all of a PI's collars
-    DECLARE @PI varchar(255) = 'NPS\SDMIller';
+    DECLARE @PI varchar(255) = 'NPS\BBorg';
      SELECT C.CollarManufacturer, C.CollarId, F.*
        FROM Collars AS C
 CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer,C.CollarId)) AS F
@@ -223,7 +223,7 @@ CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer,C.CollarId)) A
 
 
 -- All conflicting fixes for all collars deployed (at any time) on a project
-    DECLARE @ProjectId varchar(255) = 'ARCNVSID022';
+    DECLARE @ProjectId varchar(255) = 'DENA_Wolves';
      SELECT C.CollarManufacturer, C.CollarId, F.*
        FROM (SELECT DISTINCT CollarManufacturer, CollarId, ProjectId FROM CollarDeployments) AS C
 CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer, C.CollarId)) AS F
@@ -231,7 +231,7 @@ CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer, C.CollarId)) 
 
 
 -- Summary of fixes for all of a PI's collars
-    DECLARE @PI varchar(255) = 'NPS\SDMIller';
+    DECLARE @PI varchar(255) = 'NPS\BBorg';
      SELECT C.CollarManufacturer, C.CollarId, F.*
        FROM Collars AS C
 CROSS APPLY (SELECT * FROM CollarFixSummary (c.CollarManufacturer,c.CollarId)) AS F
@@ -239,7 +239,7 @@ CROSS APPLY (SELECT * FROM CollarFixSummary (c.CollarManufacturer,c.CollarId)) A
 
 
 -- Summary of fixes for all animals in a project
-    DECLARE @ProjectId varchar(255) = 'ARCNVSID022';
+    DECLARE @ProjectId varchar(255) = 'DENA_Wolves';
      SELECT C.AnimalId, F.*
        FROM CollarDeployments AS C
 CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
@@ -248,7 +248,7 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 
 
 -- All of a PI's collars that do not have fixes
-    DECLARE @PI varchar(255) = 'NPS\SDMIller';
+    DECLARE @PI varchar(255) = 'NPS\BBorg';
      SELECT C.CollarManufacturer, C.CollarId, C.AlternativeId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarFixes as F
@@ -259,7 +259,7 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 
 
 -- All of a PI's collars that do not have files
-    DECLARE @PI varchar(255) = 'NPS\SDMIller';
+    DECLARE @PI varchar(255) = 'NPS\BBorg';
      SELECT C.CollarManufacturer, C.CollarId, C.AlternativeId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarFiles as F
@@ -273,7 +273,7 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 --  If a animal has had multiple deployments, and one deployment has fixes,
 --  and the other does not, this will report a false positive for the
 --  listing the animal with the collar with no fixes 
-    DECLARE @ProjectId varchar(255) = 'ARCNVSID022';
+    DECLARE @ProjectId varchar(255) = 'DENA_Wolves';
      SELECT A.AnimalId, D.CollarId
        FROM Animals AS A
   LEFT JOIN CollarDeployments AS D
@@ -311,11 +311,11 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
 
 
 -- Preview/Hide the fixes outside a nominal range for a project
-    DECLARE @ProjectId varchar(255) = 'ARCNVSID022';
-    DECLARE @MinLat Real = 65.0;
+    DECLARE @ProjectId varchar(255) = 'DENA_Wolves';
+    DECLARE @MinLat Real = 61.0;
     DECLARE @MaxLat Real = 75.0;
-    DECLARE @MinLon Real = -170.0;
-    DECLARE @MaxLon Real = -161.0;
+    DECLARE @MinLon Real = -165.0;
+    DECLARE @MaxLon Real = -130.0;
    
   -- Preview fixes outside the range
      SELECT AnimalId, FixDate, Location.Long as Lon, Location.Lat as Lat
@@ -323,6 +323,7 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
       WHERE ProjectId = @ProjectId
         AND [Status] IS NULL
         AND (Location.Long < @MinLon OR @MaxLon < Location.Long OR Location.Lat < @MinLat OR @MaxLat < Location.Lat)
+   ORDER BY Lon, Lat
 /*   
   -- Hide fixes outside the range
      UPDATE Locations
@@ -338,4 +339,60 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
 --  The speed, distance are animal dependent.  The duration is dependent on the collar settings
 --  speed is meters/hour, and distance is meters
 --  Use ArcGIS to zoom in on the animal at the time, and use the addin tool to hide invalid locations.
-select * from Movements where ProjectId = 'ARCNVSID022' and (speed > 7500 or duration < .92 or Distance > 40000) order by AnimalId, StartDate
+select * from Movements where ProjectId = 'DENA_Wolves' and (speed > 7500 or duration < .92 or Distance > 40000) order by Distance, AnimalId, StartDate
+
+
+
+
+-- DEBEVEK FILES
+------------------------------------------------------------------------------------
+
+--Summary of Fixes in Debevek Files (those with NULL collarID are currently ignored)
+    SELECT F.[FileName], E.CollarId, E.AnimalId, 
+           CONVERT(VARCHAR(10), MIN(convert(datetime2,E.FixDate)), 101) AS FirstFix,
+           CONVERT(VARCHAR(10), MAX(convert(datetime2,E.FixDate)), 101) AS LastFix,
+           COUNT(*) AS [Count],
+           C.Manager, C.CollarId
+      FROM CollarDataDebevekFormat AS E
+ LEFT JOIN (CollarDeployments AS D
+ 		    INNER JOIN Collars AS C
+		    ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId)
+        ON (E.AnimalId = D.AnimalId OR E.AnimalId = '0' + D.AnimalId)
+       AND C.AlternativeId = E.CollarID
+INNER JOIN CollarFiles AS F
+        ON F.FileId = E.FileID
+  GROUP BY C.Manager, C.CollarId, F.[FileName], E.CollarId, E.AnimalId 
+  ORDER BY F.[FileName], C.CollarId, E.CollarId, FirstFix
+
+
+--Fixes from Ed Debevek Files which will not be used for Animal locations
+    SELECT F.[FileName], E.CollarId AS ArgosId, E.AnimalId, 
+           CONVERT(VARCHAR(10), MIN(convert(datetime2,E.FixDate)), 101) AS FirstFix,
+           CONVERT(VARCHAR(10), MAX(convert(datetime2,E.FixDate)), 101) AS LastFix,
+           C.Manager, C.CollarId,
+           CONVERT(VARCHAR(10), D.DeploymentDate, 101) AS Deployed,
+           CONVERT(VARCHAR(10), D.RetrievalDate, 101) AS Retrieved,
+           COUNT(*) AS [Count]
+      FROM CollarDataDebevekFormat AS E
+INNER JOIN CollarFiles AS F
+        ON F.FileId = E.FileID
+ LEFT JOIN (CollarDeployments AS D
+		   INNER JOIN Collars AS C
+		           ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId)
+        ON (E.AnimalId = D.AnimalId OR E.AnimalId = '0' + D.AnimalId)
+       AND C.AlternativeId = E.CollarID
+     WHERE C.Manager IS NULL OR E.FixDate < D.DeploymentDate OR E.FixDate > D.RetrievalDate
+  GROUP BY C.Manager, C.CollarId, F.[FileName], E.CollarId, E.AnimalId, D.DeploymentDate, D.RetrievalDate
+    HAVING C.Manager IS NULL OR MIN(convert(datetime2,E.FixDate)) < D.DeploymentDate OR MAX(convert(datetime2,E.FixDate)) > D.RetrievalDate
+  ORDER BY F.[FileName], E.CollarId, FirstFix
+ 
+ 
+ --Records in Debevek Files not in Fixes
+    SELECT CF.FileName, E.CollarID, E.AnimalId, COUNT(*) AS [Count]
+      FROM CollarDataDebevekFormat AS E
+ LEFT JOIN CollarFixes AS F
+        ON F.FileId = E.FileID AND F.LineNumber = E.LineNumber
+INNER JOIN CollarFiles AS CF
+        ON CF.FileId = E.FileID
+     WHERE F.FileId IS NULL
+  GROUP BY CF.FileName, E.CollarID, E.AnimalId
