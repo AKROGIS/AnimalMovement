@@ -241,7 +241,7 @@ namespace ArgosDownloader
                         throw new InvalidOperationException("Gen3 collar cannot be processed without a period");
                     var g3processor = new Gen3Processor(TimeSpan.FromMinutes(collar.Gen3Period.Value));
 
-                    ArgosFile aws3 = new ArgosAwsFile(results.ToString()) {Processor = id => g3processor};
+                    ArgosFile aws3 = new ArgosAwsFile(results.ToBytes()) {Processor = id => g3processor};
 
                     byte[] g3data =
                         Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, aws3.ToTelonicsData()));
@@ -268,7 +268,7 @@ namespace ArgosDownloader
                     if (!String.IsNullOrEmpty(batchFile))
                         g4processor.BatchFileTemplate = batchFile;
 
-                    ArgosFile aws4 = new ArgosAwsFile(results.ToString()) {Processor = id => g4processor};
+                    ArgosFile aws4 = new ArgosAwsFile(results.ToBytes()) {Processor = id => g4processor};
 
                     byte[] g4data =
                         Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, aws4.ToTelonicsData()));
