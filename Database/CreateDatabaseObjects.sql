@@ -2796,7 +2796,7 @@ GO
 CREATE VIEW [dbo].[WARNING_TelonicsGen3CollarsWithoutPeriod]
 AS
 SELECT TOP (100) PERCENT CollarId, Manager, Gen3Period FROM Collars
-WHERE CollarModel = 'TelonicsGen3' and Gen3Period IS NULL
+WHERE CollarModel LIKE 'TelonicsGen3%' and Gen3Period IS NULL and AlternativeId IS NOT NULL
 GO
 SET ANSI_NULLS ON
 GO
@@ -4417,7 +4417,7 @@ AS
            C.Frequency, C.DisposalDate, CD.RetrievalDate, C.Notes,
            CPF.[FileName] AS ParameterFile, CPF.Format, CPF.[Status]
       FROM Collars AS C
-INNER JOIN CollarDeployments AS CD
+ LEFT JOIN CollarDeployments AS CD
         ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
  LEFT JOIN CollarParameters as CP
         ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
@@ -4425,7 +4425,14 @@ INNER JOIN CollarDeployments AS CD
         ON CP.FileId = CPF.FileId           
      WHERE C.CollarModel = 'TelonicsGen4'
        AND C.AlternativeId IS NOT NULL
-       AND (CPF.Format IS NULL OR (CPF.Format = 'A' AND CPF.[Status] = 'I'))
+       AND (CPF.Format IS NULL -- no parameter file
+        OR C.CollarId NOT IN ( -- collars with active TPF files
+           SELECT CP.CollarId
+             FROM CollarParameters as CP
+       INNER JOIN CollarParameterFiles as CPF
+               ON CP.FileId = CPF.FileId           
+            WHERE CPF.Format = 'A' AND CPF.[Status] = 'A')
+            )
 GO
 SET ANSI_NULLS ON
 GO
@@ -7884,8 +7891,10 @@ CREATE VIEW [dbo].[WARNING_ArgosPlatformsNotInCollars]
 AS
 
 -- Known Argos Platforms that are not in the Collars table 
-    SELECT P.*
+    SELECT A.Investigator, P.ProgramId, P.PlatformId, P.[Status], P.Remarks
       FROM ArgosPlatforms AS P
+INNER JOIN ArgosPrograms AS A
+        ON P.ProgramId = A.ProgramId
  LEFT JOIN Collars AS C
         ON P.PlatformId = C.AlternativeId
      WHERE C.CollarManufacturer IS NULL

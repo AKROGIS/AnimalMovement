@@ -133,6 +133,7 @@ INNER JOIN AllTpfFileData AS T
     WHERE F.Format = 'A'
       AND (C.StartDate IS NULL OR T.[TimeStamp]<> C.StartDate)
 
+
 -- Show days between this collars disposal, and the next collars start
 -- Assumes all collars have a Alpha suffix, and that there are no gaps.
 -- if there is an A version, and then a C version with no B version, the results will be incorrect.
@@ -223,7 +224,7 @@ CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer,C.CollarId)) A
 
 
 -- All conflicting fixes for all collars deployed (at any time) on a project
-    DECLARE @ProjectId varchar(255) = 'DENA_Wolves';
+    DECLARE @ProjectId varchar(255) = 'Yuch_Wolf';
      SELECT C.CollarManufacturer, C.CollarId, F.*
        FROM (SELECT DISTINCT CollarManufacturer, CollarId, ProjectId FROM CollarDeployments) AS C
 CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer, C.CollarId)) AS F
@@ -239,7 +240,7 @@ CROSS APPLY (SELECT * FROM CollarFixSummary (c.CollarManufacturer,c.CollarId)) A
 
 
 -- Summary of fixes for all animals in a project
-    DECLARE @ProjectId varchar(255) = 'DENA_Wolves';
+    DECLARE @ProjectId varchar(255) = 'Yuch_Wolf';
      SELECT C.AnimalId, F.*
        FROM CollarDeployments AS C
 CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
@@ -248,24 +249,26 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 
 
 -- All of a PI's collars that do not have fixes
-    DECLARE @PI varchar(255) = 'NPS\BBorg';
-     SELECT C.CollarManufacturer, C.CollarId, C.AlternativeId, C.Frequency
+    DECLARE @PI varchar(255) = 'NPS\JWBurch';
+     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarFixes as F
          ON C.CollarId = F.CollarId
       WHERE C.Manager = @PI
         AND F.CollarId IS NULL
+   ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
 
 
 
 -- All of a PI's collars that do not have files
-    DECLARE @PI varchar(255) = 'NPS\BBorg';
-     SELECT C.CollarManufacturer, C.CollarId, C.AlternativeId, C.Frequency
+    DECLARE @PI varchar(255) = 'NPS\JWBurch';
+     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarFiles as F
          ON C.CollarId = F.CollarId
       WHERE C.Manager = @PI
         AND F.CollarId IS NULL
+   ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
 
 
 
@@ -273,7 +276,7 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 --  If a animal has had multiple deployments, and one deployment has fixes,
 --  and the other does not, this will report a false positive for the
 --  listing the animal with the collar with no fixes 
-    DECLARE @ProjectId varchar(255) = 'DENA_Wolves';
+    DECLARE @ProjectId varchar(255) = 'Yuch_Wolf';
      SELECT A.AnimalId, D.CollarId
        FROM Animals AS A
   LEFT JOIN CollarDeployments AS D
@@ -311,11 +314,11 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
 
 
 -- Preview/Hide the fixes outside a nominal range for a project
-    DECLARE @ProjectId varchar(255) = 'DENA_Wolves';
-    DECLARE @MinLat Real = 61.0;
-    DECLARE @MaxLat Real = 75.0;
-    DECLARE @MinLon Real = -165.0;
-    DECLARE @MaxLon Real = -130.0;
+    DECLARE @ProjectId varchar(255) = 'Yuch_Wolf';
+    DECLARE @MinLat Real = 63.6;
+    DECLARE @MaxLat Real = 66.3;
+    DECLARE @MinLon Real = -157.0;
+    DECLARE @MaxLon Real = -140.0;
    
   -- Preview fixes outside the range
      SELECT AnimalId, FixDate, Location.Long as Lon, Location.Lat as Lat
@@ -324,7 +327,7 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
         AND [Status] IS NULL
         AND (Location.Long < @MinLon OR @MaxLon < Location.Long OR Location.Lat < @MinLat OR @MaxLat < Location.Lat)
    ORDER BY Lon, Lat
-/*   
+/*
   -- Hide fixes outside the range
      UPDATE Locations
         SET [Status] = 'H'
@@ -339,8 +342,13 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
 --  The speed, distance are animal dependent.  The duration is dependent on the collar settings
 --  speed is meters/hour, and distance is meters
 --  Use ArcGIS to zoom in on the animal at the time, and use the addin tool to hide invalid locations.
-select * from Movements where ProjectId = 'DENA_Wolves' and (speed > 7500 or duration < .92 or Distance > 40000) order by Distance, AnimalId, StartDate
+select * from Movements where ProjectId = 'Yuch_Wolf' and (speed > 12000 or duration < .92) order by Speed, AnimalId, StartDate
 
+
+
+-- Number of locations in database and by project
+SELECT COUNT(*) FROM Locations
+SELECT ProjectId, COUNT(*) FROM Locations WHERE [Status] IS NULL GROUP BY ProjectId
 
 
 
