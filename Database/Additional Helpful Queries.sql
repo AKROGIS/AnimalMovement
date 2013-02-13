@@ -289,16 +289,20 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 
 
 
--- Collars where an Argos download yielded no data
-select c.Manager, c.CollarModel, C.AlternativeId as ArgosId, C.CollarId as CTN from Collars as C
-where collarId in (
-SELECT [CollarId]
-  FROM [Animal_Movement].[dbo].[ArgosDownloads]
-  where ErrorMessage is not null
-  group by CollarId
-  )
-  and c.DisposalDate is null
-  order by C.Manager, c.CollarModel, C.AlternativeId
+-- Collars where Argos downloads have yielded no data
+   SELECT C.Manager, C.CollarModel, C.AlternativeId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
+     FROM Collars AS C
+LEFT JOIN CollarDeployments AS D
+	   ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+	WHERE C.CollarId IN (
+				SELECT CollarId
+				  FROM ArgosDownloads
+			  GROUP BY CollarId
+			    HAVING Max(FileID) IS NULL
+		  )
+	  AND C.DisposalDate IS NULL
+	  AND D.RetrievalDate IS NULL
+ ORDER BY C.Manager, C.CollarModel, C.AlternativeId
   
 
 
