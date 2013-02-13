@@ -183,7 +183,7 @@ INNER JOIN CollarParameters AS P
 			 LEFT JOIN CollarDeployments AS D
 					ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
 				 WHERE C.DisposalDate < D.DeploymentDate OR C.DisposalDate < D.RetrievalDate
-                    OR (D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
+                    OR (D.DeploymentDate IS NOT NULL AND D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
            )
   ORDER BY C.AlternativeId, C.CollarId, D.DeploymentDate
 
@@ -200,7 +200,7 @@ INNER JOIN CollarParameters AS P
 			 LEFT JOIN CollarDeployments AS D
 					ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
 				 WHERE C.DisposalDate < D.DeploymentDate OR C.DisposalDate < D.RetrievalDate
-                    OR (D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
+                    OR (D.DeploymentDate IS NOT NULL AND D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
            )
   ORDER BY C.AlternativeId, C.CollarId, F.FileId
 
