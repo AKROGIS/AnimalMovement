@@ -3,6 +3,21 @@
 -- unless you want to run all queries as a test.
 
 
+--Argos Platforms/Collars not being downloaded (for various reasons)
+   SELECT P2.Investigator, P.PlatformId, C.*
+     FROM ArgosPlatforms AS P
+LEFT JOIN ArgosPrograms AS P2
+       ON P.ProgramId = P2.ProgramId
+LEFT JOIN Collars AS C
+       ON C.AlternativeId = P.PlatformId
+LEFT JOIN DownloadableAndAnalyzableCollars AS D
+       ON P.PlatformId = D.PlatformId
+    WHERE D.PlatformId IS NULL
+      AND C.DisposalDate IS NULL
+      AND P.[Status] <> 'I'
+ ORDER BY P2.Investigator, P.PlatformId
+ 
+
 -- ERROR Show Orphaned files (records in CollarFiles where CollarId is unmatched)
    SELECT F.FileId, F.CollarManufacturer, F.CollarId, F.[Status], X.CollarId AS CollarId_From_Fixes
      FROM CollarFiles AS F
@@ -216,11 +231,12 @@ LEFT JOIN CollarFiles AS F2
 
 
 -- All conflicting fixes for all of a PI's collars
-    DECLARE @PI varchar(255) = 'NPS\BBorg';
+    DECLARE @PI varchar(255) = 'NPS\BAMangipane';
      SELECT C.CollarManufacturer, C.CollarId, F.*
        FROM Collars AS C
 CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer,C.CollarId)) AS F
       WHERE C.Manager = @PI
+   ORDER BY CollarId, LocalFixTime, FixId
 
 
 -- All conflicting fixes for all collars deployed (at any time) on a project
@@ -249,7 +265,7 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 
 
 -- All of a PI's collars that do not have fixes
-    DECLARE @PI varchar(255) = 'NPS\JWBurch';
+    DECLARE @PI varchar(255) = 'NPS\BAMangipane';
      SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarFixes as F
@@ -346,7 +362,7 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
 --  The speed, distance are animal dependent.  The duration is dependent on the collar settings
 --  speed is meters/hour, and distance is meters
 --  Use ArcGIS to zoom in on the animal at the time, and use the addin tool to hide invalid locations.
-select * from Movements where ProjectId = 'Yuch_Wolf' and (speed > 12000 or duration < .92) order by Speed, AnimalId, StartDate
+select * from Movements where ProjectId = 'LACL_Wolf' and (speed > 12000 or duration < 6) order by Speed, AnimalId, StartDate
 
 
 
