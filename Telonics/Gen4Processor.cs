@@ -80,7 +80,7 @@ namespace Telonics
             File.WriteAllText(batchFilePath, batchCommands);
 
             //  Run TDC with the batch file
-            var p = System.Diagnostics.Process.Start(new ProcessStartInfo
+            var p = Process.Start(new ProcessStartInfo
             {
                 FileName = TdcExecutable,
                 Arguments = "/batch:" + batchFilePath,
