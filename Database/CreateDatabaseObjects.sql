@@ -4115,10 +4115,13 @@ BEGIN
 	END
 	
 	
-	-- @Format = 'E' -- Telonics email format
-	--    Converted with an external application to formats 'C' and/or 'D'
+	-- IF @Format = 'E' -- Telonics email format
+	-- GPS fixes in the email are converted with an external application to formats 'C' or 'D'
+	-- FIXME: Add the Argos PTT locations to the Fixes table (only for non-GPS collars)
 	
 	IF @Format = 'F'  -- Argos Web Services Format
+	-- GPS fixes in the raw data of a AWS file are converted with an external application to formats 'C' or 'D'
+	-- This adds the Argos PTT locations to the Fixes table (only for non-GPS collars)
 	BEGIN
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
 		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
@@ -4126,11 +4129,14 @@ BEGIN
 		        CONVERT(float, I.latitude), CONVERT(float, I.longitude)
 		   FROM dbo.CollarDataArgosWebService as I INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
+	 INNER JOIN Collars AS C
+	         ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
 		  WHERE F.[Status] = 'A'
 		    AND I.FileId = @FileId
 		    AND I.latitude IS NOT NULL AND I.longitude IS NOT NULL
 		    AND I.[locationDate] IS NOT NULL
 		    AND I.[locationDate] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+		    AND C.CollarModel LIKE 'Telonics%PTT' -- FIXME: use a new attribute to select Non-GPS collars
 	END
 	
 END

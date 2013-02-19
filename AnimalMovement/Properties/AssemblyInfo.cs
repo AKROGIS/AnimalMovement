@@ -1,6 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
+//TODO - DATABASE - Add GPS (Y/N) column to the Collars Table, fix insert/update stored procedures, and simplify QA/QC queries
+//TODO - DATABASE - Rename the column AlternativeId to ArgosId in the Collars Table, fix all queries appropriately
+//TODO - DATABASE - Remove the TelonicsGen3_xxx variants from the LookupCollarModels table, fix all queries appropriately
+//TODO - DATABASE - Create Table for Argos PTT locations from Emails
+//TODO - DATABASE - CollarFixes_Insert Stored Procedure - Create Fixes from PTT locations for non-GPS Argos Collars (formats E & F)
 //TODO - DATABASE - Add business logic to ensure that all Deployments.Collar.DeploymentDate < Collar.DisposalDate
 //TODO - DATABASE - Add logic to limit collar fixes to those before the Collar.DisposalDate
 //TODO - DATABASE - Move collar deployment date checking from Stored procedure to trigger to protect against SA and to allow bulk uploading.
@@ -16,15 +21,10 @@ using System.Runtime.InteropServices;
 //TODO - Provide some global QAQC tools - I.e. show Telonics collars that have duplicate Alternative Id and identical Disposal dates
 //TODO - If a collar has multiple TPF files, then sort messages by transmission date per TPF, and process separately. (for now, create multiple collars)
 //TODO - build tool to visualize deployments (i.e. show a graphical time line of animals & collars)
-//TODO - Create a Mortality Layer
-//TODO - Create a layer of last location (or locations)
 //TODO - Create a simple location layer, create a table of animal data, and join in ArcMap
 //TODO - Replace the wait cursors with a message box and progress bar
 //TODO - Add a warning (consent to monitoring) message at start up.
 //TODO - How do I add this warning to a layer file??
-//TODO - Support other file formats
-//TODO - 	a) support data as it is/was delivered to the PI
-//TODO - 	b) support direct download from Argos web services
 //TODO - Replication to remote locations.
 //TODO - 	a) Application/input  will all happen on the central server, which will push all data out to remote locations for fast readonly access.
 //TODO - help documents/tutorials
