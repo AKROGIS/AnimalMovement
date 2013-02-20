@@ -271,6 +271,76 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE FUNCTION [dbo].[DoDateRangesOverlap] 
+(
+	@StartDate1		DATETIME2 = NULL, 
+	@EndDate1		DATETIME2 = NULL,
+	@StartDate2		DATETIME2 = NULL, 
+	@EndDate2		DATETIME2 = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	-- A StartDate of NULL means the begining of time
+	-- A EndDate of NULL means the ending of time
+	
+	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
+	
+	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+	END
+	
+	IF @StartDate1 IS NOT NULL and @EndDate1 IS NOT NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 < @StartDate1 OR @EndDate1 < @StartDate2  RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+	END	
+
+	IF @StartDate1 IS NOT NULL and @EndDate1 IS NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			RETURN 1
+		END	
+	END
+	-- We should never get here
+	RETURN 1
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE PROCEDURE [dbo].[Location_Added] 
 	@Project NVARCHAR(255), 
 	@Animal  NVARCHAR(255), 
@@ -873,38 +943,6 @@ Add Location for F3, but not F1 or F2
 		EXEC [dbo].[DeleteLocationForAnimalAndDateRange] @ProjectId, @AnimalId, @StartDate, @EndDate
 		*/
 	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 3, 2012
--- Description:	Adds Locations when Deployment is inserted
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarDeploymentInsert] 
-   ON  [dbo].[CollarDeployments] 
-   AFTER INSERT
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Add locations for fixes that are now deployed
-	INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-		 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
-		   FROM dbo.CollarFixes AS F
-	 INNER JOIN inserted AS I
-		     ON F.CollarManufacturer = I.CollarManufacturer
-		    AND F.CollarId = I.CollarId
-	 INNER JOIN dbo.Animals AS A
-			 ON A.ProjectId = I.ProjectId
-			AND A.AnimalId = I.AnimalId
-		  WHERE F.HiddenBy IS NULL
-			AND I.DeploymentDate < F.FixDate
-			AND (I.RetrievalDate IS NULL OR F.FixDate < I.RetrievalDate)
-		    AND (A.MortalityDate IS NULL OR F.FixDate < A.MortalityDate) 
 END
 GO
 SET ANSI_NULLS ON
@@ -1772,70 +1810,81 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[DoDateRangesOverlap] 
-(
-	@StartDate1		DATETIME2 = NULL, 
-	@EndDate1		DATETIME2 = NULL,
-	@StartDate2		DATETIME2 = NULL, 
-	@EndDate2		DATETIME2 = NULL
-)
-RETURNS BIT
-AS
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 3, 2012
+-- Description:	Adds Locations when Deployment is inserted
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarDeploymentInsert] 
+   ON  [dbo].[CollarDeployments] 
+   AFTER INSERT
+AS 
 BEGIN
-	-- A StartDate of NULL means the begining of time
-	-- A EndDate of NULL means the ending of time
+	SET NOCOUNT ON;
 	
-	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
-	
-	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
+	-- Check for violations with date range
+	-- Verify the retrieval occurs after the deployment
+	IF EXISTS (SELECT 1
+	             FROM inserted AS I
+				WHERE I.RetrievalDate <= I.DeploymentDate
+			  )
 	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
+		RAISERROR('The retrevial must occur after the deployment.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
 	END
-	
-	IF @StartDate1 IS NOT NULL and @EndDate1 IS NOT NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 < @StartDate1 OR @EndDate1 < @StartDate2  RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-	END	
 
-	IF @StartDate1 IS NOT NULL and @EndDate1 IS NULL
+	-- Verify that the animal is not wearing another collar during the proposed date range
+	-- We are checking each inserted deployment against all existing deployments, and all other new deployments	 
+	IF EXISTS (SELECT 1
+	             FROM inserted AS I1
+		    LEFT JOIN inserted AS I2
+			       ON I1.ProjectId = I2.ProjectId AND I1.AnimalId = I2.AnimalId AND I1.DeploymentDate <> I2.DeploymentDate
+		   INNER JOIN dbo.CollarDeployments AS D
+			       ON D.ProjectId = I1.ProjectId AND D.AnimalId = I1.AnimalId AND D.DeploymentDate <> I1.DeploymentDate
+		   		WHERE dbo.DoDateRangesOverlap(D.DeploymentDate, D.RetrievalDate, I1.DeploymentDate, I1.RetrievalDate) = 1
+				   OR (I2.DeploymentDate IS NOT NULL AND
+				       dbo.DoDateRangesOverlap(I1.DeploymentDate, I1.RetrievalDate, I2.DeploymentDate, I2.RetrievalDate) = 1)
+			  )
 	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			RETURN 1
-		END	
+		RAISERROR('Insert would result in an animal with overlapping deployment dates violation.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
 	END
-	-- We should never get here
-	RETURN 1
+	
+	-- Verify that the collar is not on another animal during the proposed date range
+	-- We are checking each inserted deployment against all existing deployments, and all other new deployments 
+	IF EXISTS (SELECT 1
+	             FROM inserted AS I1
+		    LEFT JOIN inserted AS I2
+			       ON I1.CollarManufacturer = I2.CollarManufacturer AND I1.CollarId = I2.CollarId AND I1.DeploymentDate <> I2.DeploymentDate
+		   INNER JOIN dbo.CollarDeployments AS D
+			       ON D.CollarManufacturer = I1.CollarManufacturer AND D.CollarId = I1.CollarId AND D.DeploymentDate <> I1.DeploymentDate
+		   		WHERE dbo.DoDateRangesOverlap(D.DeploymentDate, D.RetrievalDate, I1.DeploymentDate, I1.RetrievalDate) = 1
+				   OR (I2.DeploymentDate IS NOT NULL AND
+				       dbo.DoDateRangesOverlap(I1.DeploymentDate, I1.RetrievalDate, I2.DeploymentDate, I2.RetrievalDate) = 1)
+			  )
+	BEGIN
+		RAISERROR('Insert would result in a collar with overlapping deployment dates violation.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+		
+	
+	-- Add locations for fixes that are now deployed
+	INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+		 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
+		   FROM dbo.CollarFixes AS F
+	 INNER JOIN inserted AS I
+		     ON F.CollarManufacturer = I.CollarManufacturer
+		    AND F.CollarId = I.CollarId
+	 INNER JOIN dbo.Animals AS A
+			 ON A.ProjectId = I.ProjectId
+			AND A.AnimalId = I.AnimalId
+		  WHERE F.HiddenBy IS NULL
+			AND I.DeploymentDate < F.FixDate
+			AND (I.RetrievalDate IS NULL OR F.FixDate < I.RetrievalDate)
+		    AND (A.MortalityDate IS NULL OR F.FixDate < A.MortalityDate) 
 END
 GO
 SET ANSI_NULLS ON
@@ -3121,37 +3170,7 @@ BEGIN
 		RETURN (1)
 	END
 	
-	-- Verify the retrieval occurs after the deployment
-	IF @RetrievalDate IS NOT NULL AND @RetrievalDate <= @DeploymentDate
-	BEGIN
-		RAISERROR('The retrieval must occur after the deployment.', 18, 0)
-		RETURN (1)
-	END
-
-	-- Verify that the animal is not wearing another collar during the proposed date range
-	IF EXISTS (SELECT 1 FROM dbo.CollarDeployments
-				WHERE ProjectId = @ProjectId AND AnimalId = @AnimalId
-				  AND dbo.DoDateRangesOverlap(DeploymentDate, RetrievalDate, @DeploymentDate, @RetrievalDate) = 1
-			  )
-	BEGIN
-		DECLARE @message3 nvarchar(200) = 'The animal ('+@ProjectId+'-'+@AnimalId+') is already wearing a collar during your date range.'
-		RAISERROR(@message3, 18, 0)
-		RETURN (1)
-	END
-	
-	-- Verify that the collar is not on another animal during the proposed date range
-	IF EXISTS (SELECT 1 FROM dbo.CollarDeployments
-				WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-				  AND dbo.DoDateRangesOverlap(DeploymentDate, RetrievalDate, @DeploymentDate, @RetrievalDate) = 1
-			  )
-	BEGIN
-		DECLARE @message4 nvarchar(200) = 'The collar ('+@CollarManufacturer+'-'+@CollarId+') is already deployed during your date range.'
-		RAISERROR(@message4, 18, 0)
-		RETURN (1)
-	END
-	
-
-	-- All other verification is handled by primary/foreign key and column constraints.
+	-- All other verification is handled by triggers, primary/foreign key and column constraints.
 	INSERT INTO dbo.CollarDeployments
 	            ([ProjectId], [AnimalId], [CollarManufacturer], [CollarId],  
 	             [DeploymentDate], [RetrievalDate])
