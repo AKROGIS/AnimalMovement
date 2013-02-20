@@ -1,0 +1,37 @@
+
+Data cleanup
+============
+Get missing Gen4 TPF files John:638294, Bridget Wolf:659847, Bridget Bears:643132A, 643133A
+Fix disposal dates for collars 571518 and 550204 (requires missing TPF files for 638294 and 659847)
+Get missing Gen4 TPF files for Bridget's collars 618575B, 618576B (not in database)
+  - Bridget uploaded data files (processed by TDC) for the 'B' collars.
+  - Data for the 'B' collars is currently applied to the 'A' version of the collars
+Process email 12_29_12_raw_complete.txt already in database
+Check and send message to users about Argos no data and inactive collars
+Verify John's Deployment data for direct download wolves
+Upload John's Historic Emails
+Remove John/Bridgets Debevek Files
+ - If not removed, fix issues with Bridgets debevek files (see querys)
+Upload Missing Emails for Kyle
+Replace Kyles data with Historic Emails
+Add Kyles PTT data from Historic emails
+Get SOB data for MuskOx
+Get SOB data from Kyle
+Add Buck's data for collar 606976 (A:40420)
+Load Buck's TPF files
+Add Buck's other non-GPS collars to the database
+
+
+Code Cleanup
+============
+Implement FIXMEs
+Prioritze TODOs
+Implement high priority TODOs
+
+
+Deployment
+==========
+Build database and tools from scratch and deploy on virgin server
+Document the process
+Document the user tools
+

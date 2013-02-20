@@ -16,6 +16,8 @@ using System.Linq;
  * when the form is not in edit mode.
  */
 
+//FIXME - Grey out inactive parameter files
+
 namespace AnimalMovement
 {
     internal partial class InvestigatorForm : BaseForm
