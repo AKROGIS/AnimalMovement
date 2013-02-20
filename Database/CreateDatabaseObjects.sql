@@ -582,114 +582,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
-ON [dbo].[CollarFixes] 
-INSTEAD OF INSERT AS
-BEGIN
-	SET NOCOUNT ON;
-	-- inserted is a virtual table of inserted fixes.
-	-- Multiple fixes can be inserted at once. inserted is not updateable.
-	
-	--Logic for adding a SINGLE CollarFix
-	--  1) If the new fix has the same collar id/fixdate as an existing unhidden fix
-	--     then hide the existing fix, else nothing.  hiding the fix will trigger
-	--     a removal of the cooresponding location.
-	--  2) Add a location for the new fix.
-	--
-	-- Can I add multiple fixes in one operation?
-	--   For step 2, yes, as there is no changes to the fixes table.
-	--   For Step 1, NO!
-	--   Consider adding three fixes, 1,2,3 which have the same fixdate.
-	--   two must be hidden, and one must be unhidden.  This is ambiguous
-	--   when the fixes are inserted 'simultaneously'.  In order to maintain
-	--   the chaining of fixes hiding one another, they must be processed
-	--   sequentially.
-
-	-- Another problem:
-	--   We may need to modify some of the fixes in the inserted set.
-	--   We cannot modify the virtual 'inserted' table.  Therefore some of
-	--   our state will be in the CollarFixes table, and some in the inserted
-	--   table.  This is very difficult to manage.
-	
-	-- Solution:
-	--  Use a cursor to insert fixes one by one
-	--  Use a 'instead of insert' trigger to cure the problem with
-	--  modifying the virtual inserted table
-	
-	
-	DECLARE
-		@HiddenFixId		bigint,
-		@FixId				bigint,
-		@HiddenBy			bigint,
-		@FileId				INT,
-		@LineNumber			INT,
-		@CollarManufacturer VARCHAR(16),
-		@CollarId			VARCHAR(16),
-		@FixDate			DATETIME2(7),
-		@Lat				FLOAT,
-		@Lon				FLOAT;
-	  
-	DECLARE insf_cursor CURSOR FOR 
-		SELECT HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon
-		  FROM inserted
-	-- I cannot select FixId (Identity column) from inserted, because it is set to zero in the cursor
-
-	OPEN insf_cursor;
-
-	FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
-	
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-
-		-- Step 1) Get the id of the fix we will hide (if it is null, then we are not hiding anything)
-		SET @HiddenFixId = NULL  -- The assignment below does not occur if no record is found
-		SELECT @HiddenFixId = FixId FROM CollarFixes
-		 WHERE CollarFixes.CollarManufacturer = @CollarManufacturer
-		   AND CollarFixes.CollarId = @CollarID
-		   AND CollarFixes.FixDate = @FixDate
-		   AND CollarFixes.HiddenBy IS NULL
-		
-		-- Step 2) Add new fix to table (do the insert that fired this trigger)
-		INSERT CollarFixes (HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		VALUES (@HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon)
-		SET @FixId = SCOPE_IDENTITY();
-
-		-- PRINT N'  FixDate:' + cast(@FixDate as nvarchar(30)) + N';  HiddenFixId:' + isnull(cast(@HiddenFixId as nvarchar(30)), N'null') + N';  NewFixId:' + isnull(cast(@FixId as nvarchar(30)), N'null')
-
-		-- IF @HiddenFixId IS NOT NULL We are temporarily unstable becasue we have two active & conflicting fixes
-		
-		-- Step3) Hide the hidden fix (the update trigger will remove the associated location)
-		IF @HiddenFixId IS NOT NULL
-		BEGIN
-			UPDATE CollarFixes SET HiddenBy = @FixId WHERE FixId = @HiddenFixId;
-		END
-		
-		
-		-- Step 4) Add new record to Locations table
-		-- This should not create a Location if there is no matching deployment
-		-- The new fix is never hidden.
-		-- there must be zero or one deployment/animal for this fixdate
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT C.ProjectId, C.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
-			   FROM CollarDeployments as C 
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = C.ProjectId
-		    	AND A.AnimalId = C.AnimalId
-			  WHERE C.CollarManufacturer = @CollarManufacturer AND C.CollarId = @CollarId
-				AND C.DeploymentDate <= @FixDate
-				AND (C.RetrievalDate IS NULL OR @FixDate <= C.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR @FixDate <= A.MortalityDate)
-
-		FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
-	END
-	CLOSE insf_cursor;
-	DEALLOCATE insf_cursor;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE TRIGGER [dbo].[InsteadOfCollarFixesDelete] 
 ON [dbo].[CollarFixes] 
 INSTEAD OF DELETE AS
@@ -844,106 +736,6 @@ SELECT FD.*, A.MortalityDate
  WHERE FD.FixId IS NOT NULL
    AND L.FixId IS NULL
    AND (A.MortalityDate IS NULL OR FD.FixDate < A.MortalityDate)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 3, 2012
--- Description:	Add/Remove Locations when Deployment is updated
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarDeploymentUpdate] 
-   ON  [dbo].[CollarDeployments] 
-   AFTER UPDATE
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	--Retrevial date is the only thing that can change.
-	IF UPDATE ([RetrievalDate])
-	BEGIN
-	
-		-- triggers always execute in the context of a transaction
-		-- so the following code is all or nothing.
-
-
-
-  		-- When new retrevial date < old retrevial date we may lose some Locations
-		-- Delete records from locations fix date is greater than the new retrieval date
-/*
-Example:  Time --->
-
-  *-----D1-----* *------D2--------------->
-      *              *               *
-      L1             L2              L3
-  *-----D1-----* *------D2-----*
-                             
-L1 is part of D1 but not D2,
-L2 and L3 are part of original D2, but not D1
-L3 is not part of either deploymnet after changing retrieval date on D2
-*/
-		DELETE L FROM dbo.Locations as L
-				   -- Join to the deployment that created this location
-		   INNER JOIN deleted as D
-				   ON L.ProjectId = D.ProjectId
-				  AND L.AnimalId = D.AnimalId
-				  AND D.DeploymentDate < L.FixDate
-				  AND (L.FixDate < D.RetrievalDate OR D.RetrievalDate IS NULL)
-		   INNER JOIN inserted as I
-				   ON I.ProjectId = D.ProjectId
-				  AND I.AnimalId = D.AnimalId
-				  AND I.CollarManufacturer = D.CollarManufacturer
-				  AND I.CollarId = D.CollarId
-				  AND I.DeploymentDate = D.DeploymentDate
-				   -- These are the Locations to delete:
-				WHERE I.RetrievalDate < L.FixDate 
-				
-				
-		-- When new retrevial is null, or is greater than the old retrevial date we may gain some Locations
-		-- Add locations for fixes that are now deployed, but were not before
-/*
-Example:  Time --->
-
-  *-----D1-----* *------D2-----*
-      *              *               *
-      F1             F2              F3
-  *-----D1-----* *------D2-----------------*  or --->
-                             
-Add Location for F3, but not F1 or F2
-*/
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
-			   FROM dbo.CollarFixes AS F
-				 -- Join to the fixes that are covered by the new deployment dates
-		 INNER JOIN inserted AS I
-				 ON F.CollarManufacturer = I.CollarManufacturer
-				AND F.CollarId = I.CollarId
-	     INNER JOIN deleted as D
-				 -- To get the old retrieval date, we need to link inserted and deleted deployments by PK
-			     ON I.ProjectId = D.ProjectId
-			    AND I.AnimalId = D.AnimalId
-			    AND I.CollarManufacturer = D.CollarManufacturer
-			    AND I.CollarId = D.CollarId
-				AND I.DeploymentDate = D.DeploymentDate
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = I.ProjectId
-		    	AND A.AnimalId = I.AnimalId
-			  WHERE F.HiddenBy IS NULL
-			    AND D.RetrievalDate < F.FixDate -- wasn't included before, note: NULL < F.FixDate is always false (good) 
-				AND I.DeploymentDate < F.FixDate
-				AND (I.RetrievalDate IS NULL OR F.FixDate < I.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR F.FixDate < A.MortalityDate)
-
-		/*
-		These stored procedures would be clean, but they would require a cursor,
-		stored procedures cannot be used in a set based solution.
-		EXEC [dbo].[AddLocationForDeployment] @CollarManufacturer, @CollarId, @ProjectId, @AnimalId, @StartDate, @EndDate
-		EXEC [dbo].[DeleteLocationForAnimalAndDateRange] @ProjectId, @AnimalId, @StartDate, @EndDate
-		*/
-	END
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -1560,64 +1352,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TRIGGER [dbo].[UpdateLocationAfterCollarFixesUpdate] 
-ON [dbo].[CollarFixes]
-AFTER UPDATE AS
-IF UPDATE ([HiddenBy])
-	-- HiddenBy is the only field that is allowed to be updated (all other changes must
-	-- be done with a delete/insert.  This is managed with permissions on the table and
-	-- the functionality of permitted stored procedures
-	BEGIN
-		SET NOCOUNT ON;
-
-		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
-		-- deleted/inserted are tables, since multiple records can be changed at once.
-		-- All updated rows are included, even those that didn't update hiddenby
-		
-		-- Basic logic for a changing a SINGLE CollarFix:
-		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
-		--   if HiddenBy goes from NOT NULL to NULL then add new record to Locations table
-		
-		-- Can I change multiple fixes at once?
-		--  Yes.  Since changes to CollarFixes are managed, and only done by routines
-		--        that honor the requirements of the HiddenBy relationship between
-		--        records in the table, I do not need to worry about how these changes
-		--        effect other records in the table.  I only need to manage the changes
-		--        to the locations table.
-		
-		-- if HiddenBy goes from NULL to NOT NULL then
-		-- remove record from Locations table
-		DELETE L FROM Locations as L
-		   INNER JOIN deleted as D
-				   ON L.FixId = D.FixId
-		   INNER JOIN inserted as I
-				   ON L.FixId = I.FixId
-				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
-		
-		-- if HiddenBy goes from NOT NULL to NULL then
-		-- Add new record to Locations table, if FixDate is acceptable 
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT C.ProjectId, C.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
-			   FROM inserted as I
-		 INNER JOIN deleted as D
-				 ON D.FixId = I.FixId
-		 INNER JOIN dbo.CollarDeployments as C
-				 ON C.CollarManufacturer = I.CollarManufacturer
-				AND C.CollarId = I.CollarId
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = C.ProjectId
-		    	AND A.AnimalId = C.AnimalId
-			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
-			    AND C.DeploymentDate <= I.FixDate
-			    AND (C.RetrievalDate IS NULL OR I.FixDate <= C.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
-
-	END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- Create the stored procedure to generate an error using 
 -- RAISERROR. The original error information is used to
 -- construct the msg_str for RAISERROR.
@@ -1810,6 +1544,357 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+/* Converts a datetime to the ordinal date (day of the year)
+ * commonly confused with the Julian date (days sine 1/1/4713BC)
+ */
+CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
+    @Date DATETIME2  
+)   
+	RETURNS INT
+    WITH SCHEMABINDING -- This is a deterministic function.
+
+AS
+BEGIN
+    RETURN 1 + DATEDIFF (day,
+                         CONVERT(DATETIME2,
+                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
+                                 112), -- format 112 (yyyymmdd) is deterministic
+                         @Date)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[UpdateLocationAfterCollarFixesUpdate] 
+ON [dbo].[CollarFixes]
+AFTER UPDATE AS
+IF UPDATE ([HiddenBy])
+	-- HiddenBy is the only field that is allowed to be updated (all other changes must
+	-- be done with a delete/insert.  This is managed with permissions on the table and
+	-- the functionality of permitted stored procedures
+	BEGIN
+		SET NOCOUNT ON;
+
+		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
+		-- deleted/inserted are tables, since multiple records can be changed at once.
+		-- All updated rows are included, even those that didn't update hiddenby
+		
+		-- Basic logic for a changing a SINGLE CollarFix:
+		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
+		--   if HiddenBy goes from NOT NULL to NULL then add new record to Locations table
+		
+		-- Can I change multiple fixes at once?
+		--  Yes.  Since changes to CollarFixes are managed, and only done by routines
+		--        that honor the requirements of the HiddenBy relationship between
+		--        records in the table, I do not need to worry about how these changes
+		--        effect other records in the table.  I only need to manage the changes
+		--        to the locations table.
+		
+		-- if HiddenBy goes from NULL to NOT NULL then
+		-- remove record from Locations table
+		DELETE L FROM Locations as L
+		   INNER JOIN deleted as D
+				   ON L.FixId = D.FixId
+		   INNER JOIN inserted as I
+				   ON L.FixId = I.FixId
+				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
+		
+		-- if HiddenBy goes from NOT NULL to NULL then
+		-- Add new record to Locations table, if FixDate is acceptable 
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT CD.ProjectId, CD.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
+			   FROM inserted as I
+		 INNER JOIN deleted as D
+				 ON D.FixId = I.FixId
+		 INNER JOIN dbo.CollarDeployments as CD
+				 ON CD.CollarManufacturer = I.CollarManufacturer
+				AND CD.CollarId = I.CollarId
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = CD.ProjectId
+		    	AND A.AnimalId = CD.AnimalId
+		 INNER JOIN dbo.Collars AS C
+				 ON C.CollarManufacturer = CD.CollarManufacturer
+				AND C.CollarId = CD.CollarId
+			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
+			    AND CD.DeploymentDate <= I.FixDate
+			    AND (CD.RetrievalDate IS NULL OR I.FixDate <= CD.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
+				AND (C.DisposalDate IS NULL OR I.FixDate <= C.DisposalDate)
+
+	END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
+ON [dbo].[CollarFixes] 
+INSTEAD OF INSERT AS
+BEGIN
+	SET NOCOUNT ON;
+	-- inserted is a virtual table of inserted fixes.
+	-- Multiple fixes can be inserted at once. inserted is not updateable.
+	
+	--Logic for adding a SINGLE CollarFix
+	--  1) If the new fix has the same collar id/fixdate as an existing unhidden fix
+	--     then hide the existing fix, else nothing.  hiding the fix will trigger
+	--     a removal of the cooresponding location.
+	--  2) Add a location for the new fix.
+	--
+	-- Can I add multiple fixes in one operation?
+	--   For step 2, yes, as there is no changes to the fixes table.
+	--   For Step 1, NO!
+	--   Consider adding three fixes, 1,2,3 which have the same fixdate.
+	--   two must be hidden, and one must be unhidden.  This is ambiguous
+	--   when the fixes are inserted 'simultaneously'.  In order to maintain
+	--   the chaining of fixes hiding one another, they must be processed
+	--   sequentially.
+
+	-- Another problem:
+	--   We may need to modify some of the fixes in the inserted set.
+	--   We cannot modify the virtual 'inserted' table.  Therefore some of
+	--   our state will be in the CollarFixes table, and some in the inserted
+	--   table.  This is very difficult to manage.
+	
+	-- Solution:
+	--  Use a cursor to insert fixes one by one
+	--  Use a 'instead of insert' trigger to cure the problem with
+	--  modifying the virtual inserted table
+	
+	
+	DECLARE
+		@HiddenFixId		bigint,
+		@FixId				bigint,
+		@HiddenBy			bigint,
+		@FileId				INT,
+		@LineNumber			INT,
+		@CollarManufacturer VARCHAR(16),
+		@CollarId			VARCHAR(16),
+		@FixDate			DATETIME2(7),
+		@Lat				FLOAT,
+		@Lon				FLOAT;
+	  
+	DECLARE insf_cursor CURSOR FOR 
+		SELECT HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon
+		  FROM inserted
+	-- I cannot select FixId (Identity column) from inserted, because it is set to zero in the cursor
+
+	OPEN insf_cursor;
+
+	FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
+	
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		-- Step 1) Get the id of the fix we will hide (if it is null, then we are not hiding anything)
+		SET @HiddenFixId = NULL  -- The assignment below does not occur if no record is found
+		SELECT @HiddenFixId = FixId FROM CollarFixes
+		 WHERE CollarFixes.CollarManufacturer = @CollarManufacturer
+		   AND CollarFixes.CollarId = @CollarID
+		   AND CollarFixes.FixDate = @FixDate
+		   AND CollarFixes.HiddenBy IS NULL
+		
+		-- Step 2) Add new fix to table (do the insert that fired this trigger)
+		INSERT CollarFixes (HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+		VALUES (@HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon)
+		SET @FixId = SCOPE_IDENTITY();
+
+		-- PRINT N'  FixDate:' + cast(@FixDate as nvarchar(30)) + N';  HiddenFixId:' + isnull(cast(@HiddenFixId as nvarchar(30)), N'null') + N';  NewFixId:' + isnull(cast(@FixId as nvarchar(30)), N'null')
+
+		-- IF @HiddenFixId IS NOT NULL We are temporarily unstable becasue we have two active & conflicting fixes
+		
+		-- Step3) Hide the hidden fix (the update trigger will remove the associated location)
+		IF @HiddenFixId IS NOT NULL
+		BEGIN
+			UPDATE CollarFixes SET HiddenBy = @FixId WHERE FixId = @HiddenFixId;
+		END
+		
+		
+		-- Step 4) Add new record to Locations table
+		-- This should not create a Location if there is no matching deployment
+		-- The new fix is never hidden.
+		-- there must be zero or one deployment/animal for this fixdate
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT D.ProjectId, D.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
+			   FROM CollarDeployments as D 
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = D.ProjectId
+		    	AND A.AnimalId = D.AnimalId
+		 INNER JOIN dbo.Collars AS C
+				 ON C.CollarManufacturer = D.CollarManufacturer
+				AND C.CollarId = D.CollarId
+			  WHERE D.CollarManufacturer = @CollarManufacturer AND D.CollarId = @CollarId
+				AND D.DeploymentDate <= @FixDate
+				AND (D.RetrievalDate IS NULL OR @FixDate <= D.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR @FixDate <= A.MortalityDate)
+				AND (C.DisposalDate IS NULL OR @FixDate <= C.DisposalDate)
+
+		FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
+	END
+	CLOSE insf_cursor;
+	DEALLOCATE insf_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[CollarsNotCurrentlyDeployed]
+AS
+SELECT     dbo.Collars.CollarId, dbo.Collars.CollarModel, dbo.Collars.Frequency, dbo.Collars.DownloadInfo, dbo.LookupCollarManufacturers.CollarManufacturer, 
+                      dbo.LookupCollarManufacturers.Name, dbo.LookupCollarManufacturers.Website, dbo.LookupCollarManufacturers.Description, dbo.Collars.Notes, 
+                      dbo.Collars.SerialNumber, dbo.Collars.AlternativeId, dbo.Collars.Owner, dbo.Collars.Manager
+FROM         dbo.Collars INNER JOIN
+                      dbo.CollarDeployments ON dbo.Collars.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
+                      dbo.Collars.CollarId = dbo.CollarDeployments.CollarId INNER JOIN
+                      dbo.LookupCollarManufacturers ON dbo.Collars.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer LEFT OUTER JOIN
+                      dbo.CurrentDeployments ON dbo.CollarDeployments.ProjectId = dbo.CurrentDeployments.ProjectId AND 
+                      dbo.CollarDeployments.AnimalId = dbo.CurrentDeployments.AnimalId AND 
+                      dbo.CollarDeployments.CollarManufacturer = dbo.CurrentDeployments.CollarManufacturer AND 
+                      dbo.CollarDeployments.CollarId = dbo.CurrentDeployments.CollarId
+WHERE     (dbo.CurrentDeployments.ProjectId IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[CollarsNeverDeployed]
+AS
+SELECT     dbo.Collars.CollarModel, dbo.Collars.Frequency, dbo.Collars.DownloadInfo, dbo.LookupCollarManufacturers.Name, dbo.LookupCollarManufacturers.Website, 
+                      dbo.LookupCollarManufacturers.Description, dbo.Collars.Manager, dbo.Collars.Owner, dbo.Collars.AlternativeId, dbo.Collars.SerialNumber, dbo.Collars.Notes, 
+                      dbo.CollarDeployments.ProjectId, dbo.CollarDeployments.AnimalId, dbo.CollarDeployments.DeploymentDate, dbo.CollarDeployments.RetrievalDate, 
+                      dbo.Collars.CollarManufacturer, dbo.Collars.CollarId
+FROM         dbo.Collars INNER JOIN
+                      dbo.LookupCollarManufacturers ON dbo.Collars.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer LEFT OUTER JOIN
+                      dbo.CollarDeployments ON dbo.Collars.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
+                      dbo.Collars.CollarId = dbo.CollarDeployments.CollarId
+WHERE     (dbo.CollarDeployments.CollarId IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[CollarsCurrentlyDeployed]
+AS
+SELECT     dbo.CollarDeployments.ProjectId, dbo.CollarDeployments.AnimalId, dbo.CollarDeployments.CollarManufacturer AS Expr1, dbo.CollarDeployments.CollarId AS Expr2, 
+                      dbo.CollarDeployments.DeploymentDate, dbo.CollarDeployments.RetrievalDate, dbo.LookupCollarManufacturers.Name, dbo.LookupCollarManufacturers.Website, 
+                      dbo.LookupCollarManufacturers.Description, dbo.Collars.CollarModel, dbo.Collars.Frequency, dbo.Collars.DownloadInfo, dbo.Collars.Manager, dbo.Collars.Owner, 
+                      dbo.Collars.AlternativeId, dbo.Collars.SerialNumber, dbo.Collars.Notes
+FROM         dbo.CollarDeployments INNER JOIN
+                      dbo.Collars ON dbo.CollarDeployments.CollarManufacturer = dbo.Collars.CollarManufacturer AND dbo.CollarDeployments.CollarId = dbo.Collars.CollarId INNER JOIN
+                      dbo.LookupCollarManufacturers ON dbo.Collars.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer
+WHERE     (dbo.CollarDeployments.DeploymentDate < GETDATE()) AND (dbo.CollarDeployments.RetrievalDate > GETDATE() OR
+                      dbo.CollarDeployments.RetrievalDate IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 3, 2012
+-- Description:	Add/Remove Locations when Deployment is updated
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarDeploymentUpdate] 
+   ON  [dbo].[CollarDeployments] 
+   AFTER UPDATE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	--Retrevial date is the only thing that can change.
+	IF UPDATE ([RetrievalDate])
+	BEGIN
+	
+		-- triggers always execute in the context of a transaction
+		-- so the following code is all or nothing.
+
+
+
+  		-- When new retrevial date < old retrevial date we may lose some Locations
+		-- Delete records from locations fix date is greater than the new retrieval date
+/*
+Example:  Time --->
+
+  *-----D1-----* *------D2--------------->
+      *              *               *
+      L1             L2              L3
+  *-----D1-----* *------D2-----*
+                             
+L1 is part of D1 but not D2,
+L2 and L3 are part of original D2, but not D1
+L3 is not part of either deploymnet after changing retrieval date on D2
+*/
+		DELETE L FROM dbo.Locations as L
+				   -- Join to the deployment that created this location
+		   INNER JOIN deleted as D
+				   ON L.ProjectId = D.ProjectId
+				  AND L.AnimalId = D.AnimalId
+				  AND D.DeploymentDate < L.FixDate
+				  AND (L.FixDate < D.RetrievalDate OR D.RetrievalDate IS NULL)
+		   INNER JOIN inserted as I
+				   ON I.ProjectId = D.ProjectId
+				  AND I.AnimalId = D.AnimalId
+				  AND I.CollarManufacturer = D.CollarManufacturer
+				  AND I.CollarId = D.CollarId
+				  AND I.DeploymentDate = D.DeploymentDate
+				   -- These are the Locations to delete:
+				WHERE I.RetrievalDate < L.FixDate 
+				
+				
+		-- When new retrevial is null, or is greater than the old retrevial date we may gain some Locations
+		-- Add locations for fixes that are now deployed, but were not before
+/*
+Example:  Time --->
+
+  *-----D1-----* *------D2-----*
+      *              *               *
+      F1             F2              F3
+  *-----D1-----* *------D2-----------------*  or --->
+                             
+Add Location for F3, but not F1 or F2
+*/
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
+			   FROM dbo.CollarFixes AS F
+				 -- Join to the fixes that are covered by the new deployment dates
+		 INNER JOIN inserted AS I
+				 ON F.CollarManufacturer = I.CollarManufacturer
+				AND F.CollarId = I.CollarId
+	     INNER JOIN deleted as D
+				 -- To get the old retrieval date, we need to link inserted and deleted deployments by PK
+			     ON I.ProjectId = D.ProjectId
+			    AND I.AnimalId = D.AnimalId
+			    AND I.CollarManufacturer = D.CollarManufacturer
+			    AND I.CollarId = D.CollarId
+				AND I.DeploymentDate = D.DeploymentDate
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = I.ProjectId
+ 	            AND A.AnimalId = I.AnimalId
+         INNER JOIN dbo.Collars AS C
+ 	             ON C.CollarManufacturer = I.CollarManufacturer
+ 	            AND C.CollarId = I.CollarId
+			  WHERE F.HiddenBy IS NULL
+			    AND D.RetrievalDate < F.FixDate -- wasn't included before, note: NULL < F.FixDate is always false (good) 
+				AND I.DeploymentDate <= F.FixDate
+				AND (I.RetrievalDate IS NULL OR F.FixDate <= I.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR F.FixDate <= A.MortalityDate)
+				AND (C.DisposalDate IS NULL OR F.FixDate <= C.DisposalDate)
+
+		/*
+		These stored procedures would be clean, but they would require a cursor,
+		stored procedures cannot be used in a set based solution.
+		EXEC [dbo].[AddLocationForDeployment] @CollarManufacturer, @CollarId, @ProjectId, @AnimalId, @StartDate, @EndDate
+		EXEC [dbo].[DeleteLocationForAnimalAndDateRange] @ProjectId, @AnimalId, @StartDate, @EndDate
+		*/
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: April 3, 2012
@@ -1881,84 +1966,15 @@ BEGIN
 	 INNER JOIN dbo.Animals AS A
 			 ON A.ProjectId = I.ProjectId
 			AND A.AnimalId = I.AnimalId
+     INNER JOIN dbo.Collars AS C
+             ON C.CollarManufacturer = I.CollarManufacturer
+            AND C.CollarId = I.CollarId
 		  WHERE F.HiddenBy IS NULL
-			AND I.DeploymentDate < F.FixDate
-			AND (I.RetrievalDate IS NULL OR F.FixDate < I.RetrievalDate)
-		    AND (A.MortalityDate IS NULL OR F.FixDate < A.MortalityDate) 
+			AND I.DeploymentDate <= F.FixDate
+			AND (I.RetrievalDate IS NULL OR F.FixDate <= I.RetrievalDate)
+		    AND (A.MortalityDate IS NULL OR F.FixDate <= A.MortalityDate) 
+			AND (C.DisposalDate IS NULL OR F.FixDate <= C.DisposalDate)
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-/* Converts a datetime to the ordinal date (day of the year)
- * commonly confused with the Julian date (days sine 1/1/4713BC)
- */
-CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
-    @Date DATETIME2  
-)   
-	RETURNS INT
-    WITH SCHEMABINDING -- This is a deterministic function.
-
-AS
-BEGIN
-    RETURN 1 + DATEDIFF (day,
-                         CONVERT(DATETIME2,
-                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
-                                 112), -- format 112 (yyyymmdd) is deterministic
-                         @Date)
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[CollarsNotCurrentlyDeployed]
-AS
-SELECT     dbo.Collars.CollarId, dbo.Collars.CollarModel, dbo.Collars.Frequency, dbo.Collars.DownloadInfo, dbo.LookupCollarManufacturers.CollarManufacturer, 
-                      dbo.LookupCollarManufacturers.Name, dbo.LookupCollarManufacturers.Website, dbo.LookupCollarManufacturers.Description, dbo.Collars.Notes, 
-                      dbo.Collars.SerialNumber, dbo.Collars.AlternativeId, dbo.Collars.Owner, dbo.Collars.Manager
-FROM         dbo.Collars INNER JOIN
-                      dbo.CollarDeployments ON dbo.Collars.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
-                      dbo.Collars.CollarId = dbo.CollarDeployments.CollarId INNER JOIN
-                      dbo.LookupCollarManufacturers ON dbo.Collars.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer LEFT OUTER JOIN
-                      dbo.CurrentDeployments ON dbo.CollarDeployments.ProjectId = dbo.CurrentDeployments.ProjectId AND 
-                      dbo.CollarDeployments.AnimalId = dbo.CurrentDeployments.AnimalId AND 
-                      dbo.CollarDeployments.CollarManufacturer = dbo.CurrentDeployments.CollarManufacturer AND 
-                      dbo.CollarDeployments.CollarId = dbo.CurrentDeployments.CollarId
-WHERE     (dbo.CurrentDeployments.ProjectId IS NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[CollarsNeverDeployed]
-AS
-SELECT     dbo.Collars.CollarModel, dbo.Collars.Frequency, dbo.Collars.DownloadInfo, dbo.LookupCollarManufacturers.Name, dbo.LookupCollarManufacturers.Website, 
-                      dbo.LookupCollarManufacturers.Description, dbo.Collars.Manager, dbo.Collars.Owner, dbo.Collars.AlternativeId, dbo.Collars.SerialNumber, dbo.Collars.Notes, 
-                      dbo.CollarDeployments.ProjectId, dbo.CollarDeployments.AnimalId, dbo.CollarDeployments.DeploymentDate, dbo.CollarDeployments.RetrievalDate, 
-                      dbo.Collars.CollarManufacturer, dbo.Collars.CollarId
-FROM         dbo.Collars INNER JOIN
-                      dbo.LookupCollarManufacturers ON dbo.Collars.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer LEFT OUTER JOIN
-                      dbo.CollarDeployments ON dbo.Collars.CollarManufacturer = dbo.CollarDeployments.CollarManufacturer AND 
-                      dbo.Collars.CollarId = dbo.CollarDeployments.CollarId
-WHERE     (dbo.CollarDeployments.CollarId IS NULL)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[CollarsCurrentlyDeployed]
-AS
-SELECT     dbo.CollarDeployments.ProjectId, dbo.CollarDeployments.AnimalId, dbo.CollarDeployments.CollarManufacturer AS Expr1, dbo.CollarDeployments.CollarId AS Expr2, 
-                      dbo.CollarDeployments.DeploymentDate, dbo.CollarDeployments.RetrievalDate, dbo.LookupCollarManufacturers.Name, dbo.LookupCollarManufacturers.Website, 
-                      dbo.LookupCollarManufacturers.Description, dbo.Collars.CollarModel, dbo.Collars.Frequency, dbo.Collars.DownloadInfo, dbo.Collars.Manager, dbo.Collars.Owner, 
-                      dbo.Collars.AlternativeId, dbo.Collars.SerialNumber, dbo.Collars.Notes
-FROM         dbo.CollarDeployments INNER JOIN
-                      dbo.Collars ON dbo.CollarDeployments.CollarManufacturer = dbo.Collars.CollarManufacturer AND dbo.CollarDeployments.CollarId = dbo.Collars.CollarId INNER JOIN
-                      dbo.LookupCollarManufacturers ON dbo.Collars.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer
-WHERE     (dbo.CollarDeployments.DeploymentDate < GETDATE()) AND (dbo.CollarDeployments.RetrievalDate > GETDATE() OR
-                      dbo.CollarDeployments.RetrievalDate IS NULL)
 GO
 SET ANSI_NULLS ON
 GO

@@ -17,8 +17,7 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Change FixId to 32bit int, so it can be an OID in ArcMap (we are at 1.4million, with all data loaded)
 //                - At 2^31 positive ints, we can have 1 fix every hour for 20 years for 12,000+ animals or 4,000 animals with existing ratio of 3 fix ids to 1 location
 //TODO - DATABASE - Query for Analyzable collars should be same as C# code (i.e. check for ambiguous collars)
-//TODO - DATABASE - Add business logic to ensure that all Deployments.Collar.DeploymentDate < Collar.DisposalDate
-//TODO - DATABASE - Add logic to limit collar fixes to those before the Collar.DisposalDate
+//TODO - DATABASE - Add triggers to CollarDeployments and Collars insert/update to ensure that DeploymentDate < DisposalDate; i.e. illegal to deploy a collar after it is disposed, or dispose a collar before it is deployed.
 //TODO - DATABASE - Add more unit testing.
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
@@ -55,6 +54,11 @@ using System.Runtime.InteropServices;
 //TODO - Add MS Access readonly interface
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Build a tool to hide locations outside a reasonable (user provided) range
+
+//To NOT do or fix:
+//  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date
+//  (collar may be disposed but never be retreived)
+//  do not limit collar fixes to those before the Collar.DisposalDate; just limit locations
 
 //Deployment Notes:
 //  The connection string for the DataModel.dll (app.config) must be copied in and replace the connection string in the
