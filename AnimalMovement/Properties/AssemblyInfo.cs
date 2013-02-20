@@ -17,7 +17,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Change FixId to 32bit int, so it can be an OID in ArcMap (we are at 1.4million, with all data loaded)
 //                - At 2^31 positive ints, we can have 1 fix every hour for 20 years for 12,000+ animals or 4,000 animals with existing ratio of 3 fix ids to 1 location
 //TODO - DATABASE - Query for Analyzable collars should be same as C# code (i.e. check for ambiguous collars)
-//TODO - DATABASE - Add triggers to CollarDeployments and Collars insert/update to ensure that DeploymentDate < DisposalDate; i.e. illegal to deploy a collar after it is disposed, or dispose a collar before it is deployed.
 //TODO - DATABASE - Add more unit testing.
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function

@@ -1053,13 +1053,13 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: Feb 20, 2013
--- Description:	Add/Remove Locations when Disposal Date is updated
+-- Description: Add/Remove Locations when Disposal Date is updated
 -- =============================================
 CREATE TRIGGER [dbo].[AfterCollarDisposalDateUpdate] 
-   ON  [dbo].[Collars] 
-   AFTER UPDATE
+			ON [dbo].[Collars] 
+			AFTER UPDATE
 AS 
 BEGIN
 	SET NOCOUNT ON;
@@ -1070,7 +1070,7 @@ BEGIN
 	--      rows updated. 
 	IF UPDATE ([DisposalDate])
 	BEGIN
-	
+
 		-- triggers always execute in the context of a transaction
 		-- so the following code is all or nothing.
 
@@ -1078,7 +1078,24 @@ BEGIN
     delete locations where new disposal date < fix date AND (fix date < old disposal date OR old disposal date is null) 
        add locations where old disposal date < fix date AND (fix date < new disposal date OR new disposal date is null)
 */
-    
+
+	-- Check for violations with deployment dates
+	-- i.e. illegal to deploy a collar after it is disposed, or dispose a collar before it is deployed.
+	-- We do not need to check disposal date on collar creation, because a new collar has NO deployments
+	IF EXISTS (SELECT 1
+	             FROM inserted AS I
+	       INNER JOIN CollarDeployments AS CD
+				   ON I.CollarManufacturer = CD.CollarManufacturer AND I.CollarId = CD.CollarId
+				WHERE I.DisposalDate < CD.DeploymentDate
+			  )
+	BEGIN
+		RAISERROR('Disposal date violation.  There is a deployment that begins after the new disposal date.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+
+
+   
 		DELETE L FROM dbo.Locations as L
 				   -- Join to the collar that created this location
 		   INNER JOIN CollarFixes as F
@@ -1087,33 +1104,33 @@ BEGIN
 				   ON F.CollarManufacturer = D.CollarManufacturer
 				  AND F.CollarId = D.CollarId
 		   INNER JOIN inserted as I
-				 -- To get the new disposal date, we need to link inserted and deleted collars by PK
+				   -- To get the new disposal date, we need to link inserted and deleted collars by PK
 				   ON I.CollarManufacturer = D.CollarManufacturer
 				  AND I.CollarId = D.CollarId
 				   -- These are the Locations to delete:
 				WHERE I.DisposalDate < L.FixDate AND (L.FixDate < D.DisposalDate OR D.DisposalDate IS NULL) 
 				
 
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT CD.ProjectId, CD.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
-			   FROM dbo.CollarFixes AS F
-			     -- Join to CollarDeployments to get to the animal
-		 INNER JOIN CollarDeployments AS CD
-				 ON F.CollarManufacturer = CD.CollarManufacturer
-				AND F.CollarId = CD.CollarId
-				AND CD.DeploymentDate < F.FixDate
-				AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
-				 -- Join these deployments to the collar being updated
-		 INNER JOIN inserted AS I
-				 ON CD.CollarManufacturer = I.CollarManufacturer
-				AND CD.CollarId = I.CollarId
-	     INNER JOIN deleted as D
-				 -- To get the new disposal date, we need to link inserted and deleted collars by PK
+		  INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			   SELECT CD.ProjectId, CD.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
+				 FROM dbo.CollarFixes AS F
+				   -- Join to CollarDeployments to get to the animal
+		   INNER JOIN CollarDeployments AS CD
+				   ON F.CollarManufacturer = CD.CollarManufacturer
+				  AND F.CollarId = CD.CollarId
+				  AND CD.DeploymentDate < F.FixDate
+				  AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
+				   -- Join these deployments to the collar being updated
+		   INNER JOIN inserted AS I
+				   ON CD.CollarManufacturer = I.CollarManufacturer
+				  AND CD.CollarId = I.CollarId
+		   INNER JOIN deleted as D
+				   -- To get the new disposal date, we need to link inserted and deleted collars by PK
 				   ON I.CollarManufacturer = D.CollarManufacturer
 				  AND I.CollarId = D.CollarId
-				 -- These are the Fixes to add:
-			  WHERE F.HiddenBy IS NULL
-				AND D.DisposalDate < F.FixDate AND (F.FixDate < I.DisposalDate OR I.DisposalDate IS NULL) 
+				   -- These are the Fixes to add:
+				WHERE F.HiddenBy IS NULL
+				  AND D.DisposalDate < F.FixDate AND (F.FixDate < I.DisposalDate OR I.DisposalDate IS NULL) 
 	END
 END
 GO
@@ -1140,6 +1157,18 @@ BEGIN
 		-- triggers always execute in the context of a transaction
 		-- so the following code is all or nothing.
 
+		-- Verify new deployment start occurs before collar disposal
+		IF EXISTS (SELECT 1
+					 FROM inserted AS I
+			   INNER JOIN Collars AS C
+					   ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
+					WHERE C.DisposalDate < I.DeploymentDate
+				  )
+		BEGIN
+			RAISERROR('Deployment start date violation.  The collar was disposed before the deployment begins.', 18, 0)
+			ROLLBACK TRANSACTION;
+			RETURN
+		END
 
 
   		-- When new retrevial date < old retrevial date we may lose some Locations
@@ -2245,6 +2274,19 @@ BEGIN
 			  )
 	BEGIN
 		RAISERROR('The retrevial must occur after the deployment.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+
+	-- Verify deployment start occurs before collar disposal
+	IF EXISTS (SELECT 1
+	             FROM inserted AS I
+	       INNER JOIN Collars AS C
+				   ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
+				WHERE C.DisposalDate < I.DeploymentDate
+			  )
+	BEGIN
+		RAISERROR('Deployment start date violation.  The collar was disposed before the deployment begins.', 18, 0)
 		ROLLBACK TRANSACTION;
 		RETURN
 	END
