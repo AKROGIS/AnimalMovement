@@ -3,6 +3,12 @@
 -- unless you want to run all queries as a test.
 
 
+
+
+-- Argos Download tools and checks
+-- ==================================================
+
+
 --Argos Platforms/Collars not being downloaded (for various reasons)
    SELECT P2.Investigator, P.PlatformId, C.*
      FROM ArgosPlatforms AS P
@@ -16,7 +22,60 @@ LEFT JOIN DownloadableAndAnalyzableCollars AS D
       AND C.DisposalDate IS NULL
       AND P.[Status] <> 'I'
  ORDER BY P2.Investigator, P.PlatformId
+
  
+-- Collars where Argos downloads have yielded no data
+   SELECT C.Manager, C.CollarModel, C.AlternativeId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
+     FROM Collars AS C
+LEFT JOIN CollarDeployments AS D
+	   ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+	WHERE C.CollarId IN (
+				SELECT CollarId
+				  FROM ArgosDownloads
+			  GROUP BY CollarId
+			    HAVING Max(FileID) IS NULL
+		  )
+	  AND C.DisposalDate IS NULL
+	  AND D.RetrievalDate IS NULL
+ ORDER BY C.Manager, C.CollarModel, C.AlternativeId
+  
+
+-- Collars which are downloadable, but which I cannot analyze
+   SELECT A.*, C.CollarModel, C.Gen3Period
+     FROM DownloadableCollars AS A
+LEFT JOIN DownloadableAndAnalyzableCollars AS B
+       ON A.CollarId = B.CollarId
+LEFT JOIN Collars AS C
+       ON A.CollarId = C.CollarId
+    WHERE B.CollarId IS NULL
+
+
+-- All the Email and AWS files that have not been processed 
+   SELECT F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
+     FROM CollarFiles AS F1
+LEFT JOIN CollarFiles AS F2
+       ON F1.FileId = F2.ParentFileId
+    WHERE F2.FileId IS NULL
+      AND F1.Format IN ('F','E')
+
+
+-- Count/Delete fixes that are based on PTT data
+--  DELETE FROM F1
+    SELECT C.CollarModel, COUNT(*) AS [PTT Location Count]
+      FROM CollarFixes AS F1
+INNER JOIN CollarFiles AS F2
+        ON F1.FileId = F2.FileId
+INNER JOIN Collars as C
+        ON F1.CollarManufacturer = C.CollarManufacturer AND F1.CollarId = C.CollarId
+     WHERE F2.Format = 'E' OR F2.Format = 'F'
+  GROUP BY C.CollarModel
+
+
+
+
+-- Tools helpful for renaming/assigning data files
+-- ==================================================
+
 
 -- ERROR Show Orphaned files (records in CollarFiles where CollarId is unmatched)
    SELECT F.FileId, F.CollarManufacturer, F.CollarId, F.[Status], X.CollarId AS CollarId_From_Fixes
@@ -37,18 +96,6 @@ LEFT JOIN Collars AS C
 LEFT JOIN (SELECT CollarManufacturer, CollarId, FileId FROM CollarFixes GROUP BY CollarManufacturer, CollarId, FileId) AS X
        ON F.FileId = X.FileId
     WHERE F.Format <> 'B' AND (F.CollarManufacturer <> X.CollarManufacturer OR X.CollarId <> F.CollarId)
-
-
-
--- Collars which are downloadable, but which I cannot analyze
-   SELECT A.*, C.CollarModel, C.Gen3Period
-     FROM DownloadableCollars AS A
-LEFT JOIN DownloadableAndAnalyzableCollars AS B
-       ON A.CollarId = B.CollarId
-LEFT JOIN Collars AS C
-       ON A.CollarId = C.CollarId
-    WHERE B.CollarId IS NULL
-
 
 
 -- Change status of all files in a project
@@ -75,6 +122,15 @@ CLOSE change_status_cursor;
 DEALLOCATE change_status_cursor;
 
 
+--Show all the records for a root collarId
+DECLARE @rootID varchar(16) = '643048'
+select * from Collars where left(CollarId,6) = @rootID
+select * From CollarDeployments where left(CollarId,6) = @rootID
+select * from ArgosDownloads where left(CollarId,6) = @rootID
+select * from CollarParameters where left(CollarId,6) = @rootID
+select FileId, CollarId From CollarFixes where left(CollarId,6) = @rootID group by FileId, CollarId order by fileid
+select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where left(CollarId,6) = @rootID  order by fileid
+
 
 -- Rename a collar (simple, cannot be used to split a collar into two)
 DECLARE @old varchar(16) = '634657';
@@ -82,6 +138,11 @@ DECLARE @new varchar(16) = @old + 'A';
 UPDATE Collars SET CollarId = @new WHERE CollarId = @old 
 UPDATE CollarFiles SET CollarId = @new WHERE CollarId = @old 
 
+
+
+
+-- Checks associated with TPF Files
+-- ========================================
 
 
 -- Collars in TPF Files not in Collars Table
@@ -149,6 +210,12 @@ INNER JOIN AllTpfFileData AS T
       AND (C.StartDate IS NULL OR T.[TimeStamp]<> C.StartDate)
 
 
+
+
+-- Collar Displosal/Deployment date checks
+-- =======================================
+
+
 -- Show days between this collars disposal, and the next collars start
 -- Assumes all collars have a Alpha suffix, and that there are no gaps.
 -- if there is an A version, and then a C version with no B version, the results will be incorrect.
@@ -162,6 +229,7 @@ INNER JOIN (SELECT CollarManufacturer, CollarID, LEFT(CollarId,6) + char(ASCII(S
 INNER JOIN CollarParameters AS P
         ON C2.CollarManufacturer = P.CollarManufacturer AND C2.NextCollar = P.CollarId
      WHERE C1.AlternativeId IN (SELECT AlternativeId FROM Collars GROUP BY AlternativeId HAVING COUNT(*) > 1)
+
 
 -- Show days between this collars disposal, and the next collars start
 -- There should be not be two consecutive NULL disposal Dates.
@@ -221,15 +289,18 @@ INNER JOIN CollarParameters AS P
 
 
 
--- All the Email and AWS files that have not been processed 
-   SELECT F1.FileId, F1.Format, F1.FileName
-     FROM CollarFiles AS F1
-LEFT JOIN CollarFiles AS F2
-       ON F1.FileId = F2.ParentFileId
-    WHERE F2.FileId IS NULL
-      AND F1.Format IN ('F','E')
+
+-- Project/PI summary statistics
+-- ===============================================
 
 
+-- Number of locations in database and by project
+SELECT MAX(FixId) AS [Max Fix Id], COUNT(*) AS [Fix Count] FROM CollarFixes
+SELECT COUNT(*) AS [Unique Fix Count] FROM CollarFixes WHERE HiddenBy IS NULL
+SELECT COUNT(*) AS [Total Locations] FROM Locations
+SELECT ProjectId, COUNT(*) AS [Location Count] FROM Locations WHERE [Status] IS NULL GROUP BY ProjectId
+
+ 
 -- All conflicting fixes for all of a PI's collars
     DECLARE @PI varchar(255) = 'NPS\BAMangipane';
      SELECT C.CollarManufacturer, C.CollarId, F.*
@@ -263,7 +334,6 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
       WHERE C.ProjectId = @ProjectId
 
 
-
 -- All of a PI's collars that do not have fixes
     DECLARE @PI varchar(255) = 'NPS\BAMangipane';
      SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
@@ -275,7 +345,6 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
    ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
 
 
-
 -- All of a PI's collars that do not have files
     DECLARE @PI varchar(255) = 'NPS\JWBurch';
      SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
@@ -285,7 +354,6 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
       WHERE C.Manager = @PI
         AND F.CollarId IS NULL
    ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
-
 
 
 -- All of a Project's animals that do not have fixes
@@ -305,32 +373,9 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 
 
 
--- Collars where Argos downloads have yielded no data
-   SELECT C.Manager, C.CollarModel, C.AlternativeId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
-     FROM Collars AS C
-LEFT JOIN CollarDeployments AS D
-	   ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-	WHERE C.CollarId IN (
-				SELECT CollarId
-				  FROM ArgosDownloads
-			  GROUP BY CollarId
-			    HAVING Max(FileID) IS NULL
-		  )
-	  AND C.DisposalDate IS NULL
-	  AND D.RetrievalDate IS NULL
- ORDER BY C.Manager, C.CollarModel, C.AlternativeId
-  
 
-
---Show all the records for a root collarId
-DECLARE @rootID varchar(16) = '643048'
-select * from Collars where left(CollarId,6) = @rootID
-select * From CollarDeployments where left(CollarId,6) = @rootID
-select * from ArgosDownloads where left(CollarId,6) = @rootID
-select * from CollarParameters where left(CollarId,6) = @rootID
-select FileId, CollarId From CollarFixes where left(CollarId,6) = @rootID group by FileId, CollarId order by fileid
-select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where left(CollarId,6) = @rootID  order by fileid
-
+-- Project location data cleanup and sanity checking
+-- =========================================================
 
 
 -- Preview/Hide the fixes outside a nominal range for a project
@@ -357,7 +402,6 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
 */
 
 
-
 --Find bad locations based on improbable velocity vectors
 --  The speed, distance are animal dependent.  The duration is dependent on the collar settings
 --  speed is meters/hour, and distance is meters
@@ -366,14 +410,11 @@ select * from Movements where ProjectId = 'LACL_Wolf' and (speed > 12000 or dura
 
 
 
--- Number of locations in database and by project
-SELECT COUNT(*) FROM Locations
-SELECT ProjectId, COUNT(*) FROM Locations WHERE [Status] IS NULL GROUP BY ProjectId
-
 
 
 -- DEBEVEK FILES
-------------------------------------------------------------------------------------
+-- ===========================================
+
 
 --Summary of Fixes in Debevek Files (those with NULL collarID are currently ignored)
     SELECT F.[FileName], E.CollarId, E.AnimalId, 
