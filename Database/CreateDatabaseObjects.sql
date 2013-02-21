@@ -163,44 +163,65 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[CollarFixes](
-	[FixId] [bigint] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[HiddenBy] [bigint] NULL,
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
-	[Lat] [float] NOT NULL,
-	[Lon] [float] NOT NULL,
- CONSTRAINT [PK_CollarFixes] PRIMARY KEY CLUSTERED 
+CREATE TABLE [dbo].[LookupCollarModels](
+	[CollarModel] [varchar](24) NOT NULL,
+ CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
 (
-	[FixId] ASC
+	[CollarModel] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
 GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_Collar] ON [dbo].[CollarFixes] 
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Collars](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[CollarModel] [varchar](24) NOT NULL,
+	[Manager] [sysname] NOT NULL,
+	[Owner] [nvarchar](100) NULL,
+	[AlternativeId] [varchar](16) NULL,
+	[SerialNumber] [varchar](100) NULL,
+	[Frequency] [float] NULL,
+	[DownloadInfo] [varchar](200) NULL,
+	[Notes] [nvarchar](max) NULL,
+	[DisposalDate] [datetime2](7) NULL,
+	[Gen3Period] [int] NULL,
+ CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
 (
 	[CollarManufacturer] ASC,
 	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
 GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_FileId] ON [dbo].[CollarFixes] 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+SET ANSI_PADDING OFF
 GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_FixDate] ON [dbo].[CollarFixes] 
-(
-	[FixDate] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+SET ANSI_NULLS ON
 GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_HiddenBy] ON [dbo].[CollarFixes] 
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosDownloads](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[TimeStamp] [datetime2](7) NOT NULL,
+	[FileId] [int] NULL,
+	[ErrorMessage] [varchar](255) NULL,
+ CONSTRAINT [PK_ArgosDownloads] PRIMARY KEY CLUSTERED 
 (
-	[HiddenBy] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+	[CollarManufacturer] ASC,
+	[CollarId] ASC,
+	[TimeStamp] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -208,89 +229,36 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Deletes the fixes for a CollarFile
---              Useful when changing status.
+-- Create date: January 25, 2013
+-- Description:	Logs a new Argos collar download success/failure
 -- =============================================
-CREATE PROCEDURE [dbo].[CollarFixes_Delete] 
-	@FileId int = NULL
+CREATE PROCEDURE [dbo].[ArgosDownloads_Insert] 
+	@CollarManufacturer NVARCHAR(255) = NULL, 
+	@CollarId NVARCHAR(255) = NULL,
+	@FileId INT = NULL,
+	@ErrorMessage NVARCHAR(255) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
 
-	-- This is not executed directly, only by CollarFile_Delete & CollarFile_UpdateStatus 
-
-	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[DoDateRangesOverlap] 
-(
-	@StartDate1		DATETIME2 = NULL, 
-	@EndDate1		DATETIME2 = NULL,
-	@StartDate2		DATETIME2 = NULL, 
-	@EndDate2		DATETIME2 = NULL
-)
-RETURNS BIT
-AS
-BEGIN
-	-- A StartDate of NULL means the begining of time
-	-- A EndDate of NULL means the ending of time
+	-- Validate permission for this operation
+	-- The caller is managed by permissions on the Stored Procedure
 	
-	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
+	-- Collar Mfgr/Id is managed by referential integrity
+	-- skip the check and friendly error message, since this is only called by advanced users
 	
-	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
+	-- Need to have either a FileId (success) or an ErrorMessage (failure)
+	IF @FileId IS NULL AND @ErrorMessage IS NULL
 	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId and ErrorMessage cannot both be NULL';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
 	END
-	
-	IF @StartDate1 IS NOT NULL and @EndDate1 IS NOT NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 < @StartDate1 OR @EndDate1 < @StartDate2  RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-	END	
 
-	IF @StartDate1 IS NOT NULL and @EndDate1 IS NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			RETURN 1
-		END	
-	END
-	-- We should never get here
-	RETURN 1
+		
+	INSERT INTO dbo.ArgosDownloads ([CollarManufacturer], [CollarId], [FileId], [ErrorMessage])
+		 VALUES (@CollarManufacturer, @CollarId, @FileId, @ErrorMessage)
+
 END
 GO
 SET ANSI_NULLS ON
@@ -393,6 +361,76 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE FUNCTION [dbo].[DoDateRangesOverlap] 
+(
+	@StartDate1		DATETIME2 = NULL, 
+	@EndDate1		DATETIME2 = NULL,
+	@StartDate2		DATETIME2 = NULL, 
+	@EndDate2		DATETIME2 = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	-- A StartDate of NULL means the begining of time
+	-- A EndDate of NULL means the ending of time
+	
+	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
+	
+	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+	END
+	
+	IF @StartDate1 IS NOT NULL and @EndDate1 IS NOT NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 < @StartDate1 OR @EndDate1 < @StartDate2  RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+	END	
+
+	IF @StartDate1 IS NOT NULL and @EndDate1 IS NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			RETURN 1
+		END	
+	END
+	-- We should never get here
+	RETURN 1
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupGender](
@@ -482,12 +520,67 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[CurrentDeployments]
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarFixes](
+	[FixId] [bigint] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[HiddenBy] [bigint] NULL,
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[FixDate] [datetime2](7) NOT NULL,
+	[Lat] [float] NOT NULL,
+	[Lon] [float] NOT NULL,
+ CONSTRAINT [PK_CollarFixes] PRIMARY KEY CLUSTERED 
+(
+	[FixId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_Collar] ON [dbo].[CollarFixes] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_FileId] ON [dbo].[CollarFixes] 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_FixDate] ON [dbo].[CollarFixes] 
+(
+	[FixDate] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_HiddenBy] ON [dbo].[CollarFixes] 
+(
+	[HiddenBy] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Deletes the fixes for a CollarFile
+--              Useful when changing status.
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFixes_Delete] 
+	@FileId int = NULL
 AS
-SELECT     dbo.CollarDeployments.*
-FROM         dbo.CollarDeployments
-WHERE     (DeploymentDate < GETDATE()) AND (RetrievalDate > GETDATE() OR
-                      RetrievalDate IS NULL)
+BEGIN
+	SET NOCOUNT ON;
+
+	-- This is not executed directly, only by CollarFile_Delete & CollarFile_UpdateStatus 
+
+	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -499,110 +592,6 @@ SELECT DISTINCT CollarManufacturer, CollarId
 FROM         dbo.CollarFixes
 GROUP BY CollarManufacturer, CollarId, FixDate
 HAVING      (COUNT(FixDate) > 1)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarModels](
-	[CollarModel] [varchar](24) NOT NULL,
- CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
-(
-	[CollarModel] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Collars](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[CollarModel] [varchar](24) NOT NULL,
-	[Manager] [sysname] NOT NULL,
-	[Owner] [nvarchar](100) NULL,
-	[AlternativeId] [varchar](16) NULL,
-	[SerialNumber] [varchar](100) NULL,
-	[Frequency] [float] NULL,
-	[DownloadInfo] [varchar](200) NULL,
-	[Notes] [nvarchar](max) NULL,
-	[DisposalDate] [datetime2](7) NULL,
-	[Gen3Period] [int] NULL,
- CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosDownloads](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[TimeStamp] [datetime2](7) NOT NULL,
-	[FileId] [int] NULL,
-	[ErrorMessage] [varchar](255) NULL,
- CONSTRAINT [PK_ArgosDownloads] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC,
-	[TimeStamp] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: January 25, 2013
--- Description:	Logs a new Argos collar download success/failure
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosDownloads_Insert] 
-	@CollarManufacturer NVARCHAR(255) = NULL, 
-	@CollarId NVARCHAR(255) = NULL,
-	@FileId INT = NULL,
-	@ErrorMessage NVARCHAR(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Validate permission for this operation
-	-- The caller is managed by permissions on the Stored Procedure
-	
-	-- Collar Mfgr/Id is managed by referential integrity
-	-- skip the check and friendly error message, since this is only called by advanced users
-	
-	-- Need to have either a FileId (success) or an ErrorMessage (failure)
-	IF @FileId IS NULL AND @ErrorMessage IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId and ErrorMessage cannot both be NULL';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-		
-	INSERT INTO dbo.ArgosDownloads ([CollarManufacturer], [CollarId], [FileId], [ErrorMessage])
-		 VALUES (@CollarManufacturer, @CollarId, @FileId, @ErrorMessage)
-
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -785,6 +774,17 @@ SELECT CD1.*, CD2.DeploymentDate AS DeploymentDate2, CD2.RetrievalDate AS Retrie
        AND CD1.CollarId = CD2.CollarId
  WHERE CD1.DeploymentDate < CD2.DeploymentDate
    AND CD1.RetrievalDate >= CD2.DeploymentDate
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[CurrentDeployments]
+AS
+SELECT     dbo.CollarDeployments.*
+FROM         dbo.CollarDeployments
+WHERE     (DeploymentDate < GETDATE()) AND (RetrievalDate > GETDATE() OR
+                      RetrievalDate IS NULL)
 GO
 SET ANSI_NULLS ON
 GO
@@ -3417,11 +3417,8 @@ GO
 -- Create date: April 2, 2012
 -- Description:	Adds a new Collar Deployment.
 -- =============================================
-CREATE PROCEDURE [dbo].[CollarDeployment_UpdateRetrievalDate] 
-	@ProjectId			NVARCHAR(255) = NULL,
-	@AnimalId			NVARCHAR(255) = NULL, 
-	@CollarManufacturer NVARCHAR(255) = NULL,
-	@CollarId			NVARCHAR(255) = NULL, 
+CREATE PROCEDURE [dbo].[CollarDeployment_UpdateDates] 
+	@DeploymentId		INT = NULL,
 	@DeploymentDate		DATETIME2 = NULL, 
 	@RetrievalDate		DATETIME2 = NULL
 AS
@@ -3433,6 +3430,16 @@ BEGIN
 
 	-- Validate permission for this operation
 	-- The caller must be the PI or editor on the project
+	DECLARE @ProjectId NVARCHAR(255);
+	SELECT @ProjectId = ProjectId FROM dbo.CollarDeployments WHERE DeploymentId = @DeploymentId
+	
+	-- Verify that the deployment exists (this is done now to avoid a confusing silent No-op)
+	IF @ProjectId IS NULL
+	BEGIN
+		RAISERROR('The deployment you want to change was not found.', 18, 0)
+		RETURN (1)
+	END
+
 	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
@@ -3442,24 +3449,12 @@ BEGIN
 			RETURN (1)
 		END
 	END
-
-	-- Verify that the deployment exists (this is done now to avoid a confusing silent No-op)
-	IF NOT EXISTS (SELECT 1 FROM dbo.CollarDeployments
-				   WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-				     AND ProjectId = @ProjectId AND AnimalId = @AnimalId
-				     AND DeploymentDate = @DeploymentDate
-			      )
-	BEGIN
-		RAISERROR('The deployment you want to change was not found.', 18, 0)
-		RETURN (1)
-	END
-
 	
 	-- All other verification is handled by triggers, primary/foreign key and column constraints.
-	UPDATE dbo.CollarDeployments SET RetrievalDate = @RetrievalDate
-			   WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-			     AND ProjectId = @ProjectId AND AnimalId = @AnimalId
-			     AND DeploymentDate = @DeploymentDate;
+	UPDATE dbo.CollarDeployments
+	   SET RetrievalDate = @RetrievalDate,
+	       DeploymentDate = @DeploymentDate
+	 WHERE DeploymentId = @DeploymentId;
 END
 GO
 SET ANSI_NULLS ON
@@ -3528,11 +3523,7 @@ GO
 -- Description:	Delete a Collar Deployment.
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarDeployment_Delete] 
-	@ProjectId			NVARCHAR(255) = NULL,
-	@AnimalId			NVARCHAR(255) = NULL, 
-	@CollarManufacturer NVARCHAR(255) = NULL,
-	@CollarId			NVARCHAR(255) = NULL, 
-	@DeploymentDate		DATETIME2 = NULL 
+	@DeploymentId	INT = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -3542,11 +3533,21 @@ BEGIN
 
 	-- Validate permission for this operation
 	-- The caller must be the PI or editor on the project
+	DECLARE @ProjectId NVARCHAR(255);
+	SELECT @ProjectId = ProjectId FROM dbo.CollarDeployments WHERE DeploymentId = @DeploymentId
+	
+	-- Verify that the deployment exists (this is done now to avoid a confusing silent No-op)
+	IF @ProjectId IS NULL
+	BEGIN
+		RAISERROR('The deployment you want to delete was not found.', 18, 0)
+		RETURN (1)
+	END
+
 	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
 		BEGIN
-			DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete this collar.';
+			DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete the deployment.';
 			RAISERROR(@message1, 18, 0)
 			RETURN (1)
 		END
@@ -3556,11 +3557,7 @@ BEGIN
 	-- deleting a non-existing deployment will silently succeed.
 	--All other verification is handled by primary/foreign key and column constraints.
 	DELETE FROM dbo.CollarDeployments
-		  WHERE [ProjectId] = @ProjectId
-		    AND [AnimalId] = @AnimalId
-		    AND [CollarManufacturer] = @CollarManufacturer
-		    AND [CollarId] = @CollarId
-		    AND [DeploymentDate] = @DeploymentDate
+		  WHERE DeploymentId = @DeploymentId;
 END
 GO
 SET ANSI_NULLS ON
@@ -4631,6 +4628,106 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
+CREATE TABLE [dbo].[ArgosPlatforms](
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NOT NULL,
+	[Status] [char](1) NOT NULL,
+	[Remarks] [nvarchar](255) NULL,
+ CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[WARNING_TelonicArgosCollarsWithNoPlatform]
+AS
+
+-- Telonics Gen3/4 Argos GPS Collars with no matching record in ArgosPlatforms
+    SELECT C.Manager, C.Owner, C.CollarModel, C.CollarId as CTN, C.AlternativeId as ArgosID, C.Frequency, C.DisposalDate
+      FROM Collars AS C
+ LEFT JOIN ArgosPlatforms AS P
+        ON P.PlatformId = C.AlternativeId
+     WHERE C.AlternativeId IS NOT NULL
+       AND P.PlatformId IS NULL
+       AND C.CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[WARNING_ArgosPlatformsNotTelonicsGen3or4]
+AS
+
+-- Known Argos Platforms that are not a Telonics Gen3/4 GPS Collars 
+    SELECT P.*, C.*
+      FROM ArgosPlatforms AS P
+ LEFT JOIN Collars AS C
+        ON P.PlatformId = C.AlternativeId
+     WHERE C.CollarManufacturer IS NOT NULL
+       AND C.CollarModel NOT IN ('TelonicsGen3', 'TelonicsGen4')
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[WARNING_ArgosPlatformsNotInCollars]
+AS
+
+-- Known Argos Platforms that are not in the Collars table 
+    SELECT A.Investigator, P.ProgramId, P.PlatformId, P.[Status], P.Remarks
+      FROM ArgosPlatforms AS P
+INNER JOIN ArgosPrograms AS A
+        ON P.ProgramId = A.ProgramId
+ LEFT JOIN Collars AS C
+        ON P.PlatformId = C.AlternativeId
+     WHERE C.CollarManufacturer IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[DownloadableCollars]
+AS
+
+SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
+      ,I.Email, P.[UserName], P.[Password], A.PlatformId
+      ,datediff(day,D.[TimeStamp],getdate()) AS [Days]
+  FROM
+	           ArgosPlatforms AS A
+	INNER JOIN ArgosPrograms AS P
+	        ON A.ProgramId = P.ProgramId
+	INNER JOIN ProjectInvestigators AS I
+	        ON I.Login = P.Investigator
+	INNER JOIN Collars AS C
+	        ON C.AlternativeId = A.PlatformId
+    INNER JOIN CollarDeployments as CD
+            ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
+     LEFT JOIN (
+               SELECT CollarManufacturer, CollarId, Max([Timestamp]) AS [Timestamp]
+                 FROM ArgosDownloads
+                WHERE ErrorMessage IS NULL
+                GROUP BY CollarManufacturer, CollarId
+               ) AS D
+            ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+
+ WHERE A.[Status] = 'A'
+   AND P.[Status] = 'A'
+   AND (P.EndDate IS NULL OR getdate() < P.EndDate)
+   AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
+   AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[CollarParameterFiles](
 	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[Owner] [sysname] NOT NULL,
@@ -4743,6 +4840,90 @@ AS
                ON CP.FileId = CPF.FileId           
             WHERE CPF.Format = 'A' AND CPF.[Status] = 'A')
             )
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[WARNING_ActiveArgosPlatformsWithAnalysisProblems]
+AS
+
+-- Active Argos platforms with active PPF or without Gen3period or TPF file
+SELECT C.Manager, CD.ProjectId, CD.AnimalId, C.CollarModel, C.CollarId AS CTN
+      ,A.PlatformId AS ArgosId
+      ,C.Gen3Period, CPF.[FileName] AS ParameterFile
+  FROM
+	           ArgosPlatforms AS A
+	INNER JOIN ArgosPrograms AS P
+	        ON A.ProgramId = P.ProgramId
+	INNER JOIN Collars AS C
+	        ON C.AlternativeId = A.PlatformId
+    INNER JOIN CollarDeployments as CD
+            ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
+     LEFT JOIN CollarParameters as CP
+            ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
+     LEFT JOIN CollarParameterFiles as CPF
+            ON CP.FileId = CPF.FileId           
+     LEFT JOIN (
+               SELECT CollarManufacturer, CollarId, Max([Timestamp]) AS [Timestamp]
+                 FROM ArgosDownloads
+                WHERE ErrorMessage IS NULL
+                GROUP BY CollarManufacturer, CollarId
+               ) AS D
+            ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+
+ WHERE A.[Status] = 'A'
+   AND P.[Status] = 'A'
+   AND (CPF.[Status] = 'A' OR CPF.[Status] IS NULL)
+   AND (P.EndDate IS NULL OR getdate() < P.EndDate)
+   AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
+   AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
+   AND (  (C.CollarModel = 'TelonicsGen3' AND CPF.Format <> 'B')
+       OR (C.CollarModel = 'TelonicsGen3' AND C.Gen3Period IS NULL)
+       OR (C.CollarModel = 'TelonicsGen4' AND CPF.Format IS NULL)
+       OR (C.CollarModel = 'TelonicsGen4' AND CPF.Format <> 'A')
+       )
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[DownloadableAndAnalyzableCollars]
+AS
+
+SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
+      ,I.Email, P.[UserName], P.[Password], A.PlatformId
+      ,datediff(day,D.[TimeStamp],getdate()) AS [Days]
+      ,C.CollarModel, C.Gen3Period, CPF.Contents AS TpfFile
+  FROM
+	           ArgosPlatforms AS A
+	INNER JOIN ArgosPrograms AS P
+	        ON A.ProgramId = P.ProgramId
+	INNER JOIN ProjectInvestigators AS I
+	        ON I.Login = P.Investigator
+	INNER JOIN Collars AS C
+	        ON C.AlternativeId = A.PlatformId
+    INNER JOIN CollarDeployments as CD
+            ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
+     LEFT JOIN CollarParameters as CP
+            ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
+     LEFT JOIN CollarParameterFiles as CPF
+            ON CP.FileId = CPF.FileId           
+     LEFT JOIN (
+               SELECT CollarManufacturer, CollarId, Max([Timestamp]) AS [Timestamp]
+                 FROM ArgosDownloads
+                WHERE ErrorMessage IS NULL
+                GROUP BY CollarManufacturer, CollarId
+               ) AS D
+            ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+
+ WHERE A.[Status] = 'A'
+   AND P.[Status] = 'A'
+   AND (P.EndDate IS NULL OR getdate() < P.EndDate)
+   AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
+   AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
+   AND (CPF.FileId IS NULL OR CPF.Format <> 'B' or CPF.[Status] <> 'A') -- Ignore collars with an active Gen3 PPF file 
+   AND (C.Gen3Period IS NOT NULL OR (CPF.Format = 'A' AND CPF.[Status] = 'A')) -- Ignore collars without a Gen3 period or and active TPF file
 GO
 SET ANSI_NULLS ON
 GO
@@ -4941,267 +5122,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPlatforms](
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NOT NULL,
-	[Status] [char](1) NOT NULL,
-	[Remarks] [nvarchar](255) NULL,
- CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[WARNING_TelonicArgosCollarsWithNoPlatform]
-AS
-
--- Telonics Gen3/4 Argos GPS Collars with no matching record in ArgosPlatforms
-    SELECT C.Manager, C.Owner, C.CollarModel, C.CollarId as CTN, C.AlternativeId as ArgosID, C.Frequency, C.DisposalDate
-      FROM Collars AS C
- LEFT JOIN ArgosPlatforms AS P
-        ON P.PlatformId = C.AlternativeId
-     WHERE C.AlternativeId IS NOT NULL
-       AND P.PlatformId IS NULL
-       AND C.CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[WARNING_ArgosPlatformsNotTelonicsGen3or4]
-AS
-
--- Known Argos Platforms that are not a Telonics Gen3/4 GPS Collars 
-    SELECT P.*, C.*
-      FROM ArgosPlatforms AS P
- LEFT JOIN Collars AS C
-        ON P.PlatformId = C.AlternativeId
-     WHERE C.CollarManufacturer IS NOT NULL
-       AND C.CollarModel NOT IN ('TelonicsGen3', 'TelonicsGen4')
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[WARNING_ArgosPlatformsNotInCollars]
-AS
-
--- Known Argos Platforms that are not in the Collars table 
-    SELECT A.Investigator, P.ProgramId, P.PlatformId, P.[Status], P.Remarks
-      FROM ArgosPlatforms AS P
-INNER JOIN ArgosPrograms AS A
-        ON P.ProgramId = A.ProgramId
- LEFT JOIN Collars AS C
-        ON P.PlatformId = C.AlternativeId
-     WHERE C.CollarManufacturer IS NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[WARNING_ActiveArgosPlatformsWithAnalysisProblems]
-AS
-
--- Active Argos platforms with active PPF or without Gen3period or TPF file
-SELECT C.Manager, CD.ProjectId, CD.AnimalId, C.CollarModel, C.CollarId AS CTN
-      ,A.PlatformId AS ArgosId
-      ,C.Gen3Period, CPF.[FileName] AS ParameterFile
-  FROM
-	           ArgosPlatforms AS A
-	INNER JOIN ArgosPrograms AS P
-	        ON A.ProgramId = P.ProgramId
-	INNER JOIN Collars AS C
-	        ON C.AlternativeId = A.PlatformId
-    INNER JOIN CollarDeployments as CD
-            ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
-     LEFT JOIN CollarParameters as CP
-            ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
-     LEFT JOIN CollarParameterFiles as CPF
-            ON CP.FileId = CPF.FileId           
-     LEFT JOIN (
-               SELECT CollarManufacturer, CollarId, Max([Timestamp]) AS [Timestamp]
-                 FROM ArgosDownloads
-                WHERE ErrorMessage IS NULL
-                GROUP BY CollarManufacturer, CollarId
-               ) AS D
-            ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-
- WHERE A.[Status] = 'A'
-   AND P.[Status] = 'A'
-   AND (CPF.[Status] = 'A' OR CPF.[Status] IS NULL)
-   AND (P.EndDate IS NULL OR getdate() < P.EndDate)
-   AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
-   AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
-   AND (  (C.CollarModel = 'TelonicsGen3' AND CPF.Format <> 'B')
-       OR (C.CollarModel = 'TelonicsGen3' AND C.Gen3Period IS NULL)
-       OR (C.CollarModel = 'TelonicsGen4' AND CPF.Format IS NULL)
-       OR (C.CollarModel = 'TelonicsGen4' AND CPF.Format <> 'A')
-       )
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[DownloadableCollars]
-AS
-
-SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
-      ,I.Email, P.[UserName], P.[Password], A.PlatformId
-      ,datediff(day,D.[TimeStamp],getdate()) AS [Days]
-  FROM
-	           ArgosPlatforms AS A
-	INNER JOIN ArgosPrograms AS P
-	        ON A.ProgramId = P.ProgramId
-	INNER JOIN ProjectInvestigators AS I
-	        ON I.Login = P.Investigator
-	INNER JOIN Collars AS C
-	        ON C.AlternativeId = A.PlatformId
-    INNER JOIN CollarDeployments as CD
-            ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
-     LEFT JOIN (
-               SELECT CollarManufacturer, CollarId, Max([Timestamp]) AS [Timestamp]
-                 FROM ArgosDownloads
-                WHERE ErrorMessage IS NULL
-                GROUP BY CollarManufacturer, CollarId
-               ) AS D
-            ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-
- WHERE A.[Status] = 'A'
-   AND P.[Status] = 'A'
-   AND (P.EndDate IS NULL OR getdate() < P.EndDate)
-   AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
-   AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[DownloadableAndAnalyzableCollars]
-AS
-
-SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
-      ,I.Email, P.[UserName], P.[Password], A.PlatformId
-      ,datediff(day,D.[TimeStamp],getdate()) AS [Days]
-      ,C.CollarModel, C.Gen3Period, CPF.Contents AS TpfFile
-  FROM
-	           ArgosPlatforms AS A
-	INNER JOIN ArgosPrograms AS P
-	        ON A.ProgramId = P.ProgramId
-	INNER JOIN ProjectInvestigators AS I
-	        ON I.Login = P.Investigator
-	INNER JOIN Collars AS C
-	        ON C.AlternativeId = A.PlatformId
-    INNER JOIN CollarDeployments as CD
-            ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
-     LEFT JOIN CollarParameters as CP
-            ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
-     LEFT JOIN CollarParameterFiles as CPF
-            ON CP.FileId = CPF.FileId           
-     LEFT JOIN (
-               SELECT CollarManufacturer, CollarId, Max([Timestamp]) AS [Timestamp]
-                 FROM ArgosDownloads
-                WHERE ErrorMessage IS NULL
-                GROUP BY CollarManufacturer, CollarId
-               ) AS D
-            ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-
- WHERE A.[Status] = 'A'
-   AND P.[Status] = 'A'
-   AND (P.EndDate IS NULL OR getdate() < P.EndDate)
-   AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
-   AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
-   AND (CPF.FileId IS NULL OR CPF.Format <> 'B' or CPF.[Status] <> 'A') -- Ignore collars with an active Gen3 PPF file 
-   AND (C.Gen3Period IS NOT NULL OR (CPF.Format = 'A' AND CPF.[Status] = 'A')) -- Ignore collars without a Gen3 period or and active TPF file
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AllTpfFileData]
-AS
-
--- All TPF Data
-     SELECT T.*, P.[FileName], P.[Status]
-       FROM CollarParameterFiles AS P
-CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
-      WHERE P.Format = 'A'
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: June 11, 2012
--- Description:	Drops a user from the database if
---              it is no longer being referenced.
--- =============================================
-CREATE TRIGGER [dbo].[AfterProjectEditorDelete] 
-ON [dbo].[ProjectEditors] 
-AFTER DELETE AS
-BEGIN
-	SET NOCOUNT ON;
-	DECLARE
-		@ProjectId nvarchar(255) = Null,
-		@Editor sysname  = Null
-	
-	-- Loop over all the editors to be deleted, and
-	-- if 1) they are the not a PI, and
-	--    2) they will no longer have a presense in the Editors table,
-	-- then drop them from the DB
-	
-	DECLARE del_cursor CURSOR FOR 
-		SELECT [ProjectId], [Editor] FROM deleted
-
-	OPEN del_cursor;
-
-	FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
-
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		-- If this Editor is a project investigator, then do nothing more
-		IF EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Editor)
-		BEGIN
-			FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
-			CONTINUE
-		END
-
-		-- If this Editor is still an editor (on this or other projects after deleting), then do nothing more
-		IF EXISTS(select 1 from [dbo].[ProjectEditors] AS E
-					where not exists
-					     (select * from deleted as D where D.ProjectId = E.ProjectId AND D.Editor = E.Editor)
-					 AND Editor = @Editor)
-		BEGIN
-			FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
-			CONTINUE
-		END
-		
-		-- This editor is not an editor on any projects, so remove the user from the database
-		-- This will also, obviously, remove them from the Editor role
-		-- If this fails, the user will still have permissions to run the stored procedures,
-		--  however the stored procedures should stop them because they are not in the
-		--  ProjectEditor table
-		IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @Editor)
-			EXEC ('DROP USER ['  + @Editor + ']') --  LOGIN defaults to the same name
-
-		FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;		
-	END
-	CLOSE del_cursor;
-	DEALLOCATE del_cursor;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: November 9, 2012
@@ -5339,6 +5259,83 @@ BEGIN
 
 	-- All other verification is handled by primary/foreign key and column constraints.
 	DELETE FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AllTpfFileData]
+AS
+
+-- All TPF Data
+     SELECT T.*, P.[FileName], P.[Status]
+       FROM CollarParameterFiles AS P
+CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
+      WHERE P.Format = 'A'
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: June 11, 2012
+-- Description:	Drops a user from the database if
+--              it is no longer being referenced.
+-- =============================================
+CREATE TRIGGER [dbo].[AfterProjectEditorDelete] 
+ON [dbo].[ProjectEditors] 
+AFTER DELETE AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE
+		@ProjectId nvarchar(255) = Null,
+		@Editor sysname  = Null
+	
+	-- Loop over all the editors to be deleted, and
+	-- if 1) they are the not a PI, and
+	--    2) they will no longer have a presense in the Editors table,
+	-- then drop them from the DB
+	
+	DECLARE del_cursor CURSOR FOR 
+		SELECT [ProjectId], [Editor] FROM deleted
+
+	OPEN del_cursor;
+
+	FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		-- If this Editor is a project investigator, then do nothing more
+		IF EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Editor)
+		BEGIN
+			FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
+			CONTINUE
+		END
+
+		-- If this Editor is still an editor (on this or other projects after deleting), then do nothing more
+		IF EXISTS(select 1 from [dbo].[ProjectEditors] AS E
+					where not exists
+					     (select * from deleted as D where D.ProjectId = E.ProjectId AND D.Editor = E.Editor)
+					 AND Editor = @Editor)
+		BEGIN
+			FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;
+			CONTINUE
+		END
+		
+		-- This editor is not an editor on any projects, so remove the user from the database
+		-- This will also, obviously, remove them from the Editor role
+		-- If this fails, the user will still have permissions to run the stored procedures,
+		--  however the stored procedures should stop them because they are not in the
+		--  ProjectEditor table
+		IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @Editor)
+			EXEC ('DROP USER ['  + @Editor + ']') --  LOGIN defaults to the same name
+
+		FETCH NEXT FROM del_cursor INTO @ProjectId, @Editor;		
+	END
+	CLOSE del_cursor;
+	DEALLOCATE del_cursor;
 END
 GO
 SET ANSI_NULLS ON
@@ -9018,7 +9015,7 @@ GRANT EXECUTE ON [dbo].[CollarDeployment_Delete] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[CollarDeployment_Insert] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[CollarDeployment_UpdateRetrievalDate] TO [Editor] AS [dbo]
+GRANT EXECUTE ON [dbo].[CollarDeployment_UpdateDates] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[CollarFile_Delete] TO [Editor] AS [dbo]
 GO

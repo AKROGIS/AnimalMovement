@@ -115,14 +115,6 @@ namespace DataModel
 			}
 		}
 		
-		public System.Data.Linq.Table<CollarDeployment> CollarDeployments
-		{
-			get
-			{
-				return this.GetTable<CollarDeployment>();
-			}
-		}
-		
 		public System.Data.Linq.Table<Collar> Collars
 		{
 			get
@@ -235,6 +227,14 @@ namespace DataModel
 			}
 		}
 		
+		public System.Data.Linq.Table<CollarDeployment> CollarDeployments
+		{
+			get
+			{
+				return this.GetTable<CollarDeployment>();
+			}
+		}
+		
 		private void InsertAnimal(Animal obj)
 		{
 			this.Animal_Insert(obj.ProjectId, obj.AnimalId, obj.Species, obj.Gender, ((System.Nullable<System.DateTime>)(obj.MortalityDate)), obj.GroupName, obj.Description);
@@ -286,21 +286,6 @@ namespace DataModel
 		{
 			CollarFile original = ((CollarFile)(CollarFiles.GetOriginalEntityState(obj)));
 			this.CollarFile_Delete(((System.Nullable<int>)(original.FileId)));
-		}
-		
-		private void InsertCollarDeployment(CollarDeployment obj)
-		{
-			this.CollarDeployment_Insert(obj.ProjectId, obj.AnimalId, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<System.DateTime>)(obj.DeploymentDate)), ((System.Nullable<System.DateTime>)(obj.RetrievalDate)));
-		}
-		
-		private void UpdateCollarDeployment(CollarDeployment obj)
-		{
-			this.CollarDeployment_UpdateRetrievalDate(obj.ProjectId, obj.AnimalId, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<System.DateTime>)(obj.DeploymentDate)), ((System.Nullable<System.DateTime>)(obj.RetrievalDate)));
-		}
-		
-		private void DeleteCollarDeployment(CollarDeployment obj)
-		{
-			this.CollarDeployment_Delete(obj.ProjectId, obj.AnimalId, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<System.DateTime>)(obj.DeploymentDate)));
 		}
 		
 		private void InsertCollar(Collar obj)
@@ -377,6 +362,23 @@ namespace DataModel
 			this.ArgosDownloads_Insert(obj.CollarManufacturer, obj.CollarId, ((System.Nullable<int>)(obj.FileId)), obj.ErrorMessage);
 		}
 		
+		private void InsertCollarDeployment(CollarDeployment obj)
+		{
+			this.CollarDeployment_Insert(obj.ProjectId, obj.AnimalId, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<System.DateTime>)(obj.DeploymentDate)), ((System.Nullable<System.DateTime>)(obj.RetrievalDate)));
+		}
+		
+		private void UpdateCollarDeployment(CollarDeployment obj)
+		{
+			CollarDeployment original = ((CollarDeployment)(CollarDeployments.GetOriginalEntityState(obj)));
+			this.CollarDeployment_UpdateDates(((System.Nullable<int>)(original.DeploymentId)), ((System.Nullable<System.DateTime>)(obj.DeploymentDate)), ((System.Nullable<System.DateTime>)(obj.RetrievalDate)));
+		}
+		
+		private void DeleteCollarDeployment(CollarDeployment obj)
+		{
+			CollarDeployment original = ((CollarDeployment)(CollarDeployments.GetOriginalEntityState(obj)));
+			this.CollarDeployment_Delete(((System.Nullable<int>)(original.DeploymentId)));
+		}
+		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Delete")]
 		public int Animal_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId)
 		{
@@ -405,22 +407,8 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_Delete")]
-		public int CollarDeployment_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, collarManufacturer, collarId, deploymentDate);
-			return ((int)(result.ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_Insert")]
 		public int CollarDeployment_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RetrievalDate", DbType="DateTime2")] System.Nullable<System.DateTime> retrievalDate)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, collarManufacturer, collarId, deploymentDate, retrievalDate);
-			return ((int)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_UpdateRetrievalDate")]
-		public int CollarDeployment_UpdateRetrievalDate([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RetrievalDate", DbType="DateTime2")] System.Nullable<System.DateTime> retrievalDate)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, collarManufacturer, collarId, deploymentDate, retrievalDate);
 			return ((int)(result.ReturnValue));
@@ -597,6 +585,20 @@ namespace DataModel
 		public int ArgosDownloads_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ErrorMessage", DbType="NVarChar(255)")] string errorMessage)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, fileId, errorMessage);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_Delete")]
+		public int CollarDeployment_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentId", DbType="Int")] System.Nullable<int> deploymentId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), deploymentId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_UpdateDates")]
+		public int CollarDeployment_UpdateDates([global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentId", DbType="Int")] System.Nullable<int> deploymentId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RetrievalDate", DbType="DateTime2")] System.Nullable<System.DateTime> retrievalDate)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), deploymentId, deploymentDate, retrievalDate);
 			return ((int)(result.ReturnValue));
 		}
 	}
@@ -1763,282 +1765,6 @@ namespace DataModel
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarDeployments")]
-	public partial class CollarDeployment : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private string _ProjectId;
-		
-		private string _AnimalId;
-		
-		private string _CollarManufacturer;
-		
-		private string _CollarId;
-		
-		private System.DateTime _DeploymentDate;
-		
-		private System.Nullable<System.DateTime> _RetrievalDate;
-		
-		private EntityRef<Animal> _Animal;
-		
-		private EntityRef<Collar> _Collar;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnProjectIdChanging(string value);
-    partial void OnProjectIdChanged();
-    partial void OnAnimalIdChanging(string value);
-    partial void OnAnimalIdChanged();
-    partial void OnCollarManufacturerChanging(string value);
-    partial void OnCollarManufacturerChanged();
-    partial void OnCollarIdChanging(string value);
-    partial void OnCollarIdChanged();
-    partial void OnDeploymentDateChanging(System.DateTime value);
-    partial void OnDeploymentDateChanged();
-    partial void OnRetrievalDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnRetrievalDateChanged();
-    #endregion
-		
-		public CollarDeployment()
-		{
-			this._Animal = default(EntityRef<Animal>);
-			this._Collar = default(EntityRef<Collar>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectId", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string ProjectId
-		{
-			get
-			{
-				return this._ProjectId;
-			}
-			set
-			{
-				if ((this._ProjectId != value))
-				{
-					if (this._Animal.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnProjectIdChanging(value);
-					this.SendPropertyChanging();
-					this._ProjectId = value;
-					this.SendPropertyChanged("ProjectId");
-					this.OnProjectIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_AnimalId", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string AnimalId
-		{
-			get
-			{
-				return this._AnimalId;
-			}
-			set
-			{
-				if ((this._AnimalId != value))
-				{
-					if (this._Animal.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnAnimalIdChanging(value);
-					this.SendPropertyChanging();
-					this._AnimalId = value;
-					this.SendPropertyChanged("AnimalId");
-					this.OnAnimalIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string CollarManufacturer
-		{
-			get
-			{
-				return this._CollarManufacturer;
-			}
-			set
-			{
-				if ((this._CollarManufacturer != value))
-				{
-					if (this._Collar.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCollarManufacturerChanging(value);
-					this.SendPropertyChanging();
-					this._CollarManufacturer = value;
-					this.SendPropertyChanged("CollarManufacturer");
-					this.OnCollarManufacturerChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string CollarId
-		{
-			get
-			{
-				return this._CollarId;
-			}
-			set
-			{
-				if ((this._CollarId != value))
-				{
-					if (this._Collar.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCollarIdChanging(value);
-					this.SendPropertyChanging();
-					this._CollarId = value;
-					this.SendPropertyChanged("CollarId");
-					this.OnCollarIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DeploymentDate", DbType="DateTime2 NOT NULL", IsPrimaryKey=true)]
-		public System.DateTime DeploymentDate
-		{
-			get
-			{
-				return this._DeploymentDate;
-			}
-			set
-			{
-				if ((this._DeploymentDate != value))
-				{
-					this.OnDeploymentDateChanging(value);
-					this.SendPropertyChanging();
-					this._DeploymentDate = value;
-					this.SendPropertyChanged("DeploymentDate");
-					this.OnDeploymentDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RetrievalDate", DbType="DateTime2")]
-		public System.Nullable<System.DateTime> RetrievalDate
-		{
-			get
-			{
-				return this._RetrievalDate;
-			}
-			set
-			{
-				if ((this._RetrievalDate != value))
-				{
-					this.OnRetrievalDateChanging(value);
-					this.SendPropertyChanging();
-					this._RetrievalDate = value;
-					this.SendPropertyChanged("RetrievalDate");
-					this.OnRetrievalDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Animal_CollarDeployment", Storage="_Animal", ThisKey="ProjectId,AnimalId", OtherKey="ProjectId,AnimalId", IsForeignKey=true)]
-		public Animal Animal
-		{
-			get
-			{
-				return this._Animal.Entity;
-			}
-			set
-			{
-				Animal previousValue = this._Animal.Entity;
-				if (((previousValue != value) 
-							|| (this._Animal.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Animal.Entity = null;
-						previousValue.CollarDeployments.Remove(this);
-					}
-					this._Animal.Entity = value;
-					if ((value != null))
-					{
-						value.CollarDeployments.Add(this);
-						this._ProjectId = value.ProjectId;
-						this._AnimalId = value.AnimalId;
-					}
-					else
-					{
-						this._ProjectId = default(string);
-						this._AnimalId = default(string);
-					}
-					this.SendPropertyChanged("Animal");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarDeployment", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true)]
-		public Collar Collar
-		{
-			get
-			{
-				return this._Collar.Entity;
-			}
-			set
-			{
-				Collar previousValue = this._Collar.Entity;
-				if (((previousValue != value) 
-							|| (this._Collar.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Collar.Entity = null;
-						previousValue.CollarDeployments.Remove(this);
-					}
-					this._Collar.Entity = value;
-					if ((value != null))
-					{
-						value.CollarDeployments.Add(this);
-						this._CollarManufacturer = value.CollarManufacturer;
-						this._CollarId = value.CollarId;
-					}
-					else
-					{
-						this._CollarManufacturer = default(string);
-						this._CollarId = default(string);
-					}
-					this.SendPropertyChanged("Collar");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.Collars")]
 	public partial class Collar : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -2069,13 +1795,13 @@ namespace DataModel
 		
 		private System.Nullable<int> _Gen3Period;
 		
-		private EntitySet<CollarDeployment> _CollarDeployments;
-		
 		private EntitySet<CollarFix> _CollarFixes;
 		
 		private EntitySet<CollarParameter> _CollarParameters;
 		
 		private EntitySet<ArgosDownload> _ArgosDownloads;
+		
+		private EntitySet<CollarDeployment> _CollarDeployments;
 		
 		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
 		
@@ -2115,10 +1841,10 @@ namespace DataModel
 		
 		public Collar()
 		{
-			this._CollarDeployments = new EntitySet<CollarDeployment>(new Action<CollarDeployment>(this.attach_CollarDeployments), new Action<CollarDeployment>(this.detach_CollarDeployments));
 			this._CollarFixes = new EntitySet<CollarFix>(new Action<CollarFix>(this.attach_CollarFixes), new Action<CollarFix>(this.detach_CollarFixes));
 			this._CollarParameters = new EntitySet<CollarParameter>(new Action<CollarParameter>(this.attach_CollarParameters), new Action<CollarParameter>(this.detach_CollarParameters));
 			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
+			this._CollarDeployments = new EntitySet<CollarDeployment>(new Action<CollarDeployment>(this.attach_CollarDeployments), new Action<CollarDeployment>(this.detach_CollarDeployments));
 			this._LookupCollarManufacturer = default(EntityRef<LookupCollarManufacturer>);
 			this._LookupCollarModel = default(EntityRef<LookupCollarModel>);
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
@@ -2377,19 +2103,6 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarDeployment", Storage="_CollarDeployments", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
-		public EntitySet<CollarDeployment> CollarDeployments
-		{
-			get
-			{
-				return this._CollarDeployments;
-			}
-			set
-			{
-				this._CollarDeployments.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarFix", Storage="_CollarFixes", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
 		public EntitySet<CollarFix> CollarFixes
 		{
@@ -2426,6 +2139,19 @@ namespace DataModel
 			set
 			{
 				this._ArgosDownloads.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarDeployment", Storage="_CollarDeployments", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
+		public EntitySet<CollarDeployment> CollarDeployments
+		{
+			get
+			{
+				return this._CollarDeployments;
+			}
+			set
+			{
+				this._CollarDeployments.Assign(value);
 			}
 		}
 		
@@ -2551,18 +2277,6 @@ namespace DataModel
 			}
 		}
 		
-		private void attach_CollarDeployments(CollarDeployment entity)
-		{
-			this.SendPropertyChanging();
-			entity.Collar = this;
-		}
-		
-		private void detach_CollarDeployments(CollarDeployment entity)
-		{
-			this.SendPropertyChanging();
-			entity.Collar = null;
-		}
-		
 		private void attach_CollarFixes(CollarFix entity)
 		{
 			this.SendPropertyChanging();
@@ -2594,6 +2308,18 @@ namespace DataModel
 		}
 		
 		private void detach_ArgosDownloads(ArgosDownload entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = null;
+		}
+		
+		private void attach_CollarDeployments(CollarDeployment entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = this;
+		}
+		
+		private void detach_CollarDeployments(CollarDeployment entity)
 		{
 			this.SendPropertyChanging();
 			entity.Collar = null;
@@ -5262,6 +4988,306 @@ namespace DataModel
 					if ((value != null))
 					{
 						value.ArgosDownloads.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+						this._CollarId = value.CollarId;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+						this._CollarId = default(string);
+					}
+					this.SendPropertyChanged("Collar");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarDeployments")]
+	public partial class CollarDeployment : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _DeploymentId;
+		
+		private string _ProjectId;
+		
+		private string _AnimalId;
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarId;
+		
+		private System.DateTime _DeploymentDate;
+		
+		private System.Nullable<System.DateTime> _RetrievalDate;
+		
+		private EntityRef<Animal> _Animal;
+		
+		private EntityRef<Collar> _Collar;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnDeploymentIdChanging(int value);
+    partial void OnDeploymentIdChanged();
+    partial void OnProjectIdChanging(string value);
+    partial void OnProjectIdChanged();
+    partial void OnAnimalIdChanging(string value);
+    partial void OnAnimalIdChanged();
+    partial void OnCollarManufacturerChanging(string value);
+    partial void OnCollarManufacturerChanged();
+    partial void OnCollarIdChanging(string value);
+    partial void OnCollarIdChanged();
+    partial void OnDeploymentDateChanging(System.DateTime value);
+    partial void OnDeploymentDateChanged();
+    partial void OnRetrievalDateChanging(System.Nullable<System.DateTime> value);
+    partial void OnRetrievalDateChanged();
+    #endregion
+		
+		public CollarDeployment()
+		{
+			this._Animal = default(EntityRef<Animal>);
+			this._Collar = default(EntityRef<Collar>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DeploymentId", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int DeploymentId
+		{
+			get
+			{
+				return this._DeploymentId;
+			}
+			set
+			{
+				if ((this._DeploymentId != value))
+				{
+					this.OnDeploymentIdChanging(value);
+					this.SendPropertyChanging();
+					this._DeploymentId = value;
+					this.SendPropertyChanged("DeploymentId");
+					this.OnDeploymentIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string ProjectId
+		{
+			get
+			{
+				return this._ProjectId;
+			}
+			set
+			{
+				if ((this._ProjectId != value))
+				{
+					if (this._Animal.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnProjectIdChanging(value);
+					this.SendPropertyChanging();
+					this._ProjectId = value;
+					this.SendPropertyChanged("ProjectId");
+					this.OnProjectIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_AnimalId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string AnimalId
+		{
+			get
+			{
+				return this._AnimalId;
+			}
+			set
+			{
+				if ((this._AnimalId != value))
+				{
+					if (this._Animal.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnAnimalIdChanging(value);
+					this.SendPropertyChanging();
+					this._AnimalId = value;
+					this.SendPropertyChanged("AnimalId");
+					this.OnAnimalIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarManufacturerChanging(value);
+					this.SendPropertyChanging();
+					this._CollarManufacturer = value;
+					this.SendPropertyChanged("CollarManufacturer");
+					this.OnCollarManufacturerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarIdChanging(value);
+					this.SendPropertyChanging();
+					this._CollarId = value;
+					this.SendPropertyChanged("CollarId");
+					this.OnCollarIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DeploymentDate", DbType="DateTime2 NOT NULL")]
+		public System.DateTime DeploymentDate
+		{
+			get
+			{
+				return this._DeploymentDate;
+			}
+			set
+			{
+				if ((this._DeploymentDate != value))
+				{
+					this.OnDeploymentDateChanging(value);
+					this.SendPropertyChanging();
+					this._DeploymentDate = value;
+					this.SendPropertyChanged("DeploymentDate");
+					this.OnDeploymentDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RetrievalDate", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> RetrievalDate
+		{
+			get
+			{
+				return this._RetrievalDate;
+			}
+			set
+			{
+				if ((this._RetrievalDate != value))
+				{
+					this.OnRetrievalDateChanging(value);
+					this.SendPropertyChanging();
+					this._RetrievalDate = value;
+					this.SendPropertyChanged("RetrievalDate");
+					this.OnRetrievalDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Animal_CollarDeployment", Storage="_Animal", ThisKey="ProjectId,AnimalId", OtherKey="ProjectId,AnimalId", IsForeignKey=true)]
+		public Animal Animal
+		{
+			get
+			{
+				return this._Animal.Entity;
+			}
+			set
+			{
+				Animal previousValue = this._Animal.Entity;
+				if (((previousValue != value) 
+							|| (this._Animal.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Animal.Entity = null;
+						previousValue.CollarDeployments.Remove(this);
+					}
+					this._Animal.Entity = value;
+					if ((value != null))
+					{
+						value.CollarDeployments.Add(this);
+						this._ProjectId = value.ProjectId;
+						this._AnimalId = value.AnimalId;
+					}
+					else
+					{
+						this._ProjectId = default(string);
+						this._AnimalId = default(string);
+					}
+					this.SendPropertyChanged("Animal");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarDeployment", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true)]
+		public Collar Collar
+		{
+			get
+			{
+				return this._Collar.Entity;
+			}
+			set
+			{
+				Collar previousValue = this._Collar.Entity;
+				if (((previousValue != value) 
+							|| (this._Collar.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Collar.Entity = null;
+						previousValue.CollarDeployments.Remove(this);
+					}
+					this._Collar.Entity = value;
+					if ((value != null))
+					{
+						value.CollarDeployments.Add(this);
 						this._CollarManufacturer = value.CollarManufacturer;
 						this._CollarId = value.CollarId;
 					}
