@@ -51,7 +51,7 @@ LEFT JOIN Collars AS C
 
 
 -- All the Email and AWS files that have not been processed 
-   SELECT F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
+   SELECT F1.Project, F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
      FROM CollarFiles AS F1
 LEFT JOIN CollarFiles AS F2
        ON F1.FileId = F2.ParentFileId
