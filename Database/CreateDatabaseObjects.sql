@@ -1150,122 +1150,6 @@ GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: April 3, 2012
--- Description:	Add/Remove Locations when Deployment is updated
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarDeploymentUpdate] 
-   ON  [dbo].[CollarDeployments] 
-   AFTER UPDATE
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	--Retrevial date is the only thing that can change.
-	IF UPDATE ([RetrievalDate])
-	BEGIN
-	
-		-- triggers always execute in the context of a transaction
-		-- so the following code is all or nothing.
-
-		-- Verify new deployment start occurs before collar disposal
-		IF EXISTS (SELECT 1
-					 FROM inserted AS I
-			   INNER JOIN Collars AS C
-					   ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
-					WHERE C.DisposalDate < I.DeploymentDate
-				  )
-		BEGIN
-			RAISERROR('Deployment start date violation.  The collar was disposed before the deployment begins.', 18, 0)
-			ROLLBACK TRANSACTION;
-			RETURN
-		END
-
-
-  		-- When new retrevial date < old retrevial date we may lose some Locations
-		-- Delete records from locations fix date is greater than the new retrieval date
-/*
-Example:  Time --->
-
-  *-----D1-----* *------D2--------------->
-      *              *               *
-      L1             L2              L3
-  *-----D1-----* *------D2-----*
-                             
-L1 is part of D1 but not D2,
-L2 and L3 are part of original D2, but not D1
-L3 is not part of either deploymnet after changing retrieval date on D2
-*/
-		DELETE L FROM dbo.Locations as L
-				   -- Join to the deployment that created this location
-		   INNER JOIN deleted as D
-				   ON L.ProjectId = D.ProjectId
-				  AND L.AnimalId = D.AnimalId
-				  AND D.DeploymentDate < L.FixDate
-				  AND (L.FixDate < D.RetrievalDate OR D.RetrievalDate IS NULL)
-		   INNER JOIN inserted as I
-				   ON I.ProjectId = D.ProjectId
-				  AND I.AnimalId = D.AnimalId
-				  AND I.CollarManufacturer = D.CollarManufacturer
-				  AND I.CollarId = D.CollarId
-				  AND I.DeploymentDate = D.DeploymentDate
-				   -- These are the Locations to delete:
-				WHERE I.RetrievalDate < L.FixDate 
-				
-				
-		-- When new retrevial is null, or is greater than the old retrevial date we may gain some Locations
-		-- Add locations for fixes that are now deployed, but were not before
-/*
-Example:  Time --->
-
-  *-----D1-----* *------D2-----*
-      *              *               *
-      F1             F2              F3
-  *-----D1-----* *------D2-----------------*  or --->
-                             
-Add Location for F3, but not F1 or F2
-*/
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
-			   FROM dbo.CollarFixes AS F
-				 -- Join to the fixes that are covered by the new deployment dates
-		 INNER JOIN inserted AS I
-				 ON F.CollarManufacturer = I.CollarManufacturer
-				AND F.CollarId = I.CollarId
-	     INNER JOIN deleted as D
-				 -- To get the old retrieval date, we need to link inserted and deleted deployments by PK
-			     ON I.ProjectId = D.ProjectId
-			    AND I.AnimalId = D.AnimalId
-			    AND I.CollarManufacturer = D.CollarManufacturer
-			    AND I.CollarId = D.CollarId
-				AND I.DeploymentDate = D.DeploymentDate
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = I.ProjectId
- 	            AND A.AnimalId = I.AnimalId
-         INNER JOIN dbo.Collars AS C
- 	             ON C.CollarManufacturer = I.CollarManufacturer
- 	            AND C.CollarId = I.CollarId
-			  WHERE F.HiddenBy IS NULL
-			    AND D.RetrievalDate < F.FixDate -- wasn't included before, note: NULL < F.FixDate is always false (good) 
-				AND I.DeploymentDate <= F.FixDate
-				AND (I.RetrievalDate IS NULL OR F.FixDate <= I.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR F.FixDate <= A.MortalityDate)
-				AND (C.DisposalDate IS NULL OR F.FixDate <= C.DisposalDate)
-
-		/*
-		These stored procedures would be clean, but they would require a cursor,
-		stored procedures cannot be used in a set based solution.
-		EXEC [dbo].[AddLocationForDeployment] @CollarManufacturer, @CollarId, @ProjectId, @AnimalId, @StartDate, @EndDate
-		EXEC [dbo].[DeleteLocationForAnimalAndDateRange] @ProjectId, @AnimalId, @StartDate, @EndDate
-		*/
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 3, 2012
 -- Description:	Remove Locations when Deployment is deleted
 -- =============================================
 CREATE TRIGGER [dbo].[AfterCollarDeploymentDelete] 
@@ -2258,6 +2142,167 @@ FROM         dbo.CollarDeployments INNER JOIN
                       dbo.LookupCollarManufacturers ON dbo.Collars.CollarManufacturer = dbo.LookupCollarManufacturers.CollarManufacturer
 WHERE     (dbo.CollarDeployments.DeploymentDate < GETDATE()) AND (dbo.CollarDeployments.RetrievalDate > GETDATE() OR
                       dbo.CollarDeployments.RetrievalDate IS NULL)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 3, 2012
+-- Description:	Add/Remove Locations when Deployment is updated
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarDeploymentUpdate] 
+   ON  [dbo].[CollarDeployments] 
+   AFTER UPDATE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	--Retrevial date is the only thing that can change.
+	IF (UPDATE (ProjectId) OR UPDATE (AnimalId) OR UPDATE (CollarManufacturer) OR UPDATE(CollarId))
+	BEGIN
+		RAISERROR('Updating the Animal or Collar is not allowed.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+	
+	-- triggers always execute in the context of a transaction
+	-- so the following code is all or nothing.
+
+	-- Verify the retrieval occurs after the deployment
+	IF EXISTS (SELECT 1
+				 FROM inserted AS I
+				WHERE I.RetrievalDate <= I.DeploymentDate
+			  )
+	BEGIN
+		RAISERROR('The retrevial must occur after the deployment.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+
+	-- Verify new deployment start occurs before collar disposal
+	IF EXISTS (SELECT 1
+				 FROM inserted AS I
+		   INNER JOIN Collars AS C
+				   ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
+				WHERE C.DisposalDate < I.DeploymentDate
+			  )
+	BEGIN
+		RAISERROR('Deployment start date violation.  The collar was disposed before the deployment begins.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+
+	-- Verify that the animal is not wearing another collar during the proposed date range
+	-- We are checking each inserted deployment against all existing deployments, and all other new deployments	 
+	IF EXISTS (SELECT 1
+				 FROM inserted AS I1
+			LEFT JOIN inserted AS I2
+				   ON I1.ProjectId = I2.ProjectId AND I1.AnimalId = I2.AnimalId AND I1.DeploymentId <> I2.DeploymentId
+		   INNER JOIN dbo.CollarDeployments AS D
+				   ON D.ProjectId = I1.ProjectId AND D.AnimalId = I1.AnimalId AND D.DeploymentId <> I1.DeploymentId
+	   			WHERE dbo.DoDateRangesOverlap(D.DeploymentDate, D.RetrievalDate, I1.DeploymentDate, I1.RetrievalDate) = 1
+				   OR (I2.DeploymentDate IS NOT NULL AND
+					   dbo.DoDateRangesOverlap(I1.DeploymentDate, I1.RetrievalDate, I2.DeploymentDate, I2.RetrievalDate) = 1)
+			  )
+	BEGIN
+		RAISERROR('Insert would result in an animal with overlapping deployment dates violation.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+	
+	-- Verify that the collar is not on another animal during the proposed date range
+	-- We are checking each inserted deployment against all existing deployments, and all other new deployments 
+	IF EXISTS (SELECT 1
+				 FROM inserted AS I1
+			LEFT JOIN inserted AS I2
+				   ON I1.CollarManufacturer = I2.CollarManufacturer AND I1.CollarId = I2.CollarId AND I1.DeploymentId <> I2.DeploymentId
+		   INNER JOIN dbo.CollarDeployments AS D
+				   ON D.CollarManufacturer = I1.CollarManufacturer AND D.CollarId = I1.CollarId AND D.DeploymentId <> I1.DeploymentId
+	   			WHERE dbo.DoDateRangesOverlap(D.DeploymentDate, D.RetrievalDate, I1.DeploymentDate, I1.RetrievalDate) = 1
+				   OR (I2.DeploymentDate IS NOT NULL AND
+					   dbo.DoDateRangesOverlap(I1.DeploymentDate, I1.RetrievalDate, I2.DeploymentDate, I2.RetrievalDate) = 1)
+			  )
+	BEGIN
+		RAISERROR('Insert would result in a collar with overlapping deployment dates violation.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+		
+
+  		-- When new retrevial date < old retrieval date we may lose some Locations
+		-- Delete records from locations fix date is greater than the new retrieval date
+/*
+Example:  Time --->
+
+  *-----D1-----* *------D2--------------->
+      *              *               *
+      L1             L2              L3
+  *-----D1-----* *------D2-----*
+                             
+L1 is part of D1 but not D2,
+L2 and L3 are part of original D2, but not D1
+L3 is not part of either deploymnet after changing retrieval date on D2
+*/
+		DELETE L FROM dbo.Locations as L
+				   -- Join to the deployment that created this location
+		   INNER JOIN deleted as D
+				   ON L.ProjectId = D.ProjectId
+				  AND L.AnimalId = D.AnimalId
+				  AND D.DeploymentDate < L.FixDate
+				  AND (L.FixDate < D.RetrievalDate OR D.RetrievalDate IS NULL)
+				   -- Match the old (deleted) deployment dates to the new (inserted) deployment dates
+		   INNER JOIN inserted as I
+				   ON I.DeploymentId = D.DeploymentId
+				   -- Delete the Locations outside the new (inserted) deployment dates:
+				WHERE L.FixDate < I.DeploymentDate OR I.RetrievalDate < L.FixDate 
+								
+		-- When new retrevial is null, or is greater than the old retrevial date we may gain some Locations
+		-- Add locations for fixes that are now deployed, but were not before
+/*
+Example:  Time --->
+
+  *-----D1-----* *------D2-----*
+      *              *               *
+      F1             F2              F3
+  *-----D1-----* *------D2-----------------*  or --->
+                             
+Add Location for F3, but not F1 or F2
+*/
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
+			   FROM dbo.CollarFixes AS F
+				 -- Join to the fixes that are covered by the new deployment dates
+		 INNER JOIN inserted AS I
+				 ON F.CollarManufacturer = I.CollarManufacturer
+				AND F.CollarId = I.CollarId
+	     INNER JOIN deleted as D
+				 -- To get the old retrieval date, we need to link inserted and deleted deployments by PK
+			     ON I.DeploymentId = D.DeploymentId
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = I.ProjectId
+ 	            AND A.AnimalId = I.AnimalId
+         INNER JOIN dbo.Collars AS C
+ 	             ON C.CollarManufacturer = I.CollarManufacturer
+ 	            AND C.CollarId = I.CollarId
+			  WHERE F.HiddenBy IS NULL
+			     -- fix wasn't in old deployment dates, note: NULL < F.FixDate is always false (good) 
+			    AND (F.FixDate < D.DeploymentDate OR D.RetrievalDate < F.FixDate)
+				 -- fix is in new deployment dates
+				AND I.DeploymentDate < F.FixDate
+				AND (I.RetrievalDate IS NULL OR F.FixDate <= I.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR F.FixDate <= A.MortalityDate)
+				AND (C.DisposalDate IS NULL OR F.FixDate <= C.DisposalDate)
+
+		/*
+		These stored procedures would be clean, but they would require a cursor,
+		stored procedures cannot be used in a set based solution.
+		EXEC [dbo].[AddLocationForDeployment] @CollarManufacturer, @CollarId, @ProjectId, @AnimalId, @StartDate, @EndDate
+		EXEC [dbo].[DeleteLocationForAnimalAndDateRange] @ProjectId, @AnimalId, @StartDate, @EndDate
+		*/
+
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -3409,55 +3454,8 @@ BEGIN
 		RETURN (1)
 	END
 
-	-- Verify the retrieval occurs after the deployment
-	IF @RetrievalDate IS NOT NULL AND @RetrievalDate <= @DeploymentDate
-	BEGIN
-		RAISERROR('The retrieval must occur after the deployment.', 18, 0)
-		RETURN (1)
-	END
-
-	-- Get the old retrieval date
-	DECLARE @OldRetrievalDate DATETIME2 = NULL
-	SELECT @OldRetrievalDate = RetrievalDate FROM dbo.CollarDeployments
-			   WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-			     AND ProjectId = @ProjectId AND AnimalId = @AnimalId
-			     AND DeploymentDate = @DeploymentDate;
-			     
-			
-
-	IF @OldRetrievalDate = @RetrievalDate	
-		Return(0) -- Nothing needs to be done.
 	
-	if @RetrievalDate IS NULL OR (@OldRetrievalDate IS NOT NULL AND @OldRetrievalDate < @RetrievalDate)
-	BEGIN
-		-- We are expanding the duration of this deployment which may cause a conflict
-		
-		-- Verify that the animal is not wearing another collar during the proposed date range
-		IF EXISTS (SELECT 1 FROM dbo.CollarDeployments
-					WHERE ProjectId = @ProjectId AND AnimalId = @AnimalId
-					  AND DeploymentDate <> @DeploymentDate  -- make sure we ignore the deployment being changed
-					  AND dbo.DoDateRangesOverlap(DeploymentDate, RetrievalDate, @DeploymentDate, @RetrievalDate) = 1
-				  )
-		BEGIN
-			DECLARE @message3 nvarchar(200) = 'The new retreival date conflicts with another deployment for animal ('+@ProjectId+'-'+@AnimalId+').'
-			RAISERROR(@message3, 18, 0)
-			RETURN (1)
-		END
-	
-		-- Verify that the collar is not on another animal during the proposed date range
-		IF EXISTS (SELECT 1 FROM dbo.CollarDeployments
-					WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-					  AND DeploymentDate <> @DeploymentDate  -- make sure we ignore the deployment being changed
-					  AND dbo.DoDateRangesOverlap(DeploymentDate, RetrievalDate, @DeploymentDate, @RetrievalDate) = 1
-				  )
-		BEGIN
-			DECLARE @message4 nvarchar(200) = 'The new retreival date conflicts with another deployment for collar ('+@CollarManufacturer+'-'+@CollarId+').'
-			RAISERROR(@message4, 18, 0)
-			RETURN (1)
-		END
-	END
-	
-	-- All other verification is handled by primary/foreign key and column constraints.
+	-- All other verification is handled by triggers, primary/foreign key and column constraints.
 	UPDATE dbo.CollarDeployments SET RetrievalDate = @RetrievalDate
 			   WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
 			     AND ProjectId = @ProjectId AND AnimalId = @AnimalId
@@ -3517,7 +3515,7 @@ BEGIN
 	            ([ProjectId], [AnimalId], [CollarManufacturer], [CollarId],  
 	             [DeploymentDate], [RetrievalDate])
 		 VALUES (nullif(@ProjectId,''), nullif(@AnimalId,''), nullif(@CollarManufacturer,''), 
-				 nullif(@CollarId,''), nullif(@DeploymentDate,''), nullif(@RetrievalDate,''))
+				 nullif(@CollarId,''), @DeploymentDate, @RetrievalDate)
 END
 GO
 SET ANSI_NULLS ON
