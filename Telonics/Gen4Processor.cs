@@ -83,7 +83,7 @@ namespace Telonics
             var p = Process.Start(new ProcessStartInfo
             {
                 FileName = TdcExecutable,
-                Arguments = "/batch:" + batchFilePath,
+                Arguments = "/batch:\"" + batchFilePath +"\"",
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardError = true
