@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//FIXME - DATABASE - Add Sql_Proxy to main database
 //FIXME - DATABASE - When project is created add SQL_proxy as an editor
 //FIXME - DATABASE - Implement EXEC xp_cmdshell 'ArgosProcessor.exe' in CollarData_Insert
 //FIXME - DATABASE - Start scheduled process for ArgosDownload on server
@@ -55,6 +54,7 @@ using System.Runtime.InteropServices;
 //TODO - Add MS Access readonly interface
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Build a tool to hide locations outside a reasonable (user provided) range
+//TODO - provide datasheet views of collars, animals, deployments, and maybe files and fixes
 
 //To NOT do or fix:
 //  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date
