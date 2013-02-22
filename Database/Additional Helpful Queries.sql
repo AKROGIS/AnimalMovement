@@ -73,6 +73,7 @@ INNER JOIN Collars as C
 
 
 
+
 -- Tools helpful for renaming/assigning data files
 -- ==================================================
 
@@ -136,7 +137,8 @@ select FileId, CollarId, [FileName], [Format], [Status] From CollarFiles where l
 DECLARE @old varchar(16) = '634657';
 DECLARE @new varchar(16) = @old + 'A';
 UPDATE Collars SET CollarId = @new WHERE CollarId = @old 
-UPDATE CollarFiles SET CollarId = @new WHERE CollarId = @old 
+UPDATE CollarFiles SET CollarId = @new WHERE CollarId = @old
+
 
 
 
@@ -290,7 +292,8 @@ INNER JOIN CollarParameters AS P
 
 
 
--- Project/PI summary statistics
+
+-- Database summary statistics
 -- ===============================================
 
 
@@ -300,76 +303,6 @@ SELECT COUNT(*) AS [Unique Fix Count] FROM CollarFixes WHERE HiddenBy IS NULL
 SELECT COUNT(*) AS [Total Locations] FROM Locations
 SELECT ProjectId, COUNT(*) AS [Location Count] FROM Locations WHERE [Status] IS NULL GROUP BY ProjectId
 
- 
--- All conflicting fixes for all of a PI's collars
-    DECLARE @PI varchar(255) = 'NPS\BAMangipane';
-     SELECT C.CollarManufacturer, C.CollarId, F.*
-       FROM Collars AS C
-CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer,C.CollarId)) AS F
-      WHERE C.Manager = @PI
-   ORDER BY CollarId, LocalFixTime, FixId
-
-
--- All conflicting fixes for all collars deployed (at any time) on a project
-    DECLARE @ProjectId varchar(255) = 'Yuch_Wolf';
-     SELECT C.CollarManufacturer, C.CollarId, F.*
-       FROM (SELECT DISTINCT CollarManufacturer, CollarId, ProjectId FROM CollarDeployments) AS C
-CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer, C.CollarId)) AS F
-      WHERE C.ProjectId = @ProjectId
-
-
--- Summary of fixes for all of a PI's collars
-    DECLARE @PI varchar(255) = 'NPS\BBorg';
-     SELECT C.CollarManufacturer, C.CollarId, F.*
-       FROM Collars AS C
-CROSS APPLY (SELECT * FROM CollarFixSummary (c.CollarManufacturer,c.CollarId)) AS F
-      WHERE C.Manager = @PI
-
-
--- Summary of fixes for all animals in a project
-    DECLARE @ProjectId varchar(255) = 'Yuch_Wolf';
-     SELECT C.AnimalId, F.*
-       FROM CollarDeployments AS C
-CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
-      WHERE C.ProjectId = @ProjectId
-
-
--- All of a PI's collars that do not have fixes
-    DECLARE @PI varchar(255) = 'NPS\BAMangipane';
-     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
-       FROM Collars AS C
-  LEFT JOIN CollarFixes as F
-         ON C.CollarId = F.CollarId
-      WHERE C.Manager = @PI
-        AND F.CollarId IS NULL
-   ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
-
-
--- All of a PI's collars that do not have files
-    DECLARE @PI varchar(255) = 'NPS\JWBurch';
-     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
-       FROM Collars AS C
-  LEFT JOIN CollarFiles as F
-         ON C.CollarId = F.CollarId
-      WHERE C.Manager = @PI
-        AND F.CollarId IS NULL
-   ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
-
-
--- All of a Project's animals that do not have fixes
---  If a animal has had multiple deployments, and one deployment has fixes,
---  and the other does not, this will report a false positive for the
---  listing the animal with the collar with no fixes 
-    DECLARE @ProjectId varchar(255) = 'Yuch_Wolf';
-     SELECT A.AnimalId, D.CollarId
-       FROM Animals AS A
-  LEFT JOIN CollarDeployments AS D
-         ON A.ProjectId = D.ProjectId AND A.AnimalId = D.AnimalId
-  LEFT JOIN CollarFixes as F
-         ON D.CollarId = F.CollarId
-      WHERE A.ProjectId = @ProjectId
-        AND F.CollarId IS NULL
-   ORDER BY A.AnimalId
 
 
 
@@ -379,7 +312,7 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 
 
 -- Preview/Hide the fixes outside a nominal range for a project
-    DECLARE @ProjectId varchar(255) = 'Yuch_Wolf';
+    DECLARE @Project varchar(255) = 'Yuch_Wolf';
     DECLARE @MinLat Real = 63.6;
     DECLARE @MaxLat Real = 66.3;
     DECLARE @MinLon Real = -157.0;
@@ -388,7 +321,7 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
   -- Preview fixes outside the range
      SELECT AnimalId, FixDate, Location.Long as Lon, Location.Lat as Lat
        FROM Locations
-      WHERE ProjectId = @ProjectId
+      WHERE ProjectId = @Project
         AND [Status] IS NULL
         AND (Location.Long < @MinLon OR @MaxLon < Location.Long OR Location.Lat < @MinLat OR @MaxLat < Location.Lat)
    ORDER BY Lon, Lat
@@ -406,7 +339,11 @@ CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
 --  The speed, distance are animal dependent.  The duration is dependent on the collar settings
 --  speed is meters/hour, and distance is meters
 --  Use ArcGIS to zoom in on the animal at the time, and use the addin tool to hide invalid locations.
-select * from Movements where ProjectId = 'LACL_Wolf' and (speed > 12000 or duration < 6) order by Speed, AnimalId, StartDate
+  SELECT *
+    FROM Movements
+   WHERE ProjectId = 'Yuch_Wolf'
+     AND (speed > 12000 or duration < 6)
+ORDER BY Speed, AnimalId, StartDate
 
 
 
