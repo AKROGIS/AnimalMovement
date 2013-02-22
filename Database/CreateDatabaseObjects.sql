@@ -8,6 +8,8 @@ CREATE USER [INPAKROMS53AIS\repl_merge] FOR LOGIN [INPAKROMS53AIS\repl_merge] WI
 GO
 CREATE USER [INPAKROMS53AIS\repl_snapshot] FOR LOGIN [INPAKROMS53AIS\repl_snapshot] WITH DEFAULT_SCHEMA=[dbo]
 GO
+CREATE USER [INPAKROMS53AIS\sql_proxy] FOR LOGIN [INPAKROMS53AIS\sql_proxy] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\BAMangipane] FOR LOGIN [NPS\BAMangipane] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\BBorg] FOR LOGIN [NPS\BBorg] WITH DEFAULT_SCHEMA=[dbo]
@@ -2461,13 +2463,15 @@ GO
 -- Author:		Regan Sarwas
 -- Create date: May 30, 2012
 -- Description:	Returns a table of conflicting fixes for a specific collar.
--- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007')
--- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations 
+-- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007', DEFAULT)
+-- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations
+-- Modified:    Feb 22, 2013, added an optional currency filter to return only conflicts in the last X days 
 -- =============================================
 CREATE FUNCTION [dbo].[ConflictingFixes] 
 (
 	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255)
+	@CollarId           NVARCHAR(255),
+	@LastXdays          INTEGER = 36500
 )
 RETURNS TABLE 
 AS
@@ -2485,6 +2489,7 @@ AS
 		ON  C.CollarManufacturer = D.CollarManufacturer
 		AND C.CollarId = D.CollarId
 		AND C.FixDate = D.FixDate
+        AND C.FixDate > DATEADD(DAY, -@LastXdays, GETDATE())
 GO
 SET ANSI_NULLS ON
 GO
@@ -9080,6 +9085,8 @@ GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\RESarwas'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\KCJoly'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'INPAKROMS53AIS\sql_proxy'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\BAMangipane'
 GO

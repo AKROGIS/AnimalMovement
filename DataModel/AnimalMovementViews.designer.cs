@@ -92,12 +92,6 @@ namespace DataModel
 			return this.CreateMethodCallQuery<AnimalLocationSummaryResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId);
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ConflictingFixes", IsComposable=true)]
-		public IQueryable<ConflictingFixesResult> ConflictingFixes([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
-		{
-			return this.CreateMethodCallQuery<ConflictingFixesResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId);
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFixesByFile", IsComposable=true)]
 		public IQueryable<CollarFixesByFileResult> CollarFixesByFile([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
 		{
@@ -108,6 +102,12 @@ namespace DataModel
 		public IQueryable<CollarFixSummaryResult> CollarFixSummary([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
 		{
 			return this.CreateMethodCallQuery<CollarFixSummaryResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId);
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ConflictingFixes", IsComposable=true)]
+		public IQueryable<ConflictingFixesResult> ConflictingFixes([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="LastXdays", DbType="Int")] System.Nullable<int> lastXdays)
+		{
+			return this.CreateMethodCallQuery<ConflictingFixesResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, lastXdays);
 		}
 	}
 	
@@ -607,7 +607,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TpfFile", DbType="VarBinary(MAX)", CanBeNull=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TpfFile", DbType="VarBinary(MAX)", UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary TpfFile
 		{
 			get
@@ -753,140 +753,6 @@ namespace DataModel
 				if ((this._Last != value))
 				{
 					this._Last = value;
-				}
-			}
-		}
-	}
-	
-	public partial class ConflictingFixesResult
-	{
-		
-		private long _FixId;
-		
-		private System.Nullable<long> _HiddenBy;
-		
-		private int _FileId;
-		
-		private int _LineNumber;
-		
-		private System.Nullable<System.DateTime> _LocalFixTime;
-		
-		private double _Lat;
-		
-		private double _Lon;
-		
-		public ConflictingFixesResult()
-		{
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FixId", DbType="BigInt NOT NULL")]
-		public long FixId
-		{
-			get
-			{
-				return this._FixId;
-			}
-			set
-			{
-				if ((this._FixId != value))
-				{
-					this._FixId = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_HiddenBy", DbType="BigInt")]
-		public System.Nullable<long> HiddenBy
-		{
-			get
-			{
-				return this._HiddenBy;
-			}
-			set
-			{
-				if ((this._HiddenBy != value))
-				{
-					this._HiddenBy = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL")]
-		public int FileId
-		{
-			get
-			{
-				return this._FileId;
-			}
-			set
-			{
-				if ((this._FileId != value))
-				{
-					this._FileId = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LineNumber", DbType="Int NOT NULL")]
-		public int LineNumber
-		{
-			get
-			{
-				return this._LineNumber;
-			}
-			set
-			{
-				if ((this._LineNumber != value))
-				{
-					this._LineNumber = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LocalFixTime", DbType="DateTime")]
-		public System.Nullable<System.DateTime> LocalFixTime
-		{
-			get
-			{
-				return this._LocalFixTime;
-			}
-			set
-			{
-				if ((this._LocalFixTime != value))
-				{
-					this._LocalFixTime = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Lat", DbType="Float NOT NULL")]
-		public double Lat
-		{
-			get
-			{
-				return this._Lat;
-			}
-			set
-			{
-				if ((this._Lat != value))
-				{
-					this._Lat = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Lon", DbType="Float NOT NULL")]
-		public double Lon
-		{
-			get
-			{
-				return this._Lon;
-			}
-			set
-			{
-				if ((this._Lon != value))
-				{
-					this._Lon = value;
 				}
 			}
 		}
@@ -1083,6 +949,140 @@ namespace DataModel
 				if ((this._Last != value))
 				{
 					this._Last = value;
+				}
+			}
+		}
+	}
+	
+	public partial class ConflictingFixesResult
+	{
+		
+		private long _FixId;
+		
+		private System.Nullable<long> _HiddenBy;
+		
+		private int _FileId;
+		
+		private int _LineNumber;
+		
+		private System.Nullable<System.DateTime> _LocalFixTime;
+		
+		private double _Lat;
+		
+		private double _Lon;
+		
+		public ConflictingFixesResult()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FixId", DbType="BigInt NOT NULL")]
+		public long FixId
+		{
+			get
+			{
+				return this._FixId;
+			}
+			set
+			{
+				if ((this._FixId != value))
+				{
+					this._FixId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_HiddenBy", DbType="BigInt")]
+		public System.Nullable<long> HiddenBy
+		{
+			get
+			{
+				return this._HiddenBy;
+			}
+			set
+			{
+				if ((this._HiddenBy != value))
+				{
+					this._HiddenBy = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL")]
+		public int FileId
+		{
+			get
+			{
+				return this._FileId;
+			}
+			set
+			{
+				if ((this._FileId != value))
+				{
+					this._FileId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LineNumber", DbType="Int NOT NULL")]
+		public int LineNumber
+		{
+			get
+			{
+				return this._LineNumber;
+			}
+			set
+			{
+				if ((this._LineNumber != value))
+				{
+					this._LineNumber = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LocalFixTime", DbType="DateTime")]
+		public System.Nullable<System.DateTime> LocalFixTime
+		{
+			get
+			{
+				return this._LocalFixTime;
+			}
+			set
+			{
+				if ((this._LocalFixTime != value))
+				{
+					this._LocalFixTime = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Lat", DbType="Float NOT NULL")]
+		public double Lat
+		{
+			get
+			{
+				return this._Lat;
+			}
+			set
+			{
+				if ((this._Lat != value))
+				{
+					this._Lat = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Lon", DbType="Float NOT NULL")]
+		public double Lon
+		{
+			get
+			{
+				return this._Lon;
+			}
+			set
+			{
+				if ((this._Lon != value))
+				{
+					this._Lon = value;
 				}
 			}
 		}

@@ -2,6 +2,7 @@
 -- ===============================================
 
     DECLARE @Project NVARCHAR(255) = 'DENA_Wolves'
+    DECLARE @LastXdays INT = 30  -- Number of days in the past to consider
 
 ----------- Last location for each living animal with a collar in a project
      SELECT A.ProjectId, A.AnimalId, CONVERT(VARCHAR(10), MAX(FixDate), 101) AS [Date of Last Location]
@@ -66,7 +67,7 @@
 ----------- All conflicting fixes for all collars deployed (at any time) on a project (SLOW!!!)
      SELECT C.CollarManufacturer, C.CollarId, F.*
        FROM (SELECT DISTINCT CollarManufacturer, CollarId, ProjectId FROM CollarDeployments) AS C
-CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer, C.CollarId)) AS F
+CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer, C.CollarId, @LastXdays)) AS F
       WHERE C.ProjectId = @Project
 
 ----------- Summary of fixes for all animals in a project (Slow!!!)

@@ -66,9 +66,8 @@
 ----------- Conflicting fixes for all of a PI's collars in the last X days (SLOW!!)
      SELECT C.CollarManufacturer, C.CollarId, F.*
        FROM Collars AS C
-CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer,C.CollarId)) AS F
+CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer,C.CollarId, @LastXdays)) AS F
       WHERE C.Manager = @PI
-        AND F.LocalFixTime >  dateadd(day, -@LastXdays, getdate())
    ORDER BY CollarId, LocalFixTime, FixId
 
 ----------- Summary of fixes for all of a PI's collars (SLOW!!)

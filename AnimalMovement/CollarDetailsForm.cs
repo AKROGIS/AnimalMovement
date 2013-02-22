@@ -93,7 +93,7 @@ namespace AnimalMovement
             if (Collar == null)
                 return;
             var db = new AnimalMovementViewsDataContext();
-            FixConflictsDataGridView.DataSource = db.ConflictingFixes(Collar.CollarManufacturer, Collar.CollarId);
+            FixConflictsDataGridView.DataSource = db.ConflictingFixes(Collar.CollarManufacturer, Collar.CollarId, 36500); //last 100 years
             var summary = db.CollarFixSummary(Collar.CollarManufacturer, Collar.CollarId).FirstOrDefault();
             SummaryLabel.Text = summary == null
                               ? "There are NO fixes."

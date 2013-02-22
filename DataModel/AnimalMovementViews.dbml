@@ -52,19 +52,6 @@
       <Column Name="Last" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
     </ElementType>
   </Function>
-  <Function Name="dbo.ConflictingFixes" Method="ConflictingFixes" IsComposable="true">
-    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
-    <ElementType Name="ConflictingFixesResult">
-      <Column Name="FixId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
-      <Column Name="HiddenBy" Type="System.Int64" DbType="BigInt" CanBeNull="true" />
-      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="LineNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="LocalFixTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
-      <Column Name="Lat" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-      <Column Name="Lon" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
-    </ElementType>
-  </Function>
   <Function Name="dbo.CollarFixesByFile" Method="CollarFixesByFile" IsComposable="true">
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
@@ -85,6 +72,20 @@
       <Column Name="[Unique]" Member="Unique" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="First" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Column Name="Last" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+    </ElementType>
+  </Function>
+  <Function Name="dbo.ConflictingFixes" Method="ConflictingFixes" IsComposable="true">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="LastXdays" Parameter="lastXdays" Type="System.Int32" DbType="Int" />
+    <ElementType Name="ConflictingFixesResult">
+      <Column Name="FixId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="HiddenBy" Type="System.Int64" DbType="BigInt" CanBeNull="true" />
+      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="LineNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="LocalFixTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="Lat" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
+      <Column Name="Lon" Type="System.Double" DbType="Float NOT NULL" CanBeNull="false" />
     </ElementType>
   </Function>
 </Database>
