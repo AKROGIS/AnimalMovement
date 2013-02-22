@@ -4,6 +4,56 @@
     DECLARE @PI NVARCHAR(255) = 'NPS\BBorg'
     DECLARE @LastXdays INT = 30  -- Number of days in the past to consider
 
+----------- WARNING: Telonics Gen4 GPS Collars without TPF file
+     SELECT C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
+       FROM Collars AS C
+  LEFT JOIN CollarParameters AS P
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+      WHERE C.CollarModel = 'TelonicsGen4'
+        AND P.CollarId IS NULL
+        AND C.Manager = @PI
+        
+----------- WARNING: Telonics Gen3 GPS Collars with an active PPF File
+     SELECT C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
+       FROM Collars AS C
+  LEFT JOIN CollarParameters AS P
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+  LEFT JOIN CollarParameterFiles AS F
+         ON P.FileId = F.FileId
+      WHERE C.CollarModel = 'TelonicsGen3'
+        AND F.Format = 'B'
+        AND F.Status = 'A'
+        AND C.Manager = @PI
+
+----------- WARNING: Telonics Gen3 GPS Collars without a Gen3 Period
+     SELECT C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
+       FROM Collars AS C
+      WHERE C.CollarModel = 'TelonicsGen3'
+        AND C.Gen3Period IS NULL
+        AND C.Manager = @PI
+
+----------- ERROR: Collars with multiple Active TPF files
+     SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
+       FROM AllTpfFileData AS T
+  LEFT JOIN CollarParameters AS P
+         ON T.FileId = P.FileId AND T.CTN = P.CollarId
+  LEFT JOIN Collars AS C
+         ON C.CollarManufacturer = 'Telonics' AND T.CTN = C.CollarId
+      WHERE T.CTN in (SELECT CTN FROM AllTpfFileData WHERE [Status] = 'A' GROUP BY CTN HAVING COUNT(*) > 1)
+        AND C.Manager = @PI
+   ORDER BY T.CTN, T.[Status]
+
+----------- Collars in multiple TPF files
+     SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
+       FROM AllTpfFileData AS T
+  LEFT JOIN CollarParameters AS P
+         ON T.FileId = P.FileId AND T.CTN = P.CollarId
+  LEFT JOIN Collars AS C
+         ON C.CollarManufacturer = 'Telonics' AND T.CTN = C.CollarId
+      WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
+        AND C.Manager = @PI
+   ORDER BY T.CTN, T.[Status]
+
 ----------- All of a PI's collars that do not have fixes
      SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
        FROM Collars AS C
