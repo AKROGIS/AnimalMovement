@@ -54,6 +54,28 @@
         AND C.Manager = @PI
    ORDER BY T.CTN, T.[Status]
 
+----------- Active dates for all the collars of a PI
+     SELECT C.CollarManufacturer, C.CollarId, MIN(D.DeploymentDate) AS [FirstDeployment], C.DisposalDate
+       FROM Collars as C
+  LEFT JOIN CollarDeployments AS D
+         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+      WHERE C.Manager = @PI
+   GROUP BY C.CollarManufacturer, C.CollarId, C.DisposalDate
+   ORDER BY C.CollarManufacturer, C.CollarId
+
+----------- Count of unused fixes for all of a PI's Collars
+     SELECT C.Manager, F.CollarManufacturer, F.CollarId, MIN(F.FixDate) AS [First Fix], MAX(F.FixDate) AS [Last Fix], COUNT(F.FixDate) AS [Fix Count]
+       FROM CollarFixes AS F
+  LEFT JOIN Locations AS L
+         ON F.FixId = L.FixId
+  LEFT JOIN Collars AS C
+         ON F.CollarManufacturer = C.CollarManufacturer AND  F.CollarId = C.CollarId
+      WHERE L.FixId IS NULL
+        AND F.HiddenBy IS NULL
+        AND C.Manager = @PI
+   GROUP BY C.Manager, F.CollarManufacturer, F.CollarId
+   ORDER BY COUNT(F.FixDate) DESC
+
 ----------- All of a PI's collars that do not have fixes
      SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
        FROM Collars AS C
