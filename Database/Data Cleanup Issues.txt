@@ -8,7 +8,6 @@ Fix disposal dates for collars 571518 and 550204 (requires missing TPF file for 
 Get missing Gen4 TPF files for Bridget's collars 618575B, 618576B (not in database)
   - Bridget uploaded data files (processed by TDC) for the 'B' collars.
   - Data for the 'B' collars is currently applied to the 'A' version of the collars
-Process email 12_29_12_raw_complete.txt already in database - data for argos 105424 not in DB
 Check and send message to users about Argos no data and inactive collars
 Verify John's Deployment data for direct download wolves
 Upload John's Historic Emails
@@ -22,6 +21,9 @@ Get SOB data from Kyle
 Add Buck's data for collar 606976 (A:40420)
 Load Buck's TPF files
 Add Buck's other non-GPS collars to the database
+	platforms 40832, 40420, 105424 are not in database, and there is data (PTT?) in his emails
+	CTN 606990, and 606970 have PTT data in the emails (not GPS)
+	Email 12_29_12_raw_complete.txt (already in database) only has data for argos 105424, so appears not processed
 
 
 Code Cleanup
