@@ -1,8 +1,10 @@
 
 Data cleanup
 ============
-Get missing Gen4 TPF files John:638294, Bridget Wolf:659847, Bridget Bears:643132A, 643133A
-Fix disposal dates for collars 571518 and 550204 (requires missing TPF files for 638294 and 659847)
+Get Missing TPF files from Ed 120629001a.tpf: (85995 2012-07-06) and 110714001a.tpf	(96008, 96009 2011-09-13)
+  - for collars 618576B, 631644B, 631645B (I think)
+Get missing Gen4 TPF files Bridget Wolf:659847 (is this Gen3 or imaginary), Bridget Bears:643132A, 643133A
+Fix disposal dates for collars 571518 and 550204 (requires missing TPF file for 659847)
 Get missing Gen4 TPF files for Bridget's collars 618575B, 618576B (not in database)
   - Bridget uploaded data files (processed by TDC) for the 'B' collars.
   - Data for the 'B' collars is currently applied to the 'A' version of the collars
