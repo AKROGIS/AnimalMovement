@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -31,7 +32,7 @@ namespace Telonics
                     {
                         ProgramId = tokens[0],
                         PlatformId = tokens[1],
-                        DateTime = DateTime.Parse(tokens[7]),
+                        DateTime = DateTime.Parse(tokens[7], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
                         Location = String.IsNullOrEmpty(tokens[13]) ? null : new ArgosTransmission.ArgosLocation
                         {
                             DateTime = DateTime.Parse(tokens[13]),
