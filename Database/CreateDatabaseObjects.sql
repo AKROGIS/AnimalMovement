@@ -8713,8 +8713,9 @@ BEGIN
 	DECLARE @Caller sysname = ORIGINAL_LOGIN();
 
 	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	-- The caller must be the PI or editor on the project, or the local sql_proxy account
+	IF @Caller <> @@SERVERNAME + '\sql_proxy' AND
+	   NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
 		BEGIN

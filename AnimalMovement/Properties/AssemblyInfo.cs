@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//FIXME - DATABASE - When project is created add SQL_proxy as an editor
 //FIXME - DATABASE - Implement EXEC xp_cmdshell 'ArgosProcessor.exe' in CollarData_Insert
 //FIXME - DATABASE - Start scheduled process for ArgosDownload on server
 //FIXME - DATABASE - File status update should trigger status update to all child files
@@ -22,7 +21,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Remove unused views from database, put them in an external file.
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
 
-//FIXME - Do not show, or allow edit/delete of the SQL_Proxy editor on each project
 //FIXME - Deleting multiple files and subfile in one operation fails, and corrupts datamodel. - Fix with heirarchy
 //TODO - Document the optimal "getting started" process, and make sure the code supports it
 //TODO - Build UI to add/edit/delete Argos Projects and Platforms
