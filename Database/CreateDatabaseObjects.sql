@@ -3925,9 +3925,11 @@ BEGIN
 
 	IF @ProjectID IS NULL
 	BEGIN
-			DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+CAST(@FileId AS VARCHAR(10))+' in CollarFiles.';
-			RAISERROR(@message1, 18, 0)
-			RETURN (1)
+		DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+CAST(@FileId AS VARCHAR(10))+' in CollarFiles.';
+		IF @FileId IS NULL
+			SET @message1  = 'Invalid Parameter: NULL FileId was provided.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
 	END
 	
 	-- Get the name of the caller
