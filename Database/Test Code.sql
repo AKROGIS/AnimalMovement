@@ -1439,18 +1439,22 @@ Check illegal modifications of deployment
     IF ORIGINAL_LOGIN() <> @T3_sa
     BEGIN
         PRINT '  You must be the sa to run this test'
-        RETURN 1
+        RETURN
     END
 
 /*
     -- Clean up mess if previous test failed; need to find and set the file id first
-    SET @T3_fileid = 203
+    DECLARE @T3_project nvarchar(16) = 'p1__',
+            @T3_mfgr nvarchar(16) = 'Telonics',
+            @T3_collar1 nvarchar(16) = 'c1__',
+            @T3_file nvarchar(16) = 'f1__',
+            @T3_fileId int
+    SELECT @T3_fileId = fileid from collarfiles where filename = @T3_file
     EXEC [dbo].[CollarFile_Delete] @T3_fileid
     DELETE CollarDeployments Where [ProjectId] = @T3_project 
     DELETE Collars where CollarManufacturer = @T3_mfgr and CollarId = @T3_collar1
-    Delete Animals where ProjectId = @T3_project -- SP checks if user is in role, which sa is not
+    DELETE Animals where ProjectId = @T3_project -- SP checks if user is in role, which sa is not
     EXEC [dbo].[Project_Delete] @T3_project
-    return 1
 */
 
     --Check to make sure we are not going to overwrite any data
@@ -1458,7 +1462,7 @@ Check illegal modifications of deployment
     OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T3_mfgr AND [CollarId] = @T3_collar1)
     BEGIN
         PRINT '  Aborting tests.  Existing data conflicts with test data.'
-        RETURN 1
+        RETURN
     END
     
     -- Add the sa is a project investigator
@@ -1502,7 +1506,7 @@ Check illegal modifications of deployment
        OR     EXISTS (SELECT 1 from Movements Where [ProjectId] = @T3_project AND [AnimalId] = @T3_animal1)
     BEGIN
         PRINT '  Test data not initialized properly'
-        RETURN 1
+        RETURN
     END
     
     
@@ -1515,7 +1519,7 @@ Check illegal modifications of deployment
        OR NOT EXISTS (SELECT 1 from CollarFixes Where [FixId] = @T3_fix6 AND [HiddenBy] IS NULL)
     BEGIN
         PRINT '  Fixes not initialized properly'
-        RETURN 1
+        RETURN
     END
 
     -- Check initial Locations
@@ -1526,7 +1530,7 @@ Check illegal modifications of deployment
        OR     EXISTS (SELECT 1 from Locations Where [ProjectId] = @T3_project AND [AnimalId] = @T3_animal1 AND [FixId] NOT IN (@T3_fix2,@T3_fix5,@T3_fix6))
     BEGIN
         PRINT '  Locations not initialized properly'
-        RETURN 1
+        RETURN
     END
 
     
@@ -1721,7 +1725,7 @@ Check illegal modifications of deployment
        OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @T3_project AND [AnimalId] = @T3_animal1)
     BEGIN
         PRINT 'Test data not completely removed'
-        RETURN 1
+        RETURN
     END
 
     -- Remove the sa from project investigator
@@ -1766,18 +1770,22 @@ Check illegal modifications of deployment
     IF ORIGINAL_LOGIN() <> @T4_sa
     BEGIN
         PRINT '  You must be the sa to run this test'
-        RETURN 1
+        RETURN
     END
 
 /*
     -- Clean up mess if previous test failed; need to find and set the file id first
-    SET @T4_fileid = 133
+    DECLARE @T4_project nvarchar(16) = 'p1__',
+            @T4_mfgr nvarchar(16) = 'Telonics',
+            @T4_collar nvarchar(16) = 'c1__',
+            @T4_file nvarchar(16) = 'f1__',
+            @T4_fileId int
+    SELECT @T4_fileId = fileid from collarfiles where filename = @T4_file
     EXEC [dbo].[CollarFile_Delete] @T4_fileid
     DELETE CollarDeployments Where [ProjectId] = @T4_project 
     DELETE Collars where CollarManufacturer = @T4_mfgr and CollarId = @T4_collar
-    Delete Animals where ProjectId = @T4_project -- SP checks if user is in role, which sa is not
+    DELETE Animals where ProjectId = @T4_project -- SP checks if user is in role, which sa is not
     EXEC [dbo].[Project_Delete] @T4_project
-    return 1
 */
 
     --Check to make sure we are not going to overwrite any data
@@ -1785,7 +1793,7 @@ Check illegal modifications of deployment
     OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T4_mfgr AND [CollarId] = @T4_collar)
     BEGIN
         PRINT '  Aborting tests.  Existing data conflicts with test data.'
-        RETURN 1
+        RETURN
     END
     
     -- Add the sa is a project investigator
@@ -1824,7 +1832,7 @@ Check illegal modifications of deployment
        OR     EXISTS (SELECT 1 from Movements Where [ProjectId] = @T4_project AND [AnimalId] = @T4_animal)
     BEGIN
         PRINT '  Test data not initialized properly'
-        RETURN 1
+        RETURN
     END
     
 
@@ -2183,7 +2191,7 @@ Check illegal modifications of deployment
        OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @T4_project AND [AnimalId] = @T4_animal)
     BEGIN
         PRINT 'Test data not completely removed'
-        RETURN 1
+        RETURN
     END
 
     -- Remove the sa from project investigator
@@ -2232,18 +2240,22 @@ END
     IF ORIGINAL_LOGIN() <> @T5_sa
     BEGIN
         PRINT '  You must be the sa to run this test'
-        RETURN 1
+        RETURN
     END
 
 /*
     -- Clean up mess if previous test failed; need to find and set the file id first
-    SET @T5_fileid = 140
+    DECLARE @T5_project nvarchar(16) = 'p1__',
+            @T5_mfgr nvarchar(16) = 'Telonics',
+            @T5_collar nvarchar(16) = 'c1__',
+            @T5_file nvarchar(16) = 'f1__',
+            @T5_fileId int
+    SELECT @T5_fileId = fileid from collarfiles where filename = @T5_file
     EXEC [dbo].[CollarFile_Delete] @T5_fileid
     DELETE CollarDeployments Where [ProjectId] = @T5_project 
     DELETE Collars where CollarManufacturer = @T5_mfgr and CollarId = @T5_collar
-    Delete Animals where ProjectId = @T5_project -- SP checks if user is in role, which sa is not
+    DELETE Animals where ProjectId = @T5_project -- SP checks if user is in role, which sa is not
     EXEC [dbo].[Project_Delete] @T5_project
-    return 1
 */
 
     --Check to make sure we are not going to overwrite any data
@@ -2251,7 +2263,7 @@ END
     OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T5_mfgr AND [CollarId] = @T5_collar)
     BEGIN
         PRINT '  Aborting tests.  Existing data conflicts with test data.'
-        RETURN 1
+        RETURN
     END
     
     -- Add the sa is a project investigator
@@ -2283,7 +2295,7 @@ END
        OR     EXISTS (SELECT 1 from Movements Where [ProjectId] = @T5_project AND [AnimalId] = @T5_animal)
     BEGIN
         PRINT '  Test data not initialized properly'
-        RETURN 1
+        RETURN
     END
     
 
@@ -2937,7 +2949,7 @@ END
        OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @T5_project AND [AnimalId] = @T5_animal)
     BEGIN
         PRINT 'Test data not completely removed'
-        RETURN 1
+        RETURN
     END
 
     -- Remove the sa from project investigator
@@ -3042,7 +3054,7 @@ END
     IF ORIGINAL_LOGIN() <> @T6_sa
     BEGIN
         PRINT '  You must be the sa to run this test'
-        RETURN 1
+        RETURN
     END
 
     -- Add the sa is a project investigator
@@ -3079,7 +3091,7 @@ END
     IF (@@ROWCOUNT <> 2)
     BEGIN
         PRINT '  Unable to initialize test'
-        RETURN 1
+        RETURN
     END
     
 
