@@ -12,18 +12,6 @@
       <Column Name="[Number of Fixes]" Member="Number_of_Fixes" Type="System.Int32" DbType="Int" CanBeNull="true" />
     </Type>
   </Table>
-  <Table Name="dbo.DownloadableCollars" Member="DownloadableCollars">
-    <Type Name="DownloadableCollar">
-      <Column Name="ProjectId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
-      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
-      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
-      <Column Name="Email" Type="System.String" DbType="NVarChar(200) NOT NULL" CanBeNull="false" />
-      <Column Name="UserName" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
-      <Column Name="Password" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
-      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
-      <Column Name="Days" Type="System.Int32" DbType="Int" CanBeNull="true" />
-    </Type>
-  </Table>
   <Table Name="dbo.DownloadableAndAnalyzableCollars" Member="DownloadableAndAnalyzableCollars">
     <Type Name="DownloadableAndAnalyzableCollar">
       <Column Name="ProjectId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />

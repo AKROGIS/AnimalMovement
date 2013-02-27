@@ -18,7 +18,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Add more unit testing.
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
-//TODO - DATABASE - Remove unused views from database, put them in an external file.
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
 
 //FIXME - Deleting multiple files and subfile in one operation fails, and corrupts datamodel. - Fix with heirarchy
