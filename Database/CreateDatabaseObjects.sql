@@ -876,8 +876,8 @@ BEGIN
 	   INNER JOIN deleted as D
 			   ON L.ProjectId = D.ProjectId
 			  AND L.AnimalId = D.AnimalId
-			  AND L.FixDate > D.DeploymentDate
-			  AND (D.RetrievalDate IS NULL OR L.FixDate < D.RetrievalDate)
+			  AND L.FixDate >= D.DeploymentDate
+			  AND (D.RetrievalDate IS NULL OR L.FixDate <= D.RetrievalDate)
 END
 GO
 SET ANSI_NULLS ON
