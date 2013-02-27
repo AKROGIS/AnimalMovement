@@ -87,13 +87,28 @@
      HAVING COUNT(FixDate) > 1
 
 
+----------- ERROR_AnimalsWithOverlappingDeployments
+     SELECT CD1.ProjectId, CD1.AnimalId,
+            CD1.DeploymentId, CD1.CollarManufacturer, CD1.CollarId, CD1.DeploymentDate, CD1.RetrievalDate,
+            CD2.DeploymentId, CD2.CollarManufacturer, CD2.CollarId, CD2.DeploymentDate, CD2.RetrievalDate
+       FROM CollarDeployments AS CD1
+ INNER JOIN CollarDeployments AS CD2
+         ON CD1.ProjectId = CD2.ProjectId AND CD1.AnimalId = CD2.AnimalId
+      WHERE (CD1.CollarManufacturer <> CD2.CollarManufacturer OR CD1.CollarId <> CD2.CollarId)
+        AND (CD1.DeploymentDate <= CD2.DeploymentDate AND (CD2.DeploymentDate <= CD1.RetrievalDate OR CD1.RetrievalDate IS NULL)
+         OR CD2.DeploymentDate <= CD1.DeploymentDate AND (CD1.DeploymentDate <= CD2.RetrievalDate OR CD2.RetrievalDate IS NULL))
+
+
 ----------- ERROR_CollarsWithOverlappingDeployments
-     SELECT CD1.*, CD2.DeploymentDate AS DeploymentDate2, CD2.RetrievalDate AS RetrievalDate2 
+     SELECT CD1.CollarManufacturer, CD1.CollarId,
+            CD1.DeploymentId, CD1.ProjectId, CD1.AnimalId, CD1.DeploymentDate, CD1.RetrievalDate,
+            CD2.DeploymentId, CD2.ProjectId, CD2.AnimalId, CD2.DeploymentDate, CD2.RetrievalDate
        FROM CollarDeployments AS CD1
  INNER JOIN CollarDeployments AS CD2
          ON CD1.CollarManufacturer = CD2.CollarManufacturer AND CD1.CollarId = CD2.CollarId
-      WHERE CD1.DeploymentDate < CD2.DeploymentDate
-        AND CD1.RetrievalDate >= CD2.DeploymentDate
+      WHERE (CD1.ProjectId <> CD2.ProjectId OR CD1.AnimalId <> CD2.AnimalId)
+        AND (CD1.DeploymentDate <= CD2.DeploymentDate AND (CD2.DeploymentDate <= CD1.RetrievalDate OR CD1.RetrievalDate IS NULL)
+         OR CD2.DeploymentDate <= CD1.DeploymentDate AND (CD1.DeploymentDate <= CD2.RetrievalDate OR CD2.RetrievalDate IS NULL))
 
 
 ----------- ERROR_FixesWhichShouldBeLocations
