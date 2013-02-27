@@ -298,7 +298,11 @@
             @T1_fix21 bigint,
             @T1_fix22 bigint,
             @T1_fix23 bigint,
-            @T1_fix_l bigint
+            @T1_fix_l bigint,
+            @T1_deploy1 int,
+            @T1_deploy2 int,
+            @T1_deploy3 int,
+            @T1_deploy4 int
             
     -- This test must be run as SA, since others cannot operate on table directly
     -- This test the integrity of the tables underlying the Store Procedures available to users.
@@ -307,18 +311,24 @@
     IF ORIGINAL_LOGIN() <> @T1_sa
     BEGIN
         PRINT '  You must be the sa to run this test'
-        RETURN 1
+        RETURN
     END
 
 /*
     -- Clean up mess if previous test failed; need to find and set the file id first
-    SET @T1_fileid = 140
-    EXEC [dbo].[CollarFile_Delete] @T1_fileid
+    DECLARE @T1_project nvarchar(16) = 'p1__',
+            @T1_mfgr nvarchar(16) = 'Telonics',
+            @T1_collar1 nvarchar(16) = 'c1__',
+            @T1_collar2 nvarchar(16) = 'c2__',
+            @T1_file1 nvarchar(16) = 'f1__',
+            @T1_file2 nvarchar(16) = 'f2__'
+    select fileid from collarfiles where filename IN (@T1_file1, @T1_file2)
+    EXEC [dbo].[CollarFile_Delete] 879
+    EXEC [dbo].[CollarFile_Delete] 880
     DELETE CollarDeployments Where [ProjectId] = @T1_project 
-    DELETE Collars where CollarManufacturer = @T1_mfgr and CollarId = @T1_collar
+    DELETE Collars where CollarManufacturer = @T1_mfgr and CollarId IN (@T1_collar1,@T1_collar2)
     Delete Animals where ProjectId = @T1_project -- SP checks if user is in role, which sa is not
     EXEC [dbo].[Project_Delete] @T1_project
-    return 1
 */
 
     --Check to make sure we are not going to overwrite any data
@@ -326,7 +336,7 @@
     OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T1_mfgr AND [CollarId] IN (@T1_collar1,@T1_collar2))
     BEGIN
         PRINT '  Aborting tests.  Existing data conflicts with test data.'
-        RETURN 1
+        RETURN
     END
     
     -- Add the sa is a project investigator
@@ -379,7 +389,7 @@
        OR     EXISTS (SELECT 1 from Movements Where [ProjectId] = @T1_project AND [AnimalId] IN (@T1_animal1, @T1_animal2))
     BEGIN
         PRINT '  Test data not initialized properly'
-        RETURN 1
+        RETURN
     END
     
 
@@ -389,9 +399,13 @@
     SET @T1_test = '  Test1: multiple valid deployments: '
     --Action
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-11 12:00'
+    SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:01'
+    SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-11 12:01'
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar2, '2012-05-10 12:00', '2012-05-11 12:00'
+    SELECT @T1_deploy3 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-10 12:00'
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:01'
+    SELECT @T1_deploy4 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:01'
     --Test
     SET @T1_msg = ''
 
@@ -444,18 +458,20 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:01'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar2, '2012-05-10 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:01'
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy3
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy4
     
 
     -- Test2
     SET @T1_test = '  Test2: 2 collars on 1 animal Rdate1 = null : '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', NULL
+    SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
+		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
     END TRY
     BEGIN CATCH
@@ -465,16 +481,18 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
         
     -- Test3
     SET @T1_test = '  Test3: 2 collars on 1 animal Rdate1 <> null : '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-12 12:00'
+    SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
+		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
     END TRY
     BEGIN CATCH
@@ -484,16 +502,17 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
-
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
     -- Test4
     SET @T1_test = '  Test4: 2 collars on 1 animal Rdate1 = Ddate2 : '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-11 12:00'
+    SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
+		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
     END TRY
     BEGIN CATCH
@@ -503,16 +522,18 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
 
     -- Test5
     SET @T1_test = '  Test5: 1 collar on 2 animals Rdate1 = null: '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', NULL
+    SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
+		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
     END TRY
     BEGIN CATCH
@@ -522,16 +543,18 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
         
         
     -- Test6
     SET @T1_test = '  Test6: 1 collar on 2 animals Rdate1 <> null: '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-12 12:00'
+    SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
+		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
     END TRY
     BEGIN CATCH
@@ -541,16 +564,18 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
         
 
     -- Test7
     SET @T1_test = '  Test7: 1 collar on 2 animals Rdate1 <> Ddate2: '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-11 12:00'
+    SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
+		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
     END TRY
     BEGIN CATCH
@@ -560,8 +585,8 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
 
     -- Test8
@@ -569,6 +594,7 @@
     --Action/Test
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-10 12:00'
+		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
         SET @T1_msg = 'Failed'
     END TRY
     BEGIN CATCH
@@ -578,7 +604,7 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
 
     -- Test9
@@ -586,6 +612,7 @@
     --Action/Test
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-11 12:00', '2012-05-10 12:00'
+		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
     END TRY
     BEGIN CATCH
@@ -595,7 +622,7 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
 
     -- Clean up
@@ -621,7 +648,7 @@
        OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @T1_project AND [AnimalId] IN (@T1_animal1, @T1_animal2))
     BEGIN
         PRINT 'Test data not completely removed'
-        RETURN 1
+        RETURN
     END
 
     -- Remove the sa from project investigator
