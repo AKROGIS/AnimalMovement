@@ -1,3 +1,11 @@
+/***************************************************************
+ * Tests for database code
+ *
+ * You can run all these tests in one go by executing the file
+ * or you can run a test by itself (all tests are independent)
+ *
+ **************************************************************/
+
 
 --  ************************************************************
     PRINT 'Test_Function_DoDateRangesOverlap'
@@ -226,6 +234,7 @@
         SET @F1_RESULT = 'Pass' ELSE SET @F1_RESULT = 'Fail'
     print '  9  (' + ISNULL(CONVERT(NVARCHAR(32),Year(@F1_StartDate1)),'NULL') +',' + ISNULL(CONVERT(NVARCHAR(32),Year(@F1_EndDate1)),'NULL') + ') TO (' + ISNULL(CONVERT(NVARCHAR(32),Year(@F1_StartDate2)),'NULL') +',' + ISNULL(CONVERT(NVARCHAR(32),Year(@F1_EndDate2)),'NULL') + ') '+ @F1_OVERLAP + '.  ' + @F1_RESULT
 
+    PRINT '  Done'
 
 
 
@@ -243,6 +252,7 @@
     
     PRINT '  Test not written yet'
 
+    PRINT '  Done'
 
 
 
@@ -260,8 +270,7 @@
 
     PRINT '  See Test_Trigger_CollarDeployments_Insert'
 
-
-
+    PRINT '  Done'
 
 
 
@@ -475,6 +484,7 @@
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
+	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
         SET @T1_msg = 'Passed'
@@ -484,7 +494,6 @@
     PRINT @T1_msg
     --Reset
     EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
-    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
         
     -- Test3
@@ -496,6 +505,7 @@
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
+	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
         SET @T1_msg = 'Passed'
@@ -505,7 +515,6 @@
     PRINT @T1_msg
     --Reset
     EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
-    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
     -- Test4
     SET @T1_test = '  Test4: 2 collars on 1 animal Rdate1 = Ddate2 : '
@@ -516,6 +525,7 @@
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
+	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
         SET @T1_msg = 'Passed'
@@ -525,7 +535,6 @@
     PRINT @T1_msg
     --Reset
     EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
-    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
 
     -- Test5
@@ -537,6 +546,7 @@
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
+	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
         SET @T1_msg = 'Passed'
@@ -546,7 +556,6 @@
     PRINT @T1_msg
     --Reset
     EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
-    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
         
         
     -- Test6
@@ -558,6 +567,7 @@
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
+	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
         SET @T1_msg = 'Passed'
@@ -567,7 +577,6 @@
     PRINT @T1_msg
     --Reset
     EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
-    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
         
 
     -- Test7
@@ -579,6 +588,7 @@
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
+	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
         SET @T1_msg = 'Passed'
@@ -588,7 +598,6 @@
     PRINT @T1_msg
     --Reset
     EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
-    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
 
 
     -- Test8
@@ -598,6 +607,7 @@
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-10 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
         SET @T1_msg = 'Failed'
+	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
         SET @T1_msg = 'Passed'
@@ -606,8 +616,7 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
-
+	--  nothing
 
     -- Test9
     SET @T1_test = '  Test9: Rdate < Ddate: '
@@ -616,6 +625,7 @@
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-11 12:00', '2012-05-10 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
         SET @T1_msg = 'Failed'
+	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
         SET @T1_msg = 'Passed'
@@ -624,7 +634,7 @@
     SET @T1_msg = @T1_test + @T1_msg
     PRINT @T1_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
+	--  nothing
 
 
     -- Clean up
@@ -656,6 +666,7 @@
     -- Remove the sa from project investigator
     DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @T1_sa
 
+    PRINT '  Done'
 
 
 
@@ -1383,6 +1394,7 @@ Check illegal modifications of deployment
     -- Remove the sa from project investigator
     DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @T2_sa
 
+    PRINT '  Done'
 
 
 
@@ -1731,6 +1743,7 @@ Check illegal modifications of deployment
     -- Remove the sa from project investigator
     DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @T3_sa
 
+    PRINT '  Done'
 
 
 
@@ -1761,7 +1774,9 @@ Check illegal modifications of deployment
             @T4_fileid int,
             @T4_date datetime2,
             @T4_fix1 bigint,
-            @T4_fix2 bigint
+            @T4_fix2 bigint,
+            @T4_deploy1 int,
+            @T4_deploy2 int
             
     -- This test must be run as SA, since others cannot operate on table directly
     -- This test the integrity of the tables underlying the Store Procedures available to users.
@@ -1867,6 +1882,7 @@ Check illegal modifications of deployment
     SET @T4_test = '  Test2: 6 Fixes, Deployment starts after first fix: '
     --Action
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-11 12:00'
+	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-11 12:00'
     EXEC [dbo].[CollarFixes_Insert] @T4_fileid, @T4_format
     --Test
     SET @T4_msg = ''
@@ -1893,7 +1909,7 @@ Check illegal modifications of deployment
     SET @T4_msg = @T4_test + @T4_msg
     PRINT @T4_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy1
     EXEC [dbo].[CollarFixes_Delete] @T4_fileid
     
     
@@ -1901,6 +1917,7 @@ Check illegal modifications of deployment
     SET @T4_test = '  Test3: 6 Fixes, Deployment starts after first fix end before last fix: '
     --Action
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-11 12:00', '2012-05-15 12:00'
+	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-11 12:00'
     EXEC [dbo].[CollarFixes_Insert] @T4_fileid, @T4_format
     --Test
     SET @T4_msg = ''
@@ -1927,7 +1944,7 @@ Check illegal modifications of deployment
     SET @T4_msg = @T4_test + @T4_msg
     PRINT @T4_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy1
     EXEC [dbo].[CollarFixes_Delete] @T4_fileid
     
     
@@ -1935,6 +1952,7 @@ Check illegal modifications of deployment
     SET @T4_test = '  Test4: 6 Fixes, Deployment after last fix: '
     --Action
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-20 12:00', '2012-05-25 12:00'
+	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-20 12:00'
     EXEC [dbo].[CollarFixes_Insert] @T4_fileid, @T4_format
     --Test
     SET @T4_msg = ''
@@ -1955,7 +1973,7 @@ Check illegal modifications of deployment
     SET @T4_msg = @T4_test + @T4_msg
     PRINT @T4_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-20 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy1
     EXEC [dbo].[CollarFixes_Delete] @T4_fileid
     
     
@@ -1963,7 +1981,9 @@ Check illegal modifications of deployment
     SET @T4_test = '  Test5: 2 Deployment before and after middle fixes: '
     --Action
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-05 12:00', '2012-05-12 12:00'
+	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-05 12:00'
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-14 12:00', '2012-05-25 12:00'
+	SELECT @T4_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-14 12:00'
     EXEC [dbo].[CollarFixes_Insert] @T4_fileid, @T4_format
     --Test
     SET @T4_msg = ''
@@ -1991,8 +2011,8 @@ Check illegal modifications of deployment
     SET @T4_msg = @T4_test + @T4_msg
     PRINT @T4_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-05 12:00'
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-14 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy1
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy2
     EXEC [dbo].[CollarFixes_Delete] @T4_fileid
     
     
@@ -2001,6 +2021,7 @@ Check illegal modifications of deployment
     --Action
     EXEC [dbo].[Animal_Update] @T4_project, @T4_animal,null,null,'2012-05-15 12:00'
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-11 12:00'
+	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-11 12:00'
     EXEC [dbo].[CollarFixes_Insert] @T4_fileid, @T4_format
     --Test
     SET @T4_msg = ''
@@ -2027,7 +2048,7 @@ Check illegal modifications of deployment
     SET @T4_msg = @T4_test + @T4_msg
     PRINT @T4_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy1
     EXEC [dbo].[CollarFixes_Delete] @T4_fileid
     EXEC [dbo].[Animal_Update] @T4_project, @T4_animal,null,null,null
     
@@ -2037,6 +2058,7 @@ Check illegal modifications of deployment
     --Action
     EXEC [dbo].[Animal_Update] @T4_project, @T4_animal,null,null,'2012-05-15 12:00'
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-11 12:00', '2012-05-14 12:00'
+	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-11 12:00'
     EXEC [dbo].[CollarFixes_Insert] @T4_fileid, @T4_format
     --Test
     SET @T4_msg = ''
@@ -2063,7 +2085,7 @@ Check illegal modifications of deployment
     SET @T4_msg = @T4_test + @T4_msg
     PRINT @T4_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy1
     EXEC [dbo].[CollarFixes_Delete] @T4_fileid
     EXEC [dbo].[Animal_Update] @T4_project, @T4_animal,null,null,null
 
@@ -2074,6 +2096,7 @@ Check illegal modifications of deployment
     INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T4_fileid, 7, '2012-05-11', '60.7', '-154.7', 'Fix Available')
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-10 12:00'
+	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-10 12:00'
     EXEC [dbo].[CollarFixes_Insert] @T4_fileid, @T4_format
     --Test
     SET @T4_msg = ''
@@ -2104,7 +2127,7 @@ Check illegal modifications of deployment
     SET @T4_msg = @T4_test + @T4_msg
     PRINT @T4_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-10 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy1
     EXEC [dbo].[CollarFixes_Delete] @T4_fileid
 
     
@@ -2120,6 +2143,7 @@ Check illegal modifications of deployment
                 (@T4_fileid, 5, '2012-05-13', '60.5', '-154.5', 'Fix Available'),
                 (@T4_fileid, 6, '2012-05-13', '60.6', '-154.6', 'Fix Available');
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-10 12:00'
+	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-10 12:00'
     EXEC [dbo].[CollarFixes_Insert] @T4_fileid, @T4_format
     --Test
     SET @T4_msg = ''
@@ -2166,7 +2190,7 @@ Check illegal modifications of deployment
     SET @T4_msg = @T4_test + @T4_msg
     PRINT @T4_msg
     --Reset
-    EXEC [dbo].[CollarDeployment_Delete] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-10 12:00'
+    EXEC [dbo].[CollarDeployment_Delete] @T4_deploy1
     EXEC [dbo].[CollarFixes_Delete] @T4_fileid
     
     
@@ -2196,9 +2220,8 @@ Check illegal modifications of deployment
 
     -- Remove the sa from project investigator
     DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @T4_sa
-    
-END
 
+    PRINT '  Done'
 
 
 
@@ -2231,7 +2254,8 @@ END
             @T5_fix2 bigint,
             @T5_fix3 bigint,
             @T5_fix4 bigint,
-            @T5_fix_l bigint
+            @T5_fix_l bigint,
+            @T5_deploy int
             
     -- This test must be run as SA, since others cannot operate on table directly
     -- This test the integrity of the tables underlying the Store Procedures available to users.
@@ -2278,7 +2302,8 @@ END
     EXEC [dbo].[Animal_Insert] @T5_project, @T5_animal
     EXEC [dbo].[Collar_Insert] @T5_mfgr, @T5_collar, @T5_model ,@T5_sa
     EXEC [dbo].[CollarDeployment_Insert] @T5_project, @T5_animal, @T5_mfgr, @T5_collar, '2012-05-10 12:00'
-    -- do not use the [dbo].[CollarFile_Insert] because it calls 
+ 	SELECT @T5_deploy = DeploymentId FROM CollarDeployments WHERE ProjectId = @T5_project and AnimalId = @T5_animal AND CollarManufacturer = @T5_mfgr AND CollarId = @T5_collar AND DeploymentDate = '2012-05-10 12:00'
+   -- do not use the [dbo].[CollarFile_Insert] because it calls 
     -- [dbo].[CollarData_Insert] which tries to read the binary contents field to populate fixes
     -- EXEC [dbo].[CollarFile_Insert] @T5_file, @T5_project, @T5_mfgr, @T5_collar,'A','I',NULL,@T5_fileid
     INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
@@ -2734,7 +2759,7 @@ END
     -- Mortality is null and retrieval date is not null (after hidden)
     SET @T5_test = '  Test5: Retrieve after hidden (4 hide 3 hide 2): '
     --Action
-    EXEC [dbo].[CollarDeployment_UpdateRetrievalDate] @T5_project, @T5_animal, @T5_mfgr, @T5_collar, '2012-05-10 12:00', '2012-05-12 12:00'
+    EXEC [dbo].[CollarDeployment_UpdateDates] @T5_deploy, '2012-05-10 12:00', '2012-05-12 12:00'
     Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T5_fileid
     INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T5_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
@@ -2834,7 +2859,7 @@ END
     -- Mortality is null and retrieval date is not null (before hidden)
     SET @T5_test = '  Test6: Retrieve before hidden (4 hide 3 hide 2): '
     --Action
-    EXEC [dbo].[CollarDeployment_UpdateRetrievalDate] @T5_project, @T5_animal, @T5_mfgr, @T5_collar, '2012-05-10 12:00', '2012-05-11 12:00'
+    EXEC [dbo].[CollarDeployment_UpdateDates] @T5_deploy, '2012-05-10 12:00', '2012-05-11 12:00'
     Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T5_fileid
     INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T5_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
@@ -2924,7 +2949,7 @@ END
     PRINT @T5_msg
     --Reset
     EXEC [dbo].[CollarFixes_Delete] @T5_fileid
-    EXEC [dbo].[CollarDeployment_UpdateRetrievalDate] @T5_project, @T5_animal, @T5_mfgr, @T5_collar, '2012-05-10 12:00', null
+    EXEC [dbo].[CollarDeployment_UpdateDates] @T5_deploy, '2012-05-10 12:00', null
 
 
 
@@ -2955,6 +2980,7 @@ END
     -- Remove the sa from project investigator
     DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @T5_sa
 
+    PRINT '  Done'
 
 
 
@@ -2972,6 +2998,7 @@ END
 
     PRINT '  Test not written yet'
 
+    PRINT '  Done'
 
 
 
@@ -2989,6 +3016,7 @@ END
 
     PRINT '  Test not written yet'
 
+    PRINT '  Done'
 
 
 
@@ -3006,6 +3034,7 @@ END
 
     PRINT '  Test not written yet (some testing in CollarFixes_Insert)'
 
+    PRINT '  Done'
 
 
 
@@ -3022,7 +3051,8 @@ END
 --  ============================================================
 
     PRINT '  Test not written yet'
-    
+
+    PRINT '  Done'
 
 
 
@@ -3036,6 +3066,9 @@ END
 --  Author:      Regan Sarwas
 --  Create date: June 11, 2012
 --  Description: Test the ProjectEditor DeleteTrigger
+--               *** You must set the variables below to two
+--               *** valid windows accounts that are not already
+--               *** editors in the database
 --  ============================================================
 
 	SET NOCOUNT ON
@@ -3057,19 +3090,19 @@ END
         RETURN
     END
 
+    --Check to make sure we are not going to overwrite any data
+    IF EXISTS (SELECT 1 from Projects Where [ProjectId] IN (@T6_p1, @T6_p2))
+    OR EXISTS (SELECT 1 from ProjectEditors Where [Editor] IN  (@T6_e1,@T6_e2))
+    BEGIN
+        PRINT '  Aborting tests.  Existing data conflicts with test data.'
+        RETURN
+    END
+
     -- Add the sa is a project investigator
     IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @T6_sa)
     BEGIN
         INSERT [dbo].[ProjectInvestigators] ([Login],[Name],[Email],[Phone]) VALUES (@T6_sa,@T6_sa,@T6_sa,@T6_sa)
     END
-
-    -- Make sure test projects/editors do not exist
-    DELETE Projects Where ProjectId in (@T6_p1, @T6_p2)
-    DELETE ProjectEditors Where Editor in (@T6_e1, @T6_e2)
-    IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @T6_e1)
-        EXEC ('DROP USER ['  + @T6_e1 + ']')
-    IF EXISTS (SELECT 1 from sys.database_principals WHERE type = 'U' AND name = @T6_e2)
-        EXEC ('DROP USER ['  + @T6_e2 + ']')
 
     -- Create clean test projects
     INSERT Projects (ProjectId, ProjectName, ProjectInvestigator) VALUES (@T6_p1, @T6_p1, @T6_sa)
@@ -3190,4 +3223,5 @@ END
 
     -- Remove the sa from project investigator
     DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @T6_sa
-    
+
+    PRINT '  Done'
