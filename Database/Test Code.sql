@@ -3007,6 +3007,244 @@ Check illegal modifications of deployment
 
 
 --  ************************************************************
+    PRINT 'Test_Trigger_AfterCollarsInsert'
+--  ************************************************************
+--  Author:	     Regan Sarwas
+--  Create date: Feb 27, 2013
+--  Description: Test the Collars Insert Trigger
+--  Business Rule(s) being tested:
+--    1) Collars that share a non-null Argos ID must have unique disposal dates
+--  ============================================================
+    
+	SET NOCOUNT ON
+    DECLARE
+            @T1_sa nvarchar(16) = 'sa',
+            @T1_mfgr nvarchar(16) = '__test__',
+            @T1_model nvarchar(16) = 'TelonicsGen4',
+            @T1_test nvarchar(255) = null,
+            @T1_msg nvarchar(255) = null
+            
+    -- This test must be run as SA to add the record to LookupCollarManufacturers
+    IF ORIGINAL_LOGIN() <> @T1_sa
+    BEGIN
+        PRINT '  You must be the sa to run this test'
+        RETURN
+    END
+
+/*
+    -- Clean up mess if previous test failed; need to find and set the file id first
+    DECLARE @T1_mfgr nvarchar(16) = '__test__'
+    DELETE Collars where CollarManufacturer = @T1_mfgr
+    DELETE LookupCollarManufacturers WHERE CollarManufacturer = @T1_mfgr
+*/
+
+    --Check to make sure we are not going to overwrite any data
+    IF EXISTS (SELECT 1 from LookupCollarManufacturers Where CollarManufacturer = @T1_mfgr)
+    BEGIN
+        PRINT '  Aborting tests.  Existing data conflicts with test data.'
+        RETURN
+    END
+    
+    -- Add the sa is a project investigator
+    IF NOT EXISTS(SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @T1_sa)
+    BEGIN
+        INSERT [dbo].[ProjectInvestigators] ([Login],[Name],[Email],[Phone]) VALUES (@T1_sa,@T1_sa,@T1_sa,@T1_sa)
+    END
+
+    -- Setup for test
+    INSERT INTO LookupCollarManufacturers ([CollarManufacturer]) VALUES (@T1_mfgr)
+
+    -- Check initial conditions
+    IF NOT EXISTS (SELECT 1 from LookupCollarManufacturers Where CollarManufacturer = @T1_mfgr)
+    BEGIN
+        PRINT '  Test data not initialized properly'
+        RETURN
+    END
+    
+
+    -- Do tests	
+
+    -- Test1a
+    SET @T1_test = '  Test1a: Insert collar null argos, null dispdate (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_1a', @T1_model, @AlternativeId = NULL, @DisposalDate = NULL 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test2a
+    SET @T1_test = '  Test2a: Insert collar non-null argos, null dispdate (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_2a', @T1_model, @AlternativeId = '2a', @DisposalDate = NULL 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test2b
+    SET @T1_test = '  Test2b: Insert collar non-null argos, null dispdate - no argos conflict (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_2b', @T1_model, @AlternativeId = '2b', @DisposalDate = NULL 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+	 
+    -- Test2c
+    SET @T1_test = '  Test2c: Insert collar non-null argos, null dispdate - argos conflict (bad): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_2c', @T1_model, NULL, '2b', NULL, NULL, NULL, NULL, NULL 
+        SET @T1_msg = '  Fail' + @T1_test + 'Insert succeeded'
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Pass' + @T1_test
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test3a
+    SET @T1_test = '  Test3a: Insert collar null argos, non-null dispdate (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_3a', @T1_model, @AlternativeId = NULL, @DisposalDate = '2012-02-03' 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test3b
+    SET @T1_test = '  Test3b: Insert collar null argos, non-null dispdate - no date conflict (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_3b', @T1_model, @AlternativeId = NULL, @DisposalDate = '2012-02-04' 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test3c
+    SET @T1_test = '  Test3c: Insert collar null argos, non-null dispdate - date conflict (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_3c', @T1_model, @AlternativeId = NULL, @DisposalDate = '2012-02-04' 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test4a
+    SET @T1_test = '  Test4a: Insert collar non-null argos, non-null dispdate (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_4a', @T1_model, @AlternativeId = '4a', @DisposalDate = '2012-02-03' 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test4b
+    SET @T1_test = '  Test4b: Insert collar non-null argos, non-null dispdate - no conflict (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_4b', @T1_model, @AlternativeId = '4b', @DisposalDate = '2012-02-04' 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test4c
+    SET @T1_test = '  Test4c: Insert collar non-null argos, non-null dispdate - argos conflict (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_4c', @T1_model, @AlternativeId = '4b', @DisposalDate = '2012-02-05' 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test4d
+    SET @T1_test = '  Test4d: Insert collar non-null argos, non-null dispdate - date conflict (ok): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_4d', @T1_model, @AlternativeId = '4d', @DisposalDate = '2012-02-05' 
+        SET @T1_msg = '  Pass' + @T1_test
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Fail' + @T1_test + ERROR_MESSAGE()
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+    -- Test4e
+    SET @T1_test = '  Test4e: Insert collar non-null argos, non-null dispdate - both conflict (bad): '
+    --Action/Test
+    BEGIN TRY
+		EXEC [dbo].[Collar_Insert] @T1_mfgr, 'c_4e', @T1_model, NULL, '4d', NULL, NULL, NULL, NULL, '2012-02-05' 
+        SET @T1_msg = '  Fail' + @T1_test + 'Insert succeeded'
+    END TRY
+    BEGIN CATCH
+        SET @T1_msg = '  Pass' + @T1_test
+    END CATCH
+    --Report
+    PRINT @T1_msg
+
+
+    -- Clean up
+    PRINT '  Cleaning up'
+    DELETE Collars where CollarManufacturer = @T1_mfgr
+    DELETE LookupCollarManufacturers WHERE CollarManufacturer = @T1_mfgr
+
+    -- Check that cleanup worked
+    IF    EXISTS (SELECT 1 from LookupCollarManufacturers Where CollarManufacturer = @T1_mfgr)
+    BEGIN
+        PRINT 'Test data not completely removed'
+        RETURN
+    END
+
+    -- Remove the sa from project investigator
+    DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @T1_sa
+
+    PRINT '  Done'
+
+
+
+
+
+
+
+--  ************************************************************
     PRINT 'Test_Trigger_Locations_Delete'
 --  ************************************************************
 --  Author:	     Regan Sarwas

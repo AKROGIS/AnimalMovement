@@ -776,6 +776,39 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:      Regan Sarwas
+-- Create date: Feb 27, 2013
+-- Description: Ensure Data integerity on Collar Insert
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarInsert] 
+			ON [dbo].[Collars] 
+			AFTER INSERT
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Business Rule: Collars that share an (non-null) Argos ID must have unique disposal dates
+	
+	IF EXISTS (    SELECT 1
+	                 FROM inserted AS i
+	           INNER JOIN Collars AS C
+	                   ON i.AlternativeId = C.AlternativeId
+	                WHERE i.AlternativeId IS NOT NULL
+	                  AND (i.DisposalDate = C.DisposalDate OR (i.DisposalDate IS NULL AND C.DisposalDate IS NULL))
+	                  AND NOT (i.CollarManufacturer = C.CollarManufacturer AND i.CollarId = C.CollarId)
+              )
+	BEGIN
+		RAISERROR('Collar Integrity Violation. Collars that share a non-null Argos ID must have unique disposal dates.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
 -- Create date: Feb 20, 2013
 -- Description: Add/Remove Locations when Disposal Date is updated
 -- =============================================
