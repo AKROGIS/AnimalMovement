@@ -3925,7 +3925,7 @@ BEGIN
 
 	IF @ProjectID IS NULL
 	BEGIN
-			DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+@FileId+' in CollarFiles.';
+			DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+CAST(@FileId AS VARCHAR(10))+' in CollarFiles.';
 			RAISERROR(@message1, 18, 0)
 			RETURN (1)
 	END
