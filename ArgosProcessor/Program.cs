@@ -103,7 +103,7 @@ namespace ArgosProcessor
                 {
                     var argosId = platform;  // Use local (not foreach) variable in closure (for compiler version stability)
                     var collars = from collar in db.Collars
-                                  where collar.AlternativeId == argosId
+                                  where collar.ArgosId == argosId
                                   select
                                       String.Format("Collar: {0} DisposalDate: {1}", collar,
                                                     collar.DisposalDate.HasValue
@@ -156,11 +156,11 @@ namespace ArgosProcessor
                             message = String.Format(
                                 "Notice: Collar {0} (for shared argos Id {1}) had no messages.\n" +
                                 "  This is common for all but one of the collars that share an Argos Id.",
-                                collar, collar.AlternativeId);
+                                collar, collar.ArgosId);
                         else
                             message = String.Format(
                                 "ERROR: Collar {0} (Argos Id {1}) encountered a problem: {2}",
-                                collar, collar.AlternativeId, ex.Message);
+                                collar, collar.ArgosId, ex.Message);
                         error.AppendLine(message);
                     }
                 }

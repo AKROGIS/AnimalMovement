@@ -34,7 +34,7 @@
             this.NotesTextBox = new System.Windows.Forms.TextBox();
             this.OwnerTextBox = new System.Windows.Forms.TextBox();
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
-            this.AlternativeIdTextBox = new System.Windows.Forms.TextBox();
+            this.ArgosIdTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -52,6 +52,7 @@
             this.label10 = new System.Windows.Forms.Label();
             this.PeriodTextBox = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.HasGpsCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // cancelButton
@@ -105,22 +106,22 @@
             this.CollarIdTextBox.Location = new System.Drawing.Point(95, 93);
             this.CollarIdTextBox.MaxLength = 16;
             this.CollarIdTextBox.Name = "CollarIdTextBox";
-            this.CollarIdTextBox.Size = new System.Drawing.Size(257, 20);
+            this.CollarIdTextBox.Size = new System.Drawing.Size(259, 20);
             this.CollarIdTextBox.TabIndex = 13;
             this.toolTip1.SetToolTip(this.CollarIdTextBox, "Unique identifier provided by manufacturer.\r\nFor Telonics this is the CTN number." +
         "");
             this.CollarIdTextBox.TextChanged += new System.EventHandler(this.CollarIdTextBox_TextChanged);
             // 
-            // AlternativeIdTextBox
+            // ArgosIdTextBox
             // 
-            this.AlternativeIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.ArgosIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.AlternativeIdTextBox.Location = new System.Drawing.Point(95, 145);
-            this.AlternativeIdTextBox.MaxLength = 16;
-            this.AlternativeIdTextBox.Name = "AlternativeIdTextBox";
-            this.AlternativeIdTextBox.Size = new System.Drawing.Size(259, 20);
-            this.AlternativeIdTextBox.TabIndex = 15;
-            this.toolTip1.SetToolTip(this.AlternativeIdTextBox, "For Telonics collars this is the Argos Id");
+            this.ArgosIdTextBox.Location = new System.Drawing.Point(95, 145);
+            this.ArgosIdTextBox.MaxLength = 16;
+            this.ArgosIdTextBox.Name = "ArgosIdTextBox";
+            this.ArgosIdTextBox.Size = new System.Drawing.Size(188, 20);
+            this.ArgosIdTextBox.TabIndex = 15;
+            this.toolTip1.SetToolTip(this.ArgosIdTextBox, "For Telonics collars this is the Argos Id");
             // 
             // label5
             // 
@@ -214,9 +215,9 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(19, 148);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(72, 13);
+            this.label6.Size = new System.Drawing.Size(49, 13);
             this.label6.TabIndex = 26;
-            this.label6.Text = "Alternative Id:";
+            this.label6.Text = "Argos Id:";
             this.toolTip1.SetToolTip(this.label6, "For Telonics collars this is the Argos Id");
             // 
             // label7
@@ -291,6 +292,19 @@
             this.toolTip1.SetToolTip(this.PeriodTextBox, "Period (in minutes) between fixes.  Only for processing Argos messages from Telon" +
         "ics Gen 3 collars");
             // 
+            // HasGpsCheckBox
+            // 
+            this.HasGpsCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.HasGpsCheckBox.AutoSize = true;
+            this.HasGpsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.HasGpsCheckBox.Location = new System.Drawing.Point(287, 147);
+            this.HasGpsCheckBox.Name = "HasGpsCheckBox";
+            this.HasGpsCheckBox.Size = new System.Drawing.Size(67, 17);
+            this.HasGpsCheckBox.TabIndex = 84;
+            this.HasGpsCheckBox.Text = "Has Gps";
+            this.toolTip1.SetToolTip(this.HasGpsCheckBox, "Check this box if the collar has an onboard GPS");
+            this.HasGpsCheckBox.UseVisualStyleBackColor = true;
+            // 
             // AddCollarForm
             // 
             this.AcceptButton = this.CreateButton;
@@ -298,6 +312,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(376, 370);
+            this.Controls.Add(this.HasGpsCheckBox);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.PeriodTextBox);
             this.Controls.Add(this.label9);
@@ -315,7 +330,7 @@
             this.Controls.Add(this.NotesTextBox);
             this.Controls.Add(this.OwnerTextBox);
             this.Controls.Add(this.CollarIdTextBox);
-            this.Controls.Add(this.AlternativeIdTextBox);
+            this.Controls.Add(this.ArgosIdTextBox);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label2);
@@ -336,7 +351,7 @@
         private System.Windows.Forms.TextBox NotesTextBox;
         private System.Windows.Forms.TextBox OwnerTextBox;
         private System.Windows.Forms.TextBox CollarIdTextBox;
-        private System.Windows.Forms.TextBox AlternativeIdTextBox;
+        private System.Windows.Forms.TextBox ArgosIdTextBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label2;
@@ -354,6 +369,7 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox PeriodTextBox;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.CheckBox HasGpsCheckBox;
 
     }
 }

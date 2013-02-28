@@ -25,13 +25,13 @@ namespace ArgosProcessor
             if (pairs.Count == 0)
             {
                 var msg = String.Format("There are no undisposed collars with Argos Id {0} at time {1}",
-                                        collars[0].AlternativeId, date);
+                                        collars[0].ArgosId, date);
                 throw new InvalidOperationException(msg);
             }
             if (pairs.Count > 1 && pairs[0].timeSpan == pairs[1].timeSpan)
             {
                 var msg = String.Format("Error: collar {0} and {1} (both with Argos Id {2}) have identical disposal dates ({3}).",
-                                        pairs[0].collar, pairs[1].collar, pairs[0].collar.AlternativeId, pairs[0].collar.DisposalDate);
+                                        pairs[0].collar, pairs[1].collar, pairs[0].collar.ArgosId, pairs[0].collar.DisposalDate);
                 throw new InvalidOperationException(msg);
             }
             return pairs[0].collar;

@@ -97,10 +97,10 @@ namespace AnimalMovement
             //A collar is only required with a ppf file, which means a telonics gen 3 collar.
             //The AlternaitveID (i.e. Argos ID) is used as the identifier since the ppf files are usually named with the argos id.
             var query = Database.Collars.Where(c => c.ProjectInvestigator == owner && c.CollarModel == "TelonicsGen3"
-                && c.AlternativeId != null);
+                && c.ArgosId != null);
             var collars = query.ToList();
             CollarComboBox.DataSource = collars;
-            CollarComboBox.DisplayMember = "AlternativeId";
+            CollarComboBox.DisplayMember = "ArgosId";
         }
  
         private void EnableUpload()
@@ -188,7 +188,7 @@ namespace AnimalMovement
                     else
                         continue;
                 }
-                if (collar.AlternativeId != collar1.ArgosId || collar.Frequency != collar1.Frequency)
+                if (collar.ArgosId != collar1.ArgosId || collar.Frequency != collar1.Frequency)
                 {
                     string msg = String.Format(
                         "The database record for collar (CTN: {0})\n" +
@@ -196,7 +196,7 @@ namespace AnimalMovement
                         "Database Argos ID: {2}\n" + "TPF file Argos ID: {3}\n" +
                         "Database Frequency: {4}\n" + "TPF file Frequency: {5}\n" +
                         "This collar is being skipped.", collar1.Ctn, file,
-                        collar.AlternativeId, collar1.ArgosId, collar.Frequency ,collar1.Frequency);
+                        collar.ArgosId, collar1.ArgosId, collar.Frequency ,collar1.Frequency);
                     MessageBox.Show(msg, "Consistancy Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     continue;
                 }
@@ -277,7 +277,7 @@ namespace AnimalMovement
                 CollarManufacturer = "Telonics",
                 CollarId = tpfCollar.Ctn,
                 CollarModel = "TelonicsGen4",
-                AlternativeId = tpfCollar.ArgosId,
+                ArgosId = tpfCollar.ArgosId,
                 Frequency = tpfCollar.Frequency,
                 Manager = owner.Login
             };

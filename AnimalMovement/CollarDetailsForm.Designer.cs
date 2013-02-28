@@ -43,7 +43,7 @@
             this.NotesTextBox = new System.Windows.Forms.TextBox();
             this.OwnerTextBox = new System.Windows.Forms.TextBox();
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
-            this.AlternativeIdTextBox = new System.Windows.Forms.TextBox();
+            this.ArgosIdTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -63,6 +63,7 @@
             this.DeleteDeploymentButton = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.HasGpsCheckBox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.DisposalDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -164,10 +165,10 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(14, 36);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(72, 13);
+            this.label6.Size = new System.Drawing.Size(49, 13);
             this.label6.TabIndex = 46;
-            this.label6.Text = "Alternative Id:";
-            this.toolTip1.SetToolTip(this.label6, "For Telonics collars this is the Argos Id");
+            this.label6.Text = "Argos Id:";
+            this.toolTip1.SetToolTip(this.label6, "Leave this empty if the collar does not use the Argos system");
             // 
             // ManagerComboBox
             // 
@@ -233,16 +234,16 @@
             this.CollarIdTextBox.Size = new System.Drawing.Size(153, 20);
             this.CollarIdTextBox.TabIndex = 2;
             // 
-            // AlternativeIdTextBox
+            // ArgosIdTextBox
             // 
-            this.AlternativeIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.ArgosIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.AlternativeIdTextBox.Location = new System.Drawing.Point(90, 33);
-            this.AlternativeIdTextBox.MaxLength = 16;
-            this.AlternativeIdTextBox.Name = "AlternativeIdTextBox";
-            this.AlternativeIdTextBox.Size = new System.Drawing.Size(154, 20);
-            this.AlternativeIdTextBox.TabIndex = 5;
-            this.toolTip1.SetToolTip(this.AlternativeIdTextBox, "For Telonics collars this is the Argos Id");
+            this.ArgosIdTextBox.Location = new System.Drawing.Point(90, 33);
+            this.ArgosIdTextBox.MaxLength = 16;
+            this.ArgosIdTextBox.Name = "ArgosIdTextBox";
+            this.ArgosIdTextBox.Size = new System.Drawing.Size(81, 20);
+            this.ArgosIdTextBox.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.ArgosIdTextBox, "For Telonics collars this is the Argos Id");
             // 
             // label5
             // 
@@ -453,6 +454,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.HasGpsCheckBox);
             this.tabPage1.Controls.Add(this.label12);
             this.tabPage1.Controls.Add(this.DisposalDateTimePicker);
             this.tabPage1.Controls.Add(this.NotesTextBox);
@@ -463,7 +465,7 @@
             this.tabPage1.Controls.Add(this.label10);
             this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.PeriodTextBox);
-            this.tabPage1.Controls.Add(this.AlternativeIdTextBox);
+            this.tabPage1.Controls.Add(this.ArgosIdTextBox);
             this.tabPage1.Controls.Add(this.label9);
             this.tabPage1.Controls.Add(this.FrequencyTextBox);
             this.tabPage1.Controls.Add(this.OwnerTextBox);
@@ -480,6 +482,19 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // HasGpsCheckBox
+            // 
+            this.HasGpsCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.HasGpsCheckBox.AutoSize = true;
+            this.HasGpsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.HasGpsCheckBox.Location = new System.Drawing.Point(177, 35);
+            this.HasGpsCheckBox.Name = "HasGpsCheckBox";
+            this.HasGpsCheckBox.Size = new System.Drawing.Size(67, 17);
+            this.HasGpsCheckBox.TabIndex = 83;
+            this.HasGpsCheckBox.Text = "Has Gps";
+            this.toolTip1.SetToolTip(this.HasGpsCheckBox, "Check this box if the collar has an onboard GPS");
+            this.HasGpsCheckBox.UseVisualStyleBackColor = true;
             // 
             // label12
             // 
@@ -686,7 +701,7 @@
         private System.Windows.Forms.TextBox NotesTextBox;
         private System.Windows.Forms.TextBox OwnerTextBox;
         private System.Windows.Forms.TextBox CollarIdTextBox;
-        private System.Windows.Forms.TextBox AlternativeIdTextBox;
+        private System.Windows.Forms.TextBox ArgosIdTextBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label2;
@@ -719,5 +734,6 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.DateTimePicker DisposalDateTimePicker;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.CheckBox HasGpsCheckBox;
     }
 }

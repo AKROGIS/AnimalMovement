@@ -240,8 +240,8 @@ namespace ArgosProcessor
         private List<string> GetUnknownPlatforms()
         {
             var databasePlatforms = from collar in Database.Collars
-                                    where collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null
-                                    select collar.AlternativeId;
+                                    where collar.CollarManufacturer == "Telonics" && collar.ArgosId != null
+                                    select collar.ArgosId;
             return FilePlatforms.Except(databasePlatforms).ToList();
         }
 
@@ -250,7 +250,7 @@ namespace ArgosProcessor
         {
             var collars = new HashSet<Collar>(SharedArgosCollars.Values.SelectMany(c => c));
             collars.ExceptWith(UnambiguousSharedCollars);
-            return collars.Select(c => c.AlternativeId).Distinct().ToList();
+            return collars.Select(c => c.ArgosId).Distinct().ToList();
         }
 
 
@@ -304,9 +304,9 @@ namespace ArgosProcessor
         {
             var argosCollars = from collar in Database.Collars
                                where
-                                   collar.CollarManufacturer == "Telonics" && collar.AlternativeId != null &&
-                                   FilePlatforms.Contains(collar.AlternativeId)
-                               group collar by collar.AlternativeId;
+                                   collar.CollarManufacturer == "Telonics" && collar.ArgosId != null &&
+                                   FilePlatforms.Contains(collar.ArgosId)
+                               group collar by collar.ArgosId;
             return argosCollars.ToDictionary(group => group.Key, group => group.ToList());
         }
 

@@ -67,7 +67,8 @@ namespace AnimalMovement
             ModelComboBox.DataSource = Database.LookupCollarModels;
             ModelComboBox.DisplayMember = "CollarModel";
             ModelComboBox.SelectedItem = Collar.LookupCollarModel;
-            AlternativeIdTextBox.Text = Collar.AlternativeId;
+            ArgosIdTextBox.Text = Collar.ArgosId;
+            HasGpsCheckBox.Checked = Collar.HasGps;
             OwnerTextBox.Text = Collar.Owner;
             SerialNumberTextBox.Text = Collar.SerialNumber;
             FrequencyTextBox.Text = Collar.Frequency.HasValue ?  Collar.Frequency.Value.ToString(CultureInfo.InvariantCulture) : null;
@@ -124,7 +125,8 @@ namespace AnimalMovement
         {
             Collar.ProjectInvestigator = (ProjectInvestigator)ManagerComboBox.SelectedItem;
             Collar.LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem;
-            Collar.AlternativeId = AlternativeIdTextBox.Text;
+            Collar.ArgosId = ArgosIdTextBox.Text;
+            Collar.HasGps = HasGpsCheckBox.Checked;
             Collar.Owner = OwnerTextBox.Text;
             Collar.SerialNumber = SerialNumberTextBox.Text;
             Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull() ?? 0;
@@ -150,7 +152,8 @@ namespace AnimalMovement
             bool editModeEnabled = EditSaveButton.Text == "Save";
             ManagerComboBox.Enabled = editModeEnabled;
             ModelComboBox.Enabled = editModeEnabled;
-            AlternativeIdTextBox.Enabled = editModeEnabled;
+            ArgosIdTextBox.Enabled = editModeEnabled;
+            HasGpsCheckBox.Enabled = editModeEnabled;
             OwnerTextBox.Enabled = editModeEnabled;
             SerialNumberTextBox.Enabled = editModeEnabled;
             FrequencyTextBox.Enabled = editModeEnabled;

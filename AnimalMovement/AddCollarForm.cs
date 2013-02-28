@@ -107,10 +107,11 @@ namespace AnimalMovement
             int period;
             var collar = new Collar
                 {
-                    AlternativeId = AlternativeIdTextBox.Text.NullifyIfEmpty(),
+                    ArgosId = ArgosIdTextBox.Text.NullifyIfEmpty(),
                     CollarId = CollarIdTextBox.Text.NullifyIfEmpty(),
                     Gen3Period = Int32.TryParse(PeriodTextBox.Text, out period) ? period : (int?)null,
                     Frequency = FrequencyTextBox.Text.DoubleOrNull(),
+                    HasGps = HasGpsCheckBox.Checked,
                     LookupCollarManufacturer = (LookupCollarManufacturer)ManufacturerComboBox.SelectedItem,
                     LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem,
                     Notes = NotesTextBox.Text.NullifyIfEmpty(),
