@@ -293,7 +293,7 @@
             @T1_animal1 nvarchar(16) = 'a1__',
             @T1_animal2 nvarchar(16) = 'a2__',
             @T1_mfgr nvarchar(16) = 'Telonics',
-            @T1_model nvarchar(16) = 'TelonicsGen4',
+            @T1_model nvarchar(16) = 'Gen4',
             @T1_collar1 nvarchar(16) = 'c1__',
             @T1_collar2 nvarchar(16) = 'c2__',
             @T1_file1 nvarchar(16) = 'f1__',
@@ -716,7 +716,7 @@ Check illegal modifications of deployment
             @T2_animal1 nvarchar(16) = 'a1__',
             @T2_animal2 nvarchar(16) = 'a2__',
             @T2_mfgr nvarchar(16) = 'Telonics',
-            @T2_model nvarchar(16) = 'TelonicsGen4',
+            @T2_model nvarchar(16) = 'Gen4',
             @T2_collar1 nvarchar(16) = 'c1__',
             @T2_collar2 nvarchar(16) = 'c2__',
             @T2_file nvarchar(16) = 'f1__',
@@ -1429,7 +1429,7 @@ Check illegal modifications of deployment
             @T3_project nvarchar(16) = 'p1__',
             @T3_animal1 nvarchar(16) = 'a1__',
             @T3_mfgr nvarchar(16) = 'Telonics',
-            @T3_model nvarchar(16) = 'TelonicsGen4',
+            @T3_model nvarchar(16) = 'Gen4',
             @T3_collar1 nvarchar(16) = 'c1__',
             @T3_file nvarchar(16) = 'f1__',
             @T3_fileid int,
@@ -1765,7 +1765,7 @@ Check illegal modifications of deployment
             @T4_project nvarchar(16) = 'p1__',
             @T4_animal nvarchar(16) = 'a1__',
             @T4_mfgr nvarchar(16) = 'Telonics',
-            @T4_model nvarchar(16) = 'TelonicsGen4',
+            @T4_model nvarchar(16) = 'Gen4',
             @T4_collar nvarchar(16) = 'c1__',
             @T4_file nvarchar(16) = 'f1__',
             @T4_format nvarchar(16) = 'A', -- Store on board format
@@ -2243,7 +2243,7 @@ Check illegal modifications of deployment
             @T5_project nvarchar(16) = 'p1__',
             @T5_animal nvarchar(16) = 'a1__',
             @T5_mfgr nvarchar(16) = 'Telonics',
-            @T5_model nvarchar(16) = 'TelonicsGen4',
+            @T5_model nvarchar(16) = 'Gen4',
             @T5_collar nvarchar(16) = 'c1__',
             @T5_file nvarchar(16) = 'f1__',
             @T5_format nvarchar(16) = 'A', -- Store on board format
@@ -3020,7 +3020,7 @@ Check illegal modifications of deployment
     DECLARE
             @T7_sa nvarchar(16) = 'sa',
             @T7_mfgr nvarchar(16) = '__test__',
-            @T7_model nvarchar(16) = 'TelonicsGen4',
+            @T7_model nvarchar(16) = '__test__',
             @T7_test nvarchar(255) = null,
             @T7_msg nvarchar(255) = null
             
@@ -3053,6 +3053,7 @@ Check illegal modifications of deployment
 
     -- Setup for test
     INSERT INTO LookupCollarManufacturers ([CollarManufacturer]) VALUES (@T7_mfgr)
+    INSERT INTO LookupCollarModels ([CollarManufacturer], [CollarModel]) VALUES (@T7_mfgr, @T7_model)
 
     -- Check initial conditions
     IF NOT EXISTS (SELECT 1 from LookupCollarManufacturers Where CollarManufacturer = @T7_mfgr)
@@ -3224,6 +3225,7 @@ Check illegal modifications of deployment
     -- Clean up
     PRINT '  Cleaning up'
     DELETE Collars where CollarManufacturer = @T7_mfgr
+    DELETE LookupCollarModels WHERE CollarManufacturer = @T7_mfgr
     DELETE LookupCollarManufacturers WHERE CollarManufacturer = @T7_mfgr
 
     -- Check that cleanup worked

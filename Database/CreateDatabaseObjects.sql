@@ -3724,7 +3724,7 @@ BEGIN
 		    AND I.latitude IS NOT NULL AND I.longitude IS NOT NULL
 		    AND I.[locationDate] IS NOT NULL
 		    AND I.[locationDate] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
-		    AND C.CollarModel LIKE 'Telonics%PTT' -- FIXME: use a new attribute to select Non-GPS collars
+		    AND C.HasGps = 0
 	END
 	
 END

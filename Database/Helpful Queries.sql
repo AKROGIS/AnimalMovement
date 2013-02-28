@@ -206,10 +206,10 @@
         AND (P.EndDate IS NULL OR getdate() < P.EndDate)
         AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
         AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
-        AND (  (C.CollarModel = 'TelonicsGen3' AND CPF.Format <> 'B')
-            OR (C.CollarModel = 'TelonicsGen3' AND C.Gen3Period IS NULL)
-            OR (C.CollarModel = 'TelonicsGen4' AND CPF.Format IS NULL)
-            OR (C.CollarModel = 'TelonicsGen4' AND CPF.Format <> 'A')
+        AND (  (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3' AND CPF.Format <> 'B')
+            OR (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3' AND C.Gen3Period IS NULL)
+            OR (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4' AND CPF.Format IS NULL)
+            OR (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4' AND CPF.Format <> 'A')
             )
 
 
@@ -225,7 +225,7 @@
          ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
   LEFT JOIN CollarParameterFiles as CPF
          ON CP.FileId = CPF.FileId           
-      WHERE C.CollarModel = 'TelonicsGen4'
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4'
         AND C.ArgosId IS NOT NULL
         AND (CPF.Format IS NULL -- no parameter file
          OR C.CollarId NOT IN ( -- collars with active TPF files
@@ -255,7 +255,7 @@
   LEFT JOIN Collars AS C
          ON P.PlatformId = C.ArgosId
       WHERE C.CollarManufacturer IS NOT NULL
-        AND C.CollarModel NOT IN ('TelonicsGen3', 'TelonicsGen4')
+        AND C.CollarManufacturer <> 'Telonics' OR C.CollarModel NOT IN ('Gen3', 'Gen4')
 
 
 ----------- WARNING_CollarsWithMultipleParameterFiles
@@ -280,13 +280,13 @@
         ON P.PlatformId = C.ArgosId
      WHERE C.ArgosId IS NOT NULL
        AND P.PlatformId IS NULL
-       AND C.CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
+       AND C.CollarManufacturer = 'Telonics' AND C.CollarModel IN ('Gen3', 'Gen4')
 
 
 ----------- WARNING_TelonicsCollarsMissingArgosId
      SELECT CollarId, CollarModel, Manager, DisposalDate
        FROM Collars
-      WHERE CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
+      WHERE CollarManufacturer = 'Telonics' AND CollarModel IN ('Gen3', 'Gen4')
         AND ArgosId IS NULL
 
 
@@ -296,7 +296,7 @@
  INNER JOIN (
              SELECT ArgosId
                FROM dbo.Collars
-              WHERE CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
+              WHERE CollarManufacturer = 'Telonics' AND CollarModel IN ('Gen3', 'Gen4')
            GROUP BY ArgosId, DisposalDate
              HAVING COUNT(*) > 1
             ) AS C2
@@ -314,7 +314,7 @@
 ----------- WARNING_TelonicsGen3CollarsWithoutPeriod
      SELECT CollarId, Manager, Gen3Period
        FROM Collars
-      WHERE CollarModel LIKE 'TelonicsGen3%'
+      WHERE CollarManufacturer = 'Telonics' AND CollarModel = 'Gen3'
         AND Gen3Period IS NULL
         AND ArgosId IS NOT NULL
 
@@ -328,6 +328,6 @@
          ON lcpf.Code = cpf.Format
  INNER JOIN Collars AS c
          ON cp.CollarManufacturer = c.CollarManufacturer AND cp.CollarId = c.CollarId
-      WHERE (cpf.Format = 'A' AND c.CollarModel <> 'TelonicsGen4')
-         OR (cpf.Format = 'B' AND c.CollarModel <> 'TelonicsGen3')
+      WHERE (cpf.Format = 'A' AND c.CollarManufacturer = 'Telonics' AND c.CollarModel <> 'Gen4')
+         OR (cpf.Format = 'B' AND c.CollarManufacturer = 'Telonics' AND c.CollarModel <> 'Gen3')
 

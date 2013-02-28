@@ -9,7 +9,7 @@
        FROM Collars AS C
   LEFT JOIN CollarParameters AS P
          ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-      WHERE C.CollarModel = 'TelonicsGen4'
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4'
         AND P.CollarId IS NULL
         AND C.Manager = @PI
         
@@ -20,7 +20,7 @@
          ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
   LEFT JOIN CollarParameterFiles AS F
          ON P.FileId = F.FileId
-      WHERE C.CollarModel = 'TelonicsGen3'
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
         AND F.Format = 'B'
         AND F.Status = 'A'
         AND C.Manager = @PI
@@ -28,7 +28,7 @@
 ----------- WARNING: Telonics Gen3 GPS Collars without a Gen3 Period
      SELECT C.CollarModel, C.CollarId, C.ArgosId, C.Frequency
        FROM Collars AS C
-      WHERE C.CollarModel = 'TelonicsGen3'
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
         AND C.Gen3Period IS NULL
         AND C.Manager = @PI
 

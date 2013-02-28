@@ -86,7 +86,7 @@ INNER JOIN dbo.Collars AS C
         ON CD.CollarManufacturer = C.CollarManufacturer AND CD.CollarId = C.CollarId
      WHERE CD.DeploymentDate < GETDATE()
        AND (CD.RetrievalDate > GETDATE() OR CD.RetrievalDate IS NULL)
-       AND C.CollarModel = 'TelonicsGen3'
+       AND C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
   ORDER BY C.Manager, CD.ProjectId, C.ArgosId
 
 
@@ -97,7 +97,7 @@ INNER JOIN dbo.Collars AS C
         ON CD.CollarManufacturer = C.CollarManufacturer AND CD.CollarId = C.CollarId
      WHERE CD.DeploymentDate < GETDATE()
        AND (CD.RetrievalDate > GETDATE() OR CD.RetrievalDate IS NULL)
-       AND C.CollarModel = 'TelonicsGen3'
+       AND C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
        --AND C.Manager = ORIGINAL_LOGIN()
        --AND C.Manager = 'NPS\KCJoly'
        AND CD.ProjectId = 'ARCNVSID022'

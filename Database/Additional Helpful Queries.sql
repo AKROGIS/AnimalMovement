@@ -80,7 +80,7 @@
      SELECT T.*
        FROM AllTpfFileData AS T
   LEFT JOIN Collars AS C
-         ON C.CollarModel = 'TelonicsGen4' AND T.CTN = C.CollarId 
+         ON C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4' AND T.CTN = C.CollarId 
       WHERE C.CollarId IS NULL
 
 ----------- Telonics Gen4 Collars in Collars table with no TPF File 
@@ -88,7 +88,7 @@
        FROM Collars AS C
   LEFT JOIN AllTpfFileData AS T
          ON C.CollarId = T.CTN 
-      WHERE C.CollarModel = 'TelonicsGen4'
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4'
         AND T.CTN IS NULL
 
 ----------- Collars in TPF Files not in CollarParameters Table
@@ -155,7 +155,7 @@
        FROM Collars AS C1
  INNER JOIN (SELECT CollarManufacturer, CollarID, LEFT(CollarId,6) + CHAR(ASCII(SUBSTRING(collarId,7,1)) + 1) AS NextCollar 
                FROM Collars
-              WHERE CollarModel = 'TelonicsGen4') AS C2
+              WHERE CollarManufacturer = 'Telonics' AND CollarModel = 'Gen4') AS C2
          ON C1.CollarManufacturer = C2.CollarManufacturer AND C1.CollarId = C2.CollarId
  INNER JOIN CollarParameters AS P
          ON C2.CollarManufacturer = P.CollarManufacturer AND C2.NextCollar = P.CollarId

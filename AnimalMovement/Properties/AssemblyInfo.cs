@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 //FIXME - DATABASE - If a new collar is added to the database, then it must disable the active older version (same argos id).
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Simplify QA/QC queries for new GPS (Y/N) column
-//TODO - DATABASE - Remove the TelonicsGen3_xxx variants from the LookupCollarModels table, fix all queries appropriately
 //TODO - DATABASE - Create Table for Argos PTT locations from Emails
 //TODO - DATABASE - Modify CollarData_Insert to add Argos PTT locations from Emails to new DB table
 //TODO - DATABASE - Modify CollarFixes_Insert to add Fixes from PTT locations for non-GPS Argos Collars (formats E & F)
