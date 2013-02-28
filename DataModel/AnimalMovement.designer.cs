@@ -39,9 +39,6 @@ namespace DataModel
     partial void InsertLookupCollarManufacturer(LookupCollarManufacturer instance);
     partial void UpdateLookupCollarManufacturer(LookupCollarManufacturer instance);
     partial void DeleteLookupCollarManufacturer(LookupCollarManufacturer instance);
-    partial void InsertLookupCollarModel(LookupCollarModel instance);
-    partial void UpdateLookupCollarModel(LookupCollarModel instance);
-    partial void DeleteLookupCollarModel(LookupCollarModel instance);
     partial void InsertLookupGender(LookupGender instance);
     partial void UpdateLookupGender(LookupGender instance);
     partial void DeleteLookupGender(LookupGender instance);
@@ -59,6 +56,9 @@ namespace DataModel
     partial void DeleteLookupCollarParameterFileFormat(LookupCollarParameterFileFormat instance);
     partial void UpdateArgosDownload(ArgosDownload instance);
     partial void DeleteArgosDownload(ArgosDownload instance);
+    partial void InsertLookupCollarModel(LookupCollarModel instance);
+    partial void UpdateLookupCollarModel(LookupCollarModel instance);
+    partial void DeleteLookupCollarModel(LookupCollarModel instance);
     #endregion
 		
 		public AnimalMovementDataContext() : 
@@ -136,14 +136,6 @@ namespace DataModel
 			get
 			{
 				return this.GetTable<LookupCollarManufacturer>();
-			}
-		}
-		
-		public System.Data.Linq.Table<LookupCollarModel> LookupCollarModels
-		{
-			get
-			{
-				return this.GetTable<LookupCollarModel>();
 			}
 		}
 		
@@ -232,6 +224,14 @@ namespace DataModel
 			get
 			{
 				return this.GetTable<Collar>();
+			}
+		}
+		
+		public System.Data.Linq.Table<LookupCollarModel> LookupCollarModels
+		{
+			get
+			{
+				return this.GetTable<LookupCollarModel>();
 			}
 		}
 		
@@ -2203,6 +2203,8 @@ namespace DataModel
 		
 		private EntitySet<Collar> _Collars;
 		
+		private EntitySet<LookupCollarModel> _LookupCollarModels;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -2223,6 +2225,7 @@ namespace DataModel
 			this._LookupCollarFileFormats = new EntitySet<LookupCollarFileFormat>(new Action<LookupCollarFileFormat>(this.attach_LookupCollarFileFormats), new Action<LookupCollarFileFormat>(this.detach_LookupCollarFileFormats));
 			this._LookupCollarParameterFileFormats = new EntitySet<LookupCollarParameterFileFormat>(new Action<LookupCollarParameterFileFormat>(this.attach_LookupCollarParameterFileFormats), new Action<LookupCollarParameterFileFormat>(this.detach_LookupCollarParameterFileFormats));
 			this._Collars = new EntitySet<Collar>(new Action<Collar>(this.attach_Collars), new Action<Collar>(this.detach_Collars));
+			this._LookupCollarModels = new EntitySet<LookupCollarModel>(new Action<LookupCollarModel>(this.attach_LookupCollarModels), new Action<LookupCollarModel>(this.detach_LookupCollarModels));
 			OnCreated();
 		}
 		
@@ -2358,6 +2361,19 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarManufacturer_LookupCollarModel", Storage="_LookupCollarModels", ThisKey="CollarManufacturer", OtherKey="CollarManufacturer")]
+		public EntitySet<LookupCollarModel> LookupCollarModels
+		{
+			get
+			{
+				return this._LookupCollarModels;
+			}
+			set
+			{
+				this._LookupCollarModels.Assign(value);
+			}
+		}
+		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -2425,95 +2441,17 @@ namespace DataModel
 			this.SendPropertyChanging();
 			entity.LookupCollarManufacturer = null;
 		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.LookupCollarModels")]
-	public partial class LookupCollarModel : INotifyPropertyChanging, INotifyPropertyChanged
-	{
 		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private string _CollarModel;
-		
-		private EntitySet<Collar> _Collars;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnCollarModelChanging(string value);
-    partial void OnCollarModelChanged();
-    #endregion
-		
-		public LookupCollarModel()
-		{
-			this._Collars = new EntitySet<Collar>(new Action<Collar>(this.attach_Collars), new Action<Collar>(this.detach_Collars));
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarModel", DbType="VarChar(24) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string CollarModel
-		{
-			get
-			{
-				return this._CollarModel;
-			}
-			set
-			{
-				if ((this._CollarModel != value))
-				{
-					this.OnCollarModelChanging(value);
-					this.SendPropertyChanging();
-					this._CollarModel = value;
-					this.SendPropertyChanged("CollarModel");
-					this.OnCollarModelChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarModel_Collar", Storage="_Collars", ThisKey="CollarModel", OtherKey="CollarModel")]
-		public EntitySet<Collar> Collars
-		{
-			get
-			{
-				return this._Collars;
-			}
-			set
-			{
-				this._Collars.Assign(value);
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_Collars(Collar entity)
+		private void attach_LookupCollarModels(LookupCollarModel entity)
 		{
 			this.SendPropertyChanging();
-			entity.LookupCollarModel = this;
+			entity.LookupCollarManufacturer = this;
 		}
 		
-		private void detach_Collars(Collar entity)
+		private void detach_LookupCollarModels(LookupCollarModel entity)
 		{
 			this.SendPropertyChanging();
-			entity.LookupCollarModel = null;
+			entity.LookupCollarManufacturer = null;
 		}
 	}
 	
@@ -4800,9 +4738,9 @@ namespace DataModel
 		
 		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
 		
-		private EntityRef<LookupCollarModel> _LookupCollarModel;
-		
 		private EntityRef<ProjectInvestigator> _ProjectInvestigator;
+		
+		private EntityRef<LookupCollarModel> _LookupCollarModel;
 		
     #region Extensibility Method Definitions
     partial void OnLoaded();
@@ -4841,8 +4779,8 @@ namespace DataModel
 			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
 			this._CollarDeployments = new EntitySet<CollarDeployment>(new Action<CollarDeployment>(this.attach_CollarDeployments), new Action<CollarDeployment>(this.detach_CollarDeployments));
 			this._LookupCollarManufacturer = default(EntityRef<LookupCollarManufacturer>);
-			this._LookupCollarModel = default(EntityRef<LookupCollarModel>);
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
+			this._LookupCollarModel = default(EntityRef<LookupCollarModel>);
 			OnCreated();
 		}
 		
@@ -5184,40 +5122,6 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarModel_Collar", Storage="_LookupCollarModel", ThisKey="CollarModel", OtherKey="CollarModel", IsForeignKey=true)]
-		public LookupCollarModel LookupCollarModel
-		{
-			get
-			{
-				return this._LookupCollarModel.Entity;
-			}
-			set
-			{
-				LookupCollarModel previousValue = this._LookupCollarModel.Entity;
-				if (((previousValue != value) 
-							|| (this._LookupCollarModel.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._LookupCollarModel.Entity = null;
-						previousValue.Collars.Remove(this);
-					}
-					this._LookupCollarModel.Entity = value;
-					if ((value != null))
-					{
-						value.Collars.Add(this);
-						this._CollarModel = value.CollarModel;
-					}
-					else
-					{
-						this._CollarModel = default(string);
-					}
-					this.SendPropertyChanged("LookupCollarModel");
-				}
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_Collar", Storage="_ProjectInvestigator", ThisKey="Manager", OtherKey="Login", IsForeignKey=true)]
 		public ProjectInvestigator ProjectInvestigator
 		{
@@ -5248,6 +5152,40 @@ namespace DataModel
 						this._Manager = default(string);
 					}
 					this.SendPropertyChanged("ProjectInvestigator");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarModel_Collar", Storage="_LookupCollarModel", ThisKey="CollarModel", OtherKey="CollarModel", IsForeignKey=true)]
+		public LookupCollarModel LookupCollarModel
+		{
+			get
+			{
+				return this._LookupCollarModel.Entity;
+			}
+			set
+			{
+				LookupCollarModel previousValue = this._LookupCollarModel.Entity;
+				if (((previousValue != value) 
+							|| (this._LookupCollarModel.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._LookupCollarModel.Entity = null;
+						previousValue.Collars.Remove(this);
+					}
+					this._LookupCollarModel.Entity = value;
+					if ((value != null))
+					{
+						value.Collars.Add(this);
+						this._CollarModel = value.CollarModel;
+					}
+					else
+					{
+						this._CollarModel = default(string);
+					}
+					this.SendPropertyChanged("LookupCollarModel");
 				}
 			}
 		}
@@ -5318,6 +5256,161 @@ namespace DataModel
 		{
 			this.SendPropertyChanging();
 			entity.Collar = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.LookupCollarModels")]
+	public partial class LookupCollarModel : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarModel;
+		
+		private EntitySet<Collar> _Collars;
+		
+		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnCollarManufacturerChanging(string value);
+    partial void OnCollarManufacturerChanged();
+    partial void OnCollarModelChanging(string value);
+    partial void OnCollarModelChanged();
+    #endregion
+		
+		public LookupCollarModel()
+		{
+			this._Collars = new EntitySet<Collar>(new Action<Collar>(this.attach_Collars), new Action<Collar>(this.detach_Collars));
+			this._LookupCollarManufacturer = default(EntityRef<LookupCollarManufacturer>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					if (this._LookupCollarManufacturer.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarManufacturerChanging(value);
+					this.SendPropertyChanging();
+					this._CollarManufacturer = value;
+					this.SendPropertyChanged("CollarManufacturer");
+					this.OnCollarManufacturerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarModel", DbType="VarChar(24) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string CollarModel
+		{
+			get
+			{
+				return this._CollarModel;
+			}
+			set
+			{
+				if ((this._CollarModel != value))
+				{
+					this.OnCollarModelChanging(value);
+					this.SendPropertyChanging();
+					this._CollarModel = value;
+					this.SendPropertyChanged("CollarModel");
+					this.OnCollarModelChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarModel_Collar", Storage="_Collars", ThisKey="CollarModel", OtherKey="CollarModel")]
+		public EntitySet<Collar> Collars
+		{
+			get
+			{
+				return this._Collars;
+			}
+			set
+			{
+				this._Collars.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarManufacturer_LookupCollarModel", Storage="_LookupCollarManufacturer", ThisKey="CollarManufacturer", OtherKey="CollarManufacturer", IsForeignKey=true)]
+		public LookupCollarManufacturer LookupCollarManufacturer
+		{
+			get
+			{
+				return this._LookupCollarManufacturer.Entity;
+			}
+			set
+			{
+				LookupCollarManufacturer previousValue = this._LookupCollarManufacturer.Entity;
+				if (((previousValue != value) 
+							|| (this._LookupCollarManufacturer.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._LookupCollarManufacturer.Entity = null;
+						previousValue.LookupCollarModels.Remove(this);
+					}
+					this._LookupCollarManufacturer.Entity = value;
+					if ((value != null))
+					{
+						value.LookupCollarModels.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+					}
+					this.SendPropertyChanged("LookupCollarManufacturer");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_Collars(Collar entity)
+		{
+			this.SendPropertyChanging();
+			entity.LookupCollarModel = this;
+		}
+		
+		private void detach_Collars(Collar entity)
+		{
+			this.SendPropertyChanging();
+			entity.LookupCollarModel = null;
 		}
 	}
 }

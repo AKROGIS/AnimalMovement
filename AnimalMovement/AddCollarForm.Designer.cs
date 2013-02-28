@@ -194,7 +194,7 @@
             this.ModelComboBox.Name = "ModelComboBox";
             this.ModelComboBox.Size = new System.Drawing.Size(259, 21);
             this.ModelComboBox.TabIndex = 12;
-            this.toolTip1.SetToolTip(this.ModelComboBox, "Required, but currently not used.");
+            this.toolTip1.SetToolTip(this.ModelComboBox, "Required to decide how to decode raw Telonics data files");
             this.ModelComboBox.SelectedIndexChanged += new System.EventHandler(this.ModelComboBox_SelectedIndexChanged);
             // 
             // ManagerComboBox

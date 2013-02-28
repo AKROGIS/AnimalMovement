@@ -64,7 +64,7 @@ namespace AnimalMovement
             ManagerComboBox.DataSource = Database.ProjectInvestigators;
             ManagerComboBox.DisplayMember = "Name";
             ManagerComboBox.SelectedItem = Collar.ProjectInvestigator;
-            ModelComboBox.DataSource = Database.LookupCollarModels;
+            ModelComboBox.DataSource = Database.LookupCollarModels.Where(m => m.CollarManufacturer == Collar.CollarManufacturer);
             ModelComboBox.DisplayMember = "CollarModel";
             ModelComboBox.SelectedItem = Collar.LookupCollarModel;
             ArgosIdTextBox.Text = Collar.ArgosId;

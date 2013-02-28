@@ -58,21 +58,30 @@ namespace AnimalMovement
             IsProjectInvestigator = ProjectInvestigator != null;
             ManagerComboBox.DisplayMember = "Name";
             ManagerComboBox.SelectedItem = ProjectInvestigator;
-            string manufacturer = Settings.GetDefaultCollarManufacturer();
+            //  first get the default, then set the datasource, then set the selection to the default.
+            //    this order is required because setting the datasource sets the selected index to 0 triggering the selectedindex_changed event
+            //    the selectedindex_changed event saves the user's selection, which when setting the datasource, overwrites the user's previous
+            //    default with the item at index 0, so initialization deletes the user's preference.
+            string manufacturerId = Settings.GetDefaultCollarManufacturer();
+            SetUpModelList(manufacturerId);
             ManufacturerComboBox.DataSource = Database.LookupCollarManufacturers;
             ManufacturerComboBox.DisplayMember = "Name";
-            SelectDefaultManufacturer(manufacturer);
-            string model = Settings.GetDefaultCollarModel();
-            ModelComboBox.DataSource = Database.LookupCollarModels;
-            ModelComboBox.DisplayMember = "CollarModel";
-            SelectDefaultModel(model);
+            SelectDefaultManufacturer(manufacturerId);
         }
 
-        private void SelectDefaultModel(string modelCode)
+        private void SetUpModelList(string mfgr)
         {
-            if (modelCode == null)
+            string model = Settings.GetDefaultCollarModel(mfgr);
+            ModelComboBox.DataSource = Database.LookupCollarModels.Where(m => m.CollarManufacturer == mfgr);
+            ModelComboBox.DisplayMember = "CollarModel";
+            SelectDefaultModel(mfgr, model);
+        }
+
+        private void SelectDefaultModel(string mfgr, string modelCode)
+        {
+            if ( mfgr == null || modelCode == null)
                 return;
-            var model = Database.LookupCollarModels.FirstOrDefault(m => m.CollarModel == modelCode);
+            var model = Database.LookupCollarModels.FirstOrDefault(m => m.CollarManufacturer == mfgr && m.CollarModel == modelCode);
             if (model != null)
                 ModelComboBox.SelectedItem = model;
         }
@@ -154,14 +163,17 @@ namespace AnimalMovement
         {
             var mfgr = (LookupCollarManufacturer)ManufacturerComboBox.SelectedItem;
             if (mfgr != null)
+            {
                 Settings.SetDefaultCollarManufacturer(mfgr.CollarManufacturer);
+                SetUpModelList(mfgr.CollarManufacturer);
+            }
         }
 
         private void ModelComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             var model = (LookupCollarModel)ModelComboBox.SelectedItem;
             if (model != null)
-                Settings.SetDefaultCollarModel(model.CollarModel);
+                Settings.SetDefaultCollarModel(model.CollarManufacturer, model.CollarModel);
         }
 
         private void OnDatabaseChanged()

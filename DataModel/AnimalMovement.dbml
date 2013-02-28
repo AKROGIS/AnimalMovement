@@ -139,12 +139,7 @@
       <Association Name="LookupCollarManufacturer_LookupCollarFileFormat" Member="LookupCollarFileFormats" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarFileFormat" />
       <Association Name="LookupCollarManufacturer_LookupCollarParameterFileFormat" Member="LookupCollarParameterFileFormats" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarParameterFileFormat" />
       <Association Name="LookupCollarManufacturer_Collar" Member="Collars" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="Collar" />
-    </Type>
-  </Table>
-  <Table Name="dbo.LookupCollarModels" Member="LookupCollarModels">
-    <Type Name="LookupCollarModel">
-      <Column Name="CollarModel" Type="System.String" DbType="VarChar(24) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Association Name="LookupCollarModel_Collar" Member="Collars" ThisKey="CollarModel" OtherKey="CollarModel" Type="Collar" />
+      <Association Name="LookupCollarManufacturer_LookupCollarModel" Member="LookupCollarModels" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarModel" />
     </Type>
   </Table>
   <Table Name="dbo.LookupGender" Member="LookupGenders">
@@ -345,8 +340,8 @@
       <Association Name="Collar_ArgosDownload" Member="ArgosDownloads" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosDownload" />
       <Association Name="Collar_CollarDeployment" Member="CollarDeployments" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarDeployment" />
       <Association Name="LookupCollarManufacturer_Collar" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
-      <Association Name="LookupCollarModel_Collar" Member="LookupCollarModel" ThisKey="CollarModel" OtherKey="CollarModel" Type="LookupCollarModel" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_Collar" Member="ProjectInvestigator" ThisKey="Manager" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
+      <Association Name="LookupCollarModel_Collar" Member="LookupCollarModel" ThisKey="CollarModel" OtherKey="CollarModel" Type="LookupCollarModel" IsForeignKey="true" />
     </Type>
     <InsertFunction FunctionId="FunctionId23">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
@@ -379,6 +374,14 @@
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
       <Argument Parameter="collarId" Member="CollarId" />
     </DeleteFunction>
+  </Table>
+  <Table Name="dbo.LookupCollarModels" Member="LookupCollarModels">
+    <Type Name="LookupCollarModel">
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="CollarModel" Type="System.String" DbType="VarChar(24) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="LookupCollarModel_Collar" Member="Collars" ThisKey="CollarModel" OtherKey="CollarModel" Type="Collar" />
+      <Association Name="LookupCollarManufacturer_LookupCollarModel" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
+    </Type>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />

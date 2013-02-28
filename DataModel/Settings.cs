@@ -52,9 +52,9 @@ namespace DataModel
             return format == null ? (char?)null : format[0];
         }
 
-        public static string GetDefaultCollarModel()
+        public static string GetDefaultCollarModel(string manufacturer)
         {
-            return GetUsersDefault(ModelKey);
+            return GetUsersDefault(ModelKey + "_" + manufacturer);
         }
 
         public static string GetDefaultCollarManufacturer()
@@ -91,9 +91,9 @@ namespace DataModel
             SetUsersDefault(ParameterFormatKey, format.ToString(CultureInfo.InvariantCulture));
         }
 
-        public static void SetDefaultCollarModel(string model)
+        public static void SetDefaultCollarModel(string manufacturer, string model)
         {
-            SetUsersDefault(ModelKey, model);
+            SetUsersDefault(ModelKey + "_" + manufacturer, model);
         }
 
         public static void SetDefaultCollarManufacturer(string manufacturer)
