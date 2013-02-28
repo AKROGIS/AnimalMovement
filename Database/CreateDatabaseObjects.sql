@@ -166,9 +166,11 @@ GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarModels](
+	[CollarManufacturer] [varchar](16) NOT NULL,
 	[CollarModel] [varchar](24) NOT NULL,
  CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
 (
+	[CollarManufacturer] ASC,
 	[CollarModel] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
@@ -5361,8 +5363,8 @@ REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
 GO
 ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_LookupCollarManufacturers]
 GO
-ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_LookupCollarModels] FOREIGN KEY([CollarModel])
-REFERENCES [dbo].[LookupCollarModels] ([CollarModel])
+ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_LookupCollarModels] FOREIGN KEY([CollarManufacturer], [CollarModel])
+REFERENCES [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel])
 GO
 ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_LookupCollarModels]
 GO
@@ -5390,6 +5392,11 @@ ALTER TABLE [dbo].[LookupCollarFileHeaders]  WITH CHECK ADD  CONSTRAINT [FK_Coll
 REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
 GO
 ALTER TABLE [dbo].[LookupCollarFileHeaders] CHECK CONSTRAINT [FK_CollarFileHeaders_LookupCollarFileFormats]
+GO
+ALTER TABLE [dbo].[LookupCollarModels]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarModels_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
+REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
+GO
+ALTER TABLE [dbo].[LookupCollarModels] CHECK CONSTRAINT [FK_LookupCollarModels_LookupCollarManufacturers]
 GO
 ALTER TABLE [dbo].[LookupCollarParameterFileFormats]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarParameterFileFormats_LookupCollarManufacturer] FOREIGN KEY([CollarManufacturer])
 REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
