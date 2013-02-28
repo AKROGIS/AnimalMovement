@@ -53,41 +53,41 @@ then a parameter file can be deactivated.
 
 
 /*  Argos Ids with multiple parameter files */
-  SELECT C.AlternativeId, C.CollarId, CPF.[FileName]
+  SELECT C.ArgosId, C.CollarId, CPF.[FileName]
   FROM [dbo].[CollarParameters] AS CP
   INNER JOIN [dbo].[Collars] AS C
   ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
   INNER JOIN [dbo].[CollarParameterFiles] AS CPF
   ON Cp.FileId = CPF.FileId
-  WHERE C.AlternativeId in
+  WHERE C.ArgosId in
    (
-  	  SELECT C.AlternativeId
+  	  SELECT C.ArgosId
 	  FROM [dbo].[CollarParameters] AS CP
 	  INNER JOIN [dbo].[Collars] AS C
 	  ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
-	  GROUP BY C.AlternativeId 
-	  HAVING Count(C.AlternativeId) > 1
+	  GROUP BY C.ArgosId 
+	  HAVING Count(C.ArgosId) > 1
 	)
-  order by C.AlternativeId
+  order by C.ArgosId
 
 /* Collars which share an Argos Id */
     SELECT * FROM Collars
-	 WHERE AlternativeId IN
-           ( SELECT AlternativeId FROM Collars
-		      WHERE AlternativeId IS NOT NULL
-		   GROUP BY AlternativeId
-			 HAVING COUNT(AlternativeId) > 1)
-  ORDER BY AlternativeId
+	 WHERE ArgosId IN
+           ( SELECT ArgosId FROM Collars
+		      WHERE ArgosId IS NOT NULL
+		   GROUP BY ArgosId
+			 HAVING COUNT(ArgosId) > 1)
+  ORDER BY ArgosId
   
 /* Projects/Managers with Gen3 collars */
-    SELECT C.Manager, CD.ProjectId, C.AlternativeId --, C.CollarId , C.*
+    SELECT C.Manager, CD.ProjectId, C.ArgosId --, C.CollarId , C.*
       FROM dbo.CollarDeployments AS CD
 INNER JOIN dbo.Collars AS C
         ON CD.CollarManufacturer = C.CollarManufacturer AND CD.CollarId = C.CollarId
      WHERE CD.DeploymentDate < GETDATE()
        AND (CD.RetrievalDate > GETDATE() OR CD.RetrievalDate IS NULL)
        AND C.CollarModel = 'TelonicsGen3'
-  ORDER BY C.Manager, CD.ProjectId, C.AlternativeId
+  ORDER BY C.Manager, CD.ProjectId, C.ArgosId
 
 
 /* Does a project (or a manager) have any Gen3 collars */
@@ -111,7 +111,7 @@ DECLARE @TransmissionDate DATETIME2 = '2007-01-01'
 INNER JOIN CollarDeployments AS CD
         ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
      WHERE C.CollarManufacturer = 'Telonics'
-       AND C.AlternativeId = @ArgosId
+       AND C.ArgosId = @ArgosId
        AND CD.DeploymentDate < @TransmissionDate
        AND (CD.RetrievalDate IS NULL OR @TransmissionDate < CD.RetrievalDate)
 

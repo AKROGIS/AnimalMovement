@@ -63,7 +63,7 @@
 
 ----------- Collars Not Currently Deployed
      SELECT L.Name, C.CollarId, C.CollarModel, C.Frequency, 
-            C.SerialNumber, C.AlternativeId, C.Owner, C.Manager, C.Notes
+            C.SerialNumber, C.ArgosId, C.Owner, C.Manager, C.Notes
        FROM dbo.Collars AS C
  INNER JOIN dbo.CollarDeployments D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId 
@@ -186,7 +186,7 @@
  INNER JOIN ArgosPrograms AS P
          ON A.ProgramId = P.ProgramId
  INNER JOIN Collars AS C
-         ON C.AlternativeId = A.PlatformId
+         ON C.ArgosId = A.PlatformId
  INNER JOIN CollarDeployments as CD
          ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
   LEFT JOIN CollarParameters as CP
@@ -215,7 +215,7 @@
 
 ----------- WARNING_AllTelonicGen4CollarsWithoutActiveTpfFile
 ----------- -- All Telonics Gen4 Argos Collars without a active TPF File
-     SELECT C.Manager, CD.ProjectId, CD.AnimalId, C.CollarId as CTN, C.AlternativeId as ArgosID,  
+     SELECT C.Manager, CD.ProjectId, CD.AnimalId, C.CollarId as CTN, C.ArgosId as ArgosID,  
             C.Frequency, C.DisposalDate, CD.RetrievalDate, C.Notes,
             CPF.[FileName] AS ParameterFile, CPF.Format, CPF.[Status]
        FROM Collars AS C
@@ -226,7 +226,7 @@
   LEFT JOIN CollarParameterFiles as CPF
          ON CP.FileId = CPF.FileId           
       WHERE C.CollarModel = 'TelonicsGen4'
-        AND C.AlternativeId IS NOT NULL
+        AND C.ArgosId IS NOT NULL
         AND (CPF.Format IS NULL -- no parameter file
          OR C.CollarId NOT IN ( -- collars with active TPF files
                SELECT CP.CollarId
@@ -244,7 +244,7 @@
  INNER JOIN ArgosPrograms AS A
          ON P.ProgramId = A.ProgramId
   LEFT JOIN Collars AS C
-         ON P.PlatformId = C.AlternativeId
+         ON P.PlatformId = C.ArgosId
       WHERE C.CollarManufacturer IS NULL
 
 
@@ -253,7 +253,7 @@
      SELECT P.*, C.*
        FROM ArgosPlatforms AS P
   LEFT JOIN Collars AS C
-         ON P.PlatformId = C.AlternativeId
+         ON P.PlatformId = C.ArgosId
       WHERE C.CollarManufacturer IS NOT NULL
         AND C.CollarModel NOT IN ('TelonicsGen3', 'TelonicsGen4')
 
@@ -274,11 +274,11 @@
 
 ----------- WARNING_TelonicArgosCollarsWithNoPlatform
 ----------- -- Telonics Gen3/4 Argos GPS Collars with no matching record in ArgosPlatforms
-    SELECT C.Manager, C.Owner, C.CollarModel, C.CollarId as CTN, C.AlternativeId as ArgosID, C.Frequency, C.DisposalDate
+    SELECT C.Manager, C.Owner, C.CollarModel, C.CollarId as CTN, C.ArgosId as ArgosID, C.Frequency, C.DisposalDate
       FROM Collars AS C
  LEFT JOIN ArgosPlatforms AS P
-        ON P.PlatformId = C.AlternativeId
-     WHERE C.AlternativeId IS NOT NULL
+        ON P.PlatformId = C.ArgosId
+     WHERE C.ArgosId IS NOT NULL
        AND P.PlatformId IS NULL
        AND C.CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
 
@@ -287,20 +287,20 @@
      SELECT CollarId, CollarModel, Manager, DisposalDate
        FROM Collars
       WHERE CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
-        AND AlternativeId IS NULL
+        AND ArgosId IS NULL
 
 
 ----------- WARNING_TelonicsCollarsSharingAnArgosId
-     SELECT C1.AlternativeId, C1.CollarId, C1.DisposalDate, C1.Manager
+     SELECT C1.ArgosId, C1.CollarId, C1.DisposalDate, C1.Manager
        FROM dbo.Collars AS C1
  INNER JOIN (
-             SELECT AlternativeId
+             SELECT ArgosId
                FROM dbo.Collars
               WHERE CollarModel IN ('TelonicsGen3', 'TelonicsGen4')
-           GROUP BY AlternativeId, DisposalDate
+           GROUP BY ArgosId, DisposalDate
              HAVING COUNT(*) > 1
             ) AS C2
-         ON C1.AlternativeId = C2.AlternativeId
+         ON C1.ArgosId = C2.ArgosId
 
 
 ----------- WARNING_TelonicsGen3CollarsWithActivePpfFile
@@ -316,7 +316,7 @@
        FROM Collars
       WHERE CollarModel LIKE 'TelonicsGen3%'
         AND Gen3Period IS NULL
-        AND AlternativeId IS NOT NULL
+        AND ArgosId IS NOT NULL
 
 
 ----------- WARNING_TelonicsGenParameterFileMismatch

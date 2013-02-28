@@ -187,7 +187,7 @@ CREATE TABLE [dbo].[Collars](
 	[CollarModel] [varchar](24) NOT NULL,
 	[Manager] [sysname] NOT NULL,
 	[Owner] [nvarchar](100) NULL,
-	[AlternativeId] [varchar](16) NULL,
+	[ArgosId] [varchar](16) NULL,
 	[SerialNumber] [varchar](100) NULL,
 	[Frequency] [float] NULL,
 	[DownloadInfo] [varchar](200) NULL,
@@ -791,8 +791,8 @@ BEGIN
 	IF EXISTS (    SELECT 1
 	                 FROM inserted AS i
 	           INNER JOIN Collars AS C
-	                   ON i.AlternativeId = C.AlternativeId
-	                WHERE i.AlternativeId IS NOT NULL
+	                   ON i.ArgosId = C.ArgosId
+	                WHERE i.ArgosId IS NOT NULL
 	                  AND (i.DisposalDate = C.DisposalDate OR (i.DisposalDate IS NULL AND C.DisposalDate IS NULL))
 	                  AND NOT (i.CollarManufacturer = C.CollarManufacturer AND i.CollarId = C.CollarId)
               )
@@ -1033,7 +1033,7 @@ CREATE PROCEDURE [dbo].[Collar_Update]
 	@CollarModel NVARCHAR(255) = NULL, 
 	@Manager sysname = NULL, 
 	@Owner NVARCHAR(255) = NULL, 
-	@AlternativeId NVARCHAR(255) = NULL, 
+	@ArgosId NVARCHAR(255) = NULL, 
 	@SerialNumber NVARCHAR(255) = NULL, 
 	@Frequency FLOAT = NULL, 
 	@DownloadInfo NVARCHAR(255) = NULL, 
@@ -1082,9 +1082,9 @@ BEGIN
 		SELECT @Owner = [Owner] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 	END
 	
-	IF @AlternativeId IS NULL
+	IF @ArgosId IS NULL
 	BEGIN
-		SELECT @AlternativeId = [AlternativeId] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+		SELECT @ArgosId = [ArgosId] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 	END
 	
 	IF @SerialNumber IS NULL
@@ -1113,7 +1113,7 @@ BEGIN
 	UPDATE dbo.Collars SET [CollarModel] = nullif(@CollarModel,''),
 						   [Manager] = nullif(@Manager,''),
 						   [Owner] = nullif(@Owner,''),
-						   [AlternativeId] = nullif(@AlternativeId,''),
+						   [ArgosId] = nullif(@ArgosId,''),
 						   [SerialNumber] = nullif(@SerialNumber,''),
 						   [Frequency] = nullif(@Frequency,0),
 						   [DownloadInfo] = nullif(@DownloadInfo,''),
@@ -2106,7 +2106,7 @@ CREATE PROCEDURE [dbo].[Collar_Insert]
 	@CollarId NVARCHAR(255) = NULL, 
 	@CollarModel NVARCHAR(255) = NULL, 
 	@Owner NVARCHAR(255) = NULL, 
-	@AlternativeId NVARCHAR(255) = NULL, 
+	@ArgosId NVARCHAR(255) = NULL, 
 	@SerialNumber NVARCHAR(255) = NULL, 
 	@Frequency FLOAT = NULL, 
 	@DownloadInfo NVARCHAR(255) = NULL, 
@@ -2133,10 +2133,10 @@ BEGIN
 	
 	--All other verification is handled by primary/foreign key and column constraints.
 	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Owner],  
-							 [AlternativeId], [SerialNumber], [Frequency], [DownloadInfo],
+							 [ArgosId], [SerialNumber], [Frequency], [DownloadInfo],
 							 [Notes], [DisposalDate], [Gen3Period])
 			 VALUES (nullif(@CollarManufacturer,''), nullif(@CollarId,''), nullif(@CollarModel,''),
-					 nullif(@Owner,''), nullif(@AlternativeId,''), nullif(@SerialNumber,''),
+					 nullif(@Owner,''), nullif(@ArgosId,''), nullif(@SerialNumber,''),
 					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''),
 					 @DisposalDate, @Gen3Period)
 END
@@ -3158,7 +3158,7 @@ SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
 	INNER JOIN ProjectInvestigators AS I
 	        ON I.Login = P.Investigator
 	INNER JOIN Collars AS C
-	        ON C.AlternativeId = A.PlatformId
+	        ON C.ArgosId = A.PlatformId
     INNER JOIN CollarDeployments as CD
             ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
      LEFT JOIN (
@@ -3578,7 +3578,7 @@ BEGIN
 	 INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
 	 INNER JOIN Collars as C 
-			 ON C.AlternativeId = I.CollarID
+			 ON C.ArgosId = I.CollarID
 	 INNER JOIN CollarDeployments AS D
 			 ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
 			AND (I.AnimalId = D.AnimalId OR I.AnimalId = '0' + D.AnimalId)
@@ -4115,7 +4115,7 @@ SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
 	INNER JOIN ProjectInvestigators AS I
 	        ON I.Login = P.Investigator
 	INNER JOIN Collars AS C
-	        ON C.AlternativeId = A.PlatformId
+	        ON C.ArgosId = A.PlatformId
     INNER JOIN CollarDeployments as CD
             ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
      LEFT JOIN CollarParameters as CP

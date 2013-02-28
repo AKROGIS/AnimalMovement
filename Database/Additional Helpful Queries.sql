@@ -13,7 +13,7 @@
   LEFT JOIN ArgosPrograms AS P2
          ON P.ProgramId = P2.ProgramId
   LEFT JOIN Collars AS C
-         ON C.AlternativeId = P.PlatformId
+         ON C.ArgosId = P.PlatformId
   LEFT JOIN DownloadableAndAnalyzableCollars AS D
          ON P.PlatformId = D.PlatformId
       WHERE D.PlatformId IS NULL
@@ -23,7 +23,7 @@
 
  
 ----------- Collars where Argos downloads have yielded no data
-     SELECT C.Manager, C.CollarModel, C.AlternativeId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
+     SELECT C.Manager, C.CollarModel, C.ArgosId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
        FROM Collars AS C
   LEFT JOIN CollarDeployments AS D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
@@ -35,7 +35,7 @@
                           )
         AND C.DisposalDate IS NULL
         AND D.RetrievalDate IS NULL
-   ORDER BY C.Manager, C.CollarModel, C.AlternativeId
+   ORDER BY C.Manager, C.CollarModel, C.ArgosId
   
 
 ----------- Collars which are downloadable, but which I cannot analyze
@@ -127,7 +127,7 @@
        FROM Collars AS C
  INNER JOIN AllTpfFileData AS T
          ON C.CollarId = T.CTN 
-      WHERE C.AlternativeId <> T.[Platform]
+      WHERE C.ArgosId <> T.[Platform]
          OR C.Frequency <> T.Frequency
 
 ----------- TPF TimeStamp check
@@ -159,64 +159,64 @@
          ON C1.CollarManufacturer = C2.CollarManufacturer AND C1.CollarId = C2.CollarId
  INNER JOIN CollarParameters AS P
          ON C2.CollarManufacturer = P.CollarManufacturer AND C2.NextCollar = P.CollarId
-      WHERE C1.AlternativeId IN (SELECT AlternativeId FROM Collars GROUP BY AlternativeId HAVING COUNT(*) > 1)
+      WHERE C1.ArgosId IN (SELECT ArgosId FROM Collars GROUP BY ArgosId HAVING COUNT(*) > 1)
 
 
 ----------- Show days between this collars disposal, and the next collars start
 -----------     There should be not be two consecutive NULL disposal Dates.
 -----------     The disposal date should be the Start Date of the subsequent record
-     SELECT C.AlternativeId, C.CollarId, C.DisposalDate, P.StartDate
+     SELECT C.ArgosId, C.CollarId, C.DisposalDate, P.StartDate
        FROM Collars AS C
   LEFT JOIN CollarParameters AS P
          ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-      WHERE C.AlternativeId IN (SELECT AlternativeId FROM Collars GROUP BY AlternativeId HAVING COUNT(*) > 1)
-   ORDER BY C.AlternativeId, C.CollarId
+      WHERE C.ArgosId IN (SELECT ArgosId FROM Collars GROUP BY ArgosId HAVING COUNT(*) > 1)
+   ORDER BY C.ArgosId, C.CollarId
 
 
 ----------- Collar Deployment Dates for Collars sharing an Argos Id
 -----------     This needs to be reviewed sequentially for errors and issues.
-     SELECT C.AlternativeId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
+     SELECT C.ArgosId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
             CONVERT(VARCHAR(10), D.RetrievalDate, 101) AS Retrieved,  CONVERT(VARCHAR(10), C.DisposalDate, 101) AS Disposed
        FROM Collars AS C
   LEFT JOIN CollarDeployments AS D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE C.AlternativeId IN (SELECT AlternativeId FROM Collars GROUP BY AlternativeId HAVING COUNT(*) > 1)
-   ORDER BY C.AlternativeId , C.CollarId, D.DeploymentDate
+      WHERE C.ArgosId IN (SELECT ArgosId FROM Collars GROUP BY ArgosId HAVING COUNT(*) > 1)
+   ORDER BY C.ArgosId , C.CollarId, D.DeploymentDate
 
 
 ----------- ERROR - Collar Deployments that need to be fixed
-     SELECT C.Manager, C.AlternativeId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
+     SELECT C.Manager, C.ArgosId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
             CONVERT(VARCHAR(10), D.RetrievalDate, 101) AS Retrieved,  CONVERT(VARCHAR(10), C.DisposalDate, 101) AS Disposed
        FROM Collars AS C
   LEFT JOIN CollarDeployments AS D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE C.AlternativeId IN (
+      WHERE C.ArgosId IN (
                 -- ERROR - Collar deployed after they are disposed
-                SELECT DISTINCT C.AlternativeId
+                SELECT DISTINCT C.ArgosId
                   FROM Collars AS C
              LEFT JOIN CollarDeployments AS D
                     ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
                  WHERE C.DisposalDate < D.DeploymentDate OR C.DisposalDate < D.RetrievalDate
                     OR (D.DeploymentDate IS NOT NULL AND D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
             )
-   ORDER BY C.AlternativeId, C.CollarId, D.DeploymentDate
+   ORDER BY C.ArgosId, C.CollarId, D.DeploymentDate
 
 
 ----------- FIXMES - Files on collars with deployment errors
-     SELECT C.AlternativeId, C.CollarId, F.FileId, F.FileName, F.Format, F.Status
+     SELECT C.ArgosId, C.CollarId, F.FileId, F.FileName, F.Format, F.Status
        FROM Collars AS C
   LEFT JOIN CollarFiles AS F
          ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
-      WHERE C.AlternativeId IN (
+      WHERE C.ArgosId IN (
                 -- ERROR - Collar deployed after they are disposed
-                SELECT DISTINCT C.AlternativeId
+                SELECT DISTINCT C.ArgosId
                   FROM Collars AS C
              LEFT JOIN CollarDeployments AS D
                     ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
                  WHERE C.DisposalDate < D.DeploymentDate OR C.DisposalDate < D.RetrievalDate
                     OR (D.DeploymentDate IS NOT NULL AND D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
             )
-   ORDER BY C.AlternativeId, C.CollarId, F.FileId
+   ORDER BY C.ArgosId, C.CollarId, F.FileId
 
 
 
@@ -295,7 +295,7 @@
                      ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
             )
          ON (E.AnimalId = D.AnimalId OR E.AnimalId = '0' + D.AnimalId)
-        AND C.AlternativeId = E.CollarID
+        AND C.ArgosId = E.CollarID
  INNER JOIN CollarFiles AS F
          ON F.FileId = E.FileID
    GROUP BY C.Manager, C.CollarId, F.[FileName], E.CollarId, E.AnimalId 
@@ -319,7 +319,7 @@
              ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
             )
          ON (E.AnimalId = D.AnimalId OR E.AnimalId = '0' + D.AnimalId)
-        AND C.AlternativeId = E.CollarID
+        AND C.ArgosId = E.CollarID
       WHERE C.Manager IS NULL OR E.FixDate < D.DeploymentDate OR E.FixDate > D.RetrievalDate
    GROUP BY C.Manager, C.CollarId, F.[FileName], E.CollarId, E.AnimalId, D.DeploymentDate, D.RetrievalDate
      HAVING C.Manager IS NULL OR MIN(CONVERT(DATETIME2,E.FixDate)) < D.DeploymentDate OR MAX(CONVERT(DATETIME2,E.FixDate)) > D.RetrievalDate

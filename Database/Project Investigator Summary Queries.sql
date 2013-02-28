@@ -5,7 +5,7 @@
     DECLARE @LastXdays INT = 30  -- Number of days in the past to consider
 
 ----------- WARNING: Telonics Gen4 GPS Collars without TPF file
-     SELECT C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
+     SELECT C.CollarModel, C.CollarId, C.ArgosId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarParameters AS P
          ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
@@ -14,7 +14,7 @@
         AND C.Manager = @PI
         
 ----------- WARNING: Telonics Gen3 GPS Collars with an active PPF File
-     SELECT C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
+     SELECT C.CollarModel, C.CollarId, C.ArgosId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarParameters AS P
          ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
@@ -26,7 +26,7 @@
         AND C.Manager = @PI
 
 ----------- WARNING: Telonics Gen3 GPS Collars without a Gen3 Period
-     SELECT C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
+     SELECT C.CollarModel, C.CollarId, C.ArgosId, C.Frequency
        FROM Collars AS C
       WHERE C.CollarModel = 'TelonicsGen3'
         AND C.Gen3Period IS NULL
@@ -77,7 +77,7 @@
    ORDER BY COUNT(F.FixDate) DESC
 
 ----------- All of a PI's collars that do not have fixes
-     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
+     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.ArgosId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarFixes as F
          ON C.CollarId = F.CollarId
@@ -86,7 +86,7 @@
    ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
 
 ----------- All of a PI's collars that do not have files
-     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.AlternativeId, C.Frequency
+     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.ArgosId, C.Frequency
        FROM Collars AS C
   LEFT JOIN CollarFiles as F
          ON C.CollarId = F.CollarId
@@ -100,7 +100,7 @@
  LEFT JOIN ArgosPrograms AS P2
         ON P.ProgramId = P2.ProgramId
  LEFT JOIN Collars AS C
-        ON C.AlternativeId = P.PlatformId
+        ON C.ArgosId = P.PlatformId
  LEFT JOIN DownloadableAndAnalyzableCollars AS D
         ON P.PlatformId = D.PlatformId
      WHERE D.PlatformId IS NULL
@@ -110,7 +110,7 @@
   ORDER BY P2.Investigator, P.PlatformId
 
 ----------- Collars where Argos downloads have yielded no data
-     SELECT C.Manager, C.CollarModel, C.AlternativeId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
+     SELECT C.Manager, C.CollarModel, C.ArgosId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
        FROM Collars AS C
   LEFT JOIN CollarDeployments AS D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
@@ -123,7 +123,7 @@
         AND C.DisposalDate IS NULL
         AND D.RetrievalDate IS NULL
         AND C.Manager = @PI
-   ORDER BY C.Manager, C.CollarModel, C.AlternativeId
+   ORDER BY C.Manager, C.CollarModel, C.ArgosId
 
 ----------- Collars which are downloadable, but which I cannot analyze
      SELECT A.*, C.CollarModel, C.Gen3Period
