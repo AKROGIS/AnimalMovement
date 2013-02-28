@@ -364,7 +364,7 @@
          ON F.FileId = X.FileId
       WHERE F.Format <> 'B' AND (F.CollarManufacturer <> X.CollarManufacturer OR X.CollarId <> F.CollarId)
 
-
+/*
 ----------- Change status of all files in a project
 -----------     If you only want to change files of a specific format, uncomment the two parts with @Format
     DECLARE @ProjectId varchar(255) = 'ARCNVSID022';
@@ -405,3 +405,4 @@
     DECLARE @new VARCHAR(16) = @old + 'A';
      UPDATE Collars SET CollarId = @new WHERE CollarId = @old 
      UPDATE CollarFiles SET CollarId = @new WHERE CollarId = @old
+*/
