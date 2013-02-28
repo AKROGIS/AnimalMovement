@@ -236,7 +236,7 @@ namespace ArgosDownloader
             CollarFile collarFile;
             switch (collar.CollarModel)
             {
-                case "TelonicsGen3":
+                case "Gen3":
                     if (!collar.Gen3Period.HasValue)
                         throw new InvalidOperationException("Gen3 collar cannot be processed without a period");
                     var g3processor = new Gen3Processor(TimeSpan.FromMinutes(collar.Gen3Period.Value));
@@ -259,7 +259,7 @@ namespace ArgosDownloader
                             ParentFileId = parentFileId
                         };
                     break;
-                case "TelonicsGen4":
+                case "Gen4":
                     var g4processor = new Gen4Processor(collar.TpfFile.ToArray());
                     string tdcExe = Settings.GetSystemDefault("tdc_exe");
                     string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");

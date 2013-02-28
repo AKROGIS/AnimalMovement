@@ -130,9 +130,9 @@ namespace ArgosProcessor
             // Expand this switch as additional models/file formats are supported 
             switch (collar.CollarModel)
             {
-                case "TelonicsGen3":
+                case "Gen3":
                     return 'D';
-                case "TelonicsGen4":
+                case "Gen4":
                     return 'C';
                 default:
                     var msg = String.Format("Unsupported model ({0} for collar {1}", collar.CollarModel, collar.CollarId);
@@ -271,7 +271,7 @@ namespace ArgosProcessor
             var results = new Dictionary<Collar, string>();
             foreach (var collar in AllUnambiguousCollars)
             {
-                if (collar.CollarModel == "TelonicsGen3")
+                if (collar.CollarModel == "Gen3")
                 {
                     if (!Gen3periods.ContainsKey(collar.CollarId))
                         results[collar] = "Gen3 Collar does not have a period between fixes specified";
@@ -281,7 +281,7 @@ namespace ArgosProcessor
                             "  Suggest 1) deactiving the PPF file\n" +
                             ",      or 2) use Telonics ADC-T03 to process this collar";
                 }
-                else if (collar.CollarModel == "TelonicsGen4")
+                else if (collar.CollarModel == "Gen4")
                 {
                     if (TpfFiles.ContainsKey(collar.CollarId))
                     {
@@ -294,7 +294,7 @@ namespace ArgosProcessor
                         results[collar] = "Gen4 Collar does not have a TPF file";
                 }
                 else
-                    results[collar] = "Model must be one of (TelonicsGen3, TelonicsGen4)";
+                    results[collar] = "Model must be one of (Gen3, Gen4)";
             }
             return results;
         }
@@ -347,10 +347,10 @@ namespace ArgosProcessor
             {
                 switch (collar.CollarModel)
                 {
-                    case "TelonicsGen3":
+                    case "Gen3":
                         processors[collar.CollarId] = new Gen3Processor(Gen3periods[collar.CollarId]);
                         break;
-                    case "TelonicsGen4":
+                    case "Gen4":
                         var processor = new Gen4Processor(TpfFiles[collar.CollarId].First());
                         if (!String.IsNullOrEmpty(tdcExe))
                             processor.TdcExecutable = tdcExe;
@@ -382,7 +382,7 @@ namespace ArgosProcessor
         private Dictionary<string, TimeSpan> GetGen3Periods()
         {
             var query = from collar in Database.Collars
-                        where collar.CollarModel == "TelonicsGen3" && AllUnambiguousCollars.Contains(collar) && collar.Gen3Period != null
+                        where collar.CollarModel == "Gen3" && AllUnambiguousCollars.Contains(collar) && collar.Gen3Period != null
                         select collar;
             return query.ToDictionary(item => item.CollarId, item => TimeSpan.FromMinutes(item.Gen3Period.GetValueOrDefault()));
         }

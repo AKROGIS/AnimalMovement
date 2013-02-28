@@ -96,7 +96,7 @@ namespace AnimalMovement
             var owner = (ProjectInvestigator) OwnerComboBox.SelectedItem;
             //A collar is only required with a ppf file, which means a telonics gen 3 collar.
             //The AlternaitveID (i.e. Argos ID) is used as the identifier since the ppf files are usually named with the argos id.
-            var query = Database.Collars.Where(c => c.ProjectInvestigator == owner && c.CollarModel == "TelonicsGen3"
+            var query = Database.Collars.Where(c => c.ProjectInvestigator == owner && c.CollarModel == "Gen3"
                 && c.ArgosId != null);
             var collars = query.ToList();
             CollarComboBox.DataSource = collars;
@@ -276,7 +276,7 @@ namespace AnimalMovement
             {
                 CollarManufacturer = "Telonics",
                 CollarId = tpfCollar.Ctn,
-                CollarModel = "TelonicsGen4",
+                CollarModel = "Gen4",
                 ArgosId = tpfCollar.ArgosId,
                 Frequency = tpfCollar.Frequency,
                 Manager = owner.Login
