@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 //FIXME - DATABASE - File status update should trigger status update to all child files
 //FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
 //FIXME - DATABASE - If a new collar is added to the database, then it must disable the active older version (same argos id).
-//TODO - DATABASE - If a argos collar is added, or an Argos Id is changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
-//TODO - DATABASE - Add GPS (Y/N) column to the Collars Table, fix insert/update stored procedures, and simplify QA/QC queries
+//TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
+//TODO - DATABASE - Simplify QA/QC queries for new GPS (Y/N) column
 //TODO - DATABASE - Remove the TelonicsGen3_xxx variants from the LookupCollarModels table, fix all queries appropriately
 //TODO - DATABASE - Create Table for Argos PTT locations from Emails
 //TODO - DATABASE - Modify CollarData_Insert to add Argos PTT locations from Emails to new DB table
@@ -96,4 +96,4 @@ using System.Runtime.InteropServices;
 // Do not use the auto update of assembly versions, it cuases a reset of settings each time
 // and it isn't really visible.  Update the file version each time a new exe is published. 
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.9")]
+[assembly: AssemblyFileVersion("1.0.0.10")]

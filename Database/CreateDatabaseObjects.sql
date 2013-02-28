@@ -190,7 +190,7 @@ CREATE TABLE [dbo].[Collars](
 	[ArgosId] [varchar](16) NULL,
 	[SerialNumber] [varchar](100) NULL,
 	[Frequency] [float] NULL,
-	[DownloadInfo] [varchar](200) NULL,
+	[HasGps] [bit] NOT NULL,
 	[Notes] [nvarchar](max) NULL,
 	[DisposalDate] [datetime2](7) NULL,
 	[Gen3Period] [int] NULL,
@@ -1036,7 +1036,7 @@ CREATE PROCEDURE [dbo].[Collar_Update]
 	@ArgosId NVARCHAR(255) = NULL, 
 	@SerialNumber NVARCHAR(255) = NULL, 
 	@Frequency FLOAT = NULL, 
-	@DownloadInfo NVARCHAR(255) = NULL, 
+	@HasGps BIT = 0, 
 	@Notes NVARCHAR(max) = NULL,
 	@DisposalDate DATETIME2(7) = NULL,
 	@Gen3Period INT = NULL
@@ -1092,16 +1092,6 @@ BEGIN
 		SELECT @SerialNumber = [SerialNumber] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 	END
 	
-	IF @Frequency IS NULL
-	BEGIN
-		SELECT @Frequency = [Frequency] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @DownloadInfo IS NULL
-	BEGIN
-		SELECT @DownloadInfo = [DownloadInfo] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
 	IF @Notes IS NULL
 	BEGIN
 		SELECT @Notes = [Notes] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
@@ -1115,8 +1105,8 @@ BEGIN
 						   [Owner] = nullif(@Owner,''),
 						   [ArgosId] = nullif(@ArgosId,''),
 						   [SerialNumber] = nullif(@SerialNumber,''),
-						   [Frequency] = nullif(@Frequency,0),
-						   [DownloadInfo] = nullif(@DownloadInfo,''),
+						   [Frequency] = @Frequency,
+						   [HasGps] = @HasGps,
 						   [Notes] = nullif(@Notes,''),
 						   [DisposalDate] = @DisposalDate,
 						   [Gen3Period] = @Gen3Period
@@ -2109,7 +2099,7 @@ CREATE PROCEDURE [dbo].[Collar_Insert]
 	@ArgosId NVARCHAR(255) = NULL, 
 	@SerialNumber NVARCHAR(255) = NULL, 
 	@Frequency FLOAT = NULL, 
-	@DownloadInfo NVARCHAR(255) = NULL, 
+	@HasGps BIT = 0, 
 	@Notes NVARCHAR(max) = NULL,
 	@DisposalDate DATETIME2(7) = NULL,
 	@Gen3Period INT = NULL
@@ -2133,11 +2123,11 @@ BEGIN
 	
 	--All other verification is handled by primary/foreign key and column constraints.
 	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Owner],  
-							 [ArgosId], [SerialNumber], [Frequency], [DownloadInfo],
+							 [ArgosId], [SerialNumber], [Frequency], [HasGps],
 							 [Notes], [DisposalDate], [Gen3Period])
 			 VALUES (nullif(@CollarManufacturer,''), nullif(@CollarId,''), nullif(@CollarModel,''),
 					 nullif(@Owner,''), nullif(@ArgosId,''), nullif(@SerialNumber,''),
-					 nullif(@Frequency,''), nullif(@DownloadInfo,''), nullif(@Notes,''),
+					 @Frequency, @HasGps, nullif(@Notes,''),
 					 @DisposalDate, @Gen3Period)
 END
 GO
