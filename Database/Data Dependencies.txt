@@ -1,0 +1,28 @@
+Derived Data Dependencies by Table
+ - only those tables with derived data are listed
+ - triggers (or stored procedures) need to be used to maintain the derived data when the source changes
+ 
+
+CollarDataXXX
+	Collar.*
+	CollarFiles.*
+	CollarParameters.*
+	CollarParameterFiles.*
+	??? records in these tables are immutable, and are simply the unaltered data from the files,
+	    however the where the contents goes may be based on these parameters, i.e. Gen3 or Gen4
+CollarFiles
+	CollarFiles.*
+	???
+CollarFixes
+	Collar.*
+	CollarDataXXX.*
+CollarParameters
+	??? CollarParameterFiles.*
+Locations
+	CollarFixes.*
+	CollarDeployments.*
+	Collar.DisposalDate
+	Animal.MortalityDate
+Movements
+	Locations.*
+	

@@ -6,7 +6,7 @@ using DataModel;
 
 //TODO - Enable Add/Edit/Delete for parameter assignments and date ranges
 //TODO - Enable editing of file status
-//TODO - Enable edit of parameter file type
+//TODO - Enable edit of parameter file type and owner
 //TODO - add warning about PPF file types not being used and they are binary
 
 namespace AnimalMovement
