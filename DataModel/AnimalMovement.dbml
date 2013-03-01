@@ -347,6 +347,7 @@
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
       <Argument Parameter="collarId" Member="CollarId" />
       <Argument Parameter="collarModel" Member="CollarModel" />
+      <Argument Parameter="manager" Member="Manager" />
       <Argument Parameter="owner" Member="Owner" />
       <Argument Parameter="argosId" Member="ArgosId" />
       <Argument Parameter="serialNumber" Member="SerialNumber" />
@@ -577,10 +578,11 @@
     <Parameter Name="RetrievalDate" Parameter="retrievalDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId23" Name="dbo.Collar_Insert" Method="Collar_Insert">
+  <Function Id="FunctionId24" Name="dbo.Collar_Update" Method="Collar_Update">
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarModel" Parameter="collarModel" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Manager" Parameter="manager" Type="System.String" DbType="NVarChar(128)" />
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ArgosId" Parameter="argosId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="SerialNumber" Parameter="serialNumber" Type="System.String" DbType="NVarChar(255)" />
@@ -591,11 +593,11 @@
     <Parameter Name="Gen3Period" Parameter="gen3Period" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId24" Name="dbo.Collar_Update" Method="Collar_Update">
+  <Function Id="FunctionId23" Name="dbo.Collar_Insert" Method="Collar_Insert">
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarModel" Parameter="collarModel" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Manager" Parameter="manager" Type="System.String" DbType="NVarChar(128)" />
+    <Parameter Name="Manager" Parameter="manager" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ArgosId" Parameter="argosId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="SerialNumber" Parameter="serialNumber" Type="System.String" DbType="NVarChar(255)" />

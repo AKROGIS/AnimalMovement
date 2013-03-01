@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 //FIXME - DATABASE - Implement EXEC xp_cmdshell 'ArgosProcessor.exe' in CollarData_Insert
 //FIXME - DATABASE - Start scheduled process for ArgosDownload on server
 //FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
-//FIXME - DATABASE - Updating the Disposal Date of a collar should add a end date to a collar parameter
-//FIXME - DATABASE - Cascade updates of Project Id to Animals table; cascade changes of Animal ID to deployments, locations and movements
+//TODO - DATABASE - Updating the Disposal Date of a collar should add a end date to a collar parameter
+//TODO - DATABASE - Cascade updates of Project Id to Animals table; cascade changes of Animal ID to deployments, locations and movements
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Create Table for Argos PTT locations from Emails
@@ -19,8 +19,11 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
 
+
 //FIXME - recently downloaded files have the Collar ID of the CSV not the AWS file in the ArgosDownload table
 //FIXME - Deleting multiple files and subfile in one operation fails, and corrupts datamodel. - Fix with heirarchy
+//TODO - Add setting for getting emails from Telonics downloader
+//TODO - provide user interface for checking on status of downloads
 //TODO - When a new collar is added to the database, we should offer to disable the active older version (same argos id).
 //TODO - Document the optimal "getting started" process, and make sure the code supports it
 //TODO - Build UI to add/edit/delete Argos Projects and Platforms
@@ -97,4 +100,4 @@ using System.Runtime.InteropServices;
 // Do not use the auto update of assembly versions, it cuases a reset of settings each time
 // and it isn't really visible.  Update the file version each time a new exe is published. 
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.11")]
+[assembly: AssemblyFileVersion("1.0.0.12")]

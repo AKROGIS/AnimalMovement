@@ -2092,11 +2092,13 @@ GO
 -- Author:		Regan Sarwas
 -- Create date: April 2, 2012
 -- Description:	Adds a new Collar.
+--    Modified: 2013-03-01 - Added Manager to parameter list (allows creating a collar for another PI)
 -- =============================================
 CREATE PROCEDURE [dbo].[Collar_Insert] 
 	@CollarManufacturer NVARCHAR(255)= NULL,
 	@CollarId NVARCHAR(255) = NULL, 
 	@CollarModel NVARCHAR(255) = NULL, 
+	@Manager NVARCHAR(255) = NULL, 
 	@Owner NVARCHAR(255) = NULL, 
 	@ArgosId NVARCHAR(255) = NULL, 
 	@SerialNumber NVARCHAR(255) = NULL, 
@@ -2124,11 +2126,11 @@ BEGIN
 	END
 	
 	--All other verification is handled by primary/foreign key and column constraints.
-	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Owner],  
+	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Manager], [Owner],  
 							 [ArgosId], [SerialNumber], [Frequency], [HasGps],
 							 [Notes], [DisposalDate], [Gen3Period])
 			 VALUES (nullif(@CollarManufacturer,''), nullif(@CollarId,''), nullif(@CollarModel,''),
-					 nullif(@Owner,''), nullif(@ArgosId,''), nullif(@SerialNumber,''),
+					 nullif(@Manager,''), nullif(@Owner,''), nullif(@ArgosId,''), nullif(@SerialNumber,''),
 					 @Frequency, @HasGps, nullif(@Notes,''),
 					 @DisposalDate, @Gen3Period)
 END

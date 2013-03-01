@@ -3,8 +3,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
-// FIXME - The PI/Manager in the form is not written to the database.  The DB Insert SP always assumes the user is the PI/Owner
-
 namespace AnimalMovement
 {
     internal partial class AddCollarForm : BaseForm
@@ -121,7 +119,7 @@ namespace AnimalMovement
                     Gen3Period = Int32.TryParse(PeriodTextBox.Text, out period) ? period : (int?)null,
                     Frequency = FrequencyTextBox.Text.DoubleOrNull(),
                     HasGps = HasGpsCheckBox.Checked,
-                    DisposalDate = DisposalDateTimePicker.Value,
+                    DisposalDate = DisposalDateTimePicker.Checked ? DisposalDateTimePicker.Value : (DateTime?)null,
                     LookupCollarManufacturer = (LookupCollarManufacturer)ManufacturerComboBox.SelectedItem,
                     LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem,
                     Notes = NotesTextBox.Text.NullifyIfEmpty(),
