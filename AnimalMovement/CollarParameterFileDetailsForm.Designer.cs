@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollarParameterFileDetailsForm));
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
             this.CollarsDataGridView = new System.Windows.Forms.DataGridView();
@@ -45,14 +46,15 @@
             this.FileIdTextBox = new System.Windows.Forms.TextBox();
             this.UserNameTextBox = new System.Windows.Forms.TextBox();
             this.UploadDateTextBox = new System.Windows.Forms.TextBox();
-            this.OwnerTextBox = new System.Windows.Forms.TextBox();
             this.FormatTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.FileNameTextBox = new System.Windows.Forms.TextBox();
-            this.StatusTextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.OwnerComboBox = new System.Windows.Forms.ComboBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.StatusComboBox = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -98,13 +100,13 @@
             this.CollarParameterFileColumn,
             this.StartDateColumn,
             this.EndDateColumn});
-            this.CollarsDataGridView.Location = new System.Drawing.Point(17, 118);
+            this.CollarsDataGridView.Location = new System.Drawing.Point(17, 157);
             this.CollarsDataGridView.MultiSelect = false;
             this.CollarsDataGridView.Name = "CollarsDataGridView";
             this.CollarsDataGridView.ReadOnly = true;
             this.CollarsDataGridView.RowHeadersVisible = false;
             this.CollarsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.CollarsDataGridView.Size = new System.Drawing.Size(463, 144);
+            this.CollarsDataGridView.Size = new System.Drawing.Size(463, 105);
             this.CollarsDataGridView.TabIndex = 60;
             // 
             // CollarColumn
@@ -174,8 +176,8 @@
             // 
             // ShowContentsButton
             // 
-            this.ShowContentsButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.ShowContentsButton.Location = new System.Drawing.Point(186, 271);
+            this.ShowContentsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ShowContentsButton.Location = new System.Drawing.Point(364, 88);
             this.ShowContentsButton.Name = "ShowContentsButton";
             this.ShowContentsButton.Size = new System.Drawing.Size(116, 23);
             this.ShowContentsButton.TabIndex = 59;
@@ -240,16 +242,6 @@
             this.UploadDateTextBox.Size = new System.Drawing.Size(162, 20);
             this.UploadDateTextBox.TabIndex = 54;
             // 
-            // OwnerTextBox
-            // 
-            this.OwnerTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.OwnerTextBox.Enabled = false;
-            this.OwnerTextBox.Location = new System.Drawing.Point(62, 38);
-            this.OwnerTextBox.Name = "OwnerTextBox";
-            this.OwnerTextBox.Size = new System.Drawing.Size(162, 20);
-            this.OwnerTextBox.TabIndex = 55;
-            // 
             // FormatTextBox
             // 
             this.FormatTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -298,16 +290,6 @@
             this.FileNameTextBox.Size = new System.Drawing.Size(162, 20);
             this.FileNameTextBox.TabIndex = 51;
             // 
-            // StatusTextBox
-            // 
-            this.StatusTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.StatusTextBox.Enabled = false;
-            this.StatusTextBox.Location = new System.Drawing.Point(62, 90);
-            this.StatusTextBox.Name = "StatusTextBox";
-            this.StatusTextBox.Size = new System.Drawing.Size(162, 20);
-            this.StatusTextBox.TabIndex = 72;
-            // 
             // label4
             // 
             this.label4.AutoSize = true;
@@ -317,12 +299,47 @@
             this.label4.TabIndex = 73;
             this.label4.Text = "Status:";
             // 
+            // OwnerComboBox
+            // 
+            this.OwnerComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.OwnerComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.OwnerComboBox.Enabled = false;
+            this.OwnerComboBox.FormattingEnabled = true;
+            this.OwnerComboBox.Location = new System.Drawing.Point(62, 37);
+            this.OwnerComboBox.Name = "OwnerComboBox";
+            this.OwnerComboBox.Size = new System.Drawing.Size(162, 21);
+            this.OwnerComboBox.TabIndex = 74;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(59, 115);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(415, 39);
+            this.label10.TabIndex = 75;
+            this.label10.Text = resources.GetString("label10.Text");
+            // 
+            // StatusComboBox
+            // 
+            this.StatusComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.StatusComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.StatusComboBox.Enabled = false;
+            this.StatusComboBox.FormattingEnabled = true;
+            this.StatusComboBox.Location = new System.Drawing.Point(62, 90);
+            this.StatusComboBox.Name = "StatusComboBox";
+            this.StatusComboBox.Size = new System.Drawing.Size(162, 21);
+            this.StatusComboBox.TabIndex = 77;
+            // 
             // CollarParameterFileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(492, 302);
-            this.Controls.Add(this.StatusTextBox);
+            this.Controls.Add(this.StatusComboBox);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.OwnerComboBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
@@ -334,7 +351,6 @@
             this.Controls.Add(this.FileIdTextBox);
             this.Controls.Add(this.UserNameTextBox);
             this.Controls.Add(this.UploadDateTextBox);
-            this.Controls.Add(this.OwnerTextBox);
             this.Controls.Add(this.FormatTextBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label2);
@@ -360,7 +376,6 @@
         private System.Windows.Forms.TextBox FileIdTextBox;
         private System.Windows.Forms.TextBox UserNameTextBox;
         private System.Windows.Forms.TextBox UploadDateTextBox;
-        private System.Windows.Forms.TextBox OwnerTextBox;
         private System.Windows.Forms.TextBox FormatTextBox;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label2;
@@ -373,8 +388,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn CollarParameterFileColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn StartDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn EndDateColumn;
-        private System.Windows.Forms.TextBox StatusTextBox;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox OwnerComboBox;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.ComboBox StatusComboBox;
 
     }
 }

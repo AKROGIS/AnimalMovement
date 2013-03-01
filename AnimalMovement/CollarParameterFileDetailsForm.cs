@@ -4,9 +4,8 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//TODO - Provide an interface to see which collars in the TPF file are not in the db, and an option to add them.
 //TODO - Enable Add/Edit/Delete for parameter assignments and date ranges
-//TODO - Enable editing of file status
-//TODO - Enable edit of parameter file type and owner
 //TODO - add warning about PPF file types not being used and they are binary
 
 namespace AnimalMovement
@@ -43,10 +42,14 @@ namespace AnimalMovement
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarParameterFileFormat.Name;
-            StatusTextBox.Text = File.LookupCollarFileStatus.Name;
             UserNameTextBox.Text = File.UploadUser;
             UploadDateTextBox.Text = File.UploadDate.ToString(CultureInfo.CurrentCulture);
-            OwnerTextBox.Text = File.Owner;
+            OwnerComboBox.DataSource = Database.ProjectInvestigators;
+            OwnerComboBox.DisplayMember = "Name";
+            OwnerComboBox.SelectedItem = File.ProjectInvestigator;
+            StatusComboBox.DataSource = Database.LookupCollarFileStatus;
+            StatusComboBox.DisplayMember = "Name";
+            StatusComboBox.SelectedItem = File.LookupCollarFileStatus;
             UpdateCollars();
             EnableForm();
             DoneCancelButton.Focus();
@@ -55,6 +58,8 @@ namespace AnimalMovement
         private void UpdateDataSource()
         {
             File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
+            File.ProjectInvestigator = (ProjectInvestigator)OwnerComboBox.SelectedItem;
+            File.LookupCollarFileStatus = (LookupCollarFileStatus)StatusComboBox.SelectedItem;
         }
 
         private void UpdateCollars()
@@ -76,7 +81,7 @@ namespace AnimalMovement
 
         private void EnableForm()
         {
-            //ChangeStatusbutton.Enabled = IsFileEditor;
+            EditSaveButton.Enabled = IsFileEditor;
         }
 
 
@@ -131,8 +136,9 @@ namespace AnimalMovement
         private void SetEditingControls()
         {
             bool editModeEnabled = EditSaveButton.Text == "Save";
-            FileNameTextBox.Enabled = editModeEnabled; //&& IsFileEditor;
-            OwnerTextBox.Enabled = editModeEnabled && IsFileEditor;
+            FileNameTextBox.Enabled = editModeEnabled;
+            OwnerComboBox.Enabled = editModeEnabled;
+            StatusComboBox.Enabled = editModeEnabled;
         }
 
 

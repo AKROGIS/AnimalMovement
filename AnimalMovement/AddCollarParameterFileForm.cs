@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using DataModel;
 using Telonics;
 
-//FIXME - Loading a TPF file should add ALL collars (even conflicting as inactive with a warning) - check PK in database
 //TODO - When loading multiple files, do not cancel remainder of files if you skip a file
 //TODO - Reload project Investigator form after add parameter file adds a collar
 //TODO - Reload project Investigator form after add parameter file loads multiple files, but one has a problem
