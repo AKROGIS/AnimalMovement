@@ -269,6 +269,39 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Feb 27, 2013
+-- Description: Ensure Data integerity on Collar Insert
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarInsert] 
+			ON [dbo].[Collars] 
+			AFTER INSERT
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Business Rule: Collars that share an (non-null) Argos ID must have unique disposal dates
+	
+	IF EXISTS (    SELECT 1
+	                 FROM inserted AS i
+	           INNER JOIN Collars AS C
+	                   ON i.ArgosId = C.ArgosId
+	                WHERE i.ArgosId IS NOT NULL
+	                  AND (i.DisposalDate = C.DisposalDate OR (i.DisposalDate IS NULL AND C.DisposalDate IS NULL))
+	                  AND NOT (i.CollarManufacturer = C.CollarManufacturer AND i.CollarId = C.CollarId)
+              )
+	BEGIN
+		RAISERROR('Collar Integrity Violation. Collars that share a non-null Argos ID must have unique disposal dates.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE PROCEDURE [dbo].[Location_Added] 
 	@Project NVARCHAR(255), 
 	@Animal  NVARCHAR(255), 
@@ -770,39 +803,6 @@ BEGIN
 	END
 	CLOSE ins_cursor;
 	DEALLOCATE ins_cursor;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Feb 27, 2013
--- Description: Ensure Data integerity on Collar Insert
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarInsert] 
-			ON [dbo].[Collars] 
-			AFTER INSERT
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Business Rule: Collars that share an (non-null) Argos ID must have unique disposal dates
-	
-	IF EXISTS (    SELECT 1
-	                 FROM inserted AS i
-	           INNER JOIN Collars AS C
-	                   ON i.ArgosId = C.ArgosId
-	                WHERE i.ArgosId IS NOT NULL
-	                  AND (i.DisposalDate = C.DisposalDate OR (i.DisposalDate IS NULL AND C.DisposalDate IS NULL))
-	                  AND NOT (i.CollarManufacturer = C.CollarManufacturer AND i.CollarId = C.CollarId)
-              )
-	BEGIN
-		RAISERROR('Collar Integrity Violation. Collars that share a non-null Argos ID must have unique disposal dates.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
 END
 GO
 SET ANSI_NULLS ON
@@ -4449,6 +4449,49 @@ BEGIN
 
 	DELETE FROM dbo.ProjectEditors WHERE [ProjectId] = @ProjectId
 	DELETE FROM dbo.Projects WHERE [ProjectId] = @ProjectId
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 1, 2013
+-- Description:	Ripple status changes to sub files
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarFileStatusUpdate] 
+   ON  [dbo].[CollarFiles] 
+   AFTER UPDATE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	--Status is the only thing we will monitor in this trigger.
+	IF (UPDATE (Status))
+	BEGIN
+		-- triggers always execute in the context of a transaction
+		-- so the following code is all or nothing.
+
+		-- Files that are being deactivated
+		UPDATE CollarFiles SET [Status] = 'I'
+		 WHERE ParentFileId IN (
+				  SELECT i.FileId
+					FROM inserted as i
+			  INNER JOIN deleted as d
+					  ON i.FileId = d.FileId
+				   WHERE i.[Status] = 'I' AND d.[Status] = 'A'
+			   )
+		-- Files that are being activated
+		UPDATE CollarFiles SET [Status] = 'A'
+		 WHERE ParentFileId IN (
+				  SELECT i.FileId
+					FROM inserted as i
+			  INNER JOIN deleted as d
+					  ON i.FileId = d.FileId
+				   WHERE i.[Status] = 'A' AND d.[Status] = 'I'
+			   )
+	END
 END
 GO
 SET ANSI_NULLS ON
