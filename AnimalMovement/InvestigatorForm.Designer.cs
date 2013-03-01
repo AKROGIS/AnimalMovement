@@ -50,7 +50,7 @@
             this.CollarsListLabel = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.FilesListBox = new System.Windows.Forms.ListBox();
+            this.FilesListBox = new AnimalMovement.ColoredListBox();
             this.InfoFileButton = new System.Windows.Forms.Button();
             this.FilesListLabel = new System.Windows.Forms.Label();
             this.DeleteFilesButton = new System.Windows.Forms.Button();
@@ -479,7 +479,7 @@
         private System.Windows.Forms.Label CollarsListLabel;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.ListBox FilesListBox;
+        private ColoredListBox FilesListBox;
         private System.Windows.Forms.Button InfoFileButton;
         private System.Windows.Forms.Label FilesListLabel;
         private System.Windows.Forms.Button DeleteFilesButton;

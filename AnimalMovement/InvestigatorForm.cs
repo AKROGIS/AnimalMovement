@@ -16,8 +16,6 @@ using System.Linq;
  * when the form is not in edit mode.
  */
 
-//FIXME - Grey out inactive parameter files
-
 namespace AnimalMovement
 {
     internal partial class InvestigatorForm : BaseForm
@@ -336,6 +334,12 @@ namespace AnimalMovement
             var sortedList = query.OrderBy(f => f.Name).ToList();
             FilesListBox.DataSource = sortedList;
             FilesListBox.DisplayMember = "Name";
+            FilesListBox.ClearItemColors();
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (sortedList[i].File.Status == 'I')
+                    FilesListBox.SetItemColor(i, Color.DarkGray);
+            }
             FilesListLabel.Text = sortedList.Count < 5 ? "Collar Parameter Files" : String.Format("Collar Parameter Files ({0})", sortedList.Count);
         }
 
