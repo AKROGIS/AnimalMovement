@@ -103,7 +103,7 @@ namespace ArgosDownloader
                         {
                             CollarManufacturer = collar.CollarManufacturer,
                             CollarId = collar.CollarId,
-                            FileId = secondFileId,
+                            FileId = firstFileId,
                             ErrorMessage = errors
                         };
                     db.ArgosDownloads.InsertOnSubmit(log);
