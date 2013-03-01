@@ -272,12 +272,19 @@ namespace AnimalMovement
 
         private Collar AddTpfCollar(TpfCollar tpfCollar, ProjectInvestigator owner)
         {
+            //FIXME - launch add collar form with defaults
+            DisposeOfPreviousVersionOfCollar(tpfCollar);
             var collar = new Collar
             {
                 CollarManufacturer = "Telonics",
                 CollarId = tpfCollar.Ctn,
                 CollarModel = "Gen4",
                 ArgosId = tpfCollar.ArgosId,
+                HasGps = true, //guess
+                //DisposalDate = ???,
+                //Owner = ???,
+                //Notes = ???,
+                SerialNumber = tpfCollar.Ctn.Substring(0,6),
                 Frequency = tpfCollar.Frequency,
                 Manager = owner.Login
             };
@@ -294,6 +301,33 @@ namespace AnimalMovement
                 return null;
             }
             return collar;
+        }
+
+        private void DisposeOfPreviousVersionOfCollar(TpfCollar tpfCollar)
+        {
+            var conflictingCollar = Database.Collars.FirstOrDefault(c => c.ArgosId == tpfCollar.ArgosId && c.DisposalDate == null);
+            if (conflictingCollar == null)
+                return;
+
+            string msg = String.Format(
+                "The Argos Id ({0}) for the new collar (Telonics/{1})\n" +
+                "is being used by an existing collar ({2})\n" +
+                "You cannot have two active collars with the same Argos Id.\n" +
+                "Adding the new collar will fail unless the existing collar is deactivated.\n\n"+
+                "Do you want to deactivate the existing collar?", tpfCollar.ArgosId, tpfCollar.Ctn, conflictingCollar);
+            DialogResult answer = MessageBox.Show(msg, "Deactivate Existing Collar?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (answer == DialogResult.Yes)
+            {
+                conflictingCollar.DisposalDate = tpfCollar.TimeStamp;
+                try
+                {
+                    Database.SubmitChanges();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
 
