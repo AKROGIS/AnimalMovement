@@ -57,6 +57,14 @@
         AND F1.Format IN ('F','E')
 
 
+----------- ERROR Argos Downloaded files that are not the right file format
+     SELECT F.FileId, F.Format, F.[FileName], F.UserName, F.UploadDate
+       FROM ArgosDownloads AS D
+ INNER JOIN CollarFiles AS F
+         ON F.FileId = D.FileId
+      WHERE F.Format <> 'F'
+
+
 ----------- Count/Delete fixes that are based on PTT data
 ----------- DELETE FROM F1
      SELECT C.CollarModel, COUNT(*) AS [PTT Location Count]
@@ -97,6 +105,17 @@
   LEFT JOIN CollarParameters AS C
          ON T.CTN = C.CollarId AND T.FileId = C.FileId
       WHERE C.CollarId IS NULL
+
+----------- Collars/TPF files where the respective owners do not match
+     SELECT F.[Owner] AS [TPF Manager], C.Manager AS [Collar Manager], F.[FileName], F.FileId, C.CollarId
+       FROM AllTpfFileData AS T
+ INNER JOIN CollarParameterFiles AS F
+         ON F.FileId = T.FileId
+ INNER JOIN Collars AS C
+         ON C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4' and C.CollarId = T.CTN
+      WHERE F.Owner <> C.Manager
+   ORDER BY CTN
+
 
 ----------- ERROR Collar Parameters with no TPF File 
      SELECT C.*
@@ -398,6 +417,16 @@
      SELECT * FROM CollarParameters WHERE LEFT(CollarId,6) = @rootID
      SELECT FileId, CollarId FROM CollarFixes WHERE left(CollarId,6) = @rootID GROUP BY FileId, CollarId ORDER BY fileid
      SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE LEFT(CollarId,6) = @rootID  ORDER BY fileid
+
+----------- Show all the records for an ArgosId
+    DECLARE @ArgosID VARCHAR(16) = '96008'
+     SELECT * FROM Collars WHERE ArgosId = @ArgosID
+     SELECT * FROM CollarDeployments WHERE CollarId IN (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
+     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) ORDER BY fileid
+     SELECT FileId, CollarId FROM CollarFixes WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) GROUP BY FileId, CollarId ORDER BY fileid
+     SELECT * FROM AllTpfFileData WHERE Platform = @ArgosID
+     SELECT * FROM CollarParameters WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
+     SELECT * FROM ArgosDownloads WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
 
 
 ----------- Rename a collar (simple, cannot be used to split a collar into two)
