@@ -121,6 +121,7 @@ namespace AnimalMovement
                     Gen3Period = Int32.TryParse(PeriodTextBox.Text, out period) ? period : (int?)null,
                     Frequency = FrequencyTextBox.Text.DoubleOrNull(),
                     HasGps = HasGpsCheckBox.Checked,
+                    DisposalDate = DisposalDateTimePicker.Value,
                     LookupCollarManufacturer = (LookupCollarManufacturer)ManufacturerComboBox.SelectedItem,
                     LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem,
                     Notes = NotesTextBox.Text.NullifyIfEmpty(),
@@ -176,11 +177,28 @@ namespace AnimalMovement
                 Settings.SetDefaultCollarModel(model.CollarManufacturer, model.CollarModel);
         }
 
+
+        private void DisposalDateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
+            DisposalDateTimePicker.CustomFormat = DisposalDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
+        }
+
+
         private void OnDatabaseChanged()
         {
             EventHandler handle = DatabaseChanged;
             if (handle != null)
                 handle(this,EventArgs.Empty);
         }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            var now = DateTime.Now;
+            DisposalDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
+            DisposalDateTimePicker.Checked = false;
+            DisposalDateTimePicker.CustomFormat = " ";
+        }
+
     }
 }
