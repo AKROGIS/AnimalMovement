@@ -46,7 +46,7 @@
             this.StatusTextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.ChangeStatusbutton = new System.Windows.Forms.Button();
+            this.ChangeStatusButton = new System.Windows.Forms.Button();
             this.ShowContentsButton = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.FixInfoDataGridView = new System.Windows.Forms.DataGridView();
@@ -236,16 +236,16 @@
             this.label9.TabIndex = 45;
             this.label9.Text = "Uploaded By:";
             // 
-            // ChangeStatusbutton
+            // ChangeStatusButton
             // 
-            this.ChangeStatusbutton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ChangeStatusbutton.Location = new System.Drawing.Point(238, 111);
-            this.ChangeStatusbutton.Name = "ChangeStatusbutton";
-            this.ChangeStatusbutton.Size = new System.Drawing.Size(116, 23);
-            this.ChangeStatusbutton.TabIndex = 10;
-            this.ChangeStatusbutton.Text = "Change Status";
-            this.ChangeStatusbutton.UseVisualStyleBackColor = true;
-            this.ChangeStatusbutton.Click += new System.EventHandler(this.ChangeStatusbutton_Click);
+            this.ChangeStatusButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ChangeStatusButton.Location = new System.Drawing.Point(238, 111);
+            this.ChangeStatusButton.Name = "ChangeStatusButton";
+            this.ChangeStatusButton.Size = new System.Drawing.Size(116, 23);
+            this.ChangeStatusButton.TabIndex = 10;
+            this.ChangeStatusButton.Text = "Change Status";
+            this.ChangeStatusButton.UseVisualStyleBackColor = true;
+            this.ChangeStatusButton.Click += new System.EventHandler(this.ChangeStatusbutton_Click);
             // 
             // ShowContentsButton
             // 
@@ -403,7 +403,7 @@
             this.Controls.Add(this.FixInfoDataGridView);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.ShowContentsButton);
-            this.Controls.Add(this.ChangeStatusbutton);
+            this.Controls.Add(this.ChangeStatusButton);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
@@ -452,7 +452,7 @@
         private System.Windows.Forms.TextBox StatusTextBox;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Button ChangeStatusbutton;
+        private System.Windows.Forms.Button ChangeStatusButton;
         private System.Windows.Forms.Button ShowContentsButton;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.DataGridView FixInfoDataGridView;

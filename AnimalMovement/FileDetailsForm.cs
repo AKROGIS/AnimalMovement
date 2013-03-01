@@ -94,7 +94,8 @@ namespace AnimalMovement
 
         private void EnableForm()
         {
-            ChangeStatusbutton.Enabled = IsFileEditor;
+            EditSaveButton.Enabled = IsFileEditor;
+            ChangeStatusButton.Enabled = IsFileEditor;
         }
 
 
@@ -151,7 +152,7 @@ namespace AnimalMovement
             bool editModeEnabled = EditSaveButton.Text == "Save";
             FileNameTextBox.Enabled = editModeEnabled;
             CollarIdTextBox.Enabled = editModeEnabled && File.Status == 'I';
-            ChangeStatusbutton.Enabled = !editModeEnabled && IsFileEditor;
+            ChangeStatusButton.Enabled = !editModeEnabled && IsFileEditor;
         }
 
 
