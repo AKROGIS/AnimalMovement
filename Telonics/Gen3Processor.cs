@@ -220,7 +220,7 @@ namespace Telonics
             return fixes.ToArray();
         }
 
-        private DateTime CalculateFixDate(DateTime transmissionDateTime, ushort dayOfYear, byte hour, byte minute)
+        private static DateTime CalculateFixDate(DateTime transmissionDateTime, ushort dayOfYear, byte hour, byte minute)
         {
             //The fix message reports how much time has past since the begining of the year,
             //but it does not report what year the fix occured in.

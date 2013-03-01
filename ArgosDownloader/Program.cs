@@ -10,7 +10,7 @@ using Telonics;
 
 namespace ArgosDownloader
 {
-    internal class Program
+    public static class Program
     {
         private const int MinDays = 1;
         private const int MaxDays = 10;

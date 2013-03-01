@@ -137,7 +137,7 @@ namespace AnimalMovement
             OnDatabaseChanged();
         }
 
-        private string GetCollar(string filePath)
+        private static string GetCollar(string filePath)
         {
             var fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
             if (fileName == null)

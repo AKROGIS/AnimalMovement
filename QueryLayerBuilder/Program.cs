@@ -9,7 +9,7 @@ using ESRI.ArcGIS.DataSourcesGDB;
 
 namespace QueryLayerBuilder
 {
-    class Program
+    static class Program
     {
         private static readonly LicenseInitializer LicenseInitializer = new LicenseInitializer();
     

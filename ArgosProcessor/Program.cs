@@ -6,7 +6,7 @@ using Telonics;
 
 namespace ArgosProcessor
 {
-    class Program
+    static class Program
     {
         /// <summary>
         /// This program obtains an email file from the database, processes all the data in the file, and then loads the results into the database.

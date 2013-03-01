@@ -6,7 +6,7 @@ using ESRI.ArcGIS.esriSystem;
 
 namespace ArcMap_Addin
 {
-    class LayerUtils
+    static class LayerUtils
     {
         
         /// <summary>

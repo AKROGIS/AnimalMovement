@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace TelonicsTest
 {
-    class MainClass
+    static class MainClass
     {
 
         public static void Main(string[] args)

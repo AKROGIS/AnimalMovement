@@ -189,7 +189,7 @@ namespace Telonics
             return (HttpWebRequest)req;
         }
 
-        static private string GetResponse(HttpWebRequest request)
+        static private string GetResponse(WebRequest request)
         {
             var resp = (HttpWebResponse)request.GetResponse();
             var respStream = resp.GetResponseStream();

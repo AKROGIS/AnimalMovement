@@ -135,7 +135,7 @@ namespace Telonics
                     File.Delete(batchFilePath);
                 if (logFilePath != null && File.Exists(logFilePath))
                     File.Delete(logFilePath);
-                if (paths[0] != null && File.Exists(paths[0]))
+                if (paths != null && paths[0] != null && File.Exists(paths[0]))
                 {
                     File.SetAttributes(paths[0], FileAttributes.Normal);  // remove the readonly flag put on files created by TDC.
                     File.Delete(paths[0]);

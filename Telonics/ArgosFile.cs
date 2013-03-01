@@ -187,7 +187,7 @@ namespace Telonics
             _lines = ReadLines(stream, Encoding.UTF8).ToList();
         }
 
-        private IEnumerable<string> ReadLines(Stream stream, Encoding enc)
+        private static IEnumerable<string> ReadLines(Stream stream, Encoding enc)
         {
             using (var reader = new StreamReader(stream, enc))
                 while (!reader.EndOfStream)
