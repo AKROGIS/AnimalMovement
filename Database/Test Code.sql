@@ -303,13 +303,13 @@
             @T1_format nvarchar(16) = 'A', -- Store on board format
             @T1_test nvarchar(255) = null,
             @T1_msg nvarchar(255) = null,
-            @T1_fix11 bigint,
-            @T1_fix12 bigint,
-            @T1_fix13 bigint,
-            @T1_fix21 bigint,
-            @T1_fix22 bigint,
-            @T1_fix23 bigint,
-            @T1_fix_l bigint,
+            @T1_fix11 int,
+            @T1_fix12 int,
+            @T1_fix13 int,
+            @T1_fix21 int,
+            @T1_fix22 int,
+            @T1_fix23 int,
+            @T1_fix_l int,
             @T1_deploy1 int,
             @T1_deploy2 int,
             @T1_deploy3 int,
@@ -724,13 +724,13 @@ Check illegal modifications of deployment
             @T2_format nvarchar(16) = 'A', -- Store on board format
             @T2_test nvarchar(255) = null,
             @T2_msg nvarchar(255) = null,
-            @T2_fix1 bigint,
-            @T2_fix2 bigint,
-            @T2_fix3 bigint,
-            @T2_fix4 bigint,
-            @T2_fix5 bigint,
-            @T2_fix6 bigint,
-            @T2_fix_l bigint,
+            @T2_fix1 int,
+            @T2_fix2 int,
+            @T2_fix3 int,
+            @T2_fix4 int,
+            @T2_fix5 int,
+            @T2_fix6 int,
+            @T2_fix_l int,
             @T2_deploy1 int,
             @T2_deploy2 int
            
@@ -1436,13 +1436,13 @@ Check illegal modifications of deployment
             @T3_format nvarchar(16) = 'A', -- Store on board format
             @T3_test nvarchar(255) = null,
             @T3_msg nvarchar(255) = null,
-            @T3_fix1 bigint,
-            @T3_fix2 bigint,
-            @T3_fix3 bigint,
-            @T3_fix4 bigint,
-            @T3_fix5 bigint,
-            @T3_fix6 bigint,
-            @T3_fix_l bigint
+            @T3_fix1 int,
+            @T3_fix2 int,
+            @T3_fix3 int,
+            @T3_fix4 int,
+            @T3_fix5 int,
+            @T3_fix6 int,
+            @T3_fix_l int
             
     -- This test must be run as SA, since others cannot operate on table directly
     -- This test the integrity of the tables underlying the Store Procedures available to users.
@@ -1773,8 +1773,8 @@ Check illegal modifications of deployment
             @T4_msg nvarchar(255) = null,
             @T4_fileid int,
             @T4_date datetime2,
-            @T4_fix1 bigint,
-            @T4_fix2 bigint,
+            @T4_fix1 int,
+            @T4_fix2 int,
             @T4_deploy1 int,
             @T4_deploy2 int
             
@@ -2250,11 +2250,11 @@ Check illegal modifications of deployment
             @T5_test nvarchar(255) = null,
             @T5_msg nvarchar(255) = null,
             @T5_fileid int,
-            @T5_fix1 bigint,
-            @T5_fix2 bigint,
-            @T5_fix3 bigint,
-            @T5_fix4 bigint,
-            @T5_fix_l bigint,
+            @T5_fix1 int,
+            @T5_fix2 int,
+            @T5_fix3 int,
+            @T5_fix4 int,
+            @T5_fix_l int,
             @T5_deploy int
             
     -- This test must be run as SA, since others cannot operate on table directly

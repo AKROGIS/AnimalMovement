@@ -9,8 +9,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Modify CollarData_Insert to add Argos PTT locations from Emails to new DB table
 //TODO - DATABASE - Modify CollarFixes_Insert to add Fixes from PTT locations for non-GPS Argos Collars (formats E & F)
-//TODO - DATABASE - Change FixId to 32bit int, so it can be an OID in ArcMap (we are at 1.4million, with all data loaded)
-//                - At 2^31 positive ints, we can have 1 fix every hour for 20 years for 12,000+ animals or 4,000 animals with existing ratio of 3 fix ids to 1 location
 //TODO - DATABASE - Query for Analyzable collars should be same as C# code (i.e. check for ambiguous collars)
 //TODO - DATABASE - Add more unit testing.
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster

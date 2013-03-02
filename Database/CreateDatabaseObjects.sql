@@ -369,7 +369,7 @@ CREATE TABLE [dbo].[Locations](
 	[AnimalId] [varchar](16) NOT NULL,
 	[FixDate] [datetime2](7) NOT NULL,
 	[Location] [geography] NOT NULL,
-	[FixId] [bigint] NOT NULL,
+	[FixId] [int] NOT NULL,
 	[Status] [char](1) NULL,
  CONSTRAINT [PK_Locations] PRIMARY KEY CLUSTERED 
 (
@@ -456,8 +456,8 @@ GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarFixes](
-	[FixId] [bigint] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[HiddenBy] [bigint] NULL,
+	[FixId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[HiddenBy] [int] NULL,
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
 	[CollarManufacturer] [varchar](16) NOT NULL,
@@ -1189,9 +1189,9 @@ BEGIN
 	
 	
 	DECLARE
-		@HiddenFixId		bigint,
-		@FixId				bigint,
-		@HiddenBy			bigint,
+		@HiddenFixId		int,
+		@FixId				int,
+		@HiddenBy			int,
 		@FileId				INT,
 		@LineNumber			INT,
 		@CollarManufacturer VARCHAR(16),
@@ -1300,8 +1300,8 @@ BEGIN
 		    WHERE D.HiddenBy is NULL
 
 	DECLARE
-		@FixId    bigint,
-		@HiddenBy bigint;
+		@FixId    int,
+		@HiddenBy int;
 	  
 	DECLARE delf_cursor CURSOR FOR 
 		SELECT [FixId] FROM deleted;
@@ -3219,13 +3219,13 @@ GO
 -- there is one and only one fix that is not hidding any other fixes
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarFixes_UpdateUnhideFix] 
-	@FixId bigint = Null
+	@FixId int = Null
 AS
 BEGIN
 	SET NOCOUNT ON;
 	
 	-- Get some information about the fix to update
-	DECLARE @HiddenBy  BIGINT;
+	DECLARE @HiddenBy  INT;
 	DECLARE @ProjectId NVARCHAR(255);
 	 SELECT @HiddenBy  = [HiddenBy],
 		    @ProjectId = [Project]
@@ -3265,11 +3265,11 @@ BEGIN
 	-- Fix is hidden, and we have permissions, lets do it.
 	DECLARE @ConflictingFixes TABLE
 	(
-		FixId bigint,
-		HiddenBy bigint
+		FixId int,
+		HiddenBy int
 	);
-	DECLARE @NotHidden bigint;
-	DECLARE @NotHider bigint;
+	DECLARE @NotHidden int;
+	DECLARE @NotHider int;
 
 	BEGIN TRY
 		BEGIN TRAN
@@ -4856,7 +4856,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE FUNCTION [dbo].[IsFixEditor] 
 (
-	@FixId BIGINT = NULL, 
+	@FixId    INT = NULL, 
 	@User sysname = NULL
 )
 RETURNS BIT
