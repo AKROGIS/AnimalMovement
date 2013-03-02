@@ -22,6 +22,7 @@ namespace ArgosDownloader
         static Dictionary<string, string> _emails;
         static private string _admin;
         static private string _password;
+        static private bool _serverIsAlive;
 
         private static void Main()
         {
@@ -31,6 +32,9 @@ namespace ArgosDownloader
                 var views = new AnimalMovementViewsDataContext();
                 _emails = new Dictionary<string, string>();
                 _admin = Settings.GetSystemDefault(EmailKey);
+                //TODO Create new database function returns an int Max(ArgosDownloads.Timestamp) Where FileId is not Null
+                int _daysSinceLastDownload = views.DaysSinceLastDownload();
+                //TODO - Add new boolean in downloadableCollars view by joining with settings - collars.SendNoEmails
                 foreach (var collar in views.DownloadableAndAnalyzableCollars.Where(c => c.Days == null || c.Days >= MinDays))
                 {
                     var days = Math.Min(MaxDays, collar.Days ?? MaxDays);
@@ -41,6 +45,8 @@ namespace ArgosDownloader
                                                          out errors);
                     if (results != null)
                     {
+                        _serverIsAlive = true;
+
                         var collarFile = new CollarFile
                         {
                             Project = collar.ProjectId,
@@ -108,7 +114,12 @@ namespace ArgosDownloader
                         };
                     db.ArgosDownloads.InsertOnSubmit(log);
                     db.SubmitChanges();
-                    WarnAboutCollarDays(collar.Email, collar.UserName, collar.PlatformId, collar.Days, results != null);
+                    if (!collars.SendNoEmails)
+                    {
+                        EmailErrors(collar.Email, collar.UserName, collar.PlatformId, errors);
+                        WarnAboutCollarDays(collar.Email, collar.UserName, collar.PlatformId, collar.Days, results != null, _daysSinceLastDownload);
+                    }
+                    EmailErrors(_admin, collar.UserName, collar.PlatformId, errors);
                 }
                 SendEmails();
             }
@@ -147,7 +158,7 @@ namespace ArgosDownloader
             }
         }
 
-        private static void WarnAboutCollarDays(string email, string userName, string argosId, int? days, bool gotData)
+        private static void WarnAboutCollarDays(string email, string userName, string argosId, int? days, bool gotData, int daysSinceLastDownload)
         {
             if (gotData && !days.HasValue)
             {
@@ -159,28 +170,32 @@ namespace ArgosDownloader
                         MaxDays);
                 AddEmail(email, msg);
             }
-            if (gotData && days > MaxDays)
+            if (gotData && daysSinceLastDownload > MaxDays)
             {
                 var msg =
                     String.Format(
                         "Successfully downloaded collar {0} for {1} for the first time in {2} days.  " +
-                        "Only the last {2} days were available on the server.  " +
+                        "Only the last {3} days were available on the server.  " +
                         "Be sure to upload missed fixes from some other source.", argosId, userName,
-                        MaxDays);
-                AddEmail(email, msg);
-            }
-            if (!gotData && days < MaxDays && MaxDays / 2 < days)
-            {
-                var msg = String.Format(
-                    "Unable to successfully download collar {0} for {1}.  " +
-                    "It has been {2} days since the data has been successfully downloaded.  " +
-                    "You have {3} days to resolve any issues that may be causing problems.  " +
-                    "After that, previous fixes will need to be loaded from some other source.",
-                    argosId, userName, days, MaxDays);
+                        daysSinceLastDownload, MaxDays);
                 AddEmail(email, msg);
             }
         }
+        
+        private static void EmailErrors(string email, string userName, string argosId, string errors)
+        {
+            if (string.IsNullOrEmpty(errors))
+                return;
+            if (errors.StartsWith("No data"))
+                return;
 
+            var msg =
+                String.Format(
+                    "Problem downloading or processing collar {0} for {1}." + Environment.NewLine + 
+                    "    Message: {2}", argosId, userName, errors);
+            AddEmail(email, msg);
+        }
+        
         static void AddEmail(string email, string message)
         {
             if (String.IsNullOrEmpty(email))
