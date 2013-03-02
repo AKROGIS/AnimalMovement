@@ -263,10 +263,14 @@ namespace ArgosDownloader
                     var g4processor = new Gen4Processor(collar.TpfFile.ToArray());
                     string tdcExe = Settings.GetSystemDefault("tdc_exe");
                     string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");
+                    int timeout;
+                    Int32.TryParse(Settings.GetSystemDefault("tdc_timeout"), out timeout);
                     if (!String.IsNullOrEmpty(tdcExe))
                         g4processor.TdcExecutable = tdcExe;
                     if (!String.IsNullOrEmpty(batchFile))
                         g4processor.BatchFileTemplate = batchFile;
+                    if (timeout != 0)
+                        g4processor.TdcTimeout = timeout;
 
                     ArgosFile aws4 = new ArgosAwsFile(results.ToBytes()) {Processor = id => g4processor};
 

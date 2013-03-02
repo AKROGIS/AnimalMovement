@@ -28,6 +28,7 @@ namespace Telonics
   <MoveFiles>false</MoveFiles>
   <GoogleEarth>false</GoogleEarth>
 </BatchSettings>";
+        private const int DefaultTdcTimeout = 20000;
 
         #endregion
 
@@ -38,11 +39,13 @@ namespace Telonics
             TpfFile = tpfFile;
             TdcExecutable = DefaultTdcExecutable;
             BatchFileTemplate = DefaultBatchFileTemplate;
+            TdcTimeout = DefaultTdcTimeout;
         }
 
         public Byte[] TpfFile { get; private set; }
         public string TdcExecutable { get; set; }
         public string BatchFileTemplate { get; set; }
+        public int TdcTimeout { get; set; }
 
         public IEnumerable<string> ProcessTransmissions(IEnumerable<ArgosTransmission> transmissions, ArgosFile file)
         {
@@ -99,11 +102,12 @@ namespace Telonics
                     RedirectStandardError = true
                 });
                 string errors = p.StandardError.ReadToEnd();
-                bool exitedNormally = p.WaitForExit(20000);
+                bool exitedNormally = p.WaitForExit(TdcTimeout);
                 if (!exitedNormally)
-                    throw new InvalidOperationException("TDC process did not respond after 20 seconds.\n"+
-                        "Check the path in the Settings table, and be sure you have authorized TDC.");
-
+                    throw new InvalidOperationException(
+                        String.Format("TDC process did not respond after {0} seconds.\n" +
+                                      "Check the path in the Settings table, and be sure you have authorized TDC.",
+                                      TdcTimeout/1000));
                 if (!String.IsNullOrEmpty(errors))
                     throw new InvalidOperationException("TDC Execution error " + errors);
                 

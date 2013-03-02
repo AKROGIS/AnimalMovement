@@ -342,6 +342,8 @@ namespace ArgosProcessor
 
             string tdcExe = Settings.GetSystemDefault("tdc_exe");
             string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");
+            int timeout;
+            Int32.TryParse(Settings.GetSystemDefault("tdc_timeout"), out timeout);
 
             foreach (var collar in ValidCollars)
             {
@@ -356,6 +358,8 @@ namespace ArgosProcessor
                             processor.TdcExecutable = tdcExe;
                         if (!String.IsNullOrEmpty(batchFile))
                             processor.BatchFileTemplate = batchFile;
+                        if (timeout != 0)
+                            processor.TdcTimeout = timeout;
                         processors[collar.CollarId] = processor;
                         break;
                     default:
