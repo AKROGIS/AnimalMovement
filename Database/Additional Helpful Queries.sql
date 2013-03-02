@@ -358,6 +358,49 @@
 
 
 
+-- Tools for checking collar data files
+-- ==================================================
+
+
+----------- Collar Files without data in the appropriate data file
+     SELECT F1.FileId, F1.[Filename]
+       FROM CollarFiles AS F1
+  LEFT JOIN CollarDataTelonicsStoreOnBoard AS F2
+         ON F1.FileId = F2.FileId
+      WHERE F1.Format = 'A' AND F2.FileId IS NULL
+      
+     SELECT F1.FileId, F1.[Filename]
+       FROM CollarFiles AS F1
+  LEFT JOIN CollarDataDebevekFormat AS F2
+         ON F1.FileId = F2.FileId
+      WHERE f1.Format = 'B' AND f2.FileId IS NULL
+           
+     SELECT F1.FileId, F1.[Filename]
+       FROM CollarFiles AS F1
+  LEFT JOIN CollarDataTelonicsGen4 AS F2
+         ON F1.FileId = F2.FileId
+      WHERE F1.Format = 'C' AND F2.FileId IS NULL
+           
+     SELECT F1.FileId, F1.[Filename]
+       FROM CollarFiles AS F1
+  LEFT JOIN CollarDataTelonicsGen3 AS F2
+         ON F1.FileId = F2.FileId
+      WHERE F1.Format = 'D' AND F2.FileId IS NULL
+           
+     SELECT F1.FileId, F1.[Filename]
+       FROM CollarFiles AS F1
+  LEFT JOIN CollarDataArgosEmail AS F2
+         ON F1.FileId = F2.FileId
+      WHERE F1.Format = 'E' AND F2.FileId IS NULL
+      
+     SELECT F1.FileId, F1.[Filename]
+       FROM CollarFiles AS F1
+  LEFT JOIN CollarDataArgosWebService AS F2
+         ON F1.FileId = F2.FileId
+      WHERE F1.Format = 'F' AND F2.FileId IS NULL
+
+
+
 
 -- Tools helpful for renaming/assigning data files
 -- ==================================================
