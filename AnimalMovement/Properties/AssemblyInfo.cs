@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Updating the Disposal Date of a collar should add a end date to a collar parameter
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
-//TODO - DATABASE - Create Table for Argos PTT locations from Emails
 //TODO - DATABASE - Modify CollarData_Insert to add Argos PTT locations from Emails to new DB table
 //TODO - DATABASE - Modify CollarFixes_Insert to add Fixes from PTT locations for non-GPS Argos Collars (formats E & F)
 //TODO - DATABASE - Change FixId to 32bit int, so it can be an OID in ArcMap (we are at 1.4million, with all data loaded)

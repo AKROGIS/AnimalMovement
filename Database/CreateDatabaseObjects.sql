@@ -4803,6 +4803,31 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataArgosEmail](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[programNumber] [varchar](50) NULL,
+	[platformId] [varchar](50) NULL,
+	[TransmissionDate] [datetime2](7) NULL,
+	[locationDate] [datetime2](7) NULL,
+	[latitude] [float] NULL,
+	[longitude] [float] NULL,
+	[locationClass] [char](1) NULL,
+ CONSTRAINT [PK_CollarDataArgosEmail] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[IsEditor] 
 (
 	@Project VARCHAR(32)   = NULL, 
@@ -5310,6 +5335,11 @@ ALTER TABLE [dbo].[ArgosPrograms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPrograms_
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[ArgosPrograms] CHECK CONSTRAINT [FK_ArgosPrograms_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[CollarDataArgosEmail]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataArgosEmail_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+GO
+ALTER TABLE [dbo].[CollarDataArgosEmail] CHECK CONSTRAINT [FK_CollarDataArgosEmail_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarDataArgosWebService]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataArgosWebService_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
