@@ -5271,6 +5271,7 @@ ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Gender]
 GO
 ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Projects] FOREIGN KEY([ProjectId])
 REFERENCES [dbo].[Projects] ([ProjectId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Projects]
 GO
@@ -5337,6 +5338,7 @@ ALTER TABLE [dbo].[CollarDataTelonicsStoreOnBoard] CHECK CONSTRAINT [FK_CollarDa
 GO
 ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Animals]
 GO
@@ -5345,6 +5347,11 @@ REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
 ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Collars]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_CollarFiles] FOREIGN KEY([ParentFileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupCollarFileFormats] FOREIGN KEY([Format])
 REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
@@ -5363,6 +5370,7 @@ ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarMan
 GO
 ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_Projects] FOREIGN KEY([Project])
 REFERENCES [dbo].[Projects] ([ProjectId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_Projects]
 GO
@@ -5421,6 +5429,7 @@ ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_Managers]
 GO
 ALTER TABLE [dbo].[Locations]  WITH CHECK ADD  CONSTRAINT [FK_Locations_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[Locations] CHECK CONSTRAINT [FK_Locations_Animals]
 GO
@@ -5451,11 +5460,13 @@ ALTER TABLE [dbo].[LookupCollarParameterFileFormats] CHECK CONSTRAINT [FK_Lookup
 GO
 ALTER TABLE [dbo].[Movements]  WITH CHECK ADD  CONSTRAINT [FK_Movements_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[Movements] CHECK CONSTRAINT [FK_Movements_Animals]
 GO
 ALTER TABLE [dbo].[ProjectEditors]  WITH CHECK ADD  CONSTRAINT [FK_ProjectEditors_Projects] FOREIGN KEY([ProjectId])
 REFERENCES [dbo].[Projects] ([ProjectId])
+ON UPDATE CASCADE
 ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[ProjectEditors] CHECK CONSTRAINT [FK_ProjectEditors_Projects]
