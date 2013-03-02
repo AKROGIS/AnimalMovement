@@ -90,7 +90,6 @@ namespace Telonics
                 File.WriteAllText(batchFilePath, batchCommands);
                 
                 //  Run TDC with the batch file
-                //FIXME - put a timeout on this command
                 var p = Process.Start(new ProcessStartInfo
                                       {
                     FileName = TdcExecutable,
@@ -100,8 +99,11 @@ namespace Telonics
                     RedirectStandardError = true
                 });
                 string errors = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                
+                bool exitedNormally = p.WaitForExit(20000);
+                if (!exitedNormally)
+                    throw new InvalidOperationException("TDC process did not respond after 20 seconds.\n"+
+                        "Check the path in the Settings table, and be sure you have authorized TDC.");
+
                 if (!String.IsNullOrEmpty(errors))
                     throw new InvalidOperationException("TDC Execution error " + errors);
                 

@@ -20,7 +20,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
 
 
-//FIXME - recently downloaded files have the Collar ID of the CSV not the AWS file in the ArgosDownload table
 //FIXME - Deleting multiple files and subfile in one operation fails, and corrupts datamodel. - Fix with heirarchy
 //TODO - Add setting for getting emails from Telonics downloader
 //TODO - provide user interface for checking on status of downloads
