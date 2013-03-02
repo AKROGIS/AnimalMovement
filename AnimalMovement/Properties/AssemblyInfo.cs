@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 //FIXME - DATABASE - Implement EXEC xp_cmdshell 'ArgosProcessor.exe' in CollarData_Insert
 //FIXME - DATABASE - Start scheduled process for ArgosDownload on server
 //FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
+//FIXME - DATABASE - CollarUpdate Trigger - check for Disposal Date/ArgosId conflict
+//FIXME - DATABASE - Add stored procedures to add/del/update the ArgosPlatforms and Programs Tables
 //TODO - DATABASE - Updating the Disposal Date of a collar should add a end date to a collar parameter
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
