@@ -111,15 +111,27 @@ namespace Telonics
                 if (!String.IsNullOrEmpty(errors))
                     throw new InvalidOperationException("TDC Execution error " + errors);
                 
-                //FIXME - check and report errors in the log file
-                //Here is an example log file with an error:
-                /*
-                Batch started at: 2012.12.17 22:04:31
-                Processing file: C:\Users\resarwas\AppData\Local\Temp\tmpB158.tmp
-                Unable to load the the parameter file: "C:\Users\resarwas\Documents\Visual Studio 2010\Projects\AnimalMovement\ArgosProcessor\bin\Debug\tpf\23.tpf".This file may require a newer version of TDC.
-                Batch completed at: 2012.12.17 22:32:27
-                */
+                //Check the log file for errors
+/*
+Here is an example log file with NO error:
                 
+Batch started at: 2013.03.02 00:35:17
+Processing file: C:\...\37470.aws
+Report: "C:\...\650937A_1 Condensed.csv" created successfully.
+Batch completed at: 2013.03.02 00:35:18
+
+Here is an example log file with an error:
+
+Batch started at: 2012.12.17 22:04:31
+Processing file: C:\...\tmpB158.tmp
+Unable to load the the parameter file: "C:\..\23.tpf".This file may require a newer version of TDC.
+Batch completed at: 2012.12.17 22:32:27
+*/
+                var logLines = File.ReadAllLines(logFilePath);
+                errors = String.Join("\n", logLines.Skip(2).Take(logLines.Length - 3).Where(line => !line.EndsWith("successfully.")));
+                if (!String.IsNullOrEmpty(errors))
+                    throw new InvalidOperationException("TDC Execution error " + errors);
+
                 // for each output file created by TDC, send the file to the database
                 paths = Directory.GetFiles(outputFolder);
                 if (paths.Length < 1)
