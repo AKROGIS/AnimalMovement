@@ -4,9 +4,8 @@ using System.Runtime.InteropServices;
 //FIXME - DATABASE - Implement EXEC xp_cmdshell 'ArgosProcessor.exe' in CollarData_Insert
 //FIXME - DATABASE - Start scheduled process for ArgosDownload on server
 //FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
-//FIXME - DATABASE - CollarUpdate Trigger - check for Disposal Date/ArgosId conflict
+//FIXME - DATABASE - CollarUpdate Trigger - check for Disposal Date/ArgosId conflict; check for disposalDate/parameter startdate conflict
 //FIXME - DATABASE - Add stored procedures to add/del/update the ArgosPlatforms and Programs Tables
-//TODO - DATABASE - Updating the Disposal Date of a collar should add a end date to a collar parameter
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Modify CollarData_Insert to add Argos PTT locations from Emails to new DB table
@@ -53,6 +52,7 @@ using System.Runtime.InteropServices;
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Build a tool to hide locations outside a reasonable (user provided) range
 //TODO - provide datasheet views of collars, animals, deployments, and maybe files and fixes
+//TODO - When Updating the Disposal Date of a collar consider adding an end date to the collar parameter (this is not a database requirement)
 
 //To NOT do or fix:
 //  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date
