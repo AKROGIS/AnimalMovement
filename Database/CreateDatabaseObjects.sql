@@ -5596,6 +5596,8 @@ GRANT SELECT ON [dbo].[ConflictingFixes] TO [NPS\Domain Users] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[DateTimeToOrdinal] TO [NPS\Domain Users] AS [dbo]
 GO
+GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [INPAKROMS53AIS\sql_proxy] AS [dbo]
+GO
 GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [NPS\Domain Users] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[IsEditor] TO [NPS\Domain Users] AS [dbo]
