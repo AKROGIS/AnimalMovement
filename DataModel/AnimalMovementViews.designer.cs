@@ -288,6 +288,8 @@ namespace DataModel
 		
 		private System.Data.Linq.Binary _TpfFile;
 		
+		private System.Nullable<bool> _SendNoEmails;
+		
 		public DownloadableAndAnalyzableCollar()
 		{
 		}
@@ -464,6 +466,22 @@ namespace DataModel
 				if ((this._TpfFile != value))
 				{
 					this._TpfFile = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SendNoEmails", DbType="Bit")]
+		public System.Nullable<bool> SendNoEmails
+		{
+			get
+			{
+				return this._SendNoEmails;
+			}
+			set
+			{
+				if ((this._SendNoEmails != value))
+				{
+					this._SendNoEmails = value;
 				}
 			}
 		}

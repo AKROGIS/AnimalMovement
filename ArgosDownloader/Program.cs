@@ -32,7 +32,6 @@ namespace ArgosDownloader
                 _emails = new Dictionary<string, string>();
                 _admin = Settings.GetSystemDefault(EmailKey);
                 int _daysSinceLastDownload = views.DaysSinceLastDownload() ?? Int32.MaxValue;
-                //TODO - Add new boolean in downloadableCollars view by joining with settings - collars.SendNoEmails
                 foreach (var collar in views.DownloadableAndAnalyzableCollars.Where(c => c.Days == null || c.Days >= MinDays))
                 {
                     var days = Math.Min(MaxDays, collar.Days ?? MaxDays);
@@ -110,7 +109,7 @@ namespace ArgosDownloader
                         };
                     db.ArgosDownloads.InsertOnSubmit(log);
                     db.SubmitChanges();
-                    if (!collars.SendNoEmails)
+                    if (collar.SendNoEmails.HasValue && collar.SendNoEmails.Value)
                     {
                         EmailErrors(collar.Email, collar.UserName, collar.PlatformId, errors);
                         WarnAboutCollarDays(collar.Email, collar.UserName, collar.PlatformId, collar.Days, results != null, _daysSinceLastDownload);

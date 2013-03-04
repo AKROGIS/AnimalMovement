@@ -25,6 +25,7 @@
       <Column Name="CollarModel" Type="System.String" DbType="VarChar(24) NOT NULL" CanBeNull="false" />
       <Column Name="Gen3Period" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="TpfFile" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="SendNoEmails" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
     </Type>
   </Table>
   <Function Name="dbo.AnimalLocationSummary" Method="AnimalLocationSummary" IsComposable="true">
