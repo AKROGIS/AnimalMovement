@@ -101,6 +101,12 @@ namespace DataModel
 		{
 			return this.CreateMethodCallQuery<ConflictingFixesResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, lastXdays);
 		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.DaysSinceLastDownload", IsComposable=true)]
+		public System.Nullable<int> DaysSinceLastDownload()
+		{
+			return ((System.Nullable<int>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod()))).ReturnValue));
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.AnimalFixesByFile")]

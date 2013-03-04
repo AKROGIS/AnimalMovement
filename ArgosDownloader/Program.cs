@@ -22,7 +22,6 @@ namespace ArgosDownloader
         static Dictionary<string, string> _emails;
         static private string _admin;
         static private string _password;
-        static private bool _serverIsAlive;
 
         private static void Main()
         {
@@ -32,8 +31,7 @@ namespace ArgosDownloader
                 var views = new AnimalMovementViewsDataContext();
                 _emails = new Dictionary<string, string>();
                 _admin = Settings.GetSystemDefault(EmailKey);
-                //TODO Create new database function returns an int Max(ArgosDownloads.Timestamp) Where FileId is not Null
-                int _daysSinceLastDownload = views.DaysSinceLastDownload();
+                int _daysSinceLastDownload = views.DaysSinceLastDownload() ?? Int32.MaxValue;
                 //TODO - Add new boolean in downloadableCollars view by joining with settings - collars.SendNoEmails
                 foreach (var collar in views.DownloadableAndAnalyzableCollars.Where(c => c.Days == null || c.Days >= MinDays))
                 {
@@ -45,8 +43,6 @@ namespace ArgosDownloader
                                                          out errors);
                     if (results != null)
                     {
-                        _serverIsAlive = true;
-
                         var collarFile = new CollarFile
                         {
                             Project = collar.ProjectId,
