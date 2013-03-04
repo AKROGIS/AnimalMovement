@@ -4102,6 +4102,7 @@ SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
       ,I.Email, P.[UserName], P.[Password], A.PlatformId
       ,datediff(day,D.[TimeStamp],getdate()) AS [Days]
       ,C.CollarModel, C.Gen3Period, CPF.Contents AS TpfFile
+      ,CONVERT(BIT,CASE S.Value WHEN 'True' THEN 1 ELSE 0 END) AS SendNoEmails
   FROM
 	           ArgosPlatforms AS A
 	INNER JOIN ArgosPrograms AS P
@@ -4123,6 +4124,8 @@ SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
                 GROUP BY CollarManufacturer, CollarId
                ) AS D
             ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+     LEFT JOIN Settings AS S
+            ON I.Login = S.Username AND S.[Key] = 'Send_No_Email'
 
  WHERE A.[Status] = 'A'
    AND P.[Status] = 'A'
