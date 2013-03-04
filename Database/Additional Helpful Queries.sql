@@ -159,6 +159,13 @@
       WHERE F.Format = 'A'
         AND (C.StartDate IS NULL OR T.[TimeStamp]<> C.StartDate)
 
+----------- Collar Parameter End Date that does not match Collar Disposal Date
+     SELECT *
+       FROM CollarParameters AS P
+ INNER JOIN Collars AS C
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+      WHERE C.DisposalDate IS NOT NULL
+        AND P.EndDate IS NULL OR P.EndDate > C.DisposalDate
 
 
 
