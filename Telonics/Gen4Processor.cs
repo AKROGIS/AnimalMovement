@@ -65,7 +65,6 @@ namespace Telonics
             string batchFilePath = null;
             string logFilePath = null;
             string outputFolder = null;
-            string[] paths = null;
             string[] results;
 
             try
@@ -137,7 +136,7 @@ Batch completed at: 2012.12.17 22:32:27
                     throw new InvalidOperationException("TDC Execution error " + errors);
 
                 // for each output file created by TDC, send the file to the database
-                paths = Directory.GetFiles(outputFolder);
+                string[] paths = Directory.GetFiles(outputFolder);
                 if (paths.Length < 1)
                     throw new InvalidOperationException("TDC Execution error - No output file");
                 if (paths.Length > 1)
