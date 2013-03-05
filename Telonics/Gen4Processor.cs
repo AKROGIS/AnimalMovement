@@ -128,7 +128,11 @@ Unable to load the the parameter file: "C:\..\23.tpf".This file may require a ne
 Batch completed at: 2012.12.17 22:32:27
 */
                 var logLines = File.ReadAllLines(logFilePath);
-                errors = String.Join("\n", logLines.Skip(2).Take(logLines.Length - 3).Where(line => !line.EndsWith("successfully.")));
+                errors = String.Join("\n", logLines.Where(line => !String.IsNullOrWhiteSpace(line) &&
+                                                                  !line.StartsWith("Batch started at:") &&
+                                                                  !line.StartsWith("Processing file:") &&
+                                                                  !line.EndsWith("successfully.") &&
+                                                                  !line.StartsWith("Batch completed at:")));
                 if (!String.IsNullOrEmpty(errors))
                     throw new InvalidOperationException("TDC Execution error " + errors);
 
@@ -153,13 +157,16 @@ Batch completed at: 2012.12.17 22:32:27
                     File.Delete(batchFilePath);
                 if (logFilePath != null && File.Exists(logFilePath))
                     File.Delete(logFilePath);
-                if (paths != null && paths[0] != null && File.Exists(paths[0]))
-                {
-                    File.SetAttributes(paths[0], FileAttributes.Normal);  // remove the readonly flag put on files created by TDC.
-                    File.Delete(paths[0]);
-                }
                 if (outputFolder != null && Directory.Exists(outputFolder))
+                {
+                    foreach (var path in Directory.GetFiles(outputFolder))
+                    {
+                        File.SetAttributes(path, FileAttributes.Normal);
+                            // remove the readonly flag put on files created by TDC.
+                        File.Delete(path);
+                    }
                     Directory.Delete(outputFolder);
+                }
             }
 
             return results;
