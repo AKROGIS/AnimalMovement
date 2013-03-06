@@ -5716,8 +5716,6 @@ GRANT SELECT ON [dbo].[ConflictingFixes] TO [Viewer] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[DateTimeToOrdinal] TO [Viewer] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [INPAKROMS53AIS\sql_proxy] AS [dbo]
-GO
 GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [Viewer] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[IsEditor] TO [Viewer] AS [dbo]
