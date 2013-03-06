@@ -262,8 +262,13 @@
 
 ----------- Number of locations in database and by project
      SELECT MAX(FixId) AS [Max Fix Id], COUNT(*) AS [Fix Count] FROM CollarFixes
+     SELECT COUNT(*) AS [Project Count] FROM Projects
+     SELECT COUNT(*) AS [Animal Count] FROM Animals
+     SELECT COUNT(*) AS [Collar Count] FROM Collars
      SELECT COUNT(*) AS [Unique Fix Count] FROM CollarFixes WHERE HiddenBy IS NULL
-     SELECT COUNT(*) AS [Total Locations] FROM Locations
+     SELECT COUNT(*) AS [Total Fix Count] FROM CollarFixes
+     SELECT COUNT(*) AS [Total Locations], MIN(FixDate) AS [Earliest Fix], MAX(FixDate) AS [Last Fix] FROM Locations
+     EXECUTE sp_helpdb Animal_Movement
      SELECT ProjectId, COUNT(*) AS [Location Count] FROM Locations WHERE [Status] IS NULL GROUP BY ProjectId
 
 
