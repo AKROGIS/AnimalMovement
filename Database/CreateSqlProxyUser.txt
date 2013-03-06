@@ -179,3 +179,23 @@ Edit the settings file with connection and application path
 
 
 
+********************************************
+NOTES
+********************************************
+Since read permissions on the database are granted to domain users
+and SQL_Proxy account is not a memeber of this group,
+you need to add it to the database reader role
+and give it execute permissions on the function DaysSinceLastDownload
+
+If you have a user account that is an SA in the database,
+this account may run the external application as the nt_authority/system user
+and not as the sql_proxy user.  *I got mixed results, and never got to the bottom of this*
+
+The sql_proxy account name is hard coded into the following stored procedures:
+  ProcessAllCollarsForArgosFile
+  CollarFile_Insert
+
+The default path to the ArgosProcessor application in ProcessAllCollarsForArgosFile
+is 'C:\Users\sql_proxy\ArgosProcessor.exe'.  If you install this executable in a different
+location, be sure to set that path in the Settings table with
+  Username = 'system' and Key = 'argosProcessor'

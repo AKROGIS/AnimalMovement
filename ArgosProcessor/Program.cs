@@ -74,7 +74,8 @@ namespace ArgosProcessor
                 var file = db.CollarFiles.FirstOrDefault(f => f.FileId == id && (f.Format == 'E' || f.Format == 'F'));
                 if (file == null)
                 {
-                    error.AppendLine("ERROR: id provided is not an Argos email or AWS file in the database.");
+                    var msg = String.Format("ERROR: id {0} is not an Argos email or AWS file in the database.", id);
+                    error.AppendLine(msg);
                     return;
                 }
                 ArgosFile argos;

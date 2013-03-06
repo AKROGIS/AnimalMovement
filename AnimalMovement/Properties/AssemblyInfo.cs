@@ -1,10 +1,10 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//FIXME - DATABASE - Implement EXEC xp_cmdshell 'ArgosProcessor.exe' in CollarData_Insert
 //FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
 //FIXME - DATABASE - CollarUpdate Trigger - check for Disposal Date/ArgosId conflict; check for disposalDate/parameter startdate conflict
 //FIXME - DATABASE - Add stored procedures to add/del/update the ArgosPlatforms and Programs Tables
+//TODO - DATABASE - Replace the hardcoded sql_proxy name with a system setting
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Modify CollarData_Insert to add Argos PTT locations from Emails to new DB table
@@ -14,9 +14,14 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
-
+//TODO - DATABASE - Save warnings from Argos processing into a table for review by the user 
+//TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings.
+//TODO - DATABASE - Provide a CRC field in the CollarFiles and ParameterFiles tables to store the CRC of the contents, to check for duplicates
 
 //FIXME - Deleting multiple files and subfile in one operation fails, and corrupts datamodel. - Fix with heirarchy
+//FIXME - Adding a AWS file manually will not get it processed, needs to be a special case in the file upload
+//TODO - In the Gen4 processor, find a way to remove the warning for no data on secondary collar with shared argos id
+//TODO - give the user an ability to review warnings when processing an argos file, and the ability to reprocess the file.
 //TODO - Add setting for getting emails from Telonics downloader
 //TODO - provide user interface for checking on status of downloads
 //TODO - When a new collar is added to the database, we should offer to disable the active older version (same argos id).
