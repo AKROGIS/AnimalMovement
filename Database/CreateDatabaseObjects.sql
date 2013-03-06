@@ -3421,7 +3421,7 @@ RETURNS TABLE
 AS
 	RETURN
 		SELECT  F.[FileId],
-				F.[FileName]+'.csv' AS [File],
+				F.[FileName] AS [File],
 				S.[Name] AS [Status],
 				COUNT(FixDate) AS [FixCount],
 				dbo.LocalTime(MIN(FixDate)) AS [First],
