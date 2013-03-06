@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 
 //FIXME - DATABASE - Implement EXEC xp_cmdshell 'ArgosProcessor.exe' in CollarData_Insert
-//FIXME - DATABASE - Start scheduled process for ArgosDownload on server
 //FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
 //FIXME - DATABASE - CollarUpdate Trigger - check for Disposal Date/ArgosId conflict; check for disposalDate/parameter startdate conflict
 //FIXME - DATABASE - Add stored procedures to add/del/update the ArgosPlatforms and Programs Tables

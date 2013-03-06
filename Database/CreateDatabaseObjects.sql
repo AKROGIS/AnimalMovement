@@ -2056,57 +2056,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- Create the stored procedure to generate an error using 
--- RAISERROR. The original error information is used to
--- construct the msg_str for RAISERROR.
--- must be called from a CATCH block
--- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
-CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
-    -- Return if there is no error information to retrieve.
-    IF ERROR_NUMBER() IS NULL
-        RETURN;
-
-    DECLARE 
-        @ErrorMessage    NVARCHAR(4000),
-        @ErrorNumber     INT,
-        @ErrorSeverity   INT,
-        @ErrorState      INT,
-        @ErrorLine       INT,
-        @ErrorProcedure  NVARCHAR(200);
-
-    -- Assign variables to error-handling functions that 
-    -- capture information for RAISERROR.
-    SELECT 
-        @ErrorNumber = ERROR_NUMBER(),
-        @ErrorSeverity = ERROR_SEVERITY(),
-        @ErrorState = ERROR_STATE(),
-        @ErrorLine = ERROR_LINE(),
-        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
-
-    -- Build the message string that will contain original
-    -- error information.
-    SELECT @ErrorMessage = 
-        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
-            'Message: '+ ERROR_MESSAGE();
-
-    -- Raise an error: msg_str parameter of RAISERROR will contain
-    -- the original error information.
-    RAISERROR 
-        (
-        @ErrorMessage, 
-        @ErrorSeverity, 
-        1,               
-        @ErrorNumber,    -- parameter: original error number.
-        @ErrorSeverity,  -- parameter: original error severity.
-        @ErrorState,     -- parameter: original error state.
-        @ErrorProcedure, -- parameter: original error procedure name.
-        @ErrorLine       -- parameter: original error line number.
-        );
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: April 2, 2012
@@ -2168,6 +2117,73 @@ CREATE TABLE [dbo].[Settings](
 	[Key] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Create the stored procedure to generate an error using 
+-- RAISERROR. The original error information is used to
+-- construct the msg_str for RAISERROR.
+-- must be called from a CATCH block
+-- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
+CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
+    -- Return if there is no error information to retrieve.
+    IF ERROR_NUMBER() IS NULL
+        RETURN;
+
+    DECLARE 
+        @ErrorMessage    NVARCHAR(4000),
+        @ErrorNumber     INT,
+        @ErrorSeverity   INT,
+        @ErrorState      INT,
+        @ErrorLine       INT,
+        @ErrorProcedure  NVARCHAR(200);
+
+    -- Assign variables to error-handling functions that 
+    -- capture information for RAISERROR.
+    SELECT 
+        @ErrorNumber = ERROR_NUMBER(),
+        @ErrorSeverity = ERROR_SEVERITY(),
+        @ErrorState = ERROR_STATE(),
+        @ErrorLine = ERROR_LINE(),
+        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
+
+    -- Build the message string that will contain original
+    -- error information.
+    SELECT @ErrorMessage = 
+        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
+            'Message: '+ ERROR_MESSAGE();
+
+    -- Raise an error: msg_str parameter of RAISERROR will contain
+    -- the original error information.
+    RAISERROR 
+        (
+        @ErrorMessage, 
+        @ErrorSeverity, 
+        1,               
+        @ErrorNumber,    -- parameter: original error number.
+        @ErrorSeverity,  -- parameter: original error severity.
+        @ErrorState,     -- parameter: original error state.
+        @ErrorProcedure, -- parameter: original error procedure name.
+        @ErrorLine       -- parameter: original error line number.
+        );
+GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
+GO
+CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
+RETURNS  TABLE (
+	[FileId] [int] NULL,
+	[CTN] [nvarchar](16) NULL,
+	[Platform] [nvarchar](8) NULL,
+	[Frequency] [float] NULL,
+	[TimeStamp] [datetime2](7) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.TfpSummerizer].[SummarizeTpfFile]
 GO
 SET ANSI_NULLS ON
 GO
@@ -2314,22 +2330,6 @@ BEGIN
 	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
 		 VALUES (@Login, @Name, @Email, @Phone);
 END
-GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
-GO
-CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
-RETURNS  TABLE (
-	[FileId] [int] NULL,
-	[CTN] [nvarchar](16) NULL,
-	[Platform] [nvarchar](8) NULL,
-	[Frequency] [float] NULL,
-	[TimeStamp] [datetime2](7) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.TfpSummerizer].[SummarizeTpfFile]
 GO
 CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
 RETURNS  TABLE (
@@ -3194,6 +3194,220 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Deletes a CollarFile from the database by first removing all dependent records
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFile_Delete] 
+	@FileId int = -1
+WITH EXECUTE AS OWNER -- Needed for dynamic sql
+AS
+BEGIN
+	SET NOCOUNT ON;
+	-- Get the projectId
+	DECLARE @ProjectId NVARCHAR(255) = NULL
+	SELECT @ProjectID = Project FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+
+	IF @ProjectID IS NULL
+	BEGIN
+		DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+CAST(@FileId AS VARCHAR(10))+' in CollarFiles.';
+		IF @FileId IS NULL
+			SET @message1  = 'Invalid Parameter: NULL FileId was provided.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+	
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be the PI or editor on the project
+	-- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file. 
+	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
+		BEGIN
+			DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete a file.';
+			RAISERROR(@message2, 18, 0)
+			RETURN (1)
+		END
+	END
+
+	-- Do the deleting
+	BEGIN TRY
+		BEGIN TRAN
+
+			-- Recursively delete all the children (subfiles) of this file
+			DECLARE @SubFileId INT;
+			  
+			DECLARE subfile_cursor CURSOR LOCAL FOR 
+				SELECT [FileId] FROM [dbo].[CollarFiles] WHERE [ParentFileId] = @FileId;
+
+			OPEN subfile_cursor;
+				FETCH NEXT FROM subfile_cursor INTO @SubFileId;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					EXEC [dbo].[CollarFile_Delete] @SubFileId;
+					FETCH NEXT FROM subfile_cursor INTO @SubFileId;
+				END
+			CLOSE subfile_cursor;
+			DEALLOCATE subfile_cursor;
+
+			-- Delete locations derived from this file
+			DELETE L FROM dbo.Locations as L
+			   INNER JOIN dbo.CollarFixes as C
+					   ON C.FixID = L.FixId
+					WHERE C.[FileId] = @FileId;
+
+			-- Data from a file may be parsed into different data tables.
+			-- Delete all of the records that are related to this file
+		    -- by finding all the tables that have a relation to the CollarFiles.FileId
+			DECLARE @TableName sysname;
+			DECLARE @FieldName sysname;
+			DECLARE relate_cursor CURSOR LOCAL FOR 
+				SELECT o2.name, c2.name
+				FROM sys.foreign_key_columns fk
+					   JOIN sys.columns c2 
+						 ON fk.parent_column_id = c2.column_id 
+							AND fk.parent_object_id = c2.object_id
+					   JOIN sys.columns c3
+						 ON fk.referenced_column_id = c3.column_id 
+							AND fk.referenced_object_id= c3.object_id
+					   JOIN sys.objects o2 ON fk.parent_object_id = o2.object_id
+					   JOIN sys.objects o3 ON fk.referenced_object_id = o3.object_id
+					   where o3.name = 'CollarFiles' and c3.name = 'FileId'
+
+			OPEN relate_cursor;
+				FETCH NEXT FROM relate_cursor INTO @TableName, @FieldName;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					DECLARE @sql NVARCHAR(500) = N'DELETE FROM ' + @TableName + '  WHERE ' + @FieldName + ' = @file';
+					-- Execute dynamic SQL with parameters
+					EXEC sp_ExecuteSQL @sql, N'@file int', @file = @FileId;
+					FETCH NEXT FROM relate_cursor INTO @TableName, @FieldName;
+				END
+			CLOSE relate_cursor;
+			DEALLOCATE relate_cursor;
+
+			-- Delete this file
+			DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+		COMMIT TRANSACTION
+	END TRY
+	BEGIN CATCH
+		IF XACT_STATE() <> 0
+			ROLLBACK TRANSACTION;
+		EXEC [dbo].[Utility_RethrowError]
+		RETURN 1
+	END CATCH
+	
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 5, 2013
+-- Description: Processes all the collars in an Argos file
+-- =============================================
+CREATE PROCEDURE [dbo].[ProcessAllCollarsForArgosFile] 
+	@FileId INT = NULL
+	
+WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Make sure we have a suitable FileId
+	DECLARE @ProjectId nvarchar(255);
+	DECLARE @Owner sysname;
+	SELECT @ProjectId = Project, @Owner = UserName FROM CollarFiles WHERE FileId = @FileId AND [Status] = 'A' AND Format IN ('E', 'F')
+	IF @ProjectId IS NULL
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation	
+	-- Caller needs to be the uploader of the file, or an editor on the files project
+	-- The caller must be the uploader of the file, the PI or editor on the project, or the local sql_proxy account
+	IF @Caller <> @@SERVERNAME + '\sql_proxy' AND @Caller <> @Owner AND
+	   NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
+		BEGIN
+			DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
+			RAISERROR(@message2, 18, 0)
+			RETURN (1)
+		END
+	END
+	
+	
+	--Delete any existing sub files; this must be done in a cursor to call the SP
+    DECLARE delete_subfile_cursor CURSOR FOR 
+            SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId
+        
+    OPEN delete_subfile_cursor;
+
+    FETCH NEXT FROM delete_subfile_cursor INTO @FileId;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC CollarFile_Delete @FileId
+        FETCH NEXT FROM delete_subfile_cursor INTO @FileId;
+    END
+    CLOSE delete_subfile_cursor;
+    DEALLOCATE delete_subfile_cursor;
+
+
+
+	-- Run the External command
+	DECLARE @exe nvarchar (255) = 'C:\Documents and Settings\sql_proxy\ArgosProcessor.exe'
+		SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosDownloader'
+	IF @exe IS NULL
+		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
+	DECLARE @cmd nvarchar(200) = '"' + @exe + '" ' + CONVERT(NVARCHAR(10),@FileId);
+	DECLARE @result varchar(4000);
+
+		-- see http://stackoverflow.com/questions/9501192/get-results-from-xp-cmdshell 
+        IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[#tempProcessResults]') AND type in (N'U')) 
+            DROP TABLE [dbo].[#tempProcessResults]
+        BEGIN TRY
+            CREATE TABLE #tempProcessResults(result varchar(1000))
+            INSERT INTO #tempProcessResults execute xp_cmdshell @cmd ;  -- will run as the sql_proxy account
+            IF EXISTS (SELECT 1 FROM #tempProcessResults WHERE result IS NOT NULL)
+                BEGIN
+					-- FIXME how can I distiguish between warnings and errors??
+					SET @result = ''
+					SELECT @result = @result + result + '\n' FROM #tempProcessResults WHERE result IS NOT NULL
+					RAISERROR(@result, 18, 0)
+					RETURN (1)
+                END
+        END TRY
+        BEGIN CATCH
+            DROP TABLE #tempProcessResults
+			DECLARE @error int, @innerError varchar(4000);
+			SELECT @error = ERROR_NUMBER(), @innerError = ERROR_MESSAGE();
+			RAISERROR('Execution Error: %d : %s', 16, 1, @error, @innerError)
+			RETURN (1)
+        END CATCH
+        DROP TABLE #tempProcessResults	
+	
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
 -- Create date: May 31, 2012
 -- Description:	Returns a table of files with fixes for a specific collar.
 -- Example:     SELECT * FROM CollarFixesByFile('Telonics', '96007')
@@ -3948,121 +4162,6 @@ BEGIN
 			RETURN 1
 		END CATCH
 	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Deletes a CollarFile from the database by first removing all dependent records
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFile_Delete] 
-	@FileId int = -1
-WITH EXECUTE AS OWNER -- Needed for dynamic sql
-AS
-BEGIN
-	SET NOCOUNT ON;
-	-- Get the projectId
-	DECLARE @ProjectId NVARCHAR(255) = NULL
-	SELECT @ProjectID = Project FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-
-	IF @ProjectID IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'Invalid Parameter: There is no FileId = '+CAST(@FileId AS VARCHAR(10))+' in CollarFiles.';
-		IF @FileId IS NULL
-			SET @message1  = 'Invalid Parameter: NULL FileId was provided.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	-- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file. 
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete a file.';
-			RAISERROR(@message2, 18, 0)
-			RETURN (1)
-		END
-	END
-
-	-- Do the deleting
-	BEGIN TRY
-		BEGIN TRAN
-
-			-- Recursively delete all the children (subfiles) of this file
-			DECLARE @SubFileId INT;
-			  
-			DECLARE subfile_cursor CURSOR LOCAL FOR 
-				SELECT [FileId] FROM [dbo].[CollarFiles] WHERE [ParentFileId] = @FileId;
-
-			OPEN subfile_cursor;
-				FETCH NEXT FROM subfile_cursor INTO @SubFileId;
-
-				WHILE @@FETCH_STATUS = 0
-				BEGIN
-					EXEC [dbo].[CollarFile_Delete] @SubFileId;
-					FETCH NEXT FROM subfile_cursor INTO @SubFileId;
-				END
-			CLOSE subfile_cursor;
-			DEALLOCATE subfile_cursor;
-
-			-- Delete locations derived from this file
-			DELETE L FROM dbo.Locations as L
-			   INNER JOIN dbo.CollarFixes as C
-					   ON C.FixID = L.FixId
-					WHERE C.[FileId] = @FileId;
-
-			-- Data from a file may be parsed into different data tables.
-			-- Delete all of the records that are related to this file
-		    -- by finding all the tables that have a relation to the CollarFiles.FileId
-			DECLARE @TableName sysname;
-			DECLARE @FieldName sysname;
-			DECLARE relate_cursor CURSOR LOCAL FOR 
-				SELECT o2.name, c2.name
-				FROM sys.foreign_key_columns fk
-					   JOIN sys.columns c2 
-						 ON fk.parent_column_id = c2.column_id 
-							AND fk.parent_object_id = c2.object_id
-					   JOIN sys.columns c3
-						 ON fk.referenced_column_id = c3.column_id 
-							AND fk.referenced_object_id= c3.object_id
-					   JOIN sys.objects o2 ON fk.parent_object_id = o2.object_id
-					   JOIN sys.objects o3 ON fk.referenced_object_id = o3.object_id
-					   where o3.name = 'CollarFiles' and c3.name = 'FileId'
-
-			OPEN relate_cursor;
-				FETCH NEXT FROM relate_cursor INTO @TableName, @FieldName;
-
-				WHILE @@FETCH_STATUS = 0
-				BEGIN
-					DECLARE @sql NVARCHAR(500) = N'DELETE FROM ' + @TableName + '  WHERE ' + @FieldName + ' = @file';
-					-- Execute dynamic SQL with parameters
-					EXEC sp_ExecuteSQL @sql, N'@file int', @file = @FileId;
-					FETCH NEXT FROM relate_cursor INTO @TableName, @FieldName;
-				END
-			CLOSE relate_cursor;
-			DEALLOCATE relate_cursor;
-
-			-- Delete this file
-			DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-		COMMIT TRANSACTION
-	END TRY
-	BEGIN CATCH
-		IF XACT_STATE() <> 0
-			ROLLBACK TRANSACTION;
-		EXEC [dbo].[Utility_RethrowError]
-		RETURN 1
-	END CATCH
-	
 END
 GO
 SET ANSI_NULLS ON
@@ -5571,6 +5670,8 @@ GO
 GRANT EXECUTE ON [dbo].[CollarParameterFile_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Location_UpdateStatus] TO [Editor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ProcessAllCollarsForArgosFile] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Project_Delete] TO [Investigator] AS [dbo]
 GO

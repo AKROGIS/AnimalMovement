@@ -95,6 +95,9 @@ create credential ##xp_cmdshell_proxy_account## with identity = '_MACHINE_\sql_p
 -- replace _MACHINE_ with the sql server machine name (where the local account was created)
 -- replace _PASSWORD_ with the accounts password
 
+-- To verify the account has bee created
+select * from sys.credentials
+
 -- To disallow advanced options to be changed.
 EXEC sp_configure 'show advanced options', 0
 GO

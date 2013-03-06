@@ -131,6 +131,7 @@ Batch completed at: 2012.12.17 22:32:27
                                                                   !line.StartsWith("Batch started at:") &&
                                                                   !line.StartsWith("Processing file:") &&
                                                                   !line.EndsWith("successfully.") &&
+                                                                  !line.EndsWith("Using default settings instead.") &&  //warning when run as Sql server impersonated proxy account
                                                                   !line.StartsWith("Batch completed at:")));
                 if (!String.IsNullOrEmpty(errors))
                     throw new InvalidOperationException("TDC Execution error " + errors);
