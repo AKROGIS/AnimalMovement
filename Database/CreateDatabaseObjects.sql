@@ -40,6 +40,8 @@ CREATE ROLE [MSReplPAL_7_1] AUTHORIZATION [dbo]
 GO
 CREATE ROLE [MStran_PAL_role] AUTHORIZATION [dbo]
 GO
+CREATE ROLE [Viewer] AUTHORIZATION [dbo]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -5702,25 +5704,25 @@ GRANT EXECUTE ON [dbo].[ProjectEditor_Insert] TO [Investigator] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ProjectInvestigator_Update] TO [Investigator] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[Settings_Update] TO [NPS\Domain Users] AS [dbo]
+GRANT EXECUTE ON [dbo].[Settings_Update] TO [Viewer] AS [dbo]
 GO
-GRANT SELECT ON [dbo].[AnimalLocationSummary] TO [NPS\Domain Users] AS [dbo]
+GRANT SELECT ON [dbo].[AnimalLocationSummary] TO [Viewer] AS [dbo]
 GO
-GRANT SELECT ON [dbo].[CollarFixesByFile] TO [NPS\Domain Users] AS [dbo]
+GRANT SELECT ON [dbo].[CollarFixesByFile] TO [Viewer] AS [dbo]
 GO
-GRANT SELECT ON [dbo].[CollarFixSummary] TO [NPS\Domain Users] AS [dbo]
+GRANT SELECT ON [dbo].[CollarFixSummary] TO [Viewer] AS [dbo]
 GO
-GRANT SELECT ON [dbo].[ConflictingFixes] TO [NPS\Domain Users] AS [dbo]
+GRANT SELECT ON [dbo].[ConflictingFixes] TO [Viewer] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[DateTimeToOrdinal] TO [NPS\Domain Users] AS [dbo]
+GRANT EXECUTE ON [dbo].[DateTimeToOrdinal] TO [Viewer] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [INPAKROMS53AIS\sql_proxy] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [NPS\Domain Users] AS [dbo]
+GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [Viewer] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[IsEditor] TO [NPS\Domain Users] AS [dbo]
+GRANT EXECUTE ON [dbo].[IsEditor] TO [Viewer] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[IsFixEditor] TO [NPS\Domain Users] AS [dbo]
+GRANT EXECUTE ON [dbo].[IsFixEditor] TO [Viewer] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[NextAnimalId] TO [Editor] AS [dbo]
 GO
@@ -5769,4 +5771,8 @@ GO
 EXEC dbo.sp_addrolemember @rolename=N'MStran_PAL_role', @membername=N'INPAKROMS53AIS\repl_distribution'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'MStran_PAL_role', @membername=N'MSReplPAL_7_1'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\Domain Users'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'INPAKROMS53AIS\sql_proxy'
 GO
