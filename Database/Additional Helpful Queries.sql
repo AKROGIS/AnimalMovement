@@ -203,6 +203,29 @@
 -- =======================================
 
 
+----------- Show collars with multiple parameter settings
+     SELECT *
+       FROM CollarParameters
+      WHERE CollarId IN (
+	  		     SELECT CollarId
+				   FROM CollarParameters
+			   GROUP BY CollarId
+				 HAVING COUNT (*) > 1
+            )
+   ORDER BY CollarId, startdate
+
+----------- Show Argos platforms with multiple collar deployments
+     SELECT *
+       FROM ArgosDeployments
+      WHERE PlatformId IN (
+				   SELECT PlatformId
+				     FROM ArgosDeployments
+			     GROUP BY PlatformId
+				   HAVING COUNT (*) > 1
+            )
+   ORDER BY PlatformId, startdate
+
+
 ----------- Show days between this collars disposal, and the next collars start
 -----------     Assumes all collars have a Alpha suffix, and that there are no gaps.
 -----------     if there is an A version, and then a C version with no B version, the results will be incorrect.

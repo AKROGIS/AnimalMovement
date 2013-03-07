@@ -2847,6 +2847,38 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
+CREATE TABLE [dbo].[ArgosDeployments](
+	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
+(
+	[DeploymentId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeployments] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeployments] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[ProjectEditors](
 	[ProjectId] [varchar](16) NOT NULL,
 	[Editor] [sysname] NOT NULL,
@@ -5451,6 +5483,18 @@ ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Species] FOR
 REFERENCES [dbo].[LookupSpecies] ([Species])
 GO
 ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Species]
+GO
+ALTER TABLE [dbo].[ArgosDeployments]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDeployments_ArgosPlatforms] FOREIGN KEY([PlatformId])
+REFERENCES [dbo].[ArgosPlatforms] ([PlatformId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosDeployments] CHECK CONSTRAINT [FK_ArgosDeployments_ArgosPlatforms]
+GO
+ALTER TABLE [dbo].[ArgosDeployments]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDeployments_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosDeployments] CHECK CONSTRAINT [FK_ArgosDeployments_Collars]
 GO
 ALTER TABLE [dbo].[ArgosDownloads]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDownloads_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
