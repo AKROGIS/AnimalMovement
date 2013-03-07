@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 using DataModel;
 using Telonics;
@@ -15,6 +16,8 @@ namespace AnimalMovement
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
         internal event EventHandler DatabaseChanged;
+        private Byte[] _fileContents;
+        private Byte[] _fileHash;
 
         internal AddCollarParameterFileForm(string user)
         {
@@ -230,28 +233,19 @@ namespace AnimalMovement
 
         private CollarParameterFile UploadParameterFile(ProjectInvestigator owner, LookupCollarParameterFileFormat format, string filename)
         {
-            if (AbortBecauseDuplicate(owner, format, filename))
+            LoadAndHashFile(FileNameTextBox.Text);
+            if (_fileContents == null)
+                return null;
+            if (AbortBecauseDuplicate())
                 return null;
 
-            byte[] data;
-            try
-            {
-                data = System.IO.File.ReadAllBytes(filename);
-            }
-            catch (Exception ex)
-            {
-                string msg = "The file cannot be read.\nSystem Message:\n" + ex.Message;
-                MessageBox.Show(msg, "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                FileNameTextBox.Focus();
-                return null;
-            }
             var file = new CollarParameterFile
             {
                 FileName = System.IO.Path.GetFileName(filename),
                 LookupCollarParameterFileFormat = format,
                 ProjectInvestigator = owner,
                 LookupCollarFileStatus = (LookupCollarFileStatus)StatusComboBox.SelectedItem,
-                Contents = data
+                Contents = _fileContents
             };
             Database.CollarParameterFiles.InsertOnSubmit(file);
 
@@ -354,15 +348,34 @@ namespace AnimalMovement
         }
 
 
-        private bool AbortBecauseDuplicate(ProjectInvestigator owner, LookupCollarParameterFileFormat format, string fileName)
+        private void LoadAndHashFile(string path)
         {
-            if (!Database.CollarParameterFiles.Any(f =>
-                f.FileName == System.IO.Path.GetFileName(fileName) &&
-                f.LookupCollarParameterFileFormat == format &&
-                f.ProjectInvestigator == owner
-                ))
+            try
+            {
+                _fileContents = System.IO.File.ReadAllBytes(path);
+            }
+            catch (Exception ex)
+            {
+                string msg = "The file cannot be read.\nSystem Message:\n  " + ex.Message;
+                MessageBox.Show(msg, "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FileNameTextBox.Focus();
+                return;
+            }
+            _fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(_fileContents);
+        }
+
+        private bool AbortBecauseDuplicate()
+        {
+            var duplicate = Database.CollarParameterFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
+            if (duplicate == null)
                 return false;
-            var result = MessageBox.Show(this, "It appears this file has already been uploaded.  Are you sure you want to proceed?",
+            var msg = "The contents of this file have already been loaded as" + Environment.NewLine +
+                String.Format("file '{0}' for {1}.", duplicate.FileName, duplicate.ProjectInvestigator.Name) + Environment.NewLine +
+                "Loading a file multiple times is not a problem for the database," + Environment.NewLine +
+                "but it is unnecessary, inefficient, and generally confusing." + Environment.NewLine +
+                "It is recommended that you do NOT load this file again." + Environment.NewLine + Environment.NewLine +
+                "Are you sure you want to proceed?";
+            var result = MessageBox.Show(this, msg,
                 "Duplicate file", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             return result != DialogResult.Yes;
         }

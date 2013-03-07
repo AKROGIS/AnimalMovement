@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
+//FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
 //FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
 //FIXME - DATABASE - CollarUpdate Trigger - check for Disposal Date/ArgosId conflict; check for disposalDate/parameter startdate conflict
 //FIXME - DATABASE - Add stored procedures to add/del/update the ArgosPlatforms and Programs Tables
@@ -16,7 +17,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
 //TODO - DATABASE - Save warnings from Argos processing into a table for review by the user 
 //TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings.
-//TODO - DATABASE - Provide a CRC field in the CollarFiles and ParameterFiles tables to store the CRC of the contents, to check for duplicates
 
 //FIXME - Deleting multiple files and subfile in one operation fails, and corrupts datamodel. - Fix with heirarchy
 //FIXME - Adding a AWS file manually will not get it processed, needs to be a special case in the file upload

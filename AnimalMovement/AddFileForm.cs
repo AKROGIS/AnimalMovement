@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using DataModel;
 using Telonics;
 
-//TODO - In duplicate finename warning, give the filename
 //TODO - Provide better error messages when uploading files fails
 
 /*
@@ -25,6 +25,8 @@ namespace AnimalMovement
         private Project Project { get; set; }
         private List<Collar> AllCollars { get; set; } 
         internal event EventHandler DatabaseChanged;
+        private Byte[] _fileContents;
+        private Byte[] _fileHash;
 
         internal AddFileForm(string user)
         {
@@ -104,6 +106,9 @@ namespace AnimalMovement
 
         private void UploadButton_Click(object sender, EventArgs e)
         {
+            LoadAndHashFile(FileNameTextBox.Text);
+            if (_fileContents == null)
+                return;
             if (AbortBecauseDuplicate())
                 return;
 
@@ -112,18 +117,6 @@ namespace AnimalMovement
             Cursor.Current = Cursors.WaitCursor;
             Application.DoEvents();
 
-            byte[] data;
-            try
-            {
-                data = System.IO.File.ReadAllBytes(FileNameTextBox.Text);
-            }
-            catch (Exception ex)
-            {
-                string msg = "The file cannot be read.\nSystem Message:\n"+ex.Message;
-                MessageBox.Show(msg, "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                FileNameTextBox.Focus();
-                return;
-            }
             var file = new CollarFile
                 {
                     Project1 = Project,
@@ -132,7 +125,7 @@ namespace AnimalMovement
                     LookupCollarManufacturer = (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem,
                     CollarId = CollarComboBox.Enabled ? ((Collar)CollarComboBox.SelectedItem).CollarId : null,
                     LookupCollarFileStatus = Database.LookupCollarFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
-                    Contents = data
+                    Contents = _fileContents,
                 };
             Database.CollarFiles.InsertOnSubmit(file);
 
@@ -157,16 +150,34 @@ namespace AnimalMovement
             DialogResult = DialogResult.OK;
         }
 
+        private void LoadAndHashFile(string path)
+        {
+            try
+            {
+                _fileContents = System.IO.File.ReadAllBytes(path);
+            }
+            catch (Exception ex)
+            {
+                string msg = "The file cannot be read.\nSystem Message:\n  " + ex.Message;
+                MessageBox.Show(msg, "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FileNameTextBox.Focus();
+                return;
+            }
+            _fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(_fileContents);
+        }
+
         private bool AbortBecauseDuplicate()
         {
-            if (!Database.CollarFiles.Any(f =>
-                f.Project1 == Project &&
-                f.FileName == System.IO.Path.GetFileName(FileNameTextBox.Text) &&
-                f.LookupCollarFileFormat == (LookupCollarFileFormat)FormatComboBox.SelectedItem &&
-                f.LookupCollarManufacturer == (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem
-                ))
+            var duplicate = Database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
+            if (duplicate == null)
                 return false;
-            var result = MessageBox.Show(this, "It appears this file has already been uploaded.  Are you sure you want to proceed?",
+            var msg = "The contents of this file have already been loaded as" + Environment.NewLine +
+                String.Format("file '{0}' in project '{1}'.", duplicate.FileName, duplicate.Project1.ProjectName) + Environment.NewLine +
+                "Loading a file multiple times is not a problem for the database," + Environment.NewLine +
+                "but it is unnecessary, inefficient, and generally confusing." + Environment.NewLine +
+                "It is recommended that you do NOT load this file again." + Environment.NewLine + Environment.NewLine +
+                "Are you sure you want to proceed?";
+            var result = MessageBox.Show(this, msg,
                 "Duplicate file", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             return result != DialogResult.Yes;
         }
