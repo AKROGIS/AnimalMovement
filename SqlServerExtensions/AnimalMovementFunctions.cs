@@ -7,6 +7,7 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using Microsoft.SqlServer.Server;
 
 // See http://msdn.microsoft.com/en-us/library/ms131103.aspx
@@ -36,6 +37,13 @@ namespace SqlServerExtensions
                 return SqlDateTime.Null;
             return new SqlDateTime(localDateTime.Value.ToUniversalTime());
         }
+
+        [SqlFunction(IsDeterministic = true, IsPrecise = true)]
+        public static SqlBinary Sha1Hash(SqlBytes data)
+        {
+            return (new SHA1CryptoServiceProvider()).ComputeHash(data.Stream);
+        }
+
 
         #region SQL Server Table Value Functions
         //Code - Format
