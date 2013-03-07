@@ -177,6 +177,28 @@
 
 
 
+
+
+-- File checks
+-- =======================================
+
+
+----------- Duplicate Collar Data Files
+     SELECT Sha1Hash, COUNT(*) AS [Duplicate Count], MIN(FileId) as [First File Id], MAX(FileId) as [Last File Id]
+       FROM CollarFiles
+   GROUP BY Sha1Hash
+     HAVING COUNT(*) > 1
+
+----------- Duplicate Collar Parameter Files
+     SELECT Sha1Hash, COUNT(*) AS [Duplicate Count], MIN(FileId) as [First File Id], MAX(FileId) as [Last File Id]
+       FROM CollarParameterFiles
+   GROUP BY Sha1Hash
+     HAVING COUNT(*) > 1
+
+
+
+
+
 -- Collar Displosal/Deployment date checks
 -- =======================================
 
