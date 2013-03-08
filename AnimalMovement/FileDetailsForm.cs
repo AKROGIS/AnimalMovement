@@ -47,6 +47,7 @@ namespace AnimalMovement
             UpdateCollarFixes();
             EnableForm();
             DoneCancelButton.Focus();
+            SourceFileButton.Visible = File.ParentFileId != null;
         }
 
         private void UpdateDataSource()
@@ -98,6 +99,16 @@ namespace AnimalMovement
             ChangeStatusButton.Enabled = IsFileEditor && File.ParentFileId == null;
         }
 
+
+        private void SourceFileButton_Click(object sender, EventArgs e)
+        {
+            //If the user make changes in the info dialog, they happen in a different context, so we need to reload this context if changes were made
+            if (File.ParentFileId == null)
+                return;
+            var form = new FileDetailsForm(File.ParentFileId.Value, CurrentUser);
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.Show(this);
+        }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
         {

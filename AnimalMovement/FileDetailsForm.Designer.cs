@@ -60,6 +60,7 @@
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
+            this.SourceFileButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.FixInfoDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -263,10 +264,10 @@
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(55, 136);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(393, 26);
+            this.label10.Size = new System.Drawing.Size(299, 26);
             this.label10.TabIndex = 0;
-            this.label10.Text = "Inactive files are archived in the database, but are not used to calculate locati" +
-    "ons.\r\nFix information is only avaialble for active files.";
+            this.label10.Text = "Inactive files are archived in the database, but are not used to\r\ncalculate locat" +
+    "ions.  Fixes are only available for active files.";
             // 
             // FixInfoDataGridView
             // 
@@ -293,7 +294,7 @@
             this.FixInfoDataGridView.ReadOnly = true;
             this.FixInfoDataGridView.RowHeadersVisible = false;
             this.FixInfoDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.FixInfoDataGridView.Size = new System.Drawing.Size(463, 134);
+            this.FixInfoDataGridView.Size = new System.Drawing.Size(463, 146);
             this.FixInfoDataGridView.TabIndex = 12;
             // 
             // FileIdColumn
@@ -373,7 +374,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(12, 317);
+            this.DoneCancelButton.Location = new System.Drawing.Point(12, 329);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 46;
@@ -385,7 +386,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(401, 317);
+            this.EditSaveButton.Location = new System.Drawing.Point(401, 329);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 47;
@@ -393,11 +394,23 @@
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
             // 
+            // SourceFileButton
+            // 
+            this.SourceFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SourceFileButton.Location = new System.Drawing.Point(360, 140);
+            this.SourceFileButton.Name = "SourceFileButton";
+            this.SourceFileButton.Size = new System.Drawing.Size(116, 23);
+            this.SourceFileButton.TabIndex = 48;
+            this.SourceFileButton.Text = "Show Source File";
+            this.SourceFileButton.UseVisualStyleBackColor = true;
+            this.SourceFileButton.Click += new System.EventHandler(this.SourceFileButton_Click);
+            // 
             // FileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(492, 352);
+            this.ClientSize = new System.Drawing.Size(492, 364);
+            this.Controls.Add(this.SourceFileButton);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
             this.Controls.Add(this.FixInfoDataGridView);
@@ -466,5 +479,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
         private System.Windows.Forms.Button DoneCancelButton;
         private System.Windows.Forms.Button EditSaveButton;
+        private System.Windows.Forms.Button SourceFileButton;
     }
 }
