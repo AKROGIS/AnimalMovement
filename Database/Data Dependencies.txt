@@ -55,7 +55,8 @@ FileId/Username/UploadDate/Sha1Hash
 ParentFileId
   - is a nullable key in the collar file table.
   - It is inserted by the external file processors, and cannot be changed once inserted
-  - Would be nice if the database could manage this - requires in DB processing of argos files 
+  - Would be nice if the database could manage this - requires in DB processing of argos files
+  - Special case: CSV files generated from Gen3 *.tpf files could have the parent file loaded after.
 Format
   - Is a non-null key in LookupCollarFileFormat.
   - It is inserted by the user on creation and cannot be changed once inserted 
