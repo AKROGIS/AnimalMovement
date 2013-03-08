@@ -150,7 +150,7 @@ namespace AnimalMovement
                                       {
                                           File = file,
                                           Name = file.FileName + " (" + file.Status + ")",
-                                          CanDelete = true
+                                          CanDelete = file.ParentFileId == null
                                       };
             var sortedList = query.OrderBy(f => f.File.Status).ThenByDescending(f => f.File.UploadDate).ToList();
             FilesListBox.DataSource = sortedList;
