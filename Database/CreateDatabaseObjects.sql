@@ -4444,16 +4444,16 @@ GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarParameters](
+	[ParameterId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[CollarManufacturer] [varchar](16) NOT NULL,
 	[CollarId] [varchar](16) NOT NULL,
-	[FileId] [int] NOT NULL,
+	[FileId] [int] NULL,
+	[Gen3Period] [int] NULL,
 	[StartDate] [datetime2](7) NULL,
 	[EndDate] [datetime2](7) NULL,
  CONSTRAINT [PK_CollarParameters] PRIMARY KEY CLUSTERED 
 (
-	[CollarManufacturer] ASC,
-	[CollarId] ASC,
-	[FileId] ASC
+	[ParameterId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
