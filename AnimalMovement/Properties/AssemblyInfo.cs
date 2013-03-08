@@ -16,11 +16,9 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
 //TODO - DATABASE - Save warnings from Argos processing into a table for review by the user 
-//TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings.
+//TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings -- Need special exception for sql_proxy
 
-//FIXME - Deleting multiple files and subfile in one operation fails, and corrupts datamodel. - Fix with heirarchy
 //FIXME - Adding a AWS file manually will not get it processed, needs to be a special case in the file upload
-//TODO - In the Gen4 processor, find a way to remove the warning for no data on secondary collar with shared argos id
 //TODO - give the user an ability to review warnings when processing an argos file, and the ability to reprocess the file.
 //TODO - Add setting for getting emails from Telonics downloader
 //TODO - provide user interface for checking on status of downloads
@@ -42,6 +40,7 @@ using System.Runtime.InteropServices;
 //TODO - Provide some global QAQC tools - I.e. show Argos collars that have not downloded any data, or might be missing data since downloading began.
 //TODO - Provide some global QAQC tools - I.e. Identify collars with data gaps (analyze download dates, transmissions in email files).
 //TODO - Allow a collar to have multiple Active non-overlapping TPF files (for now, must deactive all but one)
+//TODO - In the Gen4 processor, find a way to remove the warning for no data on secondary collar with shared argos id
 //TODO - If a collar has multiple TPF files, then sort messages by transmission date per TPF, and process separately. (for now, create multiple collars)
 //TODO - build tool to visualize deployments (i.e. show a graphical time line of animals & collars)
 //TODO - Create a simple location layer, create a table of animal data, and join in ArcMap
