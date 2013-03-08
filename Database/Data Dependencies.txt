@@ -25,4 +25,83 @@ Locations
 	Animal.MortalityDate
 Movements
 	Locations.*
-	
+
+==============
+Business Rules
+==============
+
+
+Collar Files
+============
+
+Column constraints
+------------------
+
+Collar
+  - is a nullable key in the collars table
+  - Can only be null for files which will be processed, i.e will have sub files with non-null collars
+  -  (and as a special exception, ed-debevek files)
+  -  (Debevek files should in the future be processed to collar specific sub files)
+Project
+  - is a non-null key in the projects table (determines where this file is visible in UI)
+FileName
+  - must be non-null and not empty string; purely informational
+Status
+  - is a non-null key in LookupCollarFileStatus
+Content
+  - must be non-null and is immutable
+FileId/Username/UploadDate/Sha1Hash
+  - are created/maintained by the DB, and cannot be inserted/updated
+ParentFileId
+  - is a nullable key in the collar file table.
+  - It is inserted by the external file processors, and cannot be changed once inserted
+  - Would be nice if the database could manage this - requires in DB processing of argos files 
+Format
+  - Is a non-null key in LookupCollarFileFormat.
+  - It is inserted by the user on creation and cannot be changed once inserted 
+  - Getting this wrong will likely result in errors and no good fixes for this file 
+  - Would be nice if the database could determine this from the contents, and disallow user input.
+
+If a file has a non-null ParentFileId
+  then it only the project & status can be updated, and only to mirror changes in the parent
+  it can not be deleted, except when the parent is deleted or reprocessed
+  it can not be inserted, except when the parent is (re)processed
+
+Dependencies
+------------
+Collars: Collar
+Projects: Project
+LookupStatus: Status
+LookupFormat: Format
+CollarFiles: ParentFileId
+  
+Tables Dependent on CollarFiles
+-------------------------------
+
+CollarDataXXX: Contents, and Format (update: na; delete: cascade)
+CollarFile: FileId (for files with a parent) (update: na; delete: cascade)
+ArgosTransmissionSummary: Contents and Format   (update: na; delete: cascade)
+CollarFixes: Status, Collar (and Contents via CollarDataXXX) (update: see below; delete: cascade)
+
+
+Insert
+------
+
+Enforce column constraints
+If Argos, summarize the transmissions by platform id and date range
+If Argos, process to create/insert child files
+Insert data in file format specific tables
+If status is active, generate collar fixes from new data in format specific tables
+
+Delete
+------
+
+Reverse insert
+
+Updates
+-------
+Status: If the status changes, add/remove collarfixes for related data in format specific tables 
+Collar: Only allowed when a file is inactive, since fixes for a file are dependent on knowing the collar of a file
+Project: No effect on processing, will appear in a different project list
+         Must ripple down to any sub files
+FileName: Purely informational, user can change as desired.
