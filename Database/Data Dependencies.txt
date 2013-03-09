@@ -106,3 +106,50 @@ Collar: Only allowed when a file is inactive, since fixes for a file are depende
 Project: No effect on processing, will appear in a different project list
          Must ripple down to any sub files
 FileName: Purely informational, user can change as desired.
+
+
+
+ArgosFilePlatformDates
+======================
+This table is used to summarize a file without having to rescan it.
+The summary information is used to determine if a file needs to be reprocessed (i.e.
+if the platform to collar or collar to parameter mappings change).
+
+The ProgramId and PlatformId are not foreign keys to the ArgosProgram and ArgosPlatform
+tables, because we may load a file that does not have a program/platform in the database
+We want this table to reflect what is in the file, not what is in the database,
+We should provide a tool for checking database against the file and adding programs/platforms
+as required.
+
+This table is not dependent on anything beyond the contents (and format) of the related collar file.
+Since the CollarFile contents/format are immutable, this table is also immutable.
+
+Only the ArgosProcessor role can add records in this table - done when a file is processed.
+(would be nice to do when the collarfile is added to the database).
+Records cannot be updated or deleted.
+Deletes will only happen as a cascade when the collarfile is deleted.
+Inserts are done without a stored procedure, since access is controlled.
+
+
+ArgosFileProcessingIssues
+=========================
+Issue will always happen on a collarFile.
+If the collar file is deleted the related issues are also deleted (cascade)
+The platform and collar fields are nullable foreign keys
+They are used if the issue is related to a known platform/collar in the database.
+They issue will be deleted/updated if the related platform/collar is deleted/updated.
+
+The data in this table is highly dependent on the state of the database at the time
+a file was processed. In particular, the platform to collar and collar to parameter
+mappings and date ranges.
+
+If a collarfile is reprocessed, all the existing issues are cleared, and new issues
+(if any) are added to this table.
+
+Only the ArgosProcessor role can add/deleted records in this table.
+Should only be done when a file is processed.
+Records cannot be updated.
+Deletes will also happen as a cascade from deletes in related tables as discussed above.
+Inserts and deletes are done without a stored procedure, since access is controlled.
+
+
