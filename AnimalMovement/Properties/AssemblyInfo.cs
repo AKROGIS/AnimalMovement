@@ -1,34 +1,40 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
-//FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
 //FIXME - DATABASE - CollarUpdate Trigger - check for Disposal Date/ArgosId conflict; check for disposalDate/parameter startdate conflict
+//FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
+//TODO - DATABASE - Save warnings from Argos processing into a table for review by the user 
+//TODO - DATABASE - Query for Analyzable collars should be same as C# code (i.e. check for ambiguous collars)
+//TODO - Capture issues from argos processing in database for review/correection.
+//TODO - give the user an ability to review warnings when processing an argos file, and the ability to reprocess the file.
+//TODO - Allow a collar to have multiple Active non-overlapping TPF files (for now, must deactive all but one)
+//TODO - In the Gen4 processor, find a way to remove the warning for no data on secondary collar with shared argos id
+//TODO - If a collar has multiple TPF files, then sort messages by transmission date per TPF, and process separately. (for now, create multiple collars)
+//TODO - When a new collar is added to the database, we should offer to disable the active older version (same argos id).
+//TODO - When Updating the Disposal Date of a collar consider adding an end date to the collar parameter (this is not a database requirement)
+
+//FIXME - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
+//FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
 //FIXME - DATABASE - Add stored procedures to add/del/update the ArgosPlatforms and Programs Tables
 //TODO - DATABASE - Replace the hardcoded sql_proxy name with a system setting
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Modify CollarData_Insert to add Argos PTT locations from Emails to new DB table
 //TODO - DATABASE - Modify CollarFixes_Insert to add Fixes from PTT locations for non-GPS Argos Collars (formats E & F)
-//TODO - DATABASE - Query for Analyzable collars should be same as C# code (i.e. check for ambiguous collars)
 //TODO - DATABASE - Add more unit testing.
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
-//TODO - DATABASE - Save warnings from Argos processing into a table for review by the user 
 //TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings -- Need special exception for sql_proxy
 
 //FIXME - Adding a AWS file manually will not get it processed, needs to be a special case in the file upload
-//TODO - give the user an ability to review warnings when processing an argos file, and the ability to reprocess the file.
-//TODO - Add setting for getting emails from Telonics downloader
+//TODO - Add option in UI for requesting no emails be send from the Telonics downloader
 //TODO - provide user interface for checking on status of downloads
-//TODO - When a new collar is added to the database, we should offer to disable the active older version (same argos id).
 //TODO - Document the optimal "getting started" process, and make sure the code supports it
 //TODO - Build UI to add/edit/delete Argos Projects and Platforms
 //TODO - Add Icon or collar coding to Collar List to signify (VHF only, PTT only, Storeonboard GPS, GPS+Argos)
 //TODO - Simplify display of files.  honor heirachy, add dummy parents for email and AWS files
 //TODO - Provide UI to upload multiple emails (folder?) in one operation
-//TODO - Provide practice, or test upload, of emails to check for errors before doing the read deal.
 //TODO - Provide tool to upload and process Gen3 (*.tfb) and Gen4 (*.tdf) store on board source data
 //TODO - Provide some global QAQC tools - I.e. show all collars with conflict in the last x days
 //TODO - Provide some global QAQC tools - I.e. show all collars with multiple parameter files
@@ -39,9 +45,6 @@ using System.Runtime.InteropServices;
 //TODO - Provide some global QAQC tools - I.e. show Argos collars that do not have an active platform, or cannot be downloaded for any reason
 //TODO - Provide some global QAQC tools - I.e. show Argos collars that have not downloded any data, or might be missing data since downloading began.
 //TODO - Provide some global QAQC tools - I.e. Identify collars with data gaps (analyze download dates, transmissions in email files).
-//TODO - Allow a collar to have multiple Active non-overlapping TPF files (for now, must deactive all but one)
-//TODO - In the Gen4 processor, find a way to remove the warning for no data on secondary collar with shared argos id
-//TODO - If a collar has multiple TPF files, then sort messages by transmission date per TPF, and process separately. (for now, create multiple collars)
 //TODO - build tool to visualize deployments (i.e. show a graphical time line of animals & collars)
 //TODO - Create a simple location layer, create a table of animal data, and join in ArcMap
 //TODO - Replace the wait cursors with a message box and progress bar
@@ -55,7 +58,6 @@ using System.Runtime.InteropServices;
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Build a tool to hide locations outside a reasonable (user provided) range
 //TODO - provide datasheet views of collars, animals, deployments, and maybe files and fixes
-//TODO - When Updating the Disposal Date of a collar consider adding an end date to the collar parameter (this is not a database requirement)
 
 //To NOT do or fix:
 //  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date
