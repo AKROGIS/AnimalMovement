@@ -9,6 +9,7 @@ namespace ArgosProcessor
     static class Program
     {
         private static AnimalMovementDataContext _database;
+        private static AnimalMovementViewsDataContext _views;
 
         /// <summary>
         /// This program obtains an email file from the database, processes all the data in the file, and then loads the results into the database.
@@ -45,14 +46,23 @@ namespace ArgosProcessor
             try
             {
                 _database = new AnimalMovementDataContext();
+                _views = new AnimalMovementViewsDataContext();
                 if (args.Length == 0)
                     ProcessAll();
                 else
                 {
-                    // if it is an !Int32.TryParse(args[0], out id) || id < 1, ProcessId();
-                    // if it is a file, ProcessFile();
-                    //if it is a folder ProcessFolder();
-                    //else writeError
+                    foreach (var arg in args)
+                    {
+                        int id;
+                        if (Int32.TryParse(arg, out id) && 0 < id)
+                            ProcessId(id);
+                        else if (System.IO.File.Exists(arg))
+                            ProcessFile(arg);
+                        else if (System.IO.Directory.Exists(arg))
+                            ProcessFolder(arg);
+                        else
+                            LogGeneralWarning("ignoring argument '" + arg + "'.  Each argument must be an int, file, or folder");
+                    }
                 }
             }
             catch (Exception ex)
@@ -66,7 +76,7 @@ namespace ArgosProcessor
         static void LogFatalError(string error)
         {
             LogGeneralError(error);
-            //exit;
+            //FIXME - exit;
         }
 
         static void LogGeneralWarning(string warning)
@@ -82,13 +92,28 @@ namespace ArgosProcessor
         static void LogGeneralMessage(string message)
         {
             Console.WriteLine(message);
-            System.IO.File.AppendAllText("ArgosDownloader.log", message);
+            System.IO.File.AppendAllText("ArgosProcessor.log", message);
         }
 
         static void LogFileMessage(int fileid, string message, string platform = null, string collarMfgr = null, string collarId = null)
         {
-            //write message to database;
-            //if we can't log to the database, write a fatal error
+            try
+            {
+                var issue = new ArgosFileProcessingIssues
+                    {
+                        FileId = fileid,
+                        Issue = message,
+                        PlatformId = platform,
+                        CollarManufacturer = colarMfgr,
+                        CollarId = collarId
+                    };
+                _database.ArgosFileProcessingIssues.InsertOnSubmit(issue);
+                _database.SubmitChanges();
+            }
+            catch (Exception ex)
+            {
+                LogFatalError("Exception Logging Message in Database: " + ex.Message);
+            }
         }
 
         #endregion
@@ -96,7 +121,7 @@ namespace ArgosProcessor
 
         static void ProcessAll()
         {
-            foreach (var file in _database.GetUnprocessedFiles())
+            foreach (var file in _views.GetUnprocessedFiles())
                 ProcessFile(file);
         }
 
