@@ -8,7 +8,7 @@ namespace ArgosProcessor
 {
     static class Program
     {
-        private static readonly AnimalMovementDataContext Database;
+        private static AnimalMovementDataContext _database;
 
         /// <summary>
         /// This program obtains an email file from the database, processes all the data in the file, and then loads the results into the database.
@@ -44,8 +44,7 @@ namespace ArgosProcessor
         {
             try
             {
-                Database = new AnimalMovementDataContext ();
-                int id;
+                _database = new AnimalMovementDataContext ();
                 if (args.Length == 0)
                     ProcessAll();
                 else
@@ -85,14 +84,8 @@ namespace ArgosProcessor
 			Console.WriteLine(message);
 			System.IO.File.AppendAllText("ArgosDownloader.log", message);
 		}
-		
-		static void LogFileMessage(int fileid, string message)
-		{
-            LogFileError (fileid, error, null, null, null);
-			
-		}
 
-		static void LogFileMessage(int fileid, string message, string platform, string collarMfgr, string collarId)
+        static void LogFileMessage(int fileid, string message, string platform = null, string collarMfgr = null, string collarId = null)
 		{
 			//write message to database;
 			//if we can't log to the database, write a fatal error
@@ -103,14 +96,14 @@ namespace ArgosProcessor
 
         static void ProcessAll()
         {
-            foreach (var file in Database.GetUnprocessedFiles())
+            foreach (var file in _database.GetUnprocessedFiles())
                 ProcessFile(file);
         }
         
         static void ProcessFolder(string folderPath)
         {
             foreach (var file in System.IO.Directory.EnumerateFiles(folderPath))
-                ProcessFile(System.IO.Path.Combine(folder, email));
+                ProcessFile(System.IO.Path.Combine(folderPath, file));
         }
         
 		static void ProcessFile(string filePath)
@@ -134,8 +127,8 @@ namespace ArgosProcessor
 				Status = 'A',
 				Contents = content
 			};
-			Database.CollarFiles.InsertOnSubmit(file);
-			Database.SubmitChanges();
+			_database.CollarFiles.InsertOnSubmit(file);
+			_database.SubmitChanges();
 			LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, fileName));
 			ProcessId (file.FileId);
 		}
@@ -143,7 +136,7 @@ namespace ArgosProcessor
 		static void ProcessId(int id)
 		{
 			
-			var file = Database.CollarFiles.FirstOrDefault (f => f.FileId == id && (f.Format == 'E' || f.Format == 'F'));
+			var file = _database.CollarFiles.FirstOrDefault (f => f.FileId == id && (f.Format == 'E' || f.Format == 'F'));
 			if (file == null) {
                 var msg = String.Format ("{0} is not an Argos email or AWS file Id in the database.", id);
                 LogGeneralError (msg);
@@ -165,18 +158,18 @@ namespace ArgosProcessor
 			default:
 				throw new InvalidOperationException ("Unrecognized File Format: " + file.Format);
 			}
-			var analyzer = new ArgosCollarAnalyzer (argos, Database);
+			var analyzer = new ArgosCollarAnalyzer (argos, _database);
 			
 			foreach (var platform in analyzer.UnknownPlatforms) {
 				string message = String.Format (
 					"WARNING: Platform {0} will be skipped.  It was NOT found in the database.",
 					platform);
-                LogFileMessage (id, message);
+                LogFileMessage (file.FileId, message);
 			}
 			
 			foreach (var platform in analyzer.AmbiguousPlatforms) {
 				var argosId = platform;  // Use local (not foreach) variable in closure (for compiler version stability)
-				var collars = from collar in Database.Collars
+				var collars = from collar in _database.Collars
 					where collar.ArgosId == argosId
 						select
 						String.Format ("Collar: {0} DisposalDate: {1}", collar,
@@ -187,7 +180,7 @@ namespace ArgosProcessor
 					"WARNING: Platform {0} will be skipped because it is ambiguous.\n" +
 					"  Fix this problem by using distinct disposal dates for these collars:\n    {1}",
 					platform, String.Join ("\n    ", collars));
-                LogFileMessage (id, message);
+                LogFileMessage(file.FileId, message);
 			}
 			
 			foreach (var problem in analyzer.CollarsWithProblems) {
@@ -195,7 +188,7 @@ namespace ArgosProcessor
 					"WARNING: Collar {0} cannot be processed.\n" +
 					"   Reason: {1}",
 					problem.Key, problem.Value);
-                LogFileMessage (id, message);
+                LogFileMessage(file.FileId, message);
 			}
 			
 			argos.Processor = analyzer.ProcessorSelector;
@@ -211,12 +204,12 @@ namespace ArgosProcessor
 						CollarManufacturer = "Telonics",
 						CollarId = collar.CollarId,
 						Status = 'A',
-						ParentFileId = id,
+                        ParentFileId = file.FileId,
 						Contents = Encoding.UTF8.GetBytes(String.Join("\n", data)),
 					};
-					Database.CollarFiles.InsertOnSubmit (collarFile);
-					Database.SubmitChanges ();
-                    logGeneralMessage (String.Format ("Success: Added collar {0} for file {1}", collar, id));
+					_database.CollarFiles.InsertOnSubmit (collarFile);
+					_database.SubmitChanges ();
+                    LogGeneralMessage(String.Format("Success: Added collar {0} for file {1}", collar, file.FileId));
 				} catch (Exception ex) {
 					string message;
 					if (ex is NoMessagesException && analyzer.UnambiguousSharedCollars.Contains (collar))
@@ -228,7 +221,7 @@ namespace ArgosProcessor
 						message = String.Format (
 							"ERROR: Collar {0} (Argos Id {1}) encountered a problem: {2}",
 							collar, collar.ArgosId, ex.Message);
-                    LogFileMessage (id, message, collar.ArgosId, collar.CollarManufacturer, collar.CollarId);
+                    LogFileMessage(file.FileId, message, collar.ArgosId, collar.CollarManufacturer, collar.CollarId);
 				}
 			}
 		}
