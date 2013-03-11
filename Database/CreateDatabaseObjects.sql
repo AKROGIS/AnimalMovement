@@ -2179,6 +2179,11 @@ CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
         @ErrorLine       -- parameter: original error line number.
         );
 GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
+GO
 CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
 RETURNS  TABLE (
 	[FileId] [int] NULL,
@@ -2189,11 +2194,6 @@ RETURNS  TABLE (
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.TfpSummerizer].[SummarizeTpfFile]
-GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
 GO
 CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
 RETURNS  TABLE (
@@ -4871,6 +4871,20 @@ BEGIN
 		         nullif(@UnitCode,''), nullif(@Description,''))
 
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[UnprocessedArgosFile]
+AS
+
+     SELECT F1.Project, F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
+       FROM CollarFiles AS F1
+  LEFT JOIN CollarFiles AS F2
+         ON F1.FileId = F2.ParentFileId
+      WHERE F2.FileId IS NULL
+        AND F1.Format IN ('F','E')
 GO
 SET ANSI_NULLS ON
 GO

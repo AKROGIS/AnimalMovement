@@ -48,15 +48,6 @@
       WHERE B.CollarId IS NULL
 
 
------------ All the Email and AWS files that have not been processed 
-     SELECT F1.Project, F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
-       FROM CollarFiles AS F1
-  LEFT JOIN CollarFiles AS F2
-         ON F1.FileId = F2.ParentFileId
-      WHERE F2.FileId IS NULL
-        AND F1.Format IN ('F','E')
-
-
 ----------- ERROR Argos Downloaded files that are not the right file format
      SELECT F.FileId, F.Format, F.[FileName], F.UserName, F.UploadDate
        FROM ArgosDownloads AS D
@@ -75,6 +66,13 @@
          ON F1.CollarManufacturer = C.CollarManufacturer AND F1.CollarId = C.CollarId
       WHERE F2.Format = 'E' OR F2.Format = 'F'
    GROUP BY C.CollarModel
+
+
+----------- Recent downloads
+     SELECT *
+       FROM ArgosDownloads
+      WHERE DATEDIFF(hour, [TimeStamp], GETDATE()) < 24
+   ORDER BY [TimeStamp] DESC
 
 
 

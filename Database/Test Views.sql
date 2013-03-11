@@ -27,3 +27,6 @@ SELECT TOP 100 * FROM ValidLocations
 SELECT TOP 100 * FROM ValidLocationsWithTempAndActivity
 SELECT TOP 100 * FROM VelocityVectors
 
+-- All the Email and AWS files that have not been processed 
+SELECT TOP 100 * FROM UnprocessedArgosFile
+
