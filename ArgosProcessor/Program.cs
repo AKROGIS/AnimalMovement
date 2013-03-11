@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Text;
 using DataModel;
 using Telonics;
@@ -10,6 +12,7 @@ namespace ArgosProcessor
     {
         private static AnimalMovementDataContext _database;
         private static AnimalMovementViewsDataContext _views;
+        private static String _project;
 
         /// <summary>
         /// This program obtains an email file from the database, processes all the data in the file, and then loads the results into the database.
@@ -56,18 +59,24 @@ namespace ArgosProcessor
                         int id;
                         if (Int32.TryParse(arg, out id) && 0 < id)
                             ProcessId(id);
+                        else if (arg.StartsWith("/p:"))
+                            _project = arg.Substring(3);
                         else if (System.IO.File.Exists(arg))
                             ProcessFile(arg);
                         else if (System.IO.Directory.Exists(arg))
                             ProcessFolder(arg);
                         else
-                            LogGeneralWarning("ignoring argument '" + arg + "'.  Each argument must be an int, file, or folder");
+                            LogGeneralWarning("ignoring argument '" + arg + "'.  Each argument must be an int, file, folder or /p:project");
                     }
                 }
             }
+            catch (ProcessingException)
+            {
+                //this is just a signal to exit main, logging has already occured.
+            }
             catch (Exception ex)
             {
-                LogFatalError("Unhandled exception: " + ex.Message);
+                LogGeneralError("Unhandled exception: " + ex.Message);
             }
         }
 
@@ -76,7 +85,7 @@ namespace ArgosProcessor
         static void LogFatalError(string error)
         {
             LogGeneralError(error);
-            //FIXME - exit;
+            throw new ProcessingException();
         }
 
         static void LogGeneralWarning(string warning)
@@ -131,32 +140,90 @@ namespace ArgosProcessor
                 ProcessFile(System.IO.Path.Combine(folderPath, file));
         }
 
+        #region process filepath
+
+        static Byte[] _fileContents;
+        static Byte[] _fileHash;
+
         static void ProcessFile(string filePath)
         {
-            string fileName = System.IO.Path.GetFileName(filePath);
-            byte[] content = System.IO.File.ReadAllBytes(filePath);
-            //FIXME - skip if file is already loaded, get sha1Hash
-            char format = 'E';
-            if (String.Equals(".aws", System.IO.Path.GetExtension(filePath),
-                               StringComparison.InvariantCultureIgnoreCase))
-                format = 'F';
-            //FIXME - get a default project
-            string project = "ARCNVSID022";
+            if (_project == null)
+            {
+                LogGeneralError("You must provide a project a project before the file or folder.");
+                return;
+            }
+
+            LoadAndHashFile(filePath);
+            if (_fileContents == null)
+                return;
+            if (AbortBecauseDuplicate(filePath))
+                return;
+            ArgosFile argos;
+            char format = GuessFileFormat(out argos);
+            if (argos == null)
+            {
+                LogGeneralWarning("Skipping file '"+filePath+"' is not a known Argos file type.");
+                return;
+            }
 
             var file = new CollarFile
             {
-                Project = project,
-                FileName = fileName,
+                Project = _project,
+                FileName = System.IO.Path.GetFileName(filePath),
                 Format = format,
                 CollarManufacturer = "Telonics",
                 Status = 'A',
-                Contents = content
+                Contents = _fileContents,
+                Sha1Hash = _fileHash
             };
             _database.CollarFiles.InsertOnSubmit(file);
             _database.SubmitChanges();
-            LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, fileName));
-            ProcessId(file.FileId);
+            LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, file.FileName));
+
+            //TODO - provide a database option where the database only processes a file when asked.
+            // currently argos files are not processed, but emails are - get consistent
+            if (format == 'F')
+                ProcessFile(file, argos);
         }
+
+        static void LoadAndHashFile(string path)
+        {
+            try
+            {
+                _fileContents = System.IO.File.ReadAllBytes(path);
+            }
+            catch (Exception ex)
+            {
+                LogGeneralError("The file cannot be read: " + ex.Message);
+                return;
+            }
+            _fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(_fileContents);
+        }
+
+        static bool AbortBecauseDuplicate(string path)
+        {
+            var duplicate = _database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
+            if (duplicate == null)
+                return false;
+            var msg = String.Format("Skipping {2}, the contents have already been loaded as file '{0}' in project '{1}'.", path,
+                                    duplicate.FileName, duplicate.Project1.ProjectName);
+            LogGeneralWarning(msg);
+            return true;
+        }
+
+        static char GuessFileFormat(out ArgosFile argos)
+        {
+            argos = new ArgosEmailFile(_fileContents);
+            if (argos.GetPrograms().Any())
+                return 'E';
+            argos = new ArgosAwsFile(_fileContents);
+            if (argos.GetPrograms().Any())
+                return 'F';
+            argos = null;
+            return '?';
+        }
+
+        #endregion
 
         static void ProcessId(int id)
         {
@@ -171,7 +238,7 @@ namespace ArgosProcessor
             ProcessFile(file);
         }
 
-        static void ProcessFile(CollarFile file)
+        private static void ProcessFile(CollarFile file)
         {
             ArgosFile argos;
             switch (file.Format)
@@ -185,6 +252,11 @@ namespace ArgosProcessor
                 default:
                     throw new InvalidOperationException("Unrecognized File Format: " + file.Format);
             }
+            ProcessFile(file, argos);
+        }
+
+        static void ProcessFile(CollarFile file, ArgosFile argos)
+        {
             var analyzer = new ArgosCollarAnalyzer(argos, _database);
 
             foreach (var platform in analyzer.UnknownPlatforms)
@@ -258,6 +330,28 @@ namespace ArgosProcessor
                     LogFileMessage(file.FileId, message, collar.ArgosId, collar.CollarManufacturer, collar.CollarId);
                 }
             }
+        }
+    }
+
+    [Serializable]
+    public class ProcessingException : Exception
+    {
+        public ProcessingException()
+        {
+        }
+
+        public ProcessingException(string message) : base(message)
+        {
+        }
+
+        public ProcessingException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        protected ProcessingException(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context)
+        {
         }
     }
 }
