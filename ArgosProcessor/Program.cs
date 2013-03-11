@@ -8,6 +8,8 @@ namespace ArgosProcessor
 {
     static class Program
     {
+        private static readonly AnimalMovementDataContext Database;
+
         /// <summary>
         /// This program obtains an email file from the database, processes all the data in the file, and then loads the results into the database.
         /// This program will be run by the database when the user loads and email file into the database.
@@ -27,8 +29,12 @@ namespace ArgosProcessor
         /// Argos Id will map to the same Telonics CTN number (unique collar id)
         /// </summary>
         /// <param name="args">
-        /// This program takes a single command line argument, which is an integer id of a
-        /// Argos email file in the database.
+        /// This program takes zero or more arguments.
+		/// If there are no arguments, then the database is queried to get all files that need processing.
+		/// for each arg that is an int, the int is assumed to be a FileId in the collarFiles table
+		/// for each arg that is a file path, that file path is added to the database, and then processed
+		/// for each arg that is a folder path, then all the files in that folder are processed
+		/// any other args are ignored with a warning.
         /// </param>
         /// <remarks>
         /// The database can only process one file at a time, and it only makes sense for this tool to process a single file
@@ -36,150 +42,195 @@ namespace ArgosProcessor
         /// </remarks>
         static void Main(string[] args)
         {
-            var error = new StringBuilder();
             try
             {
-                var db = new AnimalMovementDataContext();
-#if DODIR
-                // args[0] is a path to a folder of email files
-                var folder = String.Copy(args[0]);
-                foreach (var email in System.IO.Directory.EnumerateFiles(folder))
-                {
-                    args[0] = System.IO.Path.Combine(folder, email);
-#endif
-#if DOFILE || DODIR
-            // args[0] is a path to an email file
-            string fileName = System.IO.Path.GetFileName(args[0]);
-            byte[] content = System.IO.File.ReadAllBytes(args[0]);
-            var testFile = new CollarFile
-                {
-                    Project = "ARCNVSID022",
-                    FileName = fileName,
-                    Format = 'E',
-                    CollarManufacturer = "Telonics",
-                    Status = 'A',
-                    Contents = content
-                };
-            db.CollarFiles.InsertOnSubmit(testFile);
-            db.SubmitChanges();
-            args = new[] { testFile.FileId.ToString( System.Globalization.CultureInfo.InvariantCulture) };
-            error.AppendLine(String.Format("Loaded file {0}, {1}", testFile.FileId, fileName));
-#endif
+                Database = new AnimalMovementDataContext ();
                 int id;
-                if (args.Length != 1 || !Int32.TryParse(args[0], out id) || id < 1)
+                if (args.Length == 0)
+                    ProcessAll();
+                else
                 {
-                    error.AppendLine("ERROR: One and only one positive integer argument is expected.");
-                    return;
+                    // if it is an !Int32.TryParse(args[0], out id) || id < 1, ProcessId();
+                    // if it is a file, ProcessFile();
+                    //if it is a folder ProcessFolder();
+                    //else writeError
                 }
-                var file = db.CollarFiles.FirstOrDefault(f => f.FileId == id && (f.Format == 'E' || f.Format == 'F'));
-                if (file == null)
-                {
-                    var msg = String.Format("ERROR: id {0} is not an Argos email or AWS file in the database.", id);
-                    error.AppendLine(msg);
-                    return;
-                }
-                ArgosFile argos;
-                switch (file.Format)
-                {
-                    case 'E':
-                        argos = new ArgosEmailFile(file.Contents.ToArray());
-                        break;
-                    case 'F':
-                        argos = new ArgosAwsFile(file.Contents.ToArray());
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unrecognized File Format: " + file.Format);
-                }
-                var analyzer = new ArgosCollarAnalyzer(argos, db);
-
-                foreach (var platform in analyzer.UnknownPlatforms)
-                {
-                    string message = String.Format(
-                        "WARNING: Platform {0} will be skipped.  It was NOT found in the database.",
-                        platform);
-                    error.AppendLine(message);
-                }
-
-                foreach (var platform in analyzer.AmbiguousPlatforms)
-                {
-                    var argosId = platform;  // Use local (not foreach) variable in closure (for compiler version stability)
-                    var collars = from collar in db.Collars
-                                  where collar.ArgosId == argosId
-                                  select
-                                      String.Format("Collar: {0} DisposalDate: {1}", collar,
-                                                    collar.DisposalDate.HasValue
-                                                        ? collar.DisposalDate.ToString()
-                                                        : "<NULL> (Active)");
-                    string message = String.Format(
-                        "WARNING: Platform {0} will be skipped because it is ambiguous.\n" +
-                        "  Fix this problem by using distinct disposal dates for these collars:\n    {1}",
-                        platform, String.Join("\n    ", collars));
-                    error.AppendLine(message);
-                }
-
-                foreach (var problem in analyzer.CollarsWithProblems)
-                {
-                    string message = String.Format(
-                        "WARNING: Collar {0} cannot be processed.\n" +
-                        "   Reason: {1}",
-                        problem.Key, problem.Value);
-                    error.AppendLine(message);
-                }
-
-                argos.Processor = analyzer.ProcessorSelector;
-                argos.CollarFinder = analyzer.CollarSelector;
-                foreach (var collar in analyzer.ValidCollars)
-                {
-                    try
-                    {
-                        var data = argos.ToTelonicsData(collar.CollarId);
-                        var collarFile = new CollarFile
-                            {
-                                Project = file.Project,
-                                FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + collar.CollarId + ".csv",
-                                Format = analyzer.GetFileFormatForCollar(collar),
-                                CollarManufacturer = "Telonics",
-                                CollarId = collar.CollarId,
-                                Status = 'A',
-                                ParentFileId = id,
-                                Contents = Encoding.UTF8.GetBytes(String.Join("\n", data)),
-                            };
-                        db.CollarFiles.InsertOnSubmit(collarFile);
-                        db.SubmitChanges();
-#if VERBOSE
-                        error.AppendLine(String.Format("Success: Added collar {0}", collar));
-#endif
-                    }
-                    catch (Exception ex)
-                    {
-                        string message;
-                        if (ex is NoMessagesException && analyzer.UnambiguousSharedCollars.Contains(collar))
-                            message = String.Format(
-                                "Notice: Collar {0} (for shared argos Id {1}) had no messages.\n" +
-                                "  This is common for all but one of the collars that share an Argos Id.",
-                                collar, collar.ArgosId);
-                        else
-                            message = String.Format(
-                                "ERROR: Collar {0} (Argos Id {1}) encountered a problem: {2}",
-                                collar, collar.ArgosId, ex.Message);
-                        error.AppendLine(message);
-                    }
-                }
-#if DODIR
-                }
-#endif
             }
             catch (Exception ex)
             {
-                error.AppendLine("\nERROR: Unhandled exception: " + ex.Message);
-            }
-            finally
-            {
-                Console.WriteLine(error);
-#if DOFILE || DODIR
-                System.IO.File.AppendAllText("ArgosDownloader.log", error.ToString());
-#endif
+				LogFatalError("Unhandled exception: " + ex.Message);
             }
         }
+
+		#region Logging
+
+		static void LogFatalError(string error)
+		{
+			LogGeneralError(error);
+			//exit;
+		}
+
+		static void LogGeneralWarning(string warning)
+		{
+			LogGeneralMessage("Warning: " + warning);
+		}
+		
+		static void LogGeneralError(string error)
+		{
+			LogGeneralMessage("ERROR: " + error);
+		}
+		
+		static void LogGeneralMessage(string message)
+		{
+			Console.WriteLine(message);
+			System.IO.File.AppendAllText("ArgosDownloader.log", message);
+		}
+		
+		static void LogFileMessage(int fileid, string message)
+		{
+            LogFileError (fileid, error, null, null, null);
+			
+		}
+
+		static void LogFileMessage(int fileid, string message, string platform, string collarMfgr, string collarId)
+		{
+			//write message to database;
+			//if we can't log to the database, write a fatal error
+		}
+
+		#endregion
+
+
+        static void ProcessAll()
+        {
+            foreach (var file in Database.GetUnprocessedFiles())
+                ProcessFile(file);
+        }
+        
+        static void ProcessFolder(string folderPath)
+        {
+            foreach (var file in System.IO.Directory.EnumerateFiles(folderPath))
+                ProcessFile(System.IO.Path.Combine(folder, email));
+        }
+        
+		static void ProcessFile(string filePath)
+		{
+			string fileName = System.IO.Path.GetFileName(filePath);
+			byte[] content = System.IO.File.ReadAllBytes(filePath);
+			//FIXME - skip if file is already loaded, get sha1Hash
+			char format = 'E';
+			if (String.Equals (".aws", System.IO.Path.GetExtension (filePath),
+			                   StringComparison.InvariantCultureIgnoreCase))
+				format = 'F';
+			//FIXME - get a default project
+			string project = "ARCNVSID022";
+			 
+			var file = new CollarFile
+			{
+				Project = project,
+				FileName = fileName,
+				Format = format,
+				CollarManufacturer = "Telonics",
+				Status = 'A',
+				Contents = content
+			};
+			Database.CollarFiles.InsertOnSubmit(file);
+			Database.SubmitChanges();
+			LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, fileName));
+			ProcessId (file.FileId);
+		}
+
+		static void ProcessId(int id)
+		{
+			
+			var file = Database.CollarFiles.FirstOrDefault (f => f.FileId == id && (f.Format == 'E' || f.Format == 'F'));
+			if (file == null) {
+                var msg = String.Format ("{0} is not an Argos email or AWS file Id in the database.", id);
+                LogGeneralError (msg);
+                return;
+            }
+            ProcessFile (file);
+        }
+        
+        static void ProcessFile(CollarFile file)
+        {
+			ArgosFile argos;
+			switch (file.Format) {
+			case 'E':
+				argos = new ArgosEmailFile (file.Contents.ToArray ());
+				break;
+			case 'F':
+				argos = new ArgosAwsFile (file.Contents.ToArray ());
+				break;
+			default:
+				throw new InvalidOperationException ("Unrecognized File Format: " + file.Format);
+			}
+			var analyzer = new ArgosCollarAnalyzer (argos, Database);
+			
+			foreach (var platform in analyzer.UnknownPlatforms) {
+				string message = String.Format (
+					"WARNING: Platform {0} will be skipped.  It was NOT found in the database.",
+					platform);
+                LogFileMessage (id, message);
+			}
+			
+			foreach (var platform in analyzer.AmbiguousPlatforms) {
+				var argosId = platform;  // Use local (not foreach) variable in closure (for compiler version stability)
+				var collars = from collar in Database.Collars
+					where collar.ArgosId == argosId
+						select
+						String.Format ("Collar: {0} DisposalDate: {1}", collar,
+						              collar.DisposalDate.HasValue
+						              ? collar.DisposalDate.ToString ()
+						              : "<NULL> (Active)");
+				string message = String.Format (
+					"WARNING: Platform {0} will be skipped because it is ambiguous.\n" +
+					"  Fix this problem by using distinct disposal dates for these collars:\n    {1}",
+					platform, String.Join ("\n    ", collars));
+                LogFileMessage (id, message);
+			}
+			
+			foreach (var problem in analyzer.CollarsWithProblems) {
+				string message = String.Format (
+					"WARNING: Collar {0} cannot be processed.\n" +
+					"   Reason: {1}",
+					problem.Key, problem.Value);
+                LogFileMessage (id, message);
+			}
+			
+			argos.Processor = analyzer.ProcessorSelector;
+			argos.CollarFinder = analyzer.CollarSelector;
+			foreach (var collar in analyzer.ValidCollars) {
+				try {
+					var data = argos.ToTelonicsData (collar.CollarId);
+					var collarFile = new CollarFile
+					{
+						Project = file.Project,
+						FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + collar.CollarId + ".csv",
+						Format = analyzer.GetFileFormatForCollar(collar),
+						CollarManufacturer = "Telonics",
+						CollarId = collar.CollarId,
+						Status = 'A',
+						ParentFileId = id,
+						Contents = Encoding.UTF8.GetBytes(String.Join("\n", data)),
+					};
+					Database.CollarFiles.InsertOnSubmit (collarFile);
+					Database.SubmitChanges ();
+                    logGeneralMessage (String.Format ("Success: Added collar {0} for file {1}", collar, id));
+				} catch (Exception ex) {
+					string message;
+					if (ex is NoMessagesException && analyzer.UnambiguousSharedCollars.Contains (collar))
+						message = String.Format (
+							"Notice: Collar {0} (for shared argos Id {1}) had no messages.\n" +
+							"  This is common for all but one of the collars that share an Argos Id.",
+							collar, collar.ArgosId);
+					else
+						message = String.Format (
+							"ERROR: Collar {0} (Argos Id {1}) encountered a problem: {2}",
+							collar, collar.ArgosId, ex.Message);
+                    LogFileMessage (id, message, collar.ArgosId, collar.CollarManufacturer, collar.CollarId);
+				}
+			}
+		}
     }
 }
