@@ -133,7 +133,7 @@ Inserts are done without a stored procedure, since access is controlled.
 
 ArgosFileProcessingIssues
 =========================
-Issue will always happen on a collarFile.
+Issues if they happen will always happen to a collarFile.
 If the collar file is deleted the related issues are also deleted (cascade)
 The platform and collar fields are nullable foreign keys
 They are used if the issue is related to a known platform/collar in the database.
@@ -153,3 +153,154 @@ Deletes will also happen as a cascade from deletes in related tables as discusse
 Inserts and deletes are done without a stored procedure, since access is controlled.
 
 
+ArgosDownloads
+==============
+This table records the attempts, results, and errors associated with downloading
+Argos data from the Argos server.  All records have a timestamp (automatically inserted)
+column that records when the record was added to the database (immediately after
+the download attempt finished).  Any timestamp provided by the client will be ignored.
+If the client and the database are in differnet timezone and client cares about the
+client time when the insert occured, then it is up to the client to determine the
+offset and adjust the display appropriately. The records in this table represent a
+snapshot in time they are immutable and non-deletable.
+
+Only the ArgosProcessor role can add records to this table.  Because of this controlled
+access, inserts occur directly on the table, and not through a stored procedure.
+
+The platformId column is a non null column that records the ArgosId that was attempted
+to be downloaded.  Since only the ArgosProcessor can add records, and the Argos-
+Processor will only try to download collars platforms in the platforms table,
+It can be used to join to other tables that have an Argos platform,
+but it is not a Foriegn Key relation to the ArgosPlatform table, because this table
+represents what was actually tried, even if a bogus argosid was attempted, this table
+should not be corrected on a cascading update/delete if a platformId in the
+ArgosPlatforms table is altered.
+
+Do we also want to capture the username (or program #) and number of days requested
+
+The ErrorMessage nullable varchar(max) and FileId nullable int represent the results.
+They are mutually exclusive, and one and only one must be non-null.  We either get a file
+or we get an error explaining why.  We do not allow the case, where we get a file, but
+also want to record some error or observation during obtaining it.  We either succeed
+or we fail.
+
+The FileId is a nullable foreign key to the CollarFile table.  Because The downloads
+occurred as a matter of historical fact, I have decided to not allow the deletion (i.e
+forgetting or erasing the memory) of this event.  This means that the files associated
+with this event cannot be deleted (they can be made inactive).  This seems appropriate,
+as the files are generally small, and the data that is downloaded from the server
+expires after 10 days, and cannot be retrieved at some later date.
+
+Summary:
+ArgosId, non null varchar(8), no FK relationship to ArgosPlatforms
+TimeStamp non-null datetime(2) default value provided
+ErrorMessage null varchar(max) must be null if FileId is non-null and visaversa
+FileId null int foreign key to CollarFiles, Cascade Update/Delete NO ACTION (deny)
+
+Insert trigger is used to maintain the null/not-null requirement for ErrorMessage/FileId
+and also to always use the current time when doing the insert (any value passed by the
+client will be ignored).
+
+
+ArgosPrograms
+=============
+ProgramNumber, UserName:
+Can we change the ProgramNumber.  I think not.  What if we make a mistake?
+It doesn't seem like it is used anywhere except in the ArgosPlatform table, so maybe it
+won't hurt?  If we link the program to the ArgosDownload, then we should make the
+programnumber and the username immutable.  This seems ok, unless we made a mistake, and
+we didn't discover it until after we attempted a download.  Tricky...
+
+Consider that the program number is not actually used anywhere (it could be used to
+download all the data for a program), so for our current purposes, it is a meaningless
+id number and can be updated as necessary.  The username is used when downloading,
+and downloads will succeed or fail if this is correct or not.  if download 1 used a
+username/password for a program, and failed, then the username/password were changed,
+and then the next download succeeded, both downloads will point to the same program,
+which would be confusing.
+
+We should hide the password from all but the owner of the program.  What is the best
+way to storing passwords in the database.
+
+Owner is a foreign key to ProjectInvestigator Table with cascade on update, and no
+action on delete (i.e you cannot delete the PI if they own an ArgosProgram).  Allow PI
+to re-assign this program to another PI.  
+
+Name, start date, end date, and remarks are purely informational.
+
+Status is Active/Inactive (via foreign key lookup).  When a program is inactive, 
+none of the platforms in that program will be downloaded.
+
+Argos platfroms are dependent on the program number.
+The download tool uses this table to determine what to download, and how to authenticate.
+
+
+ArgosPlatforms
+==============
+PlatformId varchar(8) NOT NULL - Primary Key
+ProgramId varchar(8) NOT NULL - foreign key to ArgosPrograms
+Status char(1) NOT NULL - Foreign Key to LookupStatus (Active/Inactive)
+Remarks nvarchar(255) NULL - Informational content
+
+This is a list of all the Argos Ids that are or were in a program.  The active platforms
+in an active program will be downloaded on a regular basis.  The information in the
+related program is used to authenticate with the Argos webservices.
+
+The ProgramId foreign key has delete no action, so that a program cannot be deleted if
+it has any platforms.  It has update cascade to stay synced with any corrections that
+may happen with the program code (this may be prohibited by other requirements in the
+database, but it is no problem here).
+
+The platform is used by the ArgosDeployments, but not ArgosFilePlatformDates or
+ArgosDownloads for the reasons given in the writeup on those tables.
+
+Status is a time sensitive value, and indicates if the collar is currently downloadable.
+status has nothing to do with whether is or can be deployed.
+
+remarks is purely informational and can be changed as desired.
+
+delete - will delete related deployments, warn if there are download for this platform,
+as the files will not be able to be reprocessed.
+
+update
+ platformid - allowed, cascades to deployments.  if there are files with the new or old
+              id, then files need to be reprocessed.  Check with ArgosFilePlatformDates
+              and warn user if that files cannot be processed
+ programid - can be changed to a valid program, but this may not make sense.  Is it
+             possible to verify that a platform is (or was) in a program?
+ status - will turn on/off future downloading of this platform.  no effect
+          on how the collar is processed.  inactive collars can be deployed
+
+insert - no special checks besides the column constraints above.
+
+ArgosDeployments
+================
+	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL Foreign key to ArgosPlatforms
+	[CollarManufacturer] [varchar](16) NOT NULL Foreign Key to Collars
+	[CollarId] [varchar](16) NOT NULL Foreign Key to Collars
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+
+A collar can 0 or 1 Argos platform at any given time.
+A ArgosPlatform can be deployed on 0 or 1 collars at any given time.
+
+Inserts and update triggers will ensure that collars and platforms do not overlap.
+
+Changes to this table may require a file to be reprocessed.  This can be
+verified by checking with ArgosFilePlatformDates
+
+A null startdate is considered unknown but very early,
+A null enddate is considered to by unknown, but sometime in the distant future.
+There can only be one deployment for a platform or collar with both start and end null.
+
+The deployment id is used simply a meaningless primary key to help with updates and
+deletes.
+
+Platfrom and collar foreign keys are both delete no action (you cannot delete a collar
+or a platform if it is deployed - first delete the deployment.  And they have 
+update cascading.
+
+These deployments behave nearly identical to animal/collar deployments, and most of the
+triggers and stored procedures can be re-used.
+ 
