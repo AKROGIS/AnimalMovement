@@ -7,9 +7,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Query for Analyzable collars should be same as C# code (i.e. check for ambiguous collars)
 //TODO - Capture issues from argos processing in database for review/correection.
 //TODO - give the user an ability to review warnings when processing an argos file, and the ability to reprocess the file.
-//TODO - Allow a collar to have multiple Active non-overlapping TPF files (for now, must deactive all but one)
-//TODO - In the Gen4 processor, find a way to remove the warning for no data on secondary collar with shared argos id
-//TODO - If a collar has multiple TPF files, then sort messages by transmission date per TPF, and process separately. (for now, create multiple collars)
 //TODO - When a new collar is added to the database, we should offer to disable the active older version (same argos id).
 //TODO - When Updating the Disposal Date of a collar consider adding an end date to the collar parameter (this is not a database requirement)
 

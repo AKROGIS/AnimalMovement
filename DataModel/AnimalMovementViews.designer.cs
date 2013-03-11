@@ -115,6 +115,12 @@ namespace DataModel
 		{
 			return ((System.Nullable<int>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod()))).ReturnValue));
 		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.GetTelonicsParametersForArgosDates", IsComposable=true)]
+		public IQueryable<GetTelonicsParametersForArgosDatesResult> GetTelonicsParametersForArgosDates([global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformID", DbType="VarChar(8)")] string platformID, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate)
+		{
+			return this.CreateMethodCallQuery<GetTelonicsParametersForArgosDatesResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), platformID, startDate, endDate);
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.AnimalFixesByFile")]
@@ -1071,6 +1077,194 @@ namespace DataModel
 				if ((this._Lon != value))
 				{
 					this._Lon = value;
+				}
+			}
+		}
+	}
+	
+	public partial class GetTelonicsParametersForArgosDatesResult
+	{
+		
+		private string _PlatformId;
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarId;
+		
+		private string _CollarModel;
+		
+		private System.Nullable<int> _Gen3Period;
+		
+		private System.Nullable<char> _Format;
+		
+		private string _FileName;
+		
+		private System.Data.Linq.Binary _Contents;
+		
+		private System.Nullable<System.DateTime> _StartDate;
+		
+		private System.Nullable<System.DateTime> _EndDate;
+		
+		public GetTelonicsParametersForArgosDatesResult()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PlatformId", DbType="VarChar(8) NOT NULL", CanBeNull=false)]
+		public string PlatformId
+		{
+			get
+			{
+				return this._PlatformId;
+			}
+			set
+			{
+				if ((this._PlatformId != value))
+				{
+					this._PlatformId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					this._CollarManufacturer = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					this._CollarId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarModel", DbType="VarChar(24) NOT NULL", CanBeNull=false)]
+		public string CollarModel
+		{
+			get
+			{
+				return this._CollarModel;
+			}
+			set
+			{
+				if ((this._CollarModel != value))
+				{
+					this._CollarModel = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Gen3Period", DbType="Int")]
+		public System.Nullable<int> Gen3Period
+		{
+			get
+			{
+				return this._Gen3Period;
+			}
+			set
+			{
+				if ((this._Gen3Period != value))
+				{
+					this._Gen3Period = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Format", DbType="Char(1)")]
+		public System.Nullable<char> Format
+		{
+			get
+			{
+				return this._Format;
+			}
+			set
+			{
+				if ((this._Format != value))
+				{
+					this._Format = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileName", DbType="NVarChar(255)")]
+		public string FileName
+		{
+			get
+			{
+				return this._FileName;
+			}
+			set
+			{
+				if ((this._FileName != value))
+				{
+					this._FileName = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Contents", DbType="VarBinary(MAX)", UpdateCheck=UpdateCheck.Never)]
+		public System.Data.Linq.Binary Contents
+		{
+			get
+			{
+				return this._Contents;
+			}
+			set
+			{
+				if ((this._Contents != value))
+				{
+					this._Contents = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StartDate", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> StartDate
+		{
+			get
+			{
+				return this._StartDate;
+			}
+			set
+			{
+				if ((this._StartDate != value))
+				{
+					this._StartDate = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EndDate", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> EndDate
+		{
+			get
+			{
+				return this._EndDate;
+			}
+			set
+			{
+				if ((this._EndDate != value))
+				{
+					this._EndDate = value;
 				}
 			}
 		}

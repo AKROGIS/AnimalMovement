@@ -90,4 +90,21 @@
   <Function Name="dbo.DaysSinceLastDownload" Method="DaysSinceLastDownload" IsComposable="true">
     <Return Type="System.Int32" />
   </Function>
+  <Function Name="dbo.GetTelonicsParametersForArgosDates" Method="GetTelonicsParametersForArgosDates" IsComposable="true">
+    <Parameter Name="PlatformID" Parameter="platformID" Type="System.String" DbType="VarChar(8)" />
+    <Parameter Name="StartDate" Parameter="startDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
+    <ElementType Name="GetTelonicsParametersForArgosDatesResult">
+      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="CollarModel" Type="System.String" DbType="VarChar(24) NOT NULL" CanBeNull="false" />
+      <Column Name="Gen3Period" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="Format" Type="System.Char" DbType="Char(1)" CanBeNull="true" />
+      <Column Name="FileName" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Contents" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="StartDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="EndDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+    </ElementType>
+  </Function>
 </Database>

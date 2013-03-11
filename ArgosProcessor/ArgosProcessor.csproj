@@ -58,8 +58,6 @@
     <Reference Include="System.Data.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArgosCollarAnalyzer.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

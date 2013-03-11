@@ -240,6 +240,9 @@ namespace ArgosProcessor
 
         private static void ProcessFile(CollarFile file)
         {
+            //FIXME - wrap the ArgosFile creation in a try/catch??
+            //FIXME - clear any existing processing issues for this file
+            //FIXME - make sure we clear any results files first. 
             ArgosFile argos;
             switch (file.Format)
             {
@@ -250,6 +253,7 @@ namespace ArgosProcessor
                     argos = new ArgosAwsFile(file.Contents.ToArray());
                     break;
                 default:
+                    //FIXME - replace with log error
                     throw new InvalidOperationException("Unrecognized File Format: " + file.Format);
             }
             ProcessFile(file, argos);
@@ -257,77 +261,102 @@ namespace ArgosProcessor
 
         static void ProcessFile(CollarFile file, ArgosFile argos)
         {
-            var analyzer = new ArgosCollarAnalyzer(argos, _database);
-
-            foreach (var platform in analyzer.UnknownPlatforms)
+            var transmissionGroups = from transmission in argos.GetTransmissions()
+                                     group transmission by transmission.PlatformId
+                                     into transmissions
+                                     select new
+                                         {
+                                             Platform = transmissions.Key,
+                                             First = transmissions.Min(t => t.DateTime),
+                                             Last = transmissions.Max(t => t.DateTime),
+                                             Transmissions = transmissions
+                                         };
+            foreach (var item in transmissionGroups)
             {
-                string message = String.Format(
-                    "WARNING: Platform {0} will be skipped.  It was NOT found in the database.",
-                    platform);
-                LogFileMessage(file.FileId, message);
-            }
-
-            foreach (var platform in analyzer.AmbiguousPlatforms)
-            {
-                var argosId = platform;  // Use local (not foreach) variable in closure (for compiler version stability)
-                var collars = from collar in _database.Collars
-                              where collar.ArgosId == argosId
-                              select
-                              String.Format("Collar: {0} DisposalDate: {1}", collar,
-                                            collar.DisposalDate.HasValue
-                                            ? collar.DisposalDate.ToString()
-                                            : "<NULL> (Active)");
-                string message = String.Format(
-                    "WARNING: Platform {0} will be skipped because it is ambiguous.\n" +
-                    "  Fix this problem by using distinct disposal dates for these collars:\n    {1}",
-                    platform, String.Join("\n    ", collars));
-                LogFileMessage(file.FileId, message);
-            }
-
-            foreach (var problem in analyzer.CollarsWithProblems)
-            {
-                string message = String.Format(
-                    "WARNING: Collar {0} cannot be processed.\n" +
-                    "   Reason: {1}",
-                    problem.Key, problem.Value);
-                LogFileMessage(file.FileId, message);
-            }
-
-            argos.Processor = analyzer.ProcessorSelector;
-            argos.CollarFinder = analyzer.CollarSelector;
-            foreach (var collar in analyzer.ValidCollars)
-            {
-                try
+                var parameterSets =
+                    _views.GetTelonicsParametersForArgosDates(item.Platform, item.First, item.Last)
+                          .OrderBy(c => c.StartDate)
+                          .ToList();
+                if (parameterSets.Count == 0)
                 {
-                    var data = argos.ToTelonicsData(collar.CollarId);
-                    var collarFile = new CollarFile
-                    {
-                        Project = file.Project,
-                        FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + collar.CollarId + ".csv",
-                        Format = analyzer.GetFileFormatForCollar(collar),
-                        CollarManufacturer = "Telonics",
-                        CollarId = collar.CollarId,
-                        Status = 'A',
-                        ParentFileId = file.FileId,
-                        Contents = Encoding.UTF8.GetBytes(String.Join("\n", data)),
-                    };
-                    _database.CollarFiles.InsertOnSubmit(collarFile);
-                    _database.SubmitChanges();
-                    LogGeneralMessage(String.Format("Success: Added collar {0} for file {1}", collar, file.FileId));
+                    var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}", item.Platform, item.First, item.Last);
+                    LogFileMessage(file.FileId, msg, item.Platform);
+                    continue;
                 }
-                catch (Exception ex)
+                if (parameterSets[0].StartDate != null && item.First < parameterSets[0].StartDate)
                 {
-                    string message;
-                    if (ex is NoMessagesException && analyzer.UnambiguousSharedCollars.Contains(collar))
-                        message = String.Format(
-                            "Notice: Collar {0} (for shared argos Id {1}) had no messages.\n" +
-                            "  This is common for all but one of the collars that share an Argos Id.",
-                            collar, collar.ArgosId);
-                    else
-                        message = String.Format(
-                            "ERROR: Collar {0} (Argos Id {1}) encountered a problem: {2}",
-                            collar, collar.ArgosId, ex.Message);
-                    LogFileMessage(file.FileId, message, collar.ArgosId, collar.CollarManufacturer, collar.CollarId);
+                    var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}", item.Platform, item.First, parameterSets[0].StartDate);
+                    LogFileMessage(file.FileId, msg, item.Platform);
+                }
+                int lastIndex = parameterSets.Count - 1;
+                if (parameterSets[lastIndex].EndDate != null && parameterSets[lastIndex].EndDate < item.Last)
+                {
+                    var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}", item.Platform, parameterSets[lastIndex].EndDate, item.Last);
+                    LogFileMessage(file.FileId, msg, item.Platform);
+                }
+                foreach (var parameterSet in parameterSets)
+                {
+                    try
+                    {
+                        IProcessor processor;
+                        char format;
+                        switch (parameterSet.CollarModel)
+                        {
+                            case "Gen3":
+                                //FIXME - check for null period or parameter files I can't process
+                                processor = new Gen3Processor(TimeSpan.FromMinutes((int) parameterSet.Gen3Period));
+                                format = 'D';
+                                break;
+                            case "Gen4":
+                                processor = new Gen4Processor(parameterSet.Contents.ToArray());
+                                format = 'C';
+                                break;
+                            default:
+                                var msg =
+                                    String.Format(
+                                        "Unknown CollarModel '{4}' encountered skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
+                                        parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                        parameterSet.CollarId, parameterSet.CollarModel);
+                                LogFileMessage(file.FileId, msg, parameterSet.PlatformId,
+                                               parameterSet.CollarManufacturer, parameterSet.CollarId);
+                                continue;
+                        }
+                        var start = parameterSet.StartDate ?? DateTime.MinValue;
+                        var end = parameterSet.EndDate ?? DateTime.MaxValue;
+                        var transmissions = item.Transmissions.Where(t => start <= t.DateTime && t.DateTime <= end);
+                        var lines = processor.ProcessTransmissions(transmissions, argos);
+                        var data = Encoding.UTF8.GetBytes(String.Join("\n", lines));
+                        var collarFile = new CollarFile
+                        {
+                            Project = file.Project,
+                            FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameterSet.CollarId + ".csv",
+                            Format = format,
+                            CollarManufacturer = "Telonics",
+                            CollarId = parameterSet.CollarId,
+                            Status = 'A',
+                            ParentFileId = file.FileId,
+                            Contents = data,
+                            Sha1Hash = (new SHA1CryptoServiceProvider()).ComputeHash(data)
+                        };
+                        _database.CollarFiles.InsertOnSubmit(collarFile);
+                        _database.SubmitChanges();
+                        var message =
+                            String.Format(
+                                "Successfully added Argos {0} transmission from {1:g} to {2:g} to Collar {3}/{4}",
+                                parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                parameterSet.CollarManufacturer, parameterSet.CollarId);
+                        LogGeneralMessage(message);
+                        LogFileMessage(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
+                    }
+                    catch (Exception ex)
+                    {
+                        var message =
+                            String.Format(
+                                "ERROR {5} adding Argos {0} transmissions from {1:g} to {2:g} to Collar {3}/{4}",
+                                parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                parameterSet.CollarManufacturer, parameterSet.CollarId, ex.Message);
+                        LogFileMessage(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
+                    }
                 }
             }
         }
