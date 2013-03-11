@@ -78,6 +78,14 @@ namespace DataModel
 			}
 		}
 		
+		public System.Data.Linq.Table<UnprocessedArgosFile> UnprocessedArgosFiles
+		{
+			get
+			{
+				return this.GetTable<UnprocessedArgosFile>();
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.AnimalLocationSummary", IsComposable=true)]
 		public IQueryable<AnimalLocationSummaryResult> AnimalLocationSummary([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId)
 		{
@@ -482,6 +490,123 @@ namespace DataModel
 				if ((this._SendNoEmails != value))
 				{
 					this._SendNoEmails = value;
+				}
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.UnprocessedArgosFile")]
+	public partial class UnprocessedArgosFile
+	{
+		
+		private string _Project;
+		
+		private int _FileId;
+		
+		private char _Format;
+		
+		private string _FileName;
+		
+		private System.DateTime _UploadDate;
+		
+		private string _UserName;
+		
+		public UnprocessedArgosFile()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Project", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string Project
+		{
+			get
+			{
+				return this._Project;
+			}
+			set
+			{
+				if ((this._Project != value))
+				{
+					this._Project = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL")]
+		public int FileId
+		{
+			get
+			{
+				return this._FileId;
+			}
+			set
+			{
+				if ((this._FileId != value))
+				{
+					this._FileId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Format", DbType="Char(1) NOT NULL")]
+		public char Format
+		{
+			get
+			{
+				return this._Format;
+			}
+			set
+			{
+				if ((this._Format != value))
+				{
+					this._Format = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileName", DbType="NVarChar(255) NOT NULL", CanBeNull=false)]
+		public string FileName
+		{
+			get
+			{
+				return this._FileName;
+			}
+			set
+			{
+				if ((this._FileName != value))
+				{
+					this._FileName = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UploadDate", DbType="DateTime2 NOT NULL")]
+		public System.DateTime UploadDate
+		{
+			get
+			{
+				return this._UploadDate;
+			}
+			set
+			{
+				if ((this._UploadDate != value))
+				{
+					this._UploadDate = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
+		public string UserName
+		{
+			get
+			{
+				return this._UserName;
+			}
+			set
+			{
+				if ((this._UserName != value))
+				{
+					this._UserName = value;
 				}
 			}
 		}

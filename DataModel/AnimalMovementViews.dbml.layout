@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="AnimalMovementViews">
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11.125, 8.5" name="AnimalMovementViews">
   <DataContextMoniker Name="/AnimalMovementViewsDataContext" />
   <nestedChildShapes>
     <classShape Id="19af6e8d-997f-444a-8a90-00b7205f93d0" absoluteBounds="6.5, 3, 2, 2.3478011067708335">
@@ -12,6 +12,12 @@
       <DataClassMoniker Name="/AnimalMovementViewsDataContext/DownloadableAndAnalyzableCollar" />
       <nestedChildShapes>
         <elementListCompartment Id="91e2cc5f-5aff-4d44-844c-cb842a24fd5f" absoluteBounds="4.1400000000000006, 3.46, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="8aa481b6-d094-4c60-8f26-7f7ba607987a" absoluteBounds="8.875, 3, 2, 1.9631982421875">
+      <DataClassMoniker Name="/AnimalMovementViewsDataContext/UnprocessedArgosFile" />
+      <nestedChildShapes>
+        <elementListCompartment Id="34402706-e643-40be-a377-6cd4ba20755f" absoluteBounds="8.89, 3.46, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
   </nestedChildShapes>

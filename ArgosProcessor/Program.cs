@@ -99,12 +99,12 @@ namespace ArgosProcessor
         {
             try
             {
-                var issue = new ArgosFileProcessingIssues
+                var issue = new ArgosFileProcessingIssue
                     {
                         FileId = fileid,
                         Issue = message,
                         PlatformId = platform,
-                        CollarManufacturer = colarMfgr,
+                        CollarManufacturer = collarMfgr,
                         CollarId = collarId
                     };
                 _database.ArgosFileProcessingIssues.InsertOnSubmit(issue);
@@ -121,8 +121,8 @@ namespace ArgosProcessor
 
         static void ProcessAll()
         {
-            foreach (var file in _views.GetUnprocessedFiles())
-                ProcessFile(file);
+            foreach (var file in _views.UnprocessedArgosFiles)
+                ProcessId(file.FileId);
         }
 
         static void ProcessFolder(string folderPath)

@@ -264,6 +264,7 @@
       <Association Name="Collar_CollarParameter" Member="CollarParameters" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarParameter" />
       <Association Name="Collar_ArgosDownload" Member="ArgosDownloads" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosDownload" />
       <Association Name="Collar_CollarDeployment" Member="CollarDeployments" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarDeployment" />
+      <Association Name="Collar_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosFileProcessingIssue" />
       <Association Name="LookupCollarManufacturer_Collar" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_Collar" Member="ProjectInvestigator" ThisKey="Manager" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
       <Association Name="LookupCollarModel_Collar" Member="LookupCollarModel" ThisKey="CollarModel" OtherKey="CollarModel" Type="LookupCollarModel" IsForeignKey="true" />
@@ -361,6 +362,7 @@
       <Association Name="CollarFile_CollarFix" Member="CollarFixes" ThisKey="FileId" OtherKey="FileId" Type="CollarFix" />
       <Association Name="CollarFile_ArgosDownload" Member="ArgosDownloads" ThisKey="FileId" OtherKey="FileId" Type="ArgosDownload" />
       <Association Name="CollarFile_CollarFile" Member="CollarFiles" ThisKey="FileId" OtherKey="ParentFileId" Type="CollarFile" />
+      <Association Name="CollarFile_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="FileId" OtherKey="FileId" Type="ArgosFileProcessingIssue" />
       <Association Name="CollarFile_CollarFile" Member="CollarFile1" ThisKey="ParentFileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
       <Association Name="LookupCollarFileFormat_CollarFile" Member="LookupCollarFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarFileFormat" IsForeignKey="true" />
       <Association Name="LookupCollarFileStatus_CollarFile" Member="LookupCollarFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupCollarFileStatus" IsForeignKey="true" />
@@ -387,6 +389,18 @@
     <DeleteFunction FunctionId="FunctionId25">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </DeleteFunction>
+  </Table>
+  <Table Name="dbo.ArgosFileProcessingIssues" Member="ArgosFileProcessingIssues">
+    <Type Name="ArgosFileProcessingIssue">
+      <Column Name="IssueId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Issue" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" />
+      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16)" CanBeNull="true" />
+      <Column Name="CollarId" Type="System.String" DbType="VarChar(16)" CanBeNull="true" />
+      <Association Name="CollarFile_ArgosFileProcessingIssue" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="Collar_ArgosFileProcessingIssue" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" DeleteRule="CASCADE" />
+    </Type>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
