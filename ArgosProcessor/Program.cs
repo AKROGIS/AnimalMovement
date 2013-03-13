@@ -13,6 +13,7 @@ namespace ArgosProcessor
         private static AnimalMovementDataContext _database;
         private static AnimalMovementViewsDataContext _views;
         private static String _project;
+        private static Boolean _processLocally;
 
         /// <summary>
         /// This program obtains an email file from the database, processes all the data in the file, and then loads the results into the database.
@@ -50,6 +51,8 @@ namespace ArgosProcessor
             {
                 _database = new AnimalMovementDataContext();
                 _views = new AnimalMovementViewsDataContext();
+                _processLocally = true;
+
                 if (args.Length == 0)
                     ProcessAll();
                 else
@@ -58,7 +61,10 @@ namespace ArgosProcessor
                     {
                         int id;
                         if (Int32.TryParse(arg, out id) && 0 < id)
-                            ProcessId(id);
+                            if (_processLocally)
+                                ProcessId(id);
+                            else
+                                _database.ProcessAllCollarsForArgosFile(id);
                         else if (arg.StartsWith("/p:"))
                             _project = arg.Substring(3);
                         else if (System.IO.File.Exists(arg))
@@ -131,7 +137,10 @@ namespace ArgosProcessor
         static void ProcessAll()
         {
             foreach (var file in _views.UnprocessedArgosFiles)
-                ProcessId(file.FileId);
+                if (_processLocally)
+                    ProcessId(file.FileId);
+                else
+                    _database.ProcessAllCollarsForArgosFile(file.FileId);
         }
 
         static void ProcessFolder(string folderPath)
@@ -180,10 +189,10 @@ namespace ArgosProcessor
             _database.SubmitChanges();
             LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, file.FileName));
 
-            //TODO - provide a database option where the database only processes a file when asked.
-            // currently argos files are not processed, but emails are - get consistent
-            if (format == 'F')
+            if (_processLocally)
                 ProcessFile(file, argos);
+            else
+                _database.ProcessAllCollarsForArgosFile(file.FileId);
         }
 
         static void LoadAndHashFile(string path)

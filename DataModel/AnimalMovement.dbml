@@ -626,4 +626,7 @@
     <Parameter Name="Gen3Period" Parameter="gen3Period" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
+  <Function Name="dbo.ProcessAllCollarsForArgosFile" Method="ProcessAllCollarsForArgosFile">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+  </Function>
 </Database>
