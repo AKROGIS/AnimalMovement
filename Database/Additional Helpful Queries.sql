@@ -101,7 +101,7 @@
      SELECT T.*
        FROM AllTpfFileData AS T
   LEFT JOIN CollarParameters AS C
-         ON T.CTN = C.CollarId AND T.FileId = C.FileId
+         ON T.CTN = C.CollarId -- AND T.FileId = C.FileId
       WHERE C.CollarId IS NULL
 
 ----------- Collars/TPF files where the respective owners do not match
@@ -118,14 +118,15 @@
 ----------- ERROR Collar Parameters with no TPF File 
      SELECT C.*
        FROM CollarParameters AS C
-       JOIN CollarParameterFiles AS F
+  LEFT JOIN CollarParameterFiles AS F
          ON C.FileId = F.FileId
   LEFT JOIN AllTpfFileData AS T
          ON C.CollarId = T.CTN AND C.FileId = T.FileId
-      WHERE F.Format = 'A'
+      WHERE (F.Format IS NULL OR F.Format = 'A')
         AND T.CTN IS NULL
+        AND C.Gen3Period IS NULL
 
------------ Duplicate collars in TPF file
+----------- Collars in multiple TPF files
      SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
        FROM AllTpfFileData AS T
   LEFT JOIN CollarParameters AS P
@@ -133,10 +134,10 @@
       WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
    ORDER BY T.CTN, T.[Status]
 
------------ ERROR - Duplicate collars in ACTIVE TPF file
-     SELECT CTN, [Platform], [Status], FileId, [FileName]
+----------- ERROR - Duplicate collars (id, status, timestamp) in TPF file
+     SELECT CTN, [Platform], [Status], FileId, [FileName], [TimeStamp]
        FROM AllTpfFileData
-      WHERE CTN in (SELECT CTN FROM AllTpfFileData WHERE [Status] = 'A' GROUP BY CTN HAVING COUNT(*) > 1)
+      WHERE CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN, [Status], [TimeStamp] HAVING COUNT(*) > 1)
    ORDER BY CTN
 
 ----------- ERROR - Mismatch in Collar TPF Data
@@ -171,7 +172,7 @@
  INNER JOIN Collars AS C
          ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
       WHERE C.DisposalDate IS NOT NULL
-        AND P.StartDate IS NULL OR P.StartDate > C.DisposalDate
+        AND P.StartDate > C.DisposalDate
 
 
 
