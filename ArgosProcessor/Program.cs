@@ -15,7 +15,6 @@ namespace ArgosProcessor
         private static String _project;
         private static Boolean _processLocally;
 
-        //FIXME - look for any places to wrap try/catch - if we are processing All, or files in a folder, we do not want to bubble out of the loop
         //TODO - break into an external library to be called by AnimalMovements App (files/folder processed by server), and the Downloader App(process locally)
         //TODO - error handeling/logging need to be rethunk to support a library.
         //TODO - Provide a config settings for the TDC parameters, and the processLocally flag
@@ -121,13 +120,13 @@ namespace ArgosProcessor
             try
             {
                 var issue = new ArgosFileProcessingIssue
-                    {
-                        FileId = fileid,
-                        Issue = message,
-                        PlatformId = platform,
-                        CollarManufacturer = collarMfgr,
-                        CollarId = collarId
-                    };
+                {
+                    FileId = fileid,
+                    Issue = message,
+                    PlatformId = platform,
+                    CollarManufacturer = collarMfgr,
+                    CollarId = collarId
+                };
                 _database.ArgosFileProcessingIssues.InsertOnSubmit(issue);
                 _database.SubmitChanges();
             }
@@ -143,16 +142,30 @@ namespace ArgosProcessor
         static void ProcessAll()
         {
             foreach (var file in _views.UnprocessedArgosFiles)
-                if (_processLocally)
-                    ProcessId(file.FileId);
-                else
-                    _database.ProcessAllCollarsForArgosFile(file.FileId);
+                try
+                {
+                    if (_processLocally)
+                        ProcessId(file.FileId);
+                    else
+                        _database.ProcessAllCollarsForArgosFile(file.FileId);
+                }
+                catch (Exception ex)
+                {
+                    LogFileMessage(file.FileId, "ERROR: " + ex.Message + "processing " + (_processLocally ? "locally" : "in database"));
+                }
         }
 
         static void ProcessFolder(string folderPath)
         {
             foreach (var file in System.IO.Directory.EnumerateFiles(folderPath))
-                ProcessFile(System.IO.Path.Combine(folderPath, file));
+                try
+                {
+                    ProcessFile(System.IO.Path.Combine(folderPath, file));
+                }
+                catch (Exception ex)
+                {
+                    LogGeneralError("ERROR: " + ex.Message + " processing file " + file + " in " + folderPath);
+                }
         }
 
         #region process filepath
@@ -177,7 +190,7 @@ namespace ArgosProcessor
             char format = GuessFileFormat(out argos);
             if (argos == null)
             {
-                LogGeneralWarning("Skipping file '"+filePath+"' is not a known Argos file type.");
+                LogGeneralWarning("Skipping file '" + filePath + "' is not a known Argos file type.");
                 return;
             }
 
@@ -242,7 +255,6 @@ namespace ArgosProcessor
 
         static void ProcessId(int id)
         {
-
             var file = _database.CollarFiles.FirstOrDefault(f => f.FileId == id && (f.Format == 'E' || f.Format == 'F'));
             if (file == null)
             {
@@ -255,20 +267,27 @@ namespace ArgosProcessor
 
         private static void ProcessFile(CollarFile file)
         {
-            ArgosFile argos;
-            switch (file.Format)
+            try
             {
-                case 'E':
-                    argos = new ArgosEmailFile(file.Contents.ToArray());
-                    break;
-                case 'F':
-                    argos = new ArgosAwsFile(file.Contents.ToArray());
-                    break;
-                default:
-                    LogGeneralError("Unrecognized File Format: " + file.Format);
-                    return;
+                ArgosFile argos;
+                switch (file.Format)
+                {
+                    case 'E':
+                        argos = new ArgosEmailFile(file.Contents.ToArray());
+                        break;
+                    case 'F':
+                        argos = new ArgosAwsFile(file.Contents.ToArray());
+                        break;
+                    default:
+                        LogGeneralError("Unrecognized File Format: " + file.Format);
+                        return;
+                }
+                ProcessFile(file, argos);
             }
-            ProcessFile(file, argos);
+            catch (Exception ex)
+            {
+                LogFileMessage(file.FileId, "ERROR: " + ex.Message);
+            }
         }
 
         static void ProcessFile(CollarFile file, ArgosFile argos)
@@ -278,8 +297,8 @@ namespace ArgosProcessor
 
             var transmissionGroups = from transmission in argos.GetTransmissions()
                                      group transmission by transmission.PlatformId
-                                     into transmissions
-                                     select new
+                                         into transmissions
+                                         select new
                                          {
                                              Platform = transmissions.Key,
                                              First = transmissions.Min(t => t.DateTime),
@@ -444,17 +463,20 @@ namespace ArgosProcessor
         {
         }
 
-        public ProcessingException(string message) : base(message)
+        public ProcessingException(string message)
+            : base(message)
         {
         }
 
-        public ProcessingException(string message, Exception inner) : base(message, inner)
+        public ProcessingException(string message, Exception inner)
+            : base(message, inner)
         {
         }
 
         protected ProcessingException(
             SerializationInfo info,
-            StreamingContext context) : base(info, context)
+            StreamingContext context)
+            : base(info, context)
         {
         }
     }
