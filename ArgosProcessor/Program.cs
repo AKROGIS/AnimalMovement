@@ -15,6 +15,8 @@ namespace ArgosProcessor
         private static String _project;
         private static Boolean _processLocally;
 
+        //FIXME - look for any places to wrap try/catch - if we are processing All, or files in a folder, we do not want to bubble out of the loop
+
         /// <summary>
         /// This program obtains an email file from the database, processes all the data in the file, and then loads the results into the database.
         /// This program will be run by the database when the user loads and email file into the database.
@@ -249,9 +251,6 @@ namespace ArgosProcessor
 
         private static void ProcessFile(CollarFile file)
         {
-            //FIXME - wrap the ArgosFile creation in a try/catch??
-            //FIXME - clear any existing processing issues for this file
-            //FIXME - make sure we clear any results files first. 
             ArgosFile argos;
             switch (file.Format)
             {
@@ -262,14 +261,17 @@ namespace ArgosProcessor
                     argos = new ArgosAwsFile(file.Contents.ToArray());
                     break;
                 default:
-                    //FIXME - replace with log error
-                    throw new InvalidOperationException("Unrecognized File Format: " + file.Format);
+                    LogGeneralError("Unrecognized File Format: " + file.Format);
+                    return;
             }
             ProcessFile(file, argos);
         }
 
         static void ProcessFile(CollarFile file, ArgosFile argos)
         {
+            ClearPreviousProcessedFiles(file);
+            ClearPreviousProcessingIssues(file);
+
             var transmissionGroups = from transmission in argos.GetTransmissions()
                                      group transmission by transmission.PlatformId
                                      into transmissions
@@ -317,6 +319,7 @@ namespace ArgosProcessor
                                 format = 'D';
                                 break;
                             case "Gen4":
+                                //FIXME - Add parameters to processor
                                 processor = new Gen4Processor(parameterSet.Contents.ToArray());
                                 format = 'C';
                                 break;
@@ -369,6 +372,21 @@ namespace ArgosProcessor
                 }
             }
         }
+
+        private static void ClearPreviousProcessedFiles(CollarFile parentFile)
+        {
+            foreach (var file in _database.CollarFiles.Where(f => f.ParentFileId == parentFile.FileId))
+                _database.CollarFiles.DeleteOnSubmit(file);
+            _database.SubmitChanges();
+        }
+
+        private static void ClearPreviousProcessingIssues(CollarFile file)
+        {
+            foreach (var issue in _database.ArgosFileProcessingIssues.Where(i => i.CollarFile == file))
+                _database.ArgosFileProcessingIssues.DeleteOnSubmit(issue);
+            _database.SubmitChanges();
+        }
+
     }
 
     [Serializable]
