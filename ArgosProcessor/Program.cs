@@ -309,29 +309,48 @@ namespace ArgosProcessor
                 {
                     try
                     {
-                        IProcessor processor;
-                        char format;
+                        IProcessor processor = null;
+                        char format = '?';
+                        string issue = null;
                         switch (parameterSet.CollarModel)
                         {
                             case "Gen3":
-                                //FIXME - check for null period or parameter files I can't process
-                                processor = new Gen3Processor(TimeSpan.FromMinutes((int) parameterSet.Gen3Period));
+                                try
+                                {
+                                    processor = GetGen3Processor(parameterSet);
+                                }
+                                catch (Exception ex)
+                                {
+                                    issue =
+                                        String.Format(
+                                            "{4}. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
+                                            parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                            parameterSet.CollarId, ex.Message);
+                                }
                                 format = 'D';
                                 break;
                             case "Gen4":
-                                //FIXME - Add parameters to processor
-                                processor = new Gen4Processor(parameterSet.Contents.ToArray());
+                                processor = GetGen4Processor(parameterSet);
                                 format = 'C';
                                 break;
                             default:
-                                var msg =
+                                issue =
                                     String.Format(
-                                        "Unknown CollarModel '{4}' encountered skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
+                                        "Unknown CollarModel '{4}' encountered. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
                                         parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
                                         parameterSet.CollarId, parameterSet.CollarModel);
-                                LogFileMessage(file.FileId, msg, parameterSet.PlatformId,
-                                               parameterSet.CollarManufacturer, parameterSet.CollarId);
-                                continue;
+                                break;
+                        }
+                        if (processor == null)
+                            issue =
+                                String.Format(
+                                    "Oh No! processor is null. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
+                                    parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                    parameterSet.CollarId);
+                        if (issue != null)
+                        {
+                            LogFileMessage(file.FileId, issue, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
+                            continue;
                         }
                         var start = parameterSet.StartDate ?? DateTime.MinValue;
                         var end = parameterSet.EndDate ?? DateTime.MaxValue;
@@ -371,6 +390,31 @@ namespace ArgosProcessor
                     }
                 }
             }
+        }
+
+        private static IProcessor GetGen3Processor(GetTelonicsParametersForArgosDatesResult parameterSet)
+        {
+            if (parameterSet == null || parameterSet.Gen3Period == null)
+                throw new ProcessingException("Unknown period for Gen3 collar");
+            if (parameterSet.Format == 'B')
+                throw new ProcessingException("GPS Fixes for Gen3 collars with PTT parameter files (*.ppf) must be processed with Telonics ADC-T03.");
+            return new Gen3Processor(TimeSpan.FromMinutes(parameterSet.Gen3Period.Value));
+        }
+
+        private static IProcessor GetGen4Processor(GetTelonicsParametersForArgosDatesResult parameterSet)
+        {
+            var processor = new Gen4Processor(parameterSet.Contents.ToArray());
+            string tdcExe = Settings.GetSystemDefault("tdc_exe");
+            string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");
+            int timeout;
+            Int32.TryParse(Settings.GetSystemDefault("tdc_timeout"), out timeout);
+            if (!String.IsNullOrEmpty(tdcExe))
+                processor.TdcExecutable = tdcExe;
+            if (!String.IsNullOrEmpty(batchFile))
+                processor.BatchFileTemplate = batchFile;
+            if (timeout != 0)
+                processor.TdcTimeout = timeout;
+            return processor;
         }
 
         private static void ClearPreviousProcessedFiles(CollarFile parentFile)
