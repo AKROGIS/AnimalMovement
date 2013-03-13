@@ -4382,6 +4382,7 @@ SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
    AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
    AND (CPF.FileId IS NULL OR CPF.Format <> 'B' or CPF.[Status] <> 'A') -- Ignore collars with an active Gen3 PPF file 
    AND (C.Gen3Period IS NOT NULL OR (CPF.Format = 'A' AND CPF.[Status] = 'A')) -- Ignore collars without a Gen3 period or and active TPF file
+   AND (CP.EndDate IS NULL OR getdate() < CP.EndDate)
 GO
 SET ANSI_NULLS ON
 GO
