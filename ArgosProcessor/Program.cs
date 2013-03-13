@@ -16,6 +16,10 @@ namespace ArgosProcessor
         private static Boolean _processLocally;
 
         //FIXME - look for any places to wrap try/catch - if we are processing All, or files in a folder, we do not want to bubble out of the loop
+        //TODO - break into an external library to be called by AnimalMovements App (files/folder processed by server), and the Downloader App(process locally)
+        //TODO - error handeling/logging need to be rethunk to support a library.
+        //TODO - Provide a config settings for the TDC parameters, and the processLocally flag
+        //TODO - rewrite program summary below.
 
         /// <summary>
         /// This program obtains an email file from the database, processes all the data in the file, and then loads the results into the database.
