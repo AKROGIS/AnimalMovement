@@ -82,13 +82,6 @@
 -- ========================================
 
 
------------ Collars in TPF Files not in Collars Table
-     SELECT T.*
-       FROM AllTpfFileData AS T
-  LEFT JOIN Collars AS C
-         ON C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4' AND T.CTN = C.CollarId 
-      WHERE C.CollarId IS NULL
-
 ----------- Telonics Gen4 Collars in Collars table with no TPF File 
      SELECT C.*
        FROM Collars AS C
@@ -97,14 +90,37 @@
       WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4'
         AND T.CTN IS NULL
 
------------ Collars in TPF Files not in CollarParameters Table
+----------- Collars in multiple TPF files
+     SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
+       FROM AllTpfFileData AS T
+  LEFT JOIN CollarParameters AS P
+         ON T.FileId = P.FileId AND T.CTN = P.CollarId
+      WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
+   ORDER BY T.CTN, T.[Status]
+
+----------- The following queries should return no records
+----------- Collars in TPF Files not in Collars Table
+     SELECT T.*
+       FROM AllTpfFileData AS T
+  LEFT JOIN Collars AS C
+         ON C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4' AND T.CTN = C.CollarId 
+      WHERE C.CollarId IS NULL
+
+----------- Collars in a TPF Files not in CollarParameters Table (checks each collar only once)
      SELECT T.*
        FROM AllTpfFileData AS T
   LEFT JOIN CollarParameters AS C
-         ON T.CTN = C.CollarId -- AND T.FileId = C.FileId
+         ON T.CTN = C.CollarId
       WHERE C.CollarId IS NULL
 
------------ Collars/TPF files where the respective owners do not match
+----------- TPF Collars not in CollarParameters Table (expects parameter for each tpf file a collar is in)
+     SELECT T.*
+       FROM AllTpfFileData AS T
+  LEFT JOIN CollarParameters AS C
+         ON T.CTN = C.CollarId AND T.FileId = C.FileId
+      WHERE C.CollarId IS NULL AND T.Status = 'A'
+
+----------- WARNING: Collars/TPF files where the respective owners do not match
      SELECT F.[Owner] AS [TPF Manager], C.Manager AS [Collar Manager], F.[FileName], F.FileId, C.CollarId
        FROM AllTpfFileData AS T
  INNER JOIN CollarParameterFiles AS F
@@ -125,14 +141,6 @@
       WHERE (F.Format IS NULL OR F.Format = 'A')
         AND T.CTN IS NULL
         AND C.Gen3Period IS NULL
-
------------ Collars in multiple TPF files
-     SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
-       FROM AllTpfFileData AS T
-  LEFT JOIN CollarParameters AS P
-         ON T.FileId = P.FileId AND T.CTN = P.CollarId
-      WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
-   ORDER BY T.CTN, T.[Status]
 
 ----------- ERROR - Duplicate collars (id, status, timestamp) in TPF file
      SELECT CTN, [Platform], [Status], FileId, [FileName], [TimeStamp]
@@ -517,7 +525,7 @@
 
 
 ----------- Show all the records for a root collarId
-    DECLARE @rootID VARCHAR(16) = '643048'
+    DECLARE @rootID VARCHAR(16) = '631645'
      SELECT * FROM Collars WHERE LEFT(CollarId,6) = @rootID
      SELECT * FROM CollarDeployments WHERE LEFT(CollarId,6) = @rootID
      SELECT * FROM ArgosDownloads WHERE LEFT(CollarId,6) = @rootID
