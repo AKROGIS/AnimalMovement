@@ -29,6 +29,7 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings -- Need special exception for sql_proxy
 //TODO - DATABASE - Fix permissions for processing files, check collar owner, program owner
 //TODO - DATABASE - Not all files will belong to a project - i.e Argos emails and program downloads may belong to several projects
+//TODO - DATABASE - Add a Release Date to the collardeployment - this will make a lot of logic way more complicated.
 
 //FIXME - Adding a AWS file manually will not get it processed, needs to be a special case in the file upload
 //TODO - Add option in UI for requesting no emails be send from the Telonics downloader
@@ -61,7 +62,7 @@ using System.Runtime.InteropServices;
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Build a tool to hide locations outside a reasonable (user provided) range
 //TODO - provide datasheet views of collars, animals, deployments, and maybe files and fixes
-//TODO - When deploying a collar on an animal, allow selection of all collars (
+//TODO - Pass the TPF filename to the Gen4 processor, since the filename (currently temp) is written to the output file
 
 //To NOT do or fix:
 //  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date

@@ -1,9 +1,31 @@
 Derived Data Dependencies by Table
  - only those tables with derived data are listed
  - triggers (or stored procedures) need to be used to maintain the derived data when the source changes
- 
- 
-Functions/Procedures/Views used Applications, and thier dependencies:
+
+Applications:
+	ArgosDownloader
+		DaysSinceLastDownload
+		DownloadableAndAnalyzableCollars
+			Days, Email, UserName, Password, PlatformId, ProjectId, CollarManufacturer, CollarId, SendNoEmails
+		CollarFiles_insert
+		ArgosDownloads_insert
+		Settings
+			Read system settings: sa_email_*, tdc_*
+	ArgosProcessor
+		UnprocessedArgosFiles
+			FileId
+		GetTelonicsParametersForArgosDates
+			CollarManufacturer
+			CollarId
+			CollarModel
+			PlatformId
+			Gen3Period
+			Contents
+			Format
+			StartDate
+			EndDate
+	
+Functions/Procedures/Views used in applications, and thier dependencies:
 	This does all the tables/columns used in the output and the where clause.
 	Other columns may be used to join the tables, these columns should be obvious.
 	
