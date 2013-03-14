@@ -79,6 +79,13 @@ namespace Telonics
             return _transmissions.Select(t => t.PlatformId).Distinct();
         }
 
+        public IEnumerable<string> GetPlatforms(string program)
+        {
+            if (_transmissions == null)
+                _transmissions = GetTransmissions(_lines).ToList();
+            return _transmissions.Where(t => t.ProgramId == program).Select(t => t.PlatformId).Distinct();
+        }
+
         public IEnumerable<ArgosTransmission> GetTransmissions()
         {
             if (_transmissions == null)

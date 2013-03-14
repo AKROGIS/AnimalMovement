@@ -208,6 +208,7 @@ namespace ArgosProcessor
             _database.CollarFiles.InsertOnSubmit(file);
             _database.SubmitChanges();
             LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, file.FileName));
+            SummarizeArgosFile(file.FileId, argos);
 
             if (_processLocally)
                 ProcessFile(file, argos);
@@ -459,6 +460,26 @@ namespace ArgosProcessor
             _database.SubmitChanges();
         }
 
+        private static void SummarizeArgosFile(int fileId, ArgosFile file)
+        {
+            foreach (var program in file.GetPrograms())
+            {
+                foreach (var platform in file.GetPlatforms(program))
+                {
+                    var minDate = file.FirstTransmission(platform);
+                    var maxDate = file.LastTransmission(platform);
+                    var summary = new ArgosFilePlatformDate
+                        {
+                            FileId = fileId,
+                            ProgramId = program,
+                            PlatformId = platform,
+                            FirstTransmission = minDate,
+                            LastTransmission = maxDate
+                        };
+                    _database.ArgosFilePlatformDates.InsertOnSubmit(summary);
+                }
+            }
+        }
     }
 
     [Serializable]
