@@ -25,6 +25,7 @@ namespace ArgosDownloader
 
         private static void Main()
         {
+            string errors = "";
             try
             {
                 var db = new AnimalMovementDataContext();
@@ -34,104 +35,123 @@ namespace ArgosDownloader
                 int _daysSinceLastDownload = views.DaysSinceLastDownload() ?? Int32.MaxValue;
                 foreach (var collar in views.DownloadableAndAnalyzableCollars.Where(c => c.Days == null || c.Days >= MinDays))
                 {
-                    var days = Math.Min(MaxDays, collar.Days ?? MaxDays);
-                    string errors;
-                    int? firstFileId = null;
-                    int? secondFileId = null;
-                    var results = ArgosWebSite.GetCollar(collar.UserName, collar.Password, collar.PlatformId, days,
-                                                         out errors);
-                    if (results != null)
+                    try
                     {
-                        var collarFile = new CollarFile
+                        var days = Math.Min(MaxDays, collar.Days ?? MaxDays);
+                        errors = "";
+                        int? firstFileId = null;
+                        int? secondFileId = null;
+                        var results = ArgosWebSite.GetCollar(collar.UserName, collar.Password, collar.PlatformId, days,
+                                                             out errors);
+                        if (results != null)
                         {
-                            Project = collar.ProjectId,
-                            FileName = collar.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
-                            Format = 'F',
-                            CollarManufacturer = collar.CollarManufacturer,
-                            CollarId = collar.CollarId,
-                            Status = 'A',
-                            Contents = results.ToBytes()
-                        };
-                        db.CollarFiles.InsertOnSubmit(collarFile);
-                        try
-                        {
-                            db.SubmitChanges();
-                            firstFileId = collarFile.FileId;
-                        }
-                        catch (Exception ex)
-                        {
-                            errors = "Error writing raw AWS download to database: " + ex.Message;
-                        }
-                        if (firstFileId != null)
-                        {
+                            var collarFile = new CollarFile
+                                {
+                                    Project = collar.ProjectId,
+                                    FileName = collar.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
+                                    Format = 'F',
+                                    CollarManufacturer = collar.CollarManufacturer,
+                                    CollarId = collar.CollarId,
+                                    Status = 'A',
+                                    Contents = results.ToBytes()
+                                };
+                            db.CollarFiles.InsertOnSubmit(collarFile);
                             try
                             {
-                                var collarFile2 = ProcessAws(collar, firstFileId.Value, results);
-                                db.CollarFiles.InsertOnSubmit(collarFile2);
-                                try
-                                {
-                                    db.SubmitChanges();
-                                    secondFileId = collarFile2.FileId;
-                                }
-                                catch (Exception ex)
-                                {
-                                    errors = "Error writing Gen3/4 output to database: " + ex.Message;
-                                }
+                                db.SubmitChanges();
+                                firstFileId = collarFile.FileId;
                             }
                             catch (Exception ex)
                             {
-                                errors = "Error processing AWS download to Gen3/4: " + ex.Message;
+                                errors = "Error writing raw AWS download to database: " + ex.Message;
                             }
-                            if (secondFileId == null)
+                            if (firstFileId != null)
                             {
-                                db.CollarFiles.DeleteOnSubmit(collarFile);
                                 try
                                 {
-                                    db.SubmitChanges();
+                                    var collarFile2 = ProcessAws(collar, firstFileId.Value, results);
+                                    try
+                                    {
+                                        db.CollarFiles.InsertOnSubmit(collarFile2);
+                                        db.SubmitChanges();
+                                        secondFileId = collarFile2.FileId;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        errors = "Error writing Gen3/4 output to database: " + ex.Message;
+                                    }
                                 }
                                 catch (Exception ex)
                                 {
-                                    errors += Environment.NewLine + "Error trying to rollback changes: " + ex.Message +
-                                              Environment.NewLine + "The AWS file (id = " + firstFileId +
-                                              ") added to the database could not be removed after a subsequent error.";
+                                    errors = "Error processing AWS download to Gen3/4: " + ex.Message;
+                                }
+                                if (secondFileId == null)
+                                {
+                                    try
+                                    {
+                                        db.CollarFiles.DeleteOnSubmit(collarFile);
+                                        db.SubmitChanges();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        errors += Environment.NewLine + "Error trying to rollback changes: " +
+                                                  ex.Message + Environment.NewLine + "The AWS file (id = " + firstFileId +
+                                                  ") added to the database could not be removed after a subsequent error.";
+                                    }
                                 }
                             }
                         }
-                    }
-                    //log this activity in the database
-                    //if results is null, then errors should be non-null
-                    var log = new ArgosDownload
+                        try
                         {
-                            CollarManufacturer = collar.CollarManufacturer,
-                            CollarId = collar.CollarId,
-                            FileId = firstFileId,
-                            ErrorMessage = errors
-                        };
-                    db.ArgosDownloads.InsertOnSubmit(log);
-                    db.SubmitChanges();
-                    if (collar.SendNoEmails.HasValue && collar.SendNoEmails.Value)
-                    {
-                        EmailErrors(collar.Email, collar.UserName, collar.PlatformId, errors);
-                        WarnAboutCollarDays(collar.Email, collar.UserName, collar.PlatformId, collar.Days, results != null, _daysSinceLastDownload);
+                            //log this activity in the database
+                            //if results is null, then errors should be non-null
+                            var log = new ArgosDownload
+                            {
+                                CollarManufacturer = collar.CollarManufacturer,
+                                CollarId = collar.CollarId,
+                                FileId = firstFileId,
+                                ErrorMessage = errors
+                            };
+                            db.ArgosDownloads.InsertOnSubmit(log);
+                            db.SubmitChanges();
+                        }
+                        catch (Exception ex)
+                        {
+                            errors = Environment.NewLine + "Error logging download to database: " + ex.Message +
+                                     Environment.NewLine + "Errors: '" + errors + "'" + Environment.NewLine +
+                                     "CollarId = " + collar.CollarId + "FileId = " + firstFileId;
+                        }
+                        if (collar.SendNoEmails.HasValue && collar.SendNoEmails.Value)
+                            WarnAboutCollarDays(collar.Email, collar.UserName, collar.PlatformId, collar.Days,
+                                                results != null, _daysSinceLastDownload);
                     }
-                    EmailErrors(_admin, collar.UserName, collar.PlatformId, errors);
-                }
+                    catch (Exception ex)
+                    {
+                        errors = "Unexpected Platform Exception: " + ex.Message + Environment.NewLine + "Errors: '" + errors + "'";
+                    }
+                    finally
+                    {
+                        if (collar.SendNoEmails.HasValue && collar.SendNoEmails.Value)
+                            EmailErrors(collar.Email, collar.UserName, collar.PlatformId, errors);
+                        EmailErrors(_admin, collar.UserName, collar.PlatformId, errors);
+                    }
+                } //End foreach
                 SendEmails();
             }
             catch (Exception ex)
             {
-                ReportException(ex);
+                ReportException("Setup or Email Exception: '" + ex.Message + "'  Errors: '" + errors+ "'.");
             }
         }
 
 
-        private static void ReportException(Exception ex)
+        private static void ReportException(string error)
         {
             //try to email the sys admin, otherwise log to a file, otherwise write to the console
             try
             {
                 SendGmail(_admin,
-                          "Unexpected Error Running Animal Movements Argos Downloader", ex.ToString());
+                          "Unexpected Error Running Animal Movements Argos Downloader. ", error);
             }
             catch (Exception innerEx)
             {
@@ -140,7 +160,7 @@ namespace ArgosDownloader
                                   "{0} Argos Downloader unable to email admin with error" + Environment.NewLine +
                                   "  Exception when sending email:" + Environment.NewLine + "{1}" + Environment.NewLine +
                                   "  Original error trying to email to admin:" + Environment.NewLine + "{2}",
-                                  DateTime.Now, innerEx, ex);
+                                  DateTime.Now, innerEx, error);
                 try
                 {
                     File.AppendAllText(LogFile, message);
