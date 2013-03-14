@@ -347,7 +347,7 @@ namespace ArgosProcessor
                                     issue =
                                         String.Format(
                                             "{4}. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
-                                            parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                            parameterSet.PlatformId, parameterSet.StartDate ?? DateTime.MinValue, parameterSet.EndDate ?? DateTime.MaxValue,
                                             parameterSet.CollarId, ex.Message);
                                 }
                                 format = 'D';
@@ -360,7 +360,7 @@ namespace ArgosProcessor
                                 issue =
                                     String.Format(
                                         "Unknown CollarModel '{4}' encountered. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
-                                        parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                        parameterSet.PlatformId, parameterSet.StartDate ?? DateTime.MinValue, parameterSet.EndDate ?? DateTime.MaxValue,
                                         parameterSet.CollarId, parameterSet.CollarModel);
                                 break;
                         }
@@ -368,7 +368,7 @@ namespace ArgosProcessor
                             issue =
                                 String.Format(
                                     "Oh No! processor is null. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
-                                    parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                    parameterSet.PlatformId, parameterSet.StartDate ?? DateTime.MinValue, parameterSet.EndDate ?? DateTime.MaxValue,
                                     parameterSet.CollarId);
                         if (issue != null)
                         {
@@ -407,7 +407,7 @@ namespace ArgosProcessor
                         var message =
                             String.Format(
                                 "ERROR {5} adding Argos {0} transmissions from {1:g} to {2:g} to Collar {3}/{4}",
-                                parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                parameterSet.PlatformId, parameterSet.StartDate ?? DateTime.MinValue, parameterSet.EndDate ?? DateTime.MaxValue,
                                 parameterSet.CollarManufacturer, parameterSet.CollarId, ex.Message);
                         LogFileMessage(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
                     }
