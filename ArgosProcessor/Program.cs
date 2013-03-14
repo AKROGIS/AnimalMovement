@@ -330,6 +330,12 @@ namespace ArgosProcessor
                 }
                 foreach (var parameterSet in parameterSets)
                 {
+                    DateTime start = ((parameterSet.StartDate ?? DateTime.MinValue) < item.First
+                                          ? item.First
+                                          : parameterSet.StartDate.Value);
+                    DateTime end = (item.Last < (parameterSet.EndDate ?? DateTime.MaxValue)
+                                          ? item.Last
+                                          : parameterSet.EndDate.Value);
                     try
                     {
                         IProcessor processor = null;
@@ -347,7 +353,7 @@ namespace ArgosProcessor
                                     issue =
                                         String.Format(
                                             "{4}. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
-                                            parameterSet.PlatformId, parameterSet.StartDate ?? DateTime.MinValue, parameterSet.EndDate ?? DateTime.MaxValue,
+                                            parameterSet.PlatformId, start, end,
                                             parameterSet.CollarId, ex.Message);
                                 }
                                 format = 'D';
@@ -360,7 +366,7 @@ namespace ArgosProcessor
                                 issue =
                                     String.Format(
                                         "Unknown CollarModel '{4}' encountered. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
-                                        parameterSet.PlatformId, parameterSet.StartDate ?? DateTime.MinValue, parameterSet.EndDate ?? DateTime.MaxValue,
+                                        parameterSet.PlatformId, start, end,
                                         parameterSet.CollarId, parameterSet.CollarModel);
                                 break;
                         }
@@ -368,15 +374,13 @@ namespace ArgosProcessor
                             issue =
                                 String.Format(
                                     "Oh No! processor is null. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
-                                    parameterSet.PlatformId, parameterSet.StartDate ?? DateTime.MinValue, parameterSet.EndDate ?? DateTime.MaxValue,
+                                    parameterSet.PlatformId, start, end,
                                     parameterSet.CollarId);
                         if (issue != null)
                         {
                             LogFileMessage(file.FileId, issue, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
                             continue;
                         }
-                        var start = parameterSet.StartDate ?? DateTime.MinValue;
-                        var end = parameterSet.EndDate ?? DateTime.MaxValue;
                         var transmissions = item.Transmissions.Where(t => start <= t.DateTime && t.DateTime <= end);
                         var lines = processor.ProcessTransmissions(transmissions, argos);
                         var data = Encoding.UTF8.GetBytes(String.Join("\n", lines));
@@ -396,18 +400,18 @@ namespace ArgosProcessor
                         _database.SubmitChanges();
                         var message =
                             String.Format(
-                                "Successfully added Argos {0} transmission from {1:g} to {2:g} to Collar {3}/{4}",
-                                parameterSet.PlatformId, parameterSet.StartDate, parameterSet.EndDate,
+                                "Successfully added Argos {0} transmissions from {1:g} to {2:g} to Collar {3}/{4}",
+                                parameterSet.PlatformId, start, end,
                                 parameterSet.CollarManufacturer, parameterSet.CollarId);
                         LogGeneralMessage(message);
-                        LogFileMessage(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
+                        //LogFileMessage(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
                     }
                     catch (Exception ex)
                     {
                         var message =
                             String.Format(
                                 "ERROR {5} adding Argos {0} transmissions from {1:g} to {2:g} to Collar {3}/{4}",
-                                parameterSet.PlatformId, parameterSet.StartDate ?? DateTime.MinValue, parameterSet.EndDate ?? DateTime.MaxValue,
+                                parameterSet.PlatformId, start, end,
                                 parameterSet.CollarManufacturer, parameterSet.CollarId, ex.Message);
                         LogFileMessage(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
                     }
