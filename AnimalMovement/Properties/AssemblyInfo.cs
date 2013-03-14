@@ -6,9 +6,13 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Save warnings from Argos processing into a table for review by the user 
 //TODO - DATABASE - Query for Analyzable collars should be same as C# code (i.e. check for ambiguous collars)
 //TODO - Capture issues from argos processing in database for review/correection.
-//TODO - give the user an ability to review warnings when processing an argos file, and the ability to reprocess the file.
-//TODO - When a new collar is added to the database, we should offer to disable the active older version (same argos id).
+//TODO - When a new collar is added to the database, we need to create Argos deployments, and update old Argos deployments
+//TODO - When a new TPF file for an existing Collar is added, the old parameters should be ended.
 //TODO - When Updating the Disposal Date of a collar consider adding an end date to the collar parameter (this is not a database requirement)
+//TODO - DATABASE - Remove all dependencies on CollarDisposal Date, this is for information/display only.
+//TODO - DATABASE - Remove ArgosId, Gen3period from the Collars table.
+//TODO - Create tab on collar details to show Argos platfroms used on this collar
+//TODO - Create tab on collar details to show Collar Parametes used on this process this collar
 
 //FIXME - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
 //FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
@@ -23,6 +27,8 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
 //TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings -- Need special exception for sql_proxy
+//TODO - DATABASE - Fix permissions for processing files, check collar owner, program owner
+//TODO - DATABASE - Not all files will belong to a project - i.e Argos emails and program downloads may belong to several projects
 
 //FIXME - Adding a AWS file manually will not get it processed, needs to be a special case in the file upload
 //TODO - Add option in UI for requesting no emails be send from the Telonics downloader
@@ -55,6 +61,7 @@ using System.Runtime.InteropServices;
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Build a tool to hide locations outside a reasonable (user provided) range
 //TODO - provide datasheet views of collars, animals, deployments, and maybe files and fixes
+//TODO - When deploying a collar on an animal, allow selection of all collars (
 
 //To NOT do or fix:
 //  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date

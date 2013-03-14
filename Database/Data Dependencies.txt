@@ -2,6 +2,164 @@ Derived Data Dependencies by Table
  - only those tables with derived data are listed
  - triggers (or stored procedures) need to be used to maintain the derived data when the source changes
  
+ 
+Functions/Procedures/Views used Applications, and thier dependencies:
+	This does all the tables/columns used in the output and the where clause.
+	Other columns may be used to join the tables, these columns should be obvious.
+	
+AnimalFixesByFile (view)
+	CollarFixes
+		CollarId
+		FileId
+		FixDate
+	CollarDeployments
+		AnimalId
+		DeploymentDate
+		RetreivalDate
+	Projects
+		ProjectName
+	LookupCollarManufacturers
+		Name
+		
+AnimalLocationSummary (TVF)
+	Locations
+		ProjectId
+		AnimalId
+		FixDate
+		Location
+		Status
+		
+CollarFixesByFile (TVF)
+	CollarFiles
+		CollarManufacturer
+		CollarId
+		FileId
+		FileName
+	CollarFixes
+		CollarManufacturer
+		CollarId
+		FixDate
+	LookupCollarFileStatus
+		Name
+
+CollarFixSummary (TVF)
+	CollarFixes
+		CollarManufacturer
+		CollarId
+		FixDate
+
+ConflictingFixes (TVF)
+	CollarFixes
+		CollarManufacturer
+		CollarId
+		FixDate
+		FixId, HiddenBy, FileId, LineNumber, Lat, Lon
+
+DaysSinceLastDownload (SVF)
+	ArgosDownloads
+		ErrorMessage
+		TimeStamp
+
+DownloadableAndAnalyzableCollar (view)
+	ArgosDownloads
+		TimeStamp
+		ErrorMessage
+	ArgosPlatforms
+		PlatformId
+		Status
+	ArgosPrograms
+		UserName
+		Password
+		Status
+		EndDate
+	Collars
+		CollarManufacturer
+		CollarId
+		CollarModel
+		DisposalDate
+		Gen3Period
+	CollarDeployments
+		ProjectId
+		RetreivalDate
+	CollarParameterFiles
+		Contents
+		FileId
+		Format
+		Status
+	CollarParameters
+		EndDate
+	ProjectInvestigators
+		Email
+	Settings
+		Value
+		
+GetTelonicsParametersForArgosDates (TVF)
+	ArgosDeployments
+		CollarManufacturer
+		CollarId
+		PlatformId
+		StartDate
+		EndDate
+	Collars
+		CollarModel
+	CollarParameterFiles
+		Contents
+		FileName
+		Format
+	CollarParameters
+		FileId
+		Gen3Period
+		StartDate
+		EndDate
+	
+IsEditor (SVF)
+	Projects
+		ProjectId
+		ProjectInvestigator
+	ProjectEditors
+		Editor
+
+IsFixEditor (SVF)
+	IsEditor
+	CollarFiles
+		Project
+	CollarFixes
+		FixId
+	
+NextAnimalId (SVF)
+	Animals
+		AnimalId
+	Projects
+		ProjectId
+
+ProcessAllCollarsForArgosFile (SP)
+	CollarFiles
+		FileId
+		Status
+		Format
+		ParentFileId
+	Projects
+		ProjectId
+		ProjectInvestigator
+	ProjectEditors
+		ProjectId
+		Editor	
+	Settings
+		Username, Key, Value
+	* CollarFile_Delete SP
+	* xp_cmdshell ArgosProcessor.exe
+
+UnprocessedArgosFile (view)
+	CollarFiles
+		FileId
+		FileName
+		Format
+		ParentFileId
+		Project
+		UploadDate
+		UserName
+
+
 
 CollarDataXXX
 	Collar.*

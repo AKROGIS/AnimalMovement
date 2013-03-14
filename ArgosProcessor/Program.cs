@@ -15,6 +15,7 @@ namespace ArgosProcessor
         private static String _project;
         private static Boolean _processLocally;
 
+        //TODO - When loading an Argos file, we need to populate the ArgosDownloadSummary Table.
         //TODO - break into an external library to be called by AnimalMovements App (files/folder processed by server), and the Downloader App(process locally)
         //TODO - error handeling/logging need to be rethunk to support a library.
         //TODO - Provide a config settings for the TDC parameters, and the processLocally flag
