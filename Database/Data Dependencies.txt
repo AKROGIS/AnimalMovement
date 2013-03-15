@@ -345,19 +345,22 @@ if the platform to collar or collar to parameter mappings change).
 The ProgramId and PlatformId are not foreign keys to the ArgosProgram and ArgosPlatform
 tables, because we may load a file that does not have a program/platform in the database
 We want this table to reflect what is in the file, not what is in the database,
-We should provide a tool for checking database against the file and adding programs/platforms
-as required.
+We should provide a tool for checking database against the file and adding programs and 
+platforms as required.
 
-This table is not dependent on anything beyond the contents (and format) of the related collar file.
-Since the CollarFile contents/format are immutable, this table is also immutable.
+This table is not dependent on anything beyond the contents (and format) of the related
+collar file. Since the CollarFile contents/format are immutable, this table is also
+immutable.
 
-Only the ArgosProcessor role can add records in this table - done when a file is processed.
-(would be nice to do when the collarfile is added to the database).
-Records cannot be updated or deleted.
-Deletes will only happen as a cascade when the collarfile is deleted.
-Inserts may be done by AnimalMovements.exe, ArgosProcessor.exe, or ArgosDownloader.exe which may be run
-on the server (with a local account) or a database domain user.  We need to control inserts with a SP,
-which verifies permission.  Only the user who uploaded the file can create the summary.  
+Only the ArgosProcessor role can add records in this table - done when a file is
+processed (would be nice to do when the collarfile is added to the database).
+
+Records cannot be updated or deleted. Deletes will only happen as a cascade when the
+collarfile is deleted.
+Inserts may be done by AnimalMovements.exe, ArgosProcessor.exe, or ArgosDownloader.exe
+which may be run on the server (with a local account) or a database domain user.  We need
+to control inserts with a SP, which verifies permission.  Only the user who uploaded the
+file can create the summary.  
 
 
 ArgosFileProcessingIssues
