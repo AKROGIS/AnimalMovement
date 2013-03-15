@@ -1,12 +1,14 @@
 Derived Data Dependencies by Table
  - only those tables with derived data are listed
- - triggers (or stored procedures) need to be used to maintain the derived data when the source changes
+ - triggers (or stored procedures) need to be used to maintain the derived data when the
+   source changes
 
 Applications:
 	ArgosDownloader
 		DaysSinceLastDownload
 		DownloadableAndAnalyzableCollars
-			Days, Email, UserName, Password, PlatformId, ProjectId, CollarManufacturer, CollarId, SendNoEmails
+			Days, Email, UserName, Password, PlatformId, ProjectId, CollarManufacturer,
+			CollarId, SendNoEmails
 		CollarFiles_insert
 		ArgosDownloads_insert
 		Settings
@@ -188,8 +190,9 @@ CollarDataXXX
 	CollarFiles.*
 	CollarParameters.*
 	CollarParameterFiles.*
-	??? records in these tables are immutable, and are simply the unaltered data from the files,
-	    however the where the contents goes may be based on these parameters, i.e. Gen3 or Gen4
+	??? records in these tables are immutable, and are simply the unaltered data from the
+	    files, however the where the contents goes may be based on these parameters,
+	    i.e. Gen3 or Gen4
 CollarFiles
 	CollarFiles.*
 	???
@@ -219,11 +222,20 @@ Column constraints
 
 Collar
   - is a nullable key in the collars table
-  - Can only be null for files which will be processed, i.e will have sub files with non-null collars
-  -  (and as a special exception, ed-debevek files)
-  -  (Debevek files should in the future be processed to collar specific sub files)
+  - Can only be null for files which will be processed, i.e will have sub files with
+    non-null collars (and as a special exception, ed-debevek files - Debevek files should
+    in the future be processed to collar specific sub files)
 Project
-  - is a non-null key in the projects table (determines where this file is visible in UI)
+  - is a nullable key in the projects table (determines where this file is visible in UI)
+Owner
+  - is a nullable key in the PI table (determines where this file is visible in UI)
+  - one and only one of Project/Owner must be non=null. enforced by an insert trigger.
+    if owner and project are both null, the uploading user is used as the owner.  this
+    will fail unless the uploader is also a PI.
+  - Owner is used when a file argos download or email upload will contain data for a
+    number of collars, which might be spread across multiple projects.  Owner in this
+    case really reflects the owner of the file, and not necessarily the owner of the
+    collars or projects involved with the file.
 FileName
   - must be non-null and not empty string; purely informational
 Status
@@ -235,23 +247,28 @@ FileId/Username/UploadDate/Sha1Hash
 ParentFileId
   - is a nullable key in the collar file table.
   - It is inserted by the external file processors, and cannot be changed once inserted
-  - Would be nice if the database could manage this - requires in DB processing of argos files
-  - Special case: CSV files generated from Gen3 *.tpf files could have the parent file loaded after.
+    (Would be nice if the database could manage this - requires processing of argos
+    files entirely and only in the database.)
+  - Special case: CSV files that were generated from Gen3 *.tpf files and loaded into the
+    database, might in the future load the *.tpf files, in which case the parent would
+    be loaded after the child.
 Format
   - Is a non-null key in LookupCollarFileFormat.
   - It is inserted by the user on creation and cannot be changed once inserted 
   - Getting this wrong will likely result in errors and no good fixes for this file 
-  - Would be nice if the database could determine this from the contents, and disallow user input.
+**  - Would be nice if the database could determine this from the contents, and disallow
+      user input.
 
 If a file has a non-null ParentFileId
-  then it only the project & status can be updated, and only to mirror changes in the parent
-  it can not be deleted, except when the parent is deleted or reprocessed
+  then only the project, owner & status can be updated, and only to mirror changes in the
+  parent it can not be deleted, except when the parent is deleted or reprocessed
   it can not be inserted, except when the parent is (re)processed
 
 Dependencies
 ------------
 Collars: Collar
 Projects: Project
+ProjectInvestigators: Owner
 LookupStatus: Status
 LookupFormat: Format
 CollarFiles: ParentFileId
@@ -262,8 +279,11 @@ Tables Dependent on CollarFiles
 CollarDataXXX: Contents, and Format (update: na; delete: cascade)
 CollarFile: FileId (for files with a parent) (update: na; delete: cascade)
 ArgosTransmissionSummary: Contents and Format   (update: na; delete: cascade)
-CollarFixes: Status, Collar (and Contents via CollarDataXXX) (update: see below; delete: cascade)
+CollarFixes: Status, Collar (and Contents via CollarDataXXX) (update: see below;
+             delete: cascade)
 
+*** implement cascading deletes on parentFileId and in collardataXXX this will greatly
+simplify the delete SP.
 
 Insert
 ------
@@ -277,15 +297,42 @@ If status is active, generate collar fixes from new data in format specific tabl
 Delete
 ------
 
-Reverse insert
+Reverse of insert.  files that were downloaded cannot be deleted (by business decision
+and enforced by foreign key constraint)
 
 Updates
 -------
-Status: If the status changes, add/remove collarfixes for related data in format specific tables 
-Collar: Only allowed when a file is inactive, since fixes for a file are dependent on knowing the collar of a file
+Status: If the status changes, add/remove collarfixes for related data in format specific
+        tables 
+Collar: Only allowed when a file is inactive, since fixes for a file are dependent on
+        knowing the collar of a file
 Project: No effect on processing, will appear in a different project list
-         Must ripple down to any sub files
+         Must ripple down to sub-files. must be null/not-null if owner is non-null/null
+Owner: No effect on processing, will appear in a different PI List
+       Must ripple down to sub-files. must be null/not-null if project is non-null/null
 FileName: Purely informational, user can change as desired.
+
+
+
+CollarDataXXX
+=============
+The data in these tables are not dependent on anything beyond the contents (and format)
+of the related collar file.  Since the CollarFile contents/format are immutable, this
+table is also immutable. Users cannot create/delete or update records in these tables.
+These records are created by the database by calling an appropriate parser when a
+collarfile is inserted into the database.  The data in these tables is related via
+foreign key to the CollarFile table.  It will deny updates (the collarFileId does not
+change), and will cascade deletes.  Changes to the collar file status does not change
+the contents of these table, only the fixes derived from the collar data.
+
+
+
+CollarParameters
+================
+
+
+CollarParameterFiles
+====================
 
 
 
@@ -339,24 +386,37 @@ This table records the attempts, results, and errors associated with downloading
 Argos data from the Argos server.  All records have a timestamp (automatically inserted)
 column that records when the record was added to the database (immediately after
 the download attempt finished).  Any timestamp provided by the client will be ignored.
-If the client and the database are in differnet timezone and client cares about the
+If the client and the database are in different timezone and client cares about the
 client time when the insert occured, then it is up to the client to determine the
 offset and adjust the display appropriately. The records in this table represent a
-snapshot in time they are immutable and non-deletable.
+snapshot in time - they are immutable and non-deletable.
 
-Only the ArgosProcessor role can add records to this table.  Because of this controlled
-access, inserts occur directly on the table, and not through a stored procedure.
+Data is typically downloaded by the argos download service/scheduled task, run by a
+local account on the server (ArgosProcessor role), however it may be useful to have
+allow an editor to do a download when they are eager for new results.  For this reason,
+we need to control access to the inserts on this table, and we will use a insert SP.
+permission to run the SP will be based on being a limited to editors or ArgosProcessor.
+No special permission check will be done for the insert, basically anyone editor
+can log a download attempt, however the user will need to have permissions to upload
+the results file, else an error may occur.
 
-The platformId column is a non null column that records the ArgosId that was attempted
-to be downloaded.  Since only the ArgosProcessor can add records, and the Argos-
-Processor will only try to download collars platforms in the platforms table,
-It can be used to join to other tables that have an Argos platform,
-but it is not a Foriegn Key relation to the ArgosPlatform table, because this table
-represents what was actually tried, even if a bogus argosid was attempted, this table
-should not be corrected on a cascading update/delete if a platformId in the
-ArgosPlatforms table is altered.
+The platformId/programId columns are nullable columns that records the Argos
+Platform or Program that was attempted to be downloaded. One and only one will be
+non-null.  Typically, records will only be inserted in this table by the Argos-
+Downloader application which will only try to download platforms or programs in the
+database tables at the time it is run.  Therefore, these columns
+can be used to join to other tables that have an Argos platform or program,
+but it is not a Foriegn Key relation to these tables. This table represents what was
+actually tried.  If a bogus platform/program was attempted this table
+should not be corrected on a cascading update/delete if a platformId/programId in the
+"related" table is updated or deleted.
 
-Do we also want to capture the username (or program #) and number of days requested
+This table will be consulted by the ArgosDownloader to determine the number of days
+since the last successful download of a platform/program.  There is slight risk here
+that a user may manually enter a bogus record in this table which could screw up the
+download calculations, but lets trust our editors.
+
+** Do we also want to capture the username and number of days requested in the download?
 
 The ErrorMessage nullable varchar(max) and FileId nullable int represent the results.
 They are mutually exclusive, and one and only one must be non-null.  We either get a file
@@ -373,19 +433,21 @@ expires after 10 days, and cannot be retrieved at some later date.
 
 Summary:
 ArgosId, non null varchar(8), no FK relationship to ArgosPlatforms
+ProgramId, non null varchar(8), no FK relationship to ArgosPlatforms
 TimeStamp non-null datetime(2) default value provided
 ErrorMessage null varchar(max) must be null if FileId is non-null and visaversa
 FileId null int foreign key to CollarFiles, Cascade Update/Delete NO ACTION (deny)
 
-Insert trigger is used to maintain the null/not-null requirement for ErrorMessage/FileId
-and also to always use the current time when doing the insert (any value passed by the
+The insert stored procedure is used to maintain the null/not-null requirement for
+ErrorMessage/FileId and also the null/not-null requirement for platfrom/program Ids.
+to always use the current time when doing the insert (any value passed by the
 client will be ignored).
 
 
 ArgosPrograms
 =============
 ProgramNumber, UserName:
-Can we change the ProgramNumber.  I think not.  What if we make a mistake?
+** Can we change the ProgramNumber.  I think not.  What if we make a mistake?
 It doesn't seem like it is used anywhere except in the ArgosPlatform table, so maybe it
 won't hurt?  If we link the program to the ArgosDownload, then we should make the
 programnumber and the username immutable.  This seems ok, unless we made a mistake, and
@@ -399,8 +461,8 @@ username/password for a program, and failed, then the username/password were cha
 and then the next download succeeded, both downloads will point to the same program,
 which would be confusing.
 
-We should hide the password from all but the owner of the program.  What is the best
-way to storing passwords in the database.
+** We should hide the password from all but the owner of the program.  What is the best
+way to store passwords in the database that the database needs to use as clear text?
 
 Owner is a foreign key to ProjectInvestigator Table with cascade on update, and no
 action on delete (i.e you cannot delete the PI if they own an ArgosProgram).  Allow PI
@@ -409,9 +471,9 @@ to re-assign this program to another PI.
 Name, start date, end date, and remarks are purely informational.
 
 Status is Active/Inactive (via foreign key lookup).  When a program is inactive, 
-none of the platforms in that program will be downloaded.
+neither the program or any of the platforms in that program will be downloaded.
 
-Argos platfroms are dependent on the program number.
+Argos platforms are dependent on the program number.
 The download tool uses this table to determine what to download, and how to authenticate.
 
 
