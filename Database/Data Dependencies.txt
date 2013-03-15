@@ -355,7 +355,9 @@ Only the ArgosProcessor role can add records in this table - done when a file is
 (would be nice to do when the collarfile is added to the database).
 Records cannot be updated or deleted.
 Deletes will only happen as a cascade when the collarfile is deleted.
-Inserts are done without a stored procedure, since access is controlled.
+Inserts may be done by AnimalMovements.exe, ArgosProcessor.exe, or ArgosDownloader.exe which may be run
+on the server (with a local account) or a database domain user.  We need to control inserts with a SP,
+which verifies permission.  Only the user who uploaded the file can create the summary.  
 
 
 ArgosFileProcessingIssues
