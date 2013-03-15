@@ -10,6 +10,11 @@ namespace FileLibrary
     {
         public bool ProcessLocally { get; set; }
 
+        public int? LoadAws(Byte[] contents, Project project = null)
+        {
+            throw new NotImplementedException();
+        }
+
         public void LoadPath(string path,  Project project = null, Collar collar = null)
         {
             throw new NotImplementedException();
@@ -59,10 +64,139 @@ namespace FileLibrary
     }
 }
 
+//From ArgosDownloader
+/*
+                        int? secondFileId = null;
+                             var collarFile = new CollarFile
+                                {
+                                    Project = collar.ProjectId,
+                                    FileName = collar.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
+                                    Format = 'F',
+                                    CollarManufacturer = collar.CollarManufacturer,
+                                    CollarId = collar.CollarId,
+                                    Status = 'A',
+                                    Contents = results.ToBytes()
+                                };
+                            db.CollarFiles.InsertOnSubmit(collarFile);
+                            try
+                            {
+                                db.SubmitChanges();
+                                firstFileId = collarFile.FileId;
+                            }
+                            catch (Exception ex)
+                            {
+                                errors = "Error writing raw AWS download to database: " + ex.Message;
+                            }
+                            if (firstFileId != null)
+                            {
+                                try
+                                {
+                                    var collarFile2 = ProcessAws(collar, firstFileId.Value, results);
+                                    try
+                                    {
+                                        db.CollarFiles.InsertOnSubmit(collarFile2);
+                                        db.SubmitChanges();
+                                        secondFileId = collarFile2.FileId;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        errors = "Error writing Gen3/4 output to database: " + ex.Message;
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    errors = "Error processing AWS download to Gen3/4: " + ex.Message;
+                                }
+                                if (secondFileId == null)
+                                {
+                                    try
+                                    {
+                                        db.CollarFiles.DeleteOnSubmit(collarFile);
+                                        db.SubmitChanges();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        errors += Environment.NewLine + "Error trying to rollback changes: " +
+                                                  ex.Message + Environment.NewLine + "The AWS file (id = " + firstFileId +
+                                                  ") added to the database could not be removed after a subsequent error.";
+                                    }
+                                }
+                            }
+
+
+        private static CollarFile ProcessAws(DownloadableAndAnalyzableCollar collar, int parentFileId,
+                                             ArgosWebSite.ArgosWebResult results)
+        {
+            //TODO - Can I simplify this? Maybe use the ArgosCollarAnalyzer from ArgosProcessor?
+
+            CollarFile collarFile;
+            switch (collar.CollarModel)
+            {
+                case "Gen3":
+                    if (!collar.Gen3Period.HasValue)
+                        throw new InvalidOperationException("Gen3 collar cannot be processed without a period");
+                    var g3processor = new Gen3Processor(TimeSpan.FromMinutes(collar.Gen3Period.Value));
+
+                    ArgosFile aws3 = new ArgosAwsFile(results.ToBytes()) {Processor = id => g3processor};
+
+                    byte[] g3data =
+                        Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, aws3.ToTelonicsData()));
+                    collarFile = new CollarFile
+                        {
+                            Project = collar.ProjectId,
+                            FileName =
+                                collar.PlatformId + "_gen3_" + DateTime.Now.ToString("yyyyMMdd") +
+                                ".csv",
+                            Format = 'D',
+                            CollarManufacturer = collar.CollarManufacturer,
+                            CollarId = collar.CollarId,
+                            Status = 'A',
+                            Contents = g3data,
+                            ParentFileId = parentFileId
+                        };
+                    break;
+                case "Gen4":
+                    var g4processor = new Gen4Processor(collar.TpfFile.ToArray());
+                    string tdcExe = Settings.GetSystemDefault("tdc_exe");
+                    string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");
+                    int timeout;
+                    Int32.TryParse(Settings.GetSystemDefault("tdc_timeout"), out timeout);
+                    if (!String.IsNullOrEmpty(tdcExe))
+                        g4processor.TdcExecutable = tdcExe;
+                    if (!String.IsNullOrEmpty(batchFile))
+                        g4processor.BatchFileTemplate = batchFile;
+                    if (timeout != 0)
+                        g4processor.TdcTimeout = timeout;
+
+                    ArgosFile aws4 = new ArgosAwsFile(results.ToBytes()) {Processor = id => g4processor};
+
+                    byte[] g4data =
+                        Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, aws4.ToTelonicsData()));
+                    collarFile = new CollarFile
+                        {
+                            Project = collar.ProjectId,
+                            FileName =
+                                collar.PlatformId + "_gen4_" + DateTime.Now.ToString("yyyyMMdd") +
+                                ".csv",
+                            Format = 'C',
+                            CollarManufacturer = collar.CollarManufacturer,
+                            CollarId = collar.CollarId,
+                            Status = 'A',
+                            Contents = g4data,
+                            ParentFileId = parentFileId
+                        };
+                    break;
+                default:
+                    var msg = String.Format("Unsupported model ({0} for collar {1}", collar.CollarModel, collar.CollarId);
+                    throw new ArgumentOutOfRangeException(msg);
+            }
+            return collarFile;
+        }
+*/
+
+//From ArgosProcessor
 //TODO - When loading an Argos file, we need to populate the ArgosDownloadSummary Table.
-//TODO - break into an external library to be called by AnimalMovements App (files/folder processed by server), and the Downloader App(process locally)
 //TODO - error handeling/logging need to be rethunk to support a library.
-//TODO - Provide a config settings for the TDC parameters, and the processLocally flag
 
 /*
         #region Logging

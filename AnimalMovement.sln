@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telonics", "Telonics\Teloni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelonicsTest", "TelonicsTest\TelonicsTest.csproj", "{021E673F-46FE-4971-A6F5-75645390BBCE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileLibrary", "FileLibrary\FileLibrary.csproj", "{974D12D2-2796-47F8-9259-5268DA1D84AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -144,6 +146,16 @@ Global
 		{021E673F-46FE-4971-A6F5-75645390BBCE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{021E673F-46FE-4971-A6F5-75645390BBCE}.Release|x86.ActiveCfg = Release|x86
 		{021E673F-46FE-4971-A6F5-75645390BBCE}.Release|x86.Build.0 = Release|x86
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{974D12D2-2796-47F8-9259-5268DA1D84AB}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
