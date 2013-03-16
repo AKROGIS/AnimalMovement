@@ -9,17 +9,17 @@ namespace FileLibrary
     public class FileProcessor
     {
         public bool ProcessLocally { get; set; }
-
-        public int? LoadAws(Byte[] contents, Project project = null)
+        
+        public int? LoadAws(Byte[] contents,  Project project = null, Collar collar = null)
         {
             throw new NotImplementedException();
         }
-
+        
         public void LoadPath(string path,  Project project = null, Collar collar = null)
         {
             throw new NotImplementedException();
         }
-
+        
         public void ProcessAll()
         {
             throw new NotImplementedException();
@@ -66,6 +66,51 @@ namespace FileLibrary
 
 //From ArgosDownloader
 /*
+        public int? LoadAws(Byte[] contents, Project project = null)
+        {
+            throw new NotImplementedException();
+        }
+
+
+                        var days = Math.Min(MaxDays, collar.Days ?? MaxDays);
+                        errors = "";
+                        int? firstFileId = null;
+                        var results = ArgosWebSite.GetCollar(collar.UserName, collar.Password, collar.PlatformId, days,
+                                                             out errors);
+                        if (results != null)
+                        {
+                            try
+                            {
+                                var processor = new FileProcessor();
+                                firstFileId = processor.LoadAws(results.ToBytes());
+                            }
+                            catch (Exception ex)
+                            {
+                                errors = "Error loading/processing AWS download: " + ex.Message;
+                            }
+                        }
+                        try
+                        {
+                            //log this activity in the database
+                            //if results is null, then errors should be non-null
+                            var log = new ArgosDownload
+                            {
+                                CollarManufacturer = collar.CollarManufacturer,
+                                CollarId = collar.CollarId,
+                                FileId = firstFileId,
+                                ErrorMessage = errors
+                            };
+                            db.ArgosDownloads.InsertOnSubmit(log);
+                            db.SubmitChanges();
+                        }
+                        catch (Exception ex)
+                        {
+                            errors = Environment.NewLine + "Error logging download to database: " + ex.Message +
+                                     Environment.NewLine + "Errors: '" + errors + "'" + Environment.NewLine +
+                                     "CollarId = " + collar.CollarId + "FileId = " + firstFileId;
+                        }
+
+
                         int? secondFileId = null;
                              var collarFile = new CollarFile
                                 {

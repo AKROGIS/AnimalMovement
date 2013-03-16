@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using DataModel;
 using Telonics;
+using FileLibrary;
 
 //TODO - Provide better error messages when uploading files fails
 
@@ -117,6 +118,12 @@ namespace AnimalMovement
             Cursor.Current = Cursors.WaitCursor;
             Application.DoEvents();
 
+            try
+            {
+                var collar = CollarComboBox.Enabled ? (Collar)CollarComboBox.SelectedItem : null;
+                (new FileProcessor()).LoadPath(FileNameTextBox.Text, Project, Collar);
+            }
+            /*
             var file = new CollarFile
                 {
                     Project1 = Project,
@@ -133,15 +140,48 @@ namespace AnimalMovement
             {
                 Database.SubmitChanges();
             }
-            catch (Exception ex)
+            */
+            catch (SqlException ex)
             {
                 Database.CollarFiles.DeleteOnSubmit(file);
                 MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (FileException ex)
+            {
+                string msg = "The file cannot be read.\nSystem Message:\n  " + ex.Message;
+                MessageBox.Show(msg, "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FileNameTextBox.Focus();
+                return;
+            }
+            catch (FormatException ex)
+            {
+                string msg = "File format error:  " + ex.Message;
+                MessageBox.Show(msg, "Upload Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FileNameTextBox.Focus();
+                return;
+            }
+            catch (DuplicateException ex)
+            {
+                var duplicate = Database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
+                if (duplicate == null)
+                    return false;
+                var msg = "The contents of this file have already been loaded as" + Environment.NewLine +
+                    String.Format("file '{0}' in project '{1}'.", duplicate.FileName, duplicate.Project1.ProjectName) + Environment.NewLine +
+                        "Loading a file multiple times is not a problem for the database," + Environment.NewLine +
+                        "but it is unnecessary, inefficient, and generally confusing." + Environment.NewLine +
+                        "It is recommended that you do NOT load this file again." + Environment.NewLine + Environment.NewLine +
+                        "Are you sure you want to proceed?";
+                var result = MessageBox.Show(this, msg,
+                                             "Duplicate file", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                return result != DialogResult.Yes;
+            }
+            finally
+            {
                 FileNameTextBox.Focus();
                 UploadButton.Text = "Upload";
                 Cursor.Current = Cursors.Default;
-                return;
             }
+
             Cursor.Current = Cursors.Default;
 
             OnDatabaseChanged();
@@ -275,6 +315,37 @@ namespace AnimalMovement
             if (handle != null)
                 handle(this,EventArgs.Empty);
         }
+
+        //FIXME - move these methods to a better place in UI
+        private void SummerizeFileButton_Click(object sender, EventArgs e)
+        {
+            CollarFile file;
+            (new FileProcessor()).SummerizeFile(file);
+        }
+        
+        private void SummerizeAllButton_Click(object sender, EventArgs e)
+        {
+            (new FileProcessor()).SummerizeAll();
+        }
+        
+        private void DownloadProgramButton_Click(object sender, EventArgs e)
+        {
+            ArgosProgram program;
+            FileLibrary.ArgosDownloader.DownloadArgosProgram(program);
+        }
+        
+        private void DownloadPlatformButton_Click(object sender, EventArgs e)
+        {
+            ArgosPlatform platform;
+            FileLibrary.ArgosDownloader.DownloadArgosPlatform(platform);
+        }
+        
+        private void DownloadAllButton_Click(object sender, EventArgs e)
+        {
+            ArgosProgram program;
+            FileLibrary.ArgosDownloader.DownloadAll(CurrentUser);
+        }
+        
 
     }
 }
