@@ -485,8 +485,10 @@ to re-assign this program to another PI.
 
 Name, start date, end date, and remarks are purely informational.
 
-Status is Active/Inactive (via foreign key lookup).  When a program is inactive, 
-neither the program or any of the platforms in that program will be downloaded.
+Active is a time sensitive value, and indicates if the program should be downloaded.
+If a program is Active it will be downloaded in it entirety.  If it is inactive, it
+will not be downloaded, nore will any platforms in the program.  If the Active bit is
+null, then the program is defering to the Active bit on each platform in the program.
 
 Argos platforms are dependent on the program number.
 The download tool uses this table to determine what to download, and how to authenticate.
@@ -496,7 +498,7 @@ ArgosPlatforms
 ==============
 PlatformId varchar(8) NOT NULL - Primary Key
 ProgramId varchar(8) NOT NULL - foreign key to ArgosPrograms
-Status char(1) NOT NULL - Foreign Key to LookupStatus (Active/Inactive)
+Active bit NOT NULL - True/False
 Remarks nvarchar(255) NULL - Informational content
 
 This is a list of all the Argos Ids that are or were in a program.  The active platforms
@@ -511,8 +513,10 @@ database, but it is no problem here).
 The platform is used by the ArgosDeployments, but not ArgosFilePlatformDates or
 ArgosDownloads for the reasons given in the writeup on those tables.
 
-Status is a time sensitive value, and indicates if the collar is currently downloadable.
-status has nothing to do with whether is or can be deployed.
+Active is a time sensitive value, and indicates if the platform shoudl be downloaded.
+Active has nothing to do with whether this platform is or can be deployed.
+Active on the platform is only used if the Active bit on the program is null (indicating
+that downloading will be decided on a platform by platform basis for this program)
 
 remarks is purely informational and can be changed as desired.
 

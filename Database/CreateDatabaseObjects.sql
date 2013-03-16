@@ -1481,33 +1481,16 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[LookupGeneralStatus](
-	[Code] [char](1) NOT NULL,
-	[Status] [nvarchar](32) NOT NULL,
- CONSTRAINT [PK_LookupGeneralStatus] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ArgosPrograms](
 	[ProgramId] [varchar](8) NOT NULL,
 	[ProgramName] [nvarchar](255) NULL,
 	[UserName] [sysname] NOT NULL,
 	[Password] [nvarchar](128) NOT NULL,
-	[Status] [char](1) NOT NULL,
 	[Investigator] [sysname] NOT NULL,
 	[StartDate] [datetime2](7) NULL,
 	[EndDate] [datetime2](7) NULL,
 	[Remarks] [nvarchar](255) NULL,
+	[Active] [bit] NULL,
  CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
 (
 	[ProgramId] ASC
@@ -1525,8 +1508,8 @@ GO
 CREATE TABLE [dbo].[ArgosPlatforms](
 	[PlatformId] [varchar](8) NOT NULL,
 	[ProgramId] [varchar](8) NOT NULL,
-	[Status] [char](1) NOT NULL,
 	[Remarks] [nvarchar](255) NULL,
+	[Active] [bit] NOT NULL,
  CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
 (
 	[PlatformId] ASC
@@ -2027,6 +2010,23 @@ CREATE TABLE [dbo].[LookupQueryLayerServers](
 	[Location] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupGeneralStatus](
+	[Code] [char](1) NOT NULL,
+	[Status] [nvarchar](32) NOT NULL,
+ CONSTRAINT [PK_LookupGeneralStatus] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -5772,18 +5772,9 @@ ALTER TABLE [dbo].[ArgosFileProcessingIssues] CHECK CONSTRAINT [FK_ArgosFileProc
 GO
 ALTER TABLE [dbo].[ArgosPlatforms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPlatforms_ArgosPrograms] FOREIGN KEY([ProgramId])
 REFERENCES [dbo].[ArgosPrograms] ([ProgramId])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[ArgosPlatforms] CHECK CONSTRAINT [FK_ArgosPlatforms_ArgosPrograms]
-GO
-ALTER TABLE [dbo].[ArgosPlatforms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPlatforms_LookupGeneralStatus] FOREIGN KEY([Status])
-REFERENCES [dbo].[LookupGeneralStatus] ([Code])
-GO
-ALTER TABLE [dbo].[ArgosPlatforms] CHECK CONSTRAINT [FK_ArgosPlatforms_LookupGeneralStatus]
-GO
-ALTER TABLE [dbo].[ArgosPrograms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPrograms_LookupGeneralStatus] FOREIGN KEY([Status])
-REFERENCES [dbo].[LookupGeneralStatus] ([Code])
-GO
-ALTER TABLE [dbo].[ArgosPrograms] CHECK CONSTRAINT [FK_ArgosPrograms_LookupGeneralStatus]
 GO
 ALTER TABLE [dbo].[ArgosPrograms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPrograms_ProjectInvestigators] FOREIGN KEY([Investigator])
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
