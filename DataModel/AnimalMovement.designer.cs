@@ -59,7 +59,6 @@ namespace DataModel
     partial void InsertLookupCollarModel(LookupCollarModel instance);
     partial void UpdateLookupCollarModel(LookupCollarModel instance);
     partial void DeleteLookupCollarModel(LookupCollarModel instance);
-    partial void InsertArgosFileProcessingIssue(ArgosFileProcessingIssue instance);
     partial void UpdateArgosFileProcessingIssue(ArgosFileProcessingIssue instance);
     partial void DeleteArgosFileProcessingIssue(ArgosFileProcessingIssue instance);
     partial void UpdateArgosFilePlatformDate(ArgosFilePlatformDate instance);
@@ -399,6 +398,11 @@ namespace DataModel
 			this.CollarFile_Delete(((System.Nullable<int>)(original.FileId)));
 		}
 		
+		private void InsertArgosFileProcessingIssue(ArgosFileProcessingIssue obj)
+		{
+			this.ArgosFileProcessingIssues_Insert(((System.Nullable<int>)(obj.FileId)), obj.Issue, obj.PlatformId, obj.CollarManufacturer, obj.CollarId);
+		}
+		
 		private void InsertArgosFilePlatformDate(ArgosFilePlatformDate obj)
 		{
 			this.ArgosFilePlatformDates_Insert(((System.Nullable<int>)(obj.FileId)), obj.PlatformId, obj.ProgramId, ((System.Nullable<System.DateTime>)(obj.FirstTransmission)), ((System.Nullable<System.DateTime>)(obj.LastTransmission)));
@@ -644,6 +648,20 @@ namespace DataModel
 		public int ArgosFilePlatformDates_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformId", DbType="NVarChar(255)")] string platformId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProgramId", DbType="NVarChar(255)")] string programId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FirstTransmission", DbType="DateTime2")] System.Nullable<System.DateTime> firstTransmission, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="LastTransmission", DbType="DateTime2")] System.Nullable<System.DateTime> lastTransmission)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, platformId, programId, firstTransmission, lastTransmission);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosFileProcessingIssues_Insert")]
+		public int ArgosFileProcessingIssues_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Issue", DbType="NVarChar(MAX)")] string issue, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformId", DbType="NVarChar(255)")] string platformId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, issue, platformId, collarManufacturer, collarId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosFile_ClearProcessingResults")]
+		public int ArgosFile_ClearProcessingResults([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId);
 			return ((int)(result.ReturnValue));
 		}
 	}
@@ -4822,7 +4840,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", CanBeNull=true, IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Sha1Hash
 		{
 			get
@@ -5325,7 +5343,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", CanBeNull=true, IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Sha1Hash
 		{
 			get

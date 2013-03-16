@@ -402,6 +402,13 @@
       <Association Name="CollarFile_ArgosFileProcessingIssue" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
       <Association Name="Collar_ArgosFileProcessingIssue" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" DeleteRule="CASCADE" />
     </Type>
+    <InsertFunction FunctionId="FunctionId26">
+      <Argument Parameter="fileId" Member="FileId" />
+      <Argument Parameter="issue" Member="Issue" />
+      <Argument Parameter="platformId" Member="PlatformId" />
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+    </InsertFunction>
   </Table>
   <Table Name="dbo.ArgosFilePlatformDates" Member="ArgosFilePlatformDates">
     <Type Name="ArgosFilePlatformDate">
@@ -412,7 +419,7 @@
       <Column Name="LastTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
       <Association Name="CollarFile_ArgosFilePlatformDate" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId26">
+    <InsertFunction FunctionId="FunctionId27">
       <Argument Parameter="fileId" Member="FileId" />
       <Argument Parameter="platformId" Member="PlatformId" />
       <Argument Parameter="programId" Member="ProgramId" />
@@ -654,12 +661,24 @@
     <Parameter Name="RetrievalDate" Parameter="retrievalDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId26" Name="dbo.ArgosFilePlatformDates_Insert" Method="ArgosFilePlatformDates_Insert">
+  <Function Id="FunctionId27" Name="dbo.ArgosFilePlatformDates_Insert" Method="ArgosFilePlatformDates_Insert">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ProgramId" Parameter="programId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FirstTransmission" Parameter="firstTransmission" Type="System.DateTime" DbType="DateTime2" />
     <Parameter Name="LastTransmission" Parameter="lastTransmission" Type="System.DateTime" DbType="DateTime2" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId26" Name="dbo.ArgosFileProcessingIssues_Insert" Method="ArgosFileProcessingIssues_Insert">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="Issue" Parameter="issue" Type="System.String" DbType="NVarChar(MAX)" />
+    <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Name="dbo.ArgosFile_ClearProcessingResults" Method="ArgosFile_ClearProcessingResults">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
 </Database>
