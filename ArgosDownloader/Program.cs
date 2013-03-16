@@ -5,8 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using DataModel;
-using Telonics;
-using FileLibrary;
 
 namespace ArgosDownloader
 {
@@ -25,18 +23,16 @@ namespace ArgosDownloader
         {
             try
             {
-                var db = new AnimalMovementDataContext();
-                var views = new AnimalMovementViewsDataContext();
                 _emails = new Dictionary<string, string>();
                 _admin = Settings.GetSystemDefault(EmailKey);
-
-                foreach (var download in FileLibrary.ArgosDownloader.DownloadableArgosPrograms)
+                var db = new AnimalMovementDataContext();
+                foreach (var program in db.ArgosPrograms.Where(p => p.Active.HasValue && p.Active.Value))
                 {
-                    DownloadProgram(download);
+                    DownloadProgram(program);
                 }
-                foreach (var download in FileLibrary.ArgosDownloader.DownloadableArgosPlatforms)
+                foreach (var platform in db.ArgosPlatforms.Where(p => p.Active && !p.ArgosProgram.Active.HasValue))
                 {
-                    DownloadPlatform(download);
+                    DownloadPlatform(platform);
                 }
                 SendEmails();
             }
@@ -46,30 +42,36 @@ namespace ArgosDownloader
             }
         }
 
-        private static void DownloadProgram(ArgosDownloadable download)
+        private static void DownloadProgram(ArgosProgram program)
         {
-            var program = FileLibrary.ArgosDownloader.ArgosPrograms.FirstOrDefault (p => p.ProgramId == download.ProgramId);
-            try {
-                FileLibrary.ArgosDownloader.DownloadArgosProgram (program, download.Days);
-            } catch (Exception ex) {
-                var errors = "Download error " + ex.Message + " for program " + download.ProgramId;
-                if (download.SendNoEmails.HasValue && download.SendNoEmails.Value)
-                    AddErrorToEmail (program.Email, program.UserName, program.ProgramId, errors);
-                AddErrorToEmail (_admin, program.UserName, program.ProgramId, errors);
+            try
+            {
+                FileLibrary.ArgosDownloader.DownloadArgosProgram(program);
+            }
+            //TODO catch other exceptions
+            catch (Exception ex)
+            {
+                var errors = "Download error " + ex.Message + " for program " + program.ProgramId;
+                //if (download.SendNoEmails.HasValue && download.SendNoEmails.Value)
+                AddErrorToEmail(program.ProjectInvestigator.Email, program.UserName, program.ProgramId, errors);
+                AddErrorToEmail(_admin, program.UserName, program.ProgramId, errors);
             }
         }
-        
-        private static void DownloadPlatform(ArgosDownloadable download)
+
+        private static void DownloadPlatform(ArgosPlatform platform)
         {
-            var platform = FileLibrary.ArgosDownloader.ArgosPlatforms.First(p => p.PlatformId == download.PlatformId);
-            try {
-                FileLibrary.ArgosDownloader.DownloadArgosPlatform (platform, download.Days);
-            } catch (Exception ex) {
-                var program = platform.Program;
-                var errors = "Download error " + ex.Message + " for platform " + download.PlatformId;
-                if (download.SendNoEmails.HasValue && download.SendNoEmails.Value)
-                    AddErrorToEmail (program.Email, program.UserName, program.ProgramId, errors);
-                AddErrorToEmail (_admin, program.UserName, program.ProgramId, errors);
+            try
+            {
+                FileLibrary.ArgosDownloader.DownloadArgosPlatform(platform);
+            }
+            //TODO catch other exceptions
+            catch (Exception ex)
+            {
+                var program = platform.ArgosProgram;
+                var errors = "Download error " + ex.Message + " for platform " + platform.PlatformId;
+                //if (download.SendNoEmails.HasValue && download.SendNoEmails.Value)
+                AddErrorToEmail(program.ProjectInvestigator.Email, program.UserName, program.ProgramId, errors);
+                AddErrorToEmail(_admin, program.UserName, program.ProgramId, errors);
             }
         }
         

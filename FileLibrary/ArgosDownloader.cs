@@ -12,18 +12,17 @@ namespace FileLibrary
         private const int MaxDays = 10;
 
         //FIXME - remove these when the datamodel is updated
-        public static IEnumerable<ArgosProgram> ArgosPrograms { get; set; }
-        public static IEnumerable<ArgosPlatform> ArgosPlatforms { get; set; }
-        public static IEnumerable<ArgosDownloadable> DownloadableArgosPrograms { get; set; }
-        public static IEnumerable<ArgosDownloadable> DownloadableArgosPlatforms { get; set; }
+        //public static IEnumerable<ArgosDownloadable> DownloadableArgosPrograms { get; set; }
+        //public static IEnumerable<ArgosDownloadable> DownloadableArgosPlatforms { get; set; }
         
         public static void DownloadAll(string user)
         {
-            foreach (var program in ArgosPrograms.Where(p => p.Owner == user && p.Active.HasValue && p.Active.Value))
+            var db = new AnimalMovementDataContext();
+            foreach (var program in db.ArgosPrograms.Where(p => p.Investigator == user && p.Active.HasValue && p.Active.Value))
             {
                 DownloadArgosProgram (program);
             }
-            foreach (var platform in ArgosPlatforms.Where(p => p.Program.Owner == user && p.Active && !p.Program.Active.HasValue))
+            foreach (var platform in db.ArgosPlatforms.Where(p => p.ArgosProgram.Investigator == user && p.Active && !p.ArgosProgram.Active.HasValue))
             {
                 DownloadArgosPlatform (platform);
             }
@@ -82,7 +81,7 @@ namespace FileLibrary
             //FIXME - if requestedDays is null, then query the database.
             //FIXME - get rid of requestedDays parameter, and always get days from db
             int days = Math.Min(MaxDays, requestedDays ?? MaxDays);
-            var program = platform.Program;
+            var program = platform.ArgosProgram;
             var errors = "";
             int? firstFileId = null;
             var results = ArgosWebSite.GetCollar(program.UserName, program.Password, platform.PlatformId, days,
@@ -127,32 +126,5 @@ namespace FileLibrary
             }
         }
     }
-
-    //FIXME - remove these when the datamodel is updated
-    public class ArgosProgram
-    {
-        public string ProgramId { get; set; }
-        public string Owner { get; set; }
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public string Email { get; set; }
-        public bool? Active { get; set; }
-            }
-    public class ArgosPlatform
-    {
-        public string PlatformId { get; set; }
-        public ArgosProgram Program { get; set; }
-                public bool Active { get; set; }
-            }
-    public class ArgosDownloadable
-    {
-        public string ProgramId { get; set; }
-        public string PlatformId { get; set; }
-        public bool? SendNoEmails { get; set; }
-        public int? Days { get; set; }
-    }
-    
-    
-
 }
 
