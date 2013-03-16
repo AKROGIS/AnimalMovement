@@ -137,6 +137,7 @@
       <Association Name="ProjectInvestigator_Project" Member="Projects" ThisKey="Login" OtherKey="ProjectInvestigator" Type="Project" />
       <Association Name="ProjectInvestigator_Collar" Member="Collars" ThisKey="Login" OtherKey="Manager" Type="Collar" />
       <Association Name="ProjectInvestigator_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Login" OtherKey="Owner" Type="CollarParameterFile" />
+      <Association Name="ProjectInvestigator_ArgosProgram" Member="ArgosPrograms" ThisKey="Login" OtherKey="Investigator" Type="ArgosProgram" />
     </Type>
     <UpdateFunction FunctionId="FunctionId9">
       <Argument Parameter="login" Member="Login" Version="Original" />
@@ -401,6 +402,7 @@
       <Column Name="CollarId" Type="System.String" DbType="VarChar(16)" CanBeNull="true" />
       <Association Name="CollarFile_ArgosFileProcessingIssue" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
       <Association Name="Collar_ArgosFileProcessingIssue" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" DeleteRule="CASCADE" />
+      <Association Name="ArgosPlatform_ArgosFileProcessingIssue" Member="ArgosPlatform" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosPlatform" IsForeignKey="true" DeleteRule="CASCADE" />
     </Type>
     <InsertFunction FunctionId="FunctionId26">
       <Argument Parameter="fileId" Member="FileId" />
@@ -426,6 +428,31 @@
       <Argument Parameter="firstTransmission" Member="FirstTransmission" />
       <Argument Parameter="lastTransmission" Member="LastTransmission" />
     </InsertFunction>
+  </Table>
+  <Table Name="dbo.ArgosPlatforms" Member="ArgosPlatforms">
+    <Type Name="ArgosPlatform">
+      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ProgramId" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
+      <Column Name="Remarks" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Active" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="ArgosPlatform_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFileProcessingIssue" />
+      <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosProgram" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosProgram" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.ArgosPrograms" Member="ArgosPrograms">
+    <Type Name="ArgosProgram">
+      <Column Name="ProgramId" Type="System.String" DbType="VarChar(8) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ProgramName" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="UserName" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="Password" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="Investigator" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="StartDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="EndDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="Remarks" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Active" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+      <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosPlatforms" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosPlatform" />
+      <Association Name="ProjectInvestigator_ArgosProgram" Member="ProjectInvestigator" ThisKey="Investigator" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
+    </Type>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
