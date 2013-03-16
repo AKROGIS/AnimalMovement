@@ -4342,6 +4342,55 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 16, 2013
+-- Description: Clears all the prior results from processing an Argos file.
+--              Anyone in the Editor or ArgosProcessor role can run this command
+--              since the file can always be reprocessed.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_ClearProcessingResults] 
+	@FileId INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	IF EXISTS (SELECT 1 FROM CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation
+	-- controlled by execute permissions on SP	
+	
+	--Delete any existing sub files; this must be done in a cursor to call the SP
+	DECLARE @SubFileId INT
+    DECLARE delete_subfile_cursor CURSOR FOR 
+            SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId
+        
+    OPEN delete_subfile_cursor;
+
+    FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC CollarFile_Delete @SubFileId
+        FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
+    END
+    CLOSE delete_subfile_cursor;
+    DEALLOCATE delete_subfile_cursor;
+
+	-- Delete any prior processing issues
+	DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarParameterFiles](
@@ -5894,6 +5943,10 @@ GO
 GRANT EXECUTE ON [dbo].[Animal_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosDownloads_Insert] TO [Editor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosFile_ClearProcessingResults] TO [ArgosProcessor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosFile_ClearProcessingResults] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosFilePlatformDates_Insert] TO [ArgosProcessor] AS [dbo]
 GO

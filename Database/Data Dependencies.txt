@@ -378,11 +378,20 @@ mappings and date ranges.
 If a collarfile is reprocessed, all the existing issues are cleared, and new issues
 (if any) are added to this table.
 
-Only the ArgosProcessor role can add/deleted records in this table.
-Should only be done when a file is processed.
-Records cannot be updated.
+Records in this table cannot be deleted directly, only via the stored procedure
+ArgosFile_ClearProcessingResults which can be run by anyone in the Editor or
+ArgosProcessor role since the file can always be reprocessed.
 Deletes will also happen as a cascade from deletes in related tables as discussed above.
-Inserts and deletes are done without a stored procedure, since access is controlled.
+Records cannot be updated except through FK cascades as discussed above.
+Inserts should only be done when a file is processed.  Since a file can be processed
+by the database via ArgosProcessor.exe, or by AnimalMovements.exe, ArgosProcessor.exe,
+or ArgosDownloader.exe which may be run on the server (with a local account) or by a
+database domain user.  We need to control inserts with a SP, which verifies permission.
+We could restrict permissions to just the user who uploaded the file, or the owner (if
+one), or PI/Editors on a project (if one), but since this process should be done
+automatically, when a file is inserted, it seems like it can't hurt to allow anyone to
+do it.  Inserts are controlled by permissions on the insert SP which can be run by anyone
+in the Editor or ArgosProcessor role.  
 
 
 ArgosDownloads
