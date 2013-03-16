@@ -1462,30 +1462,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[PreviousLocationTime] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [FixDate] 
-					 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [Status] IS NULL
-					  AND [FixDate] < @Time
-			     ORDER BY [FixDate] DESC);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE VIEW [dbo].[LastLocationOfKnownMortalities]
 AS
 SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
@@ -1503,6 +1479,131 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupGeneralStatus](
+	[Code] [char](1) NOT NULL,
+	[Status] [nvarchar](32) NOT NULL,
+ CONSTRAINT [PK_LookupGeneralStatus] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPrograms](
+	[ProgramId] [varchar](8) NOT NULL,
+	[ProgramName] [nvarchar](255) NULL,
+	[UserName] [sysname] NOT NULL,
+	[Password] [nvarchar](128) NOT NULL,
+	[Status] [char](1) NOT NULL,
+	[Investigator] [sysname] NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+	[Remarks] [nvarchar](255) NULL,
+ CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPlatforms](
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NOT NULL,
+	[Status] [char](1) NOT NULL,
+	[Remarks] [nvarchar](255) NULL,
+ CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFileProcessingIssues](
+	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileId] [int] NOT NULL,
+	[Issue] [nvarchar](max) NOT NULL,
+	[PlatformId] [varchar](8) NULL,
+	[CollarManufacturer] [varchar](16) NULL,
+	[CollarId] [varchar](16) NULL,
+ CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
+(
+	[IssueId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 16, 2013
+-- Description: inserts a new collar issue to the database.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFileProcessingIssues_Insert] 
+	@FileId				INT,
+	@Issue				NVARCHAR(max), 
+	@PlatformId			NVARCHAR(255) = NULL, 
+	@CollarManufacturer NVARCHAR(255) = NULL,
+	@CollarId			NVARCHAR(255) = NULL 
+AS
+BEGIN
+	SET NOCOUNT ON;
+    
+	-- Validate permission for this operation
+	-- The caller must be an editor or ArgosProcessor in the database - handled by execute permissions
+
+	-- All other verification is handled by primary/foreign key and column constraints.
+	INSERT INTO [dbo].[ArgosFileProcessingIssues]
+				([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
+		 VALUES (@FileId,  @Issue,  @PlatformId,  @CollarManufacturer,  @CollarId)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
 (
 )
@@ -1515,6 +1616,30 @@ BEGIN
 	  FROM ArgosDownloads
 	 WHERE ErrorMessage IS NULL
 	
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[PreviousLocationTime] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [FixDate] 
+					 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [Status] IS NULL
+					  AND [FixDate] < @Time
+			     ORDER BY [FixDate] DESC);
 	RETURN @Result
 END
 GO
@@ -1907,23 +2032,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupGeneralStatus](
-	[Code] [char](1) NOT NULL,
-	[Status] [nvarchar](32) NOT NULL,
- CONSTRAINT [PK_LookupGeneralStatus] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: April 3, 2012
@@ -2296,30 +2404,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[ArgosPrograms](
-	[ProgramId] [varchar](8) NOT NULL,
-	[ProgramName] [nvarchar](255) NULL,
-	[UserName] [sysname] NOT NULL,
-	[Password] [nvarchar](128) NOT NULL,
-	[Status] [char](1) NOT NULL,
-	[Investigator] [sysname] NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
-	[Remarks] [nvarchar](255) NULL,
- CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
 	[Code] [char](1) NOT NULL,
 	[CollarManufacturer] [varchar](16) NOT NULL,
@@ -2499,11 +2583,6 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatA]
 GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
-GO
 CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
 RETURNS  TABLE (
 	[FileId] [int] NULL,
@@ -2514,6 +2593,11 @@ RETURNS  TABLE (
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.TfpSummerizer].[SummarizeTpfFile]
+GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
 GO
 SET ANSI_NULLS ON
 GO
@@ -3231,25 +3315,6 @@ CREATE TABLE [dbo].[LookupCollarFileHeaders](
  CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
 (
 	[Header] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPlatforms](
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NOT NULL,
-	[Status] [char](1) NOT NULL,
-	[Remarks] [nvarchar](255) NULL,
- CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
-(
-	[PlatformId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
@@ -4305,43 +4370,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFileProcessingIssues](
-	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[FileId] [int] NOT NULL,
-	[Issue] [nvarchar](max) NOT NULL,
-	[PlatformId] [varchar](8) NULL,
-	[CollarManufacturer] [varchar](16) NULL,
-	[CollarId] [varchar](16) NULL,
- CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
-(
-	[IssueId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 16, 2013
@@ -5142,6 +5170,20 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE VIEW [dbo].[UnprocessedArgosFile]
+AS
+
+     SELECT F1.Project, F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
+       FROM CollarFiles AS F1
+  LEFT JOIN CollarFiles AS F2
+         ON F1.FileId = F2.ParentFileId
+      WHERE F2.FileId IS NULL
+        AND F1.Format IN ('F','E')
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
@@ -5174,20 +5216,6 @@ BEGIN
 	DELETE FROM dbo.ProjectEditors WHERE [ProjectId] = @ProjectId
 	DELETE FROM dbo.Projects WHERE [ProjectId] = @ProjectId
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[UnprocessedArgosFile]
-AS
-
-     SELECT F1.Project, F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
-       FROM CollarFiles AS F1
-  LEFT JOIN CollarFiles AS F2
-         ON F1.FileId = F2.ParentFileId
-      WHERE F2.FileId IS NULL
-        AND F1.Format IN ('F','E')
 GO
 SET ANSI_NULLS ON
 GO
@@ -5932,10 +5960,6 @@ REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[Projects] CHECK CONSTRAINT [FK_Projects_ProjectInvestigators]
 GO
-GRANT DELETE ON [dbo].[ArgosFileProcessingIssues] TO [ArgosProcessor] AS [dbo]
-GO
-GRANT INSERT ON [dbo].[ArgosFileProcessingIssues] TO [ArgosProcessor] AS [dbo]
-GO
 GRANT EXECUTE ON [dbo].[Animal_Delete] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Animal_Insert] TO [Editor] AS [dbo]
@@ -5951,6 +5975,10 @@ GO
 GRANT EXECUTE ON [dbo].[ArgosFilePlatformDates_Insert] TO [ArgosProcessor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosFilePlatformDates_Insert] TO [Editor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosFileProcessingIssues_Insert] TO [ArgosProcessor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosFileProcessingIssues_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Collar_Delete] TO [Editor] AS [dbo]
 GO
