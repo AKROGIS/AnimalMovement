@@ -130,7 +130,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[LookupCollarFileStatus](
+CREATE TABLE [dbo].[LookupFileStatus](
 	[Code] [char](1) NOT NULL,
 	[Name] [nvarchar](32) NOT NULL,
 	[Description] [nvarchar](255) NULL,
@@ -1797,23 +1797,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupGeneralStatus](
-	[Code] [char](1) NOT NULL,
-	[Status] [nvarchar](32) NOT NULL,
- CONSTRAINT [PK_LookupGeneralStatus] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: April 3, 2012
@@ -3425,7 +3408,7 @@ AS
 				dbo.LocalTime(MIN(FixDate)) AS [First],
 				dbo.LocalTime(MAX(FixDate)) AS [Last]
 		FROM [dbo].[CollarFiles] AS F
-		INNER JOIN [dbo].[LookupCollarFileStatus] AS S
+		INNER JOIN [dbo].[LookupFileStatus] AS S
 		ON F.[Status] = S.[Code]
 		LEFT JOIN [dbo].[CollarFixes] AS X
 		ON X.FileId = F.FileId
@@ -4011,7 +3994,7 @@ BEGIN
 		END
 	END
 		
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[LookupCollarFileStatus] WHERE [Code] = @Status)
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[LookupFileStatus] WHERE [Code] = @Status)
 	BEGIN
 		DECLARE @message1 nvarchar(100) = 'Invalid parameter: (' + @Status + ') is not a recognized status';
 		RAISERROR(@message1, 18, 0)
@@ -5836,15 +5819,15 @@ REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
 GO
 ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarFileFormats]
 GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupCollarFileStatus] FOREIGN KEY([Status])
-REFERENCES [dbo].[LookupCollarFileStatus] ([Code])
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarFileStatus]
-GO
 ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
 REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
 GO
 ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarManufacturers]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupFileStatus] FOREIGN KEY([Status])
+REFERENCES [dbo].[LookupFileStatus] ([Code])
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupFileStatus]
 GO
 ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_Projects] FOREIGN KEY([Project])
 REFERENCES [dbo].[Projects] ([ProjectId])
@@ -5863,10 +5846,10 @@ ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_Collars]
 GO
-ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupCollarFileStatus] FOREIGN KEY([Status])
-REFERENCES [dbo].[LookupCollarFileStatus] ([Code])
+ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus] FOREIGN KEY([Status])
+REFERENCES [dbo].[LookupFileStatus] ([Code])
 GO
-ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupCollarFileStatus]
+ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus]
 GO
 ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupParameterFileFormats] FOREIGN KEY([Format])
 REFERENCES [dbo].[LookupCollarParameterFileFormats] ([Code])

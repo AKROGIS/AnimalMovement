@@ -63,7 +63,7 @@ CollarFixesByFile (TVF)
 		CollarManufacturer
 		CollarId
 		FixDate
-	LookupCollarFileStatus
+	LookupFileStatus
 		Name
 
 CollarFixSummary (TVF)
@@ -239,7 +239,7 @@ Owner
 FileName
   - must be non-null and not empty string; purely informational
 Status
-  - is a non-null key in LookupCollarFileStatus
+  - is a non-null key in LookupFileStatus
 Content
   - must be non-null and is immutable
 FileId/Username/UploadDate/Sha1Hash
