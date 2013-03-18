@@ -105,7 +105,7 @@
         ON P.PlatformId = D.PlatformId
      WHERE D.PlatformId IS NULL
        AND C.DisposalDate IS NULL
-       AND P.[Status] <> 'I'
+       AND P.Active = 1
        AND P2.Investigator = @PI
   ORDER BY P2.Investigator, P.PlatformId
 

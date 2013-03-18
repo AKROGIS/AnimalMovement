@@ -200,8 +200,8 @@
                 GROUP BY PlatformId
             ) AS D
          ON A.PlatformId = D.PlatformId
-      WHERE A.[Status] = 'A'
-        AND P.[Status] = 'A'
+      WHERE A.Active = 1
+        AND P.Active = 1
         AND (CPF.[Status] = 'A' OR CPF.[Status] IS NULL)
         AND (P.EndDate IS NULL OR getdate() < P.EndDate)
         AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
@@ -239,7 +239,7 @@
 
 ----------- WARNING_ArgosPlatformsNotInCollars
 ----------- -- Known Argos Platforms that are not in the Collars table 
-     SELECT A.Investigator, P.ProgramId, P.PlatformId, P.[Status], P.Remarks
+     SELECT A.Investigator, P.ProgramId, P.PlatformId, P.Active, P.Remarks
        FROM ArgosPlatforms AS P
  INNER JOIN ArgosPrograms AS A
          ON P.ProgramId = A.ProgramId
