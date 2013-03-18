@@ -565,3 +565,65 @@ update cascading.
 These deployments behave nearly identical to animal/collar deployments, and most of the
 triggers and stored procedures can be re-used.
  
+ 
+Create a limited well defined set of methods (stored procedures) that can change the
+state of the database in a limited and well defined way.  There are two processes that
+will be done outside the database (that should be done in the database)
+1. Download Argos data.  
+   a. download all - active programs and active platforms where platform.program.active
+                     is null
+   a. download user - same as download all, but only for programs and platform.programs
+                      where program.investigator = user
+   b. download program - download a single program
+   c. download platform - download a single platform
+   
+   Downloading argos data will change the state in the following way:
+   a. Add one or more records to ArgosDownloads for each program/platform attempted
+   b. Add one or more argos web files to Collarfiles table for each successful download.
+      Files can be added with local or server side processing depending on the clients
+      resources as discussed below.
+   
+   Ideally, the database would have 4 stored procedures that managed these 5 steps,
+   and writing to ArgosFilePlatformDates, ArgosFileProcessingIssues, and ArgosDownloads
+   would only happen through these stored procedures.  However there are complication
+   in the SQL server only implementation (chiefly access to external resources), that
+   are not fully understood at this time, so I am creating 4 public methods in
+   an external library.  These methods can be called be any client applications,
+   including a simple wrapper exe that can be called via XP_cmdshell in SQL server.
+   potentially be a SQL server.  By wrapping all the logic in one set of public
+   methods, I ensure that the proper code is always called in the correct manner.
+   The downside is that I need to allow insert permissions to tables that should
+   not be written to unless part of this controlled procedure.
+   
+2. Add Argos File to CollarFiles
+   a. add with server side processing - client provides only the file, and then SQL
+      server is responsibile for spawning the code to process the telonics data in
+      the argos file.  This is the preference for clients that do not have access to
+      the necessary Telonics Data Convertor software.
+   b. Add with client side processing
+   
+   Regardless of where this occurs, the following must happen
+   a. Add the file to CollarFiles table
+   b. add records to ArgosFilePlatformDates for each platform in the new file
+   c. Process each new file as described below
+
+3. Process Argos File
+   a. process all existing - processes all the files in the database that should, but do
+                             not, have processing results
+   b. process new file - file will be a filepath, byte array, or byte stream provided by
+                         the calling program.  The downloading methods discussed above
+                         will provide a byte[] or stream, whereas other clients may
+                         provide a file path.
+   b. process existing - process a single existing file. file is be an integer id of
+                     an existing file in the database.
+                     
+   Processing an argos file will change the state in the following way:
+   If the file already exist in the database
+   b. Clear any existing ArgosFileProcessingIssues for an existing file
+   c. Clear any existing previously derived results in CollarFiles for this file, only
+   c. Add one or more derived telonics files to collarFiles for each collar/parameter
+      comination active for the platform date range in each new file
+   e. Add zero or more records to ArgosFileProcessingIssues for each issue encountered
+      deriving the telonics data for each new file
+   If the file is new
+      a. Insert a file into the Collarfiles table if not already there
