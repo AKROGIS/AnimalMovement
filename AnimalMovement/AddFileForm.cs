@@ -117,13 +117,13 @@ namespace AnimalMovement
             UploadButton.Enabled = false;
             Cursor.Current = Cursors.WaitCursor;
             Application.DoEvents();
-
+            /*
             try
             {
                 var collar = CollarComboBox.Enabled ? (Collar)CollarComboBox.SelectedItem : null;
-                (new FileProcessor()).LoadPath(FileNameTextBox.Text, Project, Collar);
+                (new FileProcessor()).LoadPath(FileNameTextBox.Text, Project, collar);
             }
-            /*
+            */
             var file = new CollarFile
                 {
                     Project1 = Project,
@@ -131,7 +131,7 @@ namespace AnimalMovement
                     LookupCollarFileFormat = (LookupCollarFileFormat)FormatComboBox.SelectedItem,
                     LookupCollarManufacturer = (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem,
                     CollarId = CollarComboBox.Enabled ? ((Collar)CollarComboBox.SelectedItem).CollarId : null,
-                    LookupCollarFileStatus = Database.LookupCollarFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
+                    LookupFileStatus = Database.LookupFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
                     Contents = _fileContents,
                 };
             Database.CollarFiles.InsertOnSubmit(file);
@@ -140,13 +140,13 @@ namespace AnimalMovement
             {
                 Database.SubmitChanges();
             }
-            */
-            catch (SqlException ex)
+            
+            catch (System.Data.SqlClient.SqlException ex)
             {
-                Database.CollarFiles.DeleteOnSubmit(file);
+                //Database.CollarFiles.DeleteOnSubmit(file);
                 MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            catch (FileException ex)
+            catch (/*File*/System.IO.IOException ex)
             {
                 string msg = "The file cannot be read.\nSystem Message:\n  " + ex.Message;
                 MessageBox.Show(msg, "File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -160,11 +160,11 @@ namespace AnimalMovement
                 FileNameTextBox.Focus();
                 return;
             }
-            catch (DuplicateException ex)
+            catch (/*Duplicate*/Exception ex)
             {
                 var duplicate = Database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
                 if (duplicate == null)
-                    return false;
+                    return;
                 var msg = "The contents of this file have already been loaded as" + Environment.NewLine +
                     String.Format("file '{0}' in project '{1}'.", duplicate.FileName, duplicate.Project1.ProjectName) + Environment.NewLine +
                         "Loading a file multiple times is not a problem for the database," + Environment.NewLine +
@@ -173,7 +173,7 @@ namespace AnimalMovement
                         "Are you sure you want to proceed?";
                 var result = MessageBox.Show(this, msg,
                                              "Duplicate file", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                return result != DialogResult.Yes;
+                return; // result != DialogResult.Yes;
             }
             finally
             {
@@ -319,7 +319,7 @@ namespace AnimalMovement
         //FIXME - move these methods to a better place in UI
         private void SummerizeFileButton_Click(object sender, EventArgs e)
         {
-            CollarFile file;
+            CollarFile file = null;
             (new FileProcessor()).SummerizeFile(file);
         }
         
@@ -330,13 +330,13 @@ namespace AnimalMovement
         
         private void DownloadProgramButton_Click(object sender, EventArgs e)
         {
-            ArgosProgram program;
+            ArgosProgram program = null;
             FileLibrary.ArgosDownloader.DownloadArgosProgram(program);
         }
         
         private void DownloadPlatformButton_Click(object sender, EventArgs e)
         {
-            ArgosPlatform platform;
+            ArgosPlatform platform = null;
             FileLibrary.ArgosDownloader.DownloadArgosPlatform(platform);
         }
         

@@ -119,7 +119,7 @@ namespace AnimalMovement
                     LookupCollarFileFormat = Format,
                     LookupCollarManufacturer = Format.LookupCollarManufacturer,
                     CollarId = GetCollar(filePath),
-                    LookupCollarFileStatus = Database.LookupCollarFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
+                    LookupFileStatus = Database.LookupFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
                     Contents = data
                 };
             Database.CollarFiles.InsertOnSubmit(file);
