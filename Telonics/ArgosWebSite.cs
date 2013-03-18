@@ -160,7 +160,7 @@ namespace Telonics
                 if (String.IsNullOrEmpty(response))
                     error = "No response";
                 else if (response == "<errors><error code=\"4\">no data</error></errors>")
-                    error = "No data:  unknown program/collar, or no fixes in requested time period";
+                    error = "No data or unknown id";
                 else if (response == "<errors><error code=\"3\">authentification error</error></errors>")
                     error = "Authentication Error: bad username or password";
                 else if (response.Contains("<errors>"))
