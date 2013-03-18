@@ -47,9 +47,9 @@ namespace AnimalMovement
             OwnerComboBox.DataSource = Database.ProjectInvestigators;
             OwnerComboBox.DisplayMember = "Name";
             OwnerComboBox.SelectedItem = File.ProjectInvestigator;
-            StatusComboBox.DataSource = Database.LookupCollarFileStatus;
+            StatusComboBox.DataSource = Database.LookupFileStatus;
             StatusComboBox.DisplayMember = "Name";
-            StatusComboBox.SelectedItem = File.LookupCollarFileStatus;
+            StatusComboBox.SelectedItem = File.LookupFileStatus;
             UpdateCollars();
             EnableForm();
             DoneCancelButton.Focus();
@@ -59,7 +59,7 @@ namespace AnimalMovement
         {
             File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
             File.ProjectInvestigator = (ProjectInvestigator)OwnerComboBox.SelectedItem;
-            File.LookupCollarFileStatus = (LookupCollarFileStatus)StatusComboBox.SelectedItem;
+            File.LookupFileStatus = (LookupFileStatus)StatusComboBox.SelectedItem;
         }
 
         private void UpdateCollars()

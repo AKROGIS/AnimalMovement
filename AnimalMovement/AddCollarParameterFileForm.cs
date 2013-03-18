@@ -79,7 +79,7 @@ namespace AnimalMovement
         private void SetupStatusList()
         {
             char? statusCode = 'A';
-            var query = Database.LookupCollarFileStatus;
+            var query = Database.LookupFileStatus;
             var statuses = query.ToList();
             StatusComboBox.DataSource = statuses;
             StatusComboBox.DisplayMember = "Name";
@@ -244,7 +244,7 @@ namespace AnimalMovement
                 FileName = System.IO.Path.GetFileName(filename),
                 LookupCollarParameterFileFormat = format,
                 ProjectInvestigator = owner,
-                LookupCollarFileStatus = (LookupCollarFileStatus)StatusComboBox.SelectedItem,
+                LookupFileStatus = (LookupFileStatus)StatusComboBox.SelectedItem,
                 Contents = _fileContents
             };
             Database.CollarParameterFiles.InsertOnSubmit(file);

@@ -124,7 +124,7 @@ namespace AnimalMovement
                     LookupCollarFileFormat = (LookupCollarFileFormat)FormatComboBox.SelectedItem,
                     LookupCollarManufacturer = (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem,
                     CollarId = CollarComboBox.Enabled ? ((Collar)CollarComboBox.SelectedItem).CollarId : null,
-                    LookupCollarFileStatus = Database.LookupCollarFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
+                    LookupFileStatus = Database.LookupFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
                     Contents = _fileContents,
                 };
             Database.CollarFiles.InsertOnSubmit(file);

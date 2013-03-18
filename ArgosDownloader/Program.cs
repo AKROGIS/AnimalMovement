@@ -107,8 +107,8 @@ namespace ArgosDownloader
                             //if results is null, then errors should be non-null
                             var log = new ArgosDownload
                             {
-                                CollarManufacturer = collar.CollarManufacturer,
-                                CollarId = collar.CollarId,
+                                PlatformId = collar.PlatformId,
+                                Days = collar.Days,
                                 FileId = firstFileId,
                                 ErrorMessage = errors
                             };

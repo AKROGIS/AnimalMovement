@@ -43,7 +43,7 @@ namespace AnimalMovement
             UserNameTextBox.Text = File.UserName;
             UploadDateTextBox.Text = File.UploadDate.ToString(CultureInfo.CurrentCulture);
             ProjectTextBox.Text = File.Project1.ProjectName;
-            StatusTextBox.Text = File.LookupCollarFileStatus.Name;
+            StatusTextBox.Text = File.LookupFileStatus.Name;
             UpdateCollarFixes();
             EnableForm();
             DoneCancelButton.Focus();
