@@ -5646,8 +5646,9 @@ GO
 -- Description:	Logs a new Argos collar download success/failure
 -- =============================================
 CREATE PROCEDURE [dbo].[ArgosDownloads_Insert] 
-	@CollarManufacturer NVARCHAR(255) = NULL, 
-	@CollarId NVARCHAR(255) = NULL,
+	@ProgramId NVARCHAR(255) = NULL, 
+	@PlatformId NVARCHAR(255) = NULL,
+	@Days INT = NULL,
 	@FileId INT = NULL,
 	@ErrorMessage NVARCHAR(255) = NULL
 AS
@@ -5657,9 +5658,6 @@ BEGIN
 	-- Validate permission for this operation
 	-- The caller is managed by permissions on the Stored Procedure
 	
-	-- Collar Mfgr/Id is managed by referential integrity
-	-- skip the check and friendly error message, since this is only called by advanced users
-	
 	-- Need to have either a FileId (success) or an ErrorMessage (failure)
 	IF @FileId IS NULL AND @ErrorMessage IS NULL
 	BEGIN
@@ -5668,9 +5666,16 @@ BEGIN
 		RETURN (1)
 	END
 
+	-- Need to have either a PlatformId or an ProgramId, these are not Foreign keys
+	IF @ProgramId IS NULL AND @PlatformId IS NULL
+	BEGIN
+		DECLARE @message2 nvarchar(100) = 'Invalid Input: ProgramId and PlatformId cannot both be NULL';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
 		
-	INSERT INTO dbo.ArgosDownloads ([CollarManufacturer], [CollarId], [FileId], [ErrorMessage])
-		 VALUES (@CollarManufacturer, @CollarId, @FileId, @ErrorMessage)
+	INSERT INTO dbo.ArgosDownloads ([ProgramId], [PlatformId], [Days], [FileId], [ErrorMessage])
+		 VALUES (@ProgramId, @PlatformId, @Days, @FileId, @ErrorMessage)
 
 END
 GO
@@ -5942,6 +5947,8 @@ GO
 GRANT EXECUTE ON [dbo].[Animal_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Animal_Update] TO [Editor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosDownloads_Insert] TO [ArgosProcessor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosDownloads_Insert] TO [Editor] AS [dbo]
 GO
