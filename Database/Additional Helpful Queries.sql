@@ -98,7 +98,7 @@
   LEFT JOIN CollarParameters AS P
          ON T.FileId = P.FileId AND T.CTN = P.CollarId
       WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
-   ORDER BY T.CTN, T.[Status]
+   ORDER BY T.CTN, T.[Status], StartDate
 
 ----------- The following queries should return no records
 ----------- Collars in TPF Files not in Collars Table
