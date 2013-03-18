@@ -27,10 +27,12 @@
        FROM Collars AS C
   LEFT JOIN CollarDeployments AS D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE C.CollarId IN (
-                            SELECT CollarId
+  LEFT JOIN ArgosDeployments AS A
+         ON C.CollarManufacturer = A.CollarManufacturer AND C.CollarId = A.CollarId
+      WHERE A.PlatformId IN (
+                            SELECT PlatformId
                               FROM ArgosDownloads
-                          GROUP BY CollarId
+                          GROUP BY PlatformId
                             HAVING Max(FileID) IS NULL
                           )
         AND C.DisposalDate IS NULL
@@ -528,7 +530,7 @@
     DECLARE @rootID VARCHAR(16) = '631645'
      SELECT * FROM Collars WHERE LEFT(CollarId,6) = @rootID
      SELECT * FROM CollarDeployments WHERE LEFT(CollarId,6) = @rootID
-     SELECT * FROM ArgosDownloads WHERE LEFT(CollarId,6) = @rootID
+     SELECT * FROM ArgosDownloads WHERE PlatformId in (SELECT PlatformID FROM ArgosDeployments WHERE LEFT(CollarId,6) = @rootID)
      SELECT * FROM CollarParameters WHERE LEFT(CollarId,6) = @rootID
      SELECT FileId, CollarId FROM CollarFixes WHERE left(CollarId,6) = @rootID GROUP BY FileId, CollarId ORDER BY fileid
      SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE LEFT(CollarId,6) = @rootID  ORDER BY fileid
@@ -541,7 +543,7 @@
      SELECT FileId, CollarId FROM CollarFixes WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) GROUP BY FileId, CollarId ORDER BY fileid
      SELECT * FROM AllTpfFileData WHERE Platform = @ArgosID
      SELECT * FROM CollarParameters WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
-     SELECT * FROM ArgosDownloads WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
+     SELECT * FROM ArgosDownloads WHERE PlatformId = @ArgosID
 
 
 ----------- Rename a collar (simple, cannot be used to split a collar into two)

@@ -400,20 +400,21 @@ ArgosDownloads
 This table records the attempts, results, and errors associated with downloading
 Argos data from the Argos server.  All records have a timestamp (automatically inserted)
 column that records when the record was added to the database (immediately after
-the download attempt finished).  Any timestamp provided by the client will be ignored.
+the download attempt finished).  The timestamp is the primary key to the table.
+Any timestamp provided by the client will be ignored.
 If the client and the database are in different timezone and client cares about the
 client time when the insert occured, then it is up to the client to determine the
 offset and adjust the display appropriately. The records in this table represent a
 snapshot in time - they are immutable and non-deletable.
 
 Data is typically downloaded by the argos download service/scheduled task, run by a
-local account on the server (ArgosProcessor role), however it may be useful to have
+local account on the server (ArgosProcessor role), however it may be useful to
 allow an editor to do a download when they are eager for new results.  For this reason,
 we need to control access to the inserts on this table, and we will use a insert SP.
-permission to run the SP will be based on being a limited to editors or ArgosProcessor.
+permission to run the SP will be limited to the editor and ArgosProcessor roles.
 No special permission check will be done for the insert, basically anyone editor
 can log a download attempt, however the user will need to have permissions to upload
-the results file, else an error may occur.
+the results file or else an error may occur.
 
 The platformId/programId columns are nullable columns that records the Argos
 Platform or Program that was attempted to be downloaded. One and only one will be
@@ -431,7 +432,9 @@ since the last successful download of a platform/program.  There is slight risk 
 that a user may manually enter a bogus record in this table which could screw up the
 download calculations, but lets trust our editors.
 
-** Do we also want to capture the username and number of days requested in the download?
+When a download is performed, the number of days requested is passed to the server.
+this information is optionally collected in the days column.  This information can
+be used to check if there were any gaps in time that might have been missed.
 
 The ErrorMessage nullable varchar(max) and FileId nullable int represent the results.
 They are mutually exclusive, and one and only one must be non-null.  We either get a file
@@ -450,6 +453,7 @@ Summary:
 ArgosId, non null varchar(8), no FK relationship to ArgosPlatforms
 ProgramId, non null varchar(8), no FK relationship to ArgosPlatforms
 TimeStamp non-null datetime(2) default value provided
+Days null int - informational, days of data requested in download
 ErrorMessage null varchar(max) must be null if FileId is non-null and visaversa
 FileId null int foreign key to CollarFiles, Cascade Update/Delete NO ACTION (deny)
 

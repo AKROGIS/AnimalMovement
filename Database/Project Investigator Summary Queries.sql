@@ -114,10 +114,12 @@
        FROM Collars AS C
   LEFT JOIN CollarDeployments AS D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE C.CollarId IN (
-                SELECT CollarId
-                  FROM ArgosDownloads
-              GROUP BY CollarId
+  LEFT JOIN ArgosDeployments AS A
+         ON C.CollarManufacturer = A.CollarManufacturer AND C.CollarId = A.CollarId
+      WHERE A.PlatformId IN (
+                            SELECT PlatformId
+                              FROM ArgosDownloads
+                          GROUP BY PlatformId
                 HAVING Max(FileID) IS NULL
             )
         AND C.DisposalDate IS NULL

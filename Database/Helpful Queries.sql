@@ -194,12 +194,12 @@
   LEFT JOIN CollarParameterFiles as CPF
          ON CP.FileId = CPF.FileId           
   LEFT JOIN (
-               SELECT CollarManufacturer, CollarId, Max([Timestamp]) AS [Timestamp]
+               SELECT PlatformId, Max([Timestamp]) AS [Timestamp]
                  FROM ArgosDownloads
                 WHERE ErrorMessage IS NULL
-                GROUP BY CollarManufacturer, CollarId
+                GROUP BY PlatformId
             ) AS D
-         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+         ON A.PlatformId = D.PlatformId
       WHERE A.[Status] = 'A'
         AND P.[Status] = 'A'
         AND (CPF.[Status] = 'A' OR CPF.[Status] IS NULL)
