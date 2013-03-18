@@ -105,15 +105,9 @@ namespace ArgosDownloader
                         {
                             //log this activity in the database
                             //if results is null, then errors should be non-null
-                            var log = new ArgosDownload
-                            {
-                                PlatformId = collar.PlatformId,
-                                Days = collar.Days,
-                                FileId = firstFileId,
-                                ErrorMessage = errors
-                            };
-                            db.ArgosDownloads.InsertOnSubmit(log);
-                            db.SubmitChanges();
+                            //I can't use LINQ to SQL here.  I get .'Cannot add an entity with a key that is already in use'
+                            //I guess because my PK is a Timestamp set to a getdate() on insert, and the object isn't getting it
+                            db.ArgosDownloads_Insert(null, collar.PlatformId, days, firstFileId, errors);
                         }
                         catch (Exception ex)
                         {
