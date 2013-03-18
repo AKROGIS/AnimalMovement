@@ -79,15 +79,6 @@
       <Association Name="LookupCollarManufacturer_LookupCollarFileFormat" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
     </Type>
   </Table>
-  <Table Name="dbo.LookupCollarFileStatus" Member="LookupCollarFileStatus">
-    <Type Name="LookupCollarFileStatus">
-      <Column Name="Code" Type="System.Char" DbType="Char(1) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="Name" Type="System.String" DbType="NVarChar(32) NOT NULL" CanBeNull="false" />
-      <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
-      <Association Name="LookupCollarFileStatus_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Code" OtherKey="Status" Type="CollarParameterFile" />
-      <Association Name="LookupCollarFileStatus_CollarFile" Member="CollarFiles" ThisKey="Code" OtherKey="Status" Type="CollarFile" />
-    </Type>
-  </Table>
   <Table Name="dbo.LookupCollarManufacturers" Member="LookupCollarManufacturers">
     <Type Name="LookupCollarManufacturer">
       <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
@@ -323,9 +314,9 @@
       <Column Name="Status" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
       <Column Name="Sha1Hash" Type="System.Data.Linq.Binary" DbType="VarBinary(8000)" IsDbGenerated="true" CanBeNull="true" UpdateCheck="Never" />
       <Association Name="CollarParameterFile_CollarParameter" Member="CollarParameters" ThisKey="FileId" OtherKey="FileId" Type="CollarParameter" />
-      <Association Name="LookupCollarFileStatus_CollarParameterFile" Member="LookupCollarFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupCollarFileStatus" IsForeignKey="true" />
       <Association Name="LookupCollarParameterFileFormat_CollarParameterFile" Member="LookupCollarParameterFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarParameterFileFormat" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_CollarParameterFile" Member="ProjectInvestigator" ThisKey="Owner" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
+      <Association Name="LookupFileStatus_CollarParameterFile" Member="LookupFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupFileStatus" IsForeignKey="true" />
     </Type>
     <InsertFunction FunctionId="FunctionId20">
       <Argument Parameter="owner" Member="Owner" />
@@ -367,9 +358,9 @@
       <Association Name="CollarFile_ArgosFilePlatformDate" Member="ArgosFilePlatformDates" ThisKey="FileId" OtherKey="FileId" Type="ArgosFilePlatformDate" />
       <Association Name="CollarFile_CollarFile" Member="CollarFile1" ThisKey="ParentFileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
       <Association Name="LookupCollarFileFormat_CollarFile" Member="LookupCollarFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarFileFormat" IsForeignKey="true" />
-      <Association Name="LookupCollarFileStatus_CollarFile" Member="LookupCollarFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupCollarFileStatus" IsForeignKey="true" />
       <Association Name="LookupCollarManufacturer_CollarFile" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
       <Association Name="Project_CollarFile" Member="Project1" ThisKey="Project" OtherKey="ProjectId" Type="Project" IsForeignKey="true" />
+      <Association Name="LookupFileStatus_CollarFile" Member="LookupFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupFileStatus" IsForeignKey="true" />
     </Type>
     <InsertFunction FunctionId="FunctionId23">
       <Argument Parameter="fileName" Member="FileName" />
@@ -452,6 +443,15 @@
       <Column Name="Active" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
       <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosPlatforms" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosPlatform" />
       <Association Name="ProjectInvestigator_ArgosProgram" Member="ProjectInvestigator" ThisKey="Investigator" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.LookupFileStatus" Member="LookupFileStatus">
+    <Type Name="LookupFileStatus">
+      <Column Name="Code" Type="System.Char" DbType="Char(1) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(32) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Association Name="LookupFileStatus_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Code" OtherKey="Status" Type="CollarParameterFile" />
+      <Association Name="LookupFileStatus_CollarFile" Member="CollarFiles" ThisKey="Code" OtherKey="Status" Type="CollarFile" />
     </Type>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
