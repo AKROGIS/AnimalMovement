@@ -79,15 +79,6 @@
       <Association Name="LookupCollarManufacturer_LookupCollarFileFormat" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
     </Type>
   </Table>
-  <Table Name="dbo.LookupCollarFileStatus" Member="LookupCollarFileStatus">
-    <Type Name="LookupCollarFileStatus">
-      <Column Name="Code" Type="System.Char" DbType="Char(1) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="Name" Type="System.String" DbType="NVarChar(32) NOT NULL" CanBeNull="false" />
-      <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
-      <Association Name="LookupCollarFileStatus_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Code" OtherKey="Status" Type="CollarParameterFile" />
-      <Association Name="LookupCollarFileStatus_CollarFile" Member="CollarFiles" ThisKey="Code" OtherKey="Status" Type="CollarFile" />
-    </Type>
-  </Table>
   <Table Name="dbo.LookupCollarManufacturers" Member="LookupCollarManufacturers">
     <Type Name="LookupCollarManufacturer">
       <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
@@ -137,6 +128,7 @@
       <Association Name="ProjectInvestigator_Project" Member="Projects" ThisKey="Login" OtherKey="ProjectInvestigator" Type="Project" />
       <Association Name="ProjectInvestigator_Collar" Member="Collars" ThisKey="Login" OtherKey="Manager" Type="Collar" />
       <Association Name="ProjectInvestigator_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Login" OtherKey="Owner" Type="CollarParameterFile" />
+      <Association Name="ProjectInvestigator_ArgosProgram" Member="ArgosPrograms" ThisKey="Login" OtherKey="Investigator" Type="ArgosProgram" />
     </Type>
     <UpdateFunction FunctionId="FunctionId9">
       <Argument Parameter="login" Member="Login" Version="Original" />
@@ -200,23 +192,6 @@
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </DeleteFunction>
   </Table>
-  <Table Name="dbo.ArgosDownloads" Member="ArgosDownloads">
-    <Type Name="ArgosDownload">
-      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="TimeStamp" Type="System.DateTime" DbType="DateTime2 NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="FileId" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="ErrorMessage" Type="System.String" DbType="VarChar(255)" CanBeNull="true" />
-      <Association Name="Collar_ArgosDownload" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" />
-      <Association Name="CollarFile_ArgosDownload" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
-    </Type>
-    <InsertFunction FunctionId="FunctionId13">
-      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
-      <Argument Parameter="collarId" Member="CollarId" />
-      <Argument Parameter="fileId" Member="FileId" />
-      <Argument Parameter="errorMessage" Member="ErrorMessage" />
-    </InsertFunction>
-  </Table>
   <Table Name="dbo.CollarDeployments" Member="CollarDeployments">
     <Type Name="CollarDeployment">
       <Column Name="DeploymentId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -229,7 +204,7 @@
       <Association Name="Animal_CollarDeployment" Member="Animal" ThisKey="ProjectId,AnimalId" OtherKey="ProjectId,AnimalId" Type="Animal" IsForeignKey="true" />
       <Association Name="Collar_CollarDeployment" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId14">
+    <InsertFunction FunctionId="FunctionId13">
       <Argument Parameter="projectId" Member="ProjectId" />
       <Argument Parameter="animalId" Member="AnimalId" />
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
@@ -237,12 +212,12 @@
       <Argument Parameter="deploymentDate" Member="DeploymentDate" />
       <Argument Parameter="retrievalDate" Member="RetrievalDate" />
     </InsertFunction>
-    <UpdateFunction FunctionId="FunctionId15">
+    <UpdateFunction FunctionId="FunctionId14">
       <Argument Parameter="deploymentId" Member="DeploymentId" Version="Original" />
       <Argument Parameter="deploymentDate" Member="DeploymentDate" />
       <Argument Parameter="retrievalDate" Member="RetrievalDate" />
     </UpdateFunction>
-    <DeleteFunction FunctionId="FunctionId16">
+    <DeleteFunction FunctionId="FunctionId15">
       <Argument Parameter="deploymentId" Member="DeploymentId" Version="Original" />
     </DeleteFunction>
   </Table>
@@ -262,14 +237,13 @@
       <Column Name="Gen3Period" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Association Name="Collar_CollarFix" Member="CollarFixes" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarFix" />
       <Association Name="Collar_CollarParameter" Member="CollarParameters" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarParameter" />
-      <Association Name="Collar_ArgosDownload" Member="ArgosDownloads" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosDownload" />
       <Association Name="Collar_CollarDeployment" Member="CollarDeployments" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarDeployment" />
       <Association Name="Collar_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosFileProcessingIssue" />
       <Association Name="LookupCollarManufacturer_Collar" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_Collar" Member="ProjectInvestigator" ThisKey="Manager" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
       <Association Name="LookupCollarModel_Collar" Member="LookupCollarModel" ThisKey="CollarModel" OtherKey="CollarModel" Type="LookupCollarModel" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId17">
+    <InsertFunction FunctionId="FunctionId16">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
       <Argument Parameter="collarId" Member="CollarId" />
       <Argument Parameter="collarModel" Member="CollarModel" />
@@ -283,7 +257,7 @@
       <Argument Parameter="disposalDate" Member="DisposalDate" />
       <Argument Parameter="gen3Period" Member="Gen3Period" />
     </InsertFunction>
-    <UpdateFunction FunctionId="FunctionId18">
+    <UpdateFunction FunctionId="FunctionId17">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" Version="Original" />
       <Argument Parameter="collarId" Member="CollarId" Version="Original" />
       <Argument Parameter="collarModel" Member="CollarModel" />
@@ -297,7 +271,7 @@
       <Argument Parameter="disposalDate" Member="DisposalDate" />
       <Argument Parameter="gen3Period" Member="Gen3Period" />
     </UpdateFunction>
-    <DeleteFunction FunctionId="FunctionId19">
+    <DeleteFunction FunctionId="FunctionId18">
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
       <Argument Parameter="collarId" Member="CollarId" />
     </DeleteFunction>
@@ -322,11 +296,11 @@
       <Column Name="Status" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
       <Column Name="Sha1Hash" Type="System.Data.Linq.Binary" DbType="VarBinary(8000)" IsDbGenerated="true" CanBeNull="true" UpdateCheck="Never" />
       <Association Name="CollarParameterFile_CollarParameter" Member="CollarParameters" ThisKey="FileId" OtherKey="FileId" Type="CollarParameter" />
-      <Association Name="LookupCollarFileStatus_CollarParameterFile" Member="LookupCollarFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupCollarFileStatus" IsForeignKey="true" />
       <Association Name="LookupCollarParameterFileFormat_CollarParameterFile" Member="LookupCollarParameterFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarParameterFileFormat" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_CollarParameterFile" Member="ProjectInvestigator" ThisKey="Owner" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
+      <Association Name="LookupFileStatus_CollarParameterFile" Member="LookupFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupFileStatus" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId20">
+    <InsertFunction FunctionId="FunctionId19">
       <Argument Parameter="owner" Member="Owner" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="format" Member="Format" />
@@ -334,14 +308,14 @@
       <Argument Parameter="status" Member="Status" />
       <Argument Parameter="fileId" Member="FileId" />
     </InsertFunction>
-    <UpdateFunction FunctionId="FunctionId21">
+    <UpdateFunction FunctionId="FunctionId20">
       <Argument Parameter="owner" Member="Owner" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="format" Member="Format" />
       <Argument Parameter="status" Member="Status" />
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </UpdateFunction>
-    <DeleteFunction FunctionId="FunctionId22">
+    <DeleteFunction FunctionId="FunctionId21">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </DeleteFunction>
   </Table>
@@ -360,17 +334,17 @@
       <Column Name="ParentFileId" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="Sha1Hash" Type="System.Data.Linq.Binary" DbType="VarBinary(8000)" IsDbGenerated="true" CanBeNull="true" UpdateCheck="Never" />
       <Association Name="CollarFile_CollarFix" Member="CollarFixes" ThisKey="FileId" OtherKey="FileId" Type="CollarFix" />
-      <Association Name="CollarFile_ArgosDownload" Member="ArgosDownloads" ThisKey="FileId" OtherKey="FileId" Type="ArgosDownload" />
       <Association Name="CollarFile_CollarFile" Member="CollarFiles" ThisKey="FileId" OtherKey="ParentFileId" Type="CollarFile" />
       <Association Name="CollarFile_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="FileId" OtherKey="FileId" Type="ArgosFileProcessingIssue" />
       <Association Name="CollarFile_ArgosFilePlatformDate" Member="ArgosFilePlatformDates" ThisKey="FileId" OtherKey="FileId" Type="ArgosFilePlatformDate" />
+      <Association Name="CollarFile_ArgosDownload" Member="ArgosDownloads" ThisKey="FileId" OtherKey="FileId" Type="ArgosDownload" />
       <Association Name="CollarFile_CollarFile" Member="CollarFile1" ThisKey="ParentFileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
       <Association Name="LookupCollarFileFormat_CollarFile" Member="LookupCollarFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarFileFormat" IsForeignKey="true" />
-      <Association Name="LookupCollarFileStatus_CollarFile" Member="LookupCollarFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupCollarFileStatus" IsForeignKey="true" />
       <Association Name="LookupCollarManufacturer_CollarFile" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
       <Association Name="Project_CollarFile" Member="Project1" ThisKey="Project" OtherKey="ProjectId" Type="Project" IsForeignKey="true" />
+      <Association Name="LookupFileStatus_CollarFile" Member="LookupFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupFileStatus" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId23">
+    <InsertFunction FunctionId="FunctionId22">
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="projectId" Member="Project" />
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
@@ -381,13 +355,13 @@
       <Argument Parameter="parentFileId" Member="ParentFileId" />
       <Argument Parameter="fileId" Member="FileId" />
     </InsertFunction>
-    <UpdateFunction FunctionId="FunctionId24">
+    <UpdateFunction FunctionId="FunctionId23">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="collarId" Member="CollarId" />
       <Argument Parameter="parentFileId" Member="ParentFileId" />
     </UpdateFunction>
-    <DeleteFunction FunctionId="FunctionId25">
+    <DeleteFunction FunctionId="FunctionId24">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </DeleteFunction>
   </Table>
@@ -401,7 +375,15 @@
       <Column Name="CollarId" Type="System.String" DbType="VarChar(16)" CanBeNull="true" />
       <Association Name="CollarFile_ArgosFileProcessingIssue" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
       <Association Name="Collar_ArgosFileProcessingIssue" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" DeleteRule="CASCADE" />
+      <Association Name="ArgosPlatform_ArgosFileProcessingIssue" Member="ArgosPlatform" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosPlatform" IsForeignKey="true" DeleteRule="CASCADE" />
     </Type>
+    <InsertFunction FunctionId="FunctionId25">
+      <Argument Parameter="fileId" Member="FileId" />
+      <Argument Parameter="issue" Member="Issue" />
+      <Argument Parameter="platformId" Member="PlatformId" />
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+    </InsertFunction>
   </Table>
   <Table Name="dbo.ArgosFilePlatformDates" Member="ArgosFilePlatformDates">
     <Type Name="ArgosFilePlatformDate">
@@ -420,17 +402,69 @@
       <Argument Parameter="lastTransmission" Member="LastTransmission" />
     </InsertFunction>
   </Table>
+  <Table Name="dbo.ArgosPlatforms" Member="ArgosPlatforms">
+    <Type Name="ArgosPlatform">
+      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ProgramId" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
+      <Column Name="Remarks" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Active" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="ArgosPlatform_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFileProcessingIssue" />
+      <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosProgram" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosProgram" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.ArgosPrograms" Member="ArgosPrograms">
+    <Type Name="ArgosProgram">
+      <Column Name="ProgramId" Type="System.String" DbType="VarChar(8) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ProgramName" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="UserName" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="Password" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="Investigator" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="StartDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="EndDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="Remarks" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="Active" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+      <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosPlatforms" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosPlatform" />
+      <Association Name="ProjectInvestigator_ArgosProgram" Member="ProjectInvestigator" ThisKey="Investigator" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.LookupFileStatus" Member="LookupFileStatus">
+    <Type Name="LookupFileStatus">
+      <Column Name="Code" Type="System.Char" DbType="Char(1) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(32) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Association Name="LookupFileStatus_CollarParameterFile" Member="CollarParameterFiles" ThisKey="Code" OtherKey="Status" Type="CollarParameterFile" />
+      <Association Name="LookupFileStatus_CollarFile" Member="CollarFiles" ThisKey="Code" OtherKey="Status" Type="CollarFile" />
+    </Type>
+  </Table>
+  <Table Name="dbo.ArgosDownloads" Member="ArgosDownloads">
+    <Type Name="ArgosDownload">
+      <Column Name="TimeStamp" Type="System.DateTime" DbType="DateTime2 NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ProgramId" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
+      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
+      <Column Name="Days" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="FileId" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="ErrorMessage" Type="System.String" DbType="VarChar(MAX)" CanBeNull="true" />
+      <Association Name="CollarFile_ArgosDownload" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
+    </Type>
+    <InsertFunction FunctionId="FunctionId27">
+      <Argument Parameter="programId" Member="ProgramId" />
+      <Argument Parameter="platformId" Member="PlatformId" />
+      <Argument Parameter="days" Member="Days" />
+      <Argument Parameter="fileId" Member="FileId" />
+      <Argument Parameter="errorMessage" Member="ErrorMessage" />
+    </InsertFunction>
+  </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId19" Name="dbo.Collar_Delete" Method="Collar_Delete">
+  <Function Id="FunctionId18" Name="dbo.Collar_Delete" Method="Collar_Delete">
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId14" Name="dbo.CollarDeployment_Insert" Method="CollarDeployment_Insert">
+  <Function Id="FunctionId13" Name="dbo.CollarDeployment_Insert" Method="CollarDeployment_Insert">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
@@ -485,7 +519,7 @@
     <Parameter Name="Status" Parameter="status" Type="System.Char" DbType="Char(1)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId25" Name="dbo.CollarFile_Delete" Method="CollarFile_Delete">
+  <Function Id="FunctionId24" Name="dbo.CollarFile_Delete" Method="CollarFile_Delete">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
@@ -535,7 +569,7 @@
     <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId20" Name="dbo.CollarParameterFile_Insert" Method="CollarParameterFile_Insert">
+  <Function Id="FunctionId19" Name="dbo.CollarParameterFile_Insert" Method="CollarParameterFile_Insert">
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
@@ -566,11 +600,11 @@
     <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId22" Name="dbo.CollarParameterFile_Delete" Method="CollarParameterFile_Delete">
+  <Function Id="FunctionId21" Name="dbo.CollarParameterFile_Delete" Method="CollarParameterFile_Delete">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId21" Name="dbo.CollarParameterFile_Update" Method="CollarParameterFile_Update">
+  <Function Id="FunctionId20" Name="dbo.CollarParameterFile_Update" Method="CollarParameterFile_Update">
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
@@ -578,7 +612,7 @@
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId23" Name="dbo.CollarFile_Insert" Method="CollarFile_Insert">
+  <Function Id="FunctionId22" Name="dbo.CollarFile_Insert" Method="CollarFile_Insert">
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
@@ -590,31 +624,24 @@
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" Direction="InOut" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId24" Name="dbo.CollarFile_Update" Method="CollarFile_Update">
+  <Function Id="FunctionId23" Name="dbo.CollarFile_Update" Method="CollarFile_Update">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ParentFileId" Parameter="parentFileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId13" Name="dbo.ArgosDownloads_Insert" Method="ArgosDownloads_Insert">
-    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Parameter Name="ErrorMessage" Parameter="errorMessage" Type="System.String" DbType="NVarChar(255)" />
-    <Return Type="System.Int32" />
-  </Function>
-  <Function Id="FunctionId16" Name="dbo.CollarDeployment_Delete" Method="CollarDeployment_Delete">
+  <Function Id="FunctionId15" Name="dbo.CollarDeployment_Delete" Method="CollarDeployment_Delete">
     <Parameter Name="DeploymentId" Parameter="deploymentId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId15" Name="dbo.CollarDeployment_UpdateDates" Method="CollarDeployment_UpdateDates">
+  <Function Id="FunctionId14" Name="dbo.CollarDeployment_UpdateDates" Method="CollarDeployment_UpdateDates">
     <Parameter Name="DeploymentId" Parameter="deploymentId" Type="System.Int32" DbType="Int" />
     <Parameter Name="DeploymentDate" Parameter="deploymentDate" Type="System.DateTime" DbType="DateTime2" />
     <Parameter Name="RetrievalDate" Parameter="retrievalDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId18" Name="dbo.Collar_Update" Method="Collar_Update">
+  <Function Id="FunctionId17" Name="dbo.Collar_Update" Method="Collar_Update">
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarModel" Parameter="collarModel" Type="System.String" DbType="NVarChar(255)" />
@@ -629,7 +656,7 @@
     <Parameter Name="Gen3Period" Parameter="gen3Period" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId17" Name="dbo.Collar_Insert" Method="Collar_Insert">
+  <Function Id="FunctionId16" Name="dbo.Collar_Insert" Method="Collar_Insert">
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarModel" Parameter="collarModel" Type="System.String" DbType="NVarChar(255)" />
@@ -660,6 +687,26 @@
     <Parameter Name="ProgramId" Parameter="programId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="FirstTransmission" Parameter="firstTransmission" Type="System.DateTime" DbType="DateTime2" />
     <Parameter Name="LastTransmission" Parameter="lastTransmission" Type="System.DateTime" DbType="DateTime2" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId25" Name="dbo.ArgosFileProcessingIssues_Insert" Method="ArgosFileProcessingIssues_Insert">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="Issue" Parameter="issue" Type="System.String" DbType="NVarChar(MAX)" />
+    <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Name="dbo.ArgosFile_ClearProcessingResults" Method="ArgosFile_ClearProcessingResults">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId27" Name="dbo.ArgosDownloads_Insert" Method="ArgosDownloads_Insert">
+    <Parameter Name="ProgramId" Parameter="programId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Days" Parameter="days" Type="System.Int32" DbType="Int" />
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="ErrorMessage" Parameter="errorMessage" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
 </Database>
