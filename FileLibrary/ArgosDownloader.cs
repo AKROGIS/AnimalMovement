@@ -57,9 +57,7 @@ namespace FileLibrary
                 //if results is null, then errors should be non-null
                 var log = new ArgosDownload
                 {
-                    //FIXME - update datamodel to support new ArgosDownload table
-                    Program = program.ProgramId,
-                    Username = program.UserName,
+                    ProgramId = program.ProgramId,
                     Days = days,
                     FileId = firstFileId,
                     ErrorMessage = errors
@@ -72,7 +70,7 @@ namespace FileLibrary
             {
                 errors = Environment.NewLine + "Error logging download to database: " + ex.Message +
                     Environment.NewLine + "Errors: '" + errors + "'" + Environment.NewLine +
-                        "CollarId = " + collar.CollarId + "FileId = " + firstFileId;
+                        "ProgramId = " + program.ProgramId + "FileId = " + firstFileId;
             }
         }
         
@@ -107,9 +105,7 @@ namespace FileLibrary
                 //if results is null, then errors should be non-null
                 var log = new ArgosDownload
                 {
-                    //FIXME - update datamodel to support new ArgosDownload table
-                    Platform = platform.PlatformId,
-                    Username = program.UserName,
+                    PlatformId = platform.PlatformId,
                     Days = days,
                     FileId = firstFileId,
                     ErrorMessage = errors
@@ -122,7 +118,7 @@ namespace FileLibrary
             {
                 errors = Environment.NewLine + "Error logging download to database: " + ex.Message +
                     Environment.NewLine + "Errors: '" + errors + "'" + Environment.NewLine +
-                        "CollarId = " + collar.CollarId + "FileId = " + firstFileId;
+                        "PlatformId = " + platform.PlatformId + "FileId = " + firstFileId;
             }
         }
     }
