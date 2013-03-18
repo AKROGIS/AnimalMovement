@@ -55,16 +55,10 @@ namespace FileLibrary
             {
                 //log this activity in the database
                 //if results is null, then errors should be non-null
-                var log = new ArgosDownload
-                {
-                    ProgramId = program.ProgramId,
-                    Days = days,
-                    FileId = firstFileId,
-                    ErrorMessage = errors
-                };
+                //I can't use LINQ to SQL here.  I get .'Cannot add an entity with a key that is already in use'
+                //I guess because my PK is a Timestamp set to a getdate() on insert, and the object isn't getting it
                 var db = new AnimalMovementDataContext();
-                db.ArgosDownloads.InsertOnSubmit(log);
-                db.SubmitChanges();
+                db.ArgosDownloads_Insert(program.ProgramId, null, days, firstFileId, errors);
             }
             catch (Exception ex)
             {
@@ -103,16 +97,10 @@ namespace FileLibrary
             {
                 //log this activity in the database
                 //if results is null, then errors should be non-null
-                var log = new ArgosDownload
-                {
-                    PlatformId = platform.PlatformId,
-                    Days = days,
-                    FileId = firstFileId,
-                    ErrorMessage = errors
-                };
+                //I can't use LINQ to SQL here.  I get .'Cannot add an entity with a key that is already in use'
+                //I guess because my PK is a Timestamp set to a getdate() on insert, and the object isn't getting it
                 var db = new AnimalMovementDataContext();
-                db.ArgosDownloads.InsertOnSubmit(log);
-                db.SubmitChanges();
+                db.ArgosDownloads_Insert(null,platform.PlatformId, days, firstFileId, errors);
             }
             catch (Exception ex)
             {
