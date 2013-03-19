@@ -608,8 +608,12 @@ will be done outside the database (that should be done in the database)
    
    Regardless of where this occurs, the following must happen
    a. Add the file to CollarFiles table
-   b. add records to ArgosFilePlatformDates for each platform in the new file
-   c. Process each new file as described below
+      - determine the format from the contents
+      - need either project, or PI (what list will this file be in)
+      - for some file formats, we need a collar id; might be determined from contents 
+   b. if the file has argos transmissions, then add records to ArgosFilePlatformDates
+      for each platform in the new file
+   c. if the file has argos transmissions, process each new file as described below
 
 3. Process Argos File
    a. process all existing - processes all the files in the database that should, but do
