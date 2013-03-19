@@ -500,6 +500,30 @@
          ON F.FileId = X.FileId
       WHERE F.Format <> 'B' AND (F.CollarManufacturer <> X.CollarManufacturer OR X.CollarId <> F.CollarId)
 
+
+----------- Show all the records for a root collarId
+    DECLARE @rootID VARCHAR(16) = '646252'
+     SELECT * FROM Collars WHERE LEFT(CollarId,6) = @rootID
+     SELECT * FROM CollarDeployments WHERE LEFT(CollarId,6) = @rootID
+     SELECT * FROM ArgosDownloads WHERE PlatformId in (SELECT PlatformID FROM ArgosDeployments WHERE LEFT(CollarId,6) = @rootID)
+     SELECT * FROM CollarParameters WHERE LEFT(CollarId,6) = @rootID
+     SELECT * FROM ArgosDeployments WHERE LEFT(CollarId,6) = @rootID
+     SELECT FileId, CollarId FROM CollarFixes WHERE left(CollarId,6) = @rootID GROUP BY FileId, CollarId ORDER BY fileid
+     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE LEFT(CollarId,6) = @rootID  ORDER BY fileid
+
+
+----------- Show all the records for an ArgosId
+    DECLARE @ArgosID VARCHAR(16) = '37779'
+     SELECT * FROM Collars WHERE ArgosId = @ArgosID
+     SELECT * FROM CollarDeployments WHERE CollarId IN (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
+     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) ORDER BY fileid
+     SELECT FileId, CollarId FROM CollarFixes WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) GROUP BY FileId, CollarId ORDER BY fileid
+     SELECT * FROM AllTpfFileData WHERE Platform = @ArgosID
+     SELECT * FROM CollarParameters WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
+     SELECT * FROM ArgosDeployments WHERE PlatformId = @ArgosID
+     SELECT * FROM ArgosDownloads WHERE PlatformId = @ArgosID
+
+
 /*
 ----------- Change status of all files in a project
 -----------     If you only want to change files of a specific format, uncomment the two parts with @Format
@@ -524,26 +548,6 @@
     END
     CLOSE change_status_cursor;
     DEALLOCATE change_status_cursor;
-
-
------------ Show all the records for a root collarId
-    DECLARE @rootID VARCHAR(16) = '631645'
-     SELECT * FROM Collars WHERE LEFT(CollarId,6) = @rootID
-     SELECT * FROM CollarDeployments WHERE LEFT(CollarId,6) = @rootID
-     SELECT * FROM ArgosDownloads WHERE PlatformId in (SELECT PlatformID FROM ArgosDeployments WHERE LEFT(CollarId,6) = @rootID)
-     SELECT * FROM CollarParameters WHERE LEFT(CollarId,6) = @rootID
-     SELECT FileId, CollarId FROM CollarFixes WHERE left(CollarId,6) = @rootID GROUP BY FileId, CollarId ORDER BY fileid
-     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE LEFT(CollarId,6) = @rootID  ORDER BY fileid
-
------------ Show all the records for an ArgosId
-    DECLARE @ArgosID VARCHAR(16) = '96008'
-     SELECT * FROM Collars WHERE ArgosId = @ArgosID
-     SELECT * FROM CollarDeployments WHERE CollarId IN (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
-     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) ORDER BY fileid
-     SELECT FileId, CollarId FROM CollarFixes WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) GROUP BY FileId, CollarId ORDER BY fileid
-     SELECT * FROM AllTpfFileData WHERE Platform = @ArgosID
-     SELECT * FROM CollarParameters WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
-     SELECT * FROM ArgosDownloads WHERE PlatformId = @ArgosID
 
 
 ----------- Rename a collar (simple, cannot be used to split a collar into two)
