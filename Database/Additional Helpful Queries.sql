@@ -70,6 +70,44 @@
    GROUP BY C.CollarModel
 
 
+----------- Days since last program download
+     SELECT ProgramId, DATEDIFF(day, MAX(TimeStamp), GETDATE())
+       FROM ArgosDownloads
+      WHERE FileId IS NOT NULL
+   GROUP BY ProgramId
+
+
+----------- Days since last platform download
+     SELECT PlatformId, DATEDIFF(day, MAX(TimeStamp), GETDATE())
+       FROM ArgosDownloads
+      WHERE FileId IS NOT NULL
+   GROUP BY PlatformId
+
+
+----------- Days by ArgosId since last processed collar file was uploaded
+     SELECT P.PlatformId, DATEDIFF(day, MAX(F.UploadDate), GETDATE())
+       FROM ArgosPlatforms AS P
+  LEFT JOIN ArgosDeployments AS D
+         ON P.PlatformId = D.PlatformId
+  LEFT JOIN CollarFiles AS F
+         ON F.CollarManufacturer = D.CollarManufacturer AND F.CollarId = D.CollarId
+      WHERE F.ParentFileId IS NOT NULL
+   GROUP BY P.PlatformId
+
+
+----------- Days by ArgosId since last AWS file was uploaded
+     SELECT P.PlatformId, DATEDIFF(day, MAX(F.UploadDate), GETDATE())
+       FROM ArgosPlatforms AS P
+  LEFT JOIN ArgosDeployments AS D
+         ON P.PlatformId = D.PlatformId
+  LEFT JOIN CollarFiles AS F
+         ON F.CollarManufacturer = D.CollarManufacturer AND F.CollarId = D.CollarId
+  LEFT JOIN CollarFiles AS F2
+         ON F.ParentFileId = F2.FileId
+      WHERE F2.Format = 'F'
+   GROUP BY P.PlatformId
+
+
 ----------- Recent downloads
      SELECT *
        FROM ArgosDownloads
