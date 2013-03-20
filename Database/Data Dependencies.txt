@@ -481,37 +481,57 @@ no way for a non-sa account to insert the timestamp.
 
 ArgosPrograms
 =============
-ProgramNumber, UserName:
-** Can we change the ProgramNumber.  I think not.  What if we make a mistake?
-It doesn't seem like it is used anywhere except in the ArgosPlatforms table, so maybe it
-won't hurt?  If we link the program to the ArgosDownloads, then we should make the
-ProgramNumber and the UserName immutable.  This seems OK, unless we made a mistake, and
-we didn't discover it until after we attempted a download.  Tricky...
+ProgramId:
+The ProgramId is used as a PK in this table, a FK in ArgosPlatforms, and a non-FK in
+ArgosDownloads.  The ProgramId should not change, but we need to correct a mistake on
+input.  This can be allowed by cascading updates, without a problem.  We do not want to
+cascade updates to ArgosDownloads, because that table records what we attempted, not what
+we should have attempted.
+We will not cascade deletes.  This will protect against a huge irreversible change. The
+user must delete all ArgosPlatforms in an ArgosProgram before an ArgosProgram can be
+deleted.
 
-Consider that the program number is not actually used anywhere (it could be used to
-download all the data for a program), so for our current purposes, it is a meaningless
-id number and can be updated as necessary.  The UserName is used when downloading,
-and downloads will succeed or fail if this is correct or not.  if download 1 used a
-UserName/password for a program, and failed, then the UserName/password were changed,
-and then the next download succeeded, both downloads will point to the same program,
-which would be confusing.
+Manager:
+This the project investigator that manages this ArgosProgram.  It is a Foreign Key to
+the ProjectInvestigator table with cascade on update, and no action on delete (i.e you
+cannot delete the PI if they own an ArgosProgram).  Only the current PI can edit the
+fields in the ArgosProgram, including re-assigning this ArgosProgram to another PI.  
 
-** We should hide the password from all but the owner of the program.  What is the best
-way to store passwords in the database that the database needs to use as clear text?
+UserName/Password:
+I assume the UserName is an immutable part of the ArgosProgram (on the Argos end). The
+UserName/Password combination is used to authenticate on the Argos server for downloads,
+so these values need to be correct or edited as necessary to keep them current with the
+settings on the Argos server.  When our API atempts a download it will user the current
+values in the database.  If these fields change at some point in the future, then all we
+lose is the values that were used when a previous download was attempted - thats OK.
+Therefore these are mutable without restriction.
 
-Owner is a Foreign Key to ProjectInvestigator Table with cascade on update, and no
-action on delete (i.e you cannot delete the PI if they own an ArgosProgram).  Allow PI
-to re-assign this program to another PI.  
+Note, that an ArgosDownload will reference an ArgosProgram either directly, or through
+an ArgosPlatform.  When it does an old download will link to the current UserName and
+Password, not the one that was used when the download was attempted.
 
-Name, start date, end date, and remarks are purely informational.
+**We should hide the password from all but the manager of the ArgosProgram.  However, 
+anyone the can download on behalf of the manager will need to obtain and transmit the
+password in clear text.  What is the best way for the database manage this?**
 
-Active is a time sensitive value, and indicates if the program should be downloaded.
-If a program is Active it will be downloaded in it entirety.  If it is inactive, it
-will not be downloaded, nor will any platforms in the program.  If the Active bit is
-null, then the program is deferring to the Active bit on each platform in the program.
+ProgramName, StartDate, EndDate, Remarks:
+These fields are purely informational.
 
-Argos platforms are dependent on the program number.
-The download tool uses this table to determine what to download, and how to authenticate.
+Active:
+This is mutable value that indicates if the ArgosProgram should be downloaded. If an
+ArgosProgram is Active it will be downloaded in it entirety.  If it is not Active, it will
+not be downloaded, nor will any ArgosPlatforms in the ArgosProgram.  If the Active bit is
+null, then the ArgosProgram is deferring to the Active bit on each ArgosPlatform in the
+ArgosProgram.
+
+ArgosPlatforms are dependent on the related ArgosProgram. The download API uses the
+ArgosProgram to authenticate a download for an ArgosPlatform.
+
+An ArgosProgram can be deleted but only by the Manager, and only if there are no
+related ArgosPlatforms (part of FK specification)
+An ArgosProgram can be edited within the constraints above, but only by the Manager.
+An ArgosProgram can only be created by a ProjectInvestigator.  A PI can create an
+ArgosProgram for another PI.
 
 
 ArgosPlatforms

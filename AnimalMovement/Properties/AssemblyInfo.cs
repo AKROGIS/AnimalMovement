@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 //TODO - Create tab on collar details to show Argos platfroms used on this collar
 //TODO - Create tab on collar details to show Collar Parametes used on this process this collar
 
+//FIXME - DATABASE - Hide the ArgosPlatforms.Password from all but the Manager, and the Download API
 //FIXME - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
 //FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
 //FIXME - DATABASE - Add stored procedures to add/del/update the ArgosPlatforms and Programs Tables
