@@ -2393,7 +2393,7 @@ CREATE TABLE [dbo].[ArgosPrograms](
 	[Manager] [sysname] NOT NULL,
 	[StartDate] [datetime2](7) NULL,
 	[EndDate] [datetime2](7) NULL,
-	[Remarks] [nvarchar](max) NULL,
+	[Notes] [nvarchar](max) NULL,
 	[Active] [bit] NULL,
  CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
 (
@@ -3098,7 +3098,7 @@ CREATE PROCEDURE [dbo].[ArgosProgram_Update]
     @Manager NVARCHAR(255) = NULL, 
     @StartDate DATETIME2(7) = NULL,
     @EndDate DATETIME2(7) = NULL,
-    @Remarks NVARCHAR(max) = NULL,
+    @Notes NVARCHAR(max) = NULL,
     @Active BIT = 1
 AS
 BEGIN
@@ -3126,7 +3126,7 @@ BEGIN
     --Fix Defaults
     SET @Manager = ISNULL(@Manager,@Caller)
     SET @ProgramName = NULLIF(@ProgramName,'')
-    SET @Remarks = NULLIF(@Remarks,'')
+    SET @Notes = NULLIF(@Notes,'')
 
     -- I use NULL to indicate don't change value only on non-null fields.
     -- The defaults for nullable field should match the insert SP.
@@ -3152,7 +3152,7 @@ BEGIN
                                  [Manager] = @Manager,
                                  [StartDate] = @StartDate,
                                  [EndDate] = @EndDate,
-                                 [Remarks] = @Remarks,
+                                 [Notes] = @Notes,
                                  [Active] = @Active
                            WHERE [ProgramId] = @OldProgramId;
 
@@ -3175,7 +3175,7 @@ CREATE PROCEDURE [dbo].[ArgosProgram_Insert]
     @Manager NVARCHAR(255) = NULL, 
     @StartDate DATETIME2(7) = NULL,
     @EndDate DATETIME2(7) = NULL,
-    @Remarks NVARCHAR(max) = NULL,
+    @Notes NVARCHAR(max) = NULL,
     @Active BIT = 1 
 AS
 BEGIN
@@ -3190,13 +3190,13 @@ BEGIN
     --Fix Defaults
     SET @Manager = ISNULL(@Manager,@Caller)
     SET @ProgramName = NULLIF(@ProgramName,'')
-    SET @Remarks = NULLIF(@Remarks,'')
+    SET @Notes = NULLIF(@Notes,'')
     
     --All other verification is handled by primary/foreign key and column constraints.
     INSERT INTO [dbo].[ArgosPrograms] ([ProgramId], [ProgramName], [UserName], [Password],
-                                       [Manager], [StartDate], [EndDate], [Remarks], [Active])
+                                       [Manager], [StartDate], [EndDate], [Notes], [Active])
                                VALUES (@ProgramId, @ProgramName, @UserName, @Password,
-                                       @Manager, @StartDate, @EndDate, @Remarks, @Active)
+                                       @Manager, @StartDate, @EndDate, @Notes, @Active)
 END
 
 
@@ -3248,7 +3248,7 @@ GO
 CREATE TABLE [dbo].[ArgosPlatforms](
 	[PlatformId] [varchar](8) NOT NULL,
 	[ProgramId] [varchar](8) NOT NULL,
-	[Remarks] [nvarchar](255) NULL,
+	[Notes] [nvarchar](max) NULL,
 	[Active] [bit] NOT NULL,
  CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
 (
