@@ -418,11 +418,13 @@ snapshot in time - they are immutable and non-deletable.
 Data is typically downloaded by the Argos download service/scheduled task, run by a
 local account on the server (ArgosProcessor role), however it may be useful to
 allow an editor to do a download when they are eager for new results.  For this reason,
-we need to control access to the inserts on this table, and we will use a insert SP.
+we need to control access to the inserts on this table, and we will use an insert SP.
 permission to run the SP will be limited to the editor and ArgosProcessor roles.
-No special permission check will be done for the insert, basically anyone editor
+No special permission check will be done for the insert, basically any editor
 can log a download attempt, however the user will need to have permissions to upload
-the results file or else an error may occur.
+the results file or else an error may occur.  Hopefully the client will not try to
+add a record to this table until after the results file has been uploadded.  The
+Upload API that all client apps should use will guarantee this.
 
 The PlatformId/ProgramId columns are nullable columns that records the Argos
 Platform or Program that was attempted to be downloaded. One and only one will be
@@ -463,15 +465,18 @@ expires after 10 days, and cannot be retrieved at some later date.
 Summary:
 PlatformId, non null varchar(8), no FK relationship to ArgosPlatforms
 ProgramId, non null varchar(8), no FK relationship to ArgosPlatforms
-TimeStamp non-null datetime2(7) default value provided
+                                must be null if PlatformId is non-null and visa-versa
+TimeStamp non-null datetime2(7) PK - default server getdate()
 Days null int - informational, days of data requested in download
-ErrorMessage null varchar(max) must be null if FileId is non-null and visa-versa
+ErrorMessage null varchar(max) - error message string returned by download API
+                                 must be null if FileId is non-null and visa-versa
 FileId null int Foreign Key to CollarFiles, Cascade Update/Delete NO ACTION (deny)
 
-The insert stored procedure is used to maintain the null/not-null requirement for
-ErrorMessage/FileId and also the null/not-null requirement for PlatformId/program Ids.
-to always use the current time when doing the insert (any value passed by the
-client will be ignored).
+An insert trigger is  used to maintain the null/not-null requirement for
+ErrorMessage/FileId and also the null/not-null requirement for PlatformId/program Ids,
+This maintains data integrity if an elevated account inserts directly into the table.
+the insert SP, and a default constraint enforce the timestamp requirements.  There is
+no way for a non-sa account to insert the timestamp.
 
 
 ArgosPrograms

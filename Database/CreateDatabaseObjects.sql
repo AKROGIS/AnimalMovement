@@ -2083,11 +2083,6 @@ CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
         @ErrorLine       -- parameter: original error line number.
         );
 GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
-GO
 CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
 RETURNS  TABLE (
 	[FileId] [int] NULL,
@@ -2098,6 +2093,11 @@ RETURNS  TABLE (
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.TfpSummerizer].[SummarizeTpfFile]
+GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
 GO
 SET ANSI_NULLS ON
 GO
@@ -5674,25 +5674,52 @@ BEGIN
 	-- Validate permission for this operation
 	-- The caller is managed by permissions on the Stored Procedure
 	
-	-- Need to have either a FileId (success) or an ErrorMessage (failure)
-	IF @FileId IS NULL AND @ErrorMessage IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId and ErrorMessage cannot both be NULL';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Need to have either a PlatformId or an ProgramId, these are not Foreign keys
-	IF @ProgramId IS NULL AND @PlatformId IS NULL
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'Invalid Input: ProgramId and PlatformId cannot both be NULL';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-		
+	-- Check the insert trigger for additional business rule enforcement
+			
 	INSERT INTO dbo.ArgosDownloads ([ProgramId], [PlatformId], [Days], [FileId], [ErrorMessage])
 		 VALUES (@ProgramId, @PlatformId, @Days, @FileId, @ErrorMessage)
 
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Mar 20, 2013
+-- Description: Ensure Data integerity on Insert
+-- =============================================
+CREATE TRIGGER [dbo].[AfterArgosDownloadsInsert] 
+			ON [dbo].[ArgosDownloads] 
+			AFTER INSERT
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Business Rule: Argos Downloads must have one and only one non-null value for (FileId,ErrorMessage)
+	IF EXISTS (    SELECT 1
+	                 FROM inserted 
+	                WHERE (FileId IS NULL AND ErrorMessage IS NULL)
+	                   OR (FileId IS NOT NULL AND ErrorMessage IS NOT NULL)
+              )
+	BEGIN
+		RAISERROR('Integrity Violation. Downloads must only one non-null value in FileId or ErrorMessage', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+
+	-- Business Rule: Argos Downloads must have one and only one non-null value for (PlatformId, ProgramId)
+	IF EXISTS (    SELECT 1
+	                 FROM inserted 
+	                WHERE (PlatformId IS NULL AND ProgramId IS NULL)
+	                   OR (PlatformId IS NOT NULL AND ProgramId IS NOT NULL)
+              )
+	BEGIN
+		RAISERROR('Integrity Violation. Downloads must only one non-null value in PlatformId or ProgramId', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
 END
 GO
 ALTER TABLE [dbo].[ArgosDownloads] ADD  CONSTRAINT [DF_ArgosDownloads_TimeStamp]  DEFAULT (getdate()) FOR [TimeStamp]
