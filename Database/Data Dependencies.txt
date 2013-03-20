@@ -27,7 +27,7 @@ Applications:
 			StartDate
 			EndDate
 	
-Functions/Procedures/Views used in applications, and thier dependencies:
+Functions/Procedures/Views used in applications, and their dependencies:
 	This does all the tables/columns used in the output and the where clause.
 	Other columns may be used to join the tables, these columns should be obvious.
 	
@@ -223,16 +223,16 @@ Column constraints
 Collar
   - is a nullable key in the collars table
   - Can only be null for files which will be processed, i.e will have sub files with
-    non-null collars (and as a special exception, ed-debevek files - Debevek files should
-    in the future be processed to collar specific sub files)
+    non-null collars (and as a special exception, Debevek files - in the future these
+    should be processed to collar specific sub files)
 Project
   - is a nullable key in the projects table (determines where this file is visible in UI)
 Owner
   - is a nullable key in the PI table (determines where this file is visible in UI)
   - one and only one of Project/Owner must be non=null. enforced by an insert trigger.
     if owner and project are both null, the uploading user is used as the owner.  this
-    will fail unless the uploader is also a PI.
-  - Owner is used when a file argos download or email upload will contain data for a
+    will fail unless the up-loader is also a PI.
+  - Owner is used when a file Argos download or email upload will contain data for a
     number of collars, which might be spread across multiple projects.  Owner in this
     case really reflects the owner of the file, and not necessarily the owner of the
     collars or projects involved with the file.
@@ -247,7 +247,7 @@ FileId/Username/UploadDate/Sha1Hash
 ParentFileId
   - is a nullable key in the collar file table.
   - It is inserted by the external file processors, and cannot be changed once inserted
-    (Would be nice if the database could manage this - requires processing of argos
+    (Would be nice if the database could manage this - requires processing of Argos
     files entirely and only in the database.)
   - Special case: CSV files that were generated from Gen3 *.tpf files and loaded into the
     database, might in the future load the *.tpf files, in which case the parent would
@@ -269,7 +269,7 @@ Dependencies
 Collars: Collar
 Projects: Project
 ProjectInvestigators: Owner
-LookupStatus: Status
+LookupFileStatus: Status
 LookupFormat: Format
 CollarFiles: ParentFileId
   
@@ -282,7 +282,7 @@ ArgosTransmissionSummary: Contents and Format   (update: na; delete: cascade)
 CollarFixes: Status, Collar (and Contents via CollarDataXXX) (update: see below;
              delete: cascade)
 
-*** implement cascading deletes on parentFileId and in collardataXXX this will greatly
+*** implement cascading deletes on ParentFileId and in CollarDataXXX this will greatly
 simplify the delete SP.
 
 Insert
@@ -298,11 +298,11 @@ Delete
 ------
 
 Reverse of insert.  files that were downloaded cannot be deleted (by business decision
-and enforced by foreign key constraint)
+and enforced by Foreign Key constraint)
 
 Updates
 -------
-Status: If the status changes, add/remove collarfixes for related data in format specific
+Status: If the status changes, add/remove CollarFixes for related data in format specific
         tables 
 Collar: Only allowed when a file is inactive, since fixes for a file are dependent on
         knowing the collar of a file
@@ -320,8 +320,8 @@ The data in these tables are not dependent on anything beyond the contents (and 
 of the related collar file.  Since the CollarFile contents/format are immutable, this
 table is also immutable. Users cannot create/delete or update records in these tables.
 These records are created by the database by calling an appropriate parser when a
-collarfile is inserted into the database.  The data in these tables is related via
-foreign key to the CollarFile table.  It will deny updates (the collarFileId does not
+CollarFile is inserted into the database.  The data in these tables is related via
+foreign key to the CollarFile table.  It will deny updates (the CollarFile.FileId does not
 change), and will cascade deletes.  Changes to the collar file status does not change
 the contents of these table, only the fixes derived from the collar data.
 
@@ -342,21 +342,27 @@ This table is used to summarize a file without having to rescan it.
 The summary information is used to determine if a file needs to be reprocessed (i.e.
 if the platform to collar or collar to parameter mappings change).
 
-The ProgramId and PlatformId are not foreign keys to the ArgosProgram and ArgosPlatform
+The ProgramId and PlatformId are not Foreign Keys to the ArgosPrograms and ArgosPlatforms
 tables, because we may load a file that does not have a program/platform in the database
-We want this table to reflect what is in the file, not what is in the database,
-We should provide a tool for checking database against the file and adding programs and 
-platforms as required.
+We want this table to reflect what is in the file, not what is in the database.
+
+*We should provide a tool for checking for platforms/programs in this table that are not
+in the ArgosPlatforms or ArgosPrograms tables, and adding them if appropriate.
+
+The files that this table is related to are files that need processing (Argos files with
+Telonics messages).  These files will have no parent, but they will (at some point) have
+sub files.  These files may have multiple platforms, so the FileId is not sufficient for
+a primary key, however the FileId, PlatformId tuple is sufficient for a primary key.
 
 This table is not dependent on anything beyond the contents (and format) of the related
 collar file. Since the CollarFile contents/format are immutable, this table is also
 immutable.
 
 Only the ArgosProcessor role can add records in this table - done when a file is
-processed (would be nice to do when the collarfile is added to the database).
+processed (would be nice to do when the CollarFile is added to the database).
 
 Records cannot be updated or deleted. Deletes will only happen as a cascade when the
-collarfile is deleted.
+CollarFile is deleted.
 Inserts may be done by AnimalMovements.exe, ArgosProcessor.exe, or ArgosDownloader.exe
 which may be run on the server (with a local account) or a database domain user.  We need
 to control inserts with a SP, which verifies permission.  Only the user who uploaded the
@@ -365,9 +371,9 @@ file can create the summary.
 
 ArgosFileProcessingIssues
 =========================
-Issues if they happen will always happen to a collarFile.
+Issues if they happen will always happen to a CollarFile.
 If the collar file is deleted the related issues are also deleted (cascade)
-The platform and collar fields are nullable foreign keys
+The platform and collar fields are nullable Foreign Keys
 They are used if the issue is related to a known platform/collar in the database.
 They issue will be deleted/updated if the related platform/collar is deleted/updated.
 
@@ -375,14 +381,14 @@ The data in this table is highly dependent on the state of the database at the t
 a file was processed. In particular, the platform to collar and collar to parameter
 mappings and date ranges.
 
-If a collarfile is reprocessed, all the existing issues are cleared, and new issues
+If a CollarFile is reprocessed, all the existing issues are cleared, and new issues
 (if any) are added to this table.
 
 Records in this table cannot be deleted directly, only via the stored procedure
 ArgosFile_ClearProcessingResults which can be run by anyone in the Editor or
 ArgosProcessor role since the file can always be reprocessed.
 Deletes will also happen as a cascade from deletes in related tables as discussed above.
-Records cannot be updated except through FK cascades as discussed above.
+Records cannot be updated except through Foreign Key cascades as discussed above.
 Insert Permissions:
 Inserts should only be done when a file is processed.  A file can be processed
 by the database via ArgosProcessor.exe, or by AnimalMovements.exe, ArgosProcessor.exe,
@@ -398,16 +404,16 @@ in the Editor or ArgosProcessor role to process a file, and therefore insert iss
 ArgosDownloads
 ==============
 This table records the attempts, results, and errors associated with downloading
-Argos data from the Argos server.  All records have a timestamp (automatically inserted)
+Argos data from the Argos server.  All records have a TimeStamp (automatically inserted)
 column that records when the record was added to the database (immediately after
-the download attempt finished).  The timestamp is the primary key to the table.
-Any timestamp provided by the client will be ignored.
+the download attempt finished).  The TimeStamp is the primary key to the table.
+Any TimeStamp provided by the client will be ignored.
 If the client and the database are in different timezone and client cares about the
-client time when the insert occured, then it is up to the client to determine the
+client time when the insert occurred, then it is up to the client to determine the
 offset and adjust the display appropriately. The records in this table represent a
 snapshot in time - they are immutable and non-deletable.
 
-Data is typically downloaded by the argos download service/scheduled task, run by a
+Data is typically downloaded by the Argos download service/scheduled task, run by a
 local account on the server (ArgosProcessor role), however it may be useful to
 allow an editor to do a download when they are eager for new results.  For this reason,
 we need to control access to the inserts on this table, and we will use a insert SP.
@@ -416,16 +422,19 @@ No special permission check will be done for the insert, basically anyone editor
 can log a download attempt, however the user will need to have permissions to upload
 the results file or else an error may occur.
 
-The platformId/programId columns are nullable columns that records the Argos
+The PlatformId/ProgramId columns are nullable columns that records the Argos
 Platform or Program that was attempted to be downloaded. One and only one will be
 non-null.  Typically, records will only be inserted in this table by the Argos-
 Downloader application which will only try to download platforms or programs in the
 database tables at the time it is run.  Therefore, these columns
 can be used to join to other tables that have an Argos platform or program,
-but it is not a Foriegn Key relation to these tables. This table represents what was
+but it is not a Foreign Key relation to these tables. This table represents what was
 actually tried.  If a bogus platform/program was attempted this table
-should not be corrected on a cascading update/delete if a platformId/programId in the
+should not be corrected on a cascading update/delete if a PlatformId/ProgramId in the
 "related" table is updated or deleted.
+
+*We should provide a tool for checking for platforms/programs in this table that are not
+in the ArgosPlatforms or ArgosPrograms tables, and adding them if appropriate.
 
 This table will be consulted by the ArgosDownloader to determine the number of days
 since the last successful download of a platform/program.  There is slight risk here
@@ -442,7 +451,7 @@ or we get an error explaining why.  We do not allow the case, where we get a fil
 also want to record some error or observation during obtaining it.  We either succeed
 or we fail.
 
-The FileId is a nullable foreign key to the CollarFile table.  Because The downloads
+The FileId is a nullable Foreign Key to the CollarFile table.  Because The downloads
 occurred as a matter of historical fact, I have decided to not allow the deletion (i.e
 forgetting or erasing the memory) of this event.  This means that the files associated
 with this event cannot be deleted (they can be made inactive).  This seems appropriate,
@@ -450,15 +459,15 @@ as the files are generally small, and the data that is downloaded from the serve
 expires after 10 days, and cannot be retrieved at some later date.
 
 Summary:
-ArgosId, non null varchar(8), no FK relationship to ArgosPlatforms
+PlatformId, non null varchar(8), no FK relationship to ArgosPlatforms
 ProgramId, non null varchar(8), no FK relationship to ArgosPlatforms
-TimeStamp non-null datetime(2) default value provided
+TimeStamp non-null datetime2(7) default value provided
 Days null int - informational, days of data requested in download
-ErrorMessage null varchar(max) must be null if FileId is non-null and visaversa
-FileId null int foreign key to CollarFiles, Cascade Update/Delete NO ACTION (deny)
+ErrorMessage null varchar(max) must be null if FileId is non-null and visa-versa
+FileId null int Foreign Key to CollarFiles, Cascade Update/Delete NO ACTION (deny)
 
 The insert stored procedure is used to maintain the null/not-null requirement for
-ErrorMessage/FileId and also the null/not-null requirement for platfrom/program Ids.
+ErrorMessage/FileId and also the null/not-null requirement for PlatformId/program Ids.
 to always use the current time when doing the insert (any value passed by the
 client will be ignored).
 
@@ -467,23 +476,23 @@ ArgosPrograms
 =============
 ProgramNumber, UserName:
 ** Can we change the ProgramNumber.  I think not.  What if we make a mistake?
-It doesn't seem like it is used anywhere except in the ArgosPlatform table, so maybe it
-won't hurt?  If we link the program to the ArgosDownload, then we should make the
-programnumber and the username immutable.  This seems ok, unless we made a mistake, and
+It doesn't seem like it is used anywhere except in the ArgosPlatforms table, so maybe it
+won't hurt?  If we link the program to the ArgosDownloads, then we should make the
+ProgramNumber and the UserName immutable.  This seems OK, unless we made a mistake, and
 we didn't discover it until after we attempted a download.  Tricky...
 
 Consider that the program number is not actually used anywhere (it could be used to
 download all the data for a program), so for our current purposes, it is a meaningless
-id number and can be updated as necessary.  The username is used when downloading,
+id number and can be updated as necessary.  The UserName is used when downloading,
 and downloads will succeed or fail if this is correct or not.  if download 1 used a
-username/password for a program, and failed, then the username/password were changed,
+UserName/password for a program, and failed, then the UserName/password were changed,
 and then the next download succeeded, both downloads will point to the same program,
 which would be confusing.
 
 ** We should hide the password from all but the owner of the program.  What is the best
 way to store passwords in the database that the database needs to use as clear text?
 
-Owner is a foreign key to ProjectInvestigator Table with cascade on update, and no
+Owner is a Foreign Key to ProjectInvestigator Table with cascade on update, and no
 action on delete (i.e you cannot delete the PI if they own an ArgosProgram).  Allow PI
 to re-assign this program to another PI.  
 
@@ -491,8 +500,8 @@ Name, start date, end date, and remarks are purely informational.
 
 Active is a time sensitive value, and indicates if the program should be downloaded.
 If a program is Active it will be downloaded in it entirety.  If it is inactive, it
-will not be downloaded, nore will any platforms in the program.  If the Active bit is
-null, then the program is defering to the Active bit on each platform in the program.
+will not be downloaded, nor will any platforms in the program.  If the Active bit is
+null, then the program is deferring to the Active bit on each platform in the program.
 
 Argos platforms are dependent on the program number.
 The download tool uses this table to determine what to download, and how to authenticate.
@@ -501,15 +510,15 @@ The download tool uses this table to determine what to download, and how to auth
 ArgosPlatforms
 ==============
 PlatformId varchar(8) NOT NULL - Primary Key
-ProgramId varchar(8) NOT NULL - foreign key to ArgosPrograms
+ProgramId varchar(8) NOT NULL - Foreign Key to ArgosPrograms
 Active bit NOT NULL - True/False
 Remarks nvarchar(255) NULL - Informational content
 
 This is a list of all the Argos Ids that are or were in a program.  The active platforms
 in an active program will be downloaded on a regular basis.  The information in the
-related program is used to authenticate with the Argos webservices.
+related program is used to authenticate with the Argos web services.
 
-The ProgramId foreign key has delete no action, so that a program cannot be deleted if
+The ProgramId Foreign Key has delete no action, so that a program cannot be deleted if
 it has any platforms.  It has update cascade to stay synced with any corrections that
 may happen with the program code (this may be prohibited by other requirements in the
 database, but it is no problem here).
@@ -517,7 +526,7 @@ database, but it is no problem here).
 The platform is used by the ArgosDeployments, but not ArgosFilePlatformDates or
 ArgosDownloads for the reasons given in the writeup on those tables.
 
-Active is a time sensitive value, and indicates if the platform shoudl be downloaded.
+Active is a time sensitive value, and indicates if the platform should be downloaded.
 Active has nothing to do with whether this platform is or can be deployed.
 Active on the platform is only used if the Active bit on the program is null (indicating
 that downloading will be decided on a platform by platform basis for this program)
@@ -528,10 +537,10 @@ delete - will delete related deployments, warn if there are download for this pl
 as the files will not be able to be reprocessed.
 
 update
- platformid - allowed, cascades to deployments.  if there are files with the new or old
+ PlatformId - allowed, cascades to deployments.  if there are files with the new or old
               id, then files need to be reprocessed.  Check with ArgosFilePlatformDates
               and warn user if that files cannot be processed
- programid - can be changed to a valid program, but this may not make sense.  Is it
+ ProgramId - can be changed to a valid program, but this may not make sense.  Is it
              possible to verify that a platform is (or was) in a program?
  status - will turn on/off future downloading of this platform.  no effect
           on how the collar is processed.  inactive collars can be deployed
@@ -541,7 +550,7 @@ insert - no special checks besides the column constraints above.
 ArgosDeployments
 ================
 	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL Foreign key to ArgosPlatforms
+	[PlatformId] [varchar](8) NOT NULL Foreign Key to ArgosPlatforms
 	[CollarManufacturer] [varchar](16) NOT NULL Foreign Key to Collars
 	[CollarId] [varchar](16) NOT NULL Foreign Key to Collars
 	[StartDate] [datetime2](7) NULL,
@@ -555,14 +564,14 @@ Inserts and update triggers will ensure that collars and platforms do not overla
 Changes to this table may require a file to be reprocessed.  This can be
 verified by checking with ArgosFilePlatformDates
 
-A null startdate is considered unknown but very early,
-A null enddate is considered to by unknown, but sometime in the distant future.
+A null StartDate is considered unknown but very early,
+A null EndDate is considered to by unknown, but sometime in the distant future.
 There can only be one deployment for a platform or collar with both start and end null.
 
 The deployment id is used simply a meaningless primary key to help with updates and
 deletes.
 
-Platfrom and collar foreign keys are both delete no action (you cannot delete a collar
+PlatformId and collar Foreign Keys are both delete no action (you cannot delete a collar
 or a platform if it is deployed - first delete the deployment.  And they have 
 update cascading.
 
@@ -581,29 +590,29 @@ will be done outside the database (that should be done in the database)
    b. download program - download a single program
    c. download platform - download a single platform
    
-   Downloading argos data will change the state in the following way:
+   Downloading Argos data will change the state in the following way:
    a. Add one or more records to ArgosDownloads for each program/platform attempted
-   b. Add one or more argos web files to Collarfiles table for each successful download.
+   b. Add one or more Argos web files to CollarFiles table for each successful download.
       Files can be added with local or server side processing depending on the clients
       resources as discussed below.
    
    Ideally, the database would have 4 stored procedures that managed these 5 steps,
    and writing to ArgosFilePlatformDates, ArgosFileProcessingIssues, and ArgosDownloads
    would only happen through these stored procedures.  However there are complication
-   in the SQL server only implementation (chiefly access to external resources), that
+   in the SQL Server only implementation (chiefly access to external resources), that
    are not fully understood at this time, so I am creating 4 public methods in
    an external library.  These methods can be called be any client applications,
-   including a simple wrapper exe that can be called via XP_cmdshell in SQL server.
-   potentially be a SQL server.  By wrapping all the logic in one set of public
+   including a simple wrapper exe that can be called via xp_cmdshell in SQL Server.
+   potentially be a SQL Server.  By wrapping all the logic in one set of public
    methods, I ensure that the proper code is always called in the correct manner.
    The downside is that I need to allow insert permissions to tables that should
    not be written to unless part of this controlled procedure.
    
 2. Add Argos File to CollarFiles
    a. add with server side processing - client provides only the file, and then SQL
-      server is responsibile for spawning the code to process the telonics data in
-      the argos file.  This is the preference for clients that do not have access to
-      the necessary Telonics Data Convertor software.
+      server is responsible for spawning the code to process the Telonics data in
+      the Argos file.  This is the preference for clients that do not have access to
+      the necessary Telonics Data Converter software.
    b. Add with client side processing
    
    Regardless of where this occurs, the following must happen
@@ -611,27 +620,27 @@ will be done outside the database (that should be done in the database)
       - determine the format from the contents
       - need either project, or PI (what list will this file be in)
       - for some file formats, we need a collar id; might be determined from contents 
-   b. if the file has argos transmissions, then add records to ArgosFilePlatformDates
+   b. if the file has Argos transmissions, then add records to ArgosFilePlatformDates
       for each platform in the new file
-   c. if the file has argos transmissions, process each new file as described below
+   c. if the file has Argos transmissions, process each new file as described below
 
 3. Process Argos File
    a. process all existing - processes all the files in the database that should, but do
                              not, have processing results
-   b. process new file - file will be a filepath, byte array, or byte stream provided by
+   b. process new file - file will be a path string, byte array, or byte stream provided by
                          the calling program.  The downloading methods discussed above
                          will provide a byte[] or stream, whereas other clients may
                          provide a file path.
    b. process existing - process a single existing file. file is be an integer id of
                      an existing file in the database.
                      
-   Processing an argos file will change the state in the following way:
+   Processing an Argos file will change the state in the following way:
    If the file already exist in the database
    b. Clear any existing ArgosFileProcessingIssues for an existing file
    c. Clear any existing previously derived results in CollarFiles for this file, only
-   c. Add one or more derived telonics files to collarFiles for each collar/parameter
-      comination active for the platform date range in each new file
+   c. Add one or more derived Telonics files to CollarFiles for each collar/parameter
+      combination active for the platform date range in each new file
    e. Add zero or more records to ArgosFileProcessingIssues for each issue encountered
-      deriving the telonics data for each new file
+      deriving the Telonics data for each new file
    If the file is new
-      a. Insert a file into the Collarfiles table if not already there
+      a. Insert a file into the CollarFiles table if not already there
