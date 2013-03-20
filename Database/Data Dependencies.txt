@@ -352,14 +352,14 @@ in the ArgosPlatforms or ArgosPrograms tables, and adding them if appropriate.
 The files that this table is related to are files that need processing (Argos files with
 Telonics messages).  These files will have no parent, but they will (at some point) have
 sub files.  These files may have multiple platforms, so the FileId is not sufficient for
-a primary key, however the FileId, PlatformId tuple is sufficient for a primary key.
+a primary key, however the (FileId, PlatformId) tuple is sufficient for a primary key.
 
 This table is not dependent on anything beyond the contents (and format) of the related
 collar file. Since the CollarFile contents/format are immutable, this table is also
 immutable.
 
 Only the ArgosProcessor role can add records in this table - done when a file is
-processed (would be nice to do when the CollarFile is added to the database).
+processed *would be nice to do when the CollarFile is added to the database*.
 
 Records cannot be updated or deleted. Deletes will only happen as a cascade when the
 CollarFile is deleted.
@@ -627,8 +627,8 @@ will be done outside the database (that should be done in the database)
 3. Process Argos File
    a. process all existing - processes all the files in the database that should, but do
                              not, have processing results
-   b. process new file - file will be a path string, byte array, or byte stream provided by
-                         the calling program.  The downloading methods discussed above
+   b. process new file - file will be a path string, byte array, or byte stream provided
+                         by the calling program.  The downloading methods discussed above
                          will provide a byte[] or stream, whereas other clients may
                          provide a file path.
    b. process existing - process a single existing file. file is be an integer id of

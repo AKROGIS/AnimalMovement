@@ -5630,6 +5630,14 @@ BEGIN
 		RETURN (1)
 	END
 	
+	-- The file must be one that has Argos Transmissions
+	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	BEGIN
+		DECLARE @message2 nvarchar(200) = 'The source file is not the correct format.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+	
 	--All other verification is handled by primary/foreign key and column constraints.
 	INSERT INTO dbo.ArgosFilePlatformDates (FileId, PlatformId, ProgramId, FirstTransmission, LastTransmission)
 		 VALUES (@FileId, @PlatformId, @ProgramId, @FirstTransmission, @LastTransmission);
