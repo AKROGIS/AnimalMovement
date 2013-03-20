@@ -346,8 +346,8 @@ The ProgramId and PlatformId are not Foreign Keys to the ArgosPrograms and Argos
 tables, because we may load a file that does not have a program/platform in the database
 We want this table to reflect what is in the file, not what is in the database.
 
-*We should provide a tool for checking for platforms/programs in this table that are not
-in the ArgosPlatforms or ArgosPrograms tables, and adding them if appropriate.
+**We should provide a tool for checking for platforms/programs in this table that are not
+in the ArgosPlatforms or ArgosPrograms tables, and adding them if appropriate.**
 
 The files that this table is related to are files that need processing (Argos files with
 Telonics messages).  These files will have no parent, but they will (at some point) have
@@ -423,7 +423,7 @@ permission to run the SP will be limited to the editor and ArgosProcessor roles.
 No special permission check will be done for the insert, basically any editor
 can log a download attempt, however the user will need to have permissions to upload
 the results file or else an error may occur.  Hopefully the client will not try to
-add a record to this table until after the results file has been uploadded.  The
+add a record to this table until after the results file has been uploaded.  The
 Upload API that all client apps should use will guarantee this.
 
 The PlatformId/ProgramId columns are nullable columns that records the Argos
@@ -475,7 +475,7 @@ FileId null int Foreign Key to CollarFiles, Cascade Update/Delete NO ACTION (den
 An insert trigger is  used to maintain the null/not-null requirement for
 ErrorMessage/FileId and also the null/not-null requirement for PlatformId/program Ids,
 This maintains data integrity if an elevated account inserts directly into the table.
-the insert SP, and a default constraint enforce the timestamp requirements.  There is
+the insert SP, and a default constraint enforce the TimeStamp requirements.  There is
 no way for a non-sa account to insert the timestamp.
 
 
@@ -483,13 +483,13 @@ ArgosPrograms
 =============
 ProgramId:
 The ProgramId is used as a PK in this table, a FK in ArgosPlatforms, and a non-FK in
-ArgosDownloads.  The ProgramId should not change, but we need to correct a mistake on
-input.  This can be allowed by cascading updates, without a problem.  We do not want to
-cascade updates to ArgosDownloads, because that table records what we attempted, not what
-we should have attempted.
-We will not cascade deletes.  This will protect against a huge irreversible change. The
-user must delete all ArgosPlatforms in an ArgosProgram before an ArgosProgram can be
-deleted.
+ArgosDownloads and ArgosFilePlatformDates as discussed in those tables.  Ideally, the
+ProgramId should not change, but we may need to correct a mistake on input.  This can be
+allowed by cascading updates without a problem.  We do not want to cascade updates to
+ArgosDownloads or ArgosFilePlatformDates, because those table records what we attempted,
+or what is in the file, not what was/is in the ArgosPrograms table. We will not cascade
+deletes.  This will protect against a huge irreversible change. The user must delete all
+ArgosPlatforms in an ArgosProgram before an ArgosProgram can be deleted.
 
 Manager:
 This the project investigator that manages this ArgosProgram.  It is a Foreign Key to
@@ -501,7 +501,7 @@ UserName/Password:
 I assume the UserName is an immutable part of the ArgosProgram (on the Argos end). The
 UserName/Password combination is used to authenticate on the Argos server for downloads,
 so these values need to be correct or edited as necessary to keep them current with the
-settings on the Argos server.  When our API atempts a download it will user the current
+settings on the Argos server.  When our API attempts a download it will user the current
 values in the database.  If these fields change at some point in the future, then all we
 lose is the values that were used when a previous download was attempted - thats OK.
 Therefore these are mutable without restriction.
@@ -514,7 +514,7 @@ Password, not the one that was used when the download was attempted.
 anyone the can download on behalf of the manager will need to obtain and transmit the
 password in clear text.  What is the best way for the database manage this?**
 
-ProgramName, StartDate, EndDate, Remarks:
+ProgramName, StartDate, EndDate, Notes:
 These fields are purely informational.
 
 Active:
@@ -536,43 +536,99 @@ ArgosProgram for another PI.
 
 ArgosPlatforms
 ==============
-PlatformId varchar(8) NOT NULL - Primary Key
-ProgramId varchar(8) NOT NULL - Foreign Key to ArgosPrograms
-Active bit NOT NULL - True/False
-Remarks nvarchar(255) NULL - Informational content
+This is a list of all the ArgosPlatforms that are (or were) in an ArgosProgram.
+The PI is charged for all the platforms in a program, so the PI may request that Argos
+remove a platform from a program.  We need all relevant ArgosPlatforms in the database
+to process (or reprocess) historical data files, so we will not generally not delete an
+ArgosPlatform unless a mistake was made in data entry.  See the discussion on Active and
+DisposalDate for handling ArgosPlatforms that are removed from an ArgosProgram.
 
-This is a list of all the Argos Ids that are or were in a program.  The active platforms
-in an active program will be downloaded on a regular basis.  The information in the
-related program is used to authenticate with the Argos web services.
+PlatformId:
+PlatformId is the PK, and a FK in the ArgosDeployments and ArgosFileProcessingIssues
+table, and a non-FK in ArgosDownloads and ArgosFilePlatformDates as discussed in those
+tables.  Ideally, the PlatformId should not change, but we may need to correct a mistake
+typo made during input.  This can be allowed by cascading updates, without a problem.
+We do not want to cascade updates to ArgosDownloads or ArgosFilePlatformDates as discussed
+in the description of those tables. We will cascade deletes to ArgosFileProcessingIssues,
+but not to ArgosDeployments.  If the user wants to delete an ArgosPlatform, they must
+first review and delete all related ArgosDeployments.
 
-The ProgramId Foreign Key has delete no action, so that a program cannot be deleted if
-it has any platforms.  It has update cascade to stay synced with any corrections that
-may happen with the program code (this may be prohibited by other requirements in the
-database, but it is no problem here).
+ProgramId:
+ProgramId is the Foreign Key to the related ArgosProgram.  The UserName/Password in the
+related ArgosProgram is used to authenticate with the Argos web services when the user
+wants to download an ArgosPlatform.  The related ArgosProgram is also used to establish
+ownership (via the Manager), and for hierarchical display in the UI.  The Foreign Key   
+has no action on delete to stop a delete in ArgosPrograms if it has an ArgosPlatform.
+The Foreign Key has cascade on update, to stay current with a rename of an ProgramId.
 
-The platform is used by the ArgosDeployments, but not ArgosFilePlatformDates or
-ArgosDownloads for the reasons given in the writeup on those tables.
+Active:
+This is mutable value that indicates if the ArgosPlatform should be downloaded in the
+future.  Active has nothing to do with whether this ArgosPlatform is or can be deployed.
+The Active setting for an ArgosPlatform is only consulted if the Active bit on the
+related ArgosProgram is null.
 
-Active is a time sensitive value, and indicates if the platform should be downloaded.
-Active has nothing to do with whether this platform is or can be deployed.
-Active on the platform is only used if the Active bit on the program is null (indicating
-that downloading will be decided on a platform by platform basis for this program)
+DisposalDate:
+The DisposalDate is used to reflect the status of the ArgosPlatform in the ArgosProgram as
+discussed above.  A null DisposalDate indicates that the ArgosPlatform is still in the
+ArgosProgram.  DisposalDate is used in the UI to change the display of the ArgosPlatform,
+and filter the list of ArgosPlatforms.  The UI should not stop a user from creating a
+historical deployment on an ArgosPlatform with a non null DisposalDate.
 
-remarks is purely informational and can be changed as desired.
+Setting the DisposalDate to a non-null value will set any null EndDate of any related
+ArgosDeployment to the same value.  Changing an ArgosDeployment.EndDate will do its own
+validation which may end this transaction with an error.  The DisposalDate cannot be set
+to a date that conflicts with any ArgosDeployment (that is the DisposalDate must be after
+the EndDate of all related ArgosDeployments).
 
-delete - will delete related deployments, warn if there are download for this platform,
-as the files will not be able to be reprocessed.
+Setting the DisposalDate will also set the ArgosPlatform.Active to false if the date is
+in the past.  If the DisposalDate is in the future (not likely), then a ArgosPlatform may
+remain Active after it's DisposalDate. **We should provide a tool to check for Active
+ArgosPlatforms with a DisposalDate in the past.**
 
-update
- PlatformId - allowed, cascades to deployments.  if there are files with the new or old
-              id, then files need to be reprocessed.  Check with ArgosFilePlatformDates
-              and warn user if that files cannot be processed
- ProgramId - can be changed to a valid program, but this may not make sense.  Is it
-             possible to verify that a platform is (or was) in a program?
- status - will turn on/off future downloading of this platform.  no effect
-          on how the collar is processed.  inactive collars can be deployed
+The DisposalDate can be cleared (set to null from non-null) if the PI recovers and/or
+re-actives this ArgosPlatform.  This will not change any deployment dates or make the
+ArgosPlatform Active - The user or client software will need to do this depending on
+the wishes of the user.
 
-insert - no special checks besides the column constraints above.
+When an ArgosDeployment is created or altered, it needs to validate against the
+DisposalDate of the related ArgosPlatform.
+
+Notes:
+This fields are purely informational.
+
+All data manipulation and permission checks occur in stored procedures
+Delete
+  Can only be done by the Manager of the related ArgosProgram. By the FK constraints, the
+  delete will fail if there are related ArgosDeployments, but it will delete all related
+  ArgosFileProcessingIssues. **The UI should warn the user that deleting an ArgosPlatform
+  that has a related record in ArgosFilePlatformDates, will preclude (re)processing of the
+  related files.**
+  **May want to deny a delete if an ArgosPlatform is listed in an Active TPF type
+  CollarParameterFile**
+
+Update
+  PlatformId:
+    Changes are allowed, and will cascade to only ArgosDeployments and
+    ArgosFileProcessingIssues as discussed above.  Changing an ArgosDeployment may result
+	in a validation error that cancels the transaction.  Changing an ArgosDeployment may
+	also require reprocessing files.  See ArgosDeployments for more discussion.  **The UI
+	should warn the user that changing a PlatformId that is in ArgosFilePlatformDates,
+	will preclude (re)processing of the related files.**
+  ProgramId:
+    Changes are allowed, and usually initiate from changes in the ArgosProgram.  Moving a
+	ArgosPlatform from one ArgosProgram to another is valid to correct for input errors.
+	**Need to provide some way to validate against the information at the Argos Server.**
+  Active, Notes:
+    No restrictions.  See discussion above.
+  DisposalDate:
+    Restrictions and cascading changes are discussed above, and will be handled in a
+	trigger to protect data integrity against edits made without the SP (typically SA) 
+
+Insert
+  Only Investigators can run this SP.  A non-null PlatformId and ProgramId is required.
+  Only the Manager of the related ArgosProgram can do the insert.  Since a new
+  ArgosPlatform has no ArgosDeployment, any DisposalDate value is valid.  Active defaults
+  to true.
 
 ArgosDeployments
 ================
@@ -582,6 +638,14 @@ ArgosDeployments
 	[CollarId] [varchar](16) NOT NULL Foreign Key to Collars
 	[StartDate] [datetime2](7) NULL,
 	[EndDate] [datetime2](7) NULL,
+
+Deployments should match related TPF files. Validation on insert/update/delete
+
+**Changing the PlatformId of a Deployment will invalidate the collar attribute of any
+files resulting from processing files with the previous PlatformId.  Since there is now no
+collar associated with the old PlatformId (collar cannot have two platforms at the same
+time), the files should be deleted.  UI should warn that there is unprocessed data for
+the old PlatformId  **
 
 A collar can 0 or 1 Argos platform at any given time.
 A ArgosPlatform can be deployed on 0 or 1 collars at any given time.
