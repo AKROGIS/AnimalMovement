@@ -374,19 +374,21 @@ ArgosFileProcessingIssues
 Issues if they happen will always happen to a CollarFile.
 If the collar file is deleted the related issues are also deleted (cascade)
 The platform and collar fields are nullable Foreign Keys
-They are used if the issue is related to a known platform/collar in the database.
-They issue will be deleted/updated if the related platform/collar is deleted/updated.
+They are used if the issue is related to a known platform/collar in the database.  If
+both the platform/collar fields are null, then the issue is related to the file in
+general, and not a specific platform/collar.
+The issue will be deleted/updated if the related platform/collar is deleted/updated.
 
 The data in this table is highly dependent on the state of the database at the time
 a file was processed. In particular, the platform to collar and collar to parameter
-mappings and date ranges.
+mappings and date ranges of those mappings.
 
 If a CollarFile is reprocessed, all the existing issues are cleared, and new issues
 (if any) are added to this table.
 
 Records in this table cannot be deleted directly, only via the stored procedure
-ArgosFile_ClearProcessingResults which can be run by anyone in the Editor or
-ArgosProcessor role since the file can always be reprocessed.
+ArgosFile_ClearProcessingResults.  Since the file can always be reprocessed, anyone
+in the Editor or ArgosProcessor role can run this procedure.
 Deletes will also happen as a cascade from deletes in related tables as discussed above.
 Records cannot be updated except through Foreign Key cascades as discussed above.
 Insert Permissions:
@@ -644,3 +646,9 @@ will be done outside the database (that should be done in the database)
       deriving the Telonics data for each new file
    If the file is new
       a. Insert a file into the CollarFiles table if not already there
+
+   The processing results are dependent on the state of the database at the time
+   a file was processed. In particular, the platform to collar and collar to parameter
+   mappings and date ranges of those mappings.  *If the ArgosDeployments, or
+   CollarParameters tables are edited, all related files should be checked use
+   ArgosFilePlatformDates and reprocess if necessary*
