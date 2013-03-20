@@ -3250,6 +3250,7 @@ CREATE TABLE [dbo].[ArgosPlatforms](
 	[ProgramId] [varchar](8) NOT NULL,
 	[Notes] [nvarchar](max) NULL,
 	[Active] [bit] NOT NULL,
+	[DisposalDate] [datetime2](7) NULL,
  CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
 (
 	[PlatformId] ASC
