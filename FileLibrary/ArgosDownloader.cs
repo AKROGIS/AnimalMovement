@@ -18,11 +18,11 @@ namespace FileLibrary
         public static void DownloadAll(string user)
         {
             var db = new AnimalMovementDataContext();
-            foreach (var program in db.ArgosPrograms.Where(p => p.Investigator == user && p.Active.HasValue && p.Active.Value))
+            foreach (var program in db.ArgosPrograms.Where(p => p.Manager == user && p.Active.HasValue && p.Active.Value))
             {
                 DownloadArgosProgram (program);
             }
-            foreach (var platform in db.ArgosPlatforms.Where(p => p.ArgosProgram.Investigator == user && p.Active && !p.ArgosProgram.Active.HasValue))
+            foreach (var platform in db.ArgosPlatforms.Where(p => p.ArgosProgram.Manager == user && p.Active && !p.ArgosProgram.Active.HasValue))
             {
                 DownloadArgosPlatform (platform);
             }

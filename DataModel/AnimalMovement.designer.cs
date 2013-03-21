@@ -58,17 +58,13 @@ namespace DataModel
     partial void DeleteArgosFileProcessingIssue(ArgosFileProcessingIssue instance);
     partial void UpdateArgosFilePlatformDate(ArgosFilePlatformDate instance);
     partial void DeleteArgosFilePlatformDate(ArgosFilePlatformDate instance);
-    partial void InsertArgosPlatform(ArgosPlatform instance);
-    partial void UpdateArgosPlatform(ArgosPlatform instance);
-    partial void DeleteArgosPlatform(ArgosPlatform instance);
-    partial void InsertArgosProgram(ArgosProgram instance);
-    partial void UpdateArgosProgram(ArgosProgram instance);
-    partial void DeleteArgosProgram(ArgosProgram instance);
     partial void InsertLookupFileStatus(LookupFileStatus instance);
     partial void UpdateLookupFileStatus(LookupFileStatus instance);
     partial void DeleteLookupFileStatus(LookupFileStatus instance);
     partial void UpdateArgosDownload(ArgosDownload instance);
     partial void DeleteArgosDownload(ArgosDownload instance);
+    partial void InsertArgosProgram(ArgosProgram instance);
+    partial void DeleteArgosProgram(ArgosProgram instance);
     #endregion
 		
 		public AnimalMovementDataContext() : 
@@ -245,22 +241,6 @@ namespace DataModel
 			}
 		}
 		
-		public System.Data.Linq.Table<ArgosPlatform> ArgosPlatforms
-		{
-			get
-			{
-				return this.GetTable<ArgosPlatform>();
-			}
-		}
-		
-		public System.Data.Linq.Table<ArgosProgram> ArgosPrograms
-		{
-			get
-			{
-				return this.GetTable<ArgosProgram>();
-			}
-		}
-		
 		public System.Data.Linq.Table<LookupFileStatus> LookupFileStatus
 		{
 			get
@@ -274,6 +254,22 @@ namespace DataModel
 			get
 			{
 				return this.GetTable<ArgosDownload>();
+			}
+		}
+		
+		public System.Data.Linq.Table<ArgosPlatform> ArgosPlatforms
+		{
+			get
+			{
+				return this.GetTable<ArgosPlatform>();
+			}
+		}
+		
+		public System.Data.Linq.Table<ArgosProgram> ArgosPrograms
+		{
+			get
+			{
+				return this.GetTable<ArgosProgram>();
 			}
 		}
 		
@@ -428,6 +424,29 @@ namespace DataModel
 		private void InsertArgosDownload(ArgosDownload obj)
 		{
 			this.ArgosDownloads_Insert(obj.ProgramId, obj.PlatformId, ((System.Nullable<int>)(obj.Days)), ((System.Nullable<int>)(obj.FileId)), obj.ErrorMessage);
+		}
+		
+		private void InsertArgosPlatform(ArgosPlatform obj)
+		{
+			this.ArgosPlatform_Insert(obj.PlatformId, obj.ProgramId, ((System.Nullable<System.DateTime>)(obj.DisposalDate)), obj.Notes, ((System.Nullable<bool>)(obj.Active)));
+		}
+		
+		private void UpdateArgosPlatform(ArgosPlatform obj)
+		{
+			ArgosPlatform original = ((ArgosPlatform)(ArgosPlatforms.GetOriginalEntityState(obj)));
+			this.ArgosPlatform_Update(original.PlatformId, obj.PlatformId, obj.ProgramId, ((System.Nullable<System.DateTime>)(obj.DisposalDate)), obj.Notes, ((System.Nullable<bool>)(obj.Active)));
+		}
+		
+		private void DeleteArgosPlatform(ArgosPlatform obj)
+		{
+			ArgosPlatform original = ((ArgosPlatform)(ArgosPlatforms.GetOriginalEntityState(obj)));
+			this.ArgosPlatform_Delete(original.PlatformId);
+		}
+		
+		private void UpdateArgosProgram(ArgosProgram obj)
+		{
+			ArgosProgram original = ((ArgosProgram)(ArgosPrograms.GetOriginalEntityState(obj)));
+			this.ArgosProgram_Update(original.ProgramId, obj.ProgramId, obj.ProgramName, obj.UserName, obj.Password, obj.Manager, ((System.Nullable<System.DateTime>)(obj.StartDate)), ((System.Nullable<System.DateTime>)(obj.EndDate)), obj.Notes, ((System.Nullable<bool>)(obj.Active)));
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Delete")]
@@ -684,6 +703,48 @@ namespace DataModel
 		public int ArgosDownloads_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProgramId", DbType="NVarChar(255)")] string programId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformId", DbType="NVarChar(255)")] string platformId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Days", DbType="Int")] System.Nullable<int> days, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ErrorMessage", DbType="NVarChar(255)")] string errorMessage)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), programId, platformId, days, fileId, errorMessage);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosPlatform_Delete")]
+		public int ArgosPlatform_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformId", DbType="NVarChar(255)")] string platformId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), platformId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosProgram_Update")]
+		public int ArgosProgram_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="OldProgramId", DbType="NVarChar(255)")] string oldProgramId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="NewProgramId", DbType="NVarChar(255)")] string newProgramId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProgramName", DbType="NVarChar(255)")] string programName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UserName", DbType="NVarChar(255)")] string userName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Password", DbType="NVarChar(255)")] string password, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Manager", DbType="NVarChar(255)")] string manager, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Active", DbType="Bit")] System.Nullable<bool> active)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), oldProgramId, newProgramId, programName, userName, password, manager, startDate, endDate, notes, active);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosPlatform_Insert")]
+		public int ArgosPlatform_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformId", DbType="NVarChar(255)")] string platformId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProgramId", DbType="NVarChar(255)")] string programId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DisposalDate", DbType="DateTime2")] System.Nullable<System.DateTime> disposalDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Active", DbType="Bit")] System.Nullable<bool> active)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), platformId, programId, disposalDate, notes, active);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosPlatform_Update")]
+		public int ArgosPlatform_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="OldPlatformId", DbType="NVarChar(255)")] string oldPlatformId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="NewPlatformId", DbType="NVarChar(255)")] string newPlatformId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProgramId", DbType="NVarChar(255)")] string programId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DisposalDate", DbType="DateTime2")] System.Nullable<System.DateTime> disposalDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Active", DbType="Bit")] System.Nullable<bool> active)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), oldPlatformId, newPlatformId, programId, disposalDate, notes, active);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosProgram_Delete")]
+		public int ArgosProgram_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProgramId", DbType="NVarChar(255)")] string programId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), programId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosProgram_Insert")]
+		public int ArgosProgram_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProgramId", DbType="NVarChar(255)")] string programId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProgramName", DbType="NVarChar(255)")] string programName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UserName", DbType="NVarChar(255)")] string userName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Password", DbType="NVarChar(255)")] string password, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Manager", DbType="NVarChar(255)")] string manager, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Active", DbType="Bit")] System.Nullable<bool> active)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), programId, programName, userName, password, manager, startDate, endDate, notes, active);
 			return ((int)(result.ReturnValue));
 		}
 	}
@@ -2324,7 +2385,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_ArgosProgram", Storage="_ArgosPrograms", ThisKey="Login", OtherKey="Investigator")]
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_ArgosProgram", Storage="_ArgosPrograms", ThisKey="Login", OtherKey="Manager")]
 		public EntitySet<ArgosProgram> ArgosPrograms
 		{
 			get
@@ -5799,532 +5860,6 @@ namespace DataModel
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosPlatforms")]
-	public partial class ArgosPlatform : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private string _PlatformId;
-		
-		private string _ProgramId;
-		
-		private string _Remarks;
-		
-		private bool _Active;
-		
-		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
-		
-		private EntityRef<ArgosProgram> _ArgosProgram;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnPlatformIdChanging(string value);
-    partial void OnPlatformIdChanged();
-    partial void OnProgramIdChanging(string value);
-    partial void OnProgramIdChanged();
-    partial void OnRemarksChanging(string value);
-    partial void OnRemarksChanged();
-    partial void OnActiveChanging(bool value);
-    partial void OnActiveChanged();
-    #endregion
-		
-		public ArgosPlatform()
-		{
-			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
-			this._ArgosProgram = default(EntityRef<ArgosProgram>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PlatformId", DbType="VarChar(8) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string PlatformId
-		{
-			get
-			{
-				return this._PlatformId;
-			}
-			set
-			{
-				if ((this._PlatformId != value))
-				{
-					this.OnPlatformIdChanging(value);
-					this.SendPropertyChanging();
-					this._PlatformId = value;
-					this.SendPropertyChanged("PlatformId");
-					this.OnPlatformIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProgramId", DbType="VarChar(8) NOT NULL", CanBeNull=false)]
-		public string ProgramId
-		{
-			get
-			{
-				return this._ProgramId;
-			}
-			set
-			{
-				if ((this._ProgramId != value))
-				{
-					if (this._ArgosProgram.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnProgramIdChanging(value);
-					this.SendPropertyChanging();
-					this._ProgramId = value;
-					this.SendPropertyChanged("ProgramId");
-					this.OnProgramIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Remarks", DbType="NVarChar(255)")]
-		public string Remarks
-		{
-			get
-			{
-				return this._Remarks;
-			}
-			set
-			{
-				if ((this._Remarks != value))
-				{
-					this.OnRemarksChanging(value);
-					this.SendPropertyChanging();
-					this._Remarks = value;
-					this.SendPropertyChanged("Remarks");
-					this.OnRemarksChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Active", DbType="Bit NOT NULL")]
-		public bool Active
-		{
-			get
-			{
-				return this._Active;
-			}
-			set
-			{
-				if ((this._Active != value))
-				{
-					this.OnActiveChanging(value);
-					this.SendPropertyChanging();
-					this._Active = value;
-					this.SendPropertyChanged("Active");
-					this.OnActiveChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="PlatformId", OtherKey="PlatformId")]
-		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
-		{
-			get
-			{
-				return this._ArgosFileProcessingIssues;
-			}
-			set
-			{
-				this._ArgosFileProcessingIssues.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosPlatform", Storage="_ArgosProgram", ThisKey="ProgramId", OtherKey="ProgramId", IsForeignKey=true)]
-		public ArgosProgram ArgosProgram
-		{
-			get
-			{
-				return this._ArgosProgram.Entity;
-			}
-			set
-			{
-				ArgosProgram previousValue = this._ArgosProgram.Entity;
-				if (((previousValue != value) 
-							|| (this._ArgosProgram.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._ArgosProgram.Entity = null;
-						previousValue.ArgosPlatforms.Remove(this);
-					}
-					this._ArgosProgram.Entity = value;
-					if ((value != null))
-					{
-						value.ArgosPlatforms.Add(this);
-						this._ProgramId = value.ProgramId;
-					}
-					else
-					{
-						this._ProgramId = default(string);
-					}
-					this.SendPropertyChanged("ArgosProgram");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
-		{
-			this.SendPropertyChanging();
-			entity.ArgosPlatform = this;
-		}
-		
-		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
-		{
-			this.SendPropertyChanging();
-			entity.ArgosPlatform = null;
-		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosPrograms")]
-	public partial class ArgosProgram : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private string _ProgramId;
-		
-		private string _ProgramName;
-		
-		private string _UserName;
-		
-		private string _Password;
-		
-		private string _Investigator;
-		
-		private System.Nullable<System.DateTime> _StartDate;
-		
-		private System.Nullable<System.DateTime> _EndDate;
-		
-		private string _Remarks;
-		
-		private System.Nullable<bool> _Active;
-		
-		private EntitySet<ArgosPlatform> _ArgosPlatforms;
-		
-		private EntityRef<ProjectInvestigator> _ProjectInvestigator;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnProgramIdChanging(string value);
-    partial void OnProgramIdChanged();
-    partial void OnProgramNameChanging(string value);
-    partial void OnProgramNameChanged();
-    partial void OnUserNameChanging(string value);
-    partial void OnUserNameChanged();
-    partial void OnPasswordChanging(string value);
-    partial void OnPasswordChanged();
-    partial void OnInvestigatorChanging(string value);
-    partial void OnInvestigatorChanged();
-    partial void OnStartDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnStartDateChanged();
-    partial void OnEndDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnEndDateChanged();
-    partial void OnRemarksChanging(string value);
-    partial void OnRemarksChanged();
-    partial void OnActiveChanging(System.Nullable<bool> value);
-    partial void OnActiveChanged();
-    #endregion
-		
-		public ArgosProgram()
-		{
-			this._ArgosPlatforms = new EntitySet<ArgosPlatform>(new Action<ArgosPlatform>(this.attach_ArgosPlatforms), new Action<ArgosPlatform>(this.detach_ArgosPlatforms));
-			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProgramId", DbType="VarChar(8) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string ProgramId
-		{
-			get
-			{
-				return this._ProgramId;
-			}
-			set
-			{
-				if ((this._ProgramId != value))
-				{
-					this.OnProgramIdChanging(value);
-					this.SendPropertyChanging();
-					this._ProgramId = value;
-					this.SendPropertyChanged("ProgramId");
-					this.OnProgramIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProgramName", DbType="NVarChar(255)")]
-		public string ProgramName
-		{
-			get
-			{
-				return this._ProgramName;
-			}
-			set
-			{
-				if ((this._ProgramName != value))
-				{
-					this.OnProgramNameChanging(value);
-					this.SendPropertyChanging();
-					this._ProgramName = value;
-					this.SendPropertyChanged("ProgramName");
-					this.OnProgramNameChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
-		public string UserName
-		{
-			get
-			{
-				return this._UserName;
-			}
-			set
-			{
-				if ((this._UserName != value))
-				{
-					this.OnUserNameChanging(value);
-					this.SendPropertyChanging();
-					this._UserName = value;
-					this.SendPropertyChanged("UserName");
-					this.OnUserNameChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Password", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
-		public string Password
-		{
-			get
-			{
-				return this._Password;
-			}
-			set
-			{
-				if ((this._Password != value))
-				{
-					this.OnPasswordChanging(value);
-					this.SendPropertyChanging();
-					this._Password = value;
-					this.SendPropertyChanged("Password");
-					this.OnPasswordChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Investigator", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
-		public string Investigator
-		{
-			get
-			{
-				return this._Investigator;
-			}
-			set
-			{
-				if ((this._Investigator != value))
-				{
-					if (this._ProjectInvestigator.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnInvestigatorChanging(value);
-					this.SendPropertyChanging();
-					this._Investigator = value;
-					this.SendPropertyChanged("Investigator");
-					this.OnInvestigatorChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StartDate", DbType="DateTime2")]
-		public System.Nullable<System.DateTime> StartDate
-		{
-			get
-			{
-				return this._StartDate;
-			}
-			set
-			{
-				if ((this._StartDate != value))
-				{
-					this.OnStartDateChanging(value);
-					this.SendPropertyChanging();
-					this._StartDate = value;
-					this.SendPropertyChanged("StartDate");
-					this.OnStartDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EndDate", DbType="DateTime2")]
-		public System.Nullable<System.DateTime> EndDate
-		{
-			get
-			{
-				return this._EndDate;
-			}
-			set
-			{
-				if ((this._EndDate != value))
-				{
-					this.OnEndDateChanging(value);
-					this.SendPropertyChanging();
-					this._EndDate = value;
-					this.SendPropertyChanged("EndDate");
-					this.OnEndDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Remarks", DbType="NVarChar(255)")]
-		public string Remarks
-		{
-			get
-			{
-				return this._Remarks;
-			}
-			set
-			{
-				if ((this._Remarks != value))
-				{
-					this.OnRemarksChanging(value);
-					this.SendPropertyChanging();
-					this._Remarks = value;
-					this.SendPropertyChanged("Remarks");
-					this.OnRemarksChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Active", DbType="Bit")]
-		public System.Nullable<bool> Active
-		{
-			get
-			{
-				return this._Active;
-			}
-			set
-			{
-				if ((this._Active != value))
-				{
-					this.OnActiveChanging(value);
-					this.SendPropertyChanging();
-					this._Active = value;
-					this.SendPropertyChanged("Active");
-					this.OnActiveChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosPlatform", Storage="_ArgosPlatforms", ThisKey="ProgramId", OtherKey="ProgramId")]
-		public EntitySet<ArgosPlatform> ArgosPlatforms
-		{
-			get
-			{
-				return this._ArgosPlatforms;
-			}
-			set
-			{
-				this._ArgosPlatforms.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_ArgosProgram", Storage="_ProjectInvestigator", ThisKey="Investigator", OtherKey="Login", IsForeignKey=true)]
-		public ProjectInvestigator ProjectInvestigator
-		{
-			get
-			{
-				return this._ProjectInvestigator.Entity;
-			}
-			set
-			{
-				ProjectInvestigator previousValue = this._ProjectInvestigator.Entity;
-				if (((previousValue != value) 
-							|| (this._ProjectInvestigator.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._ProjectInvestigator.Entity = null;
-						previousValue.ArgosPrograms.Remove(this);
-					}
-					this._ProjectInvestigator.Entity = value;
-					if ((value != null))
-					{
-						value.ArgosPrograms.Add(this);
-						this._Investigator = value.Login;
-					}
-					else
-					{
-						this._Investigator = default(string);
-					}
-					this.SendPropertyChanged("ProjectInvestigator");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_ArgosPlatforms(ArgosPlatform entity)
-		{
-			this.SendPropertyChanging();
-			entity.ArgosProgram = this;
-		}
-		
-		private void detach_ArgosPlatforms(ArgosPlatform entity)
-		{
-			this.SendPropertyChanging();
-			entity.ArgosProgram = null;
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.LookupFileStatus")]
 	public partial class LookupFileStatus : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -6711,6 +6246,556 @@ namespace DataModel
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosPlatforms")]
+	public partial class ArgosPlatform : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _PlatformId;
+		
+		private string _ProgramId;
+		
+		private string _Notes;
+		
+		private bool _Active;
+		
+		private System.Nullable<System.DateTime> _DisposalDate;
+		
+		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
+		
+		private EntityRef<ArgosProgram> _ArgosProgram;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnPlatformIdChanging(string value);
+    partial void OnPlatformIdChanged();
+    partial void OnProgramIdChanging(string value);
+    partial void OnProgramIdChanged();
+    partial void OnNotesChanging(string value);
+    partial void OnNotesChanged();
+    partial void OnActiveChanging(bool value);
+    partial void OnActiveChanged();
+    partial void OnDisposalDateChanging(System.Nullable<System.DateTime> value);
+    partial void OnDisposalDateChanged();
+    #endregion
+		
+		public ArgosPlatform()
+		{
+			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
+			this._ArgosProgram = default(EntityRef<ArgosProgram>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PlatformId", DbType="VarChar(8) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string PlatformId
+		{
+			get
+			{
+				return this._PlatformId;
+			}
+			set
+			{
+				if ((this._PlatformId != value))
+				{
+					this.OnPlatformIdChanging(value);
+					this.SendPropertyChanging();
+					this._PlatformId = value;
+					this.SendPropertyChanged("PlatformId");
+					this.OnPlatformIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProgramId", DbType="VarChar(8) NOT NULL", CanBeNull=false)]
+		public string ProgramId
+		{
+			get
+			{
+				return this._ProgramId;
+			}
+			set
+			{
+				if ((this._ProgramId != value))
+				{
+					if (this._ArgosProgram.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnProgramIdChanging(value);
+					this.SendPropertyChanging();
+					this._ProgramId = value;
+					this.SendPropertyChanged("ProgramId");
+					this.OnProgramIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Notes", DbType="NVarChar(MAX)")]
+		public string Notes
+		{
+			get
+			{
+				return this._Notes;
+			}
+			set
+			{
+				if ((this._Notes != value))
+				{
+					this.OnNotesChanging(value);
+					this.SendPropertyChanging();
+					this._Notes = value;
+					this.SendPropertyChanged("Notes");
+					this.OnNotesChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Active", DbType="Bit NOT NULL")]
+		public bool Active
+		{
+			get
+			{
+				return this._Active;
+			}
+			set
+			{
+				if ((this._Active != value))
+				{
+					this.OnActiveChanging(value);
+					this.SendPropertyChanging();
+					this._Active = value;
+					this.SendPropertyChanged("Active");
+					this.OnActiveChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DisposalDate", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> DisposalDate
+		{
+			get
+			{
+				return this._DisposalDate;
+			}
+			set
+			{
+				if ((this._DisposalDate != value))
+				{
+					this.OnDisposalDateChanging(value);
+					this.SendPropertyChanging();
+					this._DisposalDate = value;
+					this.SendPropertyChanged("DisposalDate");
+					this.OnDisposalDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="PlatformId", OtherKey="PlatformId")]
+		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
+		{
+			get
+			{
+				return this._ArgosFileProcessingIssues;
+			}
+			set
+			{
+				this._ArgosFileProcessingIssues.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosPlatform", Storage="_ArgosProgram", ThisKey="ProgramId", OtherKey="ProgramId", IsForeignKey=true)]
+		public ArgosProgram ArgosProgram
+		{
+			get
+			{
+				return this._ArgosProgram.Entity;
+			}
+			set
+			{
+				ArgosProgram previousValue = this._ArgosProgram.Entity;
+				if (((previousValue != value) 
+							|| (this._ArgosProgram.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ArgosProgram.Entity = null;
+						previousValue.ArgosPlatforms.Remove(this);
+					}
+					this._ArgosProgram.Entity = value;
+					if ((value != null))
+					{
+						value.ArgosPlatforms.Add(this);
+						this._ProgramId = value.ProgramId;
+					}
+					else
+					{
+						this._ProgramId = default(string);
+					}
+					this.SendPropertyChanged("ArgosProgram");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosPlatform = this;
+		}
+		
+		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosPlatform = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosPrograms")]
+	public partial class ArgosProgram : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _ProgramId;
+		
+		private string _ProgramName;
+		
+		private string _UserName;
+		
+		private string _Password;
+		
+		private string _Manager;
+		
+		private System.Nullable<System.DateTime> _StartDate;
+		
+		private System.Nullable<System.DateTime> _EndDate;
+		
+		private string _Notes;
+		
+		private System.Nullable<bool> _Active;
+		
+		private EntitySet<ArgosPlatform> _ArgosPlatforms;
+		
+		private EntityRef<ProjectInvestigator> _ProjectInvestigator;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnProgramIdChanging(string value);
+    partial void OnProgramIdChanged();
+    partial void OnProgramNameChanging(string value);
+    partial void OnProgramNameChanged();
+    partial void OnUserNameChanging(string value);
+    partial void OnUserNameChanged();
+    partial void OnPasswordChanging(string value);
+    partial void OnPasswordChanged();
+    partial void OnManagerChanging(string value);
+    partial void OnManagerChanged();
+    partial void OnStartDateChanging(System.Nullable<System.DateTime> value);
+    partial void OnStartDateChanged();
+    partial void OnEndDateChanging(System.Nullable<System.DateTime> value);
+    partial void OnEndDateChanged();
+    partial void OnNotesChanging(string value);
+    partial void OnNotesChanged();
+    partial void OnActiveChanging(System.Nullable<bool> value);
+    partial void OnActiveChanged();
+    #endregion
+		
+		public ArgosProgram()
+		{
+			this._ArgosPlatforms = new EntitySet<ArgosPlatform>(new Action<ArgosPlatform>(this.attach_ArgosPlatforms), new Action<ArgosPlatform>(this.detach_ArgosPlatforms));
+			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProgramId", DbType="VarChar(8) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string ProgramId
+		{
+			get
+			{
+				return this._ProgramId;
+			}
+			set
+			{
+				if ((this._ProgramId != value))
+				{
+					this.OnProgramIdChanging(value);
+					this.SendPropertyChanging();
+					this._ProgramId = value;
+					this.SendPropertyChanged("ProgramId");
+					this.OnProgramIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProgramName", DbType="NVarChar(255)")]
+		public string ProgramName
+		{
+			get
+			{
+				return this._ProgramName;
+			}
+			set
+			{
+				if ((this._ProgramName != value))
+				{
+					this.OnProgramNameChanging(value);
+					this.SendPropertyChanging();
+					this._ProgramName = value;
+					this.SendPropertyChanged("ProgramName");
+					this.OnProgramNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
+		public string UserName
+		{
+			get
+			{
+				return this._UserName;
+			}
+			set
+			{
+				if ((this._UserName != value))
+				{
+					this.OnUserNameChanging(value);
+					this.SendPropertyChanging();
+					this._UserName = value;
+					this.SendPropertyChanged("UserName");
+					this.OnUserNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Password", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
+		public string Password
+		{
+			get
+			{
+				return this._Password;
+			}
+			set
+			{
+				if ((this._Password != value))
+				{
+					this.OnPasswordChanging(value);
+					this.SendPropertyChanging();
+					this._Password = value;
+					this.SendPropertyChanged("Password");
+					this.OnPasswordChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Manager", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
+		public string Manager
+		{
+			get
+			{
+				return this._Manager;
+			}
+			set
+			{
+				if ((this._Manager != value))
+				{
+					if (this._ProjectInvestigator.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnManagerChanging(value);
+					this.SendPropertyChanging();
+					this._Manager = value;
+					this.SendPropertyChanged("Manager");
+					this.OnManagerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StartDate", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> StartDate
+		{
+			get
+			{
+				return this._StartDate;
+			}
+			set
+			{
+				if ((this._StartDate != value))
+				{
+					this.OnStartDateChanging(value);
+					this.SendPropertyChanging();
+					this._StartDate = value;
+					this.SendPropertyChanged("StartDate");
+					this.OnStartDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EndDate", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> EndDate
+		{
+			get
+			{
+				return this._EndDate;
+			}
+			set
+			{
+				if ((this._EndDate != value))
+				{
+					this.OnEndDateChanging(value);
+					this.SendPropertyChanging();
+					this._EndDate = value;
+					this.SendPropertyChanged("EndDate");
+					this.OnEndDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Notes", DbType="NVarChar(MAX)")]
+		public string Notes
+		{
+			get
+			{
+				return this._Notes;
+			}
+			set
+			{
+				if ((this._Notes != value))
+				{
+					this.OnNotesChanging(value);
+					this.SendPropertyChanging();
+					this._Notes = value;
+					this.SendPropertyChanged("Notes");
+					this.OnNotesChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Active", DbType="Bit")]
+		public System.Nullable<bool> Active
+		{
+			get
+			{
+				return this._Active;
+			}
+			set
+			{
+				if ((this._Active != value))
+				{
+					this.OnActiveChanging(value);
+					this.SendPropertyChanging();
+					this._Active = value;
+					this.SendPropertyChanged("Active");
+					this.OnActiveChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosPlatform", Storage="_ArgosPlatforms", ThisKey="ProgramId", OtherKey="ProgramId")]
+		public EntitySet<ArgosPlatform> ArgosPlatforms
+		{
+			get
+			{
+				return this._ArgosPlatforms;
+			}
+			set
+			{
+				this._ArgosPlatforms.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_ArgosProgram", Storage="_ProjectInvestigator", ThisKey="Manager", OtherKey="Login", IsForeignKey=true)]
+		public ProjectInvestigator ProjectInvestigator
+		{
+			get
+			{
+				return this._ProjectInvestigator.Entity;
+			}
+			set
+			{
+				ProjectInvestigator previousValue = this._ProjectInvestigator.Entity;
+				if (((previousValue != value) 
+							|| (this._ProjectInvestigator.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ProjectInvestigator.Entity = null;
+						previousValue.ArgosPrograms.Remove(this);
+					}
+					this._ProjectInvestigator.Entity = value;
+					if ((value != null))
+					{
+						value.ArgosPrograms.Add(this);
+						this._Manager = value.Login;
+					}
+					else
+					{
+						this._Manager = default(string);
+					}
+					this.SendPropertyChanged("ProjectInvestigator");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_ArgosPlatforms(ArgosPlatform entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosProgram = this;
+		}
+		
+		private void detach_ArgosPlatforms(ArgosPlatform entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosProgram = null;
 		}
 	}
 }
