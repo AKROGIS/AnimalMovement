@@ -870,7 +870,7 @@ BEGIN
 	-- We cannot the PK (PlatformId) and the DisposalDate at the same time
 	IF (UPDATE(PlatformId) AND UPDATE(DisposalDate))
 	BEGIN
-		RAISERROR('Integrity Violation. You cannot update the PlatformId and the DisposalDate in one operation', 18, 0)
+		RAISERROR('Integrity Violation - You cannot update the PlatformId and the DisposalDate in one operation', 18, 0)
 		ROLLBACK TRANSACTION;
 		RETURN
 	END
@@ -901,7 +901,7 @@ BEGIN
 						   AND AD.EndDate > i.DisposalDate
 				  )
 		BEGIN
-			RAISERROR('Integrity Violation. DisposalDate must be on or after the EndDate of all related Argos Doeployments', 18, 0)
+			RAISERROR('Integrity Violation - DisposalDate must be on or after the EndDate of all related Argos Deployments', 18, 0)
 			ROLLBACK TRANSACTION;
 			RETURN
 		END
@@ -2374,7 +2374,8 @@ BEGIN
     END
     
     -- You must be the Manager to of the new Program
-    IF EXISTS (SELECT 1 FROM [dbo].[ArgosPrograms] WHERE [ProgramId] = @ProgramId AND [Manager] = @Caller)
+    IF @ProgramId IS NOT NULL AND
+       NOT EXISTS (SELECT 1 FROM [dbo].[ArgosPrograms] WHERE [ProgramId] = @ProgramId AND [Manager] = @Caller)
     BEGIN
         DECLARE @message2 nvarchar(100) = 'You are not the manager of the ArgosProgram ' + @ProgramId;
         RAISERROR(@message2, 18, 0)
@@ -2406,17 +2407,33 @@ BEGIN
     -- Do the update
     -- We rely on the PK not changing in the update trigger, so we need to change the PK in a separate operation
     -- If the PK is changing, we need to do that as a separate operation
+    -- All other verification is handled by primary/foreign key and column constraints.
     IF @NewPlatformId <> @OldPlatformId
     BEGIN
-		UPDATE dbo.ArgosPlatforms SET [PlatformId] = @NewPlatformId
-								WHERE [PlatformId] = @OldPlatformId;
+        BEGIN TRAN UpdatePlatformTwice
+            BEGIN TRY
+                UPDATE dbo.ArgosPlatforms SET [PlatformId] = @NewPlatformId
+                                        WHERE [PlatformId] = @OldPlatformId;
+                UPDATE dbo.ArgosPlatforms SET [ProgramId] = @ProgramId,
+                                              [DisposalDate] = @DisposalDate,
+                                              [Notes] = @Notes,
+                                              [Active] = @Active
+                                        WHERE [PlatformId] = @NewPlatformId;
+            END TRY
+            BEGIN CATCH
+                ROLLBACK TRAN UpdatePlatformTwice
+                EXEC dbo.Utility_RethrowError
+                RETURN 1
+            END CATCH
+        COMMIT TRAN UpdatePlatformTwice
     END
-    -- All other verification is handled by primary/foreign key and column constraints.
-    UPDATE dbo.ArgosPlatforms SET [ProgramId] = @ProgramId,
-                                  [DisposalDate] = @DisposalDate,
-                                  [Notes] = @Notes,
-                                  [Active] = @Active
-                            WHERE [PlatformId] = @OldPlatformId;
+    ELSE
+        UPDATE dbo.ArgosPlatforms SET [ProgramId] = @ProgramId,
+                                      [DisposalDate] = @DisposalDate,
+                                      [Notes] = @Notes,
+                                      [Active] = @Active
+                                WHERE [PlatformId] = @NewPlatformId;
+
 
 END
 GO
