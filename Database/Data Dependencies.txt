@@ -536,12 +536,16 @@ ArgosProgram for another PI.
 
 ArgosPlatforms
 ==============
-This is a list of all the ArgosPlatforms that are (or were) in an ArgosProgram.
-The PI is charged for all the platforms in a program, so the PI may request that Argos
-remove a platform from a program.  We need all relevant ArgosPlatforms in the database
-to process (or reprocess) historical data files, so we will not generally not delete an
-ArgosPlatform unless a mistake was made in data entry.  See the discussion on Active and
-DisposalDate for handling ArgosPlatforms that are removed from an ArgosProgram.
+This is a list of all the ArgosPlatforms that are (or were) in an ArgosProgram. An
+ArgosPlatform deployed in the field can communicate with the Argos satellite network.
+Data the ArgosPlatform has is regularly made available to the Manager of the ArgosPlatform
+(via email, or web site download).  Using an ArgosPlatform allows the Manager to get data
+like Collar locations on a regular basis without going out into the field. 
+The Manager is charged for all the platforms in a program, so the Manager may request that
+Argos remove a platform from a program.  We need all relevant ArgosPlatforms in the
+database to process (or reprocess) historical data files, so we will not generally not
+delete an ArgosPlatform unless a mistake was made in data entry.  See the discussion on
+Active and DisposalDate for handling ArgosPlatforms that are removed from an ArgosProgram.
 
 PlatformId:
 PlatformId is the PK, and a FK in the ArgosDeployments and ArgosFileProcessingIssues
@@ -632,44 +636,106 @@ Insert
   ArgosPlatform has no ArgosDeployment, any DisposalDate value is valid.  Active defaults
   to true.
 
+
 ArgosDeployments
 ================
-	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL Foreign Key to ArgosPlatforms
-	[CollarManufacturer] [varchar](16) NOT NULL Foreign Key to Collars
-	[CollarId] [varchar](16) NOT NULL Foreign Key to Collars
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
+A Manager of an ArgosPlatform can deploy it on a Collar they also Manage allowing them to
+get Collar data without going in the field.  The ArgosDeployments table tracks when an
+ArgosPlatform is deployed on a Collar.  The Manager cannot do the physical deployment,
+that is typically done by the CollarManufacturer.  Over the lifetime of an ArgosPlatform
+it may be deployed on several Collars.  Over the lifetime of a Collar, it may carry
+several different ArgosPlatforms.  However, a Collar can have only one Argos Platform at
+any given time, and an ArgosPlatform can only be deployed on one Collar at any given time.
 
-Deployments should match related TPF files. Validation on insert/update/delete
+DeploymentId:
+The DeploymentId is a surrogate primary key (INT IDENTITY(1,1) NOT NULL) used to help
+identify records in updates and deletes.
 
-**Changing the PlatformId of a Deployment will invalidate the collar attribute of any
-files resulting from processing files with the previous PlatformId.  Since there is now no
-collar associated with the old PlatformId (collar cannot have two platforms at the same
-time), the files should be deleted.  UI should warn that there is unprocessed data for
-the old PlatformId  **
+PlatformId:
+PlatformId is the Foreign Key to the ArgosPlatfroms table. It represents the ArgosPlatfrom
+that is deployed on a Collar. The FK will reject (no action) a delete of the primary table
+so the Manager must delete all related ArgosDeployments before deleting an ArgosPlatform.
+The FK will accept (cascade) an update of the PlatformId in the ArgosPlatfroms table.
+Changing the PlatformId of an ArgosDeployment will invalidate the Collar value of any
+CollarFiles created from processing CollarFiles containing transmission from the previous
+PlatformId during the relevant time period.  Since there is now no Collar associated
+with the old PlatformId (collar cannot have two platforms at the same time), the result
+files for the Collar covering the relevant date range should be deleted.
 
-A collar can 0 or 1 Argos platform at any given time.
-A ArgosPlatform can be deployed on 0 or 1 collars at any given time.
+CollarManufacturer, CollarId:
+This is the Foreign Key for a Collar in the Collars table.  It represents the collar that
+the ArgosPlatfrom is deployed on.  The FK will reject (no action) a delete of the primary
+table so the Manager must delete all related deployments before deleting an ArgosPlatform.
+The FK will accept (cascade) an update of the PlatformId in the ArgosPlatfroms table.
+Changing the Collar of an ArgosDeployment will invalidate the Collar value of any files
+resulting from processing files containing transmission from PlatformId during the
+relevant time period.  Since there is now no collar associated with the PlatformId
+(a Collar cannot have two platforms at the same time), the result files for the relevant
+date range should be deleted.
 
-Inserts and update triggers will ensure that collars and platforms do not overlap.
+StartDate, EndDate:
+These dates provide the time period during which the ArgosPlatform is deployed on the
+Collar.  A null StartDate is an unknown date that is considered to be less than any known
+date/time.  A null EndDate is an unknown date/time that is considered to be greater than
+any known date.  The StartDate must be before the EndDate.  The StartDate and EndDate must
+be before the DisposalDate of the Collar and the ArgosPlatform if any.
+Changing the date range of an ArgosDeployment will invalidate CollarFiles built from
+transmission that were in the date range, but are now outside the new date range.  There
+may also be unprocessed transmissions if the date range has been expanded.
 
-Changes to this table may require a file to be reprocessed.  This can be
-verified by checking with ArgosFilePlatformDates
 
-A null StartDate is considered unknown but very early,
-A null EndDate is considered to by unknown, but sometime in the distant future.
-There can only be one deployment for a platform or collar with both start and end null.
+Business Rules:
+The following rules are enforced in the insert and delete triggers to ensure data
+integrity if an elevated account bypasses the insert/update stored procedures.
+  Ensure StartDate is before the EndDate.
+  Ensure both Dates are before the DisposalDate of the Collar and ArgosPlatform.
+  Ensure an ArgosPlatform is not deployed on multiple Collars at the same time.
+  Ensure a Collar is not carrying multiple ArgosPlatforms at the same time.
 
-The deployment id is used simply a meaningless primary key to help with updates and
-deletes.
+For Gen4 Collars manufactured by Telonics, the manufacturer provides a Telonics Parameter
+File (*.tpf) which provides, among other things, the PlatformId and StartDate for each
+Collar.  If the Manager loads the TPF file in the database (required to process Collar
+data obtained via the Argos system), then the TPF file data can be used to create and
+validate ArgosDeployments.  **How should this validation be done?**
 
-PlatformId and collar Foreign Keys are both delete no action (you cannot delete a collar
-or a platform if it is deployed - first delete the deployment.  And they have 
-update cascading.
 
-These deployments behave nearly identical to animal/collar deployments, and most of the
-triggers and stored procedures can be re-used.
+The ArgosDeployments table cannot be edited directly, only through stored procedures.
+Stored procedures manage the permission validation, and triggers manage the data
+validation, and updates to related tables.
+Delete
+  A delete can be done by the Manager of the Collar, *or* the Manager of the PlatformId
+  (obtained from the related ArgosProgram).  It seems reasonable that the user must be
+  the Manager of both, but since Collars and ArgosPrograms can be given away, it is
+  possible that the two items could belong to different PIs.  If permitted, the delete
+  should never fail (there are no FK dependencies on this table).  The delete may render
+  the results from prior processing of one or more CollarFiles invalid.  The delete action
+  must scan ArgosFilePlatformDates to find to find CollarFiles that have data that
+  overlaps the deleted ArgosDeployment, and delete the CollarFiles' subfiles with the same
+  Collar as the deleted ArgosDeployment.  **Until we have a solution for detecting
+  partially processed files, and for partially processing a file, we will reprocess all
+  overlapping CollarFiles** **The UI should warn the user if the deleted deployment will
+  leave some CollarFile data unprocessed.**
+
+Update
+  DeploymentId:
+    Changes are not allowed.
+  PlatformId, Collar, StartDate, EndDate.
+    Changes are allowed.  Business rules listed above must be validated. The update should
+	be treated as a delete followed by an insert for purposes of managing the processing
+	of CollarFiles.  **The UI should warn the user if the changed deployment will leave
+	some CollarFile data unprocessed.**
+
+Insert
+  Only Investigators can run this SP.  A valid non-null PlatformId and Collar is required.
+  Business rules listed above must be validated.  Only the Manager of the Collar and
+  related ArgosProgram can do the insert.  **One of our ArgosPrograms is used by multiple
+  Managers, so we will relax this second requirement, until we create an 'Assistant'
+  role.**  StartDate and EndDate default to null.
+  The new ArgosDeployment may provide new data required to process a CollarFile.
+  ArgosFilePlatformDates can be scanned to see if the new deployment overlaps with a
+  CollarFile.  Any overlapping files should be (re)processed.  **Provide an
+  ability to (re)process only one platfrom in a file.**
+
 
 
 
