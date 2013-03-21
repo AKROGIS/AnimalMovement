@@ -565,7 +565,7 @@ Active:
 This is mutable value that indicates if the ArgosPlatform should be downloaded in the
 future.  Active has nothing to do with whether this ArgosPlatform is or can be deployed.
 The Active setting for an ArgosPlatform is only consulted if the Active bit on the
-related ArgosProgram is null.
+related ArgosProgram is null.  New ArgosPlatform are Active by default.
 
 DisposalDate:
 The DisposalDate is used to reflect the status of the ArgosPlatform in the ArgosProgram as
@@ -590,6 +590,8 @@ re-actives this ArgosPlatform.  This will not change any deployment dates or mak
 ArgosPlatform Active - The user or client software will need to do this depending on
 the wishes of the user.
 
+New ArgosPlatform have a null DisposalDate by default.
+
 When an ArgosDeployment is created or altered, it needs to validate against the
 DisposalDate of the related ArgosPlatform.
 
@@ -601,8 +603,8 @@ Delete
   Can only be done by the Manager of the related ArgosProgram. By the FK constraints, the
   delete will fail if there are related ArgosDeployments, but it will delete all related
   ArgosFileProcessingIssues. **The UI should warn the user that deleting an ArgosPlatform
-  that has a related record in ArgosFilePlatformDates, will preclude (re)processing of the
-  related files.**
+  that has a related record in ArgosFilePlatformDates, will preclude processing of the
+  related files. Since there are no related ArgosDeployments, there are no results files**
   **May want to deny a delete if an ArgosPlatform is listed in an Active TPF type
   CollarParameterFile**
 
@@ -668,7 +670,11 @@ update cascading.
 
 These deployments behave nearly identical to animal/collar deployments, and most of the
 triggers and stored procedures can be re-used.
- 
+
+
+
+API for changing database State
+===============================
  
 Create a limited well defined set of methods (stored procedures) that can change the
 state of the database in a limited and well defined way.  There are two processes that
