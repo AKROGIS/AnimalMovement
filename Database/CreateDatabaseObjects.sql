@@ -885,7 +885,7 @@ BEGIN
 				ON AD.PlatformId = i.PlatformId
 		INNER JOIN deleted AS d
 				ON d.PlatformId = i.PlatformId
-			 WHERE d.DisposalDate <> i.DisposalDate
+			 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
 			   AND i.DisposalDate IS NOT NULL
 			   AND AD.EndDate IS NULL
 		
@@ -896,7 +896,7 @@ BEGIN
 							ON AD.PlatformId = i.PlatformId
 					INNER JOIN deleted AS d
 							ON d.PlatformId = i.PlatformId
-						 WHERE d.DisposalDate <> i.DisposalDate
+						 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
 						   AND i.DisposalDate IS NOT NULL
 						   AND AD.EndDate > i.DisposalDate
 				  )
@@ -913,7 +913,7 @@ BEGIN
 				ON P.PlatformId = i.PlatformId
 		INNER JOIN deleted AS d
 				ON d.PlatformId = i.PlatformId
-			 WHERE d.DisposalDate <> i.DisposalDate
+			 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
 			   AND i.DisposalDate < GETDATE()
 
 
