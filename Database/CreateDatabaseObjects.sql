@@ -97,7 +97,7 @@ BEGIN
 		END
 		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
 		BEGIN
-			IF @EndDate2 <= @StartDate1 OR @EndDate1 < @StartDate2  RETURN 0 ELSE RETURN 1
+			IF @EndDate2 <= @StartDate1 OR @EndDate1 <= @StartDate2  RETURN 0 ELSE RETURN 1
 		END	
 		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
 		BEGIN
