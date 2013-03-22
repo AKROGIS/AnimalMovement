@@ -325,7 +325,10 @@ foreign key to the CollarFile table.  It will deny updates (the CollarFile.FileI
 change), and will cascade deletes.  Changes to the collar file status does not change
 the contents of these table, only the fixes derived from the collar data.
 
+Collars
+=======
 
+**Updating DisposalDate needs to update any null EndDate in a related ArgosDeployment.**
 
 CollarParameters
 ================
@@ -685,10 +688,10 @@ may also be unprocessed transmissions if the date range has been expanded.
 
 
 Business Rules:
-The following rules are enforced in the insert and delete triggers to ensure data
+The following rules are enforced in the insert and update triggers to ensure data
 integrity if an elevated account bypasses the insert/update stored procedures.
   Ensure StartDate is before the EndDate.
-  Ensure both Dates are before the DisposalDate of the Collar and ArgosPlatform.
+  Ensure EndDate is before the DisposalDate of the Collar and ArgosPlatform.
   Ensure an ArgosPlatform is not deployed on multiple Collars at the same time.
   Ensure a Collar is not carrying multiple ArgosPlatforms at the same time.
 
@@ -717,6 +720,8 @@ Delete
   leave some CollarFile data unprocessed.**
 
 Update
+  A update can be done by the Manager of the Collar, *or* the Manager of the PlatformId,
+  see the discussion above for delete.
   DeploymentId:
     Changes are not allowed.
   PlatformId, Collar, StartDate, EndDate.
