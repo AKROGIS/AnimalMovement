@@ -61,6 +61,16 @@ BEGIN
 	-- A StartDate of NULL means the begining of time
 	-- A EndDate of NULL means the ending of time
 	
+	-- Touching i.e. EndDate = StartDate WAS considered overlapping
+	-- At that instant in time, a collar for example would be on two animals
+	-- simultaneously, which violates reality and creates some ambiguity.
+	-- In reality, it is highly unlikely that we will get a fix at this exact instant, and
+	-- even if we did, then that fix would be applied to both animals.  No real problem.
+	-- Since user's are likely to be confused if they get an overlap error when they
+	-- stop and start different deployment on the same date (time = 00:00) I have
+	-- relaxed this requirement:
+	--      EndDate = StartDate IS NOT overlapping
+	
 	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
 	
 	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
@@ -71,11 +81,11 @@ BEGIN
 		END
 		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
 		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
 		END	
 		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
 		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
 		END	
 	END
 	
@@ -83,15 +93,15 @@ BEGIN
 	BEGIN
 		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
 		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
 		END
 		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
 		BEGIN
-			IF @EndDate2 < @StartDate1 OR @EndDate1 < @StartDate2  RETURN 0 ELSE RETURN 1
+			IF @EndDate2 <= @StartDate1 OR @EndDate1 < @StartDate2  RETURN 0 ELSE RETURN 1
 		END	
 		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
 		BEGIN
-			IF @EndDate1 < @StartDate2 RETURN 0 ELSE RETURN 1
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
 		END	
 	END	
 
@@ -99,11 +109,11 @@ BEGIN
 	BEGIN
 		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
 		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
 		END
 		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
 		BEGIN
-			IF @EndDate2 < @StartDate1 RETURN 0 ELSE RETURN 1
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
 		END	
 		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
 		BEGIN
