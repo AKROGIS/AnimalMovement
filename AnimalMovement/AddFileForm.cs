@@ -320,30 +320,30 @@ namespace AnimalMovement
         private void SummerizeFileButton_Click(object sender, EventArgs e)
         {
             CollarFile file = null;
-            (new FileProcessor()).SummerizeFile(file);
+            FileSummerizer.SummerizeFile(file);
         }
         
         private void SummerizeAllButton_Click(object sender, EventArgs e)
         {
-            (new FileProcessor()).SummerizeAll();
+            FileSummerizer.SummerizeAll();
         }
         
         private void DownloadProgramButton_Click(object sender, EventArgs e)
         {
             ArgosProgram program = null;
-            FileLibrary.ArgosDownloader.DownloadArgosProgram(program);
+            FileDownloader.DownloadArgosProgram(program);
         }
         
         private void DownloadPlatformButton_Click(object sender, EventArgs e)
         {
             ArgosPlatform platform = null;
-            FileLibrary.ArgosDownloader.DownloadArgosPlatform(platform);
+            FileDownloader.DownloadArgosPlatform(platform);
         }
         
         private void DownloadAllButton_Click(object sender, EventArgs e)
         {
             ArgosProgram program;
-            FileLibrary.ArgosDownloader.DownloadAll(CurrentUser);
+            FileDownloader.DownloadAll(null,CurrentUser);
         }
         
 

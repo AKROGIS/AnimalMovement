@@ -1,319 +1,57 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using System.Text;
 using DataModel;
+using Telonics;
+
+
+//TODO - When loading an Argos file, we need to populate the ArgosDownloadSummary Table.
+//TODO - Error handling/logging need to be rethunk to support a library.
+//TODO - Need method to Process(CollarFile,ArgosPlatform)
+//TODO - ProcessAll need to check for partial files
 
 namespace FileLibrary
 {
     public class FileProcessor
     {
         public bool ProcessLocally { get; set; }
-        
-        public int? LoadAws(Byte[] contents,  Project project = null, Collar collar = null)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public void LoadPath(string path,  Project project = null, Collar collar = null)
-        {
-            throw new NotImplementedException();
-        }
-        
+
         public void ProcessAll()
         {
-            throw new NotImplementedException();
+            var database = new AnimalMovementDataContext();
+            var views = new AnimalMovementViewsDataContext();
+            foreach (var file in views.UnprocessedArgosFiles)
+                try
+                {
+                    if (ProcessLocally)
+                        ProcessId(file.FileId);
+                    else
+                        database.ProcessAllCollarsForArgosFile(file.FileId);
+                }
+                catch (Exception ex)
+                {
+                    LogFileMessage(file.FileId, "ERROR: " + ex.Message + "processing " + (ProcessLocally ? "locally" : "in database"));
+                }
         }
 
         public void ProcessPath(string path, Project project = null)
         {
+            var database = new AnimalMovementDataContext();
             if (System.IO.File.Exists(path))
-                throw new NotImplementedException();
+                ProcessFile(database, path, project);
             else if (System.IO.Directory.Exists(path))
-                throw new NotImplementedException();
-            throw new NotImplementedException();
+                ProcessFolder(database, path, project);
+            throw new InvalidOperationException(path + "is not a folder or file");
         }
 
-        public void ProcessId(int fileId)
-        {
-            if (ProcessLocally)
-            {
-                
-            }
-            else
-            {
-                var database = new AnimalMovementDataContext(); 
-                database.ProcessAllCollarsForArgosFile(fileId);
-            }
-        }
-
-        public void ProcessFile(CollarFile file)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SummerizeFile(CollarFile file)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SummerizeAll()
-        {
-            throw new NotImplementedException();
-        }
-    }
-}
-
-//From ArgosDownloader
-/*
-        public int? LoadAws(Byte[] contents, Project project = null)
-        {
-            throw new NotImplementedException();
-        }
-
-
-                        var days = Math.Min(MaxDays, collar.Days ?? MaxDays);
-                        errors = "";
-                        int? firstFileId = null;
-                        var results = ArgosWebSite.GetCollar(collar.UserName, collar.Password, collar.PlatformId, days,
-                                                             out errors);
-                        if (results != null)
-                        {
-                            try
-                            {
-                                var processor = new FileProcessor();
-                                firstFileId = processor.LoadAws(results.ToBytes());
-                            }
-                            catch (Exception ex)
-                            {
-                                errors = "Error loading/processing AWS download: " + ex.Message;
-                            }
-                        }
-                        try
-                        {
-                            //log this activity in the database
-                            //if results is null, then errors should be non-null
-                            var log = new ArgosDownload
-                            {
-                                CollarManufacturer = collar.CollarManufacturer,
-                                CollarId = collar.CollarId,
-                                FileId = firstFileId,
-                                ErrorMessage = errors
-                            };
-                            db.ArgosDownloads.InsertOnSubmit(log);
-                            db.SubmitChanges();
-                        }
-                        catch (Exception ex)
-                        {
-                            errors = Environment.NewLine + "Error logging download to database: " + ex.Message +
-                                     Environment.NewLine + "Errors: '" + errors + "'" + Environment.NewLine +
-                                     "CollarId = " + collar.CollarId + "FileId = " + firstFileId;
-                        }
-
-
-                        int? secondFileId = null;
-                             var collarFile = new CollarFile
-                                {
-                                    Project = collar.ProjectId,
-                                    FileName = collar.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
-                                    Format = 'F',
-                                    CollarManufacturer = collar.CollarManufacturer,
-                                    CollarId = collar.CollarId,
-                                    Status = 'A',
-                                    Contents = results.ToBytes()
-                                };
-                            db.CollarFiles.InsertOnSubmit(collarFile);
-                            try
-                            {
-                                db.SubmitChanges();
-                                firstFileId = collarFile.FileId;
-                            }
-                            catch (Exception ex)
-                            {
-                                errors = "Error writing raw AWS download to database: " + ex.Message;
-                            }
-                            if (firstFileId != null)
-                            {
-                                try
-                                {
-                                    var collarFile2 = ProcessAws(collar, firstFileId.Value, results);
-                                    try
-                                    {
-                                        db.CollarFiles.InsertOnSubmit(collarFile2);
-                                        db.SubmitChanges();
-                                        secondFileId = collarFile2.FileId;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        errors = "Error writing Gen3/4 output to database: " + ex.Message;
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    errors = "Error processing AWS download to Gen3/4: " + ex.Message;
-                                }
-                                if (secondFileId == null)
-                                {
-                                    try
-                                    {
-                                        db.CollarFiles.DeleteOnSubmit(collarFile);
-                                        db.SubmitChanges();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        errors += Environment.NewLine + "Error trying to rollback changes: " +
-                                                  ex.Message + Environment.NewLine + "The AWS file (id = " + firstFileId +
-                                                  ") added to the database could not be removed after a subsequent error.";
-                                    }
-                                }
-                            }
-
-
-        private static CollarFile ProcessAws(DownloadableAndAnalyzableCollar collar, int parentFileId,
-                                             ArgosWebSite.ArgosWebResult results)
-        {
-            //TODO - Can I simplify this? Maybe use the ArgosCollarAnalyzer from ArgosProcessor?
-
-            CollarFile collarFile;
-            switch (collar.CollarModel)
-            {
-                case "Gen3":
-                    if (!collar.Gen3Period.HasValue)
-                        throw new InvalidOperationException("Gen3 collar cannot be processed without a period");
-                    var g3processor = new Gen3Processor(TimeSpan.FromMinutes(collar.Gen3Period.Value));
-
-                    ArgosFile aws3 = new ArgosAwsFile(results.ToBytes()) {Processor = id => g3processor};
-
-                    byte[] g3data =
-                        Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, aws3.ToTelonicsData()));
-                    collarFile = new CollarFile
-                        {
-                            Project = collar.ProjectId,
-                            FileName =
-                                collar.PlatformId + "_gen3_" + DateTime.Now.ToString("yyyyMMdd") +
-                                ".csv",
-                            Format = 'D',
-                            CollarManufacturer = collar.CollarManufacturer,
-                            CollarId = collar.CollarId,
-                            Status = 'A',
-                            Contents = g3data,
-                            ParentFileId = parentFileId
-                        };
-                    break;
-                case "Gen4":
-                    var g4processor = new Gen4Processor(collar.TpfFile.ToArray());
-                    string tdcExe = Settings.GetSystemDefault("tdc_exe");
-                    string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");
-                    int timeout;
-                    Int32.TryParse(Settings.GetSystemDefault("tdc_timeout"), out timeout);
-                    if (!String.IsNullOrEmpty(tdcExe))
-                        g4processor.TdcExecutable = tdcExe;
-                    if (!String.IsNullOrEmpty(batchFile))
-                        g4processor.BatchFileTemplate = batchFile;
-                    if (timeout != 0)
-                        g4processor.TdcTimeout = timeout;
-
-                    ArgosFile aws4 = new ArgosAwsFile(results.ToBytes()) {Processor = id => g4processor};
-
-                    byte[] g4data =
-                        Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, aws4.ToTelonicsData()));
-                    collarFile = new CollarFile
-                        {
-                            Project = collar.ProjectId,
-                            FileName =
-                                collar.PlatformId + "_gen4_" + DateTime.Now.ToString("yyyyMMdd") +
-                                ".csv",
-                            Format = 'C',
-                            CollarManufacturer = collar.CollarManufacturer,
-                            CollarId = collar.CollarId,
-                            Status = 'A',
-                            Contents = g4data,
-                            ParentFileId = parentFileId
-                        };
-                    break;
-                default:
-                    var msg = String.Format("Unsupported model ({0} for collar {1}", collar.CollarModel, collar.CollarId);
-                    throw new ArgumentOutOfRangeException(msg);
-            }
-            return collarFile;
-        }
-*/
-
-//From ArgosProcessor
-//TODO - When loading an Argos file, we need to populate the ArgosDownloadSummary Table.
-//TODO - error handeling/logging need to be rethunk to support a library.
-
-/*
-        #region Logging
-
-        static void LogFatalError(string error)
-        {
-            LogGeneralError(error);
-            throw new ProcessingException();
-        }
-
-        static void LogGeneralWarning(string warning)
-        {
-            LogGeneralMessage("Warning: " + warning);
-        }
-
-        static void LogGeneralError(string error)
-        {
-            LogGeneralMessage("ERROR: " + error);
-        }
-
-        static void LogGeneralMessage(string message)
-        {
-            Console.WriteLine(message);
-            System.IO.File.AppendAllText("ArgosProcessor.log", message);
-        }
-
-        static void LogFileMessage(int fileid, string message, string platform = null, string collarMfgr = null, string collarId = null)
-        {
-            try
-            {
-                var issue = new ArgosFileProcessingIssue
-                {
-                    FileId = fileid,
-                    Issue = message,
-                    PlatformId = platform,
-                    CollarManufacturer = collarMfgr,
-                    CollarId = collarId
-                };
-                _database.ArgosFileProcessingIssues.InsertOnSubmit(issue);
-                _database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                LogFatalError("Exception Logging Message in Database: " + ex.Message);
-            }
-        }
-
-        #endregion
-
-
-        static void ProcessAll()
-        {
-            foreach (var file in _views.UnprocessedArgosFiles)
-                try
-                {
-                    if (_processLocally)
-                        ProcessId(file.FileId);
-                    else
-                        _database.ProcessAllCollarsForArgosFile(file.FileId);
-                }
-                catch (Exception ex)
-                {
-                    LogFileMessage(file.FileId, "ERROR: " + ex.Message + "processing " + (_processLocally ? "locally" : "in database"));
-                }
-        }
-
-        static void ProcessFolder(string folderPath)
+        void ProcessFolder(AnimalMovementDataContext database, string folderPath, Project project = null)
         {
             foreach (var file in System.IO.Directory.EnumerateFiles(folderPath))
                 try
                 {
-                    ProcessFile(System.IO.Path.Combine(folderPath, file));
+                    ProcessFile(database, System.IO.Path.Combine(folderPath, file), project);
                 }
                 catch (Exception ex)
                 {
@@ -326,9 +64,9 @@ namespace FileLibrary
         static Byte[] _fileContents;
         static Byte[] _fileHash;
 
-        static void ProcessFile(string filePath)
+        void ProcessFile(AnimalMovementDataContext database, string filePath, Project project = null)
         {
-            if (_project == null)
+            if (project == null)
             {
                 LogGeneralError("You must provide a project a project before the file or folder.");
                 return;
@@ -337,7 +75,7 @@ namespace FileLibrary
             LoadAndHashFile(filePath);
             if (_fileContents == null)
                 return;
-            if (AbortBecauseDuplicate(filePath))
+            if (AbortBecauseDuplicate(database, filePath))
                 return;
             ArgosFile argos;
             char format = GuessFileFormat(out argos);
@@ -349,7 +87,7 @@ namespace FileLibrary
 
             var file = new CollarFile
             {
-                Project = _project,
+                Project = project.ProjectId,
                 FileName = System.IO.Path.GetFileName(filePath),
                 Format = format,
                 CollarManufacturer = "Telonics",
@@ -357,15 +95,14 @@ namespace FileLibrary
                 Contents = _fileContents,
                 Sha1Hash = _fileHash
             };
-            _database.CollarFiles.InsertOnSubmit(file);
-            _database.SubmitChanges();
+            database.CollarFiles.InsertOnSubmit(file);
+            database.SubmitChanges();
             LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, file.FileName));
-            SummarizeArgosFile(file.FileId, argos);
 
-            if (_processLocally)
+            if (ProcessLocally)
                 ProcessFile(file, argos);
             else
-                _database.ProcessAllCollarsForArgosFile(file.FileId);
+                database.ProcessAllCollarsForArgosFile(file.FileId);
         }
 
         static void LoadAndHashFile(string path)
@@ -382,9 +119,9 @@ namespace FileLibrary
             _fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(_fileContents);
         }
 
-        static bool AbortBecauseDuplicate(string path)
+        static bool AbortBecauseDuplicate(AnimalMovementDataContext database, string path)
         {
-            var duplicate = _database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
+            var duplicate = database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
             if (duplicate == null)
                 return false;
             var msg = String.Format("Skipping {2}, the contents have already been loaded as file '{0}' in project '{1}'.", path,
@@ -407,19 +144,27 @@ namespace FileLibrary
 
         #endregion
 
-        static void ProcessId(int id)
+        public void ProcessId(int fileId)
         {
-            var file = _database.CollarFiles.FirstOrDefault(f => f.FileId == id && (f.Format == 'E' || f.Format == 'F'));
-            if (file == null)
+            var database = new AnimalMovementDataContext();
+            if (ProcessLocally)
             {
-                var msg = String.Format("{0} is not an Argos email or AWS file Id in the database.", id);
-                LogGeneralError(msg);
-                return;
+                var file = database.CollarFiles.FirstOrDefault(f => f.FileId == fileId && (f.Format == 'E' || f.Format == 'F'));
+                if (file == null)
+                {
+                    var msg = String.Format("{0} is not an Argos email or AWS file Id in the database.", fileId);
+                    LogGeneralError(msg);
+                    return;
+                }
+                ProcessFile(file);
             }
-            ProcessFile(file);
+            else
+            {
+                database.ProcessAllCollarsForArgosFile(fileId);
+            }
         }
 
-        private static void ProcessFile(CollarFile file)
+        internal void ProcessFile(CollarFile file)
         {
             try
             {
@@ -449,6 +194,9 @@ namespace FileLibrary
             ClearPreviousProcessedFiles(file);
             ClearPreviousProcessingIssues(file);
 
+            var database = new AnimalMovementDataContext();
+            var views = new AnimalMovementViewsDataContext();
+
             var transmissionGroups = from transmission in argos.GetTransmissions()
                                      group transmission by transmission.PlatformId
                                          into transmissions
@@ -462,7 +210,7 @@ namespace FileLibrary
             foreach (var item in transmissionGroups)
             {
                 var parameterSets =
-                    _views.GetTelonicsParametersForArgosDates(item.Platform, item.First, item.Last)
+                    views.GetTelonicsParametersForArgosDates(item.Platform, item.First, item.Last)
                           .OrderBy(c => c.StartDate)
                           .ToList();
                 if (parameterSets.Count == 0)
@@ -550,8 +298,8 @@ namespace FileLibrary
                             Contents = data,
                             Sha1Hash = (new SHA1CryptoServiceProvider()).ComputeHash(data)
                         };
-                        _database.CollarFiles.InsertOnSubmit(collarFile);
-                        _database.SubmitChanges();
+                        database.CollarFiles.InsertOnSubmit(collarFile);
+                        database.SubmitChanges();
                         var message =
                             String.Format(
                                 "Successfully added Argos {0} transmissions from {1:g} to {2:g} to Collar {3}/{4}",
@@ -600,38 +348,69 @@ namespace FileLibrary
 
         private static void ClearPreviousProcessedFiles(CollarFile parentFile)
         {
-            foreach (var file in _database.CollarFiles.Where(f => f.ParentFileId == parentFile.FileId))
-                _database.CollarFiles.DeleteOnSubmit(file);
-            _database.SubmitChanges();
+            var database = new AnimalMovementDataContext();
+            foreach (var file in database.CollarFiles.Where(f => f.ParentFileId == parentFile.FileId))
+                database.CollarFiles.DeleteOnSubmit(file);
+            database.SubmitChanges();
         }
 
         private static void ClearPreviousProcessingIssues(CollarFile file)
         {
-            foreach (var issue in _database.ArgosFileProcessingIssues.Where(i => i.CollarFile == file))
-                _database.ArgosFileProcessingIssues.DeleteOnSubmit(issue);
-            _database.SubmitChanges();
+            var database = new AnimalMovementDataContext();
+            foreach (var issue in database.ArgosFileProcessingIssues.Where(i => i.CollarFile == file))
+                database.ArgosFileProcessingIssues.DeleteOnSubmit(issue);
+            database.SubmitChanges();
         }
 
-        private static void SummarizeArgosFile(int fileId, ArgosFile file)
+
+        #region Logging
+
+        static void LogFileMessage(int fileid, string message, string platform = null, string collarMfgr = null, string collarId = null)
         {
-            foreach (var program in file.GetPrograms())
+            try
             {
-                foreach (var platform in file.GetPlatforms(program))
+                var issue = new ArgosFileProcessingIssue
                 {
-                    var minDate = file.FirstTransmission(platform);
-                    var maxDate = file.LastTransmission(platform);
-                    var summary = new ArgosFilePlatformDate
-                        {
-                            FileId = fileId,
-                            ProgramId = program,
-                            PlatformId = platform,
-                            FirstTransmission = minDate,
-                            LastTransmission = maxDate
-                        };
-                    _database.ArgosFilePlatformDates.InsertOnSubmit(summary);
-                }
+                    FileId = fileid,
+                    Issue = message,
+                    PlatformId = platform,
+                    CollarManufacturer = collarMfgr,
+                    CollarId = collarId
+                };
+                var database = new AnimalMovementDataContext();
+                database.ArgosFileProcessingIssues.InsertOnSubmit(issue);
+                database.SubmitChanges();
+            }
+            catch (Exception ex)
+            {
+                LogFatalError("Exception Logging Message in Database: " + ex.Message);
             }
         }
+
+        static void LogFatalError(string error)
+        {
+            LogGeneralError(error);
+            throw new ProcessingException();
+        }
+
+        static void LogGeneralWarning(string warning)
+        {
+            LogGeneralMessage("Warning: " + warning);
+        }
+
+        static void LogGeneralError(string error)
+        {
+            LogGeneralMessage("ERROR: " + error);
+        }
+
+        static void LogGeneralMessage(string message)
+        {
+            Console.WriteLine(message);
+            System.IO.File.AppendAllText("ArgosProcessor.log", message);
+        }
+
+        #endregion
+
     }
 
     [Serializable]
@@ -658,4 +437,4 @@ namespace FileLibrary
         {
         }
     }
-*/
+}

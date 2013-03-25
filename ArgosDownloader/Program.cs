@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using DataModel;
+using FileLibrary;
 
 namespace ArgosDownloader
 {
@@ -46,7 +47,7 @@ namespace ArgosDownloader
         {
             try
             {
-                FileLibrary.ArgosDownloader.DownloadArgosProgram(program);
+                FileDownloader.DownloadArgosProgram(program);
             }
             //TODO catch other exceptions
             catch (Exception ex)
@@ -62,7 +63,7 @@ namespace ArgosDownloader
         {
             try
             {
-                FileLibrary.ArgosDownloader.DownloadArgosPlatform(platform);
+                FileDownloader.DownloadArgosPlatform(platform);
             }
             //TODO catch other exceptions
             catch (Exception ex)
