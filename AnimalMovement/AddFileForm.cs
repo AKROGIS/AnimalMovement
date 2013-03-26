@@ -119,10 +119,10 @@ namespace AnimalMovement
 
             var file = new CollarFile
                 {
-                    Project1 = Project,
+                    Project = Project,
                     FileName = System.IO.Path.GetFileName(FileNameTextBox.Text),
                     LookupCollarFileFormat = (LookupCollarFileFormat)FormatComboBox.SelectedItem,
-                    LookupCollarManufacturer = (LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem,
+                    CollarManufacturer = ((LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem).CollarManufacturer,
                     CollarId = CollarComboBox.Enabled ? ((Collar)CollarComboBox.SelectedItem).CollarId : null,
                     LookupFileStatus = Database.LookupFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
                     Contents = _fileContents,
@@ -172,7 +172,7 @@ namespace AnimalMovement
             if (duplicate == null)
                 return false;
             var msg = "The contents of this file have already been loaded as" + Environment.NewLine +
-                String.Format("file '{0}' in project '{1}'.", duplicate.FileName, duplicate.Project1.ProjectName) + Environment.NewLine +
+                String.Format("file '{0}' in project '{1}'.", duplicate.FileName, duplicate.Project.ProjectName) + Environment.NewLine +
                 "Loading a file multiple times is not a problem for the database," + Environment.NewLine +
                 "but it is unnecessary, inefficient, and generally confusing." + Environment.NewLine +
                 "It is recommended that you do NOT load this file again." + Environment.NewLine + Environment.NewLine +

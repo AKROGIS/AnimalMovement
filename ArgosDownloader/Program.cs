@@ -47,7 +47,7 @@ namespace ArgosDownloader
                         {
                             var collarFile = new CollarFile
                                 {
-                                    Project = collar.ProjectId,
+                                    ProjectId = collar.ProjectId,
                                     FileName = collar.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
                                     Format = 'F',
                                     CollarManufacturer = collar.CollarManufacturer,
@@ -271,7 +271,7 @@ namespace ArgosDownloader
                         Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, aws3.ToTelonicsData()));
                     collarFile = new CollarFile
                         {
-                            Project = collar.ProjectId,
+                            ProjectId = collar.ProjectId,
                             FileName =
                                 collar.PlatformId + "_gen3_" + DateTime.Now.ToString("yyyyMMdd") +
                                 ".csv",
@@ -302,7 +302,7 @@ namespace ArgosDownloader
                         Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, aws4.ToTelonicsData()));
                     collarFile = new CollarFile
                         {
-                            Project = collar.ProjectId,
+                            ProjectId = collar.ProjectId,
                             FileName =
                                 collar.PlatformId + "_gen4_" + DateTime.Now.ToString("yyyyMMdd") +
                                 ".csv",

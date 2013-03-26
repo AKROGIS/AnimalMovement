@@ -145,7 +145,7 @@ namespace AnimalMovement
         private void SetFileList()
         {
             var query =  from file in Database.CollarFiles
-                                      where file.Project1 == Project
+                                      where file.Project == Project
                                       select new FileListItem
                                       {
                                           File = file,

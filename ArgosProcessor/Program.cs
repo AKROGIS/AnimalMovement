@@ -197,7 +197,7 @@ namespace ArgosProcessor
 
             var file = new CollarFile
             {
-                Project = _project,
+                ProjectId = _project,
                 FileName = System.IO.Path.GetFileName(filePath),
                 Format = format,
                 CollarManufacturer = "Telonics",
@@ -236,7 +236,7 @@ namespace ArgosProcessor
             if (duplicate == null)
                 return false;
             var msg = String.Format("Skipping {2}, the contents have already been loaded as file '{0}' in project '{1}'.", path,
-                                    duplicate.FileName, duplicate.Project1.ProjectName);
+                                    duplicate.FileName, duplicate.Project.ProjectName);
             LogGeneralWarning(msg);
             return true;
         }
