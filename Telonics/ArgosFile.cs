@@ -61,6 +61,19 @@ namespace Telonics
         /// </summary>
         public Func<String, IProcessor> Processor { get; set; }
 
+        /// <summary>
+        /// AWS files may be too large for the server to return all records.
+        /// This is checked here, because it is simpler than implementing in ArgosAwsFile.
+        /// </summary>
+        public bool MaxResponseReached
+        {
+            get
+            {
+                return String.Equals(_lines.Last().Trim(), "MAX_RESPONSE_REACHED",
+                                     StringComparison.InvariantCultureIgnoreCase);
+            }
+        }
+
         #endregion
 
         #region Public Methods

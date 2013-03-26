@@ -197,6 +197,12 @@ namespace FileLibrary
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViewsDataContext();
 
+            if (argos.MaxResponseReached)
+            {
+                var msg = String.Format("This file is truncated.  The Argos server could not return all the data requested.");
+                LogFileMessage(file.FileId, msg);
+            }
+
             var transmissionGroups = from transmission in argos.GetTransmissions()
                                      group transmission by transmission.PlatformId
                                          into transmissions
