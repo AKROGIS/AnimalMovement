@@ -220,22 +220,27 @@ Collar Files
 Column constraints
 ------------------
 
-Collar
-  - is a nullable key in the collars table
+CollarManufacturer/CollarId
+  - is a nullable Foreign Key to the collars table
   - Can only be null for files which will be processed, i.e will have sub files with
-    non-null collars (and as a special exception, Debevek files - in the future these
-    should be processed to collar specific sub files)
-Project
-  - is a nullable key in the projects table (determines where this file is visible in UI)
+    non-null collars **and as a special exception, Debevek files - in the future these
+    should be processed to collar specific sub files**
+  - It will cascade updates, but stop deletes
+
+ProjectId
+  - is a nullable key in the projects table (determines where this file is visible in UI).
+    It will cascade updates, but stop deletes
 Owner
   - is a nullable key in the PI table (determines where this file is visible in UI)
-  - one and only one of Project/Owner must be non=null. enforced by an insert trigger.
-    if owner and project are both null, the uploading user is used as the owner.  this
-    will fail unless the up-loader is also a PI.
-  - Owner is used when a file Argos download or email upload will contain data for a
+  - It will cascade updates, but stop deletes
+  - one and only one of Project/Owner must be non-null. enforced by an insert trigger.
+    if owner and project are both null, the insert SP will use the uploading user (caller)
+	as the owner.  This will fail unless the up-loader is also a PI.
+  - Owner is used when a file (Argos download or email upload) will contain data for a
     number of collars, which might be spread across multiple projects.  Owner in this
     case really reflects the owner of the file, and not necessarily the owner of the
-    collars or projects involved with the file.
+    collars or projects involved with the file.  It is typically used for downloading
+	an Argos program which is done on behalf of a program manager, and not a project.
 FileName
   - must be non-null and not empty string; purely informational
 Status
@@ -277,10 +282,13 @@ Tables Dependent on CollarFiles
 -------------------------------
 
 CollarDataXXX: Contents, and Format (update: na; delete: cascade)
-CollarFile: FileId (for files with a parent) (update: na; delete: cascade)
-ArgosTransmissionSummary: Contents and Format   (update: na; delete: cascade)
+CollarFile: FileId (for files with a parent) (update: na; delete: cascade - can't cascade
+  in the FK contraint because this 'may cause cycles or multiple cascade paths', so we
+  must do it manually
+ArgosFilePlatformDates: Contents and Format   (update: na; delete: cascade)
 CollarFixes: Status, Collar (and Contents via CollarDataXXX) (update: see below;
-             delete: cascade)
+             delete: cascade - 'Cannot define cascaded DELETE because the table has an
+			 INSTEAD OF DELETE TRIGGER defined on it'.
 
 *** implement cascading deletes on ParentFileId and in CollarDataXXX this will greatly
 simplify the delete SP.
@@ -297,8 +305,21 @@ If status is active, generate collar fixes from new data in format specific tabl
 Delete
 ------
 
-Reverse of insert.  files that were downloaded cannot be deleted (by business decision
-and enforced by Foreign Key constraint)
+we delete active/inactive files the same.
+delete child files - handled in trigger because cascade doesn't work here
+delete fixes - handled in trigger because cascade doesn't work here (deleting fixes will
+   cascade to the locations, and then to the movement vectors)
+delete related records in ArgosFilePlatformDates - done with cascade
+delete related records in CollarDataXXX - done with cascade.
+
+files that were downloaded cannot be deleted (by business decision and enforced by
+  Foreign Key constraint)
+Files that are children of other files cannot be directly deleted.
+
+To delete a file you must be an editor of the project, or the Owner of the file
+The ArgosProcessor role is also allowed to delete files on behalf of users
+The uploader of the file has no special delete permission. i.e. They may have lost thier
+editor priveleges since they uploaded the file.
 
 Updates
 -------
