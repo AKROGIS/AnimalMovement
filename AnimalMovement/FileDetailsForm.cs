@@ -38,7 +38,7 @@ namespace AnimalMovement
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarFileFormat.Name;
-            CollarManufacturerTextBox.Text = File.Collar.LookupCollarManufacturer.Name.Trim();
+            CollarManufacturerTextBox.Text = File.Collar == null ? "" : File.Collar.LookupCollarManufacturer.Name.Trim();
             CollarIdTextBox.Text = File.CollarId;
             UserNameTextBox.Text = File.UserName;
             UploadDateTextBox.Text = File.UploadDate.ToString(CultureInfo.CurrentCulture);

@@ -148,7 +148,7 @@ GO
 CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
 RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[Sha1Hash]
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
 GO
 SET ANSI_NULLS ON
 GO
@@ -537,8 +537,8 @@ CREATE TABLE [dbo].[CollarFiles](
 	[Status] [char](1) NOT NULL,
 	[Contents] [varbinary](max) NOT NULL,
 	[ParentFileId] [int] NULL,
-	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
 	[Owner] [nvarchar](128) NULL,
+	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
  CONSTRAINT [PK_CollarFiles] PRIMARY KEY CLUSTERED 
 (
 	[FileId] ASC
@@ -2110,7 +2110,7 @@ GO
 CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[LocalTime]
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[LocalTime]
 GO
 SET ANSI_NULLS ON
 GO
@@ -4403,12 +4403,12 @@ RETURNS  TABLE (
 	[TimeStamp] [datetime2](7) NULL
 ) WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.TfpSummerizer].[SummarizeTpfFile]
+EXTERNAL NAME [SqlServer_TpfSummerizer].[SqlServer_TpfSummerizer.TfpSummerizer].[SummarizeTpfFile]
 GO
 CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[UtcTime]
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
 GO
 SET ANSI_NULLS ON
 GO
@@ -4862,7 +4862,7 @@ RETURNS  TABLE (
 	[rawData] [nvarchar](500) NULL
 ) WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatF]
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
 GO
 CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
 RETURNS  TABLE (
@@ -4878,7 +4878,7 @@ RETURNS  TABLE (
 	[Latitude] [nvarchar](50) NULL
 ) WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatD]
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatD]
 GO
 CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
 RETURNS  TABLE (
@@ -4936,7 +4936,7 @@ RETURNS  TABLE (
 	[Error] [nvarchar](250) NULL
 ) WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatC]
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatC]
 GO
 CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
 RETURNS  TABLE (
@@ -4957,7 +4957,7 @@ RETURNS  TABLE (
 	[Other] [nvarchar](255) NULL
 ) WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatB]
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatB]
 GO
 CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
 RETURNS  TABLE (
@@ -4982,7 +4982,7 @@ RETURNS  TABLE (
 	[Satellite Data] [nvarchar](150) NULL
 ) WITH EXECUTE AS CALLER
 AS 
-EXTERNAL NAME [SqlServerExtensions].[SqlServerExtensions.AnimalMovementFunctions].[ParseFormatA]
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatA]
 GO
 SET ANSI_NULLS ON
 GO
@@ -7053,13 +7053,6 @@ REFERENCES [dbo].[CollarFiles] ([FileId])
 ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[ArgosFilePlatformDates] CHECK CONSTRAINT [FK_ArgosFilePlatformDates_CollarFiles]
-GO
-ALTER TABLE [dbo].[ArgosFileProcessingIssues]  WITH CHECK ADD  CONSTRAINT [FK_ArgosFileProcessingIssues_ArgosPlatforms] FOREIGN KEY([PlatformId])
-REFERENCES [dbo].[ArgosPlatforms] ([PlatformId])
-ON UPDATE CASCADE
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[ArgosFileProcessingIssues] CHECK CONSTRAINT [FK_ArgosFileProcessingIssues_ArgosPlatforms]
 GO
 ALTER TABLE [dbo].[ArgosFileProcessingIssues]  WITH CHECK ADD  CONSTRAINT [FK_ArgosFileProcessingIssues_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])

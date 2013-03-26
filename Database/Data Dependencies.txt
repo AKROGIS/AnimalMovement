@@ -402,6 +402,9 @@ They are used if the issue is related to a known platform/collar in the database
 both the platform/collar fields are null, then the issue is related to the file in
 general, and not a specific platform/collar.
 The issue will be deleted/updated if the related platform/collar is deleted/updated.
+*Addendum* Platform is not a FK, because when processing a program file, we may come
+across a platform in the program file that is not in our database.  We want to store
+the platform in the issues file, for later correction.
 
 The data in this table is highly dependent on the state of the database at the time
 a file was processed. In particular, the platform to collar and collar to parameter

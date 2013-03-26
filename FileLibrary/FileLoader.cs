@@ -24,7 +24,7 @@ namespace FileLibrary
                 {
                     Owner = program.Manager,
                     FileName =
-                        "platform " + program.ProgramId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
+                        "program_" + program.ProgramId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
                     Format = 'F',
                     Status = 'A',
                     Contents = results.ToBytes()
@@ -56,7 +56,7 @@ namespace FileLibrary
                     {
                         Owner = platform.ArgosProgram.Manager,
                         FileName =
-                            "platform " + platform.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
+                            "platform_" + platform.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
                         Format = 'F',
                         Status = 'A',
                         Contents = results.ToBytes()
