@@ -1,15 +1,14 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FileLibrary")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Library of tools for downloading, uploading, and processing collar files")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("FileLibrary")]
+[assembly: AssemblyCompany("National Park Service, Alaska")]
+[assembly: AssemblyProduct("Animal Movement")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

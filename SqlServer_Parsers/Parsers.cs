@@ -7,43 +7,19 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using Microsoft.SqlServer.Server;
 
 // See http://msdn.microsoft.com/en-us/library/ms131103.aspx
 // for more information on creating CLR Table-Valued Functions
 
-namespace SqlServerExtensions
+namespace SqlServer_Parsers
 {
     //This attribute allows us to write to the static field in a CLR plugin for SQL Server
     // "Storing to a static field is not allowed in safe assemblies" otherwise
     [CompilerGenerated]
-    public class AnimalMovementFunctions
+    public class Parsers
     {
         private static int _formatCHeaderLines = 23;
-
-        [SqlFunction]
-        public static SqlDateTime LocalTime(SqlDateTime utcDateTime)
-        {
-            if (utcDateTime.IsNull)
-                return SqlDateTime.Null;
-            return new SqlDateTime(utcDateTime.Value.ToLocalTime());
-        }
-
-        [SqlFunction]
-        public static SqlDateTime UtcTime(SqlDateTime localDateTime)
-        {
-            if (localDateTime.IsNull)
-                return SqlDateTime.Null;
-            return new SqlDateTime(localDateTime.Value.ToUniversalTime());
-        }
-
-        [SqlFunction(IsDeterministic = true, IsPrecise = true)]
-        public static SqlBinary Sha1Hash(SqlBytes data)
-        {
-            return (new SHA1CryptoServiceProvider()).ComputeHash(data.Stream);
-        }
-
 
         #region SQL Server Table Value Functions
         //Code - Format
@@ -447,6 +423,8 @@ namespace SqlServerExtensions
         {
             //The header in this format is optional 
             if (lineNumber == 1 && lineText.Trim().StartsWith("\"programNumber\";", StringComparison.OrdinalIgnoreCase))
+                return false;
+            if (lineText.Trim().Equals("MAX_RESPONSE_REACHED", StringComparison.OrdinalIgnoreCase))
                 return false;
             if (string.IsNullOrEmpty(lineText.Trim()))
                 return false;
