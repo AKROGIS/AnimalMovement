@@ -114,10 +114,10 @@ namespace AnimalMovement
             }
             var file = new CollarFile
                 {
-                    Project1 = Project,
+                    Project = Project,
                     FileName = System.IO.Path.GetFileName(filePath),
                     LookupCollarFileFormat = Format,
-                    LookupCollarManufacturer = Format.LookupCollarManufacturer,
+                    CollarManufacturer = Format.LookupCollarManufacturer.CollarManufacturer,
                     CollarId = GetCollar(filePath),
                     LookupFileStatus = Database.LookupFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
                     Contents = data
@@ -149,10 +149,9 @@ namespace AnimalMovement
         private bool AbortBecauseDuplicate(string filePath)
         {
             if (!Database.CollarFiles.Any(f =>
-                f.Project1 == Project &&
+                f.Project == Project &&
                 f.FileName == System.IO.Path.GetFileName(filePath) &&
-                f.LookupCollarFileFormat == Format &&
-                f.LookupCollarManufacturer == Format.LookupCollarManufacturer
+                f.LookupCollarFileFormat == Format
                 ))
                 return false;
             var result = MessageBox.Show(this, "It appears this file has already been uploaded.  Are you sure you want to proceed?",

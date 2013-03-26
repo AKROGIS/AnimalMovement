@@ -22,7 +22,7 @@ namespace FileLibrary
             {
                 file = new CollarFile
                 {
-                    Manager = program.Manager,
+                    Owner = program.Manager,
                     FileName =
                         "platform " + program.ProgramId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
                     Format = 'F',
@@ -54,7 +54,7 @@ namespace FileLibrary
             {
                 file = new CollarFile
                     {
-                        Manager = platform.ArgosProgram.Manager,
+                        Owner = platform.ArgosProgram.Manager,
                         FileName =
                             "platform " + platform.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
                         Format = 'F',

@@ -34,15 +34,15 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsFileEditor = Database.IsEditor(File.Project, CurrentUser) ?? false;
+            IsFileEditor = Database.IsEditor(File.ProjectId, CurrentUser) ?? false;
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarFileFormat.Name;
-            CollarManufacturerTextBox.Text = File.LookupCollarManufacturer.Name.Trim();
+            CollarManufacturerTextBox.Text = File.Collar.LookupCollarManufacturer.Name.Trim();
             CollarIdTextBox.Text = File.CollarId;
             UserNameTextBox.Text = File.UserName;
             UploadDateTextBox.Text = File.UploadDate.ToString(CultureInfo.CurrentCulture);
-            ProjectTextBox.Text = File.Project1.ProjectName;
+            ProjectTextBox.Text = File.Project.ProjectName;
             StatusTextBox.Text = File.LookupFileStatus.Name;
             UpdateCollarFixes();
             EnableForm();

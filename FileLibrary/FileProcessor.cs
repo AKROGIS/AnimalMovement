@@ -87,7 +87,7 @@ namespace FileLibrary
 
             var file = new CollarFile
             {
-                Project = project.ProjectId,
+                ProjectId = project.ProjectId,
                 FileName = System.IO.Path.GetFileName(filePath),
                 Format = format,
                 CollarManufacturer = "Telonics",
@@ -125,7 +125,7 @@ namespace FileLibrary
             if (duplicate == null)
                 return false;
             var msg = String.Format("Skipping {2}, the contents have already been loaded as file '{0}' in project '{1}'.", path,
-                                    duplicate.FileName, duplicate.Project1.ProjectName);
+                                    duplicate.FileName, duplicate.Project.ProjectName);
             LogGeneralWarning(msg);
             return true;
         }
