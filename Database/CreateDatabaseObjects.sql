@@ -2009,6 +2009,7 @@ GO
 -- Description: Clears all the prior results from processing an Argos file.
 --              Anyone in the Editor or ArgosProcessor role can run this command
 --              since the file can always be reprocessed.
+--              It is harmless to call this on a file that has not been processed.
 -- =============================================
 CREATE PROCEDURE [dbo].[ArgosFile_ClearProcessingResults] 
 	@FileId INT
@@ -5049,7 +5050,7 @@ BEGIN
 		-- END
 		-- Converted GPS Data with an external application to formats 'C' and/or 'D'
 		-- This will always be called by an external interface
-		-- EXEC [dbo].[ProcessAllCollarsForArgosFile] @FileId
+		-- EXEC [dbo].[ArgosFile_Process] @FileId
 	END
 	
 	IF @Format = 'F'  -- Argos Web Services Format
@@ -5062,7 +5063,7 @@ BEGIN
 	    -- Converted GPS Data with an external application to formats 'C' and/or 'D'
 		-- This is beinging done more efficiently by the downloader program (the common case),
 		-- so we do not want to duplicate this here.
-		-- EXEC [dbo].[ProcessAllCollarsForArgosFile] @FileId
+		-- EXEC [dbo].[ArgosFile_Process] @FileId
 	END
 	
 	
@@ -5085,109 +5086,6 @@ CREATE TABLE [dbo].[LookupCollarFileHeaders](
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 5, 2013
--- Description: Processes all the collars in an Argos file
--- =============================================
-CREATE PROCEDURE [dbo].[ProcessAllCollarsForArgosFile] 
-	@FileId INT = NULL
-	
-WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
-
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Make sure we have a suitable FileId
-	DECLARE @ProjectId nvarchar(255);
-	DECLARE @Owner sysname;
-	SELECT @ProjectId = ProjectId, @Owner = UserName FROM CollarFiles WHERE FileId = @FileId AND [Status] = 'A' AND Format IN ('E', 'F')
-	IF @ProjectId IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Validate permission for this operation	
-	-- Caller needs to be the uploader of the file, or an editor on the files project
-	-- The caller must be the uploader of the file, the PI or editor on the project, or the local sql_proxy account
-	IF @Caller <> @@SERVERNAME + '\sql_proxy' AND @Caller <> @Owner AND
-	   NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
-			RAISERROR(@message2, 18, 0)
-			RETURN (1)
-		END
-	END
-	
-	
-	--Delete any existing sub files; this must be done in a cursor to call the SP
-	DECLARE @SubFileId INT
-    DECLARE delete_subfile_cursor CURSOR FOR 
-            SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId
-        
-    OPEN delete_subfile_cursor;
-
-    FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        EXEC CollarFile_Delete @SubFileId
-        FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
-    END
-    CLOSE delete_subfile_cursor;
-    DEALLOCATE delete_subfile_cursor;
-
-
-
-	-- Run the External command
-	DECLARE @exe nvarchar (255);
-	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
-	IF @exe IS NULL
-		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
-	DECLARE @cmd nvarchar(200) = '"' + @exe + '" ' + CONVERT(NVARCHAR(10),@FileId);
-	DECLARE @result varchar(4000);
-
-		-- see http://stackoverflow.com/questions/9501192/get-results-from-xp-cmdshell 
-        IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[#tempProcessResults]') AND type in (N'U')) 
-            DROP TABLE [dbo].[#tempProcessResults]
-        BEGIN TRY
-            CREATE TABLE #tempProcessResults(result varchar(1000))
-            INSERT INTO #tempProcessResults execute xp_cmdshell @cmd ;  -- will run as the sql_proxy account
-            IF EXISTS (SELECT 1 FROM #tempProcessResults WHERE result LIKE 'ERROR%')
-                BEGIN
-					-- FIXME how can I distiguish between warnings and errors??
-					SET @result = ''
-					SELECT @result = @result + result + '; ' FROM #tempProcessResults WHERE result LIKE 'ERROR%'
-					DROP TABLE #tempProcessResults	
-					RAISERROR(@result, 10, 0) -- Specify a severity of 10 or lower to return messages using RAISERROR without invoking a CATCH block
-					RETURN (1)
-                END
-            -- return any other results to the user.
-			SELECT result FROM #tempProcessResults WHERE result IS NOT NULL
-	        DROP TABLE #tempProcessResults	
-        END TRY
-        BEGIN CATCH
-			-- I'm using the try/catch to ensure that the temp table is dropped, then retrowing the error.
-            DROP TABLE #tempProcessResults
-			DECLARE @ErrorMessage nvarchar(400), @ErrorNumber int, @ErrorSeverity int, @ErrorState int, @ErrorLine int
-			SELECT @ErrorMessage = N'Error %d, Line %d, Message: '+ERROR_MESSAGE(),@ErrorNumber = ERROR_NUMBER(),@ErrorSeverity = ERROR_SEVERITY(),@ErrorState = ERROR_STATE(),@ErrorLine = ERROR_LINE()
-			RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState, @ErrorNumber,@ErrorLine)
-			RETURN (1)
-        END CATCH
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -5698,6 +5596,94 @@ BEGIN
 	--All other verification is handled by primary/foreign key and column constraints.
 	DELETE FROM dbo.CollarDeployments
 		  WHERE DeploymentId = @DeploymentId;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 5, 2013
+-- Description: Processes all the collars in an Argos file
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_Process] 
+	@FileId INT = NULL
+	
+WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Make sure we have a suitable FileId
+	DECLARE @ProjectId nvarchar(255);
+	DECLARE @Owner sysname;
+	SELECT @ProjectId = ProjectId, @Owner = UserName FROM CollarFiles WHERE FileId = @FileId AND [Status] = 'A' AND Format IN ('E', 'F')
+	IF @ProjectId IS NULL
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation	
+	-- Caller needs to be the uploader of the file, or an editor on the files project
+	-- The caller must be the uploader of the file, the PI or editor on the project, or the local sql_proxy account
+	IF @Caller <> @@SERVERNAME + '\sql_proxy' AND @Caller <> @Owner AND
+	   NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
+		BEGIN
+			DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
+			RAISERROR(@message2, 18, 0)
+			RETURN (1)
+		END
+	END
+	
+	
+	-- Clear any (if any) prior processing results 
+	EXEC [dbo].[ArgosFile_ClearProcessingResults] @FileId
+
+
+	-- Run the External command
+	DECLARE @exe nvarchar (255);
+	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
+	IF @exe IS NULL
+		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
+	DECLARE @cmd nvarchar(200) = '"' + @exe + '" ' + CONVERT(NVARCHAR(10),@FileId);
+	DECLARE @result varchar(4000);
+
+		-- see http://stackoverflow.com/questions/9501192/get-results-from-xp-cmdshell 
+        IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[#tempProcessResults]') AND type in (N'U')) 
+            DROP TABLE [dbo].[#tempProcessResults]
+        BEGIN TRY
+            CREATE TABLE #tempProcessResults(result varchar(1000))
+            INSERT INTO #tempProcessResults execute xp_cmdshell @cmd ;  -- will run as the sql_proxy account
+            IF EXISTS (SELECT 1 FROM #tempProcessResults WHERE result LIKE 'ERROR%')
+                BEGIN
+					-- FIXME how can I distiguish between warnings and errors??
+					SET @result = ''
+					SELECT @result = @result + result + '; ' FROM #tempProcessResults WHERE result LIKE 'ERROR%'
+					DROP TABLE #tempProcessResults	
+					RAISERROR(@result, 10, 0) -- Specify a severity of 10 or lower to return messages using RAISERROR without invoking a CATCH block
+					RETURN (1)
+                END
+            -- return any other results to the user.
+			SELECT result FROM #tempProcessResults WHERE result IS NOT NULL
+	        DROP TABLE #tempProcessResults	
+        END TRY
+        BEGIN CATCH
+			-- I'm using the try/catch to ensure that the temp table is dropped, then retrowing the error.
+            DROP TABLE #tempProcessResults
+			DECLARE @ErrorMessage nvarchar(400), @ErrorNumber int, @ErrorSeverity int, @ErrorState int, @ErrorLine int
+			SELECT @ErrorMessage = N'Error %d, Line %d, Message: '+ERROR_MESSAGE(),@ErrorNumber = ERROR_NUMBER(),@ErrorSeverity = ERROR_SEVERITY(),@ErrorState = ERROR_STATE(),@ErrorLine = ERROR_LINE()
+			RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState, @ErrorNumber,@ErrorLine)
+			RETURN (1)
+        END CATCH
 END
 GO
 SET ANSI_NULLS ON
@@ -7281,6 +7267,8 @@ GRANT EXECUTE ON [dbo].[ArgosFile_ClearProcessingResults] TO [ArgosProcessor] AS
 GO
 GRANT EXECUTE ON [dbo].[ArgosFile_ClearProcessingResults] TO [Editor] AS [dbo]
 GO
+GRANT EXECUTE ON [dbo].[ArgosFile_Process] TO [Editor] AS [dbo]
+GO
 GRANT EXECUTE ON [dbo].[ArgosFilePlatformDates_Insert] TO [ArgosProcessor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosFilePlatformDates_Insert] TO [Editor] AS [dbo]
@@ -7336,8 +7324,6 @@ GO
 GRANT EXECUTE ON [dbo].[CollarParameterFile_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Location_UpdateStatus] TO [Editor] AS [dbo]
-GO
-GRANT EXECUTE ON [dbo].[ProcessAllCollarsForArgosFile] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Project_Delete] TO [Investigator] AS [dbo]
 GO

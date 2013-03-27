@@ -28,7 +28,7 @@ namespace FileLibrary
                     if (ProcessLocally)
                         ProcessId(file.FileId);
                     else
-                        database.ProcessAllCollarsForArgosFile(file.FileId);
+                        database.ArgosFile_Process(file.FileId);
                 }
                 catch (Exception ex)
                 {
@@ -102,7 +102,7 @@ namespace FileLibrary
             if (ProcessLocally)
                 ProcessFile(file, argos);
             else
-                database.ProcessAllCollarsForArgosFile(file.FileId);
+                database.ArgosFile_Process(file.FileId);
         }
 
         static void LoadAndHashFile(string path)
@@ -160,7 +160,7 @@ namespace FileLibrary
             }
             else
             {
-                database.ProcessAllCollarsForArgosFile(fileId);
+                database.ArgosFile_Process(fileId);
             }
         }
 

@@ -685,10 +685,6 @@
     <Parameter Name="Gen3Period" Parameter="gen3Period" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Name="dbo.ProcessAllCollarsForArgosFile" Method="ProcessAllCollarsForArgosFile" IsComposable="true">
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Return Type="object" />
-  </Function>
   <Function Name="dbo.CollarDeployment_UpdateDates" Method="CollarDeployment_UpdateDates1">
     <Parameter Name="DeploymentId" Parameter="deploymentId" Type="System.Int32" DbType="Int" />
     <Parameter Name="DeploymentDate" Parameter="deploymentDate" Type="System.DateTime" DbType="DateTime2" />
@@ -799,6 +795,10 @@
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Name="dbo.ArgosFile_Process" Method="ArgosFile_Process">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
 </Database>

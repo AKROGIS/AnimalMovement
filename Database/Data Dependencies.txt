@@ -156,7 +156,7 @@ NextAnimalId (SVF)
 	Projects
 		ProjectId
 
-ProcessAllCollarsForArgosFile (SP)
+ArgosFile_Process (SP)
 	CollarFiles
 		FileId
 		Status

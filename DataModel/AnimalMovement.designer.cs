@@ -643,12 +643,6 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ProcessAllCollarsForArgosFile", IsComposable=true)]
-		public object ProcessAllCollarsForArgosFile([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
-		{
-			return ((object)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId).ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_UpdateDates")]
 		public int CollarDeployment_UpdateDates1([global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentId", DbType="Int")] System.Nullable<int> deploymentId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RetrievalDate", DbType="DateTime2")] System.Nullable<System.DateTime> retrievalDate)
 		{
@@ -745,6 +739,13 @@ namespace DataModel
 		public int CollarFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, fileName, collarManufacturer, collarId, projectId, owner);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosFile_Process")]
+		public int ArgosFile_Process([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId);
 			return ((int)(result.ReturnValue));
 		}
 	}
