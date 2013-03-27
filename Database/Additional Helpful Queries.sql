@@ -7,18 +7,18 @@
 -- ==================================================
 
 
------------ Argos Platforms/Collars not being downloaded (for various reasons)
+----------- Argos Platforms with no download data
      SELECT P2.Manager, P.PlatformId, C.*
        FROM ArgosPlatforms AS P
   LEFT JOIN ArgosPrograms AS P2
          ON P.ProgramId = P2.ProgramId
+  LEFT JOIN ArgosDeployments AS AD
+         ON AD.PlatformId = P.PlatformId
   LEFT JOIN Collars AS C
-         ON C.ArgosId = P.PlatformId
-  LEFT JOIN DownloadableAndAnalyzableCollars AS D
-         ON P.PlatformId = D.PlatformId
-      WHERE D.PlatformId IS NULL
-        AND C.DisposalDate IS NULL
-        AND P.Active = 1
+         ON AD.CollarManufacturer = C.CollarManufacturer AND AD.CollarId = C.CollarId
+  LEFT JOIN ArgosFilePlatformDates AS T
+         ON T.PlatformId = P.PlatformId
+      WHERE T.PlatformId IS NULL
    ORDER BY P2.Manager, P.PlatformId
 
  
@@ -64,14 +64,11 @@
    GROUP BY FileId
 
 
------------ Collars which are downloadable, but which I cannot analyze
-     SELECT A.*, C.CollarModel, C.Gen3Period
-       FROM DownloadableCollars AS A
-  LEFT JOIN DownloadableAndAnalyzableCollars AS B
-         ON A.CollarId = B.CollarId
-  LEFT JOIN Collars AS C
-         ON A.CollarId = C.CollarId
-      WHERE B.CollarId IS NULL
+----------- Argos Platforms I have downloaded, but which I cannot process
+     SELECT PlatformId
+       FROM ArgosFileProcessingIssues
+      WHERE PlatformId IS NOT NULL
+   GROUP BY PlatformId
 
 
 ----------- ERROR Argos Downloaded files that are not the right file format

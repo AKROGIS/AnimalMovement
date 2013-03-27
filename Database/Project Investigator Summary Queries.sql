@@ -94,20 +94,20 @@
         AND F.CollarId IS NULL
    ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
 
------------ Argos Platforms/Collars not being downloaded (for various reasons)
+----------- Argos Platforms with no download data
      SELECT P2.Manager, P.PlatformId, C.*
-      FROM ArgosPlatforms AS P
- LEFT JOIN ArgosPrograms AS P2
-        ON P.ProgramId = P2.ProgramId
- LEFT JOIN Collars AS C
-        ON C.ArgosId = P.PlatformId
- LEFT JOIN DownloadableAndAnalyzableCollars AS D
-        ON P.PlatformId = D.PlatformId
-     WHERE D.PlatformId IS NULL
-       AND C.DisposalDate IS NULL
-       AND P.Active = 1
-       AND P2.Manager = @PI
-  ORDER BY P2.Manager, P.PlatformId
+       FROM ArgosPlatforms AS P
+  LEFT JOIN ArgosPrograms AS P2
+         ON P.ProgramId = P2.ProgramId
+  LEFT JOIN ArgosDeployments AS AD
+         ON AD.PlatformId = P.PlatformId
+  LEFT JOIN Collars AS C
+         ON AD.CollarManufacturer = C.CollarManufacturer AND AD.CollarId = C.CollarId
+  LEFT JOIN ArgosFilePlatformDates AS T
+         ON T.PlatformId = P.PlatformId
+      WHERE T.PlatformId IS NULL
+        AND P2.Manager = @PI
+   ORDER BY P2.Manager, P.PlatformId
 
 ----------- Collars where Argos downloads have yielded no data
      SELECT C.Manager, C.CollarModel, C.ArgosId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
@@ -127,15 +127,18 @@
         AND C.Manager = @PI
    ORDER BY C.Manager, C.CollarModel, C.ArgosId
 
------------ Collars which are downloadable, but which I cannot analyze
-     SELECT A.*, C.CollarModel, C.Gen3Period
-       FROM DownloadableCollars AS A
-  LEFT JOIN DownloadableAndAnalyzableCollars AS B
-         ON A.CollarId = B.CollarId
-  LEFT JOIN Collars AS C
-         ON A.CollarId = C.CollarId
-      WHERE B.CollarId IS NULL
-        AND C.Manager = @PI
+
+----------- Argos Platforms I have downloaded, but which I cannot process
+     SELECT I.PlatformId
+       FROM ArgosFileProcessingIssues AS I
+       JOIN ArgosPlatforms AS P1
+         ON I.PlatformId = P1.PlatformId
+       JOIN ArgosPrograms AS P2
+         ON P1.ProgramId = P2.ProgramId
+      WHERE I.PlatformId IS NOT NULL
+        AND P2.Manager = @PI
+   GROUP BY I.PlatformId
+
 
 ----------- Conflicting fixes for all of a PI's collars in the last X days (SLOW!!)
      SELECT C.CollarManufacturer, C.CollarId, F.*

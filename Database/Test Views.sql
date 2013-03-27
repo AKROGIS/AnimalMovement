@@ -11,11 +11,11 @@ SELECT TOP 100 * FROM AllTpfFileData
 -- Used by AnimalMovement/FileDetailsForm.cs via the SQL to Linq DataModel
 SELECT TOP 10 * FROM AnimalFixesByFile
 
--- used by ArgosDownloader/Program.cs to determine collars to download 
-SELECT TOP 100 * FROM DownloadableAndAnalyzableCollars
+-- used by ArgosProcessor/Program.cs to determine which files to process 
+SELECT TOP 100 * FROM ArgosFile_NeedsPartialProcessing
 
--- Used by multiple queries in external files
-SELECT TOP 100 * FROM DownloadableCollars
+-- used by ArgosProcessor/Program.cs to determine which files to process 
+SELECT TOP 100 * FROM ArgosFile_NeverProcessed
 
 --Spatial layers
 SELECT TOP 100 * FROM InvalidLocations
@@ -26,7 +26,3 @@ SELECT TOP 100 * FROM StoreOnBoardLocations
 SELECT TOP 100 * FROM ValidLocations
 SELECT TOP 100 * FROM ValidLocationsWithTempAndActivity
 SELECT TOP 100 * FROM VelocityVectors
-
--- All the Email and AWS files that have not been processed 
-SELECT TOP 100 * FROM UnprocessedArgosFile
-

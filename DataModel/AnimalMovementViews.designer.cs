@@ -70,19 +70,19 @@ namespace DataModel
 			}
 		}
 		
-		public System.Data.Linq.Table<DownloadableAndAnalyzableCollar> DownloadableAndAnalyzableCollars
+		public System.Data.Linq.Table<PartiallyProcessedArgosFiles> PartiallyProcessedArgosFiles
 		{
 			get
 			{
-				return this.GetTable<DownloadableAndAnalyzableCollar>();
+				return this.GetTable<PartiallyProcessedArgosFiles>();
 			}
 		}
 		
-		public System.Data.Linq.Table<UnprocessedArgosFile> UnprocessedArgosFiles
+		public System.Data.Linq.Table<NeverProcessedArgosFiles> NeverProcessedArgosFiles
 		{
 			get
 			{
-				return this.GetTable<UnprocessedArgosFile>();
+				return this.GetTable<NeverProcessedArgosFiles>();
 			}
 		}
 		
@@ -276,130 +276,30 @@ namespace DataModel
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.DownloadableAndAnalyzableCollars")]
-	public partial class DownloadableAndAnalyzableCollar
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosFile_NeedsPartialProcessing")]
+	public partial class PartiallyProcessedArgosFiles
 	{
 		
-		private string _ProjectId;
-		
-		private string _CollarManufacturer;
-		
-		private string _CollarId;
-		
-		private string _Email;
-		
-		private string _UserName;
-		
-		private string _Password;
+		private int _FileId;
 		
 		private string _PlatformId;
 		
-		private System.Nullable<int> _Days;
-		
-		private string _CollarModel;
-		
-		private System.Nullable<int> _Gen3Period;
-		
-		private System.Data.Linq.Binary _TpfFile;
-		
-		private System.Nullable<bool> _SendNoEmails;
-		
-		public DownloadableAndAnalyzableCollar()
+		public PartiallyProcessedArgosFiles()
 		{
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
-		public string ProjectId
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL")]
+		public int FileId
 		{
 			get
 			{
-				return this._ProjectId;
+				return this._FileId;
 			}
 			set
 			{
-				if ((this._ProjectId != value))
+				if ((this._FileId != value))
 				{
-					this._ProjectId = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
-		public string CollarManufacturer
-		{
-			get
-			{
-				return this._CollarManufacturer;
-			}
-			set
-			{
-				if ((this._CollarManufacturer != value))
-				{
-					this._CollarManufacturer = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
-		public string CollarId
-		{
-			get
-			{
-				return this._CollarId;
-			}
-			set
-			{
-				if ((this._CollarId != value))
-				{
-					this._CollarId = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Email", DbType="NVarChar(200) NOT NULL", CanBeNull=false)]
-		public string Email
-		{
-			get
-			{
-				return this._Email;
-			}
-			set
-			{
-				if ((this._Email != value))
-				{
-					this._Email = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
-		public string UserName
-		{
-			get
-			{
-				return this._UserName;
-			}
-			set
-			{
-				if ((this._UserName != value))
-				{
-					this._UserName = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Password", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
-		public string Password
-		{
-			get
-			{
-				return this._Password;
-			}
-			set
-			{
-				if ((this._Password != value))
-				{
-					this._Password = value;
+					this._FileId = value;
 				}
 			}
 		}
@@ -419,122 +319,16 @@ namespace DataModel
 				}
 			}
 		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Days", DbType="Int")]
-		public System.Nullable<int> Days
-		{
-			get
-			{
-				return this._Days;
-			}
-			set
-			{
-				if ((this._Days != value))
-				{
-					this._Days = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarModel", DbType="VarChar(24) NOT NULL", CanBeNull=false)]
-		public string CollarModel
-		{
-			get
-			{
-				return this._CollarModel;
-			}
-			set
-			{
-				if ((this._CollarModel != value))
-				{
-					this._CollarModel = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Gen3Period", DbType="Int")]
-		public System.Nullable<int> Gen3Period
-		{
-			get
-			{
-				return this._Gen3Period;
-			}
-			set
-			{
-				if ((this._Gen3Period != value))
-				{
-					this._Gen3Period = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_TpfFile", DbType="VarBinary(MAX)", UpdateCheck=UpdateCheck.Never)]
-		public System.Data.Linq.Binary TpfFile
-		{
-			get
-			{
-				return this._TpfFile;
-			}
-			set
-			{
-				if ((this._TpfFile != value))
-				{
-					this._TpfFile = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SendNoEmails", DbType="Bit")]
-		public System.Nullable<bool> SendNoEmails
-		{
-			get
-			{
-				return this._SendNoEmails;
-			}
-			set
-			{
-				if ((this._SendNoEmails != value))
-				{
-					this._SendNoEmails = value;
-				}
-			}
-		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.UnprocessedArgosFile")]
-	public partial class UnprocessedArgosFile
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosFile_NeverProcessed")]
+	public partial class NeverProcessedArgosFiles
 	{
-		
-		private string _Project;
 		
 		private int _FileId;
 		
-		private char _Format;
-		
-		private string _FileName;
-		
-		private System.DateTime _UploadDate;
-		
-		private string _UserName;
-		
-		public UnprocessedArgosFile()
+		public NeverProcessedArgosFiles()
 		{
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Project", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
-		public string Project
-		{
-			get
-			{
-				return this._Project;
-			}
-			set
-			{
-				if ((this._Project != value))
-				{
-					this._Project = value;
-				}
-			}
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL")]
@@ -549,70 +343,6 @@ namespace DataModel
 				if ((this._FileId != value))
 				{
 					this._FileId = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Format", DbType="Char(1) NOT NULL")]
-		public char Format
-		{
-			get
-			{
-				return this._Format;
-			}
-			set
-			{
-				if ((this._Format != value))
-				{
-					this._Format = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileName", DbType="NVarChar(255) NOT NULL", CanBeNull=false)]
-		public string FileName
-		{
-			get
-			{
-				return this._FileName;
-			}
-			set
-			{
-				if ((this._FileName != value))
-				{
-					this._FileName = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UploadDate", DbType="DateTime2 NOT NULL")]
-		public System.DateTime UploadDate
-		{
-			get
-			{
-				return this._UploadDate;
-			}
-			set
-			{
-				if ((this._UploadDate != value))
-				{
-					this._UploadDate = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
-		public string UserName
-		{
-			get
-			{
-				return this._UserName;
-			}
-			set
-			{
-				if ((this._UserName != value))
-				{
-					this._UserName = value;
 				}
 			}
 		}

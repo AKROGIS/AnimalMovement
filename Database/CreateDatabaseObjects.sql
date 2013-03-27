@@ -4041,40 +4041,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[DownloadableCollars]
-AS
-
-SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
-      ,I.Email, P.[UserName], P.[Password], A.PlatformId
-      ,datediff(day,D.[TimeStamp],getdate()) AS [Days]
-  FROM
-	           ArgosPlatforms AS A
-	INNER JOIN ArgosPrograms AS P
-	        ON A.ProgramId = P.ProgramId
-	INNER JOIN ProjectInvestigators AS I
-	        ON I.Login = P.Manager
-	INNER JOIN Collars AS C
-	        ON C.ArgosId = A.PlatformId
-    INNER JOIN CollarDeployments as CD
-            ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
-     LEFT JOIN (
-               SELECT PlatformId, Max([Timestamp]) AS [Timestamp]
-                 FROM ArgosDownloads
-                WHERE ErrorMessage IS NULL
-                GROUP BY PlatformId
-               ) AS D
-            ON A.PlatformId = D.PlatformId
-
- WHERE A.Active = 1
-   AND P.Active = 1
-   AND (P.EndDate IS NULL OR getdate() < P.EndDate)
-   AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
-   AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 20, 2013
@@ -6175,51 +6141,6 @@ AS
         AND (P.EndDate IS NULL OR @StartDate < P.EndDate)
         AND (   (CollarModel = 'Gen3' AND P.Gen3Period IS NOT NULL)
              OR (CollarModel = 'Gen4' AND P.FileId IS NOT NULL))
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[DownloadableAndAnalyzableCollars]
-AS
-
-SELECT CD.ProjectId, C.CollarManufacturer, C.CollarId
-      ,I.Email, P.[UserName], P.[Password], A.PlatformId
-      ,datediff(day,D.[TimeStamp],getdate()) AS [Days]
-      ,C.CollarModel, C.Gen3Period, CPF.Contents AS TpfFile
-      ,CONVERT(BIT,CASE S.Value WHEN 'True' THEN 1 ELSE 0 END) AS SendNoEmails
-  FROM
-	           ArgosPlatforms AS A
-	INNER JOIN ArgosPrograms AS P
-	        ON A.ProgramId = P.ProgramId
-	INNER JOIN ProjectInvestigators AS I
-	        ON I.Login = P.Manager
-	INNER JOIN Collars AS C
-	        ON C.ArgosId = A.PlatformId
-    INNER JOIN CollarDeployments as CD
-            ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
-     LEFT JOIN CollarParameters as CP
-            ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
-     LEFT JOIN CollarParameterFiles as CPF
-            ON CP.FileId = CPF.FileId           
-     LEFT JOIN (
-               SELECT PlatformId, Max([Timestamp]) AS [Timestamp]
-                 FROM ArgosDownloads
-                WHERE ErrorMessage IS NULL
-                GROUP BY PlatformId
-               ) AS D
-            ON A.PlatformId = D.PlatformId
-     LEFT JOIN Settings AS S
-            ON I.Login = S.Username AND S.[Key] = 'Send_No_Email'
-
- WHERE A.Active = 1
-   AND P.Active = 1
-   AND (P.EndDate IS NULL OR getdate() < P.EndDate)
-   AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
-   AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
-   AND (CPF.FileId IS NULL OR CPF.Format <> 'B' or CPF.[Status] <> 'A') -- Ignore collars with an active Gen3 PPF file 
-   AND (C.Gen3Period IS NOT NULL OR (CPF.Format = 'A' AND CPF.[Status] = 'A')) -- Ignore collars without a Gen3 period or and active TPF file
-   AND (CP.EndDate IS NULL OR getdate() < CP.EndDate)
 GO
 SET ANSI_NULLS ON
 GO

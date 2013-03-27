@@ -22,7 +22,7 @@ namespace FileLibrary
         {
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViewsDataContext();
-            foreach (var file in views.UnprocessedArgosFiles)
+            foreach (var file in views.NeverProcessedArgosFiles)
                 try
                 {
                     if (ProcessLocally)

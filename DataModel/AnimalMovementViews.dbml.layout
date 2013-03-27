@@ -1,23 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11.125, 8.5" name="AnimalMovementViews">
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="AnimalMovementViews">
   <DataContextMoniker Name="/AnimalMovementViewsDataContext" />
   <nestedChildShapes>
-    <classShape Id="19af6e8d-997f-444a-8a90-00b7205f93d0" absoluteBounds="6.5, 3, 2, 2.3478011067708335">
+    <classShape Id="19af6e8d-997f-444a-8a90-00b7205f93d0" absoluteBounds="1.375, 2.875, 2, 2.3478011067708335">
       <DataClassMoniker Name="/AnimalMovementViewsDataContext/AnimalFixesByFile" />
       <nestedChildShapes>
-        <elementListCompartment Id="dca2ef59-24f6-49b6-86e0-6dc4255b71c0" absoluteBounds="6.515, 3.46, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="dca2ef59-24f6-49b6-86e0-6dc4255b71c0" absoluteBounds="1.3899999999999997, 3.335, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="195c1060-b677-4665-9c97-99e830cfc1af" absoluteBounds="4.125, 3, 2, 3.1170068359375">
-      <DataClassMoniker Name="/AnimalMovementViewsDataContext/DownloadableAndAnalyzableCollar" />
+    <classShape Id="401fa5e3-55d1-4ada-9ae3-2a6a6d6034cf" absoluteBounds="6.125, 2.875, 2, 1.1939925130208333">
+      <DataClassMoniker Name="/AnimalMovementViewsDataContext/PartiallyProcessedArgosFiles" />
       <nestedChildShapes>
-        <elementListCompartment Id="91e2cc5f-5aff-4d44-844c-cb842a24fd5f" absoluteBounds="4.1400000000000006, 3.46, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="8bc72b5f-e7bb-42a4-8870-c97b00019e19" absoluteBounds="6.1400000000000006, 3.335, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="8aa481b6-d094-4c60-8f26-7f7ba607987a" absoluteBounds="8.875, 3, 2, 1.9631982421875">
-      <DataClassMoniker Name="/AnimalMovementViewsDataContext/UnprocessedArgosFile" />
+    <classShape Id="e9f2c9c3-7f30-4dc0-a7d0-b5c18dbcc7da" absoluteBounds="3.75, 2.875, 2, 1.0016910807291668">
+      <DataClassMoniker Name="/AnimalMovementViewsDataContext/NeverProcessedArgosFiles" />
       <nestedChildShapes>
-        <elementListCompartment Id="34402706-e643-40be-a377-6cd4ba20755f" absoluteBounds="8.89, 3.46, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="7f58b3f3-7877-41dd-80aa-c546e7e5eb5a" absoluteBounds="3.7649999999999997, 3.335, 1.9700000000000002, 0.44169108072916669" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
   </nestedChildShapes>
