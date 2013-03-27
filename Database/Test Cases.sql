@@ -15,48 +15,48 @@ DECLARE @Step INT = 99;
 IF @Step = 1
 -- Clear the slate, and insert some test data;
 BEGIN
-	DELETE FROM [dbo].[Movement] WHERE [AnimalId] = 'test';
+	DELETE FROM [dbo].[Movements] WHERE [AnimalId] = 'test';
 	DELETE FROM [dbo].[Locations] WHERE [AnimalId] = 'test';
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-10',65.01,-160.0+0.09,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-11',65.04,-160.0+0.10,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-12',65.02,-160.0+0.11,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-13',65.02,-160.0+0.12,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-14',65.04,-160.0+0.13,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-16',65.04,-160.0+0.15,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-15',65.00,-160.0+0.14,NULL); -- put a V between two H
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-17',65.02,-160.0+0.16,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-19',65.00,-160.0+0.18,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-18',65.02,-160.0+0.17,NULL); -- put a V between two V
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-20',65.04,-160.0+0.19,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-21',65.00,-160.0+0.20,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-22',65.02,-160.0+0.21,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-23',65.00,-160.0+0.22,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-25',65.00,-160.0+0.24,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-24',65.03,-160.0+0.23,'H'); -- put a H between two V
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-26',65.02,-160.0+0.25,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-27',65.00,-160.0+0.26,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-28',65.00,-160.0+0.27,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-29',65.02,-160.0+0.28,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-30',65.00,-160.0+0.29,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-31',65.02,-160.0+0.30,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-01',65.00,-160.0+0.31,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-02',65.03,-160.0+0.32,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-03',65.01,-160.0+0.33,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-05',65.03,-160.0+0.35,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-04',65.02,-160.0+0.34,'H'); -- put a H between two H
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-06',65.01,-160.0+0.36,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-07',65.00,-160.0+0.37,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-08',65.01,-160.0+0.38,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-02-09',65.00,-160.0+0.39,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-07',65.04,-160.0+0.06,'H'); --Add stuff at the beginning
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-08',65.02,-160.0+0.07,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-09',65.04,-160.0+0.08,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-06',65.04,-160.0+0.05,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-05',65.02,-160.0+0.04,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-04',65.04,-160.0+0.03,'H');
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-03',65.02,-160.0+0.02,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-02',65.02,-160.0+0.01,NULL);
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-01',65.04,-160.0+0.00,'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-10',geography::Point(65.01,-160.0+0.09, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-11',geography::Point(65.04,-160.0+0.10, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-12',geography::Point(65.02,-160.0+0.11, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-13',geography::Point(65.02,-160.0+0.12, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-14',geography::Point(65.04,-160.0+0.13, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-16',geography::Point(65.04,-160.0+0.15, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-15',geography::Point(65.00,-160.0+0.14, 4326),NULL); -- put a V between two H
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-17',geography::Point(65.02,-160.0+0.16, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-19',geography::Point(65.00,-160.0+0.18, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-18',geography::Point(65.02,-160.0+0.17, 4326),NULL); -- put a V between two V
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-20',geography::Point(65.04,-160.0+0.19, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-21',geography::Point(65.00,-160.0+0.20, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-22',geography::Point(65.02,-160.0+0.21, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-23',geography::Point(65.00,-160.0+0.22, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-25',geography::Point(65.00,-160.0+0.24, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-24',geography::Point(65.03,-160.0+0.23, 4326),'H'); -- put a H between two V
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-26',geography::Point(65.02,-160.0+0.25, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-27',geography::Point(65.00,-160.0+0.26, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-28',geography::Point(65.00,-160.0+0.27, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-29',geography::Point(65.02,-160.0+0.28, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-30',geography::Point(65.00,-160.0+0.29, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-31',geography::Point(65.02,-160.0+0.30, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-01',geography::Point(65.00,-160.0+0.31, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-02',geography::Point(65.03,-160.0+0.32, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-03',geography::Point(65.01,-160.0+0.33, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-05',geography::Point(65.03,-160.0+0.35, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-04',geography::Point(65.02,-160.0+0.34, 4326),'H'); -- put a H between two H
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-06',geography::Point(65.01,-160.0+0.36, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-07',geography::Point(65.00,-160.0+0.37, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-08',geography::Point(65.01,-160.0+0.38, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-02-09',geography::Point(65.00,-160.0+0.39, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-07',geography::Point(65.04,-160.0+0.06, 4326),'H'); --Add stuff at the beginning
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-08',geography::Point(65.02,-160.0+0.07, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-09',geography::Point(65.04,-160.0+0.08, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-06',geography::Point(65.04,-160.0+0.05, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-05',geography::Point(65.02,-160.0+0.04, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-04',geography::Point(65.04,-160.0+0.03, 4326),'H');
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-03',geography::Point(65.02,-160.0+0.02, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-02',geography::Point(65.02,-160.0+0.01, 4326),NULL);
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) VALUES('test','1990-01-01',geography::Point(65.04,-160.0+0.00, 4326),'H');
 END;
 
 -- ===========================
@@ -70,7 +70,7 @@ END;
 IF @Step = 2
 BEGIN
 	-- Bulk insert from temp table
-	DELETE FROM [dbo].[Movement] WHERE [AnimalId] = 'test';
+	DELETE FROM [dbo].[Movements] WHERE [AnimalId] = 'test';
 	DELETE FROM [dbo].[Locations] WHERE [AnimalId] = 'test';
 
 	DECLARE @tmp TABLE (
@@ -121,7 +121,7 @@ BEGIN
 	INSERT INTO @tmp ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-02',65.02,-160.0+0.01,NULL);
 	INSERT INTO @tmp ([AnimalId],[FixDate],[Lat],[Lon],[Status]) VALUES('test','1990-01-01',65.04,-160.0+0.00,'H');
 	
-	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Lat],[Lon],[Status]) SELECT [AnimalId],[FixDate],[Lat],[Lon],[Status] FROM @tmp;
+	INSERT INTO [dbo].[Locations] ([AnimalId],[FixDate],[Location],[Status]) SELECT [AnimalId],[FixDate],geography::Point([Lat],[Lon], 4326),[Status] FROM @tmp;
 END;
 
 
@@ -570,6 +570,6 @@ END;
 IF @Step = 99
 -- Return everything to a production state
 BEGIN
-	DELETE FROM [dbo].[Movement] WHERE [AnimalID] = 'test';
+	DELETE FROM [dbo].[Movements] WHERE [AnimalID] = 'test';
 	DELETE FROM [dbo].[Locations] WHERE [AnimalID] = 'test';
 END;

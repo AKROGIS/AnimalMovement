@@ -26,10 +26,10 @@ delete from Locations where ProjectId = 'test' AND AnimalId = '12a4' AND FixId <
 
 
 Insert Locations (ProjectId, AnimalId, FixDate, FixId, Location)
-VALUES ('test', '12a4','2000-01-01 08:00', 27056, GEOGRAPHY::STPointFromText('POINT(-154.5 60.5)',4326))
+VALUES ('test', '12a4','2000-01-01 08:00', 27056, GEOGRAPHY::Point(-154.5, 60.5,4326))
 
 Insert Locations (ProjectId, AnimalId, FixDate, FixId, Location)
-VALUES ('test', '12a4','2000-01-01 16:00', 27057, GEOGRAPHY::STPointFromText('POINT(-154.4 60.6)',4326))
+VALUES ('test', '12a4','2000-01-01 16:00', 27057, GEOGRAPHY::Point(-154.4, 60.6,4326))
 
 Insert Locations (ProjectId, AnimalId, FixDate, FixId, Location)
-VALUES ('test', '12a4','2000-01-01 12:00', 27058, GEOGRAPHY::STPointFromText('POINT(-154.6 60.4)',4326))
+VALUES ('test', '12a4','2000-01-01 12:00', 27058, GEOGRAPHY::Point(-154.6, 60.4,4326))
