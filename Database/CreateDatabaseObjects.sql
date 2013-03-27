@@ -2016,7 +2016,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	IF EXISTS (SELECT 1 FROM CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	IF NOT EXISTS (SELECT 1 FROM CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
 	BEGIN
 		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid file in a suitable format.';
 		RAISERROR(@message1, 18, 0)

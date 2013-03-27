@@ -191,17 +191,10 @@ namespace FileLibrary
 
         static void ProcessFile(CollarFile file, ArgosFile argos)
         {
-            ClearPreviousProcessedFiles(file);
-            ClearPreviousProcessingIssues(file);
-
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViewsDataContext();
 
-            if (argos.MaxResponseReached)
-            {
-                var msg = String.Format("This file is truncated.  The Argos server could not return all the data requested.");
-                LogFileMessage(file.FileId, msg);
-            }
+            database.ArgosFile_ClearProcessingResults(file.FileId);
 
             var transmissionGroups = from transmission in argos.GetTransmissions()
                                      group transmission by transmission.PlatformId
@@ -213,6 +206,19 @@ namespace FileLibrary
                                              Last = transmissions.Max(t => t.DateTime),
                                              Transmissions = transmissions
                                          };
+
+            if (argos is ArgosAwsFile)
+            {
+                var awsFile = (ArgosAwsFile)argos;
+                string msg = null;
+                if (!awsFile.MaxResponseReached.HasValue)
+                    msg = String.Format("Programming Error, unable to determine if file is truncated.");
+                else if (awsFile.MaxResponseReached.Value)
+                    msg = String.Format("This file is truncated.  The Argos server could not return all the data requested.");
+                if (msg != null)
+                    LogFileMessage(file.FileId, msg);
+            }
+
             foreach (var item in transmissionGroups)
             {
                 var parameterSets =
@@ -302,7 +308,7 @@ namespace FileLibrary
                             Status = 'A',
                             ParentFileId = file.FileId,
                             Contents = data,
-                            Sha1Hash = (new SHA1CryptoServiceProvider()).ComputeHash(data)
+                            Owner = file.Owner
                         };
                         database.CollarFiles.InsertOnSubmit(collarFile);
                         database.SubmitChanges();
@@ -351,23 +357,6 @@ namespace FileLibrary
                 processor.TdcTimeout = timeout;
             return processor;
         }
-
-        private static void ClearPreviousProcessedFiles(CollarFile parentFile)
-        {
-            var database = new AnimalMovementDataContext();
-            foreach (var file in database.CollarFiles.Where(f => f.ParentFileId == parentFile.FileId))
-                database.CollarFiles.DeleteOnSubmit(file);
-            database.SubmitChanges();
-        }
-
-        private static void ClearPreviousProcessingIssues(CollarFile file)
-        {
-            var database = new AnimalMovementDataContext();
-            foreach (var issue in database.ArgosFileProcessingIssues.Where(i => i.CollarFile == file))
-                database.ArgosFileProcessingIssues.DeleteOnSubmit(issue);
-            database.SubmitChanges();
-        }
-
 
         #region Logging
 
