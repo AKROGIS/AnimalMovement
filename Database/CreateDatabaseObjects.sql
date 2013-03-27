@@ -2098,15 +2098,36 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[UnprocessedArgosFile]
+CREATE VIEW [dbo].[ArgosFile_NeverProcessed]
 AS
-
-     SELECT F1.ProjectId, F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
-       FROM CollarFiles AS F1
-  LEFT JOIN CollarFiles AS F2
-         ON F1.FileId = F2.ParentFileId
-      WHERE F2.FileId IS NULL
-        AND F1.Format IN ('F','E')
+----------- ArgosFile_NeverProcessed
+-----------   Is a file which has transmissions (ensures file is correct format),
+-----------   but no child files, and no processing issues
+-----------   (relies on files of correct format having been summerized) 
+     SELECT T.FileId
+       FROM ArgosFilePlatformDates AS T      
+  LEFT JOIN CollarFiles AS C
+         ON T.FileId = C.ParentFileId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = T.FileId
+      WHERE C.FileId IS NULL
+        AND I.FileId IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
+AS
+----------- ArgosFile_NeedsPartialProcessing
+-----------   Is a (file,platform) where the file has the correct transmissions,
+-----------   and there are special processing issues for the platform
+-----------   (relies on files of correct format having been summerized) 
+     SELECT T.FileId, T.PlatformId
+       FROM ArgosFilePlatformDates AS T         
+ INNER JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = T.FileId AND T.PlatformId = I.PlatformId
+      WHERE I.Issue Like 'Process%'
 GO
 CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER

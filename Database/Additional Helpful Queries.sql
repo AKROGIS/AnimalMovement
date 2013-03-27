@@ -40,6 +40,30 @@
    ORDER BY C.Manager, C.CollarModel, C.ArgosId
   
 
+----------- ERROR: ArgosFiles_WithoutSummary
+     SELECT P.ProjectId, P.Owner, P.FileId, P.Format, P.FileName, P.UploadDate, P.UserName
+       FROM CollarFiles AS P
+  LEFT JOIN ArgosFilePlatformDates AS T
+         ON P.FileId = T.FileId
+      WHERE T.FileId IS NULL
+        AND P.Format IN ('F','E', 'B')
+
+
+----------- ArgosFile_No children
+     SELECT P.ProjectId, P.Owner, P.FileId, P.Format, P.FileName, P.UploadDate, P.UserName
+       FROM CollarFiles AS P
+  LEFT JOIN CollarFiles AS C
+         ON P.FileId = C.ParentFileId
+      WHERE C.FileId IS NULL
+        AND P.Format IN ('F','E', 'B')
+
+
+----------- ArgosFile_HasProcessingIssues
+     SELECT FileId
+       FROM ArgosFileProcessingIssues
+   GROUP BY FileId
+
+
 ----------- Collars which are downloadable, but which I cannot analyze
      SELECT A.*, C.CollarModel, C.Gen3Period
        FROM DownloadableCollars AS A
