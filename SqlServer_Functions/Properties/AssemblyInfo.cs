@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Sql Server Extensions for Animal Movements")]
-[assembly: AssemblyDescription("Sql Server Extensions for Animal Movements")]
+[assembly: AssemblyTitle("Sql Server Extensions for Animal Movements (Simple Functions)")]
+[assembly: AssemblyDescription("Sql Server Extensions for Animal Movements (Simple Functions)")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("National Park Service, Alaska GIS Team")]
-[assembly: AssemblyProduct("Sql Server Extensions for Animal Movements")]
+[assembly: AssemblyProduct("Sql Server Extensions for Animal Movements (Simple Functions)")]
 [assembly: AssemblyCopyright("Copyright © National Park Service 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

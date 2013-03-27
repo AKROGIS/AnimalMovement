@@ -72,6 +72,10 @@
       <Project>{4B8A418A-482D-4631-A605-938D52BDF8BC}</Project>
       <Name>DataModel</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FileLibrary\FileLibrary.csproj">
+      <Project>{974D12D2-2796-47F8-9259-5268DA1D84AB}</Project>
+      <Name>FileLibrary</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Telonics\Telonics.csproj">
       <Project>{1231E7F9-7B69-4F72-9B44-21C911B2298D}</Project>
       <Name>Telonics</Name>

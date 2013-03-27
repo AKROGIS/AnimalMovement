@@ -3465,3 +3465,52 @@ Check illegal modifications of deployment
     DELETE [dbo].[ProjectInvestigators] WHERE  [Login] = @T6_sa
 
     PRINT '  Done'
+
+
+
+
+--ArgosPlatforms
+--SP Tests
+--Insert
+-- Check as nobody, editor - FAIL
+-- Check as investigator by not manager of program - FAIL
+-- Check with NULL, DEFAULT platform - FAIL
+-- Check with NULL, DEFAULT program - FAIL
+-- Check as manager of program, existing platform - FAIL
+-- Check as manager of program, new platform, rest NULL - FAIL
+-- Check as manager of program, new platform, rest DEFAULT - SUCCESS
+-- Check as manager of program, new platform, rest valid non-null values - SUCCESS
+-- Check with Notes = '' goes to Notes = NULL - SUCCESS
+--Update
+-- Check as nobody, editor - FAIL
+-- Check as investigator by not manager of old program - FAIL
+-- Check with NULL, DEFAULT oldplatform - FAIL
+-- Check with NULL newplatform - FAIL
+-- Check with DEFAULT newplatform - SUCCESS
+-- Check with invalid newplatform - FAIL
+-- Check with NULL program - FAIL
+-- Check with DEFAULT program - SUCCESS
+-- Check with invalid program - FAIL
+-- check as manager of old program and new program - SUCCESS
+-- check as manager of old program and not new program - FAIL
+-- check as not manager of old program but manager of new program - FAIL 
+-- check as not manager of old program and not manager of new program - FAIL
+-- Check valid platform/program, all rest NULL values - FAIL
+-- Check valid platform/program, all rest DEFAULT values - SUCCESS
+-- check change just platformid - SUCCESS
+-- check change just platformid and all others - SUCCESS
+--Delete
+-- check NULL PlatformId - FAIL
+-- check invalid PlatformId - FAIL
+-- check valid PlatformId as nobody, editor - FAIL
+-- check valid PlatformId as investigator by not manager of program - FAIL
+-- check valid PlatformId as manager of program - SUCCESS
+--TRIGGER Tests
+-- as SA call insert on table directly with update to PlatfromId and disposalDate - FAIL
+-- change disposal dates - check Active Bit, and EndDate of related deployments
+--  NULL -> valid - SUCCESS
+--  NULL -> too early - FAIL
+--  valid -> NULL - SUCCESS
+--  valid -> earlier, too early - FAIL
+--  valid -> earlier, valid - SUCCESS
+--  valid -> later - SUCCESS

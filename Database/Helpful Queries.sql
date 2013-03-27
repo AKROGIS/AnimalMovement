@@ -194,14 +194,14 @@
   LEFT JOIN CollarParameterFiles as CPF
          ON CP.FileId = CPF.FileId           
   LEFT JOIN (
-               SELECT CollarManufacturer, CollarId, Max([Timestamp]) AS [Timestamp]
+               SELECT PlatformId, Max([Timestamp]) AS [Timestamp]
                  FROM ArgosDownloads
                 WHERE ErrorMessage IS NULL
-                GROUP BY CollarManufacturer, CollarId
+                GROUP BY PlatformId
             ) AS D
-         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE A.[Status] = 'A'
-        AND P.[Status] = 'A'
+         ON A.PlatformId = D.PlatformId
+      WHERE A.Active = 1
+        AND P.Active = 1
         AND (CPF.[Status] = 'A' OR CPF.[Status] IS NULL)
         AND (P.EndDate IS NULL OR getdate() < P.EndDate)
         AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
@@ -239,7 +239,7 @@
 
 ----------- WARNING_ArgosPlatformsNotInCollars
 ----------- -- Known Argos Platforms that are not in the Collars table 
-     SELECT A.Investigator, P.ProgramId, P.PlatformId, P.[Status], P.Remarks
+     SELECT A.Investigator, P.ProgramId, P.PlatformId, P.Active, P.Remarks
        FROM ArgosPlatforms AS P
  INNER JOIN ArgosPrograms AS A
          ON P.ProgramId = A.ProgramId

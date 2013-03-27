@@ -12,7 +12,7 @@ using Microsoft.SqlServer.Server;
 // See http://msdn.microsoft.com/en-us/library/ms131103.aspx
 // for more information on creating CLR Table-Valued Functions
 
-namespace SqlServerExtensions
+namespace SqlServer_TpfSummerizer
 {
     public class TfpSummerizer
     {

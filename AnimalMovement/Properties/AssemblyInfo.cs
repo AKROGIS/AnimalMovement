@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 //TODO - Create tab on collar details to show Argos platfroms used on this collar
 //TODO - Create tab on collar details to show Collar Parametes used on this process this collar
 
+//FIXME - DATABASE - Hide the ArgosPlatforms.Password from all but the Manager, and the Download API
 //FIXME - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
 //FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
 //FIXME - DATABASE - Add stored procedures to add/del/update the ArgosPlatforms and Programs Tables
@@ -30,6 +31,8 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Fix permissions for processing files, check collar owner, program owner
 //TODO - DATABASE - Not all files will belong to a project - i.e Argos emails and program downloads may belong to several projects
 //TODO - DATABASE - Add a Release Date to the collardeployment - this will make a lot of logic way more complicated.
+//TODO - DATABASE - Cleanup LookupCollarFileFormats remove Tables column, add 'RequiresArgosProcessing' bit column
+//TODO - DATABASE - Fix ArgosFile_ClearProcessingResults, ArgosFilePlatformDates_Insert, ArgosFileProcessingIssues_Insert, and ?? to use LookupCollarFileFormats.RequiresArgosProcessing
 
 //FIXME - Adding a AWS file manually will not get it processed, needs to be a special case in the file upload
 //TODO - Add option in UI for requesting no emails be send from the Telonics downloader

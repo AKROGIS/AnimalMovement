@@ -8,7 +8,7 @@
 
 
 ----------- Argos Platforms/Collars not being downloaded (for various reasons)
-     SELECT P2.Investigator, P.PlatformId, C.*
+     SELECT P2.Manager, P.PlatformId, C.*
        FROM ArgosPlatforms AS P
   LEFT JOIN ArgosPrograms AS P2
          ON P.ProgramId = P2.ProgramId
@@ -18,8 +18,8 @@
          ON P.PlatformId = D.PlatformId
       WHERE D.PlatformId IS NULL
         AND C.DisposalDate IS NULL
-        AND P.[Status] <> 'I'
-   ORDER BY P2.Investigator, P.PlatformId
+        AND P.Active = 1
+   ORDER BY P2.Manager, P.PlatformId
 
  
 ----------- Collars where Argos downloads have yielded no data
@@ -27,10 +27,12 @@
        FROM Collars AS C
   LEFT JOIN CollarDeployments AS D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE C.CollarId IN (
-                            SELECT CollarId
+  LEFT JOIN ArgosDeployments AS A
+         ON C.CollarManufacturer = A.CollarManufacturer AND C.CollarId = A.CollarId
+      WHERE A.PlatformId IN (
+                            SELECT PlatformId
                               FROM ArgosDownloads
-                          GROUP BY CollarId
+                          GROUP BY PlatformId
                             HAVING Max(FileID) IS NULL
                           )
         AND C.DisposalDate IS NULL
@@ -68,6 +70,44 @@
    GROUP BY C.CollarModel
 
 
+----------- Days since last program download
+     SELECT ProgramId, DATEDIFF(day, MAX(TimeStamp), GETDATE())
+       FROM ArgosDownloads
+      WHERE FileId IS NOT NULL
+   GROUP BY ProgramId
+
+
+----------- Days since last platform download
+     SELECT PlatformId, DATEDIFF(day, MAX(TimeStamp), GETDATE())
+       FROM ArgosDownloads
+      WHERE FileId IS NOT NULL
+   GROUP BY PlatformId
+
+
+----------- Days by ArgosId since last processed collar file was uploaded
+     SELECT P.PlatformId, DATEDIFF(day, MAX(F.UploadDate), GETDATE())
+       FROM ArgosPlatforms AS P
+  LEFT JOIN ArgosDeployments AS D
+         ON P.PlatformId = D.PlatformId
+  LEFT JOIN CollarFiles AS F
+         ON F.CollarManufacturer = D.CollarManufacturer AND F.CollarId = D.CollarId
+      WHERE F.ParentFileId IS NOT NULL
+   GROUP BY P.PlatformId
+
+
+----------- Days by ArgosId since last AWS file was uploaded
+     SELECT P.PlatformId, DATEDIFF(day, MAX(F.UploadDate), GETDATE())
+       FROM ArgosPlatforms AS P
+  LEFT JOIN ArgosDeployments AS D
+         ON P.PlatformId = D.PlatformId
+  LEFT JOIN CollarFiles AS F
+         ON F.CollarManufacturer = D.CollarManufacturer AND F.CollarId = D.CollarId
+  LEFT JOIN CollarFiles AS F2
+         ON F.ParentFileId = F2.FileId
+      WHERE F2.Format = 'F'
+   GROUP BY P.PlatformId
+
+
 ----------- Recent downloads
      SELECT *
        FROM ArgosDownloads
@@ -96,7 +136,7 @@
   LEFT JOIN CollarParameters AS P
          ON T.FileId = P.FileId AND T.CTN = P.CollarId
       WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
-   ORDER BY T.CTN, T.[Status]
+   ORDER BY T.CTN, T.[Status], StartDate
 
 ----------- The following queries should return no records
 ----------- Collars in TPF Files not in Collars Table
@@ -498,6 +538,30 @@
          ON F.FileId = X.FileId
       WHERE F.Format <> 'B' AND (F.CollarManufacturer <> X.CollarManufacturer OR X.CollarId <> F.CollarId)
 
+
+----------- Show all the records for a root collarId
+    DECLARE @rootID VARCHAR(16) = '646252'
+     SELECT * FROM Collars WHERE LEFT(CollarId,6) = @rootID
+     SELECT * FROM CollarDeployments WHERE LEFT(CollarId,6) = @rootID
+     SELECT * FROM ArgosDownloads WHERE PlatformId in (SELECT PlatformID FROM ArgosDeployments WHERE LEFT(CollarId,6) = @rootID)
+     SELECT * FROM CollarParameters WHERE LEFT(CollarId,6) = @rootID
+     SELECT * FROM ArgosDeployments WHERE LEFT(CollarId,6) = @rootID
+     SELECT FileId, CollarId FROM CollarFixes WHERE left(CollarId,6) = @rootID GROUP BY FileId, CollarId ORDER BY fileid
+     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE LEFT(CollarId,6) = @rootID  ORDER BY fileid
+
+
+----------- Show all the records for an ArgosId
+    DECLARE @ArgosID VARCHAR(16) = '37779'
+     SELECT * FROM Collars WHERE ArgosId = @ArgosID
+     SELECT * FROM CollarDeployments WHERE CollarId IN (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
+     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) ORDER BY fileid
+     SELECT FileId, CollarId FROM CollarFixes WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) GROUP BY FileId, CollarId ORDER BY fileid
+     SELECT * FROM AllTpfFileData WHERE Platform = @ArgosID
+     SELECT * FROM CollarParameters WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
+     SELECT * FROM ArgosDeployments WHERE PlatformId = @ArgosID
+     SELECT * FROM ArgosDownloads WHERE PlatformId = @ArgosID
+
+
 /*
 ----------- Change status of all files in a project
 -----------     If you only want to change files of a specific format, uncomment the two parts with @Format
@@ -522,26 +586,6 @@
     END
     CLOSE change_status_cursor;
     DEALLOCATE change_status_cursor;
-
-
------------ Show all the records for a root collarId
-    DECLARE @rootID VARCHAR(16) = '631645'
-     SELECT * FROM Collars WHERE LEFT(CollarId,6) = @rootID
-     SELECT * FROM CollarDeployments WHERE LEFT(CollarId,6) = @rootID
-     SELECT * FROM ArgosDownloads WHERE LEFT(CollarId,6) = @rootID
-     SELECT * FROM CollarParameters WHERE LEFT(CollarId,6) = @rootID
-     SELECT FileId, CollarId FROM CollarFixes WHERE left(CollarId,6) = @rootID GROUP BY FileId, CollarId ORDER BY fileid
-     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE LEFT(CollarId,6) = @rootID  ORDER BY fileid
-
------------ Show all the records for an ArgosId
-    DECLARE @ArgosID VARCHAR(16) = '96008'
-     SELECT * FROM Collars WHERE ArgosId = @ArgosID
-     SELECT * FROM CollarDeployments WHERE CollarId IN (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
-     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) ORDER BY fileid
-     SELECT FileId, CollarId FROM CollarFixes WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) GROUP BY FileId, CollarId ORDER BY fileid
-     SELECT * FROM AllTpfFileData WHERE Platform = @ArgosID
-     SELECT * FROM CollarParameters WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
-     SELECT * FROM ArgosDownloads WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
 
 
 ----------- Rename a collar (simple, cannot be used to split a collar into two)
