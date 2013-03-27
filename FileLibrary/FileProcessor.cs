@@ -207,9 +207,9 @@ namespace FileLibrary
                                              Transmissions = transmissions
                                          };
 
-            if (argos is ArgosAwsFile)
+            var awsFile = argos as ArgosAwsFile;
+            if (awsFile != null)
             {
-                var awsFile = (ArgosAwsFile)argos;
                 string msg = null;
                 if (!awsFile.MaxResponseReached.HasValue)
                     msg = String.Format("Programming Error, unable to determine if file is truncated.");

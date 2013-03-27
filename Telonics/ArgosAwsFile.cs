@@ -22,7 +22,7 @@ namespace Telonics
             }
         }
 
-        private bool? _maxResponseReached = null;
+        private bool? _maxResponseReached;
 
         /// <summary>
         /// AWS files may be too large for the server to return all records.
