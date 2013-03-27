@@ -139,8 +139,8 @@
   </Table>
   <Table Name="dbo.CollarFixes" Member="CollarFixes">
     <Type Name="CollarFix">
-      <Column Name="FixId" Type="System.Int64" DbType="BigInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="HiddenBy" Type="System.Int64" DbType="BigInt" CanBeNull="true" />
+      <Column Name="FixId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="HiddenBy" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="LineNumber" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
@@ -557,7 +557,7 @@
     <Return Type="System.Int32" />
   </Function>
   <Function Name="dbo.CollarFixes_UpdateUnhideFix" Method="CollarFixes_UpdateUnhideFix">
-    <Parameter Name="FixId" Parameter="fixId" Type="System.Int64" DbType="BigInt" />
+    <Parameter Name="FixId" Parameter="fixId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
   <Function Id="FunctionId9" Name="dbo.ProjectInvestigator_Update" Method="ProjectInvestigator_Update">
@@ -568,7 +568,7 @@
     <Return Type="System.Int32" />
   </Function>
   <Function Name="dbo.IsFixEditor" Method="IsFixEditor" IsComposable="true">
-    <Parameter Name="FixId" Parameter="fixId" Type="System.Int64" DbType="BigInt" />
+    <Parameter Name="FixId" Parameter="fixId" Type="System.Int32" DbType="Int" />
     <Parameter Name="User" Parameter="user" Type="System.String" DbType="NVarChar(128)" />
     <Return Type="System.Boolean" />
   </Function>

@@ -525,7 +525,7 @@ namespace DataModel
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFixes_UpdateUnhideFix")]
-		public int CollarFixes_UpdateUnhideFix([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FixId", DbType="BigInt")] System.Nullable<long> fixId)
+		public int CollarFixes_UpdateUnhideFix([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FixId", DbType="Int")] System.Nullable<int> fixId)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fixId);
 			return ((int)(result.ReturnValue));
@@ -539,7 +539,7 @@ namespace DataModel
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.IsFixEditor", IsComposable=true)]
-		public System.Nullable<bool> IsFixEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FixId", DbType="BigInt")] System.Nullable<long> fixId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
+		public System.Nullable<bool> IsFixEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FixId", DbType="Int")] System.Nullable<int> fixId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
 		{
 			return ((System.Nullable<bool>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fixId, user).ReturnValue));
 		}
@@ -2473,9 +2473,9 @@ namespace DataModel
 		
 		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
 		
-		private long _FixId;
+		private int _FixId;
 		
-		private System.Nullable<long> _HiddenBy;
+		private System.Nullable<int> _HiddenBy;
 		
 		private int _FileId;
 		
@@ -2499,9 +2499,9 @@ namespace DataModel
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
     partial void OnCreated();
-    partial void OnFixIdChanging(long value);
+    partial void OnFixIdChanging(int value);
     partial void OnFixIdChanged();
-    partial void OnHiddenByChanging(System.Nullable<long> value);
+    partial void OnHiddenByChanging(System.Nullable<int> value);
     partial void OnHiddenByChanged();
     partial void OnFileIdChanging(int value);
     partial void OnFileIdChanged();
@@ -2526,8 +2526,8 @@ namespace DataModel
 			OnCreated();
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FixId", AutoSync=AutoSync.OnInsert, DbType="BigInt NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public long FixId
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FixId", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int FixId
 		{
 			get
 			{
@@ -2546,8 +2546,8 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_HiddenBy", DbType="BigInt")]
-		public System.Nullable<long> HiddenBy
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_HiddenBy", DbType="Int")]
+		public System.Nullable<int> HiddenBy
 		{
 			get
 			{

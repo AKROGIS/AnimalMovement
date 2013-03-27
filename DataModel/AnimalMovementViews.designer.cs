@@ -951,9 +951,9 @@ namespace DataModel
 	public partial class ConflictingFixesResult
 	{
 		
-		private long _FixId;
+		private int _FixId;
 		
-		private System.Nullable<long> _HiddenBy;
+		private System.Nullable<int> _HiddenBy;
 		
 		private int _FileId;
 		
@@ -969,8 +969,8 @@ namespace DataModel
 		{
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FixId", DbType="BigInt NOT NULL")]
-		public long FixId
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FixId", DbType="Int NOT NULL")]
+		public int FixId
 		{
 			get
 			{
@@ -985,8 +985,8 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_HiddenBy", DbType="BigInt")]
-		public System.Nullable<long> HiddenBy
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_HiddenBy", DbType="Int")]
+		public System.Nullable<int> HiddenBy
 		{
 			get
 			{
