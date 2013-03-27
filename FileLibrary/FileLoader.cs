@@ -32,7 +32,7 @@ namespace FileLibrary
                 database.CollarFiles.InsertOnSubmit(file);
             }
             var log = new ArgosDownload
-                {
+            {
                 ProgramId = program.ProgramId,
                 CollarFile = file,
                 Days = days,
@@ -53,23 +53,23 @@ namespace FileLibrary
             if (results != null)
             {
                 file = new CollarFile
-                    {
-                        Owner = platform.ArgosProgram.Manager,
-                        FileName =
-                            "platform_" + platform.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
-                        Format = 'F',
-                        Status = 'A',
-                        Contents = results.ToBytes()
-                    };
+                {
+                    Owner = platform.ArgosProgram.Manager,
+                    FileName =
+                        "platform_" + platform.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
+                    Format = 'F',
+                    Status = 'A',
+                    Contents = results.ToBytes()
+                };
                 database.CollarFiles.InsertOnSubmit(file);
             }
             var log = new ArgosDownload
-                {
-                    PlatformId = platform.PlatformId,
-                    CollarFile = file,
-                    Days = days,
-                    ErrorMessage = errors
-                };
+            {
+                PlatformId = platform.PlatformId,
+                CollarFile = file,
+                Days = days,
+                ErrorMessage = errors
+            };
             database.ArgosDownloads.InsertOnSubmit(log);
             database.SubmitChanges();
             return file;

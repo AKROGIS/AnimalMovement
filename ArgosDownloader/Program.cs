@@ -75,7 +75,7 @@ namespace ArgosDownloader
                 AddErrorToEmail(_admin, program.UserName, program.ProgramId, errors);
             }
         }
-        
+
         private static void ReportException(string error)
         {
             //try to email the sys admin, otherwise log to a file, otherwise write to the console
@@ -113,11 +113,11 @@ namespace ArgosDownloader
 
             var msg =
                 String.Format(
-                    "Problem downloading or processing collar {0} for {1}." + Environment.NewLine + 
+                    "Problem downloading or processing collar {0} for {1}." + Environment.NewLine +
                     "    Message: {2}", argosId, userName, errors);
             AddEmail(email, msg);
         }
-        
+
         static void AddEmail(string email, string message)
         {
             if (String.IsNullOrEmpty(email))
@@ -136,7 +136,7 @@ namespace ArgosDownloader
         {
             foreach (var item in _emails)
             {
-                SendGmail(item.Key,"Warning from the Animal Movements Argos Downloader", item.Value);
+                SendGmail(item.Key, "Warning from the Animal Movements Argos Downloader", item.Value);
             }
         }
 

@@ -130,7 +130,7 @@ namespace Telonics
                 throw new InvalidOperationException("There is no processor defined for Telonics Id " + telonicsId);
             if (!_transmissionsByCtn.ContainsKey(telonicsId) || _transmissionsByCtn[telonicsId].Count < 1)
                 throw new NoMessagesException("There are no messages for Telonics Id " + telonicsId);
-            return Processor(telonicsId).ProcessTransmissions(_transmissionsByCtn[telonicsId],this);
+            return Processor(telonicsId).ProcessTransmissions(_transmissionsByCtn[telonicsId], this);
         }
 
         /// <summary>
@@ -141,13 +141,13 @@ namespace Telonics
         public IEnumerable<string> ToTelonicsData()
         {
             if (_transmissions == null)
-                _transmissions = GetTransmissions(_lines).ToList(); 
+                _transmissions = GetTransmissions(_lines).ToList();
             if (Processor == null)
                 throw new InvalidOperationException("The Processor function must be defined to call ToTelonicsData()");
             var processor = Processor("default");
             if (processor == null)
                 throw new InvalidOperationException("There is no default processor defined");
-            return processor.ProcessTransmissions(_transmissions,this);
+            return processor.ProcessTransmissions(_transmissions, this);
         }
 
         #endregion

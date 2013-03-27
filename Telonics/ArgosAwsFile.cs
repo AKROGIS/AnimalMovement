@@ -8,11 +8,11 @@ namespace Telonics
 {
     public class ArgosAwsFile : ArgosFile
     {
-        public ArgosAwsFile(string path) : base(path) {}
+        public ArgosAwsFile(string path) : base(path) { }
 
-        public ArgosAwsFile(byte[] bytes) : base(bytes) {}
+        public ArgosAwsFile(byte[] bytes) : base(bytes) { }
 
-        public ArgosAwsFile(Stream stream) : base(stream) {}
+        public ArgosAwsFile(Stream stream) : base(stream) { }
 
         internal override string Header
         {
@@ -42,20 +42,20 @@ namespace Telonics
                     _maxResponseReached = true;
                     yield break;
                 }
-                var tokens = line.Substring(1, line.Length - 3).Split(new[] {"\";\""}, StringSplitOptions.None);
+                var tokens = line.Substring(1, line.Length - 3).Split(new[] { "\";\"" }, StringSplitOptions.None);
                 var transmission = new ArgosTransmission
+                {
+                    ProgramId = tokens[0],
+                    PlatformId = tokens[1],
+                    DateTime = DateTime.Parse(tokens[7], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+                    Location = String.IsNullOrEmpty(tokens[13]) ? null : new ArgosTransmission.ArgosLocation
                     {
-                        ProgramId = tokens[0],
-                        PlatformId = tokens[1],
-                        DateTime = DateTime.Parse(tokens[7], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
-                        Location = String.IsNullOrEmpty(tokens[13]) ? null : new ArgosTransmission.ArgosLocation
-                        {
-                            DateTime = DateTime.Parse(tokens[13]),
-                            Latitude = Double.Parse(tokens[14]),
-                            Longitude = Double.Parse(tokens[15]),
-                            Class = tokens[17][0]
-                        }
-                    };
+                        DateTime = DateTime.Parse(tokens[13]),
+                        Latitude = Double.Parse(tokens[14]),
+                        Longitude = Double.Parse(tokens[15]),
+                        Class = tokens[17][0]
+                    }
+                };
                 transmission.AddHexString(tokens[38]);
                 transmission.AddLine(line);
                 yield return transmission;

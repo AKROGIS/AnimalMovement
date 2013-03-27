@@ -43,7 +43,7 @@ namespace ArgosProcessor
             try
             {
                 //TODO check availability of TDC.exe (and options like TDC timeout) to set FileProcessor options
-                var processor = new FileProcessor {ProcessLocally = true};
+                var processor = new FileProcessor { ProcessLocally = true };
 
                 if (args.Length == 0)
                     processor.ProcessAll();
@@ -72,7 +72,6 @@ namespace ArgosProcessor
                     }
                 }
             }
-
             catch (Exception ex)
             {
                 Console.WriteLine("Unhandled Exception: {0}", ex.Message);
