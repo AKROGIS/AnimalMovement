@@ -236,7 +236,7 @@ insert into CollarFixes (FileId, CollarManufacturer, CollarId, FixDate, Lat, Lon
 
 --SELECT TOP 100 * FROM [Animal_Movement].[dbo].[xx0501_569754_0806132213]
 
---insert into CollarFiles ([FileName],[Project],[CollarManufacturer],[CollarId],[Format],[Status],[Contents])
+--insert into CollarFiles ([FileName],[ProjectId],[CollarManufacturer],[CollarId],[Format],[Status],[Contents])
 --                 VALUES ('xyz2', 'test', 'telonics', '96006', 'B', 'I', NULL)
 
 --insert into CollarDataTelonicsStoreOnBoard (FileId, [Fix #], [Fix Status], [Date], [Time], [Latitude], [Longitude])

@@ -573,7 +573,7 @@
     DECLARE change_status_cursor CURSOR FOR 
             SELECT FileId 
               FROM CollarFiles
-             WHERE Project = @ProjectId AND [Status]  <> @NewStatus --AND [Format]  <> @Format
+             WHERE ProjectId = @ProjectId AND [Status]  <> @NewStatus --AND [Format]  <> @Format
         
     OPEN change_status_cursor;
 

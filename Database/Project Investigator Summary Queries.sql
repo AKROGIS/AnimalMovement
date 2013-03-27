@@ -95,7 +95,7 @@
    ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
 
 ----------- Argos Platforms/Collars not being downloaded (for various reasons)
-     SELECT P2.Investigator, P.PlatformId, C.*
+     SELECT P2.Manager, P.PlatformId, C.*
       FROM ArgosPlatforms AS P
  LEFT JOIN ArgosPrograms AS P2
         ON P.ProgramId = P2.ProgramId
@@ -106,8 +106,8 @@
      WHERE D.PlatformId IS NULL
        AND C.DisposalDate IS NULL
        AND P.Active = 1
-       AND P2.Investigator = @PI
-  ORDER BY P2.Investigator, P.PlatformId
+       AND P2.Manager = @PI
+  ORDER BY P2.Manager, P.PlatformId
 
 ----------- Collars where Argos downloads have yielded no data
      SELECT C.Manager, C.CollarModel, C.ArgosId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId

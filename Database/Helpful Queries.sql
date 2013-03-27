@@ -239,7 +239,7 @@
 
 ----------- WARNING_ArgosPlatformsNotInCollars
 ----------- -- Known Argos Platforms that are not in the Collars table 
-     SELECT A.Investigator, P.ProgramId, P.PlatformId, P.Active, P.Remarks
+     SELECT A.Manager, P.ProgramId, P.PlatformId, P.Active, P.Notes
        FROM ArgosPlatforms AS P
  INNER JOIN ArgosPrograms AS A
          ON P.ProgramId = A.ProgramId

@@ -1733,7 +1733,7 @@ BEGIN
 	DECLARE @ProjectId NVARCHAR(255);
 	 SELECT @Format    = [Format],
 		    @OldStatus = [Status],
-		    @ProjectId = [Project]
+		    @ProjectId = [ProjectId]
 	   FROM [dbo].[CollarFiles]
 	  WHERE [FileId] = @FileId;
 
@@ -2100,7 +2100,7 @@ GO
 CREATE VIEW [dbo].[UnprocessedArgosFile]
 AS
 
-     SELECT F1.Project, F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
+     SELECT F1.ProjectId, F1.FileId, F1.Format, F1.FileName, F1.UploadDate, F1.UserName
        FROM CollarFiles AS F1
   LEFT JOIN CollarFiles AS F2
          ON F1.FileId = F2.ParentFileId
@@ -5110,7 +5110,7 @@ BEGIN
 	-- Make sure we have a suitable FileId
 	DECLARE @ProjectId nvarchar(255);
 	DECLARE @Owner sysname;
-	SELECT @ProjectId = Project, @Owner = UserName FROM CollarFiles WHERE FileId = @FileId AND [Status] = 'A' AND Format IN ('E', 'F')
+	SELECT @ProjectId = ProjectId, @Owner = UserName FROM CollarFiles WHERE FileId = @FileId AND [Status] = 'A' AND Format IN ('E', 'F')
 	IF @ProjectId IS NULL
 	BEGIN
 		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
@@ -5255,7 +5255,7 @@ BEGIN
 	DECLARE @HiddenBy  INT;
 	DECLARE @ProjectId NVARCHAR(255);
 	 SELECT @HiddenBy  = [HiddenBy],
-		    @ProjectId = [Project]
+		    @ProjectId = [ProjectId]
 	   FROM [dbo].[CollarFixes] AS F1
 	  INNER JOIN [dbo].[CollarFiles] AS F2
 	     ON F1.FileId = F2.FileId
@@ -6447,7 +6447,7 @@ AS
 BEGIN
 	DECLARE @Result BIT
 	
-		SELECT @Result = [dbo].[IsEditor]([f].[Project], @User)
+		SELECT @Result = [dbo].[IsEditor]([f].[ProjectId], @User)
 		  FROM [dbo].[CollarFixes] AS [x]
 	INNER JOIN [dbo].[CollarFiles] AS [f]
 			ON [x].[FileId] = [f].[FileId]

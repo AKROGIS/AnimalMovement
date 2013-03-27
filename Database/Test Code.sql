@@ -364,7 +364,7 @@
     EXEC [dbo].[Collar_Insert] @T1_mfgr, @T1_collar1, @T1_model ,@T1_sa
     EXEC [dbo].[Collar_Insert] @T1_mfgr, @T1_collar2, @T1_model ,@T1_sa
 
-    INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
+    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T1_file1, @T1_project, @T1_mfgr, @T1_collar1, @T1_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T1_file1id = SCOPE_IDENTITY();
     INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
@@ -373,7 +373,7 @@
                 (@T1_file1id, 3, '2012-05-13', '60.13', '-154.13', 'Fix Available')
     EXEC [dbo].[CollarFixes_Insert] @T1_file1id,@T1_format
 
-    INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
+    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T1_file2, @T1_project, @T1_mfgr, @T1_collar2, @T1_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T1_file2id = SCOPE_IDENTITY();
     INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
@@ -782,7 +782,7 @@ Check illegal modifications of deployment
     EXEC [dbo].[Collar_Insert] @T2_mfgr, @T2_collar1, @T2_model ,@T2_sa
     EXEC [dbo].[Collar_Insert] @T2_mfgr, @T2_collar2, @T2_model ,@T2_sa
 
-    INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
+    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T2_file, @T2_project, @T2_mfgr, @T2_collar1, @T2_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T2_fileid = SCOPE_IDENTITY();
     INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
@@ -1489,7 +1489,7 @@ Check illegal modifications of deployment
     EXEC [dbo].[Animal_Insert] @T3_project, @T3_animal1
     EXEC [dbo].[Collar_Insert] @T3_mfgr, @T3_collar1, @T3_model ,@T3_sa
 
-    INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
+    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T3_file, @T3_project, @T3_mfgr, @T3_collar1, @T3_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T3_fileid = SCOPE_IDENTITY();
     INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
@@ -1825,7 +1825,7 @@ Check illegal modifications of deployment
     -- do not use the [dbo].[CollarFile_Insert] because it calls 
     -- [dbo].[CollarData_Insert] which tries to read the binary contents field to populate fixes
     -- EXEC [dbo].[CollarFile_Insert] @T4_file, @T4_project, @T4_mfgr, @T4_collar,'A','I',NULL,@T4_fileid
-    INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
+    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T4_file, @T4_project, @T4_mfgr, @T4_collar, @T4_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T4_fileid = SCOPE_IDENTITY();
     -- Load multiple Fixes Manually into the collar data table
@@ -2306,7 +2306,7 @@ Check illegal modifications of deployment
    -- do not use the [dbo].[CollarFile_Insert] because it calls 
     -- [dbo].[CollarData_Insert] which tries to read the binary contents field to populate fixes
     -- EXEC [dbo].[CollarFile_Insert] @T5_file, @T5_project, @T5_mfgr, @T5_collar,'A','I',NULL,@T5_fileid
-    INSERT INTO dbo.CollarFiles ([FileName], [Project], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
+    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T5_file, @T5_project, @T5_mfgr, @T5_collar, @T5_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T5_fileid = SCOPE_IDENTITY();
 

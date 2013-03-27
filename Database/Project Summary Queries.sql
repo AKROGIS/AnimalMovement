@@ -36,7 +36,7 @@
                      )
  
 ----------- Active files in a project with no fixes
-     SELECT F1.Project, F1.[FileName], F2.[FileName] AS Parent, F1.Format, C.CollarModel, C.CollarId, C.ArgosId
+     SELECT F1.ProjectId, F1.[FileName], F2.[FileName] AS Parent, F1.Format, C.CollarModel, C.CollarId, C.ArgosId
        FROM CollarFiles AS F1
  INNER JOIN Collars as C
          ON F1.CollarManufacturer = C.CollarManufacturer AND F1.CollarId = C.CollarId
@@ -47,8 +47,8 @@
       WHERE F1.Format <> 'E' AND F1.Format <> 'F'
         AND F1.[Status] = 'A'
         AND F3.FixId IS NULL
-        AND F1.Project = @Project
-   ORDER BY F1.Project, F1.Format, CollarId, F2.[FileName], F1.[FileName]
+        AND F1.ProjectId = @Project
+   ORDER BY F1.ProjectId, F1.Format, CollarId, F2.[FileName], F1.[FileName]
     
 ----------- All of a Project's animals that do not have fixes
 --  If a animal has had multiple deployments, and one deployment has fixes,
