@@ -22,11 +22,26 @@ namespace Telonics
             }
         }
 
+        private bool? _maxResponseReached = null;
+
+        /// <summary>
+        /// AWS files may be too large for the server to return all records.
+        /// </summary>
+        public bool? MaxResponseReached
+        {
+            get { return _maxResponseReached; }
+        }
+
         protected override IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines)
         {
             //Each line looks like \"abc\";\"def\";\"pdq\";\"xyz\";
             foreach (var line in lines.Skip(1))
             {
+                if (String.Equals(line.Trim(), "MAX_RESPONSE_REACHED", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    _maxResponseReached = true;
+                    yield break;
+                }
                 var tokens = line.Substring(1, line.Length - 3).Split(new[] {"\";\""}, StringSplitOptions.None);
                 var transmission = new ArgosTransmission
                     {
@@ -45,6 +60,7 @@ namespace Telonics
                 transmission.AddLine(line);
                 yield return transmission;
             }
+            _maxResponseReached = false;
         }
     }
 }
