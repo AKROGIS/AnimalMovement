@@ -132,6 +132,7 @@ namespace FileLibrary
 
         static char GuessFileFormat(out ArgosFile argos)
         {
+            //FIXME - These will throw an exception if the contents is not the correct format
             argos = new ArgosEmailFile(_fileContents);
             if (argos.GetPrograms().Any())
                 return 'E';

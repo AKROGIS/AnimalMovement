@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;  //in mscorlib - For Hex to Byte[]
 
-//This is a duplicate of a file in the SqlServer_Files project (SQL CLR assemblies need to be independent)
+//This is a duplicate of a file in the Telonics project (SQL CLR assemblies need to be independent)
 //changes to one copy should be manually replicated in the other.
-namespace Telonics
+namespace SqlServer_Files
 {
 
     /// <summary>

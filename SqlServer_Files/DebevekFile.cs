@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
-//This is a duplicate of a file in the SqlServer_Files project (SQL CLR assemblies need to be independent)
+//This is a duplicate of a file in the Telonics project (SQL CLR assemblies need to be independent)
 //changes to one copy should be manually replicated in the other.
-namespace Telonics
+namespace SqlServer_Files
 {
     public class DebevekFile : ArgosFile
     {

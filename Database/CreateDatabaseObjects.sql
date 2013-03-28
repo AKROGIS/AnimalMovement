@@ -1533,6 +1533,71 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 25, 2013
+-- Description:	Instead of CollarFile Delete Trigger
+--              This trigger must deleted related records before it can delete the files.
+--              This trigger deletes related CollarFixes. This can't be done with an 
+--              ON DELETE CASCADE because of the INSTEAD OF DELETE trigger on the CollarFixes
+--              It also deletes related CollarFiles (i.e sub-files).  This can't be done with
+--              an ON DELETE CASCADE because it 'may cause cycles or multiple cascade paths'
+--              The Delete SPROC ensures that users (non-SA) cannot delete a child file.
+--              Children may be deleted by the system if they are invalidated by a change in
+--              the parameters used to derive the child file.
+--              SA should not delete parents and their children in one batch (this will cause
+--              confusion as a child may be deleted before the parent tries to delete it).
+-- =============================================
+CREATE TRIGGER [dbo].[InsteadOfCollarFileDelete] 
+   ON  [dbo].[CollarFiles] 
+   INSTEAD OF DELETE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- triggers always execute in the context of a transaction
+    -- so the following code is all or nothing.
+
+    -- Delete fixes related to the deleted files
+    DELETE X FROM dbo.CollarFixes AS X
+       INNER JOIN deleted AS D
+               ON D.FileId = X.FileId
+               
+    -- Delete children of the deleted files       
+    DELETE F FROM dbo.CollarFiles AS F
+       INNER JOIN deleted AS D
+               ON D.FileId = F.ParentFileId
+    
+    -- Finally I can delete the files       
+    DELETE F FROM dbo.CollarFiles AS F
+       INNER JOIN deleted AS D
+               ON D.FileId = F.FileId
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
+(
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Result INT;
+
+	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
+	  FROM ArgosDownloads
+	 WHERE ErrorMessage IS NULL
+	
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
 -- Author:      Regan Sarwas
 -- Create date: Feb 27, 2013
 -- Description: Ensure Data integerity on Collar Insert
@@ -2070,71 +2135,6 @@ BEGIN
 		ROLLBACK TRANSACTION;
 		RETURN
 	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
-(
-)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @Result INT;
-
-	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
-	  FROM ArgosDownloads
-	 WHERE ErrorMessage IS NULL
-	
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 25, 2013
--- Description:	Instead of CollarFile Delete Trigger
---              This trigger must deleted related records before it can delete the files.
---              This trigger deletes related CollarFixes. This can't be done with an 
---              ON DELETE CASCADE because of the INSTEAD OF DELETE trigger on the CollarFixes
---              It also deletes related CollarFiles (i.e sub-files).  This can't be done with
---              an ON DELETE CASCADE because it 'may cause cycles or multiple cascade paths'
---              The Delete SPROC ensures that users (non-SA) cannot delete a child file.
---              Children may be deleted by the system if they are invalidated by a change in
---              the parameters used to derive the child file.
---              SA should not delete parents and their children in one batch (this will cause
---              confusion as a child may be deleted before the parent tries to delete it).
--- =============================================
-CREATE TRIGGER [dbo].[InsteadOfCollarFileDelete] 
-   ON  [dbo].[CollarFiles] 
-   INSTEAD OF DELETE
-AS 
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- triggers always execute in the context of a transaction
-    -- so the following code is all or nothing.
-
-    -- Delete fixes related to the deleted files
-    DELETE X FROM dbo.CollarFixes AS X
-       INNER JOIN deleted AS D
-               ON D.FileId = X.FileId
-               
-    -- Delete children of the deleted files       
-    DELETE F FROM dbo.CollarFiles AS F
-       INNER JOIN deleted AS D
-               ON D.FileId = F.ParentFileId
-    
-    -- Finally I can delete the files       
-    DELETE F FROM dbo.CollarFiles AS F
-       INNER JOIN deleted AS D
-               ON D.FileId = F.FileId
-
 END
 GO
 CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
@@ -4045,6 +4045,11 @@ BEGIN
     DEALLOCATE delete_deployment_cursor;
 END
 GO
+CREATE FUNCTION [dbo].[FileFormat](@data [varbinary](max))
+RETURNS [nchar](1) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[FileFormat]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4389,6 +4394,11 @@ BEGIN
 
     DELETE FROM dbo.ArgosDeployments WHERE [DeploymentId] = @DeploymentId
 END
+GO
+CREATE PROCEDURE [dbo].[Summerize]
+	@fileId [int]
+AS
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
 GO
 CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
 RETURNS  TABLE (

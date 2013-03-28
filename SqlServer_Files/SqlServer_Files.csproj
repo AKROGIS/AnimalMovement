@@ -47,7 +47,12 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArgosAwsFile.cs" />
+    <Compile Include="ArgosEmailFile.cs" />
+    <Compile Include="ArgosFile.cs" />
+    <Compile Include="ArgosTransmission.cs" />
     <Compile Include="CollarFileInfo.cs" />
+    <Compile Include="DebevekFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
