@@ -16,7 +16,11 @@ namespace FileLibrary
         public static void SummerizeAll(Action<Exception, CollarFile> handler = null)
         {
             var database = new AnimalMovementDataContext();
-            var query = from file in database.CollarFiles select file;
+            var query = from file in database.CollarFiles
+                        join item in database.ArgosFilePlatformDates on file.FileId equals item.FileId into items
+                        from item in items.DefaultIfEmpty()
+                        where file.Format == 'B' || file.Format == 'E' || file.Format == 'F'
+                        select file;
             foreach (var item in query)
             {
                 try
@@ -32,11 +36,26 @@ namespace FileLibrary
             }
         }
 
+
+        public static void SummerizeFile(int fileId)
+        {
+            var database = new AnimalMovementDataContext();
+            var file = database.CollarFiles.FirstOrDefault(
+                    f => f.FileId == fileId && (f.Format == 'B' || f.Format == 'E' || f.Format == 'F'));
+            if (file == null)
+                throw new InvalidOperationException("Collar File not found (or the wrong format)");
+            SummerizeFile(file);
+        }
+
+
         public static void SummerizeFile(CollarFile file)
         {
             ArgosFile argos;
             switch (file.Format)
             {
+                case 'B':
+                    argos = new DebevekFile(file.Contents.ToArray());
+                    break;
                 case 'E':
                     argos = new ArgosEmailFile(file.Contents.ToArray());
                     break;
@@ -48,6 +67,7 @@ namespace FileLibrary
             }
             SummarizeArgosFile(file.FileId, argos);
         }
+
 
         private static void SummarizeArgosFile(int fileId, ArgosFile file)
         {

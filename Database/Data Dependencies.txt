@@ -3,12 +3,10 @@ Derived Data Dependencies by Table
  - triggers (or stored procedures) need to be used to maintain the derived data when the
    source changes
 
+   ** THIS SECTION IS OUT OF DATE **
 Applications:
 	ArgosDownloader
 		DaysSinceLastDownload
-		DownloadableAndAnalyzableCollars
-			Days, Email, UserName, Password, PlatformId, ProjectId, CollarManufacturer,
-			CollarId, SendNoEmails
 		CollarFiles_insert
 		ArgosDownloads_insert
 		Settings
