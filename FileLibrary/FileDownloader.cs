@@ -51,15 +51,23 @@ namespace FileLibrary
         }
 
 
-        public static void DownloadArgosProgram(ArgosProgram program)
+        public static void DownloadArgosProgram(ArgosProgram program, int? daysToRetrieve = null)
         {
-            var database = new AnimalMovementDataContext();
-            var dateOfLastDownload = (from log in database.ArgosDownloads
-                                      where log.ProgramId == program.ProgramId && log.FileId != null
-                                      orderby log.TimeStamp descending
-                                      select log.TimeStamp).FirstOrDefault();
-            var daysSinceLastDownload = (DateTime.Now - dateOfLastDownload).Days;
-            var days = Math.Max(MinDays, Math.Min(MaxDays, daysSinceLastDownload));
+            int daysSinceLastDownload;
+            if (daysToRetrieve.HasValue)
+                daysSinceLastDownload = daysToRetrieve.Value;
+            else
+            {
+                var database = new AnimalMovementDataContext();
+                var dateOfLastDownload = (from log in database.ArgosDownloads
+                                          where log.ProgramId == program.ProgramId && log.FileId != null
+                                          orderby log.TimeStamp descending
+                                          select log.TimeStamp).FirstOrDefault();
+                daysSinceLastDownload = (DateTime.Now - dateOfLastDownload).Days;
+            }
+            var days = Math.Min(MaxDays, daysSinceLastDownload);
+            if (days < MinDays)
+                return;
             string errors;
             var results = ArgosWebSite.GetProgram(program.UserName, program.Password, program.ProgramId, days,
                                                  out errors);
@@ -74,15 +82,23 @@ namespace FileLibrary
         }
 
 
-        public static void DownloadArgosPlatform(ArgosPlatform platform)
+        public static void DownloadArgosPlatform(ArgosPlatform platform, int? daysToRetrieve = null)
         {
-            var database = new AnimalMovementDataContext();
-            var dateOfLastDownload = (from log in database.ArgosDownloads
-                                      where log.PlatformId == platform.PlatformId && log.FileId != null
-                                      orderby log.TimeStamp descending
-                                      select log.TimeStamp).FirstOrDefault();
-            var daysSinceLastDownload = (DateTime.Now - dateOfLastDownload).Days;
-            var days = Math.Max(MinDays, Math.Min(MaxDays, daysSinceLastDownload));
+            int daysSinceLastDownload;
+            if (daysToRetrieve.HasValue)
+                daysSinceLastDownload = daysToRetrieve.Value;
+            else
+            {
+                var database = new AnimalMovementDataContext();
+                var dateOfLastDownload = (from log in database.ArgosDownloads
+                                          where log.PlatformId == platform.PlatformId && log.FileId != null
+                                          orderby log.TimeStamp descending
+                                          select log.TimeStamp).FirstOrDefault();
+                daysSinceLastDownload = (DateTime.Now - dateOfLastDownload).Days;
+            }
+            var days = Math.Min(MaxDays, daysSinceLastDownload);
+            if (days < MinDays)
+                return;
             var program = platform.ArgosProgram;
             string errors;
             var results = ArgosWebSite.GetCollar(program.UserName, program.Password, platform.PlatformId, days,
