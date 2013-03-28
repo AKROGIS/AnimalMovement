@@ -35,6 +35,8 @@ namespace Telonics
                 var cleanLine = line.Trim();
                 if (cleanLine == String.Empty)
                     continue;
+                if (string.IsNullOrEmpty(cleanLine.Replace(',', ' ').Trim())) //empty except for commas
+                    continue;
                 if (_header == String.Empty)
                 {
                     _header = cleanLine;
@@ -59,7 +61,7 @@ namespace Telonics
                 }
 
                 var tokens = cleanLine.Split(new[] { '\t', ',' });
-                var dateTime = DateTime.Parse(tokens[dateIndex] + " " + tokens[dateIndex], CultureInfo.InvariantCulture,
+                var dateTime = DateTime.Parse(tokens[dateIndex] + " " + tokens[timeIndex], CultureInfo.InvariantCulture,
                                               DateTimeStyles.RoundtripKind);
                 var transmission = new ArgosTransmission
                 {

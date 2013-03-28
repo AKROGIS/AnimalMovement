@@ -797,6 +797,405 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFileProcessingIssues](
+	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileId] [int] NOT NULL,
+	[Issue] [nvarchar](max) NOT NULL,
+	[PlatformId] [varchar](8) NULL,
+	[CollarManufacturer] [varchar](16) NULL,
+	[CollarId] [varchar](16) NULL,
+ CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
+(
+	[IssueId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 16, 2013
+-- Description: inserts a new collar issue to the database.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFileProcessingIssues_Insert] 
+	@FileId				INT,
+	@Issue				NVARCHAR(max), 
+	@PlatformId			NVARCHAR(255) = NULL, 
+	@CollarManufacturer NVARCHAR(255) = NULL,
+	@CollarId			NVARCHAR(255) = NULL 
+AS
+BEGIN
+	SET NOCOUNT ON;
+    
+	-- Validate permission for this operation
+	-- The caller must be an editor or ArgosProcessor in the database - handled by execute permissions
+
+	-- The file must be one that has Argos Transmissions
+	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	BEGIN
+		DECLARE @message2 nvarchar(200) = 'The source file is not the correct format.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+
+	-- All other verification is handled by primary/foreign key and column constraints.
+	INSERT INTO [dbo].[ArgosFileProcessingIssues]
+				([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
+		 VALUES (@FileId,  @Issue,  @PlatformId,  @CollarManufacturer,  @CollarId)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFilePlatformDates](
+	[FileId] [int] NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NULL,
+	[FirstTransmission] [datetime2](7) NOT NULL,
+	[LastTransmission] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 14, 2013
+-- Description: Adds a collar file summary to the database.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFilePlatformDates_Insert] 
+	@FileId INT,
+	@PlatformId NVARCHAR(255), 
+	@ProgramId NVARCHAR(255), 
+	@FirstTransmission DATETIME2(7), 
+	@LastTransmission DATETIME2(7) 
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be uploader of the file
+	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND UserName = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must have uploaded the source file to create the summary.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+	
+	-- The file must be one that has Argos Transmissions
+	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	BEGIN
+		DECLARE @message2 nvarchar(200) = 'The source file is not the correct format.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+	
+	--All other verification is handled by primary/foreign key and column constraints.
+	INSERT INTO dbo.ArgosFilePlatformDates (FileId, PlatformId, ProgramId, FirstTransmission, LastTransmission)
+		 VALUES (@FileId, @PlatformId, @ProgramId, @FirstTransmission, @LastTransmission);
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 22, 2013
+-- Description: Processes only the transmission for a single platform in a file.
+--              This is a helper (sub) procedure, and is not available to
+--              be called directly by user code
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
+	@FileId INT,
+	@PlatformId VARCHAR(255)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- If this can be called by clients, then do some parameter validation.
+	
+	-- The unprocessing should have happened already.
+	-- Process the (file,platformId) with xp_cmdshell - See ArgosFile_Process for details
+	-- If we can't process this file, then set an issue that will flag this as undone.
+	INSERT INTO [dbo].[ArgosFileProcessingIssues]
+				([FileId], [Issue], [PlatformId])
+		 VALUES (@FileId, 'Process this (file,platform) a deployment or parameter as changed',  @PlatformId)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ArgosFile_NeverProcessed]
+AS
+----------- ArgosFile_NeverProcessed
+-----------   Is a file which has transmissions (ensures file is correct format),
+-----------   but no child files, and no processing issues
+-----------   (relies on files of correct format having been summerized) 
+     SELECT T.FileId
+       FROM ArgosFilePlatformDates AS T      
+  LEFT JOIN CollarFiles AS C
+         ON T.FileId = C.ParentFileId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = T.FileId
+      WHERE C.FileId IS NULL
+        AND I.FileId IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
+AS
+----------- ArgosFile_NeedsPartialProcessing
+-----------   Is a (file,platform) where the file has the correct transmissions,
+-----------   and there are special processing issues for the platform
+-----------   (relies on files of correct format having been summerized) 
+     SELECT T.FileId, T.PlatformId
+       FROM ArgosFilePlatformDates AS T         
+ INNER JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = T.FileId AND T.PlatformId = I.PlatformId
+      WHERE I.Issue Like 'Process%'
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProjectEditors](
+	[ProjectId] [varchar](16) NOT NULL,
+	[Editor] [sysname] NOT NULL,
+ CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[Editor] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+--     revised: March 25, 2013
+-- Description:	Deletes a CollarFile
+--              related records are deleted by FK Cascades, or the INSTEAD OF trigger
+--              Ensures that Child files are never delete (the trigger handles it)
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFile_Delete] 
+    @FileId int
+AS
+BEGIN
+    SET NOCOUNT ON;
+        
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    -- First check that this is a valid file, if not exit quietly (we are done)
+    IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId)
+    BEGIN
+        RETURN 0
+    END
+
+    -- Validate permission for this operation
+    -- To delete a file you must be an editor of the project, or the Owner of the file
+    -- The ArgosProcessor role is also allowed to delete files on behalf of users
+    -- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file.
+        
+    -- Get the projectId and Owner
+    DECLARE @ProjectId NVARCHAR(255) = NULL
+    DECLARE @Owner NVARCHAR(255) = NULL
+    SELECT @ProjectID = [ProjectId], @Owner = [Owner] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+    IF @Owner <> @Caller  -- Not the owner
+       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not the Project PI
+       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller) -- Not a Project Editor
+       AND NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
+    BEGIN
+        DECLARE @message1 nvarchar(200)
+        IF @ProjectId IS NOT NULL
+            SET @message1 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
+        ELSE
+            SET @message1 = 'You ('+@Caller+') are not the owner (' + @Owner + ') of this file.';
+        RAISERROR(@message1, 18, 0)
+        RETURN (1)
+    END
+ 
+    -- Check that this is not somebodies child
+    IF EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE ParentFileId IS NOT NULL and FileId = @FileId)
+    BEGIN
+        DECLARE @message3 nvarchar(200) = 'This file was derived from another file.  It cannot be deleted directly';
+        RAISERROR(@message3, 18, 0)
+        RETURN (1)
+    END
+    
+    -- Delete this file
+    DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+    
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 16, 2013
+-- Description: Clears all the prior results from processing an Argos file.
+--              Anyone in the Editor or ArgosProcessor role can run this command
+--              since the file can always be reprocessed.
+--              It is harmless to call this on a file that has not been processed.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_ClearProcessingResults] 
+	@FileId INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	IF NOT EXISTS (SELECT 1 FROM CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation
+	-- controlled by execute permissions on SP	
+	
+	--Delete any existing sub files; this must be done in a cursor to call the SP
+	DECLARE @SubFileId INT
+    DECLARE delete_subfile_cursor CURSOR FOR 
+            SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId
+        
+    OPEN delete_subfile_cursor;
+
+    FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC CollarFile_Delete @SubFileId
+        FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
+    END
+    CLOSE delete_subfile_cursor;
+    DEALLOCATE delete_subfile_cursor;
+
+	-- Delete any prior processing issues
+	DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosDownloads](
+	[TimeStamp] [datetime2](7) NOT NULL,
+	[ProgramId] [varchar](8) NULL,
+	[PlatformId] [varchar](8) NULL,
+	[Days] [int] NULL,
+	[FileId] [int] NULL,
+	[ErrorMessage] [varchar](max) NULL,
+ CONSTRAINT [PK_ArgosDownloads] PRIMARY KEY CLUSTERED 
+(
+	[TimeStamp] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_PlatformId] ON [dbo].[ArgosDownloads] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_ProgamId] ON [dbo].[ArgosDownloads] 
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: January 25, 2013
+-- Description:	Logs a new Argos collar download success/failure
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosDownloads_Insert] 
+	@ProgramId NVARCHAR(255) = NULL, 
+	@PlatformId NVARCHAR(255) = NULL,
+	@Days INT = NULL,
+	@FileId INT = NULL,
+	@ErrorMessage NVARCHAR(255) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Validate permission for this operation
+	-- The caller is managed by permissions on the Stored Procedure
+	
+	-- Check the insert trigger for additional business rule enforcement
+			
+	INSERT INTO dbo.ArgosDownloads ([ProgramId], [PlatformId], [Days], [FileId], [ErrorMessage])
+		 VALUES (@ProgramId, @PlatformId, @Days, @FileId, @ErrorMessage)
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
@@ -1317,257 +1716,6 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
--- Create date: March 25, 2013
--- Description:	Instead of CollarFile Delete Trigger
---              This trigger must deleted related records before it can delete the files.
---              This trigger deletes related CollarFixes. This can't be done with an 
---              ON DELETE CASCADE because of the INSTEAD OF DELETE trigger on the CollarFixes
---              It also deletes related CollarFiles (i.e sub-files).  This can't be done with
---              an ON DELETE CASCADE because it 'may cause cycles or multiple cascade paths'
---              The Delete SPROC ensures that users (non-SA) cannot delete a child file.
---              Children may be deleted by the system if they are invalidated by a change in
---              the parameters used to derive the child file.
---              SA should not delete parents and their children in one batch (this will cause
---              confusion as a child may be deleted before the parent tries to delete it).
--- =============================================
-CREATE TRIGGER [dbo].[InsteadOfCollarFileDelete] 
-   ON  [dbo].[CollarFiles] 
-   INSTEAD OF DELETE
-AS 
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- triggers always execute in the context of a transaction
-    -- so the following code is all or nothing.
-
-    -- Delete fixes related to the deleted files
-    DELETE X FROM dbo.CollarFixes AS X
-       INNER JOIN deleted AS D
-               ON D.FileId = X.FileId
-               
-    -- Delete children of the deleted files       
-    DELETE F FROM dbo.CollarFiles AS F
-       INNER JOIN deleted AS D
-               ON D.FileId = F.ParentFileId
-    
-    -- Finally I can delete the files       
-    DELETE F FROM dbo.CollarFiles AS F
-       INNER JOIN deleted AS D
-               ON D.FileId = F.FileId
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosDownloads](
-	[TimeStamp] [datetime2](7) NOT NULL,
-	[ProgramId] [varchar](8) NULL,
-	[PlatformId] [varchar](8) NULL,
-	[Days] [int] NULL,
-	[FileId] [int] NULL,
-	[ErrorMessage] [varchar](max) NULL,
- CONSTRAINT [PK_ArgosDownloads] PRIMARY KEY CLUSTERED 
-(
-	[TimeStamp] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_PlatformId] ON [dbo].[ArgosDownloads] 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_ProgamId] ON [dbo].[ArgosDownloads] 
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
-(
-)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @Result INT;
-
-	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
-	  FROM ArgosDownloads
-	 WHERE ErrorMessage IS NULL
-	
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: January 25, 2013
--- Description:	Logs a new Argos collar download success/failure
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosDownloads_Insert] 
-	@ProgramId NVARCHAR(255) = NULL, 
-	@PlatformId NVARCHAR(255) = NULL,
-	@Days INT = NULL,
-	@FileId INT = NULL,
-	@ErrorMessage NVARCHAR(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Validate permission for this operation
-	-- The caller is managed by permissions on the Stored Procedure
-	
-	-- Check the insert trigger for additional business rule enforcement
-			
-	INSERT INTO dbo.ArgosDownloads ([ProgramId], [PlatformId], [Days], [FileId], [ErrorMessage])
-		 VALUES (@ProgramId, @PlatformId, @Days, @FileId, @ErrorMessage)
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Mar 20, 2013
--- Description: Ensure Data integerity on Insert
--- =============================================
-CREATE TRIGGER [dbo].[AfterArgosDownloadsInsert] 
-			ON [dbo].[ArgosDownloads] 
-			AFTER INSERT
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Business Rule: Argos Downloads must have one and only one non-null value for (FileId,ErrorMessage)
-	IF EXISTS (    SELECT 1
-	                 FROM inserted 
-	                WHERE (FileId IS NULL AND ErrorMessage IS NULL)
-	                   OR (FileId IS NOT NULL AND ErrorMessage IS NOT NULL)
-              )
-	BEGIN
-		RAISERROR('Integrity Violation. Downloads must only one non-null value in FileId or ErrorMessage', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-
-	-- Business Rule: Argos Downloads must have one and only one non-null value for (PlatformId, ProgramId)
-	IF EXISTS (    SELECT 1
-	                 FROM inserted 
-	                WHERE (PlatformId IS NULL AND ProgramId IS NULL)
-	                   OR (PlatformId IS NOT NULL AND ProgramId IS NOT NULL)
-              )
-	BEGIN
-		RAISERROR('Integrity Violation. Downloads must only one non-null value in PlatformId or ProgramId', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPrograms](
-	[ProgramId] [varchar](8) NOT NULL,
-	[ProgramName] [nvarchar](255) NULL,
-	[UserName] [sysname] NOT NULL,
-	[Password] [nvarchar](128) NOT NULL,
-	[Manager] [sysname] NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
-	[Notes] [nvarchar](max) NULL,
-	[Active] [bit] NULL,
- CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPlatforms](
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NOT NULL,
-	[Notes] [nvarchar](max) NULL,
-	[Active] [bit] NOT NULL,
-	[DisposalDate] [datetime2](7) NULL,
- CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 22, 2013
--- Description: Processes only the transmission for a single platform in a file.
---              This is a helper (sub) procedure, and is not available to
---              be called directly by user code
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
-	@FileId INT,
-	@PlatformId VARCHAR(255)
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFilePlatformDates](
-	[FileId] [int] NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NOT NULL,
-	[FirstTransmission] [datetime2](7) NOT NULL,
-	[LastTransmission] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 22, 2013
 -- Description: Un-processes the transmissions for a single platform in a file.
@@ -1604,61 +1752,6 @@ BEGIN
       WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, @StartDate, @EndDate) = 1
 
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFileProcessingIssues](
-	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[FileId] [int] NOT NULL,
-	[Issue] [nvarchar](max) NOT NULL,
-	[PlatformId] [varchar](8) NULL,
-	[CollarManufacturer] [varchar](16) NULL,
-	[CollarId] [varchar](16) NULL,
- CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
-(
-	[IssueId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ProjectEditors](
-	[ProjectId] [varchar](16) NOT NULL,
-	[Editor] [sysname] NOT NULL,
- CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[Editor] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -1826,6 +1919,50 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPrograms](
+	[ProgramId] [varchar](8) NOT NULL,
+	[ProgramName] [nvarchar](255) NULL,
+	[UserName] [sysname] NOT NULL,
+	[Password] [nvarchar](128) NOT NULL,
+	[Manager] [sysname] NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+	[Notes] [nvarchar](max) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPlatforms](
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NOT NULL,
+	[Notes] [nvarchar](max) NULL,
+	[Active] [bit] NOT NULL,
+	[DisposalDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: Mar 20, 2013
@@ -1900,34 +2037,58 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:      Regan Sarwas
--- Create date: March 16, 2013
--- Description: inserts a new collar issue to the database.
+-- Create date: Mar 20, 2013
+-- Description: Ensure Data integerity on Insert
 -- =============================================
-CREATE PROCEDURE [dbo].[ArgosFileProcessingIssues_Insert] 
-	@FileId				INT,
-	@Issue				NVARCHAR(max), 
-	@PlatformId			NVARCHAR(255) = NULL, 
-	@CollarManufacturer NVARCHAR(255) = NULL,
-	@CollarId			NVARCHAR(255) = NULL 
-AS
+CREATE TRIGGER [dbo].[AfterArgosDownloadsInsert] 
+			ON [dbo].[ArgosDownloads] 
+			AFTER INSERT
+AS 
 BEGIN
 	SET NOCOUNT ON;
-    
-	-- Validate permission for this operation
-	-- The caller must be an editor or ArgosProcessor in the database - handled by execute permissions
-
-	-- The file must be one that has Argos Transmissions
-	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	
+	-- Business Rule: Argos Downloads must have one and only one non-null value for (FileId,ErrorMessage)
+	IF EXISTS (    SELECT 1
+	                 FROM inserted 
+	                WHERE (FileId IS NULL AND ErrorMessage IS NULL)
+	                   OR (FileId IS NOT NULL AND ErrorMessage IS NOT NULL)
+              )
 	BEGIN
-		DECLARE @message2 nvarchar(200) = 'The source file is not the correct format.';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
+		RAISERROR('Integrity Violation. Downloads must only one non-null value in FileId or ErrorMessage', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
 	END
 
-	-- All other verification is handled by primary/foreign key and column constraints.
-	INSERT INTO [dbo].[ArgosFileProcessingIssues]
-				([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
-		 VALUES (@FileId,  @Issue,  @PlatformId,  @CollarManufacturer,  @CollarId)
+	-- Business Rule: Argos Downloads must have one and only one non-null value for (PlatformId, ProgramId)
+	IF EXISTS (    SELECT 1
+	                 FROM inserted 
+	                WHERE (PlatformId IS NULL AND ProgramId IS NULL)
+	                   OR (PlatformId IS NOT NULL AND ProgramId IS NOT NULL)
+              )
+	BEGIN
+		RAISERROR('Integrity Violation. Downloads must only one non-null value in PlatformId or ProgramId', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
+(
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Result INT;
+
+	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
+	  FROM ArgosDownloads
+	 WHERE ErrorMessage IS NULL
+	
+	RETURN @Result
 END
 GO
 SET ANSI_NULLS ON
@@ -1936,198 +2097,45 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
--- Create date: March 2, 2012
---     revised: March 25, 2013
--- Description:	Deletes a CollarFile
---              related records are deleted by FK Cascades, or the INSTEAD OF trigger
---              Ensures that Child files are never delete (the trigger handles it)
+-- Create date: March 25, 2013
+-- Description:	Instead of CollarFile Delete Trigger
+--              This trigger must deleted related records before it can delete the files.
+--              This trigger deletes related CollarFixes. This can't be done with an 
+--              ON DELETE CASCADE because of the INSTEAD OF DELETE trigger on the CollarFixes
+--              It also deletes related CollarFiles (i.e sub-files).  This can't be done with
+--              an ON DELETE CASCADE because it 'may cause cycles or multiple cascade paths'
+--              The Delete SPROC ensures that users (non-SA) cannot delete a child file.
+--              Children may be deleted by the system if they are invalidated by a change in
+--              the parameters used to derive the child file.
+--              SA should not delete parents and their children in one batch (this will cause
+--              confusion as a child may be deleted before the parent tries to delete it).
 -- =============================================
-CREATE PROCEDURE [dbo].[CollarFile_Delete] 
-    @FileId int
-AS
+CREATE TRIGGER [dbo].[InsteadOfCollarFileDelete] 
+   ON  [dbo].[CollarFiles] 
+   INSTEAD OF DELETE
+AS 
 BEGIN
     SET NOCOUNT ON;
-        
-    -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-    -- First check that this is a valid file, if not exit quietly (we are done)
-    IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId)
-    BEGIN
-        RETURN 0
-    END
-
-    -- Validate permission for this operation
-    -- To delete a file you must be an editor of the project, or the Owner of the file
-    -- The ArgosProcessor role is also allowed to delete files on behalf of users
-    -- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file.
-        
-    -- Get the projectId and Owner
-    DECLARE @ProjectId NVARCHAR(255) = NULL
-    DECLARE @Owner NVARCHAR(255) = NULL
-    SELECT @ProjectID = [ProjectId], @Owner = [Owner] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-    IF @Owner <> @Caller  -- Not the owner
-       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not the Project PI
-       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller) -- Not a Project Editor
-       AND NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-    BEGIN
-        DECLARE @message1 nvarchar(200)
-        IF @ProjectId IS NOT NULL
-            SET @message1 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
-        ELSE
-            SET @message1 = 'You ('+@Caller+') are not the owner (' + @Owner + ') of this file.';
-        RAISERROR(@message1, 18, 0)
-        RETURN (1)
-    END
- 
-    -- Check that this is not somebodies child
-    IF EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE ParentFileId IS NOT NULL and FileId = @FileId)
-    BEGIN
-        DECLARE @message3 nvarchar(200) = 'This file was derived from another file.  It cannot be deleted directly';
-        RAISERROR(@message3, 18, 0)
-        RETURN (1)
-    END
     
-    -- Delete this file
-    DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+    -- triggers always execute in the context of a transaction
+    -- so the following code is all or nothing.
+
+    -- Delete fixes related to the deleted files
+    DELETE X FROM dbo.CollarFixes AS X
+       INNER JOIN deleted AS D
+               ON D.FileId = X.FileId
+               
+    -- Delete children of the deleted files       
+    DELETE F FROM dbo.CollarFiles AS F
+       INNER JOIN deleted AS D
+               ON D.FileId = F.ParentFileId
     
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 16, 2013
--- Description: Clears all the prior results from processing an Argos file.
---              Anyone in the Editor or ArgosProcessor role can run this command
---              since the file can always be reprocessed.
---              It is harmless to call this on a file that has not been processed.
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_ClearProcessingResults] 
-	@FileId INT
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	IF NOT EXISTS (SELECT 1 FROM CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid file in a suitable format.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Validate permission for this operation
-	-- controlled by execute permissions on SP	
-	
-	--Delete any existing sub files; this must be done in a cursor to call the SP
-	DECLARE @SubFileId INT
-    DECLARE delete_subfile_cursor CURSOR FOR 
-            SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId
-        
-    OPEN delete_subfile_cursor;
-
-    FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        EXEC CollarFile_Delete @SubFileId
-        FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
-    END
-    CLOSE delete_subfile_cursor;
-    DEALLOCATE delete_subfile_cursor;
-
-	-- Delete any prior processing issues
-	DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId
+    -- Finally I can delete the files       
+    DELETE F FROM dbo.CollarFiles AS F
+       INNER JOIN deleted AS D
+               ON D.FileId = F.FileId
 
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 14, 2013
--- Description: Adds a collar file summary to the database.
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFilePlatformDates_Insert] 
-	@FileId INT,
-	@PlatformId NVARCHAR(255), 
-	@ProgramId NVARCHAR(255), 
-	@FirstTransmission DATETIME2(7), 
-	@LastTransmission DATETIME2(7) 
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be uploader of the file
-	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND UserName = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must have uploaded the source file to create the summary.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-	
-	-- The file must be one that has Argos Transmissions
-	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
-	BEGIN
-		DECLARE @message2 nvarchar(200) = 'The source file is not the correct format.';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-	
-	--All other verification is handled by primary/foreign key and column constraints.
-	INSERT INTO dbo.ArgosFilePlatformDates (FileId, PlatformId, ProgramId, FirstTransmission, LastTransmission)
-		 VALUES (@FileId, @PlatformId, @ProgramId, @FirstTransmission, @LastTransmission);
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ArgosFile_NeverProcessed]
-AS
------------ ArgosFile_NeverProcessed
------------   Is a file which has transmissions (ensures file is correct format),
------------   but no child files, and no processing issues
------------   (relies on files of correct format having been summerized) 
-     SELECT T.FileId
-       FROM ArgosFilePlatformDates AS T      
-  LEFT JOIN CollarFiles AS C
-         ON T.FileId = C.ParentFileId
-  LEFT JOIN ArgosFileProcessingIssues AS I
-         ON I.FileId = T.FileId
-      WHERE C.FileId IS NULL
-        AND I.FileId IS NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
-AS
------------ ArgosFile_NeedsPartialProcessing
------------   Is a (file,platform) where the file has the correct transmissions,
------------   and there are special processing issues for the platform
------------   (relies on files of correct format having been summerized) 
-     SELECT T.FileId, T.PlatformId
-       FROM ArgosFilePlatformDates AS T         
- INNER JOIN ArgosFileProcessingIssues AS I
-         ON I.FileId = T.FileId AND T.PlatformId = I.PlatformId
-      WHERE I.Issue Like 'Process%'
 GO
 CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER

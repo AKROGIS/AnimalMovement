@@ -17,9 +17,9 @@ namespace FileLibrary
         {
             var database = new AnimalMovementDataContext();
             var query = from file in database.CollarFiles
-                        join item in database.ArgosFilePlatformDates on file.FileId equals item.FileId into items
-                        from item in items.DefaultIfEmpty()
-                        where file.Format == 'B' || file.Format == 'E' || file.Format == 'F'
+                        join item in database.ArgosFilePlatformDates on file.FileId equals item.FileId into fileItems
+                        from item in fileItems.DefaultIfEmpty()
+                        where item == null && (file.Format == 'B' || file.Format == 'E' || file.Format == 'F')
                         select file;
             foreach (var item in query)
             {

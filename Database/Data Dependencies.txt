@@ -368,6 +368,9 @@ The ProgramId and PlatformId are not Foreign Keys to the ArgosPrograms and Argos
 tables, because we may load a file that does not have a program/platform in the database
 We want this table to reflect what is in the file, not what is in the database.
 
+PlatformId must be non-null, in order to know what platfrom the transmissions belong to.
+ProgramId is nullable.  most files will provide it, however the Debevek format does not.
+
 **We should provide a tool for checking for platforms/programs in this table that are not
 in the ArgosPlatforms or ArgosPrograms tables, and adding them if appropriate.**
 
