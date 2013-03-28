@@ -30,16 +30,14 @@ namespace TelonicsTest
                     {"77267", new Gen3Processor(TimeSpan.FromMinutes(24*60))},
                     {"87744", new Gen4Processor(File.ReadAllBytes(tpf))},
                 };
-            var a = new ArgosEmailFile(path)
-            {
-                Processor = (i => processorDict[i]),
-                CollarFinder = (i, d) => i
-            };
+            ArgosFile a = new ArgosEmailFile(path);
             SummarizeFile(a);
             foreach (var id in new[] {"77267", "87744"})
             {
                 Console.WriteLine("Messages for {0} in File", id);
-                foreach (var s in a.ToTelonicsData(id))
+                var platform = id; // to protect against AccessToForEachVariableInClosure
+                var transmissions = a.GetTransmissions().Where(t => t.PlatformId == platform);
+                foreach (var s in processorDict[id].ProcessTransmissions(transmissions, a))
                     Console.WriteLine(s);
             }
         }
@@ -48,13 +46,11 @@ namespace TelonicsTest
         {
             const string path = @"..\..\SampleFiles\53478_20130129_Gen3.aws";
             Console.WriteLine("File {0}", path);
-            var a = new ArgosAwsFile(path)
-            {
-                Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(24 * 60))),
-            };
+            ArgosFile a = new ArgosAwsFile(path);
+            var processor = new Gen3Processor(TimeSpan.FromMinutes(24*60));
             SummarizeFile(a);
             Console.WriteLine("Messages in File");
-            foreach (var s in a.ToTelonicsData())
+            foreach (var s in processor.ProcessTransmissions(a.GetTransmissions(), a))
                 Console.WriteLine(s);
         }
 
@@ -64,13 +60,11 @@ namespace TelonicsTest
             const string path = @"..\..\SampleFiles\37780 20121219_231239_Gen4.aws";
             const string tpf = @"..\..\SampleFiles\100628007B_37780.tpf";
             Console.WriteLine("File {0}", path);
-            var a = new ArgosAwsFile(path)
-            {
-                Processor = (i => new Gen4Processor(File.ReadAllBytes(tpf))),
-            };
+            ArgosFile a = new ArgosAwsFile(path);
+            var processor = new Gen4Processor(File.ReadAllBytes(tpf));
             SummarizeFile(a);
             Console.WriteLine("Messages in File");
-            foreach (var s in a.ToTelonicsData())
+            foreach (var s in processor.ProcessTransmissions(a.GetTransmissions(), a))
                 Console.WriteLine(s);
         }
 
@@ -106,16 +100,14 @@ namespace TelonicsTest
                 {
                     var path = Path.Combine(in_path, file);
                     Console.WriteLine("  File {0}", file);
-                    var a = new ArgosEmailFile(path)
-                    {
-                        //IgnorePlatform = (p => p != id),
-                        Processor = (i => new Gen3Processor(TimeSpan.FromMinutes(hours * 60))),
-                        CollarFinder = (i, d) => i
-                    };
+                    ArgosFile a = new ArgosEmailFile(path);
+                    var processor = new Gen3Processor(TimeSpan.FromMinutes(hours*60));
+                    //CollarFinder = (i, d) => i
                     var lines = new string[0]; 
                     try
                     {
-                        lines = a.ToTelonicsData(id).ToArray();
+                        var transmissions = a.GetTransmissions().Where(t => t.PlatformId == id);
+                        lines = processor.ProcessTransmissions(transmissions, a).ToArray();
                     }
                     catch (Exception ex)
                     {

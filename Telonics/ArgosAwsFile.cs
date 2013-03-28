@@ -50,7 +50,7 @@ namespace Telonics
                     DateTime = DateTime.Parse(tokens[7], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
                     Location = String.IsNullOrEmpty(tokens[13]) ? null : new ArgosTransmission.ArgosLocation
                     {
-                        DateTime = DateTime.Parse(tokens[13]),
+                        DateTime = DateTime.Parse(tokens[13], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
                         Latitude = Double.Parse(tokens[14]),
                         Longitude = Double.Parse(tokens[15]),
                         Class = tokens[17][0]

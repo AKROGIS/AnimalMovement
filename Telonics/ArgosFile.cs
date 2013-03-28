@@ -13,7 +13,6 @@ namespace Telonics
 
         private List<string> _lines;
         private List<ArgosTransmission> _transmissions;
-        private Dictionary<String, List<ArgosTransmission>> _transmissionsByCtn;  //CTN is the Telonics Id
 
         #endregion
 
@@ -47,19 +46,6 @@ namespace Telonics
             if (_lines.Count == 0)
                 throw new InvalidDataException("stream has no lines");
         }
-
-        #endregion
-
-        #region Public Properties
-
-        /// <summary>
-        /// Function that returns the Telonics ID (CTN Number) for a platformId (ArgosId) and Transmission date/time
-        /// </summary>
-        public Func<String, DateTime, String> CollarFinder { get; set; }
-        /// <summary>
-        /// Function that returns the object that knows how to process Argos transmissions for the given Telonics ID
-        /// </summary>
-        public Func<String, IProcessor> Processor { get; set; }
 
         #endregion
 
@@ -113,43 +99,6 @@ namespace Telonics
                     select t.DateTime).First();
         }
 
-        public IEnumerable<string> ToTelonicsData(string telonicsId)
-        {
-            if (_transmissionsByCtn == null)
-            {
-                if (CollarFinder == null)
-                    throw new InvalidOperationException("The TelonicsId function must be defined to call ToTelonicsData()");
-                if (_transmissions == null)
-                    _transmissions = GetTransmissions(_lines).ToList();
-                _transmissionsByCtn = SortTransmissions(_transmissions);
-            }
-            if (Processor == null)
-                throw new InvalidOperationException("The Processor function must be defined to call ToTelonicsData()");
-            var processor = Processor(telonicsId);
-            if (processor == null)
-                throw new InvalidOperationException("There is no processor defined for Telonics Id " + telonicsId);
-            if (!_transmissionsByCtn.ContainsKey(telonicsId) || _transmissionsByCtn[telonicsId].Count < 1)
-                throw new NoMessagesException("There are no messages for Telonics Id " + telonicsId);
-            return Processor(telonicsId).ProcessTransmissions(_transmissionsByCtn[telonicsId], this);
-        }
-
-        /// <summary>
-        /// Processes all the transmissions,  caller must ensure the file has only one platform,
-        /// and that the default processor is appropriate for this platform
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<string> ToTelonicsData()
-        {
-            if (_transmissions == null)
-                _transmissions = GetTransmissions(_lines).ToList();
-            if (Processor == null)
-                throw new InvalidOperationException("The Processor function must be defined to call ToTelonicsData()");
-            var processor = Processor("default");
-            if (processor == null)
-                throw new InvalidOperationException("There is no default processor defined");
-            return processor.ProcessTransmissions(_transmissions, this);
-        }
-
         #endregion
 
         #endregion
@@ -159,22 +108,6 @@ namespace Telonics
         abstract internal string Header { get; }
 
         abstract protected IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines);
-
-        private Dictionary<string, List<ArgosTransmission>> SortTransmissions(IEnumerable<ArgosTransmission> transmissions)
-        {
-            var results = new Dictionary<string, List<ArgosTransmission>>();
-            foreach (var transmission in transmissions)
-            {
-                var ctn = CollarFinder(transmission.PlatformId, transmission.DateTime);
-                if (ctn == null)
-                    continue;
-                if (!results.ContainsKey(ctn))
-                    results[ctn] = new List<ArgosTransmission>();
-                results[ctn].Add(transmission);
-            }
-            return results;
-        }
-
 
         #region Line Readers
 

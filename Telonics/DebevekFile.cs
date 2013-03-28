@@ -20,6 +20,9 @@ namespace Telonics
             get { return _header; }
         }
 
+        //We return no transmissions if first non-blank line is not recognized as the header
+        //Fail with Format Exception if there is a parse error anywhere in the file
+        //We could skip lines with parse errors, but we have no way to alert the user
         protected override IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines)
         {
             //The debevek file contains fixes not transmissions,
