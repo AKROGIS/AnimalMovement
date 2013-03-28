@@ -114,46 +114,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[ProjectInvestigators](
-	[Login] [sysname] NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Email] [nvarchar](200) NOT NULL,
-	[Phone] [nvarchar](100) NOT NULL,
- CONSTRAINT [PK_ProjectInvestigators] PRIMARY KEY CLUSTERED 
-(
-	[Login] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Projects](
-	[ProjectId] [varchar](16) NOT NULL,
-	[ProjectName] [nvarchar](150) NOT NULL,
-	[ProjectInvestigator] [sysname] NOT NULL,
-	[UnitCode] [char](4) NULL,
-	[Description] [nvarchar](2000) NULL,
- CONSTRAINT [PK_Projects] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
-RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarManufacturers](
@@ -189,6 +149,46 @@ CREATE TABLE [dbo].[LookupCollarFileFormats](
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ProjectInvestigators](
+	[Login] [sysname] NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Email] [nvarchar](200) NOT NULL,
+	[Phone] [nvarchar](100) NOT NULL,
+ CONSTRAINT [PK_ProjectInvestigators] PRIMARY KEY CLUSTERED 
+(
+	[Login] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Projects](
+	[ProjectId] [varchar](16) NOT NULL,
+	[ProjectName] [nvarchar](150) NOT NULL,
+	[ProjectInvestigator] [sysname] NOT NULL,
+	[UnitCode] [char](4) NULL,
+	[Description] [nvarchar](2000) NULL,
+ CONSTRAINT [PK_Projects] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
+RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
 GO
 SET ANSI_NULLS ON
 GO
@@ -1532,6 +1532,25 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
+(
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Result INT;
+
+	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
+	  FROM ArgosDownloads
+	 WHERE ErrorMessage IS NULL
+	
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 25, 2013
@@ -1572,25 +1591,6 @@ BEGIN
        INNER JOIN deleted AS D
                ON D.FileId = F.FileId
 
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
-(
-)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @Result INT;
-
-	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
-	  FROM ArgosDownloads
-	 WHERE ErrorMessage IS NULL
-	
-	RETURN @Result
 END
 GO
 SET ANSI_NULLS ON
@@ -2285,18 +2285,25 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE VIEW [dbo].[LastLocationOfKnownMortalities]
+CREATE FUNCTION [dbo].[PreviousLocationTime] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
 AS
-SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
-FROM Locations AS L
-INNER JOIN
-   (SELECT A.ProjectId, A.AnimalId, MAX(FixDate) AS FixDate
-	FROM dbo.Locations AS L
-	INNER JOIN dbo.Animals AS A
-	ON A.AnimalId = L.AnimalId AND A.ProjectId = L.ProjectId AND L.FixDate < A.MortalityDate
-	WHERE [Status] IS NULL
-	GROUP BY A.ProjectId, A.AnimalId) AS F
-ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId and F.FixDate = L.FixDate
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [FixDate] 
+					 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [Status] IS NULL
+					  AND [FixDate] < @Time
+			     ORDER BY [FixDate] DESC);
+	RETURN @Result
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -3172,25 +3179,18 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[PreviousLocationTime] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
+CREATE VIEW [dbo].[LastLocationOfKnownMortalities]
 AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [FixDate] 
-					 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [Status] IS NULL
-					  AND [FixDate] < @Time
-			     ORDER BY [FixDate] DESC);
-	RETURN @Result
-END
+SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
+FROM Locations AS L
+INNER JOIN
+   (SELECT A.ProjectId, A.AnimalId, MAX(FixDate) AS FixDate
+	FROM dbo.Locations AS L
+	INNER JOIN dbo.Animals AS A
+	ON A.AnimalId = L.AnimalId AND A.ProjectId = L.ProjectId AND L.FixDate < A.MortalityDate
+	WHERE [Status] IS NULL
+	GROUP BY A.ProjectId, A.AnimalId) AS F
+ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId and F.FixDate = L.FixDate
 GO
 SET ANSI_NULLS ON
 GO
@@ -4045,6 +4045,19 @@ BEGIN
     DEALLOCATE delete_deployment_cursor;
 END
 GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[HiddenFixes](
+	[FixDate] [datetime2](7) NOT NULL,
+	[Sha1Hash] [varbinary](8000) NULL
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
 CREATE FUNCTION [dbo].[FileFormat](@data [varbinary](max))
 RETURNS [nchar](1) WITH EXECUTE AS CALLER
 AS 
@@ -4395,6 +4408,261 @@ BEGIN
     DELETE FROM dbo.ArgosDeployments WHERE [DeploymentId] = @DeploymentId
 END
 GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
+GO
+CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[programNumber] [nvarchar](50) NULL,
+	[platformId] [nvarchar](50) NULL,
+	[platformType] [nvarchar](50) NULL,
+	[platformModel] [nvarchar](50) NULL,
+	[platformName] [nvarchar](50) NULL,
+	[platformHexId] [nvarchar](50) NULL,
+	[satellite] [nvarchar](50) NULL,
+	[bestMsgDate] [nvarchar](50) NULL,
+	[duration] [nvarchar](50) NULL,
+	[nbMessage] [nvarchar](50) NULL,
+	[message120] [nvarchar](50) NULL,
+	[bestLevel] [nvarchar](50) NULL,
+	[frequency] [nvarchar](50) NULL,
+	[locationDate] [nvarchar](50) NULL,
+	[latitude] [nvarchar](50) NULL,
+	[longitude] [nvarchar](50) NULL,
+	[altitude] [nvarchar](50) NULL,
+	[locationClass] [nvarchar](50) NULL,
+	[gpsSpeed] [nvarchar](50) NULL,
+	[gpsHeading] [nvarchar](50) NULL,
+	[latitude2] [nvarchar](50) NULL,
+	[longitude2] [nvarchar](50) NULL,
+	[altitude2] [nvarchar](50) NULL,
+	[index] [nvarchar](50) NULL,
+	[nopc] [nvarchar](50) NULL,
+	[errorRadius] [nvarchar](50) NULL,
+	[semiMajor] [nvarchar](50) NULL,
+	[semiMinor] [nvarchar](50) NULL,
+	[orientation] [nvarchar](50) NULL,
+	[hdop] [nvarchar](50) NULL,
+	[bestDate] [nvarchar](50) NULL,
+	[compression] [nvarchar](50) NULL,
+	[type] [nvarchar](50) NULL,
+	[alarm] [nvarchar](50) NULL,
+	[concatenated] [nvarchar](50) NULL,
+	[date] [nvarchar](50) NULL,
+	[level] [nvarchar](50) NULL,
+	[doppler] [nvarchar](50) NULL,
+	[rawData] [nvarchar](500) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
+GO
+CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[TXDate] [nvarchar](50) NULL,
+	[TXTime] [nvarchar](50) NULL,
+	[PTTID] [nvarchar](50) NULL,
+	[FixNum] [nvarchar](50) NULL,
+	[FixQual] [nvarchar](50) NULL,
+	[FixDate] [nvarchar](50) NULL,
+	[FixTime] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatD]
+GO
+CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[AcquisitionTime] [nvarchar](50) NULL,
+	[AcquisitionStartTime] [nvarchar](50) NULL,
+	[Ctn] [nvarchar](50) NULL,
+	[ArgosId] [nvarchar](50) NULL,
+	[ArgosLocationClass] [nvarchar](50) NULL,
+	[ArgosLatitude] [nvarchar](50) NULL,
+	[ArgosLongitude] [nvarchar](50) NULL,
+	[ArgosAltitude] [nvarchar](50) NULL,
+	[GpsFixTime] [nvarchar](50) NULL,
+	[GpsFixAttempt] [nvarchar](50) NULL,
+	[GpsLatitude] [nvarchar](50) NULL,
+	[GpsLongitude] [nvarchar](50) NULL,
+	[GpsUtmZone] [nvarchar](50) NULL,
+	[GpsUtmNorthing] [nvarchar](50) NULL,
+	[GpsUtmEasting] [nvarchar](50) NULL,
+	[GpsAltitude] [nvarchar](50) NULL,
+	[GpsSpeed] [nvarchar](50) NULL,
+	[GpsHeading] [nvarchar](50) NULL,
+	[GpsHorizontalError] [nvarchar](50) NULL,
+	[GpsPositionalDilution] [nvarchar](50) NULL,
+	[GpsHorizontalDilution] [nvarchar](50) NULL,
+	[GpsSatelliteBitmap] [nvarchar](50) NULL,
+	[GpsSatelliteCount] [nvarchar](50) NULL,
+	[GpsNavigationTime] [nvarchar](50) NULL,
+	[UnderwaterPercentage] [nvarchar](50) NULL,
+	[DiveCount] [nvarchar](50) NULL,
+	[AverageDiveDuration] [nvarchar](50) NULL,
+	[MaximumDiveDuration] [nvarchar](50) NULL,
+	[LayerPercentage] [nvarchar](50) NULL,
+	[MaximumDiveDepth] [nvarchar](50) NULL,
+	[DiveStartTime] [nvarchar](50) NULL,
+	[DiveDuration] [nvarchar](50) NULL,
+	[DiveDepth] [nvarchar](50) NULL,
+	[DiveProfile] [nvarchar](50) NULL,
+	[ActivityCount] [nvarchar](50) NULL,
+	[Temperature] [nvarchar](50) NULL,
+	[RemoteAnalog] [nvarchar](50) NULL,
+	[SatelliteUplink] [nvarchar](50) NULL,
+	[ReceiveTime] [nvarchar](50) NULL,
+	[SatelliteName] [nvarchar](50) NULL,
+	[RepetitionCount] [nvarchar](50) NULL,
+	[LowVoltage] [nvarchar](50) NULL,
+	[Mortality] [nvarchar](50) NULL,
+	[SaltwaterFailsafe] [nvarchar](50) NULL,
+	[HaulOut] [nvarchar](50) NULL,
+	[DigitalInput] [nvarchar](50) NULL,
+	[MotionDetected] [nvarchar](50) NULL,
+	[TrapTriggerTime] [nvarchar](50) NULL,
+	[ReleaseTime] [nvarchar](50) NULL,
+	[PredeploymentData] [nvarchar](50) NULL,
+	[Error] [nvarchar](250) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatC]
+GO
+CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[CollarID] [nvarchar](255) NULL,
+	[AnimalId] [nvarchar](255) NULL,
+	[Species] [nvarchar](255) NULL,
+	[Group] [nvarchar](255) NULL,
+	[Park] [nvarchar](255) NULL,
+	[FixDate] [nvarchar](255) NULL,
+	[FixTime] [nvarchar](255) NULL,
+	[FixMonth] [int] NULL,
+	[FixDay] [int] NULL,
+	[FixYear] [int] NULL,
+	[LatWGS84] [float] NULL,
+	[LonWGS84] [float] NULL,
+	[Temperature] [float] NULL,
+	[Other] [nvarchar](255) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatB]
+GO
+CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[Fix #] [nvarchar](50) NULL,
+	[Date] [nvarchar](50) NULL,
+	[Time] [nvarchar](50) NULL,
+	[Fix Status] [nvarchar](50) NULL,
+	[Status Text] [nvarchar](150) NULL,
+	[Velocity East(m s)] [nvarchar](50) NULL,
+	[Velocity North(m s)] [nvarchar](50) NULL,
+	[Velocity Up(m s)] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[Altitude(m)] [nvarchar](50) NULL,
+	[PDOP] [nvarchar](50) NULL,
+	[HDOP] [nvarchar](50) NULL,
+	[VDOP] [nvarchar](50) NULL,
+	[TDOP] [nvarchar](50) NULL,
+	[Temperature Sensor(deg )] [nvarchar](50) NULL,
+	[Activity Sensor] [nvarchar](50) NULL,
+	[Satellite Data] [nvarchar](150) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatA]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Parses the data in a Collar File
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarData_Insert] 
+	@FileId INT,
+	@Format CHAR
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- This is not executed directly, only by CollarFile_Insert 
+
+	IF @Format = 'A'  -- Store on board
+	BEGIN
+		-- only parse the data if it is not already in the file
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsStoreOnBoard] WHERE [FileId] = @FileId)
+		BEGIN
+			INSERT INTO [dbo].[CollarDataTelonicsStoreOnBoard] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatA] (@FileId) 
+		END
+	END
+		
+	IF @Format = 'B'  -- Debevek Format
+	BEGIN
+		-- only parse the data if it is not already in the file
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataDebevekFormat] WHERE [FileId] = @FileId)
+		BEGIN
+			INSERT INTO [dbo].[CollarDataDebevekFormat] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatB] (@FileId) 
+		END
+	END
+	
+	IF @Format = 'C'  -- Telonics Gen4 Convertor Format
+	BEGIN
+		-- only parse the data if it is not already in the file
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen4] WHERE [FileId] = @FileId)
+		BEGIN
+			INSERT INTO [dbo].[CollarDataTelonicsGen4] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatC] (@FileId) 
+		END
+	END
+	
+	IF @Format = 'D'  -- Telonics Gen3 Convertor Format
+	BEGIN
+		-- only parse the data if it is not already in the file
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen3] WHERE [FileId] = @FileId)
+		BEGIN
+			INSERT INTO [dbo].[CollarDataTelonicsGen3] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatD] (@FileId) 
+		END
+	END
+	
+	IF @Format = 'E' -- Telonics email format
+	BEGIN
+		-- only parse the non-gps data if it is not already in the file
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosEmail] WHERE [FileId] = @FileId)
+		-- FIXME - implement PPT processor.
+		SELECT 1
+		-- BEGIN
+			-- INSERT INTO [dbo].[CollarDataArgosEmail] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatE] (@FileId) 
+		-- END
+		-- Converted GPS Data with an external application to formats 'C' and/or 'D'
+		-- This will always be called by an external interface
+		-- EXEC [dbo].[ArgosFile_Process] @FileId
+	END
+	
+	IF @Format = 'F'  -- Argos Web Services Format
+	BEGIN
+		-- only parse the non-gps data if it is not already in the file
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosWebService] WHERE [FileId] = @FileId)
+		BEGIN
+			INSERT INTO [dbo].[CollarDataArgosWebService] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatF] (@FileId) 
+		END
+	    -- Converted GPS Data with an external application to formats 'C' and/or 'D'
+		-- This is beinging done more efficiently by the downloader program (the common case),
+		-- so we do not want to duplicate this here.
+		-- EXEC [dbo].[ArgosFile_Process] @FileId
+	END
+	
+	
+END
+GO
 CREATE PROCEDURE [dbo].[Summerize]
 	@fileId [int]
 AS
@@ -4410,11 +4678,6 @@ RETURNS  TABLE (
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_TpfSummerizer].[SqlServer_TpfSummerizer.TfpSummerizer].[SummarizeTpfFile]
-GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
 GO
 SET ANSI_NULLS ON
 GO
@@ -4823,274 +5086,6 @@ AS
 	  WHERE F.FixDate > CD.DeploymentDate
         AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
    GROUP BY P.ProjectName, CD.AnimalId, F.FileId, M.Name, F.CollarId
-GO
-CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[programNumber] [nvarchar](50) NULL,
-	[platformId] [nvarchar](50) NULL,
-	[platformType] [nvarchar](50) NULL,
-	[platformModel] [nvarchar](50) NULL,
-	[platformName] [nvarchar](50) NULL,
-	[platformHexId] [nvarchar](50) NULL,
-	[satellite] [nvarchar](50) NULL,
-	[bestMsgDate] [nvarchar](50) NULL,
-	[duration] [nvarchar](50) NULL,
-	[nbMessage] [nvarchar](50) NULL,
-	[message120] [nvarchar](50) NULL,
-	[bestLevel] [nvarchar](50) NULL,
-	[frequency] [nvarchar](50) NULL,
-	[locationDate] [nvarchar](50) NULL,
-	[latitude] [nvarchar](50) NULL,
-	[longitude] [nvarchar](50) NULL,
-	[altitude] [nvarchar](50) NULL,
-	[locationClass] [nvarchar](50) NULL,
-	[gpsSpeed] [nvarchar](50) NULL,
-	[gpsHeading] [nvarchar](50) NULL,
-	[latitude2] [nvarchar](50) NULL,
-	[longitude2] [nvarchar](50) NULL,
-	[altitude2] [nvarchar](50) NULL,
-	[index] [nvarchar](50) NULL,
-	[nopc] [nvarchar](50) NULL,
-	[errorRadius] [nvarchar](50) NULL,
-	[semiMajor] [nvarchar](50) NULL,
-	[semiMinor] [nvarchar](50) NULL,
-	[orientation] [nvarchar](50) NULL,
-	[hdop] [nvarchar](50) NULL,
-	[bestDate] [nvarchar](50) NULL,
-	[compression] [nvarchar](50) NULL,
-	[type] [nvarchar](50) NULL,
-	[alarm] [nvarchar](50) NULL,
-	[concatenated] [nvarchar](50) NULL,
-	[date] [nvarchar](50) NULL,
-	[level] [nvarchar](50) NULL,
-	[doppler] [nvarchar](50) NULL,
-	[rawData] [nvarchar](500) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
-GO
-CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[TXDate] [nvarchar](50) NULL,
-	[TXTime] [nvarchar](50) NULL,
-	[PTTID] [nvarchar](50) NULL,
-	[FixNum] [nvarchar](50) NULL,
-	[FixQual] [nvarchar](50) NULL,
-	[FixDate] [nvarchar](50) NULL,
-	[FixTime] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatD]
-GO
-CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[AcquisitionTime] [nvarchar](50) NULL,
-	[AcquisitionStartTime] [nvarchar](50) NULL,
-	[Ctn] [nvarchar](50) NULL,
-	[ArgosId] [nvarchar](50) NULL,
-	[ArgosLocationClass] [nvarchar](50) NULL,
-	[ArgosLatitude] [nvarchar](50) NULL,
-	[ArgosLongitude] [nvarchar](50) NULL,
-	[ArgosAltitude] [nvarchar](50) NULL,
-	[GpsFixTime] [nvarchar](50) NULL,
-	[GpsFixAttempt] [nvarchar](50) NULL,
-	[GpsLatitude] [nvarchar](50) NULL,
-	[GpsLongitude] [nvarchar](50) NULL,
-	[GpsUtmZone] [nvarchar](50) NULL,
-	[GpsUtmNorthing] [nvarchar](50) NULL,
-	[GpsUtmEasting] [nvarchar](50) NULL,
-	[GpsAltitude] [nvarchar](50) NULL,
-	[GpsSpeed] [nvarchar](50) NULL,
-	[GpsHeading] [nvarchar](50) NULL,
-	[GpsHorizontalError] [nvarchar](50) NULL,
-	[GpsPositionalDilution] [nvarchar](50) NULL,
-	[GpsHorizontalDilution] [nvarchar](50) NULL,
-	[GpsSatelliteBitmap] [nvarchar](50) NULL,
-	[GpsSatelliteCount] [nvarchar](50) NULL,
-	[GpsNavigationTime] [nvarchar](50) NULL,
-	[UnderwaterPercentage] [nvarchar](50) NULL,
-	[DiveCount] [nvarchar](50) NULL,
-	[AverageDiveDuration] [nvarchar](50) NULL,
-	[MaximumDiveDuration] [nvarchar](50) NULL,
-	[LayerPercentage] [nvarchar](50) NULL,
-	[MaximumDiveDepth] [nvarchar](50) NULL,
-	[DiveStartTime] [nvarchar](50) NULL,
-	[DiveDuration] [nvarchar](50) NULL,
-	[DiveDepth] [nvarchar](50) NULL,
-	[DiveProfile] [nvarchar](50) NULL,
-	[ActivityCount] [nvarchar](50) NULL,
-	[Temperature] [nvarchar](50) NULL,
-	[RemoteAnalog] [nvarchar](50) NULL,
-	[SatelliteUplink] [nvarchar](50) NULL,
-	[ReceiveTime] [nvarchar](50) NULL,
-	[SatelliteName] [nvarchar](50) NULL,
-	[RepetitionCount] [nvarchar](50) NULL,
-	[LowVoltage] [nvarchar](50) NULL,
-	[Mortality] [nvarchar](50) NULL,
-	[SaltwaterFailsafe] [nvarchar](50) NULL,
-	[HaulOut] [nvarchar](50) NULL,
-	[DigitalInput] [nvarchar](50) NULL,
-	[MotionDetected] [nvarchar](50) NULL,
-	[TrapTriggerTime] [nvarchar](50) NULL,
-	[ReleaseTime] [nvarchar](50) NULL,
-	[PredeploymentData] [nvarchar](50) NULL,
-	[Error] [nvarchar](250) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatC]
-GO
-CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[CollarID] [nvarchar](255) NULL,
-	[AnimalId] [nvarchar](255) NULL,
-	[Species] [nvarchar](255) NULL,
-	[Group] [nvarchar](255) NULL,
-	[Park] [nvarchar](255) NULL,
-	[FixDate] [nvarchar](255) NULL,
-	[FixTime] [nvarchar](255) NULL,
-	[FixMonth] [int] NULL,
-	[FixDay] [int] NULL,
-	[FixYear] [int] NULL,
-	[LatWGS84] [float] NULL,
-	[LonWGS84] [float] NULL,
-	[Temperature] [float] NULL,
-	[Other] [nvarchar](255) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatB]
-GO
-CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[Fix #] [nvarchar](50) NULL,
-	[Date] [nvarchar](50) NULL,
-	[Time] [nvarchar](50) NULL,
-	[Fix Status] [nvarchar](50) NULL,
-	[Status Text] [nvarchar](150) NULL,
-	[Velocity East(m s)] [nvarchar](50) NULL,
-	[Velocity North(m s)] [nvarchar](50) NULL,
-	[Velocity Up(m s)] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[Altitude(m)] [nvarchar](50) NULL,
-	[PDOP] [nvarchar](50) NULL,
-	[HDOP] [nvarchar](50) NULL,
-	[VDOP] [nvarchar](50) NULL,
-	[TDOP] [nvarchar](50) NULL,
-	[Temperature Sensor(deg )] [nvarchar](50) NULL,
-	[Activity Sensor] [nvarchar](50) NULL,
-	[Satellite Data] [nvarchar](150) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatA]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Parses the data in a Collar File
--- =============================================
-CREATE PROCEDURE [dbo].[CollarData_Insert] 
-	@FileId INT,
-	@Format CHAR
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- This is not executed directly, only by CollarFile_Insert 
-
-	IF @Format = 'A'  -- Store on board
-	BEGIN
-		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsStoreOnBoard] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataTelonicsStoreOnBoard] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatA] (@FileId) 
-		END
-	END
-		
-	IF @Format = 'B'  -- Debevek Format
-	BEGIN
-		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataDebevekFormat] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataDebevekFormat] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatB] (@FileId) 
-		END
-	END
-	
-	IF @Format = 'C'  -- Telonics Gen4 Convertor Format
-	BEGIN
-		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen4] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataTelonicsGen4] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatC] (@FileId) 
-		END
-	END
-	
-	IF @Format = 'D'  -- Telonics Gen3 Convertor Format
-	BEGIN
-		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen3] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataTelonicsGen3] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatD] (@FileId) 
-		END
-	END
-	
-	IF @Format = 'E' -- Telonics email format
-	BEGIN
-		-- only parse the non-gps data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosEmail] WHERE [FileId] = @FileId)
-		-- FIXME - implement PPT processor.
-		SELECT 1
-		-- BEGIN
-			-- INSERT INTO [dbo].[CollarDataArgosEmail] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatE] (@FileId) 
-		-- END
-		-- Converted GPS Data with an external application to formats 'C' and/or 'D'
-		-- This will always be called by an external interface
-		-- EXEC [dbo].[ArgosFile_Process] @FileId
-	END
-	
-	IF @Format = 'F'  -- Argos Web Services Format
-	BEGIN
-		-- only parse the non-gps data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosWebService] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataArgosWebService] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatF] (@FileId) 
-		END
-	    -- Converted GPS Data with an external application to formats 'C' and/or 'D'
-		-- This is beinging done more efficiently by the downloader program (the common case),
-		-- so we do not want to duplicate this here.
-		-- EXEC [dbo].[ArgosFile_Process] @FileId
-	END
-	
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarFileHeaders](
-	[Header] [nvarchar](450) NOT NULL,
-	[FileFormat] [char](1) NOT NULL,
-	[Regex] [nvarchar](450) NULL,
- CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
-(
-	[Header] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -5822,6 +5817,24 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarFileHeaders](
+	[Header] [nvarchar](450) NOT NULL,
+	[FileFormat] [char](1) NOT NULL,
+	[Regex] [nvarchar](450) NULL,
+ CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
+(
+	[Header] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 20, 2012
@@ -6357,88 +6370,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[IsEditor] 
-(
-	@Project VARCHAR(32)   = NULL, 
-	@User sysname = NULL
-)
-RETURNS BIT
-AS
-BEGIN
-	-- Check that @User is in the Investigator or the Editor Role
-	IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
-												   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
-		RETURN 0
-	
-	--Check that the users is either an editor or the PI on the project
-	IF EXISTS( SELECT 1 FROM dbo.Projects AS P 
-				LEFT JOIN dbo.ProjectEditors AS E ON P.ProjectId = E.ProjectId 
-				WHERE P.ProjectId = @Project
-				  AND (E.Editor = @User OR P.ProjectInvestigator = @User))
-		RETURN 1
-	RETURN 0
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[IsFixEditor] 
-(
-	@FixId    INT = NULL, 
-	@User sysname = NULL
-)
-RETURNS BIT
-AS
-BEGIN
-	DECLARE @Result BIT
-	
-		SELECT @Result = [dbo].[IsEditor]([f].[ProjectId], @User)
-		  FROM [dbo].[CollarFixes] AS [x]
-	INNER JOIN [dbo].[CollarFiles] AS [f]
-			ON [x].[FileId] = [f].[FileId]
-		 WHERE [x].[FixId] = @FixId;
-		 
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Deletes an animal
--- =============================================
-CREATE PROCEDURE [dbo].[Animal_Delete] 
-	@ProjectId nvarchar(255) = NULL,
-	@AnimalId nvarchar(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be able to edit this project
-	IF NOT EXISTS (SELECT 1 WHERE [dbo].[IsEditor](@ProjectId, @Caller) = 1)
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete an animal.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- deleting a non-existing animal will silently succeed.
-	-- All other verification is handled by primary/foreign key and column constraints.
-	DELETE FROM dbo.Animals WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: November 9, 2012
@@ -6743,6 +6674,88 @@ BEGIN
 			EXEC ('DROP LOGIN ['  + @Investigator + ']')
 		END
 	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[IsEditor] 
+(
+	@Project VARCHAR(32)   = NULL, 
+	@User sysname = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	-- Check that @User is in the Investigator or the Editor Role
+	IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
+												   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
+		RETURN 0
+	
+	--Check that the users is either an editor or the PI on the project
+	IF EXISTS( SELECT 1 FROM dbo.Projects AS P 
+				LEFT JOIN dbo.ProjectEditors AS E ON P.ProjectId = E.ProjectId 
+				WHERE P.ProjectId = @Project
+				  AND (E.Editor = @User OR P.ProjectInvestigator = @User))
+		RETURN 1
+	RETURN 0
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[IsFixEditor] 
+(
+	@FixId    INT = NULL, 
+	@User sysname = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	DECLARE @Result BIT
+	
+		SELECT @Result = [dbo].[IsEditor]([f].[ProjectId], @User)
+		  FROM [dbo].[CollarFixes] AS [x]
+	INNER JOIN [dbo].[CollarFiles] AS [f]
+			ON [x].[FileId] = [f].[FileId]
+		 WHERE [x].[FixId] = @FixId;
+		 
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Deletes an animal
+-- =============================================
+CREATE PROCEDURE [dbo].[Animal_Delete] 
+	@ProjectId nvarchar(255) = NULL,
+	@AnimalId nvarchar(255) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be able to edit this project
+	IF NOT EXISTS (SELECT 1 WHERE [dbo].[IsEditor](@ProjectId, @Caller) = 1)
+	BEGIN
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to delete an animal.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- deleting a non-existing animal will silently succeed.
+	-- All other verification is handled by primary/foreign key and column constraints.
+	DELETE FROM dbo.Animals WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId
 END
 GO
 SET ANSI_NULLS ON
