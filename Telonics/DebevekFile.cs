@@ -60,13 +60,16 @@ namespace Telonics
                         if (String.Equals(column, "LonWGS84", StringComparison.InvariantCultureIgnoreCase))
                             lonIndex = i;
                     }
-                    if (platformIndex == -1 || dateIndex == -1 || timeIndex == -1 || latIndex == -1 || lonIndex == -1)
+                    if (platformIndex == -1 || dateIndex == -1 || latIndex == -1 || lonIndex == -1)  //FixTime is optional
                         yield break;
                     continue;
                 }
 
                 var tokens = cleanLine.Split(new[] { '\t', ',' });
-                var dateTime = DateTime.Parse(tokens[dateIndex] + " " + tokens[timeIndex], CultureInfo.InvariantCulture,
+                var timeString = "12:00";
+                if (timeIndex != -1)
+                    timeString = tokens[timeIndex];
+                var dateTime = DateTime.Parse(tokens[dateIndex] + " " + timeString, CultureInfo.InvariantCulture,
                                               DateTimeStyles.RoundtripKind);
                 var transmission = new ArgosTransmission
                 {
