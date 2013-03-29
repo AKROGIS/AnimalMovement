@@ -781,8 +781,9 @@ CREATE TABLE [dbo].[CollarDataArgosEmail](
 	[PlatformId] [varchar](50) NULL,
 	[TransmissionDate] [datetime2](7) NULL,
 	[LocationDate] [datetime2](7) NULL,
-	[Latitude] [float] NULL,
-	[Longitude] [float] NULL,
+	[Latitude] [real] NULL,
+	[Longitude] [real] NULL,
+	[Altitude] [real] NULL,
 	[LocationClass] [char](1) NULL,
 	[Message] [varbinary](50) NULL,
  CONSTRAINT [PK_CollarDataArgosEmail] PRIMARY KEY CLUSTERED 
@@ -4400,8 +4401,9 @@ RETURNS  TABLE (
 	[PlatformId] [nvarchar](50) NULL,
 	[TransmissionDate] [datetime2](7) NULL,
 	[LocationDate] [datetime2](7) NULL,
-	[Latitude] [float] NULL,
-	[Longitude] [float] NULL,
+	[Latitude] [real] NULL,
+	[Longitude] [real] NULL,
+	[Altitude] [real] NULL,
 	[LocationClass] [nchar](1) NULL,
 	[Message] [varbinary](50) NULL
 ) WITH EXECUTE AS CALLER

@@ -82,8 +82,8 @@ namespace SqlServer_Files
                     Location = String.IsNullOrEmpty(tokens[latIndex]) ? null : new ArgosTransmission.ArgosLocation
                     {
                         DateTime = dateTime,
-                        Latitude = Double.Parse(tokens[latIndex]),
-                        Longitude = Double.Parse(tokens[lonIndex])
+                        Latitude = Single.Parse(tokens[latIndex]),
+                        Longitude = Single.Parse(tokens[lonIndex])
                     }
                 };
                 transmission.AddLine(line);

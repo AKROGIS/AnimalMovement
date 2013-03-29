@@ -66,8 +66,9 @@ namespace Telonics
                                    : new ArgosTransmission.ArgosLocation
                                        {
                                            DateTime = DateTime.Parse(line.Substring(23, 19)),
-                                           Latitude = Double.Parse(line.Substring(43, 7)),
-                                           Longitude = Double.Parse(line.Substring(51, 8)),
+                                           Latitude = Single.Parse(line.Substring(43, 7)),
+                                           Longitude = Single.Parse(line.Substring(51, 8)),
+                                           Altitude = Single.Parse(line.Substring(60, 6)),
                                            Class = line[21]
                                        };
                     transmission = null;

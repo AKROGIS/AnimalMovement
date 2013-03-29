@@ -89,8 +89,9 @@ namespace Telonics
         public class ArgosLocation
         {
             public DateTime DateTime { get; internal set; }
-            public double Latitude { get; internal set; }
-            public double Longitude { get; internal set; }
+            public float Latitude { get; internal set; }
+            public float Longitude { get; internal set; }
+            public float Altitude { get; internal set; }
             public char Class { get; internal set; }
         }
 

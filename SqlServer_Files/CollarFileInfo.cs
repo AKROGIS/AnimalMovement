@@ -92,8 +92,9 @@ namespace SqlServer_Files
                 [PlatformId] [nvarchar](50) NULL,
                 [TransmissionDate] [datetime2](7) NULL,
                 [LocationDate] [datetime2](7) NULL,
-                [Latitude] [float] NULL,
-                [Longitude] [float] NULL,
+                [Latitude] [real] NULL,
+                [Longitude] [real] NULL,
+                [Altitude] [real] NULL,
                 [LocationClass] [nchar](1) NULL,
                 [Message] [varbinary](50) NULL")]
         public static IEnumerable ParseFormatE(SqlInt32 fileId)
@@ -121,8 +122,9 @@ namespace SqlServer_Files
             out SqlString platformId,
             out DateTime transmissionDate,
             out DateTime? locationDate,
-            out double? latitude,
-            out double? longitude,
+            out float? latitude,
+            out float? longitude,
+            out float? altitude,
             out char? locationClass,
             out Byte[] message)
         {
@@ -132,9 +134,10 @@ namespace SqlServer_Files
             platformId = transmission.PlatformId;
             transmissionDate = transmission.DateTime;
             locationDate = transmission.Location == null ? (DateTime?) null : transmission.Location.DateTime;
-            latitude = transmission.Location == null ? (double?) null : transmission.Location.Latitude;
-            longitude = transmission.Location == null ? (double?) null : transmission.Location.Longitude;
-            locationClass = transmission.Location == null ? (char?) null : transmission.Location.Class;
+            latitude = transmission.Location == null ? (float?) null : transmission.Location.Latitude;
+            longitude = transmission.Location == null ? (float?)null : transmission.Location.Longitude;
+            altitude = transmission.Location == null ? (float?)null : transmission.Location.Altitude;
+            locationClass = transmission.Location == null ? (char?)null : transmission.Location.Class;
             message = transmission.Message;
         }
 
