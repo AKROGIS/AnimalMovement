@@ -777,13 +777,14 @@ GO
 CREATE TABLE [dbo].[CollarDataArgosEmail](
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
-	[programNumber] [varchar](50) NULL,
-	[platformId] [varchar](50) NULL,
+	[ProgramId] [varchar](50) NULL,
+	[PlatformId] [varchar](50) NULL,
 	[TransmissionDate] [datetime2](7) NULL,
-	[locationDate] [datetime2](7) NULL,
-	[latitude] [float] NULL,
-	[longitude] [float] NULL,
-	[locationClass] [char](1) NULL,
+	[LocationDate] [datetime2](7) NULL,
+	[Latitude] [float] NULL,
+	[Longitude] [float] NULL,
+	[LocationClass] [char](1) NULL,
+	[Message] [varbinary](50) NULL,
  CONSTRAINT [PK_CollarDataArgosEmail] PRIMARY KEY CLUSTERED 
 (
 	[FileId] ASC,
@@ -1269,11 +1270,25 @@ BEGIN
 		    AND I.Latitude IS NOT NULL AND I.Longitude IS NOT NULL
 		    AND I.[Longitude] <> 'Error' AND I.[Latitude] <> 'Error'
 	END
-	
-	
+		
 	-- IF @Format = 'E' -- Telonics email format
 	-- GPS fixes in the email are converted with an external application to formats 'C' or 'D'
-	-- FIXME: Add the Argos PTT locations to the Fixes table (only for non-GPS collars)
+	-- This adds the Argos PTT locations to the Fixes table (only for non-GPS collars)
+	BEGIN
+		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId, I.LocationDate, I.Latitude, I.Longitude
+		   FROM dbo.CollarDataArgosEmail AS I
+	 INNER JOIN CollarFiles AS F 
+			 ON I.FileId = F.FileId
+	 INNER JOIN Collars AS C
+	         ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+		  WHERE F.[Status] = 'A'
+		    AND I.FileId = @FileId
+		    AND I.Latitude BETWEEN -90 AND 90
+		    AND I.Longitude BETWEEN -180 AND 180
+		    AND I.LocationDate < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+		    AND C.HasGps = 0
+	END
 	
 	IF @Format = 'F'  -- Argos Web Services Format
 	-- GPS fixes in the raw data of a AWS file are converted with an external application to formats 'C' or 'D'
@@ -4378,6 +4393,21 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
 GO
+CREATE FUNCTION [dbo].[ParseFormatE](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[ProgramId] [nvarchar](50) NULL,
+	[PlatformId] [nvarchar](50) NULL,
+	[TransmissionDate] [datetime2](7) NULL,
+	[LocationDate] [datetime2](7) NULL,
+	[Latitude] [float] NULL,
+	[Longitude] [float] NULL,
+	[LocationClass] [nchar](1) NULL,
+	[Message] [varbinary](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[ParseFormatE]
+GO
 CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
 RETURNS  TABLE (
 	[LineNumber] [int] NULL,
@@ -4556,14 +4586,9 @@ BEGIN
 	BEGIN
 		-- only parse the non-gps data if it is not already in the file
 		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosEmail] WHERE [FileId] = @FileId)
-		-- FIXME - implement PPT processor.
-		SELECT 1
-		-- BEGIN
-			-- INSERT INTO [dbo].[CollarDataArgosEmail] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatE] (@FileId) 
-		-- END
-		-- Converted GPS Data with an external application to formats 'C' and/or 'D'
-		-- This will always be called by an external interface
-		-- EXEC [dbo].[ArgosFile_Process] @FileId
+		BEGIN
+			INSERT INTO [dbo].[CollarDataArgosEmail] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatE] (@FileId) 
+		END
 	END
 	
 	IF @Format = 'F'  -- Argos Web Services Format
@@ -4573,10 +4598,6 @@ BEGIN
 		BEGIN
 			INSERT INTO [dbo].[CollarDataArgosWebService] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatF] (@FileId) 
 		END
-	    -- Converted GPS Data with an external application to formats 'C' and/or 'D'
-		-- This is beinging done more efficiently by the downloader program (the common case),
-		-- so we do not want to duplicate this here.
-		-- EXEC [dbo].[ArgosFile_Process] @FileId
 	END
 	
 	--IF @Format = 'G'  -- Debevek Format

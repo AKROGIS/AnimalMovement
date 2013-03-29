@@ -35,8 +35,10 @@ namespace SqlServer_Files
             var latIndex = -1;
             var lonIndex = -1;
 
+            int lineNumber = 0;
             foreach (var line in lines)
             {
+                lineNumber++;
                 var cleanLine = line.Trim();
                 if (cleanLine == String.Empty)
                     continue;
@@ -73,6 +75,7 @@ namespace SqlServer_Files
                                               DateTimeStyles.RoundtripKind);
                 var transmission = new ArgosTransmission
                 {
+                    LineNumber = lineNumber,
                     ProgramId = null,
                     PlatformId = tokens[platformIndex],
                     DateTime = dateTime,

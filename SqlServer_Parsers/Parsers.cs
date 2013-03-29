@@ -23,11 +23,13 @@ namespace SqlServer_Parsers
 
         #region SQL Server Table Value Functions
         //Code - Format
-        //   A - Telonics Store On Board Format
-        //   B - Ed Debevek's File Format - for a single deployment of a platform
-        //   C - Telonics Gen4 File Format
+        //   A - Telonics Gen3 Store On Board Format
+        //   B - Ed Debevek's Child File Format - for a single deployment of a platform
+        //   C - Telonics Gen4 File Format (from Argos or direct download)
         //   D - Telonics Gen3 File Format
+        //   E - Telonics Email File Format (See the SqlServer_Files project)
         //   F - Argos WebService CSV File Format (aws)
+        //   G - Ed Debevek's Parent File Format, not parsed (children are parsed as 'B')
 
         // A - Telonics Store On Board Format
 

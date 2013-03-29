@@ -51,6 +51,7 @@ namespace SqlServer_Files
 
         #region Public API
 
+        public int LineNumber { get; internal set; }
         public string ProgramId { get; internal set; }
         public string PlatformId { get; internal set; }
         public DateTime DateTime { get; internal set; }

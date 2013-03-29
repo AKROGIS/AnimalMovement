@@ -39,8 +39,10 @@ namespace SqlServer_Files
         protected override IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines)
         {
             //Each line looks like \"abc\";\"def\";\"pdq\";\"xyz\";
+            int lineNumber = 1;
             foreach (var line in lines.Skip(1))
             {
+                lineNumber++;
                 if (String.Equals(line.Trim(), "MAX_RESPONSE_REACHED", StringComparison.InvariantCultureIgnoreCase))
                 {
                     _maxResponseReached = true;
@@ -49,6 +51,7 @@ namespace SqlServer_Files
                 var tokens = line.Substring(1, line.Length - 3).Split(new[] { "\";\"" }, StringSplitOptions.None);
                 var transmission = new ArgosTransmission
                 {
+                    LineNumber = lineNumber,
                     ProgramId = tokens[0],
                     PlatformId = tokens[1],
                     DateTime = DateTime.Parse(tokens[7], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),

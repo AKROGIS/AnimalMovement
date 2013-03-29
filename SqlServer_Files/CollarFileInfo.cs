@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
@@ -81,6 +82,62 @@ namespace SqlServer_Files
                 throw new InvalidOperationException("File not found: " + fileId);
             SummerizeFile(fileId, bytes, format);
         }
+
+        [SqlFunction(
+            DataAccess = DataAccessKind.Read,
+            FillRowMethodName = "FormatE_FillRow",
+            TableDefinition =
+              @"[LineNumber] [int],
+                [ProgramId] [nvarchar](50) NULL,
+                [PlatformId] [nvarchar](50) NULL,
+                [TransmissionDate] [datetime2](7) NULL,
+                [LocationDate] [datetime2](7) NULL,
+                [Latitude] [float] NULL,
+                [Longitude] [float] NULL,
+                [LocationClass] [nchar](1) NULL,
+                [Message] [varbinary](50) NULL")]
+        public static IEnumerable ParseFormatE(SqlInt32 fileId)
+        {
+            Byte[] bytes = null;
+            using (var connection = new SqlConnection("context connection=true"))
+            {
+                connection.Open();
+                const string sql = "SELECT [Contents] FROM [dbo].[CollarFiles] WHERE [FileId] = @fileId AND [Format] = 'E'";
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.Add(new SqlParameter("@fileId", SqlDbType.Int) { Value = fileId });
+                    using (SqlDataReader results = command.ExecuteReader())
+                        while (results.Read())
+                            bytes = results.GetSqlBytes(0).Buffer;
+                }
+            }
+            return (new ArgosEmailFile(bytes)).GetTransmissions();
+        }
+
+        public static void FormatE_FillRow(
+            object inputObject,
+            out SqlInt32 lineNumber,
+            out SqlString programNumber,
+            out SqlString platformId,
+            out DateTime transmissionDate,
+            out DateTime? locationDate,
+            out double? latitude,
+            out double? longitude,
+            out char? locationClass,
+            out Byte[] message)
+        {
+            var transmission = (ArgosTransmission) inputObject;
+            lineNumber = transmission.LineNumber;
+            programNumber = transmission.ProgramId;
+            platformId = transmission.PlatformId;
+            transmissionDate = transmission.DateTime;
+            locationDate = transmission.Location == null ? (DateTime?) null : transmission.Location.DateTime;
+            latitude = transmission.Location == null ? (double?) null : transmission.Location.Latitude;
+            longitude = transmission.Location == null ? (double?) null : transmission.Location.Longitude;
+            locationClass = transmission.Location == null ? (char?) null : transmission.Location.Class;
+            message = transmission.Message;
+        }
+
 
         private static void SummerizeFile(SqlInt32 fileId, Byte[] contents, char format)
         {

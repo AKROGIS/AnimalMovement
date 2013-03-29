@@ -53,8 +53,10 @@ namespace Telonics
             string platformheader = null;
             ArgosTransmission.ArgosLocation location = null;
             ArgosTransmission transmission = null;
+            int lineNumber = 0;
             foreach (var line in lines)
             {
+                lineNumber++;
                 if (platformPattern.IsMatch(line))
                 {
                     programId = line.Substring(0, 5).Trim().TrimStart('0');
@@ -81,6 +83,7 @@ namespace Telonics
 
                         transmission = new ArgosTransmission
                             {
+                                LineNumber = lineNumber,
                                 ProgramId = programId,
                                 PlatformId = platformId,
                                 DateTime = transmissionDateTime,
