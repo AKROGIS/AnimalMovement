@@ -94,14 +94,14 @@
 ----------- Days since last program download
      SELECT ProgramId, DATEDIFF(day, MAX(TimeStamp), GETDATE())
        FROM ArgosDownloads
-      WHERE FileId IS NOT NULL
+      WHERE FileId IS NOT NULL AND ProgramId IS NOT NULL
    GROUP BY ProgramId
 
 
 ----------- Days since last platform download
      SELECT PlatformId, DATEDIFF(day, MAX(TimeStamp), GETDATE())
        FROM ArgosDownloads
-      WHERE FileId IS NOT NULL
+      WHERE FileId IS NOT NULL AND PlatformId IS NOT NULL
    GROUP BY PlatformId
 
 
@@ -139,6 +139,36 @@
 
 
 
+-- Checks associated with Hidden Locations 
+-- =======================================
+
+
+----------- Locations which are not but should be hidden    
+     SELECT L.FixDate, F.Sha1Hash, L.ProjectId, L.AnimalId, L.[Status]
+       FROM HiddenFixes AS H
+ INNER JOIN (
+						Locations AS L
+			 INNER JOIN CollarFixes AS X
+					 ON L.FixId = X.FixId
+			 INNER JOIN CollarFiles AS F
+					 ON F.FileId = X.FileId
+            )
+         ON H.FixDate = L.FixDate AND H.Sha1Hash = F.Sha1Hash
+      WHERE L.[Status] IS NULL
+
+----------- FixDate and FileHash for hidden locations    
+     SELECT L.FixDate, F.Sha1Hash --, L.ProjectId, L.AnimalId, L.[Status]
+       FROM Locations AS L
+ INNER JOIN CollarFixes AS X
+         ON L.FixId = X.FixId
+ INNER JOIN CollarFiles AS F
+         ON F.FileId = X.FileId
+      WHERE L.[Status] IS NOT NULL
+
+
+
+
+
 -- Checks associated with TPF Files
 -- ========================================
 
@@ -158,6 +188,23 @@
          ON T.FileId = P.FileId AND T.CTN = P.CollarId
       WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
    ORDER BY T.CTN, T.[Status], StartDate
+
+----------- Warning - Duplicate collars (CTN, timestamp) in TPF file
+     SELECT T.CTN, T.[Platform], T.[TimeStamp], T.[Status], T.FileId, T.[FileName], T3.[Count] AS [CTNs in File]
+       FROM AllTpfFileData AS T
+       JOIN (SELECT CTN, [TimeStamp] FROM AllTpfFileData GROUP BY CTN, [TimeStamp] HAVING COUNT(*) > 1) AS T2
+         ON T.CTN = T2.CTN AND T.[TimeStamp] = T2.[TimeStamp]
+       JOIN (SELECT [FileName], COUNT(*) AS [Count] FROM AllTpfFileData GROUP BY [FileName]) AS T3
+         ON T.[FileName] = T3.[FileName]
+   ORDER BY T.CTN, T.[Status]
+
+----------- Warning - Mismatch in Collar TPF Data (Changes in Frequency are permissible)
+     SELECT C.*, T.*
+       FROM Collars AS C
+ INNER JOIN AllTpfFileData AS T
+         ON C.CollarId = T.CTN 
+      WHERE C.ArgosId <> T.[Platform]
+         OR C.Frequency <> T.Frequency
 
 ----------- The following queries should return no records
 ----------- Collars in TPF Files not in Collars Table
@@ -191,7 +238,6 @@
       WHERE F.Owner <> C.Manager
    ORDER BY CTN
 
-
 ----------- ERROR Collar Parameters with no TPF File 
      SELECT C.*
        FROM CollarParameters AS C
@@ -209,13 +255,12 @@
       WHERE CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN, [Status], [TimeStamp] HAVING COUNT(*) > 1)
    ORDER BY CTN
 
------------ ERROR - Mismatch in Collar TPF Data
+----------- ERROR - Mismatch in Collar TPF Data (Changes in Frequency are permissible)
      SELECT C.*, T.*
        FROM Collars AS C
  INNER JOIN AllTpfFileData AS T
          ON C.CollarId = T.CTN 
       WHERE C.ArgosId <> T.[Platform]
-         OR C.Frequency <> T.Frequency
 
 ----------- TPF TimeStamp check
      SELECT C.*, T.[TimeStamp], DATEDIFF(day,T.[TimeStamp], C.StartDate) as diff
@@ -226,14 +271,6 @@
          ON C.CollarId = T.CTN AND C.FileId = T.FileId
       WHERE F.Format = 'A'
         AND (C.StartDate IS NULL OR T.[TimeStamp]<> C.StartDate)
-
------------ WARNING Collar Parameter End Date that does not match Collar Disposal Date
-     SELECT *
-       FROM CollarParameters AS P
- INNER JOIN Collars AS C
-         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-      WHERE C.DisposalDate IS NOT NULL
-        AND P.EndDate IS NULL OR P.EndDate > C.DisposalDate
 
 ----------- ERROR Collar Parameter Start Date that violates Collar Disposal Date
      SELECT *
@@ -263,6 +300,15 @@
    GROUP BY Sha1Hash
      HAVING COUNT(*) > 1
 
+----------- ERROR: Children/Parent files that are out of sync.
+     SELECT P.FileId, P.FileName, P.ProjectId, P.Owner, P.Status,
+            C.FileId, C.FileName, C.ProjectId, C.Owner, C.Status
+       FROM CollarFiles AS P
+  LEFT JOIN CollarFiles AS C
+         ON P.FileId = C.ParentFileId
+      WHERE C.[Status] <> P.[Status]
+         OR C.ProjectId <> P.ProjectId
+         OR C.[Owner] <> P.[Owner]
 
 
 
