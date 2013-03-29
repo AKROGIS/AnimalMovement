@@ -150,10 +150,10 @@ namespace FileLibrary
             var database = new AnimalMovementDataContext();
             if (ProcessLocally)
             {
-                var file = database.CollarFiles.FirstOrDefault(f => f.FileId == fileId && (f.Format == 'E' || f.Format == 'F'));
+                var file = database.CollarFiles.FirstOrDefault(f => f.FileId == fileId && (f.Format == 'E' || f.Format == 'F' || f.Format == 'G'));
                 if (file == null)
                 {
-                    var msg = String.Format("{0} is not an Argos email or AWS file Id in the database.", fileId);
+                    var msg = String.Format("{0} is not an Id for an Argos file in the database.", fileId);
                     LogGeneralError(msg);
                     return;
                 }
@@ -177,6 +177,9 @@ namespace FileLibrary
                         break;
                     case 'F':
                         argos = new ArgosAwsFile(file.Contents.ToArray());
+                        break;
+                    case 'G':
+                        argos = new DebevekFile(file.Contents.ToArray());
                         break;
                     default:
                         LogGeneralError("Unrecognized File Format: " + file.Format);
@@ -256,34 +259,47 @@ namespace FileLibrary
                         IProcessor processor = null;
                         char format = '?';
                         string issue = null;
-                        switch (parameterSet.CollarModel)
+                        switch (file.Format)
                         {
-                            case "Gen3":
-                                try
+                            case 'E':
+                            case 'F':
+                                switch (parameterSet.CollarModel)
                                 {
-                                    processor = GetGen3Processor(parameterSet);
+                                    case "Gen3":
+                                        try
+                                        {
+                                            processor = GetGen3Processor(parameterSet);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            issue =
+                                                String.Format(
+                                                    "{4}. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
+                                                    parameterSet.PlatformId, start, end,
+                                                    parameterSet.CollarId, ex.Message);
+                                        }
+                                        format = 'D';
+                                        break;
+                                    case "Gen4":
+                                        processor = GetGen4Processor(parameterSet);
+                                        format = 'C';
+                                        break;
+                                    default:
+                                        issue =
+                                            String.Format(
+                                                "Unknown CollarModel '{4}' encountered. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
+                                                parameterSet.PlatformId, start, end,
+                                                parameterSet.CollarId, parameterSet.CollarModel);
+                                        break;
                                 }
-                                catch (Exception ex)
-                                {
-                                    issue =
-                                        String.Format(
-                                            "{4}. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
-                                            parameterSet.PlatformId, start, end,
-                                            parameterSet.CollarId, ex.Message);
-                                }
-                                format = 'D';
                                 break;
-                            case "Gen4":
-                                processor = GetGen4Processor(parameterSet);
-                                format = 'C';
+                            case 'G':
+                                processor = new DebevekProcessor();
+                                format = 'B';
                                 break;
                             default:
-                                issue =
-                                    String.Format(
-                                        "Unknown CollarModel '{4}' encountered. Skipping parameter set for collar {3}, ArgosId:{0} from {1:g} to {2:g}",
-                                        parameterSet.PlatformId, start, end,
-                                        parameterSet.CollarId, parameterSet.CollarModel);
-                                break;
+                                //This is programming error, as we should have already checked for this condition
+                                throw new InvalidOperationException("Unsupported CollarFile Format '" + format +"'.");
                         }
                         if (processor == null)
                             issue =
@@ -301,7 +317,7 @@ namespace FileLibrary
                         var data = Encoding.UTF8.GetBytes(String.Join("\n", lines));
                         var collarFile = new CollarFile
                         {
-                            Project = file.Project,
+                            ProjectId = file.Project.ProjectId,
                             FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameterSet.CollarId + ".csv",
                             Format = format,
                             CollarManufacturer = "Telonics",

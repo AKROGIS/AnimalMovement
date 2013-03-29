@@ -24,7 +24,7 @@ namespace SqlServer_Parsers
         #region SQL Server Table Value Functions
         //Code - Format
         //   A - Telonics Store On Board Format
-        //   B - Ed Debevek's File Format
+        //   B - Ed Debevek's File Format - for a single deployment of a platform
         //   C - Telonics Gen4 File Format
         //   D - Telonics Gen3 File Format
         //   F - Argos WebService CSV File Format (aws)
@@ -67,7 +67,7 @@ namespace SqlServer_Parsers
             FillRowMethodName = "FormatB_FillRow",
             TableDefinition =
                 @"[LineNumber] [int],
-	                [CollarID] [nvarchar](255) NULL,
+	                [PlatformId] [nvarchar](255) NULL,
 	                [AnimalId] [nvarchar](255) NULL,
 	                [Species] [nvarchar](255) NULL,
 	                [Group] [nvarchar](255) NULL,
@@ -308,7 +308,7 @@ namespace SqlServer_Parsers
             // See Section 2.5 of Argos/Telonics Online Data Conversion, April 2010, Edward M. Debevec
             var wellKnownColumns = new[]
                                        {
-                                           "CollarID", "varies", "Species", "varies", "Park", "FixDate", "FixTime", "FixMonth", "FixDay",
+                                           "PlatformId", "varies", "Species", "varies", "Park", "FixDate", "FixTime", "FixMonth", "FixDay",
                                            "FixYear", "LatWGS84", "LonWGS84", "Temperature"
                                        };
             var variableColumns = new Dictionary<int, List<string>>(2);

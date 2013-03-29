@@ -688,7 +688,7 @@ GO
 CREATE TABLE [dbo].[CollarDataDebevekFormat](
 	[FileID] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
-	[CollarID] [char](6) NULL,
+	[PlatformId] [char](6) NULL,
 	[AnimalId] [char](6) NULL,
 	[Species] [nvarchar](255) NULL,
 	[Group] [nvarchar](255) NULL,
@@ -853,7 +853,7 @@ BEGIN
 	-- The caller must be an editor or ArgosProcessor in the database - handled by execute permissions
 
 	-- The file must be one that has Argos Transmissions
-	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('E', 'F','G'))
 	BEGIN
 		DECLARE @message2 nvarchar(200) = 'The source file is not the correct format.';
 		RAISERROR(@message2, 18, 0)
@@ -919,7 +919,7 @@ BEGIN
 	END
 	
 	-- The file must be one that has Argos Transmissions
-	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	IF NOT EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE FileId = @FileId AND Format IN ('E', 'F', 'G'))
 	BEGIN
 		DECLARE @message2 nvarchar(200) = 'The source file is not the correct format.';
 		RAISERROR(@message2, 18, 0)
@@ -978,6 +978,7 @@ AS
          ON I.FileId = T.FileId
       WHERE C.FileId IS NULL
         AND I.FileId IS NULL
+   GROUP BY T.FileId
 GO
 SET ANSI_NULLS ON
 GO
@@ -999,93 +1000,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ProjectEditors](
-	[ProjectId] [varchar](16) NOT NULL,
-	[Editor] [sysname] NOT NULL,
- CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[Editor] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
---     revised: March 25, 2013
--- Description:	Deletes a CollarFile
---              related records are deleted by FK Cascades, or the INSTEAD OF trigger
---              Ensures that Child files are never delete (the trigger handles it)
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFile_Delete] 
-    @FileId int
-AS
-BEGIN
-    SET NOCOUNT ON;
-        
-    -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-    -- First check that this is a valid file, if not exit quietly (we are done)
-    IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId)
-    BEGIN
-        RETURN 0
-    END
-
-    -- Validate permission for this operation
-    -- To delete a file you must be an editor of the project, or the Owner of the file
-    -- The ArgosProcessor role is also allowed to delete files on behalf of users
-    -- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file.
-        
-    -- Get the projectId and Owner
-    DECLARE @ProjectId NVARCHAR(255) = NULL
-    DECLARE @Owner NVARCHAR(255) = NULL
-    SELECT @ProjectID = [ProjectId], @Owner = [Owner] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-    IF @Owner <> @Caller  -- Not the owner
-       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not the Project PI
-       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller) -- Not a Project Editor
-       AND NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-    BEGIN
-        DECLARE @message1 nvarchar(200)
-        IF @ProjectId IS NOT NULL
-            SET @message1 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
-        ELSE
-            SET @message1 = 'You ('+@Caller+') are not the owner (' + @Owner + ') of this file.';
-        RAISERROR(@message1, 18, 0)
-        RETURN (1)
-    END
- 
-    -- Check that this is not somebodies child
-    IF EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE ParentFileId IS NOT NULL and FileId = @FileId)
-    BEGIN
-        DECLARE @message3 nvarchar(200) = 'This file was derived from another file.  It cannot be deleted directly';
-        RAISERROR(@message3, 18, 0)
-        RETURN (1)
-    END
-    
-    -- Delete this file
-    DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-    
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 16, 2013
@@ -1100,7 +1014,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	IF NOT EXISTS (SELECT 1 FROM CollarFiles WHERE FileId = @FileId AND Format IN ('B', 'E', 'F'))
+	IF NOT EXISTS (SELECT 1 FROM CollarFiles WHERE FileId = @FileId AND Format IN ('E', 'F', 'G'))
 	BEGIN
 		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid file in a suitable format.';
 		RAISERROR(@message1, 18, 0)
@@ -1111,21 +1025,10 @@ BEGIN
 	-- controlled by execute permissions on SP	
 	
 	--Delete any existing sub files; this must be done in a cursor to call the SP
-	DECLARE @SubFileId INT
-    DECLARE delete_subfile_cursor CURSOR FOR 
-            SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId
-        
-    OPEN delete_subfile_cursor;
-
-    FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        EXEC CollarFile_Delete @SubFileId
-        FETCH NEXT FROM delete_subfile_cursor INTO @SubFileId;
-    END
-    CLOSE delete_subfile_cursor;
-    DEALLOCATE delete_subfile_cursor;
+	--We can't call the SPROC, because it will deny deleting a sub file
+	--Fortunately, the SPROC doesn't do anything more than a delete
+	--(the rest of the work is done in the trigger)
+	DELETE FROM [dbo].[CollarFiles] WHERE [FileId] IN (SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId)
 
 	-- Delete any prior processing issues
 	DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId
@@ -1229,20 +1132,18 @@ BEGIN
 		    AND I.[Fix Status] = 'Fix Available'
 		    AND I.FileId = @FileId
 	END
-		
-	IF @Format = 'B'  -- Debevek Format
+	
+	IF @Format = 'B'  -- Debevek Sub file, same as a 'G' file, except it is for a single Collar
 	BEGIN
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, C.CollarId,
+		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
 		        CONVERT(datetime2, I.[FixDate]+ ' ' + ISNULL(I.[FixTime],'')),
 		        I.LatWGS84, I.LonWGS84
 		   FROM dbo.CollarDataDebevekFormat as I
 	 INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
-	 INNER JOIN Collars as C 
-			 ON C.ArgosId = I.CollarID
 	 INNER JOIN CollarDeployments AS D
-			 ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+			 ON F.CollarManufacturer = D.CollarManufacturer AND F.CollarId = D.CollarId
 			AND (I.AnimalId = D.AnimalId OR I.AnimalId = '0' + D.AnimalId)
 		  WHERE F.[Status] = 'A'
 		    AND I.FileId = @FileId
@@ -1396,6 +1297,9 @@ BEGIN
 		    AND I.[locationDate] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
 		    AND C.HasGps = 0
 	END
+
+	--IF @Format = 'G'  -- Debevek Format
+	-- nothing to do for this format
 	
 END
 GO
@@ -1804,7 +1708,7 @@ BEGIN
  INNER JOIN ArgosDeployments AS D
          ON D.CollarId = F.CollarId
       WHERE D.PlatformId = @PlatformId
-        AND P.[Format] IN ('B', 'E', 'F')
+        AND P.[Format] IN ('E', 'F', 'G')
 
          -- FAIL - finds all results for a source file with the @Platform (also requires date range).
     DECLARE @StartDate datetime2(7) = '2010-01-01'
@@ -1817,6 +1721,24 @@ BEGIN
       WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, @StartDate, @EndDate) = 1
 
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProjectEditors](
+	[ProjectId] [varchar](16) NOT NULL,
+	[Editor] [sysname] NOT NULL,
+ CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[Editor] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -3769,7 +3691,7 @@ BEGIN
                            FROM CollarFiles AS F
                            JOIN CollarFiles AS P
                              ON F.ParentFileId = P.FileId
-                          WHERE P.Format IN ('B', 'E', 'F')
+                          WHERE P.Format IN ('E', 'F', 'G')
                             AND F.CollarManufacturer = @OldMfgr AND F.CollarId = @OldCollar
                     
                 OPEN update_collar_deployment_cursor;
@@ -4536,7 +4458,7 @@ GO
 CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
 RETURNS  TABLE (
 	[LineNumber] [int] NULL,
-	[CollarID] [nvarchar](255) NULL,
+	[PlatformId] [nvarchar](255) NULL,
 	[AnimalId] [nvarchar](255) NULL,
 	[Species] [nvarchar](255) NULL,
 	[Group] [nvarchar](255) NULL,
@@ -4606,7 +4528,7 @@ BEGIN
 		END
 	END
 		
-	IF @Format = 'B'  -- Debevek Format
+	IF @Format = 'B'  -- Debevek SubFile Format
 	BEGIN
 		-- only parse the data if it is not already in the file
 		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataDebevekFormat] WHERE [FileId] = @FileId)
@@ -4660,6 +4582,8 @@ BEGIN
 		-- EXEC [dbo].[ArgosFile_Process] @FileId
 	END
 	
+	--IF @Format = 'G'  -- Debevek Format
+	-- do not process the parent, only the children ('B')
 	
 END
 GO
@@ -5444,6 +5368,75 @@ BEGIN
         EXEC [dbo].[Utility_RethrowError]
         RETURN (1)
     END CATCH
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+--     revised: March 25, 2013
+-- Description:	Deletes a CollarFile
+--              related records are deleted by FK Cascades, or the INSTEAD OF trigger
+--              Ensures that Child files are never delete (the trigger handles it)
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFile_Delete] 
+    @FileId int
+AS
+BEGIN
+    SET NOCOUNT ON;
+        
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    -- First check that this is a valid file, if not exit quietly (we are done)
+    IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId)
+    BEGIN
+        RETURN 0
+    END
+
+    -- Validate permission for this operation
+    -- To delete a file you must be an editor of the project, or the Owner of the file
+    -- The ArgosProcessor role is also allowed to delete files on behalf of users
+    -- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file.
+        
+    -- Get the projectId and Owner
+    DECLARE @ProjectId NVARCHAR(255) = NULL
+    DECLARE @Owner NVARCHAR(255) = NULL
+    SELECT @ProjectID = [ProjectId], @Owner = [Owner] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+    IF @Owner <> @Caller  -- Not the owner
+       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not the Project PI
+       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller) -- Not a Project Editor
+       AND NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
+    BEGIN
+        DECLARE @message1 nvarchar(200)
+        IF @ProjectId IS NOT NULL
+            SET @message1 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
+        ELSE
+            SET @message1 = 'You ('+@Caller+') are not the owner (' + @Owner + ') of this file.';
+        RAISERROR(@message1, 18, 0)
+        RETURN (1)
+    END
+ 
+    -- Check that this is not somebodies child
+    IF EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE ParentFileId IS NOT NULL and FileId = @FileId)
+    BEGIN
+        DECLARE @message3 nvarchar(200) = 'This file was derived from another file.  It cannot be deleted directly';
+        RAISERROR(@message3, 18, 0)
+        RETURN (1)
+    END
+    
+    -- Delete this file
+    DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+    
 END
 GO
 SET ANSI_NULLS ON

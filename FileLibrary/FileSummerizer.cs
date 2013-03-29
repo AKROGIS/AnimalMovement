@@ -19,7 +19,7 @@ namespace FileLibrary
             var query = from file in database.CollarFiles
                         join item in database.ArgosFilePlatformDates on file.FileId equals item.FileId into fileItems
                         from item in fileItems.DefaultIfEmpty()
-                        where item == null && (file.Format == 'B' || file.Format == 'E' || file.Format == 'F')
+                        where item == null && (file.Format == 'E' || file.Format == 'F' || file.Format == 'G')
                         select file;
             foreach (var item in query)
             {
@@ -41,7 +41,7 @@ namespace FileLibrary
         {
             var database = new AnimalMovementDataContext();
             var file = database.CollarFiles.FirstOrDefault(
-                    f => f.FileId == fileId && (f.Format == 'B' || f.Format == 'E' || f.Format == 'F'));
+                    f => f.FileId == fileId && (f.Format == 'E' || f.Format == 'F' || f.Format == 'G'));
             if (file == null)
                 throw new InvalidOperationException("Collar File not found (or the wrong format)");
             SummerizeFile(file);
@@ -53,14 +53,14 @@ namespace FileLibrary
             ArgosFile argos;
             switch (file.Format)
             {
-                case 'B':
-                    argos = new DebevekFile(file.Contents.ToArray());
-                    break;
                 case 'E':
                     argos = new ArgosEmailFile(file.Contents.ToArray());
                     break;
                 case 'F':
                     argos = new ArgosAwsFile(file.Contents.ToArray());
+                    break;
+                case 'G':
+                    argos = new DebevekFile(file.Contents.ToArray());
                     break;
                 default:
                     throw new InvalidOperationException("Unrecognized File Format: " + file.Format);

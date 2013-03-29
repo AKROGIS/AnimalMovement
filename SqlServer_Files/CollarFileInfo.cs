@@ -87,14 +87,14 @@ namespace SqlServer_Files
             ArgosFile argos;
             switch (format)
             {
-                case 'B':
-                    argos = new DebevekFile(contents);
-                    break;
                 case 'E':
                     argos = new ArgosEmailFile(contents);
                     break;
                 case 'F':
                     argos = new ArgosAwsFile(contents);
+                    break;
+                case 'G':
+                    argos = new DebevekFile(contents);
                     break;
                 default:
                     throw new InvalidOperationException("Unsupported File Format: " + format);

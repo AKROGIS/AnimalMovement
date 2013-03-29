@@ -64,6 +64,7 @@
     <Compile Include="ArgosTransmission.cs" />
     <Compile Include="ArgosWebSite.cs" />
     <Compile Include="DebevekFile.cs" />
+    <Compile Include="DebevekProcessor.cs" />
     <Compile Include="Gen3Processor.cs" />
     <Compile Include="Gen4Processor.cs" />
     <Compile Include="IProcessor.cs" />
