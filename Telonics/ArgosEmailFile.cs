@@ -65,10 +65,10 @@ namespace Telonics
                                    ? null
                                    : new ArgosTransmission.ArgosLocation
                                        {
-                                           DateTime = DateTime.Parse(line.Substring(24, 19)),
-                                           Latitude = Double.Parse(line.Substring(44, 7)),
-                                           Longitude = Double.Parse(line.Substring(52, 8)),
-                                           Class = line[22]
+                                           DateTime = DateTime.Parse(line.Substring(23, 19)),
+                                           Latitude = Double.Parse(line.Substring(43, 7)),
+                                           Longitude = Double.Parse(line.Substring(51, 8)),
+                                           Class = line[21]
                                        };
                     transmission = null;
                     platformheader = line;
