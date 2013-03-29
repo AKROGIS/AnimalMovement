@@ -320,9 +320,9 @@ namespace FileLibrary
                             ProjectId = file.Project.ProjectId,
                             FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameterSet.CollarId + ".csv",
                             Format = format,
-                            CollarManufacturer = "Telonics",
+                            CollarManufacturer = parameterSet.CollarManufacturer,
                             CollarId = parameterSet.CollarId,
-                            Status = 'A',
+                            Status = file.Status,
                             ParentFileId = file.FileId,
                             Contents = data,
                             Owner = file.Owner

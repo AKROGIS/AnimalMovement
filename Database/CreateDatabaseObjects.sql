@@ -1142,9 +1142,6 @@ BEGIN
 		   FROM dbo.CollarDataDebevekFormat as I
 	 INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
-	 INNER JOIN CollarDeployments AS D
-			 ON F.CollarManufacturer = D.CollarManufacturer AND F.CollarId = D.CollarId
-			AND (I.AnimalId = D.AnimalId OR I.AnimalId = '0' + D.AnimalId)
 		  WHERE F.[Status] = 'A'
 		    AND I.FileId = @FileId
 		    AND I.LatWGS84 IS NOT NULL AND I.LonWGS84 IS NOT NULL

@@ -435,58 +435,47 @@
 
 
 ----------- Summary of Fixes in Debevek Files (those with NULL collarID are currently ignored)
-     SELECT F.[FileName], E.CollarId, E.AnimalId, 
+     SELECT F.[FileName], E.PlatformID, E.AnimalId, 
             CONVERT(VARCHAR(10), MIN(convert(datetime2,E.FixDate)), 101) AS FirstFix,
             CONVERT(VARCHAR(10), MAX(convert(datetime2,E.FixDate)), 101) AS LastFix,
             COUNT(*) AS [Count],
             C.Manager, C.CollarId
        FROM CollarDataDebevekFormat AS E
-  LEFT JOIN (
-                        CollarDeployments AS D
-             INNER JOIN Collars AS C
-                     ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-            )
-         ON (E.AnimalId = D.AnimalId OR E.AnimalId = '0' + D.AnimalId)
-        AND C.ArgosId = E.CollarID
  INNER JOIN CollarFiles AS F
          ON F.FileId = E.FileID
-   GROUP BY C.Manager, C.CollarId, F.[FileName], E.CollarId, E.AnimalId 
-   ORDER BY F.[FileName], C.CollarId, E.CollarId, FirstFix
+ INNER JOIN Collars AS C
+         ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+   GROUP BY C.Manager, C.CollarId, F.[FileName], E.PlatformID, E.AnimalId 
+   ORDER BY F.[FileName], C.CollarId, E.PlatformID, FirstFix
 
 
------------ Fixes from Ed Debevek Files which will not be used for Animal locations
-     SELECT F.[FileName], E.CollarId AS ArgosId, E.AnimalId, 
-            CONVERT(VARCHAR(10), MIN(CONVERT(DATETIME2,E.FixDate)), 101) AS FirstFix,
-            CONVERT(VARCHAR(10), MAX(CONVERT(DATETIME2,E.FixDate)), 101) AS LastFix,
-            C.Manager, C.CollarId,
-            CONVERT(VARCHAR(10), D.DeploymentDate, 101) AS Deployed,
-            CONVERT(VARCHAR(10), D.RetrievalDate, 101) AS Retrieved,
-            COUNT(*) AS [Count]
-       FROM CollarDataDebevekFormat AS E
- INNER JOIN CollarFiles AS F
-         ON F.FileId = E.FileID
-  LEFT JOIN (
-             CollarDeployments AS D
-             INNER JOIN Collars AS C
-             ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-            )
-         ON (E.AnimalId = D.AnimalId OR E.AnimalId = '0' + D.AnimalId)
-        AND C.ArgosId = E.CollarID
-      WHERE C.Manager IS NULL OR E.FixDate < D.DeploymentDate OR E.FixDate > D.RetrievalDate
-   GROUP BY C.Manager, C.CollarId, F.[FileName], E.CollarId, E.AnimalId, D.DeploymentDate, D.RetrievalDate
-     HAVING C.Manager IS NULL OR MIN(CONVERT(DATETIME2,E.FixDate)) < D.DeploymentDate OR MAX(CONVERT(DATETIME2,E.FixDate)) > D.RetrievalDate
-   ORDER BY F.[FileName], E.CollarId, FirstFix
- 
+----------- Fixes from Ed Debevek Files not be used for Animal locations
+     SELECT F.[FileName], D.PlatformId, X.CollarManufacturer, X.CollarId,
+            D.AnimalId AS [Debevek AnimalId],
+            CONVERT(VARCHAR(10), MIN(X.FixDate), 101) AS [First Fix],
+            CONVERT(VARCHAR(10), MAX(X.FixDate), 101) AS [Last Fix],
+            COUNT(X.FixDate) AS [Fix Count]
+       FROM CollarDataDebevekFormat AS D
+  LEFT JOIN CollarFixes AS X
+         ON X.FileId = D.FileID AND X.LineNumber = D.LineNumber
+  LEFT JOIN Locations AS L
+         ON L.FixId = X.FixId
+  LEFT JOIN CollarFiles AS F
+         ON D.FileID = F.FileId
+      WHERE L.FixId IS NULL
+   GROUP BY F.[FileName], D.PlatformId, D.AnimalId, X.CollarManufacturer, X.CollarId 
+   ORDER BY F.[FileName], D.PlatformID, [First Fix]
+
  
 ----------- Records in Debevek Files not in Fixes
-     SELECT CF.[FileName], E.CollarID, E.AnimalId, COUNT(*) AS [Count]
+     SELECT CF.[FileName], E.PlatformID, E.AnimalId, COUNT(*) AS [Count]
        FROM CollarDataDebevekFormat AS E
   LEFT JOIN CollarFixes AS F
          ON F.FileId = E.FileID AND F.LineNumber = E.LineNumber
  INNER JOIN CollarFiles AS CF
          ON CF.FileId = E.FileID
       WHERE F.FileId IS NULL
-   GROUP BY CF.[FileName], E.CollarID, E.AnimalId
+   GROUP BY CF.[FileName], E.PlatformID, E.AnimalId
 
 
 

@@ -221,8 +221,7 @@ Column constraints
 CollarManufacturer/CollarId
   - is a nullable Foreign Key to the collars table
   - Can only be null for files which will be processed, i.e will have sub files with
-    non-null collars **and as a special exception, Debevek files - in the future these
-    should be processed to collar specific sub files**
+    non-null collars
   - It will cascade updates, but stop deletes
 
 ProjectId
