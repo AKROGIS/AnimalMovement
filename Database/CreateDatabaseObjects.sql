@@ -553,42 +553,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[CollarDataTelonicsStoreOnBoard](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[Fix #] [varchar](50) NULL,
-	[Date] [nvarchar](50) NULL,
-	[Time] [nvarchar](50) NULL,
-	[Fix Status] [varchar](50) NULL,
-	[Status Text] [varchar](150) NULL,
-	[Velocity East(m s)] [varchar](50) NULL,
-	[Velocity North(m s)] [varchar](50) NULL,
-	[Velocity Up(m s)] [varchar](50) NULL,
-	[Latitude] [varchar](50) NULL,
-	[Longitude] [varchar](50) NULL,
-	[Altitude(m)] [varchar](50) NULL,
-	[PDOP] [varchar](50) NULL,
-	[HDOP] [varchar](50) NULL,
-	[VDOP] [varchar](50) NULL,
-	[TDOP] [varchar](50) NULL,
-	[Temperature Sensor(deg )] [varchar](50) NULL,
-	[Activity Sensor] [varchar](50) NULL,
-	[Satellite Data] [varchar](150) NULL,
- CONSTRAINT [PK_CollarDataTelonicsStoreOnBoard] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[CollarDataTelonicsGen4](
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
@@ -644,6 +608,42 @@ CREATE TABLE [dbo].[CollarDataTelonicsGen4](
 	[PredeploymentData] [varchar](50) NULL,
 	[Error] [varchar](250) NULL,
  CONSTRAINT [PK_CollarDataTelonicsGen4] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[Fix #] [varchar](50) NULL,
+	[Date] [nvarchar](50) NULL,
+	[Time] [nvarchar](50) NULL,
+	[Fix Status] [varchar](50) NULL,
+	[Status Text] [varchar](150) NULL,
+	[Velocity East(m s)] [varchar](50) NULL,
+	[Velocity North(m s)] [varchar](50) NULL,
+	[Velocity Up(m s)] [varchar](50) NULL,
+	[Latitude] [varchar](50) NULL,
+	[Longitude] [varchar](50) NULL,
+	[Altitude(m)] [varchar](50) NULL,
+	[PDOP] [varchar](50) NULL,
+	[HDOP] [varchar](50) NULL,
+	[VDOP] [varchar](50) NULL,
+	[TDOP] [varchar](50) NULL,
+	[Temperature Sensor(deg )] [varchar](50) NULL,
+	[Activity Sensor] [varchar](50) NULL,
+	[Satellite Data] [varchar](150) NULL,
+ CONSTRAINT [PK_CollarDataTelonicsGen3StoreOnBoard] PRIMARY KEY CLUSTERED 
 (
 	[FileId] ASC,
 	[LineNumber] ASC
@@ -1131,7 +1131,7 @@ BEGIN
 		        CASE WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 < -180 THEN 360 + (CONVERT(numeric(10,5),I.Longitude) % 360.0)
 		             WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 > 180 THEN (CONVERT(numeric(10,5),I.Longitude) % 360.0) - 360
 		             ELSE CONVERT(numeric(10,5),I.Longitude) % 360.0 END
-		   FROM dbo.CollarDataTelonicsStoreOnBoard as I INNER JOIN CollarFiles as F 
+		   FROM dbo.CollarDataTelonicsGen3StoreOnBoard as I INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
 		  WHERE F.[Status] = 'A'
 		    AND I.[Fix Status] = 'Fix Available'
@@ -2223,14 +2223,14 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE VIEW [dbo].[StoreOnBoardLocations]
 AS
-SELECT     dbo.CollarDataTelonicsStoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
+SELECT     dbo.CollarDataTelonicsGen3StoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
                       dbo.CollarFiles.UploadDate
-FROM         dbo.CollarDataTelonicsStoreOnBoard INNER JOIN
-                      dbo.CollarFixes ON dbo.CollarDataTelonicsStoreOnBoard.FileId = dbo.CollarFixes.FileId AND 
-                      dbo.CollarDataTelonicsStoreOnBoard.LineNumber = dbo.CollarFixes.LineNumber INNER JOIN
+FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
+                      dbo.CollarFixes ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFixes.FileId AND 
+                      dbo.CollarDataTelonicsGen3StoreOnBoard.LineNumber = dbo.CollarFixes.LineNumber INNER JOIN
                       dbo.Locations ON dbo.CollarFixes.FixId = dbo.Locations.FixId INNER JOIN
                       dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
-                      dbo.CollarFiles ON dbo.CollarDataTelonicsStoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
+                      dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
 GO
 SET ANSI_NULLS ON
 GO
@@ -4567,9 +4567,9 @@ BEGIN
 	IF @Format = 'A'  -- Store on board
 	BEGIN
 		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsStoreOnBoard] WHERE [FileId] = @FileId)
+		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen3StoreOnBoard] WHERE [FileId] = @FileId)
 		BEGIN
-			INSERT INTO [dbo].[CollarDataTelonicsStoreOnBoard] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatA] (@FileId) 
+			INSERT INTO [dbo].[CollarDataTelonicsGen3StoreOnBoard] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatA] (@FileId) 
 		END
 	END
 		
@@ -7091,17 +7091,17 @@ ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsGen3] CHECK CONSTRAINT [FK_CollarDataTelonicsGen3_CollarFiles]
 GO
+ALTER TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen3StoreOnBoard_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard] CHECK CONSTRAINT [FK_CollarDataTelonicsGen3StoreOnBoard_CollarFiles]
+GO
 ALTER TABLE [dbo].[CollarDataTelonicsGen4]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
 ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsGen4] CHECK CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarDataTelonicsStoreOnBoard]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsStoreOnBoard_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDataTelonicsStoreOnBoard] CHECK CONSTRAINT [FK_CollarDataTelonicsStoreOnBoard_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])

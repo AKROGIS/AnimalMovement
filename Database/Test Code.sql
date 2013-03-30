@@ -367,7 +367,7 @@
     INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T1_file1, @T1_project, @T1_mfgr, @T1_collar1, @T1_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T1_file1id = SCOPE_IDENTITY();
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T1_file1id, 1, '2012-05-11', '60.11', '-154.11', 'Fix Available'),
                 (@T1_file1id, 2, '2012-05-12', '60.12', '-154.12', 'Fix Available'),
                 (@T1_file1id, 3, '2012-05-13', '60.13', '-154.13', 'Fix Available')
@@ -376,7 +376,7 @@
     INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T1_file2, @T1_project, @T1_mfgr, @T1_collar2, @T1_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T1_file2id = SCOPE_IDENTITY();
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T1_file2id, 1, '2012-05-11', '60.21', '-154.21', 'Fix Available'),
                 (@T1_file2id, 2, '2012-05-12', '60.22', '-154.22', 'Fix Available'),
                 (@T1_file2id, 3, '2012-05-13', '60.23', '-154.23', 'Fix Available')
@@ -653,7 +653,7 @@
        OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T1_mfgr AND [CollarId] IN (@T1_collar1,@T1_collar2))
        OR EXISTS (SELECT 1 from CollarDeployments Where [ProjectId] = @T1_project)
        OR EXISTS (SELECT 1 from CollarFiles Where [FileId] IN (@T1_File1Id, @T1_File2Id))
-       OR EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] IN (@T1_File1Id, @T1_File2Id))
+       OR EXISTS (SELECT 1 from CollarDataTelonicsGen3StoreOnBoard Where [FileId] IN (@T1_File1Id, @T1_File2Id))
        OR EXISTS (SELECT 1 from CollarFixes Where [FileId] = @T1_file1id AND [CollarManufacturer] = @T1_mfgr AND [CollarId] = @T1_collar1)
        OR EXISTS (SELECT 1 from CollarFixes Where [FileId] = @T1_file2id AND [CollarManufacturer] = @T1_mfgr AND [CollarId] = @T1_collar2)
        OR EXISTS (SELECT 1 from Locations Where [ProjectId] = @T1_project AND [AnimalId] IN (@T1_animal1, @T1_animal2))
@@ -785,7 +785,7 @@ Check illegal modifications of deployment
     INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T2_file, @T2_project, @T2_mfgr, @T2_collar1, @T2_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T2_fileid = SCOPE_IDENTITY();
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T2_fileid, 1, '2012-05-11', '60.11', '-154.11', 'Fix Available'),
                 (@T2_fileid, 2, '2012-05-12', '60.12', '-154.12', 'Fix Available'),
                 (@T2_fileid, 3, '2012-05-13', '60.13', '-154.13', 'Fix Available'),
@@ -1382,7 +1382,7 @@ Check illegal modifications of deployment
        OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T2_mfgr AND [CollarId] IN (@T2_collar1,@T2_collar2))
        OR EXISTS (SELECT 1 from CollarDeployments Where [ProjectId] = @T2_project)
        OR EXISTS (SELECT 1 from CollarFiles Where [FileId] = @T2_FileId)
-       OR EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] = @T2_FileId)
+       OR EXISTS (SELECT 1 from CollarDataTelonicsGen3StoreOnBoard Where [FileId] = @T2_FileId)
        OR EXISTS (SELECT 1 from CollarFixes Where [FileId] = @T2_fileid AND [CollarManufacturer] = @T2_mfgr AND [CollarId] = @T2_collar1)
        OR EXISTS (SELECT 1 from Locations Where [ProjectId] = @T2_project AND [AnimalId] IN (@T2_animal1, @T2_animal2))
        OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @T2_project AND [AnimalId] IN (@T2_animal1, @T2_animal2))
@@ -1492,7 +1492,7 @@ Check illegal modifications of deployment
     INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [CollarManufacturer], [CollarId], [Format], [Status], [Contents])
          VALUES (@T3_file, @T3_project, @T3_mfgr, @T3_collar1, @T3_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T3_fileid = SCOPE_IDENTITY();
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T3_fileid, 1, '2012-05-11', '60.11', '-154.11', 'Fix Available'),
                 (@T3_fileid, 2, '2012-05-12', '60.12', '-154.12', 'Fix Available'),
                 (@T3_fileid, 3, '2012-05-11', '60.13', '-154.13', 'Fix Available'),
@@ -1731,7 +1731,7 @@ Check illegal modifications of deployment
        OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T3_mfgr AND [CollarId] = @T3_collar1)
        OR EXISTS (SELECT 1 from CollarDeployments Where [ProjectId] = @T3_project)
        OR EXISTS (SELECT 1 from CollarFiles Where [FileId] = @T3_FileId)
-       OR EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] = @T3_FileId)
+       OR EXISTS (SELECT 1 from CollarDataTelonicsGen3StoreOnBoard Where [FileId] = @T3_FileId)
        OR EXISTS (SELECT 1 from CollarFixes Where [FileId] = @T3_fileid AND [CollarManufacturer] = @T3_mfgr AND [CollarId] = @T3_collar1)
        OR EXISTS (SELECT 1 from Locations Where [ProjectId] = @T3_project AND [AnimalId] = @T3_animal1)
        OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @T3_project AND [AnimalId] = @T3_animal1)
@@ -1829,7 +1829,7 @@ Check illegal modifications of deployment
          VALUES (@T4_file, @T4_project, @T4_mfgr, @T4_collar, @T4_format, 'A', convert(varbinary,'data'))  -- 'A' = Store on board
     SET @T4_fileid = SCOPE_IDENTITY();
     -- Load multiple Fixes Manually into the collar data table
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T4_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
                 (@T4_fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
                 (@T4_fileid, 3, '2012-05-13', '60.3', '-154.3', 'Fix Available'),
@@ -1841,7 +1841,7 @@ Check illegal modifications of deployment
     IF    NOT EXISTS (SELECT 1 from Animals Where [ProjectId] = @T4_project AND [AnimalId] = @T4_animal) 
        OR NOT EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T4_mfgr AND [CollarId] = @T4_collar)
        OR NOT EXISTS (SELECT 1 from CollarFiles Where [FileId] = @T4_FileId)
-       OR NOT EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] = @T4_fileid)
+       OR NOT EXISTS (SELECT 1 from CollarDataTelonicsGen3StoreOnBoard Where [FileId] = @T4_fileid)
        OR     EXISTS (SELECT 1 from CollarFixes Where [FileId] = @T4_fileid AND [CollarManufacturer] = @T4_mfgr AND [CollarId] = @T4_collar)
        OR     EXISTS (SELECT 1 from Locations Where [ProjectId] = @T4_project AND [AnimalId] = @T4_animal)
        OR     EXISTS (SELECT 1 from Movements Where [ProjectId] = @T4_project AND [AnimalId] = @T4_animal)
@@ -2093,7 +2093,7 @@ Check illegal modifications of deployment
     -- Test8
     SET @T4_test = '  Test8: Hide first with new fix: '
     --Action
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T4_fileid, 7, '2012-05-11', '60.7', '-154.7', 'Fix Available')
     EXEC [dbo].[CollarDeployment_Insert] @T4_project, @T4_animal, @T4_mfgr, @T4_collar, '2012-05-10 12:00'
 	SELECT @T4_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T4_project and AnimalId = @T4_animal AND CollarManufacturer = @T4_mfgr AND CollarId = @T4_collar AND DeploymentDate = '2012-05-10 12:00'
@@ -2134,8 +2134,8 @@ Check illegal modifications of deployment
     -- Test9
     SET @T4_test = '  Test9: Hide 1w/2; 2w/4; 3w/5 5w/6: '
     --Action
-    Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T4_fileid
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    Delete from dbo.CollarDataTelonicsGen3StoreOnBoard where FileId = @T4_fileid
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T4_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
                 (@T4_fileid, 2, '2012-05-11', '60.2', '-154.2', 'Fix Available'),
                 (@T4_fileid, 3, '2012-05-13', '60.3', '-154.3', 'Fix Available'),
@@ -2209,7 +2209,7 @@ Check illegal modifications of deployment
        OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T4_mfgr AND [CollarId] = @T4_collar)
        OR EXISTS (SELECT 1 from CollarDeployments Where [ProjectId] = @T4_project)
        OR EXISTS (SELECT 1 from CollarFiles Where [FileId] = @T4_fileid)
-       OR EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] = @T4_fileid)
+       OR EXISTS (SELECT 1 from CollarDataTelonicsGen3StoreOnBoard Where [FileId] = @T4_fileid)
        OR EXISTS (SELECT 1 from CollarFixes Where [FileId] = @T4_fileid AND [CollarManufacturer] = @T4_mfgr AND [CollarId] = @T4_collar)
        OR EXISTS (SELECT 1 from Locations Where [ProjectId] = @T4_project AND [AnimalId] = @T4_animal)
        OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @T4_project AND [AnimalId] = @T4_animal)
@@ -2330,8 +2330,8 @@ Check illegal modifications of deployment
     -- Mortality is null and retrieval date is null
     SET @T5_test = '  Test1: (3 hide 2): '
     --Action
-    Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T5_fileid
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    Delete from dbo.CollarDataTelonicsGen3StoreOnBoard where FileId = @T5_fileid
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T5_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
                 (@T5_fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
                 (@T5_fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available')
@@ -2420,8 +2420,8 @@ Check illegal modifications of deployment
     -- Mortality is null and retrieval date is null
     SET @T5_test = '  Test2: (4 hide 3 hide 2): '
     --Action
-    Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T5_fileid
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    Delete from dbo.CollarDataTelonicsGen3StoreOnBoard where FileId = @T5_fileid
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T5_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
                 (@T5_fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
                 (@T5_fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
@@ -2559,8 +2559,8 @@ Check illegal modifications of deployment
     SET @T5_test = '  Test3: Mort after hidden (4 hide 3 hide 2): '
     --Action
     EXEC [dbo].[Animal_Update] @T5_project, @T5_animal, null, null, '2012-05-12 12:00'
-    Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T5_fileid
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    Delete from dbo.CollarDataTelonicsGen3StoreOnBoard where FileId = @T5_fileid
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T5_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
                 (@T5_fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
                 (@T5_fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
@@ -2659,8 +2659,8 @@ Check illegal modifications of deployment
     SET @T5_test = '  Test4: Mort before hidden (4 hide 3 hide 2): '
     --Action
     EXEC [dbo].[Animal_Update] @T5_project, @T5_animal, null, null, '2012-05-11 12:00'
-    Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T5_fileid
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    Delete from dbo.CollarDataTelonicsGen3StoreOnBoard where FileId = @T5_fileid
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T5_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
                 (@T5_fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
                 (@T5_fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
@@ -2760,8 +2760,8 @@ Check illegal modifications of deployment
     SET @T5_test = '  Test5: Retrieve after hidden (4 hide 3 hide 2): '
     --Action
     EXEC [dbo].[CollarDeployment_UpdateDates] @T5_deploy, '2012-05-10 12:00', '2012-05-12 12:00'
-    Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T5_fileid
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    Delete from dbo.CollarDataTelonicsGen3StoreOnBoard where FileId = @T5_fileid
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T5_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
                 (@T5_fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
                 (@T5_fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
@@ -2860,8 +2860,8 @@ Check illegal modifications of deployment
     SET @T5_test = '  Test6: Retrieve before hidden (4 hide 3 hide 2): '
     --Action
     EXEC [dbo].[CollarDeployment_UpdateDates] @T5_deploy, '2012-05-10 12:00', '2012-05-11 12:00'
-    Delete from dbo.CollarDataTelonicsStoreOnBoard where FileId = @T5_fileid
-    INSERT INTO dbo.CollarDataTelonicsStoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
+    Delete from dbo.CollarDataTelonicsGen3StoreOnBoard where FileId = @T5_fileid
+    INSERT INTO dbo.CollarDataTelonicsGen3StoreOnBoard ([FileId], [LineNumber], [Date], [Latitude], [Longitude], [Fix Status])
          VALUES (@T5_fileid, 1, '2012-05-11', '60.1', '-154.1', 'Fix Available'),
                 (@T5_fileid, 2, '2012-05-12', '60.2', '-154.2', 'Fix Available'),
                 (@T5_fileid, 3, '2012-05-12', '60.3', '-154.3', 'Fix Available'),
@@ -2968,7 +2968,7 @@ Check illegal modifications of deployment
        OR EXISTS (SELECT 1 from Collars Where [CollarManufacturer] = @T5_mfgr AND [CollarId] = @T5_collar)
        OR EXISTS (SELECT 1 from CollarDeployments Where [ProjectId] = @T5_project)
        OR EXISTS (SELECT 1 from CollarFiles Where [FileId] = @T5_fileid)
-       OR EXISTS (SELECT 1 from CollarDataTelonicsStoreOnBoard Where [FileId] = @T5_fileid)
+       OR EXISTS (SELECT 1 from CollarDataTelonicsGen3StoreOnBoard Where [FileId] = @T5_fileid)
        OR EXISTS (SELECT 1 from CollarFixes Where [FileId] = @T5_fileid AND [CollarManufacturer] = @T5_mfgr AND [CollarId] = @T5_collar)
        OR EXISTS (SELECT 1 from Locations Where [ProjectId] = @T5_project AND [AnimalId] = @T5_animal)
        OR EXISTS (SELECT 1 from Movements Where [ProjectId] = @T5_project AND [AnimalId] = @T5_animal)

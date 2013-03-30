@@ -105,7 +105,7 @@ Adding a new file format
  Add a record describing this file format in the table LookupCollarFileFormats
 	Use the FileFormat code for naming the functions in the following step
  Create table definition for CollarData{Format} - must have FileId and LineNumber primary keys
-	Be as liberal as possible regarding column types.  See CollarDataTelonicsStoreOnBoard for an example.
+	Be as liberal as possible regarding column types.  See CollarDataTelonicsGen3StoreOnBoard for an example.
  Edit AnimalMovementFunctions.cs In the SqlServerExtensions Project of the AnimalMovements Solution
     The other file formats should provide a good template for creating a table-valued funtion
  Build/Deploy this project - the domain user doing the deployment must be a sa on the target database
@@ -185,7 +185,7 @@ VALUES ( 5, 'telonics', '96006', '2012-01-01 00:00', 60.1234, -145.1234),
 SELECT * FROM CollarFiles
 --select * from CollarDeployments where CollarId = '96006'
 --select * from CollarDataDebevekFormat
-select * from CollarDataTelonicsStoreOnBoard
+select * from CollarDataTelonicsGen3StoreOnBoard
 select * from Collarfixes
 select ProjectId, AnimalId, FixDate, Location.Lat, Location.Long, SourceFile, [Status] from Locations
 select * from Movements
@@ -239,13 +239,13 @@ insert into CollarFixes (FileId, CollarManufacturer, CollarId, FixDate, Lat, Lon
 --insert into CollarFiles ([FileName],[ProjectId],[CollarManufacturer],[CollarId],[Format],[Status],[Contents])
 --                 VALUES ('xyz2', 'test', 'telonics', '96006', 'B', 'I', NULL)
 
---insert into CollarDataTelonicsStoreOnBoard (FileId, [Fix #], [Fix Status], [Date], [Time], [Latitude], [Longitude])
+--insert into CollarDataTelonicsGen3StoreOnBoard (FileId, [Fix #], [Fix Status], [Date], [Time], [Latitude], [Longitude])
 --									VALUES (6,5,'Fix Available', '2010.12.03', '16:06:55', 60.189860, 205.679892)
 
 --		 SELECT I.FileId, F.CollarManufacturer, F.CollarId,
 --		        CONVERT(datetime2, I.[Date]+ ' ' + I.[Time]),
 --		        CONVERT(float, I.Latitude), CONVERT(float, I.Longitude) - 360.0
---		   FROM CollarDataTelonicsStoreOnBoard as I INNER JOIN CollarFiles as F 
+--		   FROM CollarDataTelonicsGen3StoreOnBoard as I INNER JOIN CollarFiles as F 
 --			 ON I.FileId = F.FileId
 --		  WHERE F.[Status] = 'A' AND I.[Fix Status] = 'Fix Available'
 
