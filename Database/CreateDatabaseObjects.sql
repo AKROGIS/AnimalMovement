@@ -1272,23 +1272,32 @@ BEGIN
 		    AND I.[Longitude] <> 'Error' AND I.[Latitude] <> 'Error'
 	END
 		
-	-- IF @Format = 'E' -- Telonics email format
+	IF @Format = 'E' -- Telonics email format
 	-- GPS fixes in the email are converted with an external application to formats 'C' or 'D'
 	-- This adds the Argos PTT locations to the Fixes table (only for non-GPS collars)
 	BEGIN
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId, I.LocationDate, I.Latitude, I.Longitude
+		 SELECT @FileId, MIN(I.LineNumber), C.CollarManufacturer, C.CollarId,
+		        I.LocationDate, I.Latitude,
+		        CASE WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 < -180 THEN 360 + (CONVERT(numeric(10,5),I.Longitude) % 360.0)
+		             WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 > 180 THEN (CONVERT(numeric(10,5),I.Longitude) % 360.0) - 360
+		             ELSE CONVERT(numeric(10,5),I.Longitude) % 360.0 END
 		   FROM dbo.CollarDataArgosEmail AS I
 	 INNER JOIN CollarFiles AS F 
 			 ON I.FileId = F.FileId
+	 INNER JOIN ArgosDeployments AS D
+	         ON I.platformId = D.PlatformId
+	        AND (D.StartDate IS NULL OR D.StartDate < I.TransmissionDate)
+	        AND (D.EndDate IS NULL OR I.TransmissionDate < D.EndDate)
 	 INNER JOIN Collars AS C
-	         ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+	         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
 		  WHERE F.[Status] = 'A'
 		    AND I.FileId = @FileId
 		    AND I.Latitude BETWEEN -90 AND 90
-		    AND I.Longitude BETWEEN -180 AND 180
+		    AND I.Longitude IS NOT NULL
 		    AND I.LocationDate < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
 		    AND C.HasGps = 0
+	   GROUP BY C.CollarManufacturer, C.CollarId, I.LocationDate, I.Latitude, I.Longitude
 	END
 	
 	IF @Format = 'F'  -- Argos Web Services Format
@@ -1296,11 +1305,15 @@ BEGIN
 	-- This adds the Argos PTT locations to the Fixes table (only for non-GPS collars)
 	BEGIN
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
+		 SELECT I.FileId, I.LineNumber, C.CollarManufacturer, C.CollarId,
 		        CONVERT(datetime2, I.[locationDate]),
 		        CONVERT(float, I.latitude), CONVERT(float, I.longitude)
 		   FROM dbo.CollarDataArgosWebService as I INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
+	 INNER JOIN ArgosDeployments AS D
+	         ON I.platformId = D.PlatformId
+	        AND (D.StartDate IS NULL OR D.StartDate < I.locationDate)
+	        AND (D.EndDate IS NULL OR I.locationDate < D.EndDate)
 	 INNER JOIN Collars AS C
 	         ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
 		  WHERE F.[Status] = 'A'
