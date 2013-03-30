@@ -60,17 +60,21 @@ namespace SqlServer_Files
                 if (platformPattern.IsMatch(line))
                 {
                     programId = line.Substring(0, 5).Trim().TrimStart('0');
-                    platformId = line.Substring(6, 6).Trim().TrimStart('0');
+                    //platformid is 5(old) or 6(new) characters.  The rest of the line is offset accordingly
+                    //if we always get 6, we may get a trailing space (old files)
+                    platformId = line.Substring(6, 6).Trim();
+                    var old = (platformId.Length == 5);
+                    platformId = platformId.TrimStart('0');
                     location = line.Length < 61
                                    ? null
                                    : new ArgosTransmission.ArgosLocation
-                                       {
-                                           DateTime = DateTime.Parse(line.Substring(23, 19)),
-                                           Latitude = Single.Parse(line.Substring(43, 7)),
-                                           Longitude = Single.Parse(line.Substring(51, 8)),
-                                           Altitude = Single.Parse(line.Substring(60, 6)),
-                                           Class = line[21]
-                                       };
+                                   {
+                                       DateTime = DateTime.Parse(line.Substring(23 + (old ? 0 : 1), 19)),
+                                       Latitude = Single.Parse(line.Substring(43 + (old ? 0 : 1), 7)),
+                                       Longitude = Single.Parse(line.Substring(51 + (old ? 0 : 1), 8)),
+                                       Altitude = Single.Parse(line.Substring(60 + (old ? 0 : 1), 6)),
+                                       Class = line[21 + (old ? 0 : 1)]
+                                   };
                     transmission = null;
                     platformheader = line;
                 }
