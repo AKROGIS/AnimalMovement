@@ -438,12 +438,28 @@
 -- =========================================================
 
 
+----------- Really Bad Fixes
+     SELECT MIN(Lat), MAX(Lat), MIN(Lon), MAX(Lon) FROM CollarFixes 
+     SELECT F.FileId
+       FROM CollarFixes AS X
+ INNER JOIN CollarFiles AS F
+         ON X.fileId = F.fileId
+      WHERE X.Lon < -180
+   GROUP BY F.FileId
+
 ----------- Preview/Hide the fixes outside a nominal range for a project
+/*
+    DECLARE @Project varchar(255) = 'DENA_Wolves';
+    DECLARE @MinLat Real = 62.5;
+    DECLARE @MaxLat Real = 66.6;
+    DECLARE @MinLon Real = -163.0;
+    DECLARE @MaxLon Real = -142.0;
+*/
     DECLARE @Project varchar(255) = 'Yuch_Wolf';
-    DECLARE @MinLat Real = 63.6;
-    DECLARE @MaxLat Real = 66.3;
-    DECLARE @MinLon Real = -157.0;
-    DECLARE @MaxLon Real = -140.0;
+    DECLARE @MinLat Real = 63.7;
+    DECLARE @MaxLat Real = 66.0;
+    DECLARE @MinLon Real = -146.8;
+    DECLARE @MaxLon Real = -140.3;
    
 ----------- Preview fixes outside the range
      SELECT AnimalId, FixDate, Location.Long as Lon, Location.Lat as Lat
@@ -456,7 +472,7 @@
 ----------- Hide fixes outside the range
      UPDATE Locations
         SET [Status] = 'H'
-      WHERE ProjectId = @ProjectId
+      WHERE ProjectId = @Project
         AND [Status] IS NULL
         AND (Location.Long < @MinLon OR @MaxLon < Location.Long OR Location.Lat < @MinLat OR @MaxLat < Location.Lat)
 */

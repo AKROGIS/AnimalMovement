@@ -1127,7 +1127,10 @@ BEGIN
 		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
 		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
 		        CONVERT(datetime2, I.[Date]+ ' ' + ISNULL(I.[Time],'')),
-		        CONVERT(float, I.Latitude), CONVERT(float, I.Longitude) - 360.0
+		        CONVERT(float, I.Latitude),
+		        CASE WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 < -180 THEN 360 + (CONVERT(numeric(10,5),I.Longitude) % 360.0)
+		             WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 > 180 THEN (CONVERT(numeric(10,5),I.Longitude) % 360.0) - 360
+		             ELSE CONVERT(numeric(10,5),I.Longitude) % 360.0 END
 		   FROM dbo.CollarDataTelonicsStoreOnBoard as I INNER JOIN CollarFiles as F 
 			 ON I.FileId = F.FileId
 		  WHERE F.[Status] = 'A'
