@@ -3931,6 +3931,11 @@ BEGIN
     DELETE FROM dbo.ArgosDeployments WHERE [DeploymentId] = @DeploymentId
 END
 GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
+GO
 CREATE PROCEDURE [dbo].[Summerize]
 	@fileId [int]
 AS
@@ -3946,11 +3951,6 @@ RETURNS  TABLE (
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_TpfSummerizer].[SqlServer_TpfSummerizer.TfpSummerizer].[SummarizeTpfFile]
-GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
 GO
 CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
 RETURNS  TABLE (
@@ -5394,17 +5394,17 @@ BEGIN
     -- If Collar is provided, it must be a valid collar.
     
     -- The need to provide a CollarId is determined by the file format, so check it. 	
-    DECLARE @HasCollarId CHAR(1) = NULL
-    SELECT @HasCollarId = HasCollarIdColumn FROM dbo.LookupCollarFileFormats WHERE Code = @Format;
-    IF @HasCollarId IS NULL
+    DECLARE @ArgosData CHAR(1) = NULL
+    SELECT @ArgosData = ArgosData FROM dbo.LookupCollarFileFormats WHERE Code = @Format;
+    IF @ArgosData IS NULL
     BEGIN
         DECLARE @message2 nvarchar(100) = 'Invalid parameter: Format (' + @Format + ') was not found in the LookupCollarFileFormats table';
         RAISERROR(@message2, 18, 0)
         RETURN (1)
     END
 
-    -- If the collar is required, make sure it is provided
-    IF @CollarId IS NULL AND (@HasCollarId = 'N')
+    -- Collars are required unless the file has Argos Data (will require processing to separate into collar files)
+    IF @CollarId IS NULL AND (@ArgosData = 'N')
     BEGIN
         DECLARE @message3 nvarchar(100) = 'Invalid parameter: CollarId must not be null with file format ' + @Format + '.';
         RAISERROR(@message3, 18, 0)
@@ -5419,6 +5419,7 @@ BEGIN
 
             SET @FileId = SCOPE_IDENTITY();
 
+            EXEC [dbo].[Summerize] @FileId
             EXEC [dbo].[CollarData_Insert] @FileId, @Format
             EXEC [dbo].[CollarFixes_Insert] @FileId, @Format
         COMMIT TRANSACTION
