@@ -317,17 +317,6 @@ namespace AnimalMovement
         }
 
         //FIXME - move these methods to a better place in UI
-        private void SummerizeFileButton_Click(object sender, EventArgs e)
-        {
-            CollarFile file = null;
-            FileSummerizer.SummerizeFile(file);
-        }
-        
-        private void SummerizeAllButton_Click(object sender, EventArgs e)
-        {
-            FileSummerizer.SummerizeAll();
-        }
-        
         private void DownloadProgramButton_Click(object sender, EventArgs e)
         {
             ArgosProgram program = null;

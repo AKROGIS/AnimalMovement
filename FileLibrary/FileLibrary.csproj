@@ -41,7 +41,6 @@
   <ItemGroup>
     <Compile Include="FileLoader.cs" />
     <Compile Include="FileProcessor.cs" />
-    <Compile Include="FileSummerizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FileDownloader.cs" />
   </ItemGroup>

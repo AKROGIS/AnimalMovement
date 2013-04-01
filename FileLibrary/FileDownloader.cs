@@ -74,7 +74,6 @@ namespace FileLibrary
             CollarFile file = FileLoader.LoadProgram(program, days, results, errors);
             if (file != null)
             {
-                FileSummerizer.SummerizeFile(file);
                 //FIXME- is this a local or server process?? who sets the TDC path?? 
                 var processor = new FileProcessor();
                 processor.ProcessFile(file);
@@ -106,7 +105,6 @@ namespace FileLibrary
             CollarFile file = FileLoader.LoadPlatfrom(platform, days, results, errors);
             if (file != null)
             {
-                FileSummerizer.SummerizeFile(file);
                 //FIXME- is this a local or server process?? who sets the TDC path?? 
                 var processor = new FileProcessor();
                 processor.ProcessFile(file);

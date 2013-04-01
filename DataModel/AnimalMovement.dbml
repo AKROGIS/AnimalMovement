@@ -340,23 +340,6 @@
       <Argument Parameter="collarId" Member="CollarId" />
     </InsertFunction>
   </Table>
-  <Table Name="dbo.ArgosFilePlatformDates" Member="ArgosFilePlatformDates">
-    <Type Name="ArgosFilePlatformDate">
-      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="ProgramId" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
-      <Column Name="FirstTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
-      <Column Name="LastTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
-      <Association Name="CollarFile_ArgosFilePlatformDate" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
-    </Type>
-    <InsertFunction FunctionId="FunctionId23">
-      <Argument Parameter="fileId" Member="FileId" />
-      <Argument Parameter="platformId" Member="PlatformId" />
-      <Argument Parameter="programId" Member="ProgramId" />
-      <Argument Parameter="firstTransmission" Member="FirstTransmission" />
-      <Argument Parameter="lastTransmission" Member="LastTransmission" />
-    </InsertFunction>
-  </Table>
   <Table Name="dbo.LookupFileStatus" Member="LookupFileStatus">
     <Type Name="LookupFileStatus">
       <Column Name="Code" Type="System.Char" DbType="Char(1) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
@@ -376,7 +359,7 @@
       <Column Name="ErrorMessage" Type="System.String" DbType="VarChar(MAX)" CanBeNull="true" />
       <Association Name="CollarFile_ArgosDownload" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId24">
+    <InsertFunction FunctionId="FunctionId23">
       <Argument Parameter="programId" Member="ProgramId" />
       <Argument Parameter="platformId" Member="PlatformId" />
       <Argument Parameter="days" Member="Days" />
@@ -394,14 +377,14 @@
       <Association Name="ArgosPlatform_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFileProcessingIssue" />
       <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosProgram" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosProgram" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId25">
+    <InsertFunction FunctionId="FunctionId24">
       <Argument Parameter="platformId" Member="PlatformId" />
       <Argument Parameter="programId" Member="ProgramId" />
       <Argument Parameter="disposalDate" Member="DisposalDate" />
       <Argument Parameter="notes" Member="Notes" />
       <Argument Parameter="active" Member="Active" />
     </InsertFunction>
-    <UpdateFunction FunctionId="FunctionId26">
+    <UpdateFunction FunctionId="FunctionId25">
       <Argument Parameter="oldPlatformId" Member="PlatformId" Version="Original" />
       <Argument Parameter="newPlatformId" Member="PlatformId" />
       <Argument Parameter="programId" Member="ProgramId" />
@@ -409,7 +392,7 @@
       <Argument Parameter="notes" Member="Notes" />
       <Argument Parameter="active" Member="Active" />
     </UpdateFunction>
-    <DeleteFunction FunctionId="FunctionId27">
+    <DeleteFunction FunctionId="FunctionId26">
       <Argument Parameter="platformId" Member="PlatformId" Version="Original" />
     </DeleteFunction>
   </Table>
@@ -427,7 +410,7 @@
       <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosPlatforms" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosPlatform" />
       <Association Name="ProjectInvestigator_ArgosProgram" Member="ProjectInvestigator" ThisKey="Manager" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
     </Type>
-    <UpdateFunction FunctionId="FunctionId28">
+    <UpdateFunction FunctionId="FunctionId27">
       <Argument Parameter="oldProgramId" Member="ProgramId" Version="Original" />
       <Argument Parameter="newProgramId" Member="ProgramId" />
       <Argument Parameter="programName" Member="ProgramName" />
@@ -457,7 +440,6 @@
       <Column Name="Owner" Type="System.String" DbType="NVarChar(128)" CanBeNull="true" />
       <Association Name="CollarFile_CollarFix" Member="CollarFixes" ThisKey="FileId" OtherKey="FileId" Type="CollarFix" />
       <Association Name="CollarFile_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="FileId" OtherKey="FileId" Type="ArgosFileProcessingIssue" />
-      <Association Name="CollarFile_ArgosFilePlatformDate" Member="ArgosFilePlatformDates" ThisKey="FileId" OtherKey="FileId" Type="ArgosFilePlatformDate" />
       <Association Name="CollarFile_ArgosDownload" Member="ArgosDownloads" ThisKey="FileId" OtherKey="FileId" Type="ArgosDownload" />
       <Association Name="CollarFile_CollarFile" Member="CollarFiles" ThisKey="FileId" OtherKey="ParentFileId" Type="CollarFile" />
       <Association Name="CollarFile_CollarFile" Member="CollarFile1" ThisKey="ParentFileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
@@ -467,7 +449,7 @@
       <Association Name="ProjectInvestigator_CollarFile" Member="ProjectInvestigator" ThisKey="Owner" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
       <Association Name="Project_CollarFile" Member="Project" ThisKey="ProjectId" OtherKey="ProjectId" Type="Project" IsForeignKey="true" />
     </Type>
-    <InsertFunction FunctionId="FunctionId29">
+    <InsertFunction FunctionId="FunctionId28">
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="projectId" Member="ProjectId" />
       <Argument Parameter="owner" Member="Owner" />
@@ -479,7 +461,7 @@
       <Argument Parameter="parentFileId" Member="ParentFileId" />
       <Argument Parameter="fileId" Member="FileId" />
     </InsertFunction>
-    <UpdateFunction FunctionId="FunctionId30">
+    <UpdateFunction FunctionId="FunctionId29">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
@@ -487,7 +469,7 @@
       <Argument Parameter="projectId" Member="ProjectId" />
       <Argument Parameter="owner" Member="Owner" />
     </UpdateFunction>
-    <DeleteFunction FunctionId="FunctionId31">
+    <DeleteFunction FunctionId="FunctionId30">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </DeleteFunction>
   </Table>
@@ -691,14 +673,6 @@
     <Parameter Name="RetrievalDate" Parameter="retrievalDate" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId23" Name="dbo.ArgosFilePlatformDates_Insert" Method="ArgosFilePlatformDates_Insert">
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="ProgramId" Parameter="programId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="FirstTransmission" Parameter="firstTransmission" Type="System.DateTime" DbType="DateTime2" />
-    <Parameter Name="LastTransmission" Parameter="lastTransmission" Type="System.DateTime" DbType="DateTime2" />
-    <Return Type="System.Int32" />
-  </Function>
   <Function Id="FunctionId22" Name="dbo.ArgosFileProcessingIssues_Insert" Method="ArgosFileProcessingIssues_Insert">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Parameter Name="Issue" Parameter="issue" Type="System.String" DbType="NVarChar(MAX)" />
@@ -711,7 +685,7 @@
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId24" Name="dbo.ArgosDownloads_Insert" Method="ArgosDownloads_Insert">
+  <Function Id="FunctionId23" Name="dbo.ArgosDownloads_Insert" Method="ArgosDownloads_Insert">
     <Parameter Name="ProgramId" Parameter="programId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Days" Parameter="days" Type="System.Int32" DbType="Int" />
@@ -719,11 +693,11 @@
     <Parameter Name="ErrorMessage" Parameter="errorMessage" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId27" Name="dbo.ArgosPlatform_Delete" Method="ArgosPlatform_Delete">
+  <Function Id="FunctionId26" Name="dbo.ArgosPlatform_Delete" Method="ArgosPlatform_Delete">
     <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId28" Name="dbo.ArgosProgram_Update" Method="ArgosProgram_Update">
+  <Function Id="FunctionId27" Name="dbo.ArgosProgram_Update" Method="ArgosProgram_Update">
     <Parameter Name="OldProgramId" Parameter="oldProgramId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="NewProgramId" Parameter="newProgramId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ProgramName" Parameter="programName" Type="System.String" DbType="NVarChar(255)" />
@@ -736,7 +710,7 @@
     <Parameter Name="Active" Parameter="active" Type="System.Boolean" DbType="Bit" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId25" Name="dbo.ArgosPlatform_Insert" Method="ArgosPlatform_Insert">
+  <Function Id="FunctionId24" Name="dbo.ArgosPlatform_Insert" Method="ArgosPlatform_Insert">
     <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ProgramId" Parameter="programId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="DisposalDate" Parameter="disposalDate" Type="System.DateTime" DbType="DateTime2" />
@@ -744,7 +718,7 @@
     <Parameter Name="Active" Parameter="active" Type="System.Boolean" DbType="Bit" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId26" Name="dbo.ArgosPlatform_Update" Method="ArgosPlatform_Update">
+  <Function Id="FunctionId25" Name="dbo.ArgosPlatform_Update" Method="ArgosPlatform_Update">
     <Parameter Name="OldPlatformId" Parameter="oldPlatformId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="NewPlatformId" Parameter="newPlatformId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ProgramId" Parameter="programId" Type="System.String" DbType="NVarChar(255)" />
@@ -769,11 +743,11 @@
     <Parameter Name="Active" Parameter="active" Type="System.Boolean" DbType="Bit" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId31" Name="dbo.CollarFile_Delete" Method="CollarFile_Delete">
+  <Function Id="FunctionId30" Name="dbo.CollarFile_Delete" Method="CollarFile_Delete">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId29" Name="dbo.CollarFile_Insert" Method="CollarFile_Insert">
+  <Function Id="FunctionId28" Name="dbo.CollarFile_Insert" Method="CollarFile_Insert">
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
@@ -788,7 +762,7 @@
       <Column Name="" Member="Column1" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
     </ElementType>
   </Function>
-  <Function Id="FunctionId30" Name="dbo.CollarFile_Update" Method="CollarFile_Update">
+  <Function Id="FunctionId29" Name="dbo.CollarFile_Update" Method="CollarFile_Update">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
