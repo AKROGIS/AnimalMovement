@@ -45,8 +45,10 @@
        FROM CollarFiles AS P
   LEFT JOIN ArgosFilePlatformDates AS T
          ON P.FileId = T.FileId
+ INNER JOIN LookupCollarFileFormats AS F
+         ON P.Format = F.Code
       WHERE T.FileId IS NULL
-        AND P.Format IN ('F', 'E', 'G')
+        AND F.ArgosData = 'Y'
 
 
 ----------- ArgosFile_No children
@@ -54,8 +56,10 @@
        FROM CollarFiles AS P
   LEFT JOIN CollarFiles AS C
          ON P.FileId = C.ParentFileId
+ INNER JOIN LookupCollarFileFormats AS F
+         ON P.Format = F.Code
       WHERE C.FileId IS NULL
-        AND P.Format IN ('F', 'E', 'G')
+        AND F.ArgosData = 'Y'
 
 
 ----------- ArgosFile_HasProcessingIssues
@@ -597,7 +601,7 @@
          ON F.CollarManufacturer = C.CollarManufacturer AND F.CollarId = C.CollarId
   LEFT JOIN (SELECT CollarManufacturer, CollarId, FileId FROM CollarFixes GROUP BY CollarManufacturer, CollarId, FileId) AS X
          ON F.FileId = X.FileId
-      WHERE F.Format <> 'G' AND C.CollarId IS NULL AND F.CollarId IS NOT NULL
+      WHERE C.CollarId IS NULL AND F.CollarId IS NOT NULL
 
 
 ----------- ERROR Collar mismatch between Files and Fixes
@@ -608,7 +612,7 @@
          ON F.CollarManufacturer = C.CollarManufacturer AND F.CollarId = C.CollarId
   LEFT JOIN (SELECT CollarManufacturer, CollarId, FileId FROM CollarFixes GROUP BY CollarManufacturer, CollarId, FileId) AS X
          ON F.FileId = X.FileId
-      WHERE F.Format <> 'G' AND (F.CollarManufacturer <> X.CollarManufacturer OR X.CollarId <> F.CollarId)
+      WHERE (F.CollarManufacturer <> X.CollarManufacturer OR X.CollarId <> F.CollarId)
 
 
 ----------- Show all the records for a root collarId

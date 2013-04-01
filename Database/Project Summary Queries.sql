@@ -36,19 +36,21 @@
                      )
  
 ----------- Active files in a project with no fixes
-     SELECT F1.ProjectId, F1.[FileName], F2.[FileName] AS Parent, F1.Format, C.CollarModel, C.CollarId, C.ArgosId
-       FROM CollarFiles AS F1
+     SELECT CF.ProjectId, CF.[FileName], PF.[FileName] AS Parent, CF.Format, C.CollarModel, C.CollarId, C.ArgosId
+       FROM CollarFiles AS CF
  INNER JOIN Collars as C
-         ON F1.CollarManufacturer = C.CollarManufacturer AND F1.CollarId = C.CollarId
-  LEFT JOIN CollarFiles AS F2
-         ON F1.ParentFileId = F2.FileId
-  LEFT JOIN CollarFixes AS F3
-         ON F1.FileId = F3.FileId
-      WHERE F1.Format <> 'E' AND F1.Format <> 'F'
-        AND F1.[Status] = 'A'
-        AND F3.FixId IS NULL
-        AND F1.ProjectId = @Project
-   ORDER BY F1.ProjectId, F1.Format, CollarId, F2.[FileName], F1.[FileName]
+         ON CF.CollarManufacturer = C.CollarManufacturer AND CF.CollarId = C.CollarId
+  LEFT JOIN CollarFiles AS PF
+         ON CF.ParentFileId = PF.FileId
+  LEFT JOIN CollarFixes AS X
+         ON CF.FileId = X.FileId
+ INNER JOIN LookupCollarFileFormats AS F
+         ON CF.Format = F.Code
+      WHERE F.ArgosData = 'N'
+        AND CF.[Status] = 'A'
+        AND X.FixId IS NULL
+        AND CF.ProjectId = @Project
+   ORDER BY CF.ProjectId, CF.Format, CollarId, PF.[FileName], CF.[FileName]
     
 ----------- All of a Project's animals that do not have fixes
 --  If a animal has had multiple deployments, and one deployment has fixes,
