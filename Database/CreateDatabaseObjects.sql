@@ -5293,6 +5293,101 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 5, 2013
+-- Description: Processes all the collars in an Argos file
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_Process] 
+	@FileId INT = NULL
+	
+WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Make sure we have a suitable FileId
+	DECLARE @ProjectId nvarchar(255);
+	DECLARE @Owner sysname;
+	DECLARE @Uploader sysname;
+	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
+	  FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F ON C.Format = F.Code
+	 WHERE FileId = @FileId AND [Status] = 'A' AND F.ArgosData = 'Y'
+	IF @ProjectId IS NULL
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation	
+	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
+	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
+	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
+	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
+       AND NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
+	BEGIN
+		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+	
+	
+	-- Clear any (if any) prior processing results 
+	EXEC [dbo].[ArgosFile_ClearProcessingResults] @FileId
+
+
+	-- Run the External command
+	DECLARE @exe nvarchar (255);
+	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
+	IF @exe IS NULL
+		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
+	DECLARE @cmd nvarchar(200) = '"' + @exe + '" ' + CONVERT(NVARCHAR(10),@FileId);
+	DECLARE @result varchar(4000);
+
+		-- see http://stackoverflow.com/questions/9501192/get-results-from-xp-cmdshell 
+        IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[#tempProcessResults]') AND type in (N'U')) 
+            DROP TABLE [dbo].[#tempProcessResults]
+        BEGIN TRY
+            CREATE TABLE #tempProcessResults(result varchar(1000))
+            INSERT INTO #tempProcessResults execute xp_cmdshell @cmd ;  -- will run as the sql_proxy account
+            IF EXISTS (SELECT 1 FROM #tempProcessResults WHERE result LIKE 'ERROR%')
+                BEGIN
+					-- FIXME how can I distiguish between warnings and errors??
+					SET @result = ''
+					SELECT @result = @result + result + '; ' FROM #tempProcessResults WHERE result LIKE 'ERROR%'
+					DROP TABLE #tempProcessResults	
+					RAISERROR(@result, 10, 0) -- Specify a severity of 10 or lower to return messages using RAISERROR without invoking a CATCH block
+					RETURN (1)
+                END
+            -- return any other results to the user.
+			SELECT result FROM #tempProcessResults WHERE result IS NOT NULL
+	        DROP TABLE #tempProcessResults	
+        END TRY
+        BEGIN CATCH
+			-- I'm using the try/catch to ensure that the temp table is dropped, then retrowing the error.
+            DROP TABLE #tempProcessResults
+			DECLARE @ErrorMessage nvarchar(400), @ErrorNumber int, @ErrorSeverity int, @ErrorState int, @ErrorLine int
+			SELECT @ErrorMessage = N'Error %d, Line %d, Message: '+ERROR_MESSAGE(),@ErrorNumber = ERROR_NUMBER(),@ErrorSeverity = ERROR_SEVERITY(),@ErrorState = ERROR_STATE(),@ErrorLine = ERROR_LINE()
+			RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState, @ErrorNumber,@ErrorLine)
+			RETURN (1)
+        END CATCH
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 3, 2012
 -- Description:	Adds a new collar file to the database.
@@ -5373,9 +5468,13 @@ BEGIN
 
             SET @FileId = SCOPE_IDENTITY();
 
-            EXEC [dbo].[Summerize] @FileId
             EXEC [dbo].[CollarData_Insert] @FileId, @Format
             EXEC [dbo].[CollarFixes_Insert] @FileId, @Format
+            IF (@ArgosData = 'Y')
+            BEGIN
+                EXEC [dbo].[Summerize] @FileId
+                EXEC [dbo].[ArgosFile_Process] @FileId
+            END
         COMMIT TRANSACTION
     END TRY
     BEGIN CATCH
@@ -5597,101 +5696,6 @@ BEGIN
 	--All other verification is handled by primary/foreign key and column constraints.
 	DELETE FROM dbo.CollarDeployments
 		  WHERE DeploymentId = @DeploymentId;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 5, 2013
--- Description: Processes all the collars in an Argos file
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_Process] 
-	@FileId INT = NULL
-	
-WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
-
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Make sure we have a suitable FileId
-	DECLARE @ProjectId nvarchar(255);
-	DECLARE @Owner sysname;
-	DECLARE @Uploader sysname;
-	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
-	  FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F ON C.Format = F.Code
-	 WHERE FileId = @FileId AND [Status] = 'A' AND F.ArgosData = 'Y'
-	IF @ProjectId IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Validate permission for this operation	
-	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
-	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
-	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
-	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
-       AND NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-	BEGIN
-		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-	
-	
-	-- Clear any (if any) prior processing results 
-	EXEC [dbo].[ArgosFile_ClearProcessingResults] @FileId
-
-
-	-- Run the External command
-	DECLARE @exe nvarchar (255);
-	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
-	IF @exe IS NULL
-		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
-	DECLARE @cmd nvarchar(200) = '"' + @exe + '" ' + CONVERT(NVARCHAR(10),@FileId);
-	DECLARE @result varchar(4000);
-
-		-- see http://stackoverflow.com/questions/9501192/get-results-from-xp-cmdshell 
-        IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[#tempProcessResults]') AND type in (N'U')) 
-            DROP TABLE [dbo].[#tempProcessResults]
-        BEGIN TRY
-            CREATE TABLE #tempProcessResults(result varchar(1000))
-            INSERT INTO #tempProcessResults execute xp_cmdshell @cmd ;  -- will run as the sql_proxy account
-            IF EXISTS (SELECT 1 FROM #tempProcessResults WHERE result LIKE 'ERROR%')
-                BEGIN
-					-- FIXME how can I distiguish between warnings and errors??
-					SET @result = ''
-					SELECT @result = @result + result + '; ' FROM #tempProcessResults WHERE result LIKE 'ERROR%'
-					DROP TABLE #tempProcessResults	
-					RAISERROR(@result, 10, 0) -- Specify a severity of 10 or lower to return messages using RAISERROR without invoking a CATCH block
-					RETURN (1)
-                END
-            -- return any other results to the user.
-			SELECT result FROM #tempProcessResults WHERE result IS NOT NULL
-	        DROP TABLE #tempProcessResults	
-        END TRY
-        BEGIN CATCH
-			-- I'm using the try/catch to ensure that the temp table is dropped, then retrowing the error.
-            DROP TABLE #tempProcessResults
-			DECLARE @ErrorMessage nvarchar(400), @ErrorNumber int, @ErrorSeverity int, @ErrorState int, @ErrorLine int
-			SELECT @ErrorMessage = N'Error %d, Line %d, Message: '+ERROR_MESSAGE(),@ErrorNumber = ERROR_NUMBER(),@ErrorSeverity = ERROR_SEVERITY(),@ErrorState = ERROR_STATE(),@ErrorLine = ERROR_LINE()
-			RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState, @ErrorNumber,@ErrorLine)
-			RETURN (1)
-        END CATCH
 END
 GO
 SET ANSI_NULLS ON
