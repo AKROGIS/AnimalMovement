@@ -3065,10 +3065,10 @@ GO
 --    Modified: 2013-03-01 - Added Manager to parameter list (allows creating a collar for another PI)
 -- =============================================
 CREATE PROCEDURE [dbo].[Collar_Insert] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL, 
-	@CollarModel NVARCHAR(255) = NULL, 
-	@Manager NVARCHAR(255) = NULL, 
+	@CollarManufacturer NVARCHAR(255),
+	@CollarId NVARCHAR(255), 
+	@CollarModel NVARCHAR(255), 
+	@Manager NVARCHAR(255) = NULL, -- null defaults to caller
 	@Owner NVARCHAR(255) = NULL, 
 	@ArgosId NVARCHAR(255) = NULL, 
 	@SerialNumber NVARCHAR(255) = NULL, 
@@ -3095,14 +3095,17 @@ BEGIN
 		RETURN
 	END
 	
+	--Fix Defaults
+    SET @Manager = ISNULL(@Manager,@Caller)
+    SET @Owner = NULLIF(@Owner,'')
+    SET @SerialNumber = NULLIF(@SerialNumber,'')
+    SET @Notes = NULLIF(@Notes,'')
+	
 	--All other verification is handled by primary/foreign key and column constraints.
 	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Manager], [Owner],  
-							 [ArgosId], [SerialNumber], [Frequency], [HasGps],
-							 [Notes], [DisposalDate], [Gen3Period])
-			 VALUES (nullif(@CollarManufacturer,''), nullif(@CollarId,''), nullif(@CollarModel,''),
-					 nullif(@Manager,''), nullif(@Owner,''), nullif(@ArgosId,''), nullif(@SerialNumber,''),
-					 @Frequency, @HasGps, nullif(@Notes,''),
-					 @DisposalDate, @Gen3Period)
+							 [SerialNumber], [Frequency], [HasGps], [Notes])
+					 VALUES (@CollarManufacturer, @CollarId, @CollarModel, @Manager, @Owner,
+							 @SerialNumber, @Frequency, @HasGps, @Notes)
 END
 GO
 SET ANSI_NULLS ON

@@ -497,7 +497,7 @@
 
         
     -- Test3
-    SET @T1_test = '  Test3: 2 collars on 1 animal Rdate1 <> null : '
+    SET @T1_test = '  Test3: 2 collars on 1 animal Rdate1 <> null, Ddate2 < Rdate1 : '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-12 12:00'
     SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
@@ -517,18 +517,18 @@
     EXEC [dbo].[CollarDeployment_Delete] @T1_deploy1
 
     -- Test4
-    SET @T1_test = '  Test4: 2 collars on 1 animal Rdate1 = Ddate2 : '
+    SET @T1_test = '  Test4: 2 collars on 1 animal Rdate1 <= Ddate2 : '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-11 12:00'
     SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar2, '2012-05-11 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar2 AND DeploymentDate = '2012-05-11 12:00'
-        SET @T1_msg = 'Failed'
+        SET @T1_msg = 'Passed'
 	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
-        SET @T1_msg = 'Passed'
+        SET @T1_msg = 'Failed'
     END CATCH
     --Report
     SET @T1_msg = @T1_test + @T1_msg
@@ -559,7 +559,7 @@
         
         
     -- Test6
-    SET @T1_test = '  Test6: 1 collar on 2 animals Rdate1 <> null: '
+    SET @T1_test = '  Test6: 1 collar on 2 animals Rdate1 <> null, Ddate2 < Rdate1: '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-12 12:00'
     SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
@@ -580,18 +580,18 @@
         
 
     -- Test7
-    SET @T1_test = '  Test7: 1 collar on 2 animals Rdate1 <> Ddate2: '
+    SET @T1_test = '  Test7: 1 collar on 2 animals Rdate1 <= Ddate2: '
     --Action/Test
     EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal1, @T1_mfgr, @T1_collar1, '2012-05-10 12:00', '2012-05-11 12:00'
     SELECT @T1_deploy1 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal1 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-10 12:00'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_Insert] @T1_project, @T1_animal2, @T1_mfgr, @T1_collar1, '2012-05-11 12:00'
 		SELECT @T1_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T1_project and AnimalId = @T1_animal2 AND CollarManufacturer = @T1_mfgr AND CollarId = @T1_collar1 AND DeploymentDate = '2012-05-11 12:00'
-        SET @T1_msg = 'Failed'
+        SET @T1_msg = 'Passed'
 	    EXEC [dbo].[CollarDeployment_Delete] @T1_deploy2
     END TRY
     BEGIN CATCH
-        SET @T1_msg = 'Passed'
+        SET @T1_msg = 'Failed'
     END CATCH
     --Report
     SET @T1_msg = @T1_test + @T1_msg
@@ -1191,10 +1191,10 @@ Check illegal modifications of deployment
 	SELECT @T2_deploy2 = DeploymentId FROM CollarDeployments WHERE ProjectId = @T2_project and AnimalId = @T2_animal1 AND CollarManufacturer = @T2_mfgr AND CollarId = @T2_collar1 AND DeploymentDate = '2012-05-11'
     BEGIN TRY
         EXEC [dbo].[CollarDeployment_UpdateDates] @T2_deploy2, '2012-05-11', '2012-05-13'
-        SET @T2_msg = 'Failed'
+        SET @T2_msg = 'Passed'
     END TRY
     BEGIN CATCH
-        SET @T2_msg = 'Passed'
+        SET @T2_msg = 'Failed'
     END CATCH
     --Report
     SET @T2_msg = @T2_test + @T2_msg
