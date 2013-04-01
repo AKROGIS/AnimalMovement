@@ -5460,7 +5460,6 @@ BEGIN
 
     -- Validate permission for this operation
     -- To delete a file you must be an editor of the project, or the Owner of the file
-    -- The ArgosProcessor role is also allowed to delete files on behalf of users
     -- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file.
         
     -- Get the projectId and Owner
@@ -5470,13 +5469,6 @@ BEGIN
     IF @Owner <> @Caller  -- Not the owner
        AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not the Project PI
        AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller) -- Not a Project Editor
-       AND NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
     BEGIN
         DECLARE @message1 nvarchar(200)
         IF @ProjectId IS NOT NULL
@@ -5676,7 +5668,8 @@ BEGIN
 	-- Make sure we have a suitable FileId
 	DECLARE @ProjectId nvarchar(255);
 	DECLARE @Owner sysname;
-	SELECT @ProjectId = ProjectId, @Owner = UserName
+	DECLARE @Uploader sysname;
+	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
 	  FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F ON C.Format = F.Code
 	 WHERE FileId = @FileId AND [Status] = 'A' AND F.ArgosData = 'Y'
 	IF @ProjectId IS NULL
@@ -5687,17 +5680,21 @@ BEGIN
 	END
 
 	-- Validate permission for this operation	
-	-- Caller needs to be the uploader of the file, or an editor on the files project
-	-- The caller must be the uploader of the file, the PI or editor on the project, or the local sql_proxy account
-	IF @Caller <> @@SERVERNAME + '\sql_proxy' AND @Caller <> @Owner AND
-	   NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
+	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
+	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
+	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
+	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
+       AND NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
 	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
-			RAISERROR(@message2, 18, 0)
-			RETURN (1)
-		END
+		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
 	END
 	
 	
@@ -7278,9 +7275,9 @@ GRANT EXECUTE ON [dbo].[ArgosFile_ClearProcessingResults] TO [ArgosProcessor] AS
 GO
 GRANT EXECUTE ON [dbo].[ArgosFile_ClearProcessingResults] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosFile_Process] TO [Editor] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosFile_Process] TO [ArgosProcessor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosFilePlatformDates_Insert] TO [ArgosProcessor] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosFile_Process] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosFilePlatformDates_Insert] TO [Editor] AS [dbo]
 GO
@@ -7307,8 +7304,6 @@ GO
 GRANT EXECUTE ON [dbo].[CollarDeployment_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[CollarDeployment_UpdateDates] TO [Editor] AS [dbo]
-GO
-GRANT EXECUTE ON [dbo].[CollarFile_Delete] TO [ArgosProcessor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[CollarFile_Delete] TO [Editor] AS [dbo]
 GO
@@ -7378,8 +7373,6 @@ EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\RESarwas'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\KCJoly'
 GO
-EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'INPAKROMS53AIS\sql_proxy'
-GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\BAMangipane'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\JWBurch'
@@ -7419,4 +7412,6 @@ GO
 EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\Domain Users'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'INPAKROMS53AIS\sql_proxy'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'ArgosProcessor'
 GO

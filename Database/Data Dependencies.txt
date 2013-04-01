@@ -6,24 +6,37 @@ Derived Data Dependencies by Table
    ** THIS SECTION IS OUT OF DATE **
 Applications:
 	ArgosDownloader
-		DaysSinceLastDownload
-		CollarFiles_insert
-		ArgosDownloads_insert
-		Settings
-			Read system settings: sa_email_*, tdc_*
+		Read:
+			ArgosPrograms (Active, Manager, Manager.Email, UserName, ProgramId, Password
+			ArgosPlatforms (Active, program.*, PlatformId,
+			ArgosDownloads (ProgramId, PlatformId, FileId, TimeStamp)
+			DaysSinceLastDownload
+			Settings
+				Read system settings: sa_email_*, tdc_*
+		Execute:
+			CollarFiles_insert
+			ArgosDownloads_insert
+		
 	ArgosProcessor
-		UnprocessedArgosFiles
-			FileId
-		GetTelonicsParametersForArgosDates
-			CollarManufacturer
-			CollarId
-			CollarModel
-			PlatformId
-			Gen3Period
-			Contents
-			Format
-			StartDate
-			EndDate
+		Read:
+			Projects
+			CollarFiles
+			NeverProcessedArgosFiles
+			GetTelonicsParametersForArgosDates
+				CollarManufacturer
+				CollarId
+				CollarModel
+				PlatformId
+				Gen3Period
+				Contents
+				Format
+				StartDate
+				EndDate
+		Execute:
+			ArgosFile_Process
+			CollarFiles_Insert
+			ArgosFile_ClearProcessingResults
+			ArgosFileProcessingIssue_Insert
 	
 Functions/Procedures/Views used in applications, and their dependencies:
 	This does all the tables/columns used in the output and the where clause.

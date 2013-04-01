@@ -158,7 +158,7 @@ Go
 CREATE USER [_MACHINE_\sql_proxy] FOR LOGIN [_MACHINE_\sql_proxy];
 GO
 -- Adduser to editor role for permission to execute the insert SPs
-EXEC sp_addrolemember 'Editor', '_MACHINE_\sql_proxy'
+EXEC sp_addrolemember 'ArgosProcessor', '_MACHINE_\sql_proxy'
 GO
 
 
@@ -182,18 +182,21 @@ Edit the settings file with connection and application path
 ********************************************
 NOTES
 ********************************************
-Since read permissions on the database are granted to domain users
-and SQL_Proxy account is not a memeber of this group,
-you need to add it to the database reader role
-and give it execute permissions on the function DaysSinceLastDownload
+The new account must be made a member of the ArgosProcessor role
+this role has view permissions on the database which will otherwise
+be denied to the local account.
+
+The local account will run the following applications:
+    ArgosDownloader.exe
+	ArgosProcessor.exe
+Those applications will need to read the database (viewer role), and call several stored
+procedures, see the data dependencies write up.  All these stored procedures have execute
+permission for the ArgosProcessor role.
 
 If you have a user account that is an SA in the database,
 this account may run the external application as the nt_authority/system user
 and not as the sql_proxy user.  *I got mixed results, and never got to the bottom of this*
 
-The sql_proxy account name is hard coded into the following stored procedures:
-  ArgosFile_Process
-  CollarFile_Insert
 
 The default path to the ArgosProcessor application in ArgosFile_Process
 is 'C:\Users\sql_proxy\ArgosProcessor.exe'.  If you install this executable in a different
