@@ -50,6 +50,215 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
+CREATE TABLE [dbo].[LookupCollarManufacturers](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[Name] [nvarchar](200) NULL,
+	[Website] [nvarchar](200) NULL,
+	[Description] [nvarchar](2000) NULL,
+ CONSTRAINT [PK_CollarManufacturers] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarModels](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarModel] [varchar](24) NOT NULL,
+ CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarModel] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ProjectInvestigators](
+	[Login] [sysname] NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Email] [nvarchar](200) NOT NULL,
+	[Phone] [nvarchar](100) NOT NULL,
+ CONSTRAINT [PK_ProjectInvestigators] PRIMARY KEY CLUSTERED 
+(
+	[Login] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Collars](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[CollarModel] [varchar](24) NOT NULL,
+	[Manager] [sysname] NOT NULL,
+	[Owner] [nvarchar](100) NULL,
+	[ArgosId] [varchar](16) NULL,
+	[SerialNumber] [varchar](100) NULL,
+	[Frequency] [float] NULL,
+	[HasGps] [bit] NOT NULL,
+	[Notes] [nvarchar](max) NULL,
+	[DisposalDate] [datetime2](7) NULL,
+	[Gen3Period] [int] NULL,
+ CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 2, 2012
+-- Description:	Updates a Collar
+-- =============================================
+CREATE PROCEDURE [dbo].[Collar_Update] 
+	@CollarManufacturer NVARCHAR(255)= NULL,
+	@CollarId NVARCHAR(255) = NULL, 
+	@CollarModel NVARCHAR(255) = NULL, 
+	@Manager sysname = NULL, 
+	@Owner NVARCHAR(255) = NULL, 
+	@ArgosId NVARCHAR(255) = NULL, 
+	@SerialNumber NVARCHAR(255) = NULL, 
+	@Frequency FLOAT = NULL, 
+	@HasGps BIT = 0, 
+	@Notes NVARCHAR(max) = NULL,
+	@DisposalDate DATETIME2(7) = NULL,
+	@Gen3Period INT = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Verify this is an existing collar
+	-- Otherwise, the update will silently succeed, which could be confusing.
+	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId)
+	BEGIN
+		DECLARE @message2 nvarchar(100) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+		
+	-- Validate permission for this operation
+	-- The caller must be the Manager of the collar
+	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manager of this collar ('+@CollarManufacturer+'/'+@CollarId+') to update it.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- If a parameter is not provided, use the existing value.
+	-- (to put null in a field the user will need to pass an empty string)
+	IF @CollarModel IS NULL
+	BEGIN
+		SELECT @CollarModel = [CollarModel] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @Manager IS NULL
+	BEGIN
+		SELECT @Manager = [Manager] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @Owner IS NULL
+	BEGIN
+		SELECT @Owner = [Owner] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @ArgosId IS NULL
+	BEGIN
+		SELECT @ArgosId = [ArgosId] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @SerialNumber IS NULL
+	BEGIN
+		SELECT @SerialNumber = [SerialNumber] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	IF @Notes IS NULL
+	BEGIN
+		SELECT @Notes = [Notes] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+	END
+	
+	-- Do the update, replacing empty strings with NULLs
+	-- All other verification is handled by primary/foreign key and column constraints.
+
+	UPDATE dbo.Collars SET [CollarModel] = nullif(@CollarModel,''),
+						   [Manager] = nullif(@Manager,''),
+						   [Owner] = nullif(@Owner,''),
+						   [ArgosId] = nullif(@ArgosId,''),
+						   [SerialNumber] = nullif(@SerialNumber,''),
+						   [Frequency] = @Frequency,
+						   [HasGps] = @HasGps,
+						   [Notes] = nullif(@Notes,''),
+						   [DisposalDate] = @DisposalDate,
+						   [Gen3Period] = @Gen3Period
+					 WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 2, 2012
+-- Description:	Delete a collar
+-- =============================================
+CREATE PROCEDURE [dbo].[Collar_Delete] 
+	@CollarManufacturer NVARCHAR(255)= NULL,
+	@CollarId NVARCHAR(255) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be the Manager of the collar
+	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
+	BEGIN
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manger of this collar ('+@CollarManufacturer+'/'+@CollarId+') to delete it.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- deleting a non-existing collar will silently succeed.
+	-- All other verification is handled by primary/foreign key and column constraints.
+	DELETE FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[CollarFixes](
 	[FixId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[HiddenBy] [int] NULL,
@@ -93,81 +302,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Deletes the fixes for a CollarFile
---              Useful when changing status.
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFixes_Delete] 
-	@FileId int = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- This is not executed directly, only by CollarFile_Delete & CollarFile_UpdateStatus 
-
-	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarManufacturers](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[Name] [nvarchar](200) NULL,
-	[Website] [nvarchar](200) NULL,
-	[Description] [nvarchar](2000) NULL,
- CONSTRAINT [PK_CollarManufacturers] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarFileFormats](
-	[Code] [char](1) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Description] [nvarchar](255) NULL,
-	[ArgosData] [char](1) NOT NULL,
- CONSTRAINT [PK_CollarFileFormats] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ProjectInvestigators](
-	[Login] [sysname] NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Email] [nvarchar](200) NOT NULL,
-	[Phone] [nvarchar](100) NOT NULL,
- CONSTRAINT [PK_ProjectInvestigators] PRIMARY KEY CLUSTERED 
-(
-	[Login] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[Projects](
@@ -184,24 +318,17 @@ CREATE TABLE [dbo].[Projects](
 GO
 SET ANSI_PADDING OFF
 GO
-CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
-RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
-GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[LookupFileStatus](
-	[Code] [char](1) NOT NULL,
-	[Name] [nvarchar](32) NOT NULL,
-	[Description] [nvarchar](255) NULL,
- CONSTRAINT [PK_CollarFileStatus] PRIMARY KEY CLUSTERED 
+CREATE TABLE [dbo].[LookupGender](
+	[Sex] [varchar](7) NOT NULL,
+ CONSTRAINT [PK_LookupSex] PRIMARY KEY CLUSTERED 
 (
-	[Code] ASC
+	[Sex] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
@@ -213,17 +340,150 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[LookupCollarModels](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarModel] [varchar](24) NOT NULL,
- CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
+CREATE TABLE [dbo].[LookupSpecies](
+	[Species] [varchar](32) NOT NULL,
+ CONSTRAINT [PK_LookupSpecies] PRIMARY KEY CLUSTERED 
 (
-	[CollarManufacturer] ASC,
-	[CollarModel] ASC
+	[Species] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Animals](
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[Species] [varchar](32) NULL,
+	[Gender] [varchar](7) NOT NULL,
+	[MortalityDate] [datetime2](7) NULL,
+	[GroupName] [nvarchar](500) NULL,
+	[Description] [nvarchar](2000) NULL,
+ CONSTRAINT [PK_Animals] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Movements](
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[StartDate] [datetime2](7) NOT NULL,
+	[EndDate] [datetime2](7) NOT NULL,
+	[Duration] [float] NOT NULL,
+	[Distance] [float] NOT NULL,
+	[Speed] [float] NOT NULL,
+	[Shape] [geography] NOT NULL,
+ CONSTRAINT [PK_Movement] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC,
+	[StartDate] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Movements_EndDate] ON [dbo].[Movements] 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC,
+	[EndDate] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Movements_StartDate_EndDate] ON [dbo].[Movements] 
+(
+	[StartDate] ASC,
+	[EndDate] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE SPATIAL INDEX [SIndex_Movements_Shape] ON [dbo].[Movements] 
+(
+	[Shape]
+)USING  GEOGRAPHY_GRID 
+WITH (
+GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
+CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Movement_Delete] 
+	@Project NVARCHAR(255), 
+	@Animal  NVARCHAR(255), 
+	@PrevTime DATETIME2,
+	@NextTime DATETIME2
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	DELETE FROM [dbo].[Movements]
+	   	  WHERE [ProjectId] = @Project
+		    AND [AnimalId] = @Animal
+	        AND [StartDate] = @PrevTime
+	        AND [EndDate] = @NextTime;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[StartOfOverlappingMovement] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [StartDate]
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [StartDate] < @Time
+	                  AND [EndDate] > @Time
+	             ORDER BY [StartDate] DESC);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[EndOfMovement]
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [EndDate] 
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [StartDate] = @Time);
+	RETURN @Result
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -259,6 +519,50 @@ BEGIN
 	
 	EXEC [dbo].[Movement_Insert] @Project, @Animal, @PrevTime, @Time; 
 	EXEC [dbo].[Movement_Insert] @Project, @Animal, @Time, @NextTime; 
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [StartDate] 
+					 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [EndDate] = @Time);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[EndOfFollowingConnectedMovement] 
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [EndDate] 
+					 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [StartDate] = @Time);
+	RETURN @Result
 END
 GO
 SET ANSI_NULLS ON
@@ -320,6 +624,61 @@ CREATE SPATIAL INDEX [SIndex_Locations_Location] ON [dbo].[Locations]
 WITH (
 GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
 CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[GetLocationGeography]
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS GEOGRAPHY
+AS
+BEGIN
+	DECLARE @Result GEOGRAPHY
+	SET @Result = (SELECT [Location] 
+	                 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [FixDate] = @Time);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Feb 27, 2013
+-- Description: Ensure Data integerity on Collar Insert
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarInsert] 
+			ON [dbo].[Collars] 
+			AFTER INSERT
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Business Rule: Collars that share an (non-null) Argos ID must have unique disposal dates
+	
+	IF EXISTS (    SELECT 1
+	                 FROM inserted AS i
+	           INNER JOIN Collars AS C
+	                   ON i.ArgosId = C.ArgosId
+	                WHERE i.ArgosId IS NOT NULL
+	                  AND (i.DisposalDate = C.DisposalDate OR (i.DisposalDate IS NULL AND C.DisposalDate IS NULL))
+	                  AND NOT (i.CollarManufacturer = C.CollarManufacturer AND i.CollarId = C.CollarId)
+              )
+	BEGIN
+		RAISERROR('Collar Integrity Violation. Collars that share a non-null Argos ID must have unique disposal dates.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -407,61 +766,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[LookupGender](
-	[Sex] [varchar](7) NOT NULL,
- CONSTRAINT [PK_LookupSex] PRIMARY KEY CLUSTERED 
-(
-	[Sex] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupSpecies](
-	[Species] [varchar](32) NOT NULL,
- CONSTRAINT [PK_LookupSpecies] PRIMARY KEY CLUSTERED 
-(
-	[Species] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Animals](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[Species] [varchar](32) NULL,
-	[Gender] [varchar](7) NOT NULL,
-	[MortalityDate] [datetime2](7) NULL,
-	[GroupName] [nvarchar](500) NULL,
-	[Description] [nvarchar](2000) NULL,
- CONSTRAINT [PK_Animals] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[CollarDeployments](
 	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[ProjectId] [varchar](16) NOT NULL,
@@ -494,29 +798,587 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 3, 2012
+-- Description:	Remove Locations when Deployment is deleted
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarDeploymentDelete] 
+   ON  [dbo].[CollarDeployments] 
+   AFTER DELETE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	-- Delete records from locations that are no longer deployed
+	DELETE L FROM dbo.Locations as L
+	   INNER JOIN deleted as D
+			   ON L.ProjectId = D.ProjectId
+			  AND L.AnimalId = D.AnimalId
+			  AND L.FixDate >= D.DeploymentDate
+			  AND (D.RetrievalDate IS NULL OR L.FixDate <= D.RetrievalDate)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[Collars](
+CREATE TABLE [dbo].[LookupCollarFileFormats](
+	[Code] [char](1) NOT NULL,
 	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[CollarModel] [varchar](24) NOT NULL,
-	[Manager] [sysname] NOT NULL,
-	[Owner] [nvarchar](100) NULL,
-	[ArgosId] [varchar](16) NULL,
-	[SerialNumber] [varchar](100) NULL,
-	[Frequency] [float] NULL,
-	[HasGps] [bit] NOT NULL,
-	[Notes] [nvarchar](max) NULL,
-	[DisposalDate] [datetime2](7) NULL,
-	[Gen3Period] [int] NULL,
- CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
+	[Name] [nvarchar](100) NOT NULL,
+	[Description] [nvarchar](255) NULL,
+	[ArgosData] [char](1) NOT NULL,
+ CONSTRAINT [PK_CollarFileFormats] PRIMARY KEY CLUSTERED 
 (
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
+	[Code] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
+GO
+CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
+RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
+GO
+CREATE PROCEDURE [dbo].[Summerize]
+	@fileId [int]
+AS
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupFileStatus](
+	[Code] [char](1) NOT NULL,
+	[Name] [nvarchar](32) NOT NULL,
+	[Description] [nvarchar](255) NULL,
+ CONSTRAINT [PK_CollarFileStatus] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Deletes the fixes for a CollarFile
+--              Useful when changing status.
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFixes_Delete] 
+	@FileId int = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- This is not executed directly, only by CollarFile_Delete & CollarFile_UpdateStatus 
+
+	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Add the fixes for a CollarFile Data
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFixes_Insert] 
+    @FileId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- This is not executed directly, only by CollarFile_Insert & CollarFile_Update 
+
+    -- if FileId is not found, format is unknown or file is Inactive, then no fixes will be added.
+    DECLARE @Format CHAR = NULL
+    SELECT @Format = Format FROM CollarFiles WHERE FileId = @FileId AND [Status] = 'A'
+
+    
+    IF @Format = 'A'  -- Store on board
+    BEGIN
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+         SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
+                CONVERT(datetime2, I.[Date]+ ' ' + ISNULL(I.[Time],'')),
+                CONVERT(float, I.Latitude),
+                CASE WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 < -180 THEN 360 + (CONVERT(numeric(10,5),I.Longitude) % 360.0)
+                     WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 > 180 THEN (CONVERT(numeric(10,5),I.Longitude) % 360.0) - 360
+                     ELSE CONVERT(numeric(10,5),I.Longitude) % 360.0 END
+           FROM dbo.CollarDataTelonicsGen3StoreOnBoard as I INNER JOIN CollarFiles as F 
+             ON I.FileId = F.FileId
+          WHERE F.[Status] = 'A'
+            AND I.[Fix Status] = 'Fix Available'
+            AND I.FileId = @FileId
+    END
+    
+    IF @Format = 'B'  -- Debevek Sub file, same as a 'G' file, except it is for a single Collar
+    BEGIN
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+         SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
+                CONVERT(datetime2, I.[FixDate]+ ' ' + ISNULL(I.[FixTime],'')),
+                I.LatWGS84, I.LonWGS84
+           FROM dbo.CollarDataDebevekFormat as I
+     INNER JOIN CollarFiles as F 
+             ON I.FileId = F.FileId
+          WHERE F.[Status] = 'A'
+            AND I.FileId = @FileId
+            AND I.LatWGS84 IS NOT NULL AND I.LonWGS84 IS NOT NULL
+            AND I.[FixDate] IS NOT NULL
+    END
+    
+    /*
+    The use of AquisitionTime and not GpsFixTime is confusing, but apperantly correct
+    of the 810,428 records collected as of 8/23/2012,
+    GpsFixDate is non null in only 9205 records (GpsFixattempt = Succeeded(2D) or Succeeded(3D))
+    In those cases, GpsFixDate == AcquisitionTime
+    AcquisitionTime is never null when GpsFixAttempt == Succeed (110,090 records),
+    but is null when GpsFixAttemp == Failed (71 records)
+    
+    There are some cases where Acquisition time is bogus (in the future),
+    I've manually hidden those locations, but I'm not sure the correct strategy.
+    */
+    
+    IF @Format = 'C'  -- Telonics Gen4 Condensed Convertor Format
+    BEGIN
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+         SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
+                CONVERT(datetime2, I.[AcquisitionTime]),
+                CONVERT(float, I.GpsLatitude), CONVERT(float, I.GpsLongitude)
+           FROM dbo.CollarDataTelonicsGen4 as I INNER JOIN CollarFiles as F 
+             ON I.FileId = F.FileId
+          WHERE F.[Status] = 'A'
+            AND I.FileId = @FileId
+            AND I.GpsLatitude IS NOT NULL AND I.GpsLongitude IS NOT NULL
+            AND I.[AcquisitionTime] IS NOT NULL
+            AND I.[AcquisitionTime] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+    END
+    
+    IF @Format = 'D'  -- Telonics Gen3 Format
+
+    -- FixStatus: Bad, Good, Unavailable, Err:CCC-FFF, Invalid.
+    -- Only use FixStatus = Good.
+    -- Exception:  If Fix #1 has been declared Bad, fixes 2-6  must be considered Bad as well even if their status is listed as Good.
+    -- This is necessary since fixes 2-6 are reconstructed using information in Fix #1.
+    
+    -- Date format is YYYY.MM.DD; Time Format is HH:MM, unless there is GPS error information then HH:MM:SS
+    -- Lat/Long are decimal degrees with 4 decimal places, and are either signed, or have alpha (N,S,E,W) suffix - user options
+    -- Lat/Long with Alpha suffix in source file are converted to signed prefix by parser during insert to CollarData table 
+    
+    BEGIN
+        -- find valid packages (sequential fixes 1-6 at a specific date/time)
+        -- turns out transmission date/time is not a unique identifier - there are multiple packages during a transmission.
+        -- need to identify fixes 2-6 that need to be eliminated by location in file; i.e. do not
+        -- add lines 2-6 after a bad fix 1.
+        -- caution: in a package fixes 2 to 6 are optional. 
+        
+        -- step 1 find line numbers for valid first fixes
+        SELECT LineNumber INTO #ValidFirstFix  
+          FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3]
+         WHERE FileId = @FileId and FixNum = 1 and FixQual = 'Good'
+          
+        -- step 2 find line numbers associated with a good first fixes
+        /*
+        SELECT C.LineNumber INTO #ValidLines  
+          FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+          INNER JOIN  #ValidFirstFix AS F
+            ON (C.LineNumber = F.LineNumber)
+            OR (C.LineNumber = F.LineNumber+1 AND C.FixNum = 2)
+            OR (C.LineNumber = F.LineNumber+2 AND C.FixNum = 3)
+            OR (C.LineNumber = F.LineNumber+3 AND C.FixNum = 4)
+            OR (C.LineNumber = F.LineNumber+4 AND C.FixNum = 5)
+            OR (C.LineNumber = F.LineNumber+5 AND C.FixNum = 6)
+          WHERE C.FileId = @FileId
+        */
+        
+    -- By my observations, if any fix is bad, then all subsequent fixes in that package (1-6) are suspect,
+    -- and should be eliminated, hence the new logic below:
+    
+        SELECT LineNumber INTO #ValidLines FROM #ValidFirstFix  
+
+        SELECT C.LineNumber INTO #ValidSecondFix  
+          FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+    INNER JOIN  #ValidFirstFix AS F
+            ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 2)
+         WHERE FileId = @FileId and FixQual <> 'Bad'
+        INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidSecondFix  
+
+        SELECT C.LineNumber INTO #ValidThirdFix  
+          FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+    INNER JOIN  #ValidSecondFix AS F
+            ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 3)
+         WHERE FileId = @FileId and FixQual <> 'Bad'
+        INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidThirdFix  
+
+        SELECT C.LineNumber INTO #ValidFourthFix  
+          FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+    INNER JOIN  #ValidThirdFix AS F
+            ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 4)
+         WHERE FileId = @FileId and FixQual <> 'Bad'
+        INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidFourthFix  
+
+        SELECT C.LineNumber INTO #ValidFifthFix  
+          FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+    INNER JOIN  #ValidFourthFix AS F
+            ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 5)
+         WHERE FileId = @FileId and FixQual <> 'Bad'
+        INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidFifthFix  
+
+        SELECT C.LineNumber INTO #ValidSixthFix  
+          FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
+    INNER JOIN  #ValidFifthFix AS F
+            ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 6)
+         WHERE FileId = @FileId and FixQual <> 'Bad'
+        INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidSixthFix  
+        
+        -- step 3 add valid fixes to the fixes table.
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+        SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
+               CONVERT(datetime2, I.[FixDate]+ ' ' + ISNULL(I.[FixTime],'')),
+               CONVERT(float, I.Latitude), CONVERT(float, I.Longitude)
+          FROM dbo.CollarDataTelonicsGen3 as I
+    INNER JOIN CollarFiles as F 
+            ON I.FileId = F.FileId
+    INNER JOIN #ValidLines AS V
+            ON I.LineNumber = V.LineNumber
+         WHERE F.[Status] = 'A'
+           AND I.FileId = @FileId
+           AND I.[FixQual] = 'Good'
+           AND I.[FixDate] <> 'Error'
+           AND I.Latitude IS NOT NULL AND I.Longitude IS NOT NULL
+           AND I.[Longitude] <> 'Error' AND I.[Latitude] <> 'Error'
+    END
+        
+    IF @Format = 'E' -- Telonics email format
+    -- GPS fixes in the email are converted with an external application to formats 'C' or 'D'
+    -- This adds the Argos PTT locations to the Fixes table (only for non-GPS collars)
+    BEGIN
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+         SELECT @FileId, MIN(I.LineNumber), C.CollarManufacturer, C.CollarId,
+                I.LocationDate, I.Latitude,
+                CASE WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 < -180 THEN 360 + (CONVERT(numeric(10,5),I.Longitude) % 360.0)
+                     WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 > 180 THEN (CONVERT(numeric(10,5),I.Longitude) % 360.0) - 360
+                     ELSE CONVERT(numeric(10,5),I.Longitude) % 360.0 END
+           FROM dbo.CollarDataArgosEmail AS I
+     INNER JOIN CollarFiles AS F 
+             ON I.FileId = F.FileId
+     INNER JOIN ArgosDeployments AS D
+             ON I.platformId = D.PlatformId
+            AND (D.StartDate IS NULL OR D.StartDate < I.TransmissionDate)
+            AND (D.EndDate IS NULL OR I.TransmissionDate < D.EndDate)
+     INNER JOIN Collars AS C
+             ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+          WHERE F.[Status] = 'A'
+            AND I.FileId = @FileId
+            AND I.Latitude BETWEEN -90 AND 90
+            AND I.Longitude IS NOT NULL
+            AND I.LocationDate < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+            AND C.HasGps = 0
+       GROUP BY C.CollarManufacturer, C.CollarId, I.LocationDate, I.Latitude, I.Longitude
+    END
+    
+    IF @Format = 'F'  -- Argos Web Services Format
+    -- GPS fixes in the raw data of a AWS file are converted with an external application to formats 'C' or 'D'
+    -- This adds the Argos PTT locations to the Fixes table (only for non-GPS collars)
+    BEGIN
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+        SELECT I.FileId, I.LineNumber, C.CollarManufacturer, C.CollarId,
+               CONVERT(datetime2, I.[locationDate]),
+               CONVERT(float, I.latitude), CONVERT(float, I.longitude)
+          FROM dbo.CollarDataArgosWebService as I INNER JOIN CollarFiles as F 
+            ON I.FileId = F.FileId
+    INNER JOIN ArgosDeployments AS D
+            ON I.platformId = D.PlatformId
+           AND (D.StartDate IS NULL OR D.StartDate < I.locationDate)
+           AND (D.EndDate IS NULL OR I.locationDate < D.EndDate)
+    INNER JOIN Collars AS C
+            ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+         WHERE F.[Status] = 'A'
+           AND I.FileId = @FileId
+           AND I.latitude IS NOT NULL AND I.longitude IS NOT NULL
+           AND I.[locationDate] IS NOT NULL
+           AND I.[locationDate] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+           AND C.HasGps = 0
+    END
+
+    --IF @Format = 'G'  -- Debevek Format
+    -- nothing to do for this format
+    
+END
+GO
+CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[Fix #] [nvarchar](50) NULL,
+	[Date] [nvarchar](50) NULL,
+	[Time] [nvarchar](50) NULL,
+	[Fix Status] [nvarchar](50) NULL,
+	[Status Text] [nvarchar](150) NULL,
+	[Velocity East(m s)] [nvarchar](50) NULL,
+	[Velocity North(m s)] [nvarchar](50) NULL,
+	[Velocity Up(m s)] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[Altitude(m)] [nvarchar](50) NULL,
+	[PDOP] [nvarchar](50) NULL,
+	[HDOP] [nvarchar](50) NULL,
+	[VDOP] [nvarchar](50) NULL,
+	[TDOP] [nvarchar](50) NULL,
+	[Temperature Sensor(deg )] [nvarchar](50) NULL,
+	[Activity Sensor] [nvarchar](50) NULL,
+	[Satellite Data] [nvarchar](150) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatA]
+GO
+CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[PlatformId] [nvarchar](255) NULL,
+	[AnimalId] [nvarchar](255) NULL,
+	[Species] [nvarchar](255) NULL,
+	[Group] [nvarchar](255) NULL,
+	[Park] [nvarchar](255) NULL,
+	[FixDate] [nvarchar](255) NULL,
+	[FixTime] [nvarchar](255) NULL,
+	[FixMonth] [int] NULL,
+	[FixDay] [int] NULL,
+	[FixYear] [int] NULL,
+	[LatWGS84] [float] NULL,
+	[LonWGS84] [float] NULL,
+	[Temperature] [float] NULL,
+	[Other] [nvarchar](255) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatB]
+GO
+CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[AcquisitionTime] [nvarchar](50) NULL,
+	[AcquisitionStartTime] [nvarchar](50) NULL,
+	[Ctn] [nvarchar](50) NULL,
+	[ArgosId] [nvarchar](50) NULL,
+	[ArgosLocationClass] [nvarchar](50) NULL,
+	[ArgosLatitude] [nvarchar](50) NULL,
+	[ArgosLongitude] [nvarchar](50) NULL,
+	[ArgosAltitude] [nvarchar](50) NULL,
+	[GpsFixTime] [nvarchar](50) NULL,
+	[GpsFixAttempt] [nvarchar](50) NULL,
+	[GpsLatitude] [nvarchar](50) NULL,
+	[GpsLongitude] [nvarchar](50) NULL,
+	[GpsUtmZone] [nvarchar](50) NULL,
+	[GpsUtmNorthing] [nvarchar](50) NULL,
+	[GpsUtmEasting] [nvarchar](50) NULL,
+	[GpsAltitude] [nvarchar](50) NULL,
+	[GpsSpeed] [nvarchar](50) NULL,
+	[GpsHeading] [nvarchar](50) NULL,
+	[GpsHorizontalError] [nvarchar](50) NULL,
+	[GpsPositionalDilution] [nvarchar](50) NULL,
+	[GpsHorizontalDilution] [nvarchar](50) NULL,
+	[GpsSatelliteBitmap] [nvarchar](50) NULL,
+	[GpsSatelliteCount] [nvarchar](50) NULL,
+	[GpsNavigationTime] [nvarchar](50) NULL,
+	[UnderwaterPercentage] [nvarchar](50) NULL,
+	[DiveCount] [nvarchar](50) NULL,
+	[AverageDiveDuration] [nvarchar](50) NULL,
+	[MaximumDiveDuration] [nvarchar](50) NULL,
+	[LayerPercentage] [nvarchar](50) NULL,
+	[MaximumDiveDepth] [nvarchar](50) NULL,
+	[DiveStartTime] [nvarchar](50) NULL,
+	[DiveDuration] [nvarchar](50) NULL,
+	[DiveDepth] [nvarchar](50) NULL,
+	[DiveProfile] [nvarchar](50) NULL,
+	[ActivityCount] [nvarchar](50) NULL,
+	[Temperature] [nvarchar](50) NULL,
+	[RemoteAnalog] [nvarchar](50) NULL,
+	[SatelliteUplink] [nvarchar](50) NULL,
+	[ReceiveTime] [nvarchar](50) NULL,
+	[SatelliteName] [nvarchar](50) NULL,
+	[RepetitionCount] [nvarchar](50) NULL,
+	[LowVoltage] [nvarchar](50) NULL,
+	[Mortality] [nvarchar](50) NULL,
+	[SaltwaterFailsafe] [nvarchar](50) NULL,
+	[HaulOut] [nvarchar](50) NULL,
+	[DigitalInput] [nvarchar](50) NULL,
+	[MotionDetected] [nvarchar](50) NULL,
+	[TrapTriggerTime] [nvarchar](50) NULL,
+	[ReleaseTime] [nvarchar](50) NULL,
+	[PredeploymentData] [nvarchar](50) NULL,
+	[Error] [nvarchar](250) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatC]
+GO
+CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[TXDate] [nvarchar](50) NULL,
+	[TXTime] [nvarchar](50) NULL,
+	[PTTID] [nvarchar](50) NULL,
+	[FixNum] [nvarchar](50) NULL,
+	[FixQual] [nvarchar](50) NULL,
+	[FixDate] [nvarchar](50) NULL,
+	[FixTime] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatD]
+GO
+CREATE FUNCTION [dbo].[ParseFormatE](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[ProgramId] [nvarchar](50) NULL,
+	[PlatformId] [nvarchar](50) NULL,
+	[TransmissionDate] [datetime2](7) NULL,
+	[LocationDate] [datetime2](7) NULL,
+	[Latitude] [real] NULL,
+	[Longitude] [real] NULL,
+	[Altitude] [real] NULL,
+	[LocationClass] [nchar](1) NULL,
+	[Message] [varbinary](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[ParseFormatE]
+GO
+CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[programNumber] [nvarchar](50) NULL,
+	[platformId] [nvarchar](50) NULL,
+	[platformType] [nvarchar](50) NULL,
+	[platformModel] [nvarchar](50) NULL,
+	[platformName] [nvarchar](50) NULL,
+	[platformHexId] [nvarchar](50) NULL,
+	[satellite] [nvarchar](50) NULL,
+	[bestMsgDate] [nvarchar](50) NULL,
+	[duration] [nvarchar](50) NULL,
+	[nbMessage] [nvarchar](50) NULL,
+	[message120] [nvarchar](50) NULL,
+	[bestLevel] [nvarchar](50) NULL,
+	[frequency] [nvarchar](50) NULL,
+	[locationDate] [nvarchar](50) NULL,
+	[latitude] [nvarchar](50) NULL,
+	[longitude] [nvarchar](50) NULL,
+	[altitude] [nvarchar](50) NULL,
+	[locationClass] [nvarchar](50) NULL,
+	[gpsSpeed] [nvarchar](50) NULL,
+	[gpsHeading] [nvarchar](50) NULL,
+	[latitude2] [nvarchar](50) NULL,
+	[longitude2] [nvarchar](50) NULL,
+	[altitude2] [nvarchar](50) NULL,
+	[index] [nvarchar](50) NULL,
+	[nopc] [nvarchar](50) NULL,
+	[errorRadius] [nvarchar](50) NULL,
+	[semiMajor] [nvarchar](50) NULL,
+	[semiMinor] [nvarchar](50) NULL,
+	[orientation] [nvarchar](50) NULL,
+	[hdop] [nvarchar](50) NULL,
+	[bestDate] [nvarchar](50) NULL,
+	[compression] [nvarchar](50) NULL,
+	[type] [nvarchar](50) NULL,
+	[alarm] [nvarchar](50) NULL,
+	[concatenated] [nvarchar](50) NULL,
+	[date] [nvarchar](50) NULL,
+	[level] [nvarchar](50) NULL,
+	[doppler] [nvarchar](50) NULL,
+	[rawData] [nvarchar](500) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Parses the data in a Collar File
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarData_Insert] 
+    @FileId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- This is not executed directly, only by CollarFile_Insert 
+
+    DECLARE @Format CHAR = NULL
+    SELECT @Format = Format FROM CollarFiles WHERE FileId = @FileId
+
+    IF @Format = 'A'  -- Store on board
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen3StoreOnBoard] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataTelonicsGen3StoreOnBoard] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatA] (@FileId) 
+        END
+    END
+        
+    IF @Format = 'B'  -- Debevek SubFile Format
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataDebevekFormat] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataDebevekFormat] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatB] (@FileId) 
+        END
+    END
+    
+    IF @Format = 'C'  -- Telonics Gen4 Convertor Format
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen4] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataTelonicsGen4] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatC] (@FileId) 
+        END
+    END
+    
+    IF @Format = 'D'  -- Telonics Gen3 Convertor Format
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen3] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataTelonicsGen3] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatD] (@FileId) 
+        END
+    END
+    
+    IF @Format = 'E' -- Telonics email format
+    BEGIN
+        -- only parse the non-gps data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosEmail] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataArgosEmail] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatE] (@FileId) 
+        END
+    END
+    
+    IF @Format = 'F'  -- Argos Web Services Format
+    BEGIN
+        -- only parse the non-gps data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosWebService] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataArgosWebService] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatF] (@FileId) 
+        END
+    END
+    
+    --IF @Format = 'G'  -- Debevek Format
+    -- do not process the parent, only the children ('B')
+    
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -545,6 +1407,833 @@ CREATE TABLE [dbo].[CollarFiles](
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFileProcessingIssues](
+	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileId] [int] NOT NULL,
+	[Issue] [nvarchar](max) NOT NULL,
+	[PlatformId] [varchar](8) NULL,
+	[CollarManufacturer] [varchar](16) NULL,
+	[CollarId] [varchar](16) NULL,
+ CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
+(
+	[IssueId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 22, 2013
+-- Description: Processes only the transmission for a single platform in a file.
+--              This is a helper (sub) procedure, and is not available to
+--              be called directly by user code
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
+	@FileId INT,
+	@PlatformId VARCHAR(255)
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- If this can be called by clients, then do some parameter validation.
+	
+	-- The unprocessing should have happened already.
+	-- Process the (file,platformId) with xp_cmdshell - See ArgosFile_Process for details
+	-- If we can't process this file, then set an issue that will flag this as undone.
+	INSERT INTO [dbo].[ArgosFileProcessingIssues]
+				([FileId], [Issue], [PlatformId])
+		 VALUES (@FileId, 'Process this (file,platform) a deployment or parameter as changed',  @PlatformId)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFilePlatformDates](
+	[FileId] [int] NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NULL,
+	[FirstTransmission] [datetime2](7) NOT NULL,
+	[LastTransmission] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
+AS
+----------- ArgosFile_NeedsPartialProcessing
+-----------   Is a (file,platform) where the file has the correct transmissions,
+-----------   and there are special processing issues for the platform
+-----------   (relies on files of correct format having been summerized) 
+     SELECT T.FileId, T.PlatformId
+       FROM ArgosFilePlatformDates AS T         
+ INNER JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = T.FileId AND T.PlatformId = I.PlatformId
+      WHERE I.Issue Like 'Process%'
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosDownloads](
+	[TimeStamp] [datetime2](7) NOT NULL,
+	[ProgramId] [varchar](8) NULL,
+	[PlatformId] [varchar](8) NULL,
+	[Days] [int] NULL,
+	[FileId] [int] NULL,
+	[ErrorMessage] [varchar](max) NULL,
+ CONSTRAINT [PK_ArgosDownloads] PRIMARY KEY CLUSTERED 
+(
+	[TimeStamp] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_PlatformId] ON [dbo].[ArgosDownloads] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_ProgamId] ON [dbo].[ArgosDownloads] 
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
+(
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Result INT;
+
+	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
+	  FROM ArgosDownloads
+	 WHERE ErrorMessage IS NULL
+	
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: January 25, 2013
+-- Description:	Logs a new Argos collar download success/failure
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosDownloads_Insert] 
+	@ProgramId NVARCHAR(255) = NULL, 
+	@PlatformId NVARCHAR(255) = NULL,
+	@Days INT = NULL,
+	@FileId INT = NULL,
+	@ErrorMessage NVARCHAR(255) = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Validate permission for this operation
+	-- The caller is managed by permissions on the Stored Procedure
+	
+	-- Check the insert trigger for additional business rule enforcement
+			
+	INSERT INTO dbo.ArgosDownloads ([ProgramId], [PlatformId], [Days], [FileId], [ErrorMessage])
+		 VALUES (@ProgramId, @PlatformId, @Days, @FileId, @ErrorMessage)
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Mar 20, 2013
+-- Description: Ensure Data integerity on Insert
+-- =============================================
+CREATE TRIGGER [dbo].[AfterArgosDownloadsInsert] 
+			ON [dbo].[ArgosDownloads] 
+			AFTER INSERT
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- Business Rule: Argos Downloads must have one and only one non-null value for (FileId,ErrorMessage)
+	IF EXISTS (    SELECT 1
+	                 FROM inserted 
+	                WHERE (FileId IS NULL AND ErrorMessage IS NULL)
+	                   OR (FileId IS NOT NULL AND ErrorMessage IS NOT NULL)
+              )
+	BEGIN
+		RAISERROR('Integrity Violation. Downloads must only one non-null value in FileId or ErrorMessage', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+
+	-- Business Rule: Argos Downloads must have one and only one non-null value for (PlatformId, ProgramId)
+	IF EXISTS (    SELECT 1
+	                 FROM inserted 
+	                WHERE (PlatformId IS NULL AND ProgramId IS NULL)
+	                   OR (PlatformId IS NOT NULL AND ProgramId IS NOT NULL)
+              )
+	BEGIN
+		RAISERROR('Integrity Violation. Downloads must only one non-null value in PlatformId or ProgramId', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 22, 2013
+-- Description: Un-processes the transmissions for a single platform in a file.
+--              This is a helper (sub) procedure, and is not available to
+--              be called directly by user code
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_UnProcessPlatform] 
+    @FileId INT,
+    @PlatformId VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Find result files derived from @FileId and @PlatformId
+
+    -- FAIL - depends on ArgosDeployments which has been changed. prompting the need to unprocess
+     SELECT F.FileId
+       FROM CollarFiles AS F
+ INNER JOIN CollarFiles AS P
+         ON P.FileId = F.ParentFileId
+ INNER JOIN ArgosDeployments AS D
+         ON D.CollarId = F.CollarId
+ INNER JOIN LookupCollarFileFormats AS F2
+         ON P.Format = F2.Code
+      WHERE D.PlatformId = @PlatformId
+        AND F2.ArgosData = 'Y'
+
+
+         -- FAIL - finds all results for a source file with the @Platform (also requires date range).
+    DECLARE @StartDate datetime2(7) = '2010-01-01'
+    DECLARE @EndDate datetime2(7) = '2010-01-01'
+
+     SELECT F.FileId, F.ParentFileId, F.Format, A.FirstTransmission, A.LastTransmission
+       FROM CollarFiles AS F
+ INNER JOIN ArgosFilePlatformDates AS A
+         ON A.FileId = F.ParentFileId AND A.PlatformId = @PlatformId
+      WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, @StartDate, @EndDate) = 1
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosDeployments](
+	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
+(
+	[DeploymentId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeployments] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeployments] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPrograms](
+	[ProgramId] [varchar](8) NOT NULL,
+	[ProgramName] [nvarchar](255) NULL,
+	[UserName] [sysname] NOT NULL,
+	[Password] [nvarchar](128) NOT NULL,
+	[Manager] [sysname] NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+	[Notes] [nvarchar](max) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPlatforms](
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NOT NULL,
+	[Notes] [nvarchar](max) NULL,
+	[Active] [bit] NOT NULL,
+	[DisposalDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Mar 20, 2013
+-- Description: Ensure Data integerity on Update
+-- =============================================
+CREATE TRIGGER [dbo].[AfterArgosPlatformUpdate] 
+			ON [dbo].[ArgosPlatforms] 
+			AFTER UPDATE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- We cannot the PK (PlatformId) and the DisposalDate at the same time
+	IF (UPDATE(PlatformId) AND UPDATE(DisposalDate))
+	BEGIN
+		RAISERROR('Integrity Violation - You cannot update the PlatformId and the DisposalDate in one operation', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+
+	-- Changes to Disposal Date
+	IF (UPDATE (DisposalDate))
+	BEGIN
+		-- Business Rule: End the open (null EndDate) related Argos Doeployment
+			UPDATE AD SET EndDate = i.DisposalDate
+			  FROM dbo.ArgosDeployments AS AD
+		INNER JOIN inserted AS i
+				ON AD.PlatformId = i.PlatformId
+		INNER JOIN deleted AS d
+				ON d.PlatformId = i.PlatformId
+			 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
+			   AND i.DisposalDate IS NOT NULL
+			   AND AD.EndDate IS NULL
+		
+		-- Business Rule: Disposal Date must be on or after the EndDate of all related Argos Doeployment
+		IF EXISTS (     SELECT 1
+						  FROM dbo.ArgosDeployments AS AD
+					INNER JOIN inserted AS i
+							ON AD.PlatformId = i.PlatformId
+					INNER JOIN deleted AS d
+							ON d.PlatformId = i.PlatformId
+						 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
+						   AND i.DisposalDate IS NOT NULL
+						   AND AD.EndDate > i.DisposalDate
+				  )
+		BEGIN
+			RAISERROR('Integrity Violation - DisposalDate must be on or after the EndDate of all related Argos Deployments', 18, 0)
+			ROLLBACK TRANSACTION;
+			RETURN
+		END
+
+		-- Business Rule: Set ArgosPlatform.Active to false if the new DisposalDate is in the past
+			UPDATE P SET Active = 0
+			  FROM dbo.ArgosPlatforms AS P
+		INNER JOIN inserted AS i
+				ON P.PlatformId = i.PlatformId
+		INNER JOIN deleted AS d
+				ON d.PlatformId = i.PlatformId
+			 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
+			   AND i.DisposalDate < GETDATE()
+
+
+	END
+	
+	-- We only care about changes to DisposalDate.
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
+ON [dbo].[CollarFixes] 
+INSTEAD OF INSERT AS
+BEGIN
+	SET NOCOUNT ON;
+	-- inserted is a virtual table of inserted fixes.
+	-- Multiple fixes can be inserted at once. inserted is not updateable.
+	
+	--Logic for adding a SINGLE CollarFix
+	--  1) If the new fix has the same collar id/fixdate as an existing unhidden fix
+	--     then hide the existing fix, else nothing.  hiding the fix will trigger
+	--     a removal of the cooresponding location.
+	--  2) Add a location for the new fix.
+	--
+	-- Can I add multiple fixes in one operation?
+	--   For step 2, yes, as there is no changes to the fixes table.
+	--   For Step 1, NO!
+	--   Consider adding three fixes, 1,2,3 which have the same fixdate.
+	--   two must be hidden, and one must be unhidden.  This is ambiguous
+	--   when the fixes are inserted 'simultaneously'.  In order to maintain
+	--   the chaining of fixes hiding one another, they must be processed
+	--   sequentially.
+
+	-- Another problem:
+	--   We may need to modify some of the fixes in the inserted set.
+	--   We cannot modify the virtual 'inserted' table.  Therefore some of
+	--   our state will be in the CollarFixes table, and some in the inserted
+	--   table.  This is very difficult to manage.
+	
+	-- Solution:
+	--  Use a cursor to insert fixes one by one
+	--  Use a 'instead of insert' trigger to cure the problem with
+	--  modifying the virtual inserted table
+	
+	
+	DECLARE
+		@HiddenFixId		int,
+		@FixId				int,
+		@HiddenBy			int,
+		@FileId				INT,
+		@LineNumber			INT,
+		@CollarManufacturer VARCHAR(16),
+		@CollarId			VARCHAR(16),
+		@FixDate			DATETIME2(7),
+		@Lat				FLOAT,
+		@Lon				FLOAT;
+	  
+	DECLARE insf_cursor CURSOR FOR 
+		SELECT HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon
+		  FROM inserted
+	-- I cannot select FixId (Identity column) from inserted, because it is set to zero in the cursor
+
+	OPEN insf_cursor;
+
+	FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
+	
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		-- Step 1) Get the id of the fix we will hide (if it is null, then we are not hiding anything)
+		SET @HiddenFixId = NULL  -- The assignment below does not occur if no record is found
+		SELECT @HiddenFixId = FixId FROM CollarFixes
+		 WHERE CollarFixes.CollarManufacturer = @CollarManufacturer
+		   AND CollarFixes.CollarId = @CollarID
+		   AND CollarFixes.FixDate = @FixDate
+		   AND CollarFixes.HiddenBy IS NULL
+		
+		-- Step 2) Add new fix to table (do the insert that fired this trigger)
+		INSERT CollarFixes (HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+		VALUES (@HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon)
+		SET @FixId = SCOPE_IDENTITY();
+
+		-- PRINT N'  FixDate:' + cast(@FixDate as nvarchar(30)) + N';  HiddenFixId:' + isnull(cast(@HiddenFixId as nvarchar(30)), N'null') + N';  NewFixId:' + isnull(cast(@FixId as nvarchar(30)), N'null')
+
+		-- IF @HiddenFixId IS NOT NULL We are temporarily unstable becasue we have two active & conflicting fixes
+		
+		-- Step3) Hide the hidden fix (the update trigger will remove the associated location)
+		IF @HiddenFixId IS NOT NULL
+		BEGIN
+			UPDATE CollarFixes SET HiddenBy = @FixId WHERE FixId = @HiddenFixId;
+		END
+		
+		
+		-- Step 4) Add new record to Locations table
+		-- This should not create a Location if there is no matching deployment
+		-- The new fix is never hidden.
+		-- there must be zero or one deployment/animal for this fixdate
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT D.ProjectId, D.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
+			   FROM CollarDeployments as D 
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = D.ProjectId
+		    	AND A.AnimalId = D.AnimalId
+		 INNER JOIN dbo.Collars AS C
+				 ON C.CollarManufacturer = D.CollarManufacturer
+				AND C.CollarId = D.CollarId
+			  WHERE D.CollarManufacturer = @CollarManufacturer AND D.CollarId = @CollarId
+				AND D.DeploymentDate <= @FixDate
+				AND (D.RetrievalDate IS NULL OR @FixDate <= D.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR @FixDate <= A.MortalityDate)
+				AND (C.DisposalDate IS NULL OR @FixDate <= C.DisposalDate)
+
+		FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
+	END
+	CLOSE insf_cursor;
+	DEALLOCATE insf_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[InsteadOfCollarFixesDelete] 
+ON [dbo].[CollarFixes] 
+INSTEAD OF DELETE AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	-- deleted is a virtual table of fixes that are to be deleted.
+	-- Multiple fixes can be deleted at once. deleted is not updateable.
+
+	--Logic for removing a SINGLE CollarFix
+	--  1) If the fix is hidden do nothing else remove the related location
+	--  2) If this fix hides another fix (that is not being deleted)
+	--		 then Replace hiddenby on hidden fix with hiddenby from deleted/hiding fix
+	--       else do nothing.  Changing hiddenby will trigger changes to Locations
+	--  3) Delete the fixes
+	--  step 1 must be done before step 2, else there may be overlapping fixes
+	--    which will cause a integrity error in the Locations table.
+	
+	-- Can I delete multiple fixes in one operation?
+	--   For step 1, yes, as there is no changes to the fixes table.
+	--   For step 2, NO!
+	--   For step 3, Yes.
+	--   Consider three fixes, 1,2,3 where 2 hides 1 and 3 hides 2.
+	--   If I delete 2 and 3 at the same time, then there is no easy way to
+	--   unwind the hidden-ness of fix 1 in a bulk operation.
+	--   If it is done sequentially: removing 3 unhides 2 then removing 2 unhides 1
+	--   alternatively, removing 2 first makes 1 hidden by 3, then removing 3 unhides 1.
+	
+	-- Step 1) remove record from Locations table
+	DELETE L FROM Locations as L
+	   INNER JOIN deleted as D
+			   ON L.FixId = D.FixId
+		    WHERE D.HiddenBy is NULL
+
+	DECLARE
+		@FixId    int,
+		@HiddenBy int;
+	  
+	DECLARE delf_cursor CURSOR FOR 
+		SELECT [FixId] FROM deleted;
+
+	OPEN delf_cursor;
+
+	FETCH NEXT FROM delf_cursor INTO @FixId;
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+		-- must be done in this order to maintain uniqueness of CollarId/FixDate/HiddenBy Tuple
+		
+		-- Step 2) Get the Id of the Fix that hid this fix
+		-- get hiddenby from CollarFixes, not deleted, since previous records may
+		-- have CollarFixes.
+		SET @HiddenBy = (Select HiddenBy from CollarFixes where FixId = @FixId)
+		
+		-- Step 3) Delete the requested Fix
+		DELETE CollarFixes WHERE FixId = @FixId
+		
+		-- Step 4) What ever was hiding the fix being deleted should now be hiding
+		-- the fix that the deleted fix was hiding.
+		-- FIXME - searching the CollarFixes by HiddenBy (even when indexed) is slow
+		-- PROBLEM - unhiding a fix creates a location, thereby prohibiting the deletion of the fix
+		-- SOLUTION - do not unhide fixes in the deleted list  
+		UPDATE C SET HiddenBy = @HiddenBy
+		  FROM CollarFixes AS C
+     LEFT JOIN deleted as D
+		    ON D.FixId = C.FixId
+		 WHERE C.HiddenBy = @FixId
+		   AND D.FixId IS NULL;
+
+		FETCH NEXT FROM delf_cursor INTO @FixId;
+	END
+	CLOSE delf_cursor;
+	DEALLOCATE delf_cursor;
+	
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Feb 20, 2013
+-- Description: Add/Remove Locations when Disposal Date is updated
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarDisposalDateUpdate] 
+			ON [dbo].[Collars] 
+			AFTER UPDATE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	--Disposal date is the change that this trigger cares about.
+	--Note: this just means that DisposalDate was included in the update statement,
+	--      it does not mean that the value in this column has changed for all the
+	--      rows updated. 
+	IF UPDATE ([DisposalDate])
+	BEGIN
+
+		-- triggers always execute in the context of a transaction
+		-- so the following code is all or nothing.
+
+/* LOGIC:
+    delete locations where new disposal date < fix date AND (fix date < old disposal date OR old disposal date is null) 
+       add locations where old disposal date < fix date AND (fix date < new disposal date OR new disposal date is null)
+*/
+
+	-- Check for violations with deployment dates
+	-- i.e. illegal to deploy a collar after it is disposed, or dispose a collar before it is deployed.
+	-- We do not need to check disposal date on collar creation, because a new collar has NO deployments
+	IF EXISTS (SELECT 1
+	             FROM inserted AS I
+	       INNER JOIN CollarDeployments AS CD
+				   ON I.CollarManufacturer = CD.CollarManufacturer AND I.CollarId = CD.CollarId
+				WHERE I.DisposalDate < CD.DeploymentDate
+			  )
+	BEGIN
+		RAISERROR('Disposal date violation.  There is a deployment that begins after the new disposal date.', 18, 0)
+		ROLLBACK TRANSACTION;
+		RETURN
+	END
+
+
+   
+		DELETE L FROM dbo.Locations as L
+				   -- Join to the collar that created this location
+		   INNER JOIN CollarFixes as F
+				   ON L.FixId = F.FixId
+		   INNER JOIN deleted as D
+				   ON F.CollarManufacturer = D.CollarManufacturer
+				  AND F.CollarId = D.CollarId
+		   INNER JOIN inserted as I
+				   -- To get the new disposal date, we need to link inserted and deleted collars by PK
+				   ON I.CollarManufacturer = D.CollarManufacturer
+				  AND I.CollarId = D.CollarId
+				   -- These are the Locations to delete:
+				WHERE I.DisposalDate < L.FixDate AND (L.FixDate < D.DisposalDate OR D.DisposalDate IS NULL) 
+				
+
+		  INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			   SELECT CD.ProjectId, CD.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
+				 FROM dbo.CollarFixes AS F
+				   -- Join to CollarDeployments to get to the animal
+		   INNER JOIN CollarDeployments AS CD
+				   ON F.CollarManufacturer = CD.CollarManufacturer
+				  AND F.CollarId = CD.CollarId
+				  AND CD.DeploymentDate < F.FixDate
+				  AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
+				   -- Join these deployments to the collar being updated
+		   INNER JOIN inserted AS I
+				   ON CD.CollarManufacturer = I.CollarManufacturer
+				  AND CD.CollarId = I.CollarId
+		   INNER JOIN deleted as D
+				   -- To get the new disposal date, we need to link inserted and deleted collars by PK
+				   ON I.CollarManufacturer = D.CollarManufacturer
+				  AND I.CollarId = D.CollarId
+				   -- These are the Fixes to add:
+				WHERE F.HiddenBy IS NULL
+				  AND D.DisposalDate < F.FixDate AND (F.FixDate < I.DisposalDate OR I.DisposalDate IS NULL) 
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: June 3, 2012
+-- Description:	Add/Remove Locations when Mortality Date is updated
+-- =============================================
+CREATE TRIGGER [dbo].[AfterAnimalUpdate] 
+   ON  [dbo].[Animals] 
+   AFTER UPDATE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	--Mortality date is the change that this trigger cares about.
+	--Note: this just means that MortalityDate was included in the update statement,
+	--      it does not mean that the value in this column has changed for all the
+	--      rows updated. 
+	IF UPDATE ([MortalityDate])
+	BEGIN
+	
+		-- triggers always execute in the context of a transaction
+		-- so the following code is all or nothing.
+
+/* LOGIC:
+   If old mortality date is null then
+     if new mortality date is null
+       no change, so do nothing
+     else new mortality date is NOT null
+       we may lose locations, but never gain any.
+       delete locations where new mortality date < fix date 
+   else
+     if new mortality date is null
+       if old mortality date is null
+         no change, so do nothing     
+       else old mortality date is NOT null
+         we may gain some locations, but never lose any.
+         add location where old mortality date < fix date
+     else
+       if new mortality date = old mortality date
+         no change, so do nothing     
+       else 
+         delete locations where new mortality date < fix date and fix date < old mortality date
+         add locations where old mortality date < fix date and fix date < new mortality date
+
+  This can be simplified to:
+    delete locations where new mortality date < fix date AND (fix date < old mortality date OR old mortality date is null) 
+       add locations where old mortality date < fix date AND (fix date < new mortality date OR new mortality date is null)
+*/
+    
+		DELETE L FROM dbo.Locations as L
+				   -- Join to the animal that owns this location
+		   INNER JOIN deleted as D
+				   ON L.ProjectId = D.ProjectId
+				  AND L.AnimalId = D.AnimalId
+		   INNER JOIN inserted as I
+				 -- To get the new mortality date, we need to link inserted and deleted animals by PK
+				   ON I.ProjectId = D.ProjectId
+				  AND I.AnimalId = D.AnimalId
+				   -- These are the Locations to delete:
+				WHERE I.MortalityDate < L.FixDate AND (L.FixDate < D.MortalityDate OR D.MortalityDate IS NULL) 
+				
+
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
+			   FROM dbo.CollarFixes AS F
+			     -- Join to CollarDeployments to get to the animal
+		 INNER JOIN CollarDeployments AS C
+				 ON F.CollarManufacturer = C.CollarManufacturer
+				AND F.CollarId = C.CollarId
+				AND C.DeploymentDate < F.FixDate
+				AND (F.FixDate < C.RetrievalDate OR C.RetrievalDate IS NULL)
+				 -- Join these deployments to the animal being updated
+		 INNER JOIN inserted AS I
+				 ON C.ProjectId = I.ProjectId
+				AND C.AnimalId = I.AnimalId
+	     INNER JOIN deleted as D
+				 -- To get the new mortality date, we need to link inserted and deleted animals by PK
+			     ON I.ProjectId = D.ProjectId
+			    AND I.AnimalId = D.AnimalId
+				 -- These are the Fixes to add:
+			  WHERE F.HiddenBy IS NULL
+				AND D.MortalityDate < F.FixDate AND (F.FixDate < I.MortalityDate OR I.MortalityDate IS NULL) 
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 25, 2013
+-- Description:	Instead of CollarFile Delete Trigger
+--              This trigger must deleted related records before it can delete the files.
+--              This trigger deletes related CollarFixes. This can't be done with an 
+--              ON DELETE CASCADE because of the INSTEAD OF DELETE trigger on the CollarFixes
+--              It also deletes related CollarFiles (i.e sub-files).  This can't be done with
+--              an ON DELETE CASCADE because it 'may cause cycles or multiple cascade paths'
+--              The Delete SPROC ensures that users (non-SA) cannot delete a child file.
+--              Children may be deleted by the system if they are invalidated by a change in
+--              the parameters used to derive the child file.
+--              SA should not delete parents and their children in one batch (this will cause
+--              confusion as a child may be deleted before the parent tries to delete it).
+-- =============================================
+CREATE TRIGGER [dbo].[InsteadOfCollarFileDelete] 
+   ON  [dbo].[CollarFiles] 
+   INSTEAD OF DELETE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- triggers always execute in the context of a transaction
+    -- so the following code is all or nothing.
+
+    -- Delete fixes related to the deleted files
+    DELETE X FROM dbo.CollarFixes AS X
+       INNER JOIN deleted AS D
+               ON D.FileId = X.FileId
+               
+    -- Delete children of the deleted files       
+    DELETE F FROM dbo.CollarFiles AS F
+       INNER JOIN deleted AS D
+               ON D.FileId = F.ParentFileId
+    
+    -- Finally I can delete the files       
+    DELETE F FROM dbo.CollarFiles AS F
+       INNER JOIN deleted AS D
+               ON D.FileId = F.FileId
+
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -798,92 +2487,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFilePlatformDates](
-	[FileId] [int] NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NULL,
-	[FirstTransmission] [datetime2](7) NOT NULL,
-	[LastTransmission] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFileProcessingIssues](
-	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[FileId] [int] NOT NULL,
-	[Issue] [nvarchar](max) NOT NULL,
-	[PlatformId] [varchar](8) NULL,
-	[CollarManufacturer] [varchar](16) NULL,
-	[CollarId] [varchar](16) NULL,
- CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
-(
-	[IssueId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 22, 2013
--- Description: Processes only the transmission for a single platform in a file.
---              This is a helper (sub) procedure, and is not available to
---              be called directly by user code
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
-	@FileId INT,
-	@PlatformId VARCHAR(255)
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- If this can be called by clients, then do some parameter validation.
-	
-	-- The unprocessing should have happened already.
-	-- Process the (file,platformId) with xp_cmdshell - See ArgosFile_Process for details
-	-- If we can't process this file, then set an issue that will flag this as undone.
-	INSERT INTO [dbo].[ArgosFileProcessingIssues]
-				([FileId], [Issue], [PlatformId])
-		 VALUES (@FileId, 'Process this (file,platform) a deployment or parameter as changed',  @PlatformId)
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE VIEW [dbo].[ArgosFile_NeverProcessed]
 AS
 ----------- ArgosFile_NeverProcessed
@@ -899,1722 +2502,6 @@ AS
       WHERE C.FileId IS NULL
         AND I.FileId IS NULL
    GROUP BY T.FileId
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
-AS
------------ ArgosFile_NeedsPartialProcessing
------------   Is a (file,platform) where the file has the correct transmissions,
------------   and there are special processing issues for the platform
------------   (relies on files of correct format having been summerized) 
-     SELECT T.FileId, T.PlatformId
-       FROM ArgosFilePlatformDates AS T         
- INNER JOIN ArgosFileProcessingIssues AS I
-         ON I.FileId = T.FileId AND T.PlatformId = I.PlatformId
-      WHERE I.Issue Like 'Process%'
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosDownloads](
-	[TimeStamp] [datetime2](7) NOT NULL,
-	[ProgramId] [varchar](8) NULL,
-	[PlatformId] [varchar](8) NULL,
-	[Days] [int] NULL,
-	[FileId] [int] NULL,
-	[ErrorMessage] [varchar](max) NULL,
- CONSTRAINT [PK_ArgosDownloads] PRIMARY KEY CLUSTERED 
-(
-	[TimeStamp] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_PlatformId] ON [dbo].[ArgosDownloads] 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_ProgamId] ON [dbo].[ArgosDownloads] 
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: January 25, 2013
--- Description:	Logs a new Argos collar download success/failure
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosDownloads_Insert] 
-	@ProgramId NVARCHAR(255) = NULL, 
-	@PlatformId NVARCHAR(255) = NULL,
-	@Days INT = NULL,
-	@FileId INT = NULL,
-	@ErrorMessage NVARCHAR(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Validate permission for this operation
-	-- The caller is managed by permissions on the Stored Procedure
-	
-	-- Check the insert trigger for additional business rule enforcement
-			
-	INSERT INTO dbo.ArgosDownloads ([ProgramId], [PlatformId], [Days], [FileId], [ErrorMessage])
-		 VALUES (@ProgramId, @PlatformId, @Days, @FileId, @ErrorMessage)
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Add the fixes for a CollarFile Data
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFixes_Insert] 
-	@FileId INT,
-	@Format CHAR
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- This is not executed directly, only by CollarFile_Insert & CollarFile_UpdateStatus 
-
-	-- if FileId is not found, or file is Inactive, then no fixes will be added.
-	
-	--FIXME - CollarFile.CollarId, and CollarDataDebevekFormat.CollarId are not
-	--        related to Collars.CollarId, but CollarFixes.CollarId is.
-	--        therefore, we could try to insert a foreign key violation, and
-	--        this entire update could fail.
-	
-	IF @Format = 'A'  -- Store on board
-	BEGIN
-		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
-		        CONVERT(datetime2, I.[Date]+ ' ' + ISNULL(I.[Time],'')),
-		        CONVERT(float, I.Latitude),
-		        CASE WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 < -180 THEN 360 + (CONVERT(numeric(10,5),I.Longitude) % 360.0)
-		             WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 > 180 THEN (CONVERT(numeric(10,5),I.Longitude) % 360.0) - 360
-		             ELSE CONVERT(numeric(10,5),I.Longitude) % 360.0 END
-		   FROM dbo.CollarDataTelonicsGen3StoreOnBoard as I INNER JOIN CollarFiles as F 
-			 ON I.FileId = F.FileId
-		  WHERE F.[Status] = 'A'
-		    AND I.[Fix Status] = 'Fix Available'
-		    AND I.FileId = @FileId
-	END
-	
-	IF @Format = 'B'  -- Debevek Sub file, same as a 'G' file, except it is for a single Collar
-	BEGIN
-		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
-		        CONVERT(datetime2, I.[FixDate]+ ' ' + ISNULL(I.[FixTime],'')),
-		        I.LatWGS84, I.LonWGS84
-		   FROM dbo.CollarDataDebevekFormat as I
-	 INNER JOIN CollarFiles as F 
-			 ON I.FileId = F.FileId
-		  WHERE F.[Status] = 'A'
-		    AND I.FileId = @FileId
-		    AND I.LatWGS84 IS NOT NULL AND I.LonWGS84 IS NOT NULL
-		    AND I.[FixDate] IS NOT NULL
-	END
-	
-	/*
-	The use of AquisitionTime and not GpsFixTime is confusing, but apperantly correct
-	of the 810,428 records collected as of 8/23/2012,
-	GpsFixDate is non null in only 9205 records (GpsFixattempt = Succeeded(2D) or Succeeded(3D))
-	In those cases, GpsFixDate == AcquisitionTime
-	AcquisitionTime is never null when GpsFixAttempt == Succeed (110,090 records),
-	but is null when GpsFixAttemp == Failed (71 records)
-	
-	There are some cases where Acquisition time is bogus (in the future),
-	I've manually hidden those locations, but I'm not sure the correct strategy.
-	*/
-	
-	IF @Format = 'C'  -- Telonics Gen4 Condensed Convertor Format
-	BEGIN
-		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
-		        CONVERT(datetime2, I.[AcquisitionTime]),
-		        CONVERT(float, I.GpsLatitude), CONVERT(float, I.GpsLongitude)
-		   FROM dbo.CollarDataTelonicsGen4 as I INNER JOIN CollarFiles as F 
-			 ON I.FileId = F.FileId
-		  WHERE F.[Status] = 'A'
-		    AND I.FileId = @FileId
-		    AND I.GpsLatitude IS NOT NULL AND I.GpsLongitude IS NOT NULL
-		    AND I.[AcquisitionTime] IS NOT NULL
-		    AND I.[AcquisitionTime] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
-	END
-	
-	IF @Format = 'D'  -- Telonics Gen3 Format
-
-	-- FixStatus: Bad, Good, Unavailable, Err:CCC-FFF, Invalid.
-	-- Only use FixStatus = Good.
-	-- Exception:  If Fix #1 has been declared Bad, fixes 2-6  must be considered Bad as well even if their status is listed as Good.
-	-- This is necessary since fixes 2-6 are reconstructed using information in Fix #1.
-	
-	-- Date format is YYYY.MM.DD; Time Format is HH:MM, unless there is GPS error information then HH:MM:SS
-	-- Lat/Long are decimal degrees with 4 decimal places, and are either signed, or have alpha (N,S,E,W) suffix - user options
-	-- Lat/Long with Alpha suffix in source file are converted to signed prefix by parser during insert to CollarData table 
-	
-	BEGIN
-		-- find valid packages (sequential fixes 1-6 at a specific date/time)
-		-- turns out transmission date/time is not a unique identifier - there are multiple packages during a transmission.
-		-- need to identify fixes 2-6 that need to be eliminated by location in file; i.e. do not
-		-- add lines 2-6 after a bad fix 1.
-		-- caution: in a package fixes 2 to 6 are optional. 
-		
-		-- step 1 find line numbers for valid first fixes
-		SELECT LineNumber INTO #ValidFirstFix  
-		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3]
-		  WHERE FileId = @FileId and FixNum = 1 and FixQual = 'Good'
-		  
-		-- step 2 find line numbers associated with a good first fixes
-		/*
-		SELECT C.LineNumber INTO #ValidLines  
-		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
-		  INNER JOIN  #ValidFirstFix AS F
-		    ON (C.LineNumber = F.LineNumber)
-		    OR (C.LineNumber = F.LineNumber+1 AND C.FixNum = 2)
-		    OR (C.LineNumber = F.LineNumber+2 AND C.FixNum = 3)
-		    OR (C.LineNumber = F.LineNumber+3 AND C.FixNum = 4)
-		    OR (C.LineNumber = F.LineNumber+4 AND C.FixNum = 5)
-		    OR (C.LineNumber = F.LineNumber+5 AND C.FixNum = 6)
-		  WHERE C.FileId = @FileId
-		*/
-		
-	-- By my observations, if any fix is bad, then all subsequent fixes in that package (1-6) are suspect,
-	-- and should be eliminated, hence the new logic below:
-	
-		SELECT LineNumber INTO #ValidLines FROM #ValidFirstFix  
-
-		SELECT C.LineNumber INTO #ValidSecondFix  
-		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
-		  INNER JOIN  #ValidFirstFix AS F
-		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 2)
-		  WHERE FileId = @FileId and FixQual <> 'Bad'
-		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidSecondFix  
-
-		SELECT C.LineNumber INTO #ValidThirdFix  
-		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
-		  INNER JOIN  #ValidSecondFix AS F
-		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 3)
-		  WHERE FileId = @FileId and FixQual <> 'Bad'
-		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidThirdFix  
-
-		SELECT C.LineNumber INTO #ValidFourthFix  
-		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
-		  INNER JOIN  #ValidThirdFix AS F
-		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 4)
-		  WHERE FileId = @FileId and FixQual <> 'Bad'
-		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidFourthFix  
-
-		SELECT C.LineNumber INTO #ValidFifthFix  
-		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
-		  INNER JOIN  #ValidFourthFix AS F
-		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 5)
-		  WHERE FileId = @FileId and FixQual <> 'Bad'
-		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidFifthFix  
-
-		SELECT C.LineNumber INTO #ValidSixthFix  
-		  FROM [Animal_Movement].[dbo].[CollarDataTelonicsGen3] AS C 
-		  INNER JOIN  #ValidFifthFix AS F
-		  ON (C.LineNumber = F.LineNumber + 1 AND C.FixNum = 6)
-		  WHERE FileId = @FileId and FixQual <> 'Bad'
-		INSERT INTO #ValidLines (LineNumber) SELECT LineNumber FROM #ValidSixthFix  
-		
-		-- step 3 add valid fixes to the fixes table.
-		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, F.CollarManufacturer, F.CollarId,
-		        CONVERT(datetime2, I.[FixDate]+ ' ' + ISNULL(I.[FixTime],'')),
-		        CONVERT(float, I.Latitude), CONVERT(float, I.Longitude)
-		   FROM dbo.CollarDataTelonicsGen3 as I
-		     INNER JOIN CollarFiles as F 
-			 ON I.FileId = F.FileId
-		     INNER JOIN #ValidLines AS V
-		     ON I.LineNumber = V.LineNumber
-		  WHERE F.[Status] = 'A'
-		    AND I.FileId = @FileId
-		    AND I.[FixQual] = 'Good'
-		    AND I.[FixDate] <> 'Error'
-		    AND I.Latitude IS NOT NULL AND I.Longitude IS NOT NULL
-		    AND I.[Longitude] <> 'Error' AND I.[Latitude] <> 'Error'
-	END
-		
-	IF @Format = 'E' -- Telonics email format
-	-- GPS fixes in the email are converted with an external application to formats 'C' or 'D'
-	-- This adds the Argos PTT locations to the Fixes table (only for non-GPS collars)
-	BEGIN
-		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT @FileId, MIN(I.LineNumber), C.CollarManufacturer, C.CollarId,
-		        I.LocationDate, I.Latitude,
-		        CASE WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 < -180 THEN 360 + (CONVERT(numeric(10,5),I.Longitude) % 360.0)
-		             WHEN CONVERT(numeric(10,5),I.Longitude) % 360.0 > 180 THEN (CONVERT(numeric(10,5),I.Longitude) % 360.0) - 360
-		             ELSE CONVERT(numeric(10,5),I.Longitude) % 360.0 END
-		   FROM dbo.CollarDataArgosEmail AS I
-	 INNER JOIN CollarFiles AS F 
-			 ON I.FileId = F.FileId
-	 INNER JOIN ArgosDeployments AS D
-	         ON I.platformId = D.PlatformId
-	        AND (D.StartDate IS NULL OR D.StartDate < I.TransmissionDate)
-	        AND (D.EndDate IS NULL OR I.TransmissionDate < D.EndDate)
-	 INNER JOIN Collars AS C
-	         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-		  WHERE F.[Status] = 'A'
-		    AND I.FileId = @FileId
-		    AND I.Latitude BETWEEN -90 AND 90
-		    AND I.Longitude IS NOT NULL
-		    AND I.LocationDate < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
-		    AND C.HasGps = 0
-	   GROUP BY C.CollarManufacturer, C.CollarId, I.LocationDate, I.Latitude, I.Longitude
-	END
-	
-	IF @Format = 'F'  -- Argos Web Services Format
-	-- GPS fixes in the raw data of a AWS file are converted with an external application to formats 'C' or 'D'
-	-- This adds the Argos PTT locations to the Fixes table (only for non-GPS collars)
-	BEGIN
-		INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		 SELECT I.FileId, I.LineNumber, C.CollarManufacturer, C.CollarId,
-		        CONVERT(datetime2, I.[locationDate]),
-		        CONVERT(float, I.latitude), CONVERT(float, I.longitude)
-		   FROM dbo.CollarDataArgosWebService as I INNER JOIN CollarFiles as F 
-			 ON I.FileId = F.FileId
-	 INNER JOIN ArgosDeployments AS D
-	         ON I.platformId = D.PlatformId
-	        AND (D.StartDate IS NULL OR D.StartDate < I.locationDate)
-	        AND (D.EndDate IS NULL OR I.locationDate < D.EndDate)
-	 INNER JOIN Collars AS C
-	         ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
-		  WHERE F.[Status] = 'A'
-		    AND I.FileId = @FileId
-		    AND I.latitude IS NOT NULL AND I.longitude IS NOT NULL
-		    AND I.[locationDate] IS NOT NULL
-		    AND I.[locationDate] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
-		    AND C.HasGps = 0
-	END
-
-	--IF @Format = 'G'  -- Debevek Format
-	-- nothing to do for this format
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 2, 2012
--- Description:	Updates a Collar
--- =============================================
-CREATE PROCEDURE [dbo].[Collar_Update] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL, 
-	@CollarModel NVARCHAR(255) = NULL, 
-	@Manager sysname = NULL, 
-	@Owner NVARCHAR(255) = NULL, 
-	@ArgosId NVARCHAR(255) = NULL, 
-	@SerialNumber NVARCHAR(255) = NULL, 
-	@Frequency FLOAT = NULL, 
-	@HasGps BIT = 0, 
-	@Notes NVARCHAR(max) = NULL,
-	@DisposalDate DATETIME2(7) = NULL,
-	@Gen3Period INT = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Verify this is an existing collar
-	-- Otherwise, the update will silently succeed, which could be confusing.
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId)
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-		
-	-- Validate permission for this operation
-	-- The caller must be the Manager of the collar
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manager of this collar ('+@CollarManufacturer+'/'+@CollarId+') to update it.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- If a parameter is not provided, use the existing value.
-	-- (to put null in a field the user will need to pass an empty string)
-	IF @CollarModel IS NULL
-	BEGIN
-		SELECT @CollarModel = [CollarModel] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Manager IS NULL
-	BEGIN
-		SELECT @Manager = [Manager] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Owner IS NULL
-	BEGIN
-		SELECT @Owner = [Owner] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @ArgosId IS NULL
-	BEGIN
-		SELECT @ArgosId = [ArgosId] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @SerialNumber IS NULL
-	BEGIN
-		SELECT @SerialNumber = [SerialNumber] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Notes IS NULL
-	BEGIN
-		SELECT @Notes = [Notes] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	-- Do the update, replacing empty strings with NULLs
-	-- All other verification is handled by primary/foreign key and column constraints.
-
-	UPDATE dbo.Collars SET [CollarModel] = nullif(@CollarModel,''),
-						   [Manager] = nullif(@Manager,''),
-						   [Owner] = nullif(@Owner,''),
-						   [ArgosId] = nullif(@ArgosId,''),
-						   [SerialNumber] = nullif(@SerialNumber,''),
-						   [Frequency] = @Frequency,
-						   [HasGps] = @HasGps,
-						   [Notes] = nullif(@Notes,''),
-						   [DisposalDate] = @DisposalDate,
-						   [Gen3Period] = @Gen3Period
-					 WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 2, 2012
--- Description:	Delete a collar
--- =============================================
-CREATE PROCEDURE [dbo].[Collar_Delete] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the Manager of the collar
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manger of this collar ('+@CollarManufacturer+'/'+@CollarId+') to delete it.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- deleting a non-existing collar will silently succeed.
-	-- All other verification is handled by primary/foreign key and column constraints.
-	DELETE FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
-(
-)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @Result INT;
-
-	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
-	  FROM ArgosDownloads
-	 WHERE ErrorMessage IS NULL
-	
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 25, 2013
--- Description:	Instead of CollarFile Delete Trigger
---              This trigger must deleted related records before it can delete the files.
---              This trigger deletes related CollarFixes. This can't be done with an 
---              ON DELETE CASCADE because of the INSTEAD OF DELETE trigger on the CollarFixes
---              It also deletes related CollarFiles (i.e sub-files).  This can't be done with
---              an ON DELETE CASCADE because it 'may cause cycles or multiple cascade paths'
---              The Delete SPROC ensures that users (non-SA) cannot delete a child file.
---              Children may be deleted by the system if they are invalidated by a change in
---              the parameters used to derive the child file.
---              SA should not delete parents and their children in one batch (this will cause
---              confusion as a child may be deleted before the parent tries to delete it).
--- =============================================
-CREATE TRIGGER [dbo].[InsteadOfCollarFileDelete] 
-   ON  [dbo].[CollarFiles] 
-   INSTEAD OF DELETE
-AS 
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- triggers always execute in the context of a transaction
-    -- so the following code is all or nothing.
-
-    -- Delete fixes related to the deleted files
-    DELETE X FROM dbo.CollarFixes AS X
-       INNER JOIN deleted AS D
-               ON D.FileId = X.FileId
-               
-    -- Delete children of the deleted files       
-    DELETE F FROM dbo.CollarFiles AS F
-       INNER JOIN deleted AS D
-               ON D.FileId = F.ParentFileId
-    
-    -- Finally I can delete the files       
-    DELETE F FROM dbo.CollarFiles AS F
-       INNER JOIN deleted AS D
-               ON D.FileId = F.FileId
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Feb 27, 2013
--- Description: Ensure Data integerity on Collar Insert
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarInsert] 
-			ON [dbo].[Collars] 
-			AFTER INSERT
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Business Rule: Collars that share an (non-null) Argos ID must have unique disposal dates
-	
-	IF EXISTS (    SELECT 1
-	                 FROM inserted AS i
-	           INNER JOIN Collars AS C
-	                   ON i.ArgosId = C.ArgosId
-	                WHERE i.ArgosId IS NOT NULL
-	                  AND (i.DisposalDate = C.DisposalDate OR (i.DisposalDate IS NULL AND C.DisposalDate IS NULL))
-	                  AND NOT (i.CollarManufacturer = C.CollarManufacturer AND i.CollarId = C.CollarId)
-              )
-	BEGIN
-		RAISERROR('Collar Integrity Violation. Collars that share a non-null Argos ID must have unique disposal dates.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 1, 2013
--- Description:	Ripple status changes to sub files
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarFileStatusUpdate] 
-   ON  [dbo].[CollarFiles] 
-   AFTER UPDATE
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	--Status is the only thing we will monitor in this trigger.
-	IF (UPDATE (Status))
-	BEGIN
-		-- triggers always execute in the context of a transaction
-		-- so the following code is all or nothing.
-
-		-- Files that are being deactivated
-		UPDATE CollarFiles SET [Status] = 'I'
-		 WHERE ParentFileId IN (
-				  SELECT i.FileId
-					FROM inserted as i
-			  INNER JOIN deleted as d
-					  ON i.FileId = d.FileId
-				   WHERE i.[Status] = 'I' AND d.[Status] = 'A'
-			   )
-		-- Files that are being activated
-		UPDATE CollarFiles SET [Status] = 'A'
-		 WHERE ParentFileId IN (
-				  SELECT i.FileId
-					FROM inserted as i
-			  INNER JOIN deleted as d
-					  ON i.FileId = d.FileId
-				   WHERE i.[Status] = 'A' AND d.[Status] = 'I'
-			   )
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Mar 25, 2013
--- Description: Ensure Data integrity on Update of ProjectId
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarFileProjectIdUpdate] 
-            ON [dbo].[CollarFiles] 
-            AFTER UPDATE
-AS 
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- We only care about updates to the ProjectID in this trigger.  note we also check to
-    -- see if the value has changed.  Linq to SQL will call the update SPROC will all parameters
-    IF UPDATE([ProjectId])
-    BEGIN
-		-- Business Rule: CollarFiles must have one and only one non-null value for (Owner,ProjectId)
-		IF EXISTS (    SELECT 1
-						 FROM inserted AS i
-						 JOIN deleted AS d 
-						   ON i.FileId = d.FileId
-						WHERE (i.ProjectId <> d.ProjectId 
-						       OR (i.ProjectId IS NULL AND d.ProjectId IS NOT NULL)
-						       OR (i.ProjectId IS NOT NULL AND d.ProjectId IS NULL))
-						  AND (i.ProjectId IS NULL AND i.[Owner] IS NULL)
-						   OR (i.ProjectId IS NOT NULL AND i.[Owner] IS NOT NULL)
-				  )
-		BEGIN
-			RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
-			ROLLBACK TRANSACTION;
-			RETURN
-		END
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Mar 25, 2013
--- Description: Ensure Data integrity on Update of Owner
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarFileOwnerUpdate] 
-            ON [dbo].[CollarFiles] 
-            AFTER UPDATE
-AS 
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- We only care about updates to the Owner in this trigger.  Note we also check to
-    -- see if the value has changed.  Linq to SQL will call the update SPROC will all parameters
-    IF UPDATE([Owner])
-    BEGIN
-		-- Business Rule: CollarFiles must have one and only one non-null value for (Owner,ProjectId)
-		IF EXISTS (    SELECT 1
-						 FROM inserted AS i
-						 JOIN deleted AS d 
-						   ON i.FileId = d.FileId
-						WHERE (i.[Owner] <> d.[Owner] 
-						       OR (i.[Owner] IS NULL AND d.[Owner] IS NOT NULL)
-						       OR (i.[Owner] IS NOT NULL AND d.[Owner] IS NULL))
-						  AND (i.ProjectId IS NULL AND i.[Owner] IS NULL)
-						   OR (i.ProjectId IS NOT NULL AND i.[Owner] IS NOT NULL)
-				  )
-		BEGIN
-			RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
-			ROLLBACK TRANSACTION;
-			RETURN
-		END
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Mar 25, 2013
--- Description: Ensure Data integrity on Insert
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarFileInsert] 
-            ON [dbo].[CollarFiles] 
-            AFTER INSERT
-AS 
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Business Rule: CollarFiles must have one and only one non-null value for (Owner,ProjectId)
-    IF EXISTS (    SELECT 1
-                     FROM inserted 
-                    WHERE (ProjectId IS NULL AND [Owner] IS NULL)
-                       OR (ProjectId IS NOT NULL AND [Owner] IS NOT NULL)
-              )
-    BEGIN
-        RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
-        ROLLBACK TRANSACTION;
-        RETURN
-    END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 22, 2013
--- Description: Un-processes the transmissions for a single platform in a file.
---              This is a helper (sub) procedure, and is not available to
---              be called directly by user code
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_UnProcessPlatform] 
-    @FileId INT,
-    @PlatformId VARCHAR(255)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Find result files derived from @FileId and @PlatformId
-
-    -- FAIL - depends on ArgosDeployments which has been changed. prompting the need to unprocess
-     SELECT F.FileId
-       FROM CollarFiles AS F
- INNER JOIN CollarFiles AS P
-         ON P.FileId = F.ParentFileId
- INNER JOIN ArgosDeployments AS D
-         ON D.CollarId = F.CollarId
- INNER JOIN LookupCollarFileFormats AS F2
-         ON P.Format = F2.Code
-      WHERE D.PlatformId = @PlatformId
-        AND F2.ArgosData = 'Y'
-
-
-         -- FAIL - finds all results for a source file with the @Platform (also requires date range).
-    DECLARE @StartDate datetime2(7) = '2010-01-01'
-    DECLARE @EndDate datetime2(7) = '2010-01-01'
-
-     SELECT F.FileId, F.ParentFileId, F.Format, A.FirstTransmission, A.LastTransmission
-       FROM CollarFiles AS F
- INNER JOIN ArgosFilePlatformDates AS A
-         ON A.FileId = F.ParentFileId AND A.PlatformId = @PlatformId
-      WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, @StartDate, @EndDate) = 1
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ProjectEditors](
-	[ProjectId] [varchar](16) NOT NULL,
-	[Editor] [sysname] NOT NULL,
- CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[Editor] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- Create the stored procedure to generate an error using 
--- RAISERROR. The original error information is used to
--- construct the msg_str for RAISERROR.
--- must be called from a CATCH block
--- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
-CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
-    -- Return if there is no error information to retrieve.
-    IF ERROR_NUMBER() IS NULL
-        RETURN;
-
-    DECLARE 
-        @ErrorMessage    NVARCHAR(4000),
-        @ErrorNumber     INT,
-        @ErrorSeverity   INT,
-        @ErrorState      INT,
-        @ErrorLine       INT,
-        @ErrorProcedure  NVARCHAR(200);
-
-    -- Assign variables to error-handling functions that 
-    -- capture information for RAISERROR.
-    SELECT 
-        @ErrorNumber = ERROR_NUMBER(),
-        @ErrorSeverity = ERROR_SEVERITY(),
-        @ErrorState = ERROR_STATE(),
-        @ErrorLine = ERROR_LINE(),
-        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
-
-    -- Build the message string that will contain original
-    -- error information.
-    SELECT @ErrorMessage = 
-        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
-            'Message: '+ ERROR_MESSAGE();
-
-    -- Raise an error: msg_str parameter of RAISERROR will contain
-    -- the original error information.
-    RAISERROR 
-        (
-        @ErrorMessage, 
-        @ErrorSeverity, 
-        1,               
-        @ErrorNumber,    -- parameter: original error number.
-        @ErrorSeverity,  -- parameter: original error severity.
-        @ErrorState,     -- parameter: original error state.
-        @ErrorProcedure, -- parameter: original error procedure name.
-        @ErrorLine       -- parameter: original error line number.
-        );
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- ===============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Updates the Status of a CollarFile
--- ===============================================
-CREATE PROCEDURE [dbo].[CollarFile_UpdateStatus] 
-	@FileId INT  = NULL, 
-	@Status CHAR = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get some information about the file to update
-	DECLARE @OldStatus CHAR;
-	DECLARE @Format    CHAR;
-	DECLARE @ProjectId NVARCHAR(255);
-	 SELECT @Format    = [Format],
-		    @OldStatus = [Status],
-		    @ProjectId = [ProjectId]
-	   FROM [dbo].[CollarFiles]
-	  WHERE [FileId] = @FileId;
-
-	IF @OldStatus IS NULL
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'Invalid parameter: (' + @FileId + ') was not found in the CollarFiles table';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
-	-- If OldStatus was found, then Format and Project are guaranteed.
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor of the project ('+@ProjectId+') to update this file.';
-			RAISERROR(@message4, 18, 0)
-			RETURN (1)
-		END
-	END
-		
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[LookupFileStatus] WHERE [Code] = @Status)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid parameter: (' + @Status + ') is not a recognized status';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-	-- Do update	
-	BEGIN TRY
-		BEGIN TRAN
-			IF (@OldStatus = 'I' AND @Status = 'A')
-			BEGIN
-				UPDATE [dbo].[CollarFiles] SET [Status] = @Status WHERE [FileId] = @FileId;
-				EXEC [dbo].[CollarFixes_Insert] @FileId, @Format 
-			END
-			IF (@OldStatus = 'A' AND @Status = 'I')
-			BEGIN
-				UPDATE [dbo].[CollarFiles] SET [Status] = @Status WHERE [FileId] = @FileId;
-				EXEC [dbo].[CollarFixes_Delete] @FileId
-			END
-		COMMIT TRANSACTION
-	END TRY
-	BEGIN CATCH
-		IF XACT_STATE() <> 0
-			ROLLBACK TRANSACTION;
-		EXEC [dbo].[Utility_RethrowError]
-		RETURN 1
-	END CATCH
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosDeployments](
-	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
- CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
-(
-	[DeploymentId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeployments] 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeployments] 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPrograms](
-	[ProgramId] [varchar](8) NOT NULL,
-	[ProgramName] [nvarchar](255) NULL,
-	[UserName] [sysname] NOT NULL,
-	[Password] [nvarchar](128) NOT NULL,
-	[Manager] [sysname] NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
-	[Notes] [nvarchar](max) NULL,
-	[Active] [bit] NULL,
- CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPlatforms](
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NOT NULL,
-	[Notes] [nvarchar](max) NULL,
-	[Active] [bit] NOT NULL,
-	[DisposalDate] [datetime2](7) NULL,
- CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Mar 20, 2013
--- Description: Ensure Data integerity on Update
--- =============================================
-CREATE TRIGGER [dbo].[AfterArgosPlatformUpdate] 
-			ON [dbo].[ArgosPlatforms] 
-			AFTER UPDATE
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- We cannot the PK (PlatformId) and the DisposalDate at the same time
-	IF (UPDATE(PlatformId) AND UPDATE(DisposalDate))
-	BEGIN
-		RAISERROR('Integrity Violation - You cannot update the PlatformId and the DisposalDate in one operation', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-
-	-- Changes to Disposal Date
-	IF (UPDATE (DisposalDate))
-	BEGIN
-		-- Business Rule: End the open (null EndDate) related Argos Doeployment
-			UPDATE AD SET EndDate = i.DisposalDate
-			  FROM dbo.ArgosDeployments AS AD
-		INNER JOIN inserted AS i
-				ON AD.PlatformId = i.PlatformId
-		INNER JOIN deleted AS d
-				ON d.PlatformId = i.PlatformId
-			 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
-			   AND i.DisposalDate IS NOT NULL
-			   AND AD.EndDate IS NULL
-		
-		-- Business Rule: Disposal Date must be on or after the EndDate of all related Argos Doeployment
-		IF EXISTS (     SELECT 1
-						  FROM dbo.ArgosDeployments AS AD
-					INNER JOIN inserted AS i
-							ON AD.PlatformId = i.PlatformId
-					INNER JOIN deleted AS d
-							ON d.PlatformId = i.PlatformId
-						 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
-						   AND i.DisposalDate IS NOT NULL
-						   AND AD.EndDate > i.DisposalDate
-				  )
-		BEGIN
-			RAISERROR('Integrity Violation - DisposalDate must be on or after the EndDate of all related Argos Deployments', 18, 0)
-			ROLLBACK TRANSACTION;
-			RETURN
-		END
-
-		-- Business Rule: Set ArgosPlatform.Active to false if the new DisposalDate is in the past
-			UPDATE P SET Active = 0
-			  FROM dbo.ArgosPlatforms AS P
-		INNER JOIN inserted AS i
-				ON P.PlatformId = i.PlatformId
-		INNER JOIN deleted AS d
-				ON d.PlatformId = i.PlatformId
-			 WHERE (d.DisposalDate <> i.DisposalDate OR d.DisposalDate IS NULL)
-			   AND i.DisposalDate < GETDATE()
-
-
-	END
-	
-	-- We only care about changes to DisposalDate.
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Mar 20, 2013
--- Description: Ensure Data integerity on Insert
--- =============================================
-CREATE TRIGGER [dbo].[AfterArgosDownloadsInsert] 
-			ON [dbo].[ArgosDownloads] 
-			AFTER INSERT
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Business Rule: Argos Downloads must have one and only one non-null value for (FileId,ErrorMessage)
-	IF EXISTS (    SELECT 1
-	                 FROM inserted 
-	                WHERE (FileId IS NULL AND ErrorMessage IS NULL)
-	                   OR (FileId IS NOT NULL AND ErrorMessage IS NOT NULL)
-              )
-	BEGIN
-		RAISERROR('Integrity Violation. Downloads must only one non-null value in FileId or ErrorMessage', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-
-	-- Business Rule: Argos Downloads must have one and only one non-null value for (PlatformId, ProgramId)
-	IF EXISTS (    SELECT 1
-	                 FROM inserted 
-	                WHERE (PlatformId IS NULL AND ProgramId IS NULL)
-	                   OR (PlatformId IS NOT NULL AND ProgramId IS NOT NULL)
-              )
-	BEGIN
-		RAISERROR('Integrity Violation. Downloads must only one non-null value in PlatformId or ProgramId', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-END
-GO
-CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[LocalTime]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-/* Converts a datetime to the ordinal date (day of the year)
- * commonly confused with the Julian date (days sine 1/1/4713BC)
- */
-CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
-    @Date DATETIME2  
-)   
-	RETURNS INT
-    WITH SCHEMABINDING -- This is a deterministic function.
-
-AS
-BEGIN
-    RETURN 1 + DATEDIFF (day,
-                         CONVERT(DATETIME2,
-                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
-                                 112), -- format 112 (yyyymmdd) is deterministic
-                         @Date)
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ValidLocations]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(L.[FixDate]) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          --,L.[Status]
-          ,L.[Location] AS [Shape]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ValidLocationsWithTempAndActivity]
-AS
-SELECT     v.FixId, v.ProjectId, v.AnimalId, v.FixDate, v.LocalDateTime, v.Year, v.OrdinalDate, v.UnitCode, v.Species, v.Gender, v.GroupName, v.Shape, g2.Temperature, 
-                      g3.ActivityCount
-FROM         dbo.ValidLocations AS v INNER JOIN
-                      dbo.CollarFixes AS f ON v.FixId = f.FixId INNER JOIN
-                      dbo.CollarDataTelonicsGen4 AS g1 ON f.FileId = g1.FileId AND f.LineNumber = g1.LineNumber LEFT OUTER JOIN
-                      dbo.CollarDataTelonicsGen4 AS g2 ON g1.FileId = g2.FileId AND g1.AcquisitionStartTime = g2.AcquisitionStartTime AND g2.Temperature IS NOT NULL 
-                      LEFT OUTER JOIN
-                      dbo.CollarDataTelonicsGen4 AS g3 ON g2.FileId = g3.FileId AND g1.AcquisitionStartTime = g3.AcquisitionStartTime AND g3.ActivityCount IS NOT NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[UpdateLocationAfterCollarFixesUpdate] 
-ON [dbo].[CollarFixes]
-AFTER UPDATE AS
-IF UPDATE ([HiddenBy])
-	-- HiddenBy is the only field that is allowed to be updated (all other changes must
-	-- be done with a delete/insert.  This is managed with permissions on the table and
-	-- the functionality of permitted stored procedures
-	BEGIN
-		SET NOCOUNT ON;
-
-		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
-		-- deleted/inserted are tables, since multiple records can be changed at once.
-		-- All updated rows are included, even those that didn't update hiddenby
-		
-		-- Basic logic for a changing a SINGLE CollarFix:
-		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
-		--   if HiddenBy goes from NOT NULL to NULL then add new record to Locations table
-		
-		-- Can I change multiple fixes at once?
-		--  Yes.  Since changes to CollarFixes are managed, and only done by routines
-		--        that honor the requirements of the HiddenBy relationship between
-		--        records in the table, I do not need to worry about how these changes
-		--        effect other records in the table.  I only need to manage the changes
-		--        to the locations table.
-		
-		-- if HiddenBy goes from NULL to NOT NULL then
-		-- remove record from Locations table
-		DELETE L FROM Locations as L
-		   INNER JOIN deleted as D
-				   ON L.FixId = D.FixId
-		   INNER JOIN inserted as I
-				   ON L.FixId = I.FixId
-				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
-		
-		-- if HiddenBy goes from NOT NULL to NULL then
-		-- Add new record to Locations table, if FixDate is acceptable 
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT CD.ProjectId, CD.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
-			   FROM inserted as I
-		 INNER JOIN deleted as D
-				 ON D.FixId = I.FixId
-		 INNER JOIN dbo.CollarDeployments as CD
-				 ON CD.CollarManufacturer = I.CollarManufacturer
-				AND CD.CollarId = I.CollarId
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = CD.ProjectId
-		    	AND A.AnimalId = CD.AnimalId
-		 INNER JOIN dbo.Collars AS C
-				 ON C.CollarManufacturer = CD.CollarManufacturer
-				AND C.CollarId = CD.CollarId
-			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
-			    AND CD.DeploymentDate <= I.FixDate
-			    AND (CD.RetrievalDate IS NULL OR I.FixDate <= CD.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
-				AND (C.DisposalDate IS NULL OR I.FixDate <= C.DisposalDate)
-
-	END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[StoreOnBoardLocations]
-AS
-SELECT     dbo.CollarDataTelonicsGen3StoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
-                      dbo.CollarFiles.UploadDate
-FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
-                      dbo.CollarFixes ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFixes.FileId AND 
-                      dbo.CollarDataTelonicsGen3StoreOnBoard.LineNumber = dbo.CollarFixes.LineNumber INNER JOIN
-                      dbo.Locations ON dbo.CollarFixes.FixId = dbo.Locations.FixId INNER JOIN
-                      dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
-                      dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[PreviousLocationTime] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [FixDate] 
-					 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [Status] IS NULL
-					  AND [FixDate] < @Time
-			     ORDER BY [FixDate] DESC);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[LastLocationOfKnownMortalities]
-AS
-SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
-FROM Locations AS L
-INNER JOIN
-   (SELECT A.ProjectId, A.AnimalId, MAX(FixDate) AS FixDate
-	FROM dbo.Locations AS L
-	INNER JOIN dbo.Animals AS A
-	ON A.AnimalId = L.AnimalId AND A.ProjectId = L.ProjectId AND L.FixDate < A.MortalityDate
-	WHERE [Status] IS NULL
-	GROUP BY A.ProjectId, A.AnimalId) AS F
-ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId and F.FixDate = L.FixDate
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
-ON [dbo].[CollarFixes] 
-INSTEAD OF INSERT AS
-BEGIN
-	SET NOCOUNT ON;
-	-- inserted is a virtual table of inserted fixes.
-	-- Multiple fixes can be inserted at once. inserted is not updateable.
-	
-	--Logic for adding a SINGLE CollarFix
-	--  1) If the new fix has the same collar id/fixdate as an existing unhidden fix
-	--     then hide the existing fix, else nothing.  hiding the fix will trigger
-	--     a removal of the cooresponding location.
-	--  2) Add a location for the new fix.
-	--
-	-- Can I add multiple fixes in one operation?
-	--   For step 2, yes, as there is no changes to the fixes table.
-	--   For Step 1, NO!
-	--   Consider adding three fixes, 1,2,3 which have the same fixdate.
-	--   two must be hidden, and one must be unhidden.  This is ambiguous
-	--   when the fixes are inserted 'simultaneously'.  In order to maintain
-	--   the chaining of fixes hiding one another, they must be processed
-	--   sequentially.
-
-	-- Another problem:
-	--   We may need to modify some of the fixes in the inserted set.
-	--   We cannot modify the virtual 'inserted' table.  Therefore some of
-	--   our state will be in the CollarFixes table, and some in the inserted
-	--   table.  This is very difficult to manage.
-	
-	-- Solution:
-	--  Use a cursor to insert fixes one by one
-	--  Use a 'instead of insert' trigger to cure the problem with
-	--  modifying the virtual inserted table
-	
-	
-	DECLARE
-		@HiddenFixId		int,
-		@FixId				int,
-		@HiddenBy			int,
-		@FileId				INT,
-		@LineNumber			INT,
-		@CollarManufacturer VARCHAR(16),
-		@CollarId			VARCHAR(16),
-		@FixDate			DATETIME2(7),
-		@Lat				FLOAT,
-		@Lon				FLOAT;
-	  
-	DECLARE insf_cursor CURSOR FOR 
-		SELECT HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon
-		  FROM inserted
-	-- I cannot select FixId (Identity column) from inserted, because it is set to zero in the cursor
-
-	OPEN insf_cursor;
-
-	FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
-	
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-
-		-- Step 1) Get the id of the fix we will hide (if it is null, then we are not hiding anything)
-		SET @HiddenFixId = NULL  -- The assignment below does not occur if no record is found
-		SELECT @HiddenFixId = FixId FROM CollarFixes
-		 WHERE CollarFixes.CollarManufacturer = @CollarManufacturer
-		   AND CollarFixes.CollarId = @CollarID
-		   AND CollarFixes.FixDate = @FixDate
-		   AND CollarFixes.HiddenBy IS NULL
-		
-		-- Step 2) Add new fix to table (do the insert that fired this trigger)
-		INSERT CollarFixes (HiddenBy, FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-		VALUES (@HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon)
-		SET @FixId = SCOPE_IDENTITY();
-
-		-- PRINT N'  FixDate:' + cast(@FixDate as nvarchar(30)) + N';  HiddenFixId:' + isnull(cast(@HiddenFixId as nvarchar(30)), N'null') + N';  NewFixId:' + isnull(cast(@FixId as nvarchar(30)), N'null')
-
-		-- IF @HiddenFixId IS NOT NULL We are temporarily unstable becasue we have two active & conflicting fixes
-		
-		-- Step3) Hide the hidden fix (the update trigger will remove the associated location)
-		IF @HiddenFixId IS NOT NULL
-		BEGIN
-			UPDATE CollarFixes SET HiddenBy = @FixId WHERE FixId = @HiddenFixId;
-		END
-		
-		
-		-- Step 4) Add new record to Locations table
-		-- This should not create a Location if there is no matching deployment
-		-- The new fix is never hidden.
-		-- there must be zero or one deployment/animal for this fixdate
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT D.ProjectId, D.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
-			   FROM CollarDeployments as D 
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = D.ProjectId
-		    	AND A.AnimalId = D.AnimalId
-		 INNER JOIN dbo.Collars AS C
-				 ON C.CollarManufacturer = D.CollarManufacturer
-				AND C.CollarId = D.CollarId
-			  WHERE D.CollarManufacturer = @CollarManufacturer AND D.CollarId = @CollarId
-				AND D.DeploymentDate <= @FixDate
-				AND (D.RetrievalDate IS NULL OR @FixDate <= D.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR @FixDate <= A.MortalityDate)
-				AND (C.DisposalDate IS NULL OR @FixDate <= C.DisposalDate)
-
-		FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
-	END
-	CLOSE insf_cursor;
-	DEALLOCATE insf_cursor;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[InsteadOfCollarFixesDelete] 
-ON [dbo].[CollarFixes] 
-INSTEAD OF DELETE AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- deleted is a virtual table of fixes that are to be deleted.
-	-- Multiple fixes can be deleted at once. deleted is not updateable.
-
-	--Logic for removing a SINGLE CollarFix
-	--  1) If the fix is hidden do nothing else remove the related location
-	--  2) If this fix hides another fix (that is not being deleted)
-	--		 then Replace hiddenby on hidden fix with hiddenby from deleted/hiding fix
-	--       else do nothing.  Changing hiddenby will trigger changes to Locations
-	--  3) Delete the fixes
-	--  step 1 must be done before step 2, else there may be overlapping fixes
-	--    which will cause a integrity error in the Locations table.
-	
-	-- Can I delete multiple fixes in one operation?
-	--   For step 1, yes, as there is no changes to the fixes table.
-	--   For step 2, NO!
-	--   For step 3, Yes.
-	--   Consider three fixes, 1,2,3 where 2 hides 1 and 3 hides 2.
-	--   If I delete 2 and 3 at the same time, then there is no easy way to
-	--   unwind the hidden-ness of fix 1 in a bulk operation.
-	--   If it is done sequentially: removing 3 unhides 2 then removing 2 unhides 1
-	--   alternatively, removing 2 first makes 1 hidden by 3, then removing 3 unhides 1.
-	
-	-- Step 1) remove record from Locations table
-	DELETE L FROM Locations as L
-	   INNER JOIN deleted as D
-			   ON L.FixId = D.FixId
-		    WHERE D.HiddenBy is NULL
-
-	DECLARE
-		@FixId    int,
-		@HiddenBy int;
-	  
-	DECLARE delf_cursor CURSOR FOR 
-		SELECT [FixId] FROM deleted;
-
-	OPEN delf_cursor;
-
-	FETCH NEXT FROM delf_cursor INTO @FixId;
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-
-		-- must be done in this order to maintain uniqueness of CollarId/FixDate/HiddenBy Tuple
-		
-		-- Step 2) Get the Id of the Fix that hid this fix
-		-- get hiddenby from CollarFixes, not deleted, since previous records may
-		-- have CollarFixes.
-		SET @HiddenBy = (Select HiddenBy from CollarFixes where FixId = @FixId)
-		
-		-- Step 3) Delete the requested Fix
-		DELETE CollarFixes WHERE FixId = @FixId
-		
-		-- Step 4) What ever was hiding the fix being deleted should now be hiding
-		-- the fix that the deleted fix was hiding.
-		-- FIXME - searching the CollarFixes by HiddenBy (even when indexed) is slow
-		-- PROBLEM - unhiding a fix creates a location, thereby prohibiting the deletion of the fix
-		-- SOLUTION - do not unhide fixes in the deleted list  
-		UPDATE C SET HiddenBy = @HiddenBy
-		  FROM CollarFixes AS C
-     LEFT JOIN deleted as D
-		    ON D.FixId = C.FixId
-		 WHERE C.HiddenBy = @FixId
-		   AND D.FixId IS NULL;
-
-		FETCH NEXT FROM delf_cursor INTO @FixId;
-	END
-	CLOSE delf_cursor;
-	DEALLOCATE delf_cursor;
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[GetLocationGeography]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS GEOGRAPHY
-AS
-BEGIN
-	DECLARE @Result GEOGRAPHY
-	SET @Result = (SELECT [Location] 
-	                 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [FixDate] = @Time);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Feb 20, 2013
--- Description: Add/Remove Locations when Disposal Date is updated
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarDisposalDateUpdate] 
-			ON [dbo].[Collars] 
-			AFTER UPDATE
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	--Disposal date is the change that this trigger cares about.
-	--Note: this just means that DisposalDate was included in the update statement,
-	--      it does not mean that the value in this column has changed for all the
-	--      rows updated. 
-	IF UPDATE ([DisposalDate])
-	BEGIN
-
-		-- triggers always execute in the context of a transaction
-		-- so the following code is all or nothing.
-
-/* LOGIC:
-    delete locations where new disposal date < fix date AND (fix date < old disposal date OR old disposal date is null) 
-       add locations where old disposal date < fix date AND (fix date < new disposal date OR new disposal date is null)
-*/
-
-	-- Check for violations with deployment dates
-	-- i.e. illegal to deploy a collar after it is disposed, or dispose a collar before it is deployed.
-	-- We do not need to check disposal date on collar creation, because a new collar has NO deployments
-	IF EXISTS (SELECT 1
-	             FROM inserted AS I
-	       INNER JOIN CollarDeployments AS CD
-				   ON I.CollarManufacturer = CD.CollarManufacturer AND I.CollarId = CD.CollarId
-				WHERE I.DisposalDate < CD.DeploymentDate
-			  )
-	BEGIN
-		RAISERROR('Disposal date violation.  There is a deployment that begins after the new disposal date.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-
-
-   
-		DELETE L FROM dbo.Locations as L
-				   -- Join to the collar that created this location
-		   INNER JOIN CollarFixes as F
-				   ON L.FixId = F.FixId
-		   INNER JOIN deleted as D
-				   ON F.CollarManufacturer = D.CollarManufacturer
-				  AND F.CollarId = D.CollarId
-		   INNER JOIN inserted as I
-				   -- To get the new disposal date, we need to link inserted and deleted collars by PK
-				   ON I.CollarManufacturer = D.CollarManufacturer
-				  AND I.CollarId = D.CollarId
-				   -- These are the Locations to delete:
-				WHERE I.DisposalDate < L.FixDate AND (L.FixDate < D.DisposalDate OR D.DisposalDate IS NULL) 
-				
-
-		  INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			   SELECT CD.ProjectId, CD.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
-				 FROM dbo.CollarFixes AS F
-				   -- Join to CollarDeployments to get to the animal
-		   INNER JOIN CollarDeployments AS CD
-				   ON F.CollarManufacturer = CD.CollarManufacturer
-				  AND F.CollarId = CD.CollarId
-				  AND CD.DeploymentDate < F.FixDate
-				  AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
-				   -- Join these deployments to the collar being updated
-		   INNER JOIN inserted AS I
-				   ON CD.CollarManufacturer = I.CollarManufacturer
-				  AND CD.CollarId = I.CollarId
-		   INNER JOIN deleted as D
-				   -- To get the new disposal date, we need to link inserted and deleted collars by PK
-				   ON I.CollarManufacturer = D.CollarManufacturer
-				  AND I.CollarId = D.CollarId
-				   -- These are the Fixes to add:
-				WHERE F.HiddenBy IS NULL
-				  AND D.DisposalDate < F.FixDate AND (F.FixDate < I.DisposalDate OR I.DisposalDate IS NULL) 
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 3, 2012
--- Description:	Remove Locations when Deployment is deleted
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarDeploymentDelete] 
-   ON  [dbo].[CollarDeployments] 
-   AFTER DELETE
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	-- Delete records from locations that are no longer deployed
-	DELETE L FROM dbo.Locations as L
-	   INNER JOIN deleted as D
-			   ON L.ProjectId = D.ProjectId
-			  AND L.AnimalId = D.AnimalId
-			  AND L.FixDate >= D.DeploymentDate
-			  AND (D.RetrievalDate IS NULL OR L.FixDate <= D.RetrievalDate)
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: June 3, 2012
--- Description:	Add/Remove Locations when Mortality Date is updated
--- =============================================
-CREATE TRIGGER [dbo].[AfterAnimalUpdate] 
-   ON  [dbo].[Animals] 
-   AFTER UPDATE
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	--Mortality date is the change that this trigger cares about.
-	--Note: this just means that MortalityDate was included in the update statement,
-	--      it does not mean that the value in this column has changed for all the
-	--      rows updated. 
-	IF UPDATE ([MortalityDate])
-	BEGIN
-	
-		-- triggers always execute in the context of a transaction
-		-- so the following code is all or nothing.
-
-/* LOGIC:
-   If old mortality date is null then
-     if new mortality date is null
-       no change, so do nothing
-     else new mortality date is NOT null
-       we may lose locations, but never gain any.
-       delete locations where new mortality date < fix date 
-   else
-     if new mortality date is null
-       if old mortality date is null
-         no change, so do nothing     
-       else old mortality date is NOT null
-         we may gain some locations, but never lose any.
-         add location where old mortality date < fix date
-     else
-       if new mortality date = old mortality date
-         no change, so do nothing     
-       else 
-         delete locations where new mortality date < fix date and fix date < old mortality date
-         add locations where old mortality date < fix date and fix date < new mortality date
-
-  This can be simplified to:
-    delete locations where new mortality date < fix date AND (fix date < old mortality date OR old mortality date is null) 
-       add locations where old mortality date < fix date AND (fix date < new mortality date OR new mortality date is null)
-*/
-    
-		DELETE L FROM dbo.Locations as L
-				   -- Join to the animal that owns this location
-		   INNER JOIN deleted as D
-				   ON L.ProjectId = D.ProjectId
-				  AND L.AnimalId = D.AnimalId
-		   INNER JOIN inserted as I
-				 -- To get the new mortality date, we need to link inserted and deleted animals by PK
-				   ON I.ProjectId = D.ProjectId
-				  AND I.AnimalId = D.AnimalId
-				   -- These are the Locations to delete:
-				WHERE I.MortalityDate < L.FixDate AND (L.FixDate < D.MortalityDate OR D.MortalityDate IS NULL) 
-				
-
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
-			   FROM dbo.CollarFixes AS F
-			     -- Join to CollarDeployments to get to the animal
-		 INNER JOIN CollarDeployments AS C
-				 ON F.CollarManufacturer = C.CollarManufacturer
-				AND F.CollarId = C.CollarId
-				AND C.DeploymentDate < F.FixDate
-				AND (F.FixDate < C.RetrievalDate OR C.RetrievalDate IS NULL)
-				 -- Join these deployments to the animal being updated
-		 INNER JOIN inserted AS I
-				 ON C.ProjectId = I.ProjectId
-				AND C.AnimalId = I.AnimalId
-	     INNER JOIN deleted as D
-				 -- To get the new mortality date, we need to link inserted and deleted animals by PK
-			     ON I.ProjectId = D.ProjectId
-			    AND I.AnimalId = D.AnimalId
-				 -- These are the Fixes to add:
-			  WHERE F.HiddenBy IS NULL
-				AND D.MortalityDate < F.FixDate AND (F.FixDate < I.MortalityDate OR I.MortalityDate IS NULL) 
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- Microsoft Says: We do not recommend using cursors in triggers because they could potentially reduce performance. 
---                 To design a trigger that affects multiple rows, use rowset-based logic instead of cursors
--- However, the rowset based logic was too difficult to manage:
---   Because I think procedurally, and I needed to break the problem up into procedures to understand/code, however
---   while I can put a function in rowset logic, a function cannot use an INSERT/DELETE
---   while I can put an INSERT/DELETE in a stored procedure, I can't put a stored procedure in rowset logic.
---   Therefore I need to abandon my procedure based thinking, or I can use cursors. 
---   Example rowset logic with multi-column key in deleted and inserted virtual tables
---     DELETE m from [dbo].[Movement] as m inner join deleted as d on m.AnimalID = d.AnimalID and (d.fixdate = m.startdate or d.fixdate = m.enddate);
---     SELECT * FROM Movements as m Where Exists(Select 1 from inserted as i where i.AnimalID = m.AnimalID and (i.FixDate = m.StartDate or i.FixDate = m.EndDate)) 
-
--- I do not delete all movements in one operation (possible and faster),
---   because it is too hard to then figure out how to close all possible gaps
---   with new movements - the new locations may be in sequence, or random.
-
-
-CREATE TRIGGER [dbo].[UpdateMovementAfterLocationDelete] 
-ON [dbo].[Locations] 
-AFTER DELETE AS
-BEGIN
-	SET NOCOUNT ON;
-	DECLARE
-		@Project VARCHAR(32),
-		@Animal  VARCHAR(32),
-		@Time    DATETIME2;
-	  
-	DECLARE del_cursor CURSOR FOR 
-		SELECT [ProjectId], [AnimalId], [FixDate]
-		  FROM deleted
-		 WHERE [Status] IS NULL  --Deleting a location with a non-null status will not change the movements
-	  ORDER BY [ProjectId], [AnimalId], [FixDate];
-
-	OPEN del_cursor;
-
-	FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
-
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
-		FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
-	END
-	CLOSE del_cursor;
-	DEALLOCATE del_cursor;
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -2695,6 +2582,240 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- Microsoft Says: We do not recommend using cursors in triggers because they could potentially reduce performance. 
+--                 To design a trigger that affects multiple rows, use rowset-based logic instead of cursors
+-- However, the rowset based logic was too difficult to manage:
+--   Because I think procedurally, and I needed to break the problem up into procedures to understand/code, however
+--   while I can put a function in rowset logic, a function cannot use an INSERT/DELETE
+--   while I can put an INSERT/DELETE in a stored procedure, I can't put a stored procedure in rowset logic.
+--   Therefore I need to abandon my procedure based thinking, or I can use cursors. 
+--   Example rowset logic with multi-column key in deleted and inserted virtual tables
+--     DELETE m from [dbo].[Movement] as m inner join deleted as d on m.AnimalID = d.AnimalID and (d.fixdate = m.startdate or d.fixdate = m.enddate);
+--     SELECT * FROM Movements as m Where Exists(Select 1 from inserted as i where i.AnimalID = m.AnimalID and (i.FixDate = m.StartDate or i.FixDate = m.EndDate)) 
+
+-- I do not delete all movements in one operation (possible and faster),
+--   because it is too hard to then figure out how to close all possible gaps
+--   with new movements - the new locations may be in sequence, or random.
+
+
+CREATE TRIGGER [dbo].[UpdateMovementAfterLocationDelete] 
+ON [dbo].[Locations] 
+AFTER DELETE AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE
+		@Project VARCHAR(32),
+		@Animal  VARCHAR(32),
+		@Time    DATETIME2;
+	  
+	DECLARE del_cursor CURSOR FOR 
+		SELECT [ProjectId], [AnimalId], [FixDate]
+		  FROM deleted
+		 WHERE [Status] IS NULL  --Deleting a location with a non-null status will not change the movements
+	  ORDER BY [ProjectId], [AnimalId], [FixDate];
+
+	OPEN del_cursor;
+
+	FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
+		FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
+	END
+	CLOSE del_cursor;
+	DEALLOCATE del_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[UpdateLocationAfterCollarFixesUpdate] 
+ON [dbo].[CollarFixes]
+AFTER UPDATE AS
+IF UPDATE ([HiddenBy])
+	-- HiddenBy is the only field that is allowed to be updated (all other changes must
+	-- be done with a delete/insert.  This is managed with permissions on the table and
+	-- the functionality of permitted stored procedures
+	BEGIN
+		SET NOCOUNT ON;
+
+		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
+		-- deleted/inserted are tables, since multiple records can be changed at once.
+		-- All updated rows are included, even those that didn't update hiddenby
+		
+		-- Basic logic for a changing a SINGLE CollarFix:
+		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
+		--   if HiddenBy goes from NOT NULL to NULL then add new record to Locations table
+		
+		-- Can I change multiple fixes at once?
+		--  Yes.  Since changes to CollarFixes are managed, and only done by routines
+		--        that honor the requirements of the HiddenBy relationship between
+		--        records in the table, I do not need to worry about how these changes
+		--        effect other records in the table.  I only need to manage the changes
+		--        to the locations table.
+		
+		-- if HiddenBy goes from NULL to NOT NULL then
+		-- remove record from Locations table
+		DELETE L FROM Locations as L
+		   INNER JOIN deleted as D
+				   ON L.FixId = D.FixId
+		   INNER JOIN inserted as I
+				   ON L.FixId = I.FixId
+				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
+		
+		-- if HiddenBy goes from NOT NULL to NULL then
+		-- Add new record to Locations table, if FixDate is acceptable 
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT CD.ProjectId, CD.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
+			   FROM inserted as I
+		 INNER JOIN deleted as D
+				 ON D.FixId = I.FixId
+		 INNER JOIN dbo.CollarDeployments as CD
+				 ON CD.CollarManufacturer = I.CollarManufacturer
+				AND CD.CollarId = I.CollarId
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = CD.ProjectId
+		    	AND A.AnimalId = CD.AnimalId
+		 INNER JOIN dbo.Collars AS C
+				 ON C.CollarManufacturer = CD.CollarManufacturer
+				AND C.CollarId = CD.CollarId
+			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
+			    AND CD.DeploymentDate <= I.FixDate
+			    AND (CD.RetrievalDate IS NULL OR I.FixDate <= CD.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
+				AND (C.DisposalDate IS NULL OR I.FixDate <= C.DisposalDate)
+
+	END
+GO
+CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[LocalTime]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/* Converts a datetime to the ordinal date (day of the year)
+ * commonly confused with the Julian date (days sine 1/1/4713BC)
+ */
+CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
+    @Date DATETIME2  
+)   
+	RETURNS INT
+    WITH SCHEMABINDING -- This is a deterministic function.
+
+AS
+BEGIN
+    RETURN 1 + DATEDIFF (day,
+                         CONVERT(DATETIME2,
+                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
+                                 112), -- format 112 (yyyymmdd) is deterministic
+                         @Date)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ValidLocations]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(L.[FixDate]) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          --,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ValidLocationsWithTempAndActivity]
+AS
+SELECT     v.FixId, v.ProjectId, v.AnimalId, v.FixDate, v.LocalDateTime, v.Year, v.OrdinalDate, v.UnitCode, v.Species, v.Gender, v.GroupName, v.Shape, g2.Temperature, 
+                      g3.ActivityCount
+FROM         dbo.ValidLocations AS v INNER JOIN
+                      dbo.CollarFixes AS f ON v.FixId = f.FixId INNER JOIN
+                      dbo.CollarDataTelonicsGen4 AS g1 ON f.FileId = g1.FileId AND f.LineNumber = g1.LineNumber LEFT OUTER JOIN
+                      dbo.CollarDataTelonicsGen4 AS g2 ON g1.FileId = g2.FileId AND g1.AcquisitionStartTime = g2.AcquisitionStartTime AND g2.Temperature IS NOT NULL 
+                      LEFT OUTER JOIN
+                      dbo.CollarDataTelonicsGen4 AS g3 ON g2.FileId = g3.FileId AND g1.AcquisitionStartTime = g3.AcquisitionStartTime AND g3.ActivityCount IS NOT NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[PreviousLocationTime] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [FixDate] 
+					 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [Status] IS NULL
+					  AND [FixDate] < @Time
+			     ORDER BY [FixDate] DESC);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[LastLocationOfKnownMortalities]
+AS
+SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
+FROM Locations AS L
+INNER JOIN
+   (SELECT A.ProjectId, A.AnimalId, MAX(FixDate) AS FixDate
+	FROM dbo.Locations AS L
+	INNER JOIN dbo.Animals AS A
+	ON A.AnimalId = L.AnimalId AND A.ProjectId = L.ProjectId AND L.FixDate < A.MortalityDate
+	WHERE [Status] IS NULL
+	GROUP BY A.ProjectId, A.AnimalId) AS F
+ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId and F.FixDate = L.FixDate
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[StoreOnBoardLocations]
+AS
+SELECT     dbo.CollarDataTelonicsGen3StoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
+                      dbo.CollarFiles.UploadDate
+FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
+                      dbo.CollarFixes ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFixes.FileId AND 
+                      dbo.CollarDataTelonicsGen3StoreOnBoard.LineNumber = dbo.CollarFixes.LineNumber INNER JOIN
+                      dbo.Locations ON dbo.CollarFixes.FixId = dbo.Locations.FixId INNER JOIN
+                      dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
+                      dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[NextLocationTime] 
 (
 	@Project VARCHAR(16)   = NULL, 
@@ -2712,142 +2833,6 @@ BEGIN
 					  AND [Status] IS NULL
 					  AND [FixDate] > @Time
 			     ORDER BY [FixDate]);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Movements](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[StartDate] [datetime2](7) NOT NULL,
-	[EndDate] [datetime2](7) NOT NULL,
-	[Duration] [float] NOT NULL,
-	[Distance] [float] NOT NULL,
-	[Speed] [float] NOT NULL,
-	[Shape] [geography] NOT NULL,
- CONSTRAINT [PK_Movement] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC,
-	[StartDate] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE UNIQUE NONCLUSTERED INDEX [IX_Movements_EndDate] ON [dbo].[Movements] 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC,
-	[EndDate] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_Movements_StartDate_EndDate] ON [dbo].[Movements] 
-(
-	[StartDate] ASC,
-	[EndDate] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE SPATIAL INDEX [SIndex_Movements_Shape] ON [dbo].[Movements] 
-(
-	[Shape]
-)USING  GEOGRAPHY_GRID 
-WITH (
-GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
-CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [StartDate] 
-					 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [EndDate] = @Time);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[StartOfOverlappingMovement] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [StartDate]
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [StartDate] < @Time
-	                  AND [EndDate] > @Time
-	             ORDER BY [StartDate] DESC);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[EndOfMovement]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [EndDate] 
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [StartDate] = @Time);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[EndOfFollowingConnectedMovement] 
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [EndDate] 
-					 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [StartDate] = @Time);
 	RETURN @Result
 END
 GO
@@ -2994,26 +2979,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[Movement_Delete] 
-	@Project NVARCHAR(255), 
-	@Animal  NVARCHAR(255), 
-	@PrevTime DATETIME2,
-	@NextTime DATETIME2
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	DELETE FROM [dbo].[Movements]
-	   	  WHERE [ProjectId] = @Project
-		    AND [AnimalId] = @Animal
-	        AND [StartDate] = @PrevTime
-	        AND [EndDate] = @NextTime;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE VIEW [dbo].[MostRecentLocations]
 AS
 SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
@@ -3024,21 +2989,6 @@ INNER JOIN
 		WHERE    [Status] IS NULL
 		GROUP BY ProjectId, AnimalId) AS F
 ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Settings](
-	[Username] [sysname] NOT NULL,
-	[Key] [nvarchar](30) NOT NULL,
-	[Value] [nvarchar](500) NULL,
- CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
-(
-	[Username] ASC,
-	[Key] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
 GO
 SET ANSI_NULLS ON
 GO
@@ -3107,6 +3057,72 @@ BEGIN
 					 VALUES (@CollarManufacturer, @CollarId, @CollarModel, @Manager, @Owner,
 							 @SerialNumber, @Frequency, @HasGps, @Notes)
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Settings](
+	[Username] [sysname] NOT NULL,
+	[Key] [nvarchar](30) NOT NULL,
+	[Value] [nvarchar](500) NULL,
+ CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
+(
+	[Username] ASC,
+	[Key] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Create the stored procedure to generate an error using 
+-- RAISERROR. The original error information is used to
+-- construct the msg_str for RAISERROR.
+-- must be called from a CATCH block
+-- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
+CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
+    -- Return if there is no error information to retrieve.
+    IF ERROR_NUMBER() IS NULL
+        RETURN;
+
+    DECLARE 
+        @ErrorMessage    NVARCHAR(4000),
+        @ErrorNumber     INT,
+        @ErrorSeverity   INT,
+        @ErrorState      INT,
+        @ErrorLine       INT,
+        @ErrorProcedure  NVARCHAR(200);
+
+    -- Assign variables to error-handling functions that 
+    -- capture information for RAISERROR.
+    SELECT 
+        @ErrorNumber = ERROR_NUMBER(),
+        @ErrorSeverity = ERROR_SEVERITY(),
+        @ErrorState = ERROR_STATE(),
+        @ErrorLine = ERROR_LINE(),
+        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
+
+    -- Build the message string that will contain original
+    -- error information.
+    SELECT @ErrorMessage = 
+        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
+            'Message: '+ ERROR_MESSAGE();
+
+    -- Raise an error: msg_str parameter of RAISERROR will contain
+    -- the original error information.
+    RAISERROR 
+        (
+        @ErrorMessage, 
+        @ErrorSeverity, 
+        1,               
+        @ErrorNumber,    -- parameter: original error number.
+        @ErrorSeverity,  -- parameter: original error severity.
+        @ErrorState,     -- parameter: original error state.
+        @ErrorProcedure, -- parameter: original error procedure name.
+        @ErrorLine       -- parameter: original error line number.
+        );
 GO
 SET ANSI_NULLS ON
 GO
@@ -3584,6 +3600,145 @@ CREATE TABLE [dbo].[HiddenFixes](
 GO
 SET ANSI_PADDING OFF
 GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a table of conflicting fixes for a specific collar.
+-- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007', DEFAULT)
+-- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations
+-- Modified:    Feb 22, 2013, added an optional currency filter to return only conflicts in the last X days 
+-- =============================================
+CREATE FUNCTION [dbo].[ConflictingFixes] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255),
+	@LastXdays          INTEGER = 36500
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT FixId, HiddenBy, FileId, LineNumber, dbo.LocalTime(C.FixDate) AS LocalFixTime, Lat, Lon
+		FROM CollarFixes AS C
+		INNER JOIN 
+			(SELECT   CollarManufacturer, CollarId, FixDate 
+			 FROM
+				(SELECT DISTINCT CollarManufacturer, CollarId, FixDate, Lat, Lon
+				 FROM CollarFixes
+			     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId) AS T
+			 GROUP BY CollarManufacturer, CollarId, FixDate
+			 HAVING   COUNT(FixDate) > 1) AS D
+		ON  C.CollarManufacturer = D.CollarManufacturer
+		AND C.CollarId = D.CollarId
+		AND C.FixDate = D.FixDate
+        AND C.FixDate > DATEADD(DAY, -@LastXdays, GETDATE())
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a row of fix information for a specific collar.
+-- Example:     SELECT * FROM CollarFixSummary('Telonics', '96007')
+-- Modified:    Aug 16, 2012, added Unique field
+-- =============================================
+CREATE FUNCTION [dbo].[CollarFixSummary] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS @summary TABLE
+(
+	[Count] int,
+	[Unique] int,
+	[First] datetime2,
+	[Last] datetime2
+) 
+AS
+BEGIN
+	DECLARE @temp int;
+	
+	SELECT @temp = 1 
+	FROM [dbo].[CollarFixes]
+	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+	GROUP BY FixDate
+	
+	INSERT @summary
+	SELECT  COUNT(*) AS [Count],
+			@@ROWCOUNT AS [Unique],
+			dbo.LocalTime(MIN(FixDate)) AS [First],
+			dbo.LocalTime(MAX(FixDate)) AS [Last]
+	FROM [dbo].[CollarFixes]
+	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+	GROUP BY CollarManufacturer, CollarId
+	
+	RETURN
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 31, 2012
+-- Description:	Returns a table of files with fixes for a specific collar.
+-- Example:     SELECT * FROM CollarFixesByFile('Telonics', '96007')
+-- =============================================
+CREATE FUNCTION [dbo].[CollarFixesByFile] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT  F.[FileId],
+				F.[FileName] AS [File],
+				S.[Name] AS [Status],
+				COUNT(FixDate) AS [FixCount],
+				dbo.LocalTime(MIN(FixDate)) AS [First],
+				dbo.LocalTime(MAX(FixDate)) AS [Last]
+		FROM [dbo].[CollarFiles] AS F
+		INNER JOIN [dbo].[LookupFileStatus] AS S
+		ON F.[Status] = S.[Code]
+		LEFT JOIN [dbo].[CollarFixes] AS X
+		ON X.FileId = F.FileId
+		WHERE (F.CollarManufacturer = @CollarManufacturer AND F.CollarId = @CollarId)
+		   OR (X.CollarManufacturer = @CollarManufacturer AND X.CollarId = @CollarId)
+		GROUP BY F.[FileId], F.[FileName], S.[Name]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a row of location information for a specific animal.
+-- Example:     SELECT * FROM AnimalLocationSummary('LACL_Sheep', '0501')
+-- =============================================
+CREATE FUNCTION [dbo].[AnimalLocationSummary] 
+(
+	@ProjectId	NVARCHAR(255), 
+	@AnimalId	NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT	COUNT(*) as [Count],
+				MIN(Location.Long) as [Left], MAX(Location.Long) as [Right],
+				MIN(Location.Lat) as [Bottom], MAX(Location.Lat) as [Top],
+				dbo.LocalTime(MIN(FixDate)) AS [First], dbo.LocalTime(MAX(FixDate)) as [Last]
+		 FROM     [dbo].[Locations]
+		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
+		 GROUP BY ProjectId, AnimalId
+GO
 CREATE FUNCTION [dbo].[FileFormat](@data [varbinary](max))
 RETURNS [nchar](1) WITH EXECUTE AS CALLER
 AS 
@@ -3939,11 +4094,6 @@ RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
 GO
-CREATE PROCEDURE [dbo].[Summerize]
-	@fileId [int]
-AS
-EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
-GO
 CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
 RETURNS  TABLE (
 	[FileId] [int] NULL,
@@ -3954,529 +4104,6 @@ RETURNS  TABLE (
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_TpfSummerizer].[SqlServer_TpfSummerizer.TfpSummerizer].[SummarizeTpfFile]
-GO
-CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[programNumber] [nvarchar](50) NULL,
-	[platformId] [nvarchar](50) NULL,
-	[platformType] [nvarchar](50) NULL,
-	[platformModel] [nvarchar](50) NULL,
-	[platformName] [nvarchar](50) NULL,
-	[platformHexId] [nvarchar](50) NULL,
-	[satellite] [nvarchar](50) NULL,
-	[bestMsgDate] [nvarchar](50) NULL,
-	[duration] [nvarchar](50) NULL,
-	[nbMessage] [nvarchar](50) NULL,
-	[message120] [nvarchar](50) NULL,
-	[bestLevel] [nvarchar](50) NULL,
-	[frequency] [nvarchar](50) NULL,
-	[locationDate] [nvarchar](50) NULL,
-	[latitude] [nvarchar](50) NULL,
-	[longitude] [nvarchar](50) NULL,
-	[altitude] [nvarchar](50) NULL,
-	[locationClass] [nvarchar](50) NULL,
-	[gpsSpeed] [nvarchar](50) NULL,
-	[gpsHeading] [nvarchar](50) NULL,
-	[latitude2] [nvarchar](50) NULL,
-	[longitude2] [nvarchar](50) NULL,
-	[altitude2] [nvarchar](50) NULL,
-	[index] [nvarchar](50) NULL,
-	[nopc] [nvarchar](50) NULL,
-	[errorRadius] [nvarchar](50) NULL,
-	[semiMajor] [nvarchar](50) NULL,
-	[semiMinor] [nvarchar](50) NULL,
-	[orientation] [nvarchar](50) NULL,
-	[hdop] [nvarchar](50) NULL,
-	[bestDate] [nvarchar](50) NULL,
-	[compression] [nvarchar](50) NULL,
-	[type] [nvarchar](50) NULL,
-	[alarm] [nvarchar](50) NULL,
-	[concatenated] [nvarchar](50) NULL,
-	[date] [nvarchar](50) NULL,
-	[level] [nvarchar](50) NULL,
-	[doppler] [nvarchar](50) NULL,
-	[rawData] [nvarchar](500) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
-GO
-CREATE FUNCTION [dbo].[ParseFormatE](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[ProgramId] [nvarchar](50) NULL,
-	[PlatformId] [nvarchar](50) NULL,
-	[TransmissionDate] [datetime2](7) NULL,
-	[LocationDate] [datetime2](7) NULL,
-	[Latitude] [real] NULL,
-	[Longitude] [real] NULL,
-	[Altitude] [real] NULL,
-	[LocationClass] [nchar](1) NULL,
-	[Message] [varbinary](50) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[ParseFormatE]
-GO
-CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[TXDate] [nvarchar](50) NULL,
-	[TXTime] [nvarchar](50) NULL,
-	[PTTID] [nvarchar](50) NULL,
-	[FixNum] [nvarchar](50) NULL,
-	[FixQual] [nvarchar](50) NULL,
-	[FixDate] [nvarchar](50) NULL,
-	[FixTime] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatD]
-GO
-CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[AcquisitionTime] [nvarchar](50) NULL,
-	[AcquisitionStartTime] [nvarchar](50) NULL,
-	[Ctn] [nvarchar](50) NULL,
-	[ArgosId] [nvarchar](50) NULL,
-	[ArgosLocationClass] [nvarchar](50) NULL,
-	[ArgosLatitude] [nvarchar](50) NULL,
-	[ArgosLongitude] [nvarchar](50) NULL,
-	[ArgosAltitude] [nvarchar](50) NULL,
-	[GpsFixTime] [nvarchar](50) NULL,
-	[GpsFixAttempt] [nvarchar](50) NULL,
-	[GpsLatitude] [nvarchar](50) NULL,
-	[GpsLongitude] [nvarchar](50) NULL,
-	[GpsUtmZone] [nvarchar](50) NULL,
-	[GpsUtmNorthing] [nvarchar](50) NULL,
-	[GpsUtmEasting] [nvarchar](50) NULL,
-	[GpsAltitude] [nvarchar](50) NULL,
-	[GpsSpeed] [nvarchar](50) NULL,
-	[GpsHeading] [nvarchar](50) NULL,
-	[GpsHorizontalError] [nvarchar](50) NULL,
-	[GpsPositionalDilution] [nvarchar](50) NULL,
-	[GpsHorizontalDilution] [nvarchar](50) NULL,
-	[GpsSatelliteBitmap] [nvarchar](50) NULL,
-	[GpsSatelliteCount] [nvarchar](50) NULL,
-	[GpsNavigationTime] [nvarchar](50) NULL,
-	[UnderwaterPercentage] [nvarchar](50) NULL,
-	[DiveCount] [nvarchar](50) NULL,
-	[AverageDiveDuration] [nvarchar](50) NULL,
-	[MaximumDiveDuration] [nvarchar](50) NULL,
-	[LayerPercentage] [nvarchar](50) NULL,
-	[MaximumDiveDepth] [nvarchar](50) NULL,
-	[DiveStartTime] [nvarchar](50) NULL,
-	[DiveDuration] [nvarchar](50) NULL,
-	[DiveDepth] [nvarchar](50) NULL,
-	[DiveProfile] [nvarchar](50) NULL,
-	[ActivityCount] [nvarchar](50) NULL,
-	[Temperature] [nvarchar](50) NULL,
-	[RemoteAnalog] [nvarchar](50) NULL,
-	[SatelliteUplink] [nvarchar](50) NULL,
-	[ReceiveTime] [nvarchar](50) NULL,
-	[SatelliteName] [nvarchar](50) NULL,
-	[RepetitionCount] [nvarchar](50) NULL,
-	[LowVoltage] [nvarchar](50) NULL,
-	[Mortality] [nvarchar](50) NULL,
-	[SaltwaterFailsafe] [nvarchar](50) NULL,
-	[HaulOut] [nvarchar](50) NULL,
-	[DigitalInput] [nvarchar](50) NULL,
-	[MotionDetected] [nvarchar](50) NULL,
-	[TrapTriggerTime] [nvarchar](50) NULL,
-	[ReleaseTime] [nvarchar](50) NULL,
-	[PredeploymentData] [nvarchar](50) NULL,
-	[Error] [nvarchar](250) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatC]
-GO
-CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[PlatformId] [nvarchar](255) NULL,
-	[AnimalId] [nvarchar](255) NULL,
-	[Species] [nvarchar](255) NULL,
-	[Group] [nvarchar](255) NULL,
-	[Park] [nvarchar](255) NULL,
-	[FixDate] [nvarchar](255) NULL,
-	[FixTime] [nvarchar](255) NULL,
-	[FixMonth] [int] NULL,
-	[FixDay] [int] NULL,
-	[FixYear] [int] NULL,
-	[LatWGS84] [float] NULL,
-	[LonWGS84] [float] NULL,
-	[Temperature] [float] NULL,
-	[Other] [nvarchar](255) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatB]
-GO
-CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[Fix #] [nvarchar](50) NULL,
-	[Date] [nvarchar](50) NULL,
-	[Time] [nvarchar](50) NULL,
-	[Fix Status] [nvarchar](50) NULL,
-	[Status Text] [nvarchar](150) NULL,
-	[Velocity East(m s)] [nvarchar](50) NULL,
-	[Velocity North(m s)] [nvarchar](50) NULL,
-	[Velocity Up(m s)] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[Altitude(m)] [nvarchar](50) NULL,
-	[PDOP] [nvarchar](50) NULL,
-	[HDOP] [nvarchar](50) NULL,
-	[VDOP] [nvarchar](50) NULL,
-	[TDOP] [nvarchar](50) NULL,
-	[Temperature Sensor(deg )] [nvarchar](50) NULL,
-	[Activity Sensor] [nvarchar](50) NULL,
-	[Satellite Data] [nvarchar](150) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatA]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Parses the data in a Collar File
--- =============================================
-CREATE PROCEDURE [dbo].[CollarData_Insert] 
-	@FileId INT,
-	@Format CHAR
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- This is not executed directly, only by CollarFile_Insert 
-
-	IF @Format = 'A'  -- Store on board
-	BEGIN
-		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen3StoreOnBoard] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataTelonicsGen3StoreOnBoard] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatA] (@FileId) 
-		END
-	END
-		
-	IF @Format = 'B'  -- Debevek SubFile Format
-	BEGIN
-		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataDebevekFormat] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataDebevekFormat] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatB] (@FileId) 
-		END
-	END
-	
-	IF @Format = 'C'  -- Telonics Gen4 Convertor Format
-	BEGIN
-		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen4] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataTelonicsGen4] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatC] (@FileId) 
-		END
-	END
-	
-	IF @Format = 'D'  -- Telonics Gen3 Convertor Format
-	BEGIN
-		-- only parse the data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelonicsGen3] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataTelonicsGen3] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatD] (@FileId) 
-		END
-	END
-	
-	IF @Format = 'E' -- Telonics email format
-	BEGIN
-		-- only parse the non-gps data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosEmail] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataArgosEmail] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatE] (@FileId) 
-		END
-	END
-	
-	IF @Format = 'F'  -- Argos Web Services Format
-	BEGIN
-		-- only parse the non-gps data if it is not already in the file
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataArgosWebService] WHERE [FileId] = @FileId)
-		BEGIN
-			INSERT INTO [dbo].[CollarDataArgosWebService] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatF] (@FileId) 
-		END
-	END
-	
-	--IF @Format = 'G'  -- Debevek Format
-	-- do not process the parent, only the children ('B')
-	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 11, 2012
--- Description:	Updates a project investigator
--- =============================================
-CREATE PROCEDURE [dbo].[ProjectInvestigator_Update] 
-	@Login sysname       = NULL,
-	@Name  NVARCHAR(255) = NULL, 
-	@Email NVARCHAR(255) = NULL, 
-	@Phone NVARCHAR(255) = NULL 
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	IF @Login IS NULL
-		SET @Login = ORIGINAL_LOGIN();
-
-	-- Verify this is an existing project investigator
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'There is no project investigator with a login of ' + @Login + '.';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-	-- You must be the ProjectInvestigator to update the ProjectInvestigator
-	IF @Login <> ORIGINAL_LOGIN()
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'You can only update your own record.';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
-	
-	-- If a parameter is not provided, use the existing value.
-	-- (to put null in a field the user will need to pass an empty string)
-	IF @Name IS NULL
-	BEGIN
-		SELECT @Name = [Name] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	IF @Email IS NULL
-	BEGIN
-		SELECT @Email = [Email] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	IF @Phone IS NULL
-	BEGIN
-		SELECT @Phone = [Phone] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	-- Do the update, replacing empty strings with NULLs
-	UPDATE [dbo].[ProjectInvestigators] SET [Name]	= nullif(@Name,''),
-											[Email] = nullif(@Email,''),
-											[Phone] = nullif(@Phone,'')
-									  WHERE [Login] = @Login
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
-	@Login sysname, 
-	@Name  NVARCHAR(255), 
-	@Email NVARCHAR(255),
-	@Phone NVARCHAR(255)
-AS
-BEGIN
-	SET NOCOUNT ON
-
-	-- This can only be run be the Sysadmin
-	-- This script is mostly to remind the SA of the steps, so there is no error checking.
-
-	-- create a login
-	IF NOT EXISTS (select 1 from sys.server_principals where name = @Login)
-	BEGIN
-		EXEC ('CREATE LOGIN [' + @Login + '] FROM WINDOWS')
-	END
-
-	-- create a db user
-	IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Login)
-	BEGIN
-		EXEC ('CREATE USER ['  + @Login + ']') --  LOGIN defaults to the same name
-	END
-
-	-- Add the user to the Investigator role
-	IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
-				   INNER JOIN sys.database_principals AS P1  
-				   ON U.member_principal_id = P1.principal_id
-				   INNER JOIN sys.database_principals AS P2 
-				   ON U.role_principal_id = p2.principal_id 
-				   WHERE p1.name = @Login AND p2.name = 'Investigator' )
-	BEGIN
-		EXEC sp_addrolemember 'Investigator', @Login
-	END
-
-	-- Add the user to the Investigator table
-	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
-		 VALUES (@Login, @Name, @Email, @Phone);
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
-	[Code] [char](1) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Description] [nvarchar](255) NULL,
- CONSTRAINT [PK_LookupCollarParameterFileFormats] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a table of conflicting fixes for a specific collar.
--- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007', DEFAULT)
--- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations
--- Modified:    Feb 22, 2013, added an optional currency filter to return only conflicts in the last X days 
--- =============================================
-CREATE FUNCTION [dbo].[ConflictingFixes] 
-(
-	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255),
-	@LastXdays          INTEGER = 36500
-)
-RETURNS TABLE 
-AS
-	RETURN
-		SELECT FixId, HiddenBy, FileId, LineNumber, dbo.LocalTime(C.FixDate) AS LocalFixTime, Lat, Lon
-		FROM CollarFixes AS C
-		INNER JOIN 
-			(SELECT   CollarManufacturer, CollarId, FixDate 
-			 FROM
-				(SELECT DISTINCT CollarManufacturer, CollarId, FixDate, Lat, Lon
-				 FROM CollarFixes
-			     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId) AS T
-			 GROUP BY CollarManufacturer, CollarId, FixDate
-			 HAVING   COUNT(FixDate) > 1) AS D
-		ON  C.CollarManufacturer = D.CollarManufacturer
-		AND C.CollarId = D.CollarId
-		AND C.FixDate = D.FixDate
-        AND C.FixDate > DATEADD(DAY, -@LastXdays, GETDATE())
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a row of fix information for a specific collar.
--- Example:     SELECT * FROM CollarFixSummary('Telonics', '96007')
--- Modified:    Aug 16, 2012, added Unique field
--- =============================================
-CREATE FUNCTION [dbo].[CollarFixSummary] 
-(
-	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255)
-)
-RETURNS @summary TABLE
-(
-	[Count] int,
-	[Unique] int,
-	[First] datetime2,
-	[Last] datetime2
-) 
-AS
-BEGIN
-	DECLARE @temp int;
-	
-	SELECT @temp = 1 
-	FROM [dbo].[CollarFixes]
-	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-	GROUP BY FixDate
-	
-	INSERT @summary
-	SELECT  COUNT(*) AS [Count],
-			@@ROWCOUNT AS [Unique],
-			dbo.LocalTime(MIN(FixDate)) AS [First],
-			dbo.LocalTime(MAX(FixDate)) AS [Last]
-	FROM [dbo].[CollarFixes]
-	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-	GROUP BY CollarManufacturer, CollarId
-	
-	RETURN
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 31, 2012
--- Description:	Returns a table of files with fixes for a specific collar.
--- Example:     SELECT * FROM CollarFixesByFile('Telonics', '96007')
--- =============================================
-CREATE FUNCTION [dbo].[CollarFixesByFile] 
-(
-	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255)
-)
-RETURNS TABLE 
-AS
-	RETURN
-		SELECT  F.[FileId],
-				F.[FileName] AS [File],
-				S.[Name] AS [Status],
-				COUNT(FixDate) AS [FixCount],
-				dbo.LocalTime(MIN(FixDate)) AS [First],
-				dbo.LocalTime(MAX(FixDate)) AS [Last]
-		FROM [dbo].[CollarFiles] AS F
-		INNER JOIN [dbo].[LookupFileStatus] AS S
-		ON F.[Status] = S.[Code]
-		LEFT JOIN [dbo].[CollarFixes] AS X
-		ON X.FileId = F.FileId
-		WHERE (F.CollarManufacturer = @CollarManufacturer AND F.CollarId = @CollarId)
-		   OR (X.CollarManufacturer = @CollarManufacturer AND X.CollarId = @CollarId)
-		GROUP BY F.[FileId], F.[FileName], S.[Name]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a row of location information for a specific animal.
--- Example:     SELECT * FROM AnimalLocationSummary('LACL_Sheep', '0501')
--- =============================================
-CREATE FUNCTION [dbo].[AnimalLocationSummary] 
-(
-	@ProjectId	NVARCHAR(255), 
-	@AnimalId	NVARCHAR(255)
-)
-RETURNS TABLE 
-AS
-	RETURN
-		SELECT	COUNT(*) as [Count],
-				MIN(Location.Long) as [Left], MAX(Location.Long) as [Right],
-				MIN(Location.Lat) as [Bottom], MAX(Location.Lat) as [Top],
-				dbo.LocalTime(MIN(FixDate)) AS [First], dbo.LocalTime(MAX(FixDate)) as [Last]
-		 FROM     [dbo].[Locations]
-		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
-		 GROUP BY ProjectId, AnimalId
 GO
 SET ANSI_NULLS ON
 GO
@@ -4627,6 +4254,131 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 11, 2012
+-- Description:	Updates a project investigator
+-- =============================================
+CREATE PROCEDURE [dbo].[ProjectInvestigator_Update] 
+	@Login sysname       = NULL,
+	@Name  NVARCHAR(255) = NULL, 
+	@Email NVARCHAR(255) = NULL, 
+	@Phone NVARCHAR(255) = NULL 
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	IF @Login IS NULL
+		SET @Login = ORIGINAL_LOGIN();
+
+	-- Verify this is an existing project investigator
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'There is no project investigator with a login of ' + @Login + '.';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+	
+	-- You must be the ProjectInvestigator to update the ProjectInvestigator
+	IF @Login <> ORIGINAL_LOGIN()
+	BEGIN
+		DECLARE @message2 nvarchar(100) = 'You can only update your own record.';
+		RAISERROR(@message2, 18, 0)
+		RETURN 1
+	END
+	
+	-- If a parameter is not provided, use the existing value.
+	-- (to put null in a field the user will need to pass an empty string)
+	IF @Name IS NULL
+	BEGIN
+		SELECT @Name = [Name] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+	END
+	
+	IF @Email IS NULL
+	BEGIN
+		SELECT @Email = [Email] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+	END
+	
+	IF @Phone IS NULL
+	BEGIN
+		SELECT @Phone = [Phone] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+	END
+	
+	-- Do the update, replacing empty strings with NULLs
+	UPDATE [dbo].[ProjectInvestigators] SET [Name]	= nullif(@Name,''),
+											[Email] = nullif(@Email,''),
+											[Phone] = nullif(@Phone,'')
+									  WHERE [Login] = @Login
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
+	@Login sysname, 
+	@Name  NVARCHAR(255), 
+	@Email NVARCHAR(255),
+	@Phone NVARCHAR(255)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	-- This can only be run be the Sysadmin
+	-- This script is mostly to remind the SA of the steps, so there is no error checking.
+
+	-- create a login
+	IF NOT EXISTS (select 1 from sys.server_principals where name = @Login)
+	BEGIN
+		EXEC ('CREATE LOGIN [' + @Login + '] FROM WINDOWS')
+	END
+
+	-- create a db user
+	IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Login)
+	BEGIN
+		EXEC ('CREATE USER ['  + @Login + ']') --  LOGIN defaults to the same name
+	END
+
+	-- Add the user to the Investigator role
+	IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
+				   INNER JOIN sys.database_principals AS P1  
+				   ON U.member_principal_id = P1.principal_id
+				   INNER JOIN sys.database_principals AS P2 
+				   ON U.role_principal_id = p2.principal_id 
+				   WHERE p1.name = @Login AND p2.name = 'Investigator' )
+	BEGIN
+		EXEC sp_addrolemember 'Investigator', @Login
+	END
+
+	-- Add the user to the Investigator table
+	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
+		 VALUES (@Login, @Name, @Email, @Phone);
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
+	[Code] [char](1) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Description] [nvarchar](255) NULL,
+ CONSTRAINT [PK_LookupCollarParameterFileFormats] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 16, 2013
 -- Description: inserts a new collar issue to the database.
@@ -4696,6 +4448,285 @@ BEGIN
 
 	-- Delete any prior processing issues
 	DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 2, 2013
+-- Description:	Validate and enforce business rules
+--              when updating collar files
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarFileUpdate] 
+    ON  [dbo].[CollarFiles] 
+    AFTER UPDATE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+    -- triggers always execute in the context of a transaction
+    -- so the following code is all or nothing.
+
+
+    -- Business Rule: FileId, Contents, Format, Username, UploadDate, ParentFileId, Sha1Hash cannot be updated.
+    --                Sha1Hash is managed by the DB engine since it is a computed column
+    IF    UPDATE(FileId) OR UPDATE(Contents) OR UPDATE(Format) OR UPDATE(UserName)
+       OR UPDATE(UploadDate) OR UPDATE(ParentFileId)
+    BEGIN
+        RAISERROR('Integrity Violation. Attempted to modify an immutable column in CollarFiles', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: CollarFiles must have one and only one non-null value for (Owner,ProjectId)
+    IF EXISTS (    SELECT 1
+                     FROM inserted 
+                    WHERE (ProjectId IS NULL AND [Owner] IS NULL)
+                       OR (ProjectId IS NOT NULL AND [Owner] IS NOT NULL)
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: A Collar Mfgr/Id is required unless the file format has Argos data.
+    --                (referential integrity already guarantees a non-null collar is valid)
+    IF EXISTS (    SELECT 1
+                     FROM inserted AS i
+                     JOIN LookupCollarFileFormats AS F
+                       ON i.Format = F.Code
+                    WHERE F.ArgosData = 'N' AND i.CollarId IS NULL
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. A Collar Mfgr/Id is required unless the file format has Argos data as the parent', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: A CollarFile that was active cannot change it's Collar Mfgr/Id
+    IF EXISTS (SELECT 1 FROM inserted AS i
+                        JOIN deleted AS d
+                          ON i.FileId = d.FileId
+                       WHERE d.[Status] = 'A'
+                         AND (	  i.[CollarManufacturer] <> d.[CollarManufacturer]
+                              OR (i.[CollarManufacturer] IS NULL AND d.[CollarManufacturer] IS NOT NULL)
+                              OR (i.[CollarManufacturer] IS NOT NULL AND d.[CollarManufacturer] IS NULL)
+                              OR  i.[CollarId] <> d.[CollarId]
+                              OR (i.[CollarId] IS NULL AND d.[CollarId] IS NOT NULL)
+                              OR (i.[CollarId] IS NOT NULL AND d.[CollarId] IS NULL)))
+    BEGIN
+        RAISERROR('Integrity Violation. A CollarFile that was active cannot change it''s Collar', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: A CollarFile with a parent, must have the same owner, project, and status
+    -- step 1, make sure I am in sync with my parents
+        -- case 1: parent is also being updated
+        IF EXISTS (SELECT 1 FROM inserted AS C
+                            JOIN inserted AS P
+                              ON C.ParentFileId = P.FileId
+                           WHERE C.[Owner] <> P.[Owner]
+                              OR (C.[Owner] IS NULL AND P.[Owner] IS NOT NULL)
+                              OR (C.[Owner] IS NOT NULL AND P.[Owner] IS NULL)
+                              OR C.[ProjectId] <> P.[ProjectId]
+                              OR (C.[ProjectId] IS NULL AND P.[ProjectId] IS NOT NULL)
+                              OR (C.[ProjectId] IS NOT NULL AND P.[ProjectId] IS NULL)
+                              OR C.[Status] <> P.[Status]
+                              OR (C.[Status] IS NULL AND P.[Status] IS NOT NULL)
+                              OR (C.[Status] IS NOT NULL AND P.[Status] IS NULL)
+                  )
+        -- case 2: parent is not being updated
+        OR EXISTS (SELECT 1 FROM inserted AS C
+                       LEFT JOIN inserted AS i
+                              ON C.ParentFileId = i.FileId AND i.FileId IS NULL
+                            JOIN CollarFiles AS P
+                              ON C.ParentFileId = P.FileId
+                           WHERE C.[Owner] <> P.[Owner]
+                              OR (C.[Owner] IS NULL AND P.[Owner] IS NOT NULL)
+                              OR (C.[Owner] IS NOT NULL AND P.[Owner] IS NULL)
+                              OR C.[ProjectId] <> P.[ProjectId]
+                              OR (C.[ProjectId] IS NULL AND P.[ProjectId] IS NOT NULL)
+                              OR (C.[ProjectId] IS NOT NULL AND P.[ProjectId] IS NULL)
+                              OR C.[Status] <> P.[Status]
+                              OR (C.[Status] IS NULL AND P.[Status] IS NOT NULL)
+                              OR (C.[Status] IS NOT NULL AND P.[Status] IS NULL)
+                  )
+        BEGIN
+            RAISERROR('Integrity Violation. A CollarFile with a parent, must have the same owner, project and status as the parent', 18, 0)
+            ROLLBACK TRANSACTION;
+            RETURN
+        END
+
+    -- Step 2, propagate changes to my children 
+        UPDATE C SET C.[Status] = P.[Status]
+          FROM CollarFiles AS C --child
+    INNER JOIN inserted as P    --parent
+            ON C.ParentFileId = P.FileId
+    INNER JOIN deleted as d
+            ON P.FileId = d.FileId
+         WHERE P.[Status] <> d.[Status]  -- non-nullable
+
+        UPDATE C SET [ProjectId] = P.[ProjectId]
+          FROM CollarFiles AS C --child
+    INNER JOIN inserted as P    --parent
+            ON C.ParentFileId = P.FileId
+    INNER JOIN deleted as d
+            ON P.FileId = d.FileId
+         WHERE P.[ProjectId] <> d.[ProjectId]
+            OR (P.[ProjectId] IS NULL AND d.[ProjectId] IS NOT NULL)
+            OR (P.[ProjectId] IS NOT NULL AND d.[ProjectId] IS NULL)
+
+        UPDATE C SET [Owner] = P.[Owner]
+          FROM CollarFiles AS C --child
+    INNER JOIN inserted as P    --parent
+            ON C.ParentFileId = P.FileId
+    INNER JOIN deleted as d
+            ON P.FileId = d.FileId
+         WHERE P.[Owner] <> d.[Owner]
+            OR (P.[Owner] IS NULL AND d.[Owner] IS NOT NULL)
+            OR (P.[Owner] IS NOT NULL AND d.[Owner] IS NULL)
+
+    -- Business Rule: An active collar file has fixes, and an inactive file does not.
+    DECLARE @FileId int
+    DECLARE @OldStatus char
+    DECLARE @NewStatus char
+    DECLARE collarfiles_afterupdate_cursor CURSOR FOR 
+               SELECT d.FileId, d.[Status], i.[Status]
+                 FROM inserted AS i
+           INNER JOIN deleted AS d
+                   ON i.FileId = d.FileId
+                WHERE i.[Status] <> d.[Status]
+
+    OPEN collarfiles_afterupdate_cursor;
+    FETCH NEXT FROM collarfiles_afterupdate_cursor INTO @FileId, @OldStatus, @NewStatus
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        IF (@OldStatus = 'I' AND @NewStatus = 'A')
+            EXEC [dbo].[CollarFixes_Insert] @FileId 
+        IF (@OldStatus = 'A' AND @NewStatus = 'I')
+            EXEC [dbo].[CollarFixes_Delete] @FileId
+        FETCH NEXT FROM collarfiles_afterupdate_cursor INTO @FileId, @OldStatus, @NewStatus
+    END
+    CLOSE collarfiles_afterupdate_cursor;
+    DEALLOCATE collarfiles_afterupdate_cursor;
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Mar 25, 2013
+-- Description: Ensure Data integrity on Insert
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarFileInsert] 
+    ON [dbo].[CollarFiles] 
+    AFTER INSERT
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Business Rule: CollarFiles must have one and only one non-null value for (Owner,ProjectId)
+    IF EXISTS (    SELECT 1
+                     FROM inserted 
+                    WHERE (ProjectId IS NULL AND [Owner] IS NULL)
+                       OR (ProjectId IS NOT NULL AND [Owner] IS NOT NULL)
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: A Collar Mfgr/Id is required unless the file format has Argos data.
+    --                (referential integrity already guarantees a non-null collar is valid)
+    IF EXISTS (    SELECT 1
+                     FROM inserted AS i
+                     JOIN LookupCollarFileFormats AS F
+                       ON i.Format = F.Code
+                    WHERE F.ArgosData = 'N' AND i.CollarId IS NULL
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. A Collar Mfgr/Id is required unless the file format has Argos data as the parent', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: A CollarFile with a parent, must have the same owner, project, and status
+    --                (since a child cannot be inserted with a parent -- the parentid does not exist
+    --                 I do not need to join the inserted with the inserted to find the parent)
+    IF EXISTS (    SELECT 1
+                     FROM inserted AS C
+                     JOIN CollarFiles AS P
+                       ON C.ParentFileId = P.FileId
+                    WHERE C.[Owner] <> P.[Owner]
+                       OR (C.[Owner] IS NULL AND P.[Owner] IS NOT NULL)
+                       OR (C.[Owner] IS NOT NULL AND P.[Owner] IS NULL)
+                       OR C.[ProjectId] <> P.[ProjectId]
+                       OR (C.[ProjectId] IS NULL AND P.[ProjectId] IS NOT NULL)
+                       OR (C.[ProjectId] IS NOT NULL AND P.[ProjectId] IS NULL)
+                       OR C.[Status] <> P.[Status]
+                       OR (C.[Status] IS NULL AND P.[Status] IS NOT NULL)
+                       OR (C.[Status] IS NOT NULL AND P.[Status] IS NULL)
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. A CollarFile with a parent, must have the same owner, project, and status as the parent', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- Business Rule: All new CollarFiles with Argos data need to be summerized
+    -- Business Rule: All new files need to have their data parsed in to a collardata table
+    DECLARE @FileId int
+    DECLARE @ArgosData char
+    DECLARE collarfiles_afterinsert_cursor CURSOR FOR 
+               SELECT i.FileId, i.Format, F.ArgosData
+                 FROM inserted AS i
+                 JOIN LookupCollarFileFormats AS F
+                   ON i.Format = F.Code
+
+    OPEN collarfiles_afterinsert_cursor;
+    FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId, @ArgosData
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC [dbo].[CollarData_Insert] @FileId 
+        IF (@ArgosData = 'Y')
+            EXEC [dbo].[Summerize] @FileId
+        FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId, @ArgosData
+    END
+    CLOSE collarfiles_afterinsert_cursor;
+    DEALLOCATE collarfiles_afterinsert_cursor;
+
+
+    -- Business Rule: An active collar file has fixes, and an inactive file does not.
+    DECLARE collarfiles_afterinsert_cursor CURSOR FOR 
+               SELECT i.FileId
+                 FROM inserted AS i
+                WHERE i.[Status] = 'A'
+
+    OPEN collarfiles_afterinsert_cursor;
+    FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC [dbo].[CollarFixes_Insert] @FileId
+        FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId
+    END
+    CLOSE collarfiles_afterinsert_cursor;
+    DEALLOCATE collarfiles_afterinsert_cursor;
 
 END
 GO
@@ -5033,6 +5064,24 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProjectEditors](
+	[ProjectId] [varchar](16) NOT NULL,
+	[Editor] [sysname] NOT NULL,
+ CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[Editor] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
@@ -5194,21 +5243,32 @@ BEGIN
 	-- Get the name of the caller
 	DECLARE @Caller sysname = ORIGINAL_LOGIN();
 	
-	-- Get some information about the file to update
-	DECLARE @Status CHAR = NULL;
-	DECLARE @OldFileName NVARCHAR(255);
-	DECLARE @OldCollarManufacturer NVARCHAR(255);
-	DECLARE @OldCollarId NVARCHAR(255);
-	DECLARE @OldProjectId NVARCHAR(255);
-	DECLARE @OldOwner NVARCHAR(255);
-	 SELECT @Status = [Status],
-		    @OldFileName = [FileName],
-		    @OldCollarManufacturer = [CollarManufacturer],
-		    @OldCollarId = [CollarId],
-		    @OldProjectId = [ProjectId],
-		    @OldOwner = [Owner]
-	   FROM [dbo].[CollarFiles]
-	  WHERE [FileId] = @FileId;
+	-- Validate permission for this operation
+	-- Verify we are updating a valid collar
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId)
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
+		RAISERROR(@message1, 18, 0)
+		RETURN 1
+	END
+	
+    -- if @CurrentOwner is non-null the caller must be the existing owner, the new owner doesn't matter.
+    -- if @CurrentProjectId is non-null the caller must be the existing project PI or editor on the project
+	DECLARE @CurrentOwner NVARCHAR(255) = NULL
+	DECLARE @CurrentProjectId NVARCHAR(255) = NULL
+	SELECT @CurrentOwner = [Owner], @CurrentProjectId = [ProjectId] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+    IF         @CurrentOwner <> @Caller  -- Not the owner, when defined
+       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @CurrentProjectId AND ProjectInvestigator = @Caller)  -- Not the project's PI
+       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @CurrentProjectId AND Editor = @Caller)  -- Not an editor on the project
+    BEGIN
+        DECLARE @message2 nvarchar(200)
+        IF @CurrentProjectId IS NOT NULL
+            SET @message2 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@CurrentProjectId+').';
+        ELSE
+            SET @message2 = 'You ('+@Caller+') are not the owner (' + @CurrentOwner + ') of the file.';
+        RAISERROR(@message2, 18, 0)
+        RETURN (1)
+    END
 
     --Fix Defaults
     -- Blanks strings are not allowed
@@ -5221,169 +5281,15 @@ BEGIN
     -- The defaults for nullable field should match the insert SP.
     -- If the client does not want to change a nullable field they must provide the original value.
     IF @FileName IS NULL
-        SET @FileName = @OldFileName
+		SELECT @FileName = [FileName] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
     
-    
-	-- Validate permission for this operation
-	-- Verify we are updating a valid collar
-	IF @Status IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-
-	
-	-- The caller must be the PI or editor on the project
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor of the project ('+@ProjectId+') to update this file.';
-			RAISERROR(@message4, 18, 0)
-			RETURN 1
-		END
-	END
-	
-	-- Change the file name;  this should never fail.
-	IF @FileName IS NOT NULL AND @FileName <> @OldFileName
-	BEGIN
-		BEGIN TRY
-			UPDATE [dbo].[CollarFiles] SET [FileName] = @FileName WHERE [FileId] = @FileId; 
-		END TRY
-		BEGIN CATCH
-			EXEC [dbo].[Utility_RethrowError]
-			RETURN 1
-		END CATCH
-	END
-
-	
-	-- Can we update the CollarId?
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND @Status = 'A'
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'Unable to change the collar of an active file.  Change the status and try again.';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
-	
-	-- If the collar was provided, make sure it is a valid collar
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId AND
-	   NOT EXISTS (SELECT 1 FROM [dbo].[Collars] WHERE [CollarManufacturer] = @CollarManufacturer
-												   AND [CollarId] = @CollarId)
-	BEGIN
-		DECLARE @message3 nvarchar(100) = 'Invalid parameter: CollarId (' + @CollarId + ') was not found in the Collars table';
-		RAISERROR(@message3, 18, 0)
-		RETURN 1
-	END
 
     -- Do the update
+	UPDATE [dbo].[CollarFiles]
+	   SET [FileName] = @FileName, [CollarManufacturer] = @CollarManufacturer,
+	       [CollarId] = @CollarId, [ProjectId] = @ProjectId, [Owner] = @Owner
+	 WHERE [FileId] = @FileId
 
-	-- Update CollarId; This should never fail
-	IF @CollarId IS NOT NULL AND @CollarId <> @OldCollarId
-	BEGIN
-		BEGIN TRY
-			UPDATE [dbo].[CollarFiles] SET [CollarId] = @CollarId WHERE [FileId] = @FileId; 
-		END TRY
-		BEGIN CATCH
-			EXEC [dbo].[Utility_RethrowError]
-			RETURN 1
-		END CATCH
-	END	
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 5, 2013
--- Description: Processes all the collars in an Argos file
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_Process] 
-	@FileId INT = NULL
-	
-WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
-
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Make sure we have a suitable FileId
-	DECLARE @ProjectId nvarchar(255);
-	DECLARE @Owner sysname;
-	DECLARE @Uploader sysname;
-	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
-	  FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F ON C.Format = F.Code
-	 WHERE FileId = @FileId AND [Status] = 'A' AND F.ArgosData = 'Y'
-	IF @ProjectId IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Validate permission for this operation	
-	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
-	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
-	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
-	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
-       AND NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-	BEGIN
-		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-	
-	
-	-- Clear any (if any) prior processing results 
-	EXEC [dbo].[ArgosFile_ClearProcessingResults] @FileId
-
-
-	-- Run the External command
-	DECLARE @exe nvarchar (255);
-	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
-	IF @exe IS NULL
-		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
-	DECLARE @cmd nvarchar(200) = '"' + @exe + '" ' + CONVERT(NVARCHAR(10),@FileId);
-	DECLARE @result varchar(4000);
-
-		-- see http://stackoverflow.com/questions/9501192/get-results-from-xp-cmdshell 
-        IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[#tempProcessResults]') AND type in (N'U')) 
-            DROP TABLE [dbo].[#tempProcessResults]
-        BEGIN TRY
-            CREATE TABLE #tempProcessResults(result varchar(1000))
-            INSERT INTO #tempProcessResults execute xp_cmdshell @cmd ;  -- will run as the sql_proxy account
-            IF EXISTS (SELECT 1 FROM #tempProcessResults WHERE result LIKE 'ERROR%')
-                BEGIN
-					-- FIXME how can I distiguish between warnings and errors??
-					SET @result = ''
-					SELECT @result = @result + result + '; ' FROM #tempProcessResults WHERE result LIKE 'ERROR%'
-					DROP TABLE #tempProcessResults	
-					RAISERROR(@result, 10, 0) -- Specify a severity of 10 or lower to return messages using RAISERROR without invoking a CATCH block
-					RETURN (1)
-                END
-            -- return any other results to the user.
-			SELECT result FROM #tempProcessResults WHERE result IS NOT NULL
-	        DROP TABLE #tempProcessResults	
-        END TRY
-        BEGIN CATCH
-			-- I'm using the try/catch to ensure that the temp table is dropped, then retrowing the error.
-            DROP TABLE #tempProcessResults
-			DECLARE @ErrorMessage nvarchar(400), @ErrorNumber int, @ErrorSeverity int, @ErrorState int, @ErrorLine int
-			SELECT @ErrorMessage = N'Error %d, Line %d, Message: '+ERROR_MESSAGE(),@ErrorNumber = ERROR_NUMBER(),@ErrorSeverity = ERROR_SEVERITY(),@ErrorState = ERROR_STATE(),@ErrorLine = ERROR_LINE()
-			RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState, @ErrorNumber,@ErrorLine)
-			RETURN (1)
-        END CATCH
 END
 GO
 SET ANSI_NULLS ON
@@ -5396,15 +5302,14 @@ GO
 -- Description:	Adds a new collar file to the database.
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarFile_Insert] 
-    @FileName NVARCHAR(255) = NULL,
+    @FileName NVARCHAR(255),
+    @Status CHAR = 'I', 
+    @Contents VARBINARY(max),
     @ProjectId NVARCHAR(255) = NULL, 
     @Owner NVARCHAR(255) = NULL, 
+    @ParentFileId INT = NULL,
     @CollarManufacturer NVARCHAR(255) = NULL, 
     @CollarId NVARCHAR(255) = NULL, 
-    @Format CHAR = NULL, 
-    @Status CHAR = NULL, 
-    @Contents VARBINARY(max) = NULL,
-    @ParentFileId INT = NULL,
     @FileId INT OUTPUT
 AS
 BEGIN
@@ -5428,8 +5333,8 @@ BEGIN
                          JOIN sys.database_principals AS R 
                            ON RM.role_principal_id = R.principal_id 
                         WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-       AND (NOT EXISTS (SELECT 1 FROM dbo.ProjectInvestigators WHERE [Login] = @Caller) OR
-            NOT EXISTS (SELECT 1 FROM dbo.ProjectInvestigators WHERE [Login] = @Owner))  -- Not a Project Investigator
+      AND (NOT EXISTS (SELECT 1 FROM dbo.ProjectInvestigators WHERE [Login] = @Caller) OR
+           NOT EXISTS (SELECT 1 FROM dbo.ProjectInvestigators WHERE [Login] = @Owner))  -- Not a Project Investigator
        AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)  -- Not the project's PI
        AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not an editor on the project
     BEGIN
@@ -5437,55 +5342,24 @@ BEGIN
         IF @ProjectId IS NOT NULL
             SET @message1 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
         ELSE
-            SET @message1 = 'You ('+@Caller+') are not the owner (' + @Owner + ') of this file.';
+            SET @message1 = 'Either you ('+@Caller+') or the owner (' + @Owner + ') are not a principal investigator.';
         RAISERROR(@message1, 18, 0)
         RETURN (1)
     END
     
-    -- CollarManufacturer/Id may be null for files with multiple collars in a data file
-    -- If Collar is provided, it must be a valid collar.
-    
-    -- The need to provide a CollarId is determined by the file format, so check it. 	
-    DECLARE @ArgosData CHAR(1) = NULL
-    SELECT @ArgosData = ArgosData FROM dbo.LookupCollarFileFormats WHERE Code = @Format;
-    IF @ArgosData IS NULL
+    -- Get the format of the file, and determine if this format has Argos data (to determine processing required)
+    DECLARE @Format char(1) = [dbo].[FileFormat](@Contents)
+    IF NOT EXISTS (SELECT 1 FROM dbo.LookupCollarFileFormats WHERE Code = @Format)
     BEGIN
-        DECLARE @message2 nvarchar(100) = 'Invalid parameter: Format (' + @Format + ') was not found in the LookupCollarFileFormats table';
+        DECLARE @message2 nvarchar(100) = 'Invalid parameter: The contents of this file is not in a format the system recognizes.';
         RAISERROR(@message2, 18, 0)
         RETURN (1)
     END
-
-    -- Collars are required unless the file has Argos Data (will require processing to separate into collar files)
-    IF @CollarId IS NULL AND (@ArgosData = 'N')
-    BEGIN
-        DECLARE @message3 nvarchar(100) = 'Invalid parameter: CollarId must not be null with file format ' + @Format + '.';
-        RAISERROR(@message3, 18, 0)
-        RETURN (1)
-    END
     
-    
-    BEGIN TRY
-        BEGIN TRAN
-            INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [Owner], [CollarManufacturer], [CollarId], [Format], [Status], [Contents], [ParentFileId])
-                 VALUES (@FileName, @ProjectId, @Owner, @CollarManufacturer, @CollarId, @Format, @Status, @Contents, @ParentFileId)
-
-            SET @FileId = SCOPE_IDENTITY();
-
-            EXEC [dbo].[CollarData_Insert] @FileId, @Format
-            EXEC [dbo].[CollarFixes_Insert] @FileId, @Format
-            IF (@ArgosData = 'Y')
-            BEGIN
-                EXEC [dbo].[Summerize] @FileId
-                EXEC [dbo].[ArgosFile_Process] @FileId
-            END
-        COMMIT TRANSACTION
-    END TRY
-    BEGIN CATCH
-        IF XACT_STATE() <> 0
-            ROLLBACK TRANSACTION;
-        EXEC [dbo].[Utility_RethrowError]
-        RETURN (1)
-    END CATCH
+    -- Do the update, the rest of the integrity checks are done in the trigger
+    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [Owner], [CollarManufacturer], [CollarId], [Format], [Status], [Contents], [ParentFileId])
+                         VALUES (@FileName,  @ProjectId,  @Owner,  @CollarManufacturer,  @CollarId,  @Format,  @Status,  @Contents,  @ParentFileId)
+	SET @FileId = SCOPE_IDENTITY();
 END
 GO
 SET ANSI_NULLS ON
@@ -5699,6 +5573,101 @@ BEGIN
 	--All other verification is handled by primary/foreign key and column constraints.
 	DELETE FROM dbo.CollarDeployments
 		  WHERE DeploymentId = @DeploymentId;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 5, 2013
+-- Description: Processes all the collars in an Argos file
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_Process] 
+	@FileId INT = NULL
+	
+WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Make sure we have a suitable FileId
+	DECLARE @ProjectId nvarchar(255);
+	DECLARE @Owner sysname;
+	DECLARE @Uploader sysname;
+	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
+	  FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F ON C.Format = F.Code
+	 WHERE FileId = @FileId AND [Status] = 'A' AND F.ArgosData = 'Y'
+	IF @ProjectId IS NULL
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation	
+	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
+	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
+	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
+	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
+       AND NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
+	BEGIN
+		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+	
+	
+	-- Clear any (if any) prior processing results 
+	EXEC [dbo].[ArgosFile_ClearProcessingResults] @FileId
+
+
+	-- Run the External command
+	DECLARE @exe nvarchar (255);
+	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
+	IF @exe IS NULL
+		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
+	DECLARE @cmd nvarchar(200) = '"' + @exe + '" ' + CONVERT(NVARCHAR(10),@FileId);
+	DECLARE @result varchar(4000);
+
+		-- see http://stackoverflow.com/questions/9501192/get-results-from-xp-cmdshell 
+        IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[#tempProcessResults]') AND type in (N'U')) 
+            DROP TABLE [dbo].[#tempProcessResults]
+        BEGIN TRY
+            CREATE TABLE #tempProcessResults(result varchar(1000))
+            INSERT INTO #tempProcessResults execute xp_cmdshell @cmd ;  -- will run as the sql_proxy account
+            IF EXISTS (SELECT 1 FROM #tempProcessResults WHERE result LIKE 'ERROR%')
+                BEGIN
+					-- FIXME how can I distiguish between warnings and errors??
+					SET @result = ''
+					SELECT @result = @result + result + '; ' FROM #tempProcessResults WHERE result LIKE 'ERROR%'
+					DROP TABLE #tempProcessResults	
+					RAISERROR(@result, 10, 0) -- Specify a severity of 10 or lower to return messages using RAISERROR without invoking a CATCH block
+					RETURN (1)
+                END
+            -- return any other results to the user.
+			SELECT result FROM #tempProcessResults WHERE result IS NOT NULL
+	        DROP TABLE #tempProcessResults	
+        END TRY
+        BEGIN CATCH
+			-- I'm using the try/catch to ensure that the temp table is dropped, then retrowing the error.
+            DROP TABLE #tempProcessResults
+			DECLARE @ErrorMessage nvarchar(400), @ErrorNumber int, @ErrorSeverity int, @ErrorState int, @ErrorLine int
+			SELECT @ErrorMessage = N'Error %d, Line %d, Message: '+ERROR_MESSAGE(),@ErrorNumber = ERROR_NUMBER(),@ErrorSeverity = ERROR_SEVERITY(),@ErrorState = ERROR_STATE(),@ErrorLine = ERROR_LINE()
+			RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState, @ErrorNumber,@ErrorLine)
+			RETURN (1)
+        END CATCH
 END
 GO
 SET ANSI_NULLS ON
@@ -7272,8 +7241,6 @@ GO
 GRANT EXECUTE ON [dbo].[CollarFile_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[CollarFile_Update] TO [Editor] AS [dbo]
-GO
-GRANT EXECUTE ON [dbo].[CollarFile_UpdateStatus] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[CollarFixes_UpdateUnhideFix] TO [Editor] AS [dbo]
 GO

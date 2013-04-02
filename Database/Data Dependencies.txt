@@ -220,6 +220,26 @@ Locations
 Movements
 	Locations.*
 
+CollarFixes
+===========
+All writes to this table are done by CollarFixes_Insert, which is not visible to clients
+CollarFixes_Insert is only called by CollarFiles insert/update triggers.
+Data inserted is based on
+  1) CollarDataXXX files which are based on ther parsers, and CollarFiles.Contents/Format
+     which are immutable. Therefore the CollarDataXXX is also immutable.
+  2) For formats A-D, the Collar Mfgr/Id and Status in CollarFiles.  The triggers in
+     CollarFiles call CollarFixes_Insert/Delete as appropriate for changes in the status
+	 and Collar Mfgr/Id.
+**3) For formats E,F, it gets the collar Mfgr/Id from the Argos Deployment at the time of
+     fix.  Changes in the ArgosDeployments table should correct all the impacted fixes.
+	 It is also dependent on the Collar.HasGps attribute - This change should also be
+	 propugated as necessary**
+
+The only updates allowed to this table are to hide/deconflict overlapping fixes.
+
+All deletes are done by CollarFixes_Delete, which is not visible to clients
+CollarFixes_Delete is only called by CollarFiles update/delete triggers.
+
 ==============
 Business Rules
 ==============
