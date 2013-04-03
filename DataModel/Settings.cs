@@ -17,8 +17,20 @@ namespace DataModel
         private const string ModelKey = "collar_model";
         private const string ManufacturerKey = "collar_manufacturer";
         private const string WantsEmailKey = "wants_email";
+        private const string SystemEmailKey = "sa_email";
+        private const string SystemEmailPasswordKey = "sa_email_password";
 
         #region getters
+
+        public static string GetSystemEmail()
+        {
+            return GetSystemDefault(SystemEmailKey);
+        }
+
+        public static string GetSystemEmailPassword()
+        {
+            return GetSystemDefault(SystemEmailPasswordKey);
+        }
 
         public static string GetSystemDefault(string key)
         {

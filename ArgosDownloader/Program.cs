@@ -11,14 +11,9 @@ namespace ArgosDownloader
 {
     public static class Program
     {
-        private const string EmailKey = "sa_email";
-        private const string PasswordKey = "sa_email_password";
-        private const string MailServer = "smtp.gmail.com";
-        private const string LogFile = "ArgosDownloader.log";
 
-        static Dictionary<string, string> _emails;
+        static private Dictionary<string, string> _emails;
         static private string _admin;
-        static private string _password;
 
         /// <summary>
         /// 
@@ -45,7 +40,7 @@ namespace ArgosDownloader
             try
             {
                 _emails = new Dictionary<string, string>();
-                _admin = Settings.GetSystemDefault(EmailKey);
+                _admin = Settings.GetSystemEmail();
                 if (args.Length == 0)
                     FileDownloader.DownloadAll(exceptionHandler);
                 else
@@ -165,7 +160,7 @@ namespace ArgosDownloader
             //try to email the sys admin, otherwise log to a file, otherwise write to the console
             try
             {
-                SendGmail(_admin,
+                SendEmail(_admin,
                           "Unexpected Error Running Animal Movements Argos Downloader. ", error);
             }
             catch (Exception innerEx)
@@ -178,11 +173,11 @@ namespace ArgosDownloader
                                   DateTime.Now, innerEx, error);
                 try
                 {
-                    File.AppendAllText(LogFile, message);
+                    File.AppendAllText(Properties.Settings.Default.LogFile, message);
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("Could not write to append to " + LogFile);
+                    Console.WriteLine("Could not write to append to " + Properties.Settings.Default.LogFile);
                     Console.WriteLine(message);
                 }
             }
@@ -224,24 +219,26 @@ namespace ArgosDownloader
                 var address = item.Key;
                 var message = item.Value;
                 if (address == _admin || Settings.PiWantsEmails(address))
-                    SendGmail(address, subject, message);
+                    SendEmail(address, subject, message);
             }
         }
 
-        static void SendGmail(string email, string subject, string body)
+        static private string _password;
+
+        static void SendEmail(string email, string subject, string body)
         {
             if (_password == null)
-                _password = Settings.GetSystemDefault(PasswordKey);
+                _password = Settings.GetSystemEmailPassword();
             var fromAddress = new MailAddress(_admin, "Animal Movements Admin");
             var toAddress = new MailAddress(email, "Animal Movements User");
             var smtp = new SmtpClient
             {
-                Host = MailServer,
-                Port = 587,
+                Host = Properties.Settings.Default.MailServer,
+                Port = Properties.Settings.Default.MailServerPort,
                 EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 Credentials = new NetworkCredential(fromAddress.Address, _password),
-                Timeout = 20000 //milliseconds
+                Timeout = Properties.Settings.Default.MailServerMilliSecondTimeout
             };
             using (var message = new MailMessage(fromAddress, toAddress)
             {
