@@ -128,10 +128,9 @@ namespace AnimalMovement
                 {
                     Project = Project,
                     FileName = System.IO.Path.GetFileName(FileNameTextBox.Text),
-                    LookupCollarFileFormat = (LookupCollarFileFormat)FormatComboBox.SelectedItem,
-                    CollarManufacturer = ((LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem).CollarManufacturer,
+                    CollarManufacturer = CollarComboBox.Enabled ? ((LookupCollarManufacturer)CollarMfgrComboBox.SelectedItem).CollarManufacturer : null,
                     CollarId = CollarComboBox.Enabled ? ((Collar)CollarComboBox.SelectedItem).CollarId : null,
-                    LookupFileStatus = Database.LookupFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),
+                    Status = (StatusActiveRadioButton.Checked ? 'A' : 'I'),
                     Contents = _fileContents,
                 };
             Database.CollarFiles.InsertOnSubmit(file);
@@ -281,7 +280,7 @@ namespace AnimalMovement
             if (FormatComboBox.SelectedItem != null)
             {
                 var format = (LookupCollarFileFormat)FormatComboBox.SelectedItem;
-                CollarComboBox.Enabled = format.HasCollarIdColumn == 'N';
+                CollarComboBox.Enabled = format.ArgosData == 'N';
                 CollarMfgrComboBox.SelectedItem = format.LookupCollarManufacturer;
                 Settings.SetDefaultFileFormat(format.Code);
             }

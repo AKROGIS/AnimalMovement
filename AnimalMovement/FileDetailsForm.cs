@@ -78,7 +78,8 @@ namespace AnimalMovement
             Cursor.Current = Cursors.WaitCursor;
             try
             {
-                Database.CollarFile_UpdateStatus(File.FileId, File.Status == 'A' ? 'I' : 'A');
+                File.Status = (File.Status == 'A' ? 'I' : 'A');
+                Database.SubmitChanges();
             }
             catch (Exception ex)
             {

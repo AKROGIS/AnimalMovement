@@ -4694,7 +4694,7 @@ BEGIN
     DECLARE @FileId int
     DECLARE @ArgosData char
     DECLARE collarfiles_afterinsert_cursor CURSOR FOR 
-               SELECT i.FileId, i.Format, F.ArgosData
+               SELECT i.FileId, F.ArgosData
                  FROM inserted AS i
                  JOIN LookupCollarFileFormats AS F
                    ON i.Format = F.Code
@@ -5274,7 +5274,7 @@ BEGIN
     -- Blanks strings are not allowed
     SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
     SET @CollarId = NULLIF(@CollarId,'')
-    SET @ProjectId = NULLIF(@CollarId,'')
+    SET @ProjectId = NULLIF(@ProjectId,'')
     SET @Owner = NULLIF(@Owner,'')
 
     -- I use NULL to indicate don't change value only on non-null fields.
@@ -5283,7 +5283,6 @@ BEGIN
     IF @FileName IS NULL
 		SELECT @FileName = [FileName] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
     
-
     -- Do the update
 	UPDATE [dbo].[CollarFiles]
 	   SET [FileName] = @FileName, [CollarManufacturer] = @CollarManufacturer,

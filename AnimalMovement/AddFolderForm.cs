@@ -116,7 +116,6 @@ namespace AnimalMovement
                 {
                     Project = Project,
                     FileName = System.IO.Path.GetFileName(filePath),
-                    LookupCollarFileFormat = Format,
                     CollarManufacturer = Format.LookupCollarManufacturer.CollarManufacturer,
                     CollarId = GetCollar(filePath),
                     LookupFileStatus = Database.LookupFileStatus.FirstOrDefault(s => s.Code == (StatusActiveRadioButton.Checked ? 'A' : 'I')),

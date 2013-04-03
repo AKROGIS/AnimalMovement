@@ -89,11 +89,9 @@ namespace FileLibrary
             {
                 ProjectId = project.ProjectId,
                 FileName = System.IO.Path.GetFileName(filePath),
-                Format = format,
                 CollarManufacturer = "Telonics",
                 Status = 'A',
                 Contents = _fileContents,
-                Sha1Hash = _fileHash
             };
             database.CollarFiles.InsertOnSubmit(file);
             database.SubmitChanges();
@@ -319,7 +317,6 @@ namespace FileLibrary
                         {
                             ProjectId = file.Project.ProjectId,
                             FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameterSet.CollarId + ".csv",
-                            Format = format,
                             CollarManufacturer = parameterSet.CollarManufacturer,
                             CollarId = parameterSet.CollarId,
                             Status = file.Status,
