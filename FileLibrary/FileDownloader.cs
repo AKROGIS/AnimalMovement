@@ -16,36 +16,39 @@ namespace FileLibrary
         /// <param name="handler">An exception handler to allow processing additional items despite an exception.
         /// If the handler is null, processing will stop on first exception.
         /// The handler can throw it's own exception to halt further processing</param>
-        /// <param name="user">The name (loginId) of a project investigator.
+        /// <param name="pi">A project investigator.
         /// If provided, only the programs/platforms for that PI will be downloaded,
         /// otherwise all programs/platforms will be downloaded</param>
-        public static void DownloadAll(Action<Exception, string, string> handler = null, string user = null)
+        /// <param name="daysToRetrieve">The number of days to download.  If it is null, then the database is consulted
+        /// to get the number of days since the lastsuccessful download.  If the number is less than MinDays then nothing is
+        /// downloaded (the server is not contacted at all).  If the number is truncated to MaxDays.</param>
+        public static void DownloadAll(Action<Exception, ArgosProgram, ArgosPlatform> handler = null, ProjectInvestigator pi = null, int? daysToRetrieve = null)
         {
             var db = new AnimalMovementDataContext();
-            foreach (var program in db.ArgosPrograms.Where(p => (user == null || user == p.Manager) && p.Active.HasValue && p.Active.Value))
+            foreach (var program in db.ArgosPrograms.Where(p => (pi == null || pi == p.ProjectInvestigator) && p.Active.HasValue && p.Active.Value))
             {
                 try
                 {
-                    DownloadArgosProgram(program);
+                    DownloadArgosProgram(program, daysToRetrieve);
                 }
                 catch (Exception ex)
                 {
                     if (handler == null)
                         throw;
-                    handler(ex, program.ProgramId, null);
+                    handler(ex, program, null);
                 }
             }
-            foreach (var platform in db.ArgosPlatforms.Where(p => (user == null || user == p.ArgosProgram.Manager) && p.Active && !p.ArgosProgram.Active.HasValue))
+            foreach (var platform in db.ArgosPlatforms.Where(p => (pi == null || pi == p.ArgosProgram.ProjectInvestigator) && p.Active && !p.ArgosProgram.Active.HasValue))
             {
                 try
                 {
-                    DownloadArgosPlatform(platform);
+                    DownloadArgosPlatform(platform, daysToRetrieve);
                 }
                 catch (Exception ex)
                 {
                     if (handler == null)
                         throw;
-                    handler(ex, null, platform.ProgramId);
+                    handler(ex, null, platform);
                 }
             }
         }

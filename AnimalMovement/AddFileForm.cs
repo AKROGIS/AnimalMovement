@@ -331,7 +331,8 @@ namespace AnimalMovement
         private void DownloadAllButton_Click(object sender, EventArgs e)
         {
             ArgosProgram program;
-            FileDownloader.DownloadAll(null,CurrentUser);
+            var pi = Database.ProjectInvestigators.FirstOrDefault(p => p.Login == CurrentUser);
+            FileDownloader.DownloadAll(null,pi);
         }
         
 
