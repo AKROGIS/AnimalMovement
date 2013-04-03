@@ -16,23 +16,36 @@ namespace ArgosDownloader
         static private string _admin;
 
         /// <summary>
-        /// 
+        /// Downloads Argos Programs and Platforms from the Argos Server, then uploads and processes the files.
+        /// Any processing errors are written to the database, any other errors are emailed to the system admin,
+        /// and optionally the PI of the platform/program.
         /// </summary>
         /// <param name="args">
-        /// If there are no args, then process all programs and platforms for all users (subject to Active settings)
+        /// If there are no args, then process all active programs and platforms for all users. (An active platform
+        ///   is one where the platform is active, and the parent program is neither active or inactive, i.e null)
+        /// All args are checked to see if they are a program identifier, and if so the program is downloaded.
+        /// If an arg is not a program it is checked to see if it is a platform identifier, and if so the platform
+        ///   is downloaded.
+        ///  as a program, if it is not a validor as a platform if it the integer is not a program.
         /// If there is only one arg and that arg is a project investigator, then download all programs and
         ///   platforms for that PI
         /// If there is only one arg and that arg in the form /d:XX, where XX is an integer, then download
         ///   that many days for all programs and platforms for all users
         /// If there is only two arguments, and one  arg is a project investigator and the other arg is in the
         ///   form /d:XX, where XX is an integer, then download that many days for all programs and platforms for that PI
-        /// An the arg in the form /d:XX, where XX is an integer defines the number of days (subject to Min/Max Days
-        ///   stipulated by the Argos Server) to download for the remaining args. If this argument is not provided,
-        ///   then the database is consulted to get the number of days since the last successful download.  Once this
-        ///   is used, there is no way to reset to use the databases number.
-        /// All other integer args are processed as a program, or as a platform if it the integer is not a program.
-        /// Any argument in the form /platform:XXXX where XXX is a valid PlatformId will be processed as a platform.
+        /// An integer arg between 0 and 100, that is not a valid program or platform or an arg in the form /d:XX or
+        ///   /days:XX, where XX is an integer defines the number of days (subject to Min/Max Days stipulated by the
+        ///   Argos Server) to download for the remaining args.
+        /// An arg in the form /nodays, clears a previous setting of days, so the remaining arguments will download
+        ///   the number of days recommended by the database (this is the default behavior).
+        /// Finally an argument is checked to see if it is a project investigator's login (with domain - as stored in
+        ///   Login column of the ProjectINvestigators table.  If a valid PI is provided as the only argument, or optionally
+        ///   with a days argument (before or after), then all active programs and platforms (as defined above) for that PI
+        ///   are downloaded (for the last X days if the optional days argument was provided)
+        /// If the only argument provided was the days argument, then all programs and platforms (as defined above) for all
+        ///   users for the last X days will be downloaded.
         /// Any argument in the form /program:XXXX where XXX is a valid ProgramId will be processed as a program.
+        /// Any argument in the form /platform:XXXX where XXX is a valid PlatformId will be processed as a platform.
         /// All other args are ignored with an error message to the console.
         /// </param>
         private static void Main(string[] args)
@@ -78,7 +91,7 @@ namespace ArgosDownloader
                         var daysArg = GetDays(arg);
                         if (daysArg != null)
                         {
-                            days = daysArg;
+                            days = (daysArg == Int32.MinValue ? null : daysArg);
                             continue;
                         }
                         var piArg = GetProjectInvestigator(arg);
@@ -120,7 +133,11 @@ namespace ArgosDownloader
         private static int? GetDays(string arg)
         {
             int days;
+            if (arg == "/nodays")
+                return Int32.MinValue;
             if (arg.StartsWith("/d:") && Int32.TryParse(arg.Substring(3), out days))
+                return days;
+            if (arg.StartsWith("/days:") && Int32.TryParse(arg.Substring(6), out days))
                 return days;
             if (Int32.TryParse(arg, out days) && 0 < days && days < 100)
                 return days;
