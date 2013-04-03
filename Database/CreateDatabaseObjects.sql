@@ -5821,7 +5821,7 @@ BEGIN
 		RAISERROR(@message1, 18, 0)
 		RETURN 1
 	END
-	IF @Key in ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format', 'parameter_file_format', 'othervalidkeys...') --Add valid keys to this list
+	IF @Key in ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format', 'parameter_file_format', 'wants_email', 'othervalidkeys...') --Add valid keys to this list
 	   OR @Key IN (select 'collar_model_' + CollarManufacturer from LookupCollarManufacturers)
 	BEGIN
 		BEGIN TRY

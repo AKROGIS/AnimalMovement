@@ -223,15 +223,9 @@ namespace ArgosDownloader
             {
                 var address = item.Key;
                 var message = item.Value;
-                if (address == _admin || PiWantsEmails(address))
+                if (address == _admin || Settings.PiWantsEmails(address))
                     SendGmail(address, subject, message);
             }
-        }
-
-        private static bool PiWantsEmails(string address)
-        {
-            //TODO - check user's setting in DB
-            return true;
         }
 
         static void SendGmail(string email, string subject, string body)

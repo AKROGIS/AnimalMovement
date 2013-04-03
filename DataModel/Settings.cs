@@ -7,6 +7,7 @@ namespace DataModel
 {
     public static class Settings
     {
+        private const string SystemUsername = "system";
         // When adding new persistent settings, remember to modify the dbo.Settings_Update stored procedure
         private const string ProjectKey = "project";
         private const string FilterKey = "filter_projects";
@@ -15,13 +16,14 @@ namespace DataModel
         private const string ParameterFormatKey = "parameter_file_format";
         private const string ModelKey = "collar_model";
         private const string ManufacturerKey = "collar_manufacturer";
+        private const string WantsEmailKey = "wants_email";
 
         #region getters
 
         public static string GetSystemDefault(string key)
         {
             var db = new SettingsDataContext();
-            Setting setting = db.Settings.FirstOrDefault(s => s.Username == "system" && s.Key == key);
+            Setting setting = db.Settings.FirstOrDefault(s => s.Username == SystemUsername && s.Key == key);
             return setting == null ? null : setting.Value;
         }
 
@@ -32,7 +34,7 @@ namespace DataModel
 
         public static bool GetDefaultProjectFilter()
         {
-            return GetUsersDefault(FilterKey) == "True";
+            return GetUsersDefault(FilterKey) == true.ToString(CultureInfo.InvariantCulture);
         }
 
         public static string GetDefaultSpecies()
@@ -60,6 +62,13 @@ namespace DataModel
         public static string GetDefaultCollarManufacturer()
         {
             return GetUsersDefault(ManufacturerKey);
+        }
+
+        public static bool GetWantsEmail()
+        {
+            //default is to get email, unless explicitly and correctly denied
+            string setting = GetUsersDefault(WantsEmailKey);
+            return (setting == null || setting != false.ToString(CultureInfo.InvariantCulture));
         }
 
         #endregion
@@ -101,6 +110,11 @@ namespace DataModel
             SetUsersDefault(ManufacturerKey, manufacturer);
         }
 
+        public static void SetWantsEmail(bool wantsEmail)
+        {
+            SetUsersDefault(WantsEmailKey, wantsEmail.ToString(CultureInfo.InvariantCulture));
+        }
+
         #endregion
 
         #region Getting/Setting implementation
@@ -133,5 +147,18 @@ namespace DataModel
         }
 
         #endregion
+
+
+        public static bool PiWantsEmails(string address)
+        {
+            var database = new AnimalMovementDataContext();
+            var pi = database.ProjectInvestigators.FirstOrDefault(p => p.Email == address);
+            if (pi == null)
+                return false;
+            var db = new SettingsDataContext();
+            var setting = db.Settings.FirstOrDefault(s => s.Username == pi.Login && s.Key == WantsEmailKey);
+            //default is to get email, unless explicitly and correctly denied
+            return (setting == null || setting.Value != false.ToString(CultureInfo.InvariantCulture));
+        }
     }
 }
