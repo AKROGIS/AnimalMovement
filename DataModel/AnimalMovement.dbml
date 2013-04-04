@@ -199,6 +199,7 @@
       <Association Name="Collar_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosFileProcessingIssue" />
       <Association Name="Collar_CollarFile" Member="CollarFiles" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarFile" />
       <Association Name="Collar_CollarParameter" Member="CollarParameters" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarParameter" />
+      <Association Name="Collar_ArgosDeployment" Member="ArgosDeployments" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosDeployment" />
       <Association Name="LookupCollarManufacturer_Collar" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_Collar" Member="ProjectInvestigator" ThisKey="Manager" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
       <Association Name="LookupCollarModel_Collar" Member="LookupCollarModel" ThisKey="CollarModel" OtherKey="CollarModel" Type="LookupCollarModel" IsForeignKey="true" />
@@ -337,6 +338,7 @@
       <Column Name="Active" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
       <Column Name="DisposalDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Association Name="ArgosPlatform_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFileProcessingIssue" />
+      <Association Name="ArgosPlatform_ArgosDeployment" Member="ArgosDeployments" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosDeployment" />
       <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosProgram" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosProgram" IsForeignKey="true" />
     </Type>
     <InsertFunction FunctionId="FunctionId21">
@@ -481,6 +483,37 @@
     </UpdateFunction>
     <DeleteFunction FunctionId="FunctionId30">
       <Argument Parameter="parameterId" Member="ParameterId" Version="Original" />
+    </DeleteFunction>
+  </Table>
+  <Table Name="dbo.ArgosDeployments" Member="ArgosDeployments">
+    <Type Name="ArgosDeployment">
+      <Column Name="DeploymentId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="StartDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Column Name="EndDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
+      <Association Name="ArgosPlatform_ArgosDeployment" Member="ArgosPlatform" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosPlatform" IsForeignKey="true" />
+      <Association Name="Collar_ArgosDeployment" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" />
+    </Type>
+    <InsertFunction FunctionId="FunctionId31">
+      <Argument Parameter="platformId" Member="PlatformId" />
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+      <Argument Parameter="startDate" Member="StartDate" />
+      <Argument Parameter="endDate" Member="EndDate" />
+      <Argument Parameter="deploymentId" Member="DeploymentId" />
+    </InsertFunction>
+    <UpdateFunction FunctionId="FunctionId32">
+      <Argument Parameter="deploymentId" Member="DeploymentId" Version="Original" />
+      <Argument Parameter="platformId" Member="PlatformId" />
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+      <Argument Parameter="startDate" Member="StartDate" />
+      <Argument Parameter="endDate" Member="EndDate" />
+    </UpdateFunction>
+    <DeleteFunction FunctionId="FunctionId33">
+      <Argument Parameter="deploymentId" Member="DeploymentId" Version="Original" />
     </DeleteFunction>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
@@ -785,6 +818,28 @@
   </Function>
   <Function Id="FunctionId30" Name="dbo.CollarParameter_Delete" Method="CollarParameter_Delete">
     <Parameter Name="ParameterId" Parameter="parameterId" Type="System.Int32" DbType="Int" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId33" Name="dbo.ArgosDeployment_Delete" Method="ArgosDeployment_Delete">
+    <Parameter Name="DeploymentId" Parameter="deploymentId" Type="System.Int32" DbType="Int" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId32" Name="dbo.ArgosDeployment_Update" Method="ArgosDeployment_Update">
+    <Parameter Name="DeploymentId" Parameter="deploymentId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="StartDate" Parameter="startDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId31" Name="dbo.ArgosDeployment_Insert" Method="ArgosDeployment_Insert">
+    <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="StartDate" Parameter="startDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
+    <Parameter Name="DeploymentId" Parameter="deploymentId" Type="System.Int32" DbType="Int" Direction="InOut" />
     <Return Type="System.Int32" />
   </Function>
 </Database>
