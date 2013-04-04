@@ -4003,7 +4003,8 @@ CREATE PROCEDURE [dbo].[ArgosDeployment_Insert]
     @CollarManufacturer NVARCHAR(255), 
     @CollarId NVARCHAR(255), 
     @StartDate DATETIME2(7) = NULL,
-    @EndDate DATETIME2(7) = NULL 
+    @EndDate DATETIME2(7) = NULL,
+    @DeploymentId INT OUTPUT 
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -4041,6 +4042,7 @@ BEGIN
                                           [StartDate], [EndDate])
                                   VALUES (@PlatformId, @CollarManufacturer, @CollarId,
                                           @StartDate, @EndDate)
+    SET @DeploymentId = SCOPE_IDENTITY()
 END
 
 GRANT EXECUTE ON [dbo].[ArgosDeployment_Insert] TO [Investigator] AS [dbo]
@@ -5309,7 +5311,11 @@ CREATE PROCEDURE [dbo].[CollarFile_Insert]
     @ParentFileId INT = NULL,
     @CollarManufacturer NVARCHAR(255) = NULL, 
     @CollarId NVARCHAR(255) = NULL, 
-    @FileId INT OUTPUT
+    @FileId INT OUTPUT,
+    @Format CHAR OUTPUT,
+    @UploadDate DATETIME2(7) OUTPUT,
+    @UserName NVARCHAR(128) OUTPUT,
+    @Sha1Hash VARBINARY(8000) OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -5347,7 +5353,7 @@ BEGIN
     END
     
     -- Get the format of the file, and determine if this format has Argos data (to determine processing required)
-    DECLARE @Format char(1) = [dbo].[FileFormat](@Contents)
+    SET @Format = [dbo].[FileFormat](@Contents)
     IF NOT EXISTS (SELECT 1 FROM dbo.LookupCollarFileFormats WHERE Code = @Format)
     BEGIN
         DECLARE @message2 nvarchar(100) = 'Invalid parameter: The contents of this file is not in a format the system recognizes.';
@@ -5359,6 +5365,7 @@ BEGIN
     INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [Owner], [CollarManufacturer], [CollarId], [Format], [Status], [Contents], [ParentFileId])
                          VALUES (@FileName,  @ProjectId,  @Owner,  @CollarManufacturer,  @CollarId,  @Format,  @Status,  @Contents,  @ParentFileId)
 	SET @FileId = SCOPE_IDENTITY();
+	SELECT @UploadDate = [UploadDate], @UserName = [UserName], @Sha1Hash = [Sha1Hash] FROM dbo.CollarFiles WHERE FileId = @FileId
 END
 GO
 SET ANSI_NULLS ON
@@ -5486,7 +5493,8 @@ CREATE PROCEDURE [dbo].[CollarDeployment_Insert]
 	@CollarManufacturer NVARCHAR(255) = NULL,
 	@CollarId			NVARCHAR(255) = NULL, 
 	@DeploymentDate		DATETIME2 = NULL, 
-	@RetrievalDate		DATETIME2 = NULL
+	@RetrievalDate		DATETIME2 = NULL, 
+	@DeploymentId       INT                   OUTPUT
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -5525,6 +5533,7 @@ BEGIN
 	             [DeploymentDate], [RetrievalDate])
 		 VALUES (nullif(@ProjectId,''), nullif(@AnimalId,''), nullif(@CollarManufacturer,''), 
 				 nullif(@CollarId,''), @DeploymentDate, @RetrievalDate)
+    SET @DeploymentId = SCOPE_IDENTITY()
 END
 GO
 SET ANSI_NULLS ON
@@ -6230,7 +6239,8 @@ CREATE PROCEDURE [dbo].[CollarParameter_Insert]
 	@CollarId			NVARCHAR(255) = NULL, 
 	@FileId				INT = NULL,
 	@StartDate			DATETIME2 = NULL, 
-	@EndDate			DATETIME2 = NULL
+	@EndDate			DATETIME2 = NULL,
+	@ParameterId		INT OUTPUT
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -6279,7 +6289,7 @@ BEGIN
 	-- to do this, upload the same file as F2
 	INSERT INTO dbo.CollarParameters ([CollarManufacturer], [CollarId], [FileId], [StartDate], [EndDate])
 		 VALUES (@CollarManufacturer, @CollarId, @FileId, @StartDate, @EndDate)
-
+    SET @ParameterId = SCOPE_IDENTITY()
 END
 GO
 SET ANSI_NULLS ON
@@ -6409,7 +6419,10 @@ CREATE PROCEDURE [dbo].[CollarParameterFile_Insert]
 	@Format CHAR = NULL, 
 	@Contents VARBINARY(max) = NULL,
 	@Status CHAR = 'A',
-	@FileId INT OUTPUT
+	@FileId INT OUTPUT,
+    @UploadDate DATETIME2(7) OUTPUT,
+    @UploadUser NVARCHAR(128) OUTPUT,
+    @Sha1Hash VARBINARY(8000) OUTPUT
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -6429,6 +6442,7 @@ BEGIN
 		 VALUES (@Owner, @FileName, @Format, @Contents, @Status)
 
 	SET @FileId = SCOPE_IDENTITY();
+	SELECT @UploadDate = [UploadDate], @UploadUser = [UploadUser], @Sha1Hash = [Sha1Hash] FROM dbo.CollarParameterFiles WHERE FileId = @FileId
 
 END
 GO

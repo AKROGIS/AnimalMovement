@@ -63,6 +63,8 @@ namespace DataModel
     partial void InsertLookupCollarFileFormat(LookupCollarFileFormat instance);
     partial void UpdateLookupCollarFileFormat(LookupCollarFileFormat instance);
     partial void DeleteLookupCollarFileFormat(LookupCollarFileFormat instance);
+    partial void UpdateCollarParameter(CollarParameter instance);
+    partial void DeleteCollarParameter(CollarParameter instance);
     #endregion
 		
 		public AnimalMovementDataContext() : 
@@ -167,14 +169,6 @@ namespace DataModel
 			}
 		}
 		
-		public System.Data.Linq.Table<CollarParameter> CollarParameters
-		{
-			get
-			{
-				return this.GetTable<CollarParameter>();
-			}
-		}
-		
 		public System.Data.Linq.Table<CollarDeployment> CollarDeployments
 		{
 			get
@@ -263,6 +257,14 @@ namespace DataModel
 			}
 		}
 		
+		public System.Data.Linq.Table<CollarParameter> CollarParameters
+		{
+			get
+			{
+				return this.GetTable<CollarParameter>();
+			}
+		}
+		
 		private void InsertAnimal(Animal obj)
 		{
 			this.Animal_Insert(obj.ProjectId, obj.AnimalId, obj.Species, obj.Gender, ((System.Nullable<System.DateTime>)(obj.MortalityDate)), obj.GroupName, obj.Description);
@@ -313,26 +315,11 @@ namespace DataModel
 			this.ProjectInvestigator_Update(original.Login, obj.Name, obj.Email, obj.Phone);
 		}
 		
-		private void InsertCollarParameter(CollarParameter obj)
-		{
-			this.CollarParameter_Insert(obj.CollarManufacturer, obj.CollarId, ((System.Nullable<int>)(obj.FileId)), ((System.Nullable<System.DateTime>)(obj.StartDate)), ((System.Nullable<System.DateTime>)(obj.EndDate)));
-		}
-		
-		private void UpdateCollarParameter(CollarParameter obj)
-		{
-			CollarParameter original = ((CollarParameter)(CollarParameters.GetOriginalEntityState(obj)));
-			this.CollarParameter_Update(original.CollarManufacturer, original.CollarId, ((System.Nullable<int>)(original.FileId)), ((System.Nullable<System.DateTime>)(obj.StartDate)), ((System.Nullable<System.DateTime>)(obj.EndDate)));
-		}
-		
-		private void DeleteCollarParameter(CollarParameter obj)
-		{
-			CollarParameter original = ((CollarParameter)(CollarParameters.GetOriginalEntityState(obj)));
-			this.CollarParameter_Delete(original.CollarManufacturer, original.CollarId, ((System.Nullable<int>)(original.FileId)));
-		}
-		
 		private void InsertCollarDeployment(CollarDeployment obj)
 		{
-			this.CollarDeployment_Insert(obj.ProjectId, obj.AnimalId, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<System.DateTime>)(obj.DeploymentDate)), ((System.Nullable<System.DateTime>)(obj.RetrievalDate)));
+			System.Nullable<int> p1 = obj.DeploymentId;
+			this.CollarDeployment_Insert(obj.ProjectId, obj.AnimalId, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<System.DateTime>)(obj.DeploymentDate)), ((System.Nullable<System.DateTime>)(obj.RetrievalDate)), ref p1);
+			obj.DeploymentId = p1.GetValueOrDefault();
 		}
 		
 		private void UpdateCollarDeployment(CollarDeployment obj)
@@ -366,8 +353,14 @@ namespace DataModel
 		private void InsertCollarParameterFile(CollarParameterFile obj)
 		{
 			System.Nullable<int> p1 = obj.FileId;
-			this.CollarParameterFile_Insert(obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), obj.Contents, ((System.Nullable<char>)(obj.Status)), ref p1);
+			System.Nullable<System.DateTime> p2 = obj.UploadDate;
+			string p3 = obj.UploadUser;
+			System.Data.Linq.Binary p4 = obj.Sha1Hash;
+			this.CollarParameterFile_Insert(obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), obj.Contents, ((System.Nullable<char>)(obj.Status)), ref p1, ref p2, ref p3, ref p4);
 			obj.FileId = p1.GetValueOrDefault();
+			obj.UploadDate = p2.GetValueOrDefault();
+			obj.UploadUser = p3;
+			obj.Sha1Hash = p4;
 		}
 		
 		private void UpdateCollarParameterFile(CollarParameterFile obj)
@@ -418,8 +411,16 @@ namespace DataModel
 		private void InsertCollarFile(CollarFile obj)
 		{
 			System.Nullable<int> p1 = obj.FileId;
-			this.CollarFile_Insert(obj.FileName, ((System.Nullable<char>)(obj.Status)), obj.Contents, obj.ProjectId, obj.Owner, ((System.Nullable<int>)(obj.ParentFileId)), obj.CollarManufacturer, obj.CollarId, ref p1);
+			System.Nullable<char> p2 = obj.Format;
+			System.Nullable<System.DateTime> p3 = obj.UploadDate;
+			string p4 = obj.UserName;
+			System.Data.Linq.Binary p5 = obj.Sha1Hash;
+			this.CollarFile_Insert(obj.FileName, ((System.Nullable<char>)(obj.Status)), obj.Contents, obj.ProjectId, obj.Owner, ((System.Nullable<int>)(obj.ParentFileId)), obj.CollarManufacturer, obj.CollarId, ref p1, ref p2, ref p3, ref p4, ref p5);
 			obj.FileId = p1.GetValueOrDefault();
+			obj.Format = p2.GetValueOrDefault();
+			obj.UploadDate = p3.GetValueOrDefault();
+			obj.UserName = p4;
+			obj.Sha1Hash = p5;
 		}
 		
 		private void UpdateCollarFile(CollarFile obj)
@@ -434,6 +435,13 @@ namespace DataModel
 			this.CollarFile_Delete(((System.Nullable<int>)(original.FileId)));
 		}
 		
+		private void InsertCollarParameter(CollarParameter obj)
+		{
+			System.Nullable<int> p1 = obj.ParameterId;
+			this.CollarParameter_Insert(obj.CollarManufacturer, obj.CollarId, ((System.Nullable<int>)(obj.FileId)), ((System.Nullable<System.DateTime>)(obj.StartDate)), ((System.Nullable<System.DateTime>)(obj.EndDate)), ref p1);
+			obj.ParameterId = p1.GetValueOrDefault();
+		}
+		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Delete")]
 		public int Animal_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId)
 		{
@@ -445,13 +453,6 @@ namespace DataModel
 		public int Collar_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId);
-			return ((int)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_Insert")]
-		public int CollarDeployment_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RetrievalDate", DbType="DateTime2")] System.Nullable<System.DateTime> retrievalDate)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, collarManufacturer, collarId, deploymentDate, retrievalDate);
 			return ((int)(result.ReturnValue));
 		}
 		
@@ -550,25 +551,10 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameterFile_Insert")]
-		public int CollarParameterFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, contents, status, fileId);
-			fileId = ((System.Nullable<int>)(result.GetParameterValue(5)));
-			return ((int)(result.ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameter_Delete")]
 		public int CollarParameter_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, fileId);
-			return ((int)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameter_Insert")]
-		public int CollarParameter_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, fileId, startDate, endDate);
 			return ((int)(result.ReturnValue));
 		}
 		
@@ -705,18 +691,49 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Insert")]
-		public int CollarFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ParentFileId", DbType="Int")] System.Nullable<int> parentFileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileName, status, contents, projectId, owner, parentFileId, collarManufacturer, collarId, fileId);
-			fileId = ((System.Nullable<int>)(result.GetParameterValue(8)));
-			return ((int)(result.ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Delete")]
 		public int CollarFile_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Insert")]
+		public int CollarFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ParentFileId", DbType="Int")] System.Nullable<int> parentFileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] ref System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UploadDate", DbType="DateTime2")] ref System.Nullable<System.DateTime> uploadDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UserName", DbType="NVarChar(128)")] ref string userName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Sha1Hash", DbType="VarBinary(8000)")] ref System.Data.Linq.Binary sha1Hash)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileName, status, contents, projectId, owner, parentFileId, collarManufacturer, collarId, fileId, format, uploadDate, userName, sha1Hash);
+			fileId = ((System.Nullable<int>)(result.GetParameterValue(8)));
+			format = ((System.Nullable<char>)(result.GetParameterValue(9)));
+			uploadDate = ((System.Nullable<System.DateTime>)(result.GetParameterValue(10)));
+			userName = ((string)(result.GetParameterValue(11)));
+			sha1Hash = ((System.Data.Linq.Binary)(result.GetParameterValue(12)));
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameter_Insert")]
+		public int CollarParameter_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ParameterId", DbType="Int")] ref System.Nullable<int> parameterId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, fileId, startDate, endDate, parameterId);
+			parameterId = ((System.Nullable<int>)(result.GetParameterValue(5)));
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_Insert")]
+		public int CollarDeployment_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RetrievalDate", DbType="DateTime2")] System.Nullable<System.DateTime> retrievalDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentId", DbType="Int")] ref System.Nullable<int> deploymentId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectId, animalId, collarManufacturer, collarId, deploymentDate, retrievalDate, deploymentId);
+			deploymentId = ((System.Nullable<int>)(result.GetParameterValue(6)));
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameterFile_Insert")]
+		public int CollarParameterFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UploadDate", DbType="DateTime2")] ref System.Nullable<System.DateTime> uploadDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UploadUser", DbType="NVarChar(128)")] ref string uploadUser, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Sha1Hash", DbType="VarBinary(8000)")] ref System.Data.Linq.Binary sha1Hash)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, contents, status, fileId, uploadDate, uploadUser, sha1Hash);
+			fileId = ((System.Nullable<int>)(result.GetParameterValue(5)));
+			uploadDate = ((System.Nullable<System.DateTime>)(result.GetParameterValue(6)));
+			uploadUser = ((string)(result.GetParameterValue(7)));
+			sha1Hash = ((System.Data.Linq.Binary)(result.GetParameterValue(8)));
 			return ((int)(result.ReturnValue));
 		}
 	}
@@ -2733,252 +2750,6 @@ namespace DataModel
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarParameters")]
-	public partial class CollarParameter : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private string _CollarManufacturer;
-		
-		private string _CollarId;
-		
-		private int _FileId;
-		
-		private System.Nullable<System.DateTime> _StartDate;
-		
-		private System.Nullable<System.DateTime> _EndDate;
-		
-		private EntityRef<Collar> _Collar;
-		
-		private EntityRef<CollarParameterFile> _CollarParameterFile;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnCollarManufacturerChanging(string value);
-    partial void OnCollarManufacturerChanged();
-    partial void OnCollarIdChanging(string value);
-    partial void OnCollarIdChanged();
-    partial void OnFileIdChanging(int value);
-    partial void OnFileIdChanged();
-    partial void OnStartDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnStartDateChanged();
-    partial void OnEndDateChanging(System.Nullable<System.DateTime> value);
-    partial void OnEndDateChanged();
-    #endregion
-		
-		public CollarParameter()
-		{
-			this._Collar = default(EntityRef<Collar>);
-			this._CollarParameterFile = default(EntityRef<CollarParameterFile>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string CollarManufacturer
-		{
-			get
-			{
-				return this._CollarManufacturer;
-			}
-			set
-			{
-				if ((this._CollarManufacturer != value))
-				{
-					if (this._Collar.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCollarManufacturerChanging(value);
-					this.SendPropertyChanging();
-					this._CollarManufacturer = value;
-					this.SendPropertyChanged("CollarManufacturer");
-					this.OnCollarManufacturerChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
-		public string CollarId
-		{
-			get
-			{
-				return this._CollarId;
-			}
-			set
-			{
-				if ((this._CollarId != value))
-				{
-					if (this._Collar.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCollarIdChanging(value);
-					this.SendPropertyChanging();
-					this._CollarId = value;
-					this.SendPropertyChanged("CollarId");
-					this.OnCollarIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL", IsPrimaryKey=true)]
-		public int FileId
-		{
-			get
-			{
-				return this._FileId;
-			}
-			set
-			{
-				if ((this._FileId != value))
-				{
-					if (this._CollarParameterFile.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnFileIdChanging(value);
-					this.SendPropertyChanging();
-					this._FileId = value;
-					this.SendPropertyChanged("FileId");
-					this.OnFileIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StartDate", DbType="DateTime2")]
-		public System.Nullable<System.DateTime> StartDate
-		{
-			get
-			{
-				return this._StartDate;
-			}
-			set
-			{
-				if ((this._StartDate != value))
-				{
-					this.OnStartDateChanging(value);
-					this.SendPropertyChanging();
-					this._StartDate = value;
-					this.SendPropertyChanged("StartDate");
-					this.OnStartDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EndDate", DbType="DateTime2")]
-		public System.Nullable<System.DateTime> EndDate
-		{
-			get
-			{
-				return this._EndDate;
-			}
-			set
-			{
-				if ((this._EndDate != value))
-				{
-					this.OnEndDateChanging(value);
-					this.SendPropertyChanging();
-					this._EndDate = value;
-					this.SendPropertyChanged("EndDate");
-					this.OnEndDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarParameter", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true)]
-		public Collar Collar
-		{
-			get
-			{
-				return this._Collar.Entity;
-			}
-			set
-			{
-				Collar previousValue = this._Collar.Entity;
-				if (((previousValue != value) 
-							|| (this._Collar.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Collar.Entity = null;
-						previousValue.CollarParameters.Remove(this);
-					}
-					this._Collar.Entity = value;
-					if ((value != null))
-					{
-						value.CollarParameters.Add(this);
-						this._CollarManufacturer = value.CollarManufacturer;
-						this._CollarId = value.CollarId;
-					}
-					else
-					{
-						this._CollarManufacturer = default(string);
-						this._CollarId = default(string);
-					}
-					this.SendPropertyChanged("Collar");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarParameterFile_CollarParameter", Storage="_CollarParameterFile", ThisKey="FileId", OtherKey="FileId", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
-		public CollarParameterFile CollarParameterFile
-		{
-			get
-			{
-				return this._CollarParameterFile.Entity;
-			}
-			set
-			{
-				CollarParameterFile previousValue = this._CollarParameterFile.Entity;
-				if (((previousValue != value) 
-							|| (this._CollarParameterFile.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._CollarParameterFile.Entity = null;
-						previousValue.CollarParameters.Remove(this);
-					}
-					this._CollarParameterFile.Entity = value;
-					if ((value != null))
-					{
-						value.CollarParameters.Add(this);
-						this._FileId = value.FileId;
-					}
-					else
-					{
-						this._FileId = default(int);
-					}
-					this.SendPropertyChanged("CollarParameterFile");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarDeployments")]
 	public partial class CollarDeployment : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -3311,13 +3082,13 @@ namespace DataModel
 		
 		private EntitySet<CollarFix> _CollarFixes;
 		
-		private EntitySet<CollarParameter> _CollarParameters;
-		
 		private EntitySet<CollarDeployment> _CollarDeployments;
 		
 		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
 		
 		private EntitySet<CollarFile> _CollarFiles;
+		
+		private EntitySet<CollarParameter> _CollarParameters;
 		
 		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
 		
@@ -3358,10 +3129,10 @@ namespace DataModel
 		public Collar()
 		{
 			this._CollarFixes = new EntitySet<CollarFix>(new Action<CollarFix>(this.attach_CollarFixes), new Action<CollarFix>(this.detach_CollarFixes));
-			this._CollarParameters = new EntitySet<CollarParameter>(new Action<CollarParameter>(this.attach_CollarParameters), new Action<CollarParameter>(this.detach_CollarParameters));
 			this._CollarDeployments = new EntitySet<CollarDeployment>(new Action<CollarDeployment>(this.attach_CollarDeployments), new Action<CollarDeployment>(this.detach_CollarDeployments));
 			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
 			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
+			this._CollarParameters = new EntitySet<CollarParameter>(new Action<CollarParameter>(this.attach_CollarParameters), new Action<CollarParameter>(this.detach_CollarParameters));
 			this._LookupCollarManufacturer = default(EntityRef<LookupCollarManufacturer>);
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
 			this._LookupCollarModel = default(EntityRef<LookupCollarModel>);
@@ -3633,19 +3404,6 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarParameter", Storage="_CollarParameters", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
-		public EntitySet<CollarParameter> CollarParameters
-		{
-			get
-			{
-				return this._CollarParameters;
-			}
-			set
-			{
-				this._CollarParameters.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarDeployment", Storage="_CollarDeployments", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
 		public EntitySet<CollarDeployment> CollarDeployments
 		{
@@ -3682,6 +3440,19 @@ namespace DataModel
 			set
 			{
 				this._CollarFiles.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarParameter", Storage="_CollarParameters", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
+		public EntitySet<CollarParameter> CollarParameters
+		{
+			get
+			{
+				return this._CollarParameters;
+			}
+			set
+			{
+				this._CollarParameters.Assign(value);
 			}
 		}
 		
@@ -3819,18 +3590,6 @@ namespace DataModel
 			entity.Collar = null;
 		}
 		
-		private void attach_CollarParameters(CollarParameter entity)
-		{
-			this.SendPropertyChanging();
-			entity.Collar = this;
-		}
-		
-		private void detach_CollarParameters(CollarParameter entity)
-		{
-			this.SendPropertyChanging();
-			entity.Collar = null;
-		}
-		
 		private void attach_CollarDeployments(CollarDeployment entity)
 		{
 			this.SendPropertyChanging();
@@ -3862,6 +3621,18 @@ namespace DataModel
 		}
 		
 		private void detach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = null;
+		}
+		
+		private void attach_CollarParameters(CollarParameter entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = this;
+		}
+		
+		private void detach_CollarParameters(CollarParameter entity)
 		{
 			this.SendPropertyChanging();
 			entity.Collar = null;
@@ -5817,7 +5588,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UploadDate", DbType="DateTime2 NOT NULL")]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UploadDate", AutoSync=AutoSync.OnInsert, DbType="DateTime2 NOT NULL", IsDbGenerated=true)]
 		public System.DateTime UploadDate
 		{
 			get
@@ -5861,7 +5632,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", AutoSync=AutoSync.OnInsert, DbType="NVarChar(128) NOT NULL", CanBeNull=false, IsDbGenerated=true)]
 		public string UserName
 		{
 			get
@@ -5929,7 +5700,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Format", DbType="Char(1) NOT NULL")]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Format", AutoSync=AutoSync.OnInsert, DbType="Char(1) NOT NULL", IsDbGenerated=true)]
 		public char Format
 		{
 			get
@@ -6045,7 +5816,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.OnInsert, DbType="VarBinary(8000)", IsDbGenerated=true)]
 		public System.Data.Linq.Binary Sha1Hash
 		{
 			get
@@ -6616,6 +6387,300 @@ namespace DataModel
 		{
 			this.SendPropertyChanging();
 			entity.LookupCollarFileFormat = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarParameters")]
+	public partial class CollarParameter : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _ParameterId;
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarId;
+		
+		private System.Nullable<int> _FileId;
+		
+		private System.Nullable<int> _Gen3Period;
+		
+		private System.Nullable<System.DateTime> _StartDate;
+		
+		private System.Nullable<System.DateTime> _EndDate;
+		
+		private EntityRef<CollarParameterFile> _CollarParameterFile;
+		
+		private EntityRef<Collar> _Collar;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnParameterIdChanging(int value);
+    partial void OnParameterIdChanged();
+    partial void OnCollarManufacturerChanging(string value);
+    partial void OnCollarManufacturerChanged();
+    partial void OnCollarIdChanging(string value);
+    partial void OnCollarIdChanged();
+    partial void OnFileIdChanging(System.Nullable<int> value);
+    partial void OnFileIdChanged();
+    partial void OnGen3PeriodChanging(System.Nullable<int> value);
+    partial void OnGen3PeriodChanged();
+    partial void OnStartDateChanging(System.Nullable<System.DateTime> value);
+    partial void OnStartDateChanged();
+    partial void OnEndDateChanging(System.Nullable<System.DateTime> value);
+    partial void OnEndDateChanged();
+    #endregion
+		
+		public CollarParameter()
+		{
+			this._CollarParameterFile = default(EntityRef<CollarParameterFile>);
+			this._Collar = default(EntityRef<Collar>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ParameterId", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int ParameterId
+		{
+			get
+			{
+				return this._ParameterId;
+			}
+			set
+			{
+				if ((this._ParameterId != value))
+				{
+					this.OnParameterIdChanging(value);
+					this.SendPropertyChanging();
+					this._ParameterId = value;
+					this.SendPropertyChanged("ParameterId");
+					this.OnParameterIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarManufacturerChanging(value);
+					this.SendPropertyChanging();
+					this._CollarManufacturer = value;
+					this.SendPropertyChanged("CollarManufacturer");
+					this.OnCollarManufacturerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarIdChanging(value);
+					this.SendPropertyChanging();
+					this._CollarId = value;
+					this.SendPropertyChanged("CollarId");
+					this.OnCollarIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int")]
+		public System.Nullable<int> FileId
+		{
+			get
+			{
+				return this._FileId;
+			}
+			set
+			{
+				if ((this._FileId != value))
+				{
+					if (this._CollarParameterFile.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnFileIdChanging(value);
+					this.SendPropertyChanging();
+					this._FileId = value;
+					this.SendPropertyChanged("FileId");
+					this.OnFileIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Gen3Period", DbType="Int")]
+		public System.Nullable<int> Gen3Period
+		{
+			get
+			{
+				return this._Gen3Period;
+			}
+			set
+			{
+				if ((this._Gen3Period != value))
+				{
+					this.OnGen3PeriodChanging(value);
+					this.SendPropertyChanging();
+					this._Gen3Period = value;
+					this.SendPropertyChanged("Gen3Period");
+					this.OnGen3PeriodChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_StartDate", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> StartDate
+		{
+			get
+			{
+				return this._StartDate;
+			}
+			set
+			{
+				if ((this._StartDate != value))
+				{
+					this.OnStartDateChanging(value);
+					this.SendPropertyChanging();
+					this._StartDate = value;
+					this.SendPropertyChanged("StartDate");
+					this.OnStartDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EndDate", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> EndDate
+		{
+			get
+			{
+				return this._EndDate;
+			}
+			set
+			{
+				if ((this._EndDate != value))
+				{
+					this.OnEndDateChanging(value);
+					this.SendPropertyChanging();
+					this._EndDate = value;
+					this.SendPropertyChanged("EndDate");
+					this.OnEndDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarParameterFile_CollarParameter", Storage="_CollarParameterFile", ThisKey="FileId", OtherKey="FileId", IsForeignKey=true, DeleteRule="CASCADE")]
+		public CollarParameterFile CollarParameterFile
+		{
+			get
+			{
+				return this._CollarParameterFile.Entity;
+			}
+			set
+			{
+				CollarParameterFile previousValue = this._CollarParameterFile.Entity;
+				if (((previousValue != value) 
+							|| (this._CollarParameterFile.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._CollarParameterFile.Entity = null;
+						previousValue.CollarParameters.Remove(this);
+					}
+					this._CollarParameterFile.Entity = value;
+					if ((value != null))
+					{
+						value.CollarParameters.Add(this);
+						this._FileId = value.FileId;
+					}
+					else
+					{
+						this._FileId = default(Nullable<int>);
+					}
+					this.SendPropertyChanged("CollarParameterFile");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarParameter", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true)]
+		public Collar Collar
+		{
+			get
+			{
+				return this._Collar.Entity;
+			}
+			set
+			{
+				Collar previousValue = this._Collar.Entity;
+				if (((previousValue != value) 
+							|| (this._Collar.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Collar.Entity = null;
+						previousValue.CollarParameters.Remove(this);
+					}
+					this._Collar.Entity = value;
+					if ((value != null))
+					{
+						value.CollarParameters.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+						this._CollarId = value.CollarId;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+						this._CollarId = default(string);
+					}
+					this.SendPropertyChanged("Collar");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
 		}
 	}
 }
