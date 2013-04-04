@@ -6159,11 +6159,13 @@ GO
 --              collar/file relationship is wrong then delete it
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarParameter_Update] 
+	@ParameterId		INT,
 	@CollarManufacturer NVARCHAR(255) = NULL,
 	@CollarId			NVARCHAR(255) = NULL, 
-	@FileId				INT = NULL,
-	@StartDate			DATETIME2 = NULL, 
-	@EndDate			DATETIME2 = NULL
+	@FileId				INT,
+	@Gen3Period			INT,
+	@StartDate			DATETIME2, 
+	@EndDate			DATETIME2
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -6176,25 +6178,35 @@ BEGIN
 	-- The caller must be an editor in the database, handled by execute permissions
 	
 	-- Verify that the relationship exists (this is done now to avoid a confusing silent No-op)
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameters]
-				   WHERE [CollarManufacturer] = @CollarManufacturer AND [CollarId] = @CollarId
-				     AND [FileId] = @FileId
-			      )
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameters] WHERE [ParameterId] = @ParameterId)
 	BEGIN
 		RAISERROR('The collar/file relationship you want to change was not found.', 18, 0)
 		RETURN (1)
 	END
 
-	-- The caller must be the owner of the oollar or the file or the uploader of the file
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] WHERE [FileId] = @FileId AND ([Owner] = @Caller OR [UploadUser] = @Caller))
+	-- The caller must be
+	--    the owner or the Uploader of the collar parameter file
+	--    or the owner of to collar to delete the parameter assignment
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] AS F
+	                        JOIN [dbo].[CollarParameters] AS P ON P.FileId = F.FileId
+	                       WHERE [ParameterId] = @ParameterId AND ([Owner] = @Caller OR [UploadUser] = @Caller))
 	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM [dbo].[Collars] WHERE [CollarManufacturer] = @CollarManufacturer AND [CollarId] = @CollarId AND [Manager] = @Caller)
+		IF NOT EXISTS (SELECT 1 FROM dbo.Collars AS C
+	                        JOIN [dbo].[CollarParameters] AS P ON P.CollarManufacturer = C.CollarManufacturer AND P.CollarId = C.CollarId
+	                       WHERE [ParameterId] = @ParameterId AND [Manager] = @Caller)
 		BEGIN
-			DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner of the collar, or the owner or the Uploader of the collar parameter file to add this relationship.';
+			DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner of the related collar, or the owner/uploader of the related collar parameter file to delete it.';
 			RAISERROR(@message1, 18, 0)
 			RETURN (1)
 		END
 	END
+
+	-- Fix Defaults
+	IF (@CollarManufacturer IS NULL)
+	    SELECT @CollarManufacturer = [CollarManufacturer] FROM CollarParameters WHERE [ParameterId] = @ParameterId
+	IF (@CollarId IS NULL)
+	    SELECT @CollarId = [CollarId] FROM CollarParameters WHERE [ParameterId] = @ParameterId
+	    
 
 	-- Verify the end occurs after the start
 	IF @EndDate IS NOT NULL AND @EndDate <= @StartDate
@@ -6220,8 +6232,9 @@ BEGIN
 	
 
 	-- All other verification is handled by primary/foreign key and column constraints.
-	UPDATE [dbo].[CollarParameters] SET [StartDate] = @StartDate, [EndDate] = @EndDate
-		 WHERE [CollarManufacturer] = @CollarManufacturer AND [CollarId] = @CollarId AND [FileId] = @FileId
+	UPDATE [dbo].[CollarParameters] SET [CollarManufacturer] = @CollarManufacturer, [CollarId] = @CollarId, [FileId] = @FileId,
+	                                    [Gen3Period] = @Gen3Period, [StartDate] = @StartDate, [EndDate] = @EndDate
+		 WHERE  [ParameterId] = @ParameterId
 
 END
 GO
@@ -6235,9 +6248,10 @@ GO
 -- Description:	Adds a new collar parameter to the database.
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarParameter_Insert] 
-	@CollarManufacturer NVARCHAR(255) = NULL,
-	@CollarId			NVARCHAR(255) = NULL, 
+	@CollarManufacturer NVARCHAR(255),
+	@CollarId			NVARCHAR(255), 
 	@FileId				INT = NULL,
+	@Gen3Period         INT = NULL,
 	@StartDate			DATETIME2 = NULL, 
 	@EndDate			DATETIME2 = NULL,
 	@ParameterId		INT OUTPUT
@@ -6287,8 +6301,8 @@ BEGIN
 	-- All other verification is handled by primary/foreign key and column constraints.
 	-- You cannot have C1/F1 from D1 to D2 and then again from D3 to D4, because C1/F1 must be unique for each record.
 	-- to do this, upload the same file as F2
-	INSERT INTO dbo.CollarParameters ([CollarManufacturer], [CollarId], [FileId], [StartDate], [EndDate])
-		 VALUES (@CollarManufacturer, @CollarId, @FileId, @StartDate, @EndDate)
+	INSERT INTO dbo.CollarParameters ([CollarManufacturer], [CollarId], [FileId], [Gen3Period], [StartDate], [EndDate])
+		 VALUES (@CollarManufacturer, @CollarId, @FileId, @Gen3Period, @StartDate, @EndDate)
     SET @ParameterId = SCOPE_IDENTITY()
 END
 GO
@@ -6302,9 +6316,7 @@ GO
 -- Description:	Deletes a CollarParameter from the database
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarParameter_Delete] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL,
-	@FileId int = -1
+    @ParameterId INT
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -6317,7 +6329,7 @@ BEGIN
 	-- The caller must be an editor in the database - handled by execute permissions
 
 	-- Verify that the relationship exists (this is done now to avoid the following check issuing a confusing error)
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameters] WHERE [CollarManufacturer] = @CollarManufacturer AND [CollarId] = @CollarId AND [FileId] = @FileId)
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameters] WHERE [ParameterId] = @ParameterId)
 	BEGIN
 		RAISERROR('The collar/file relationship you want to delete was not found.', 18, 0)
 		RETURN (1)
@@ -6326,11 +6338,15 @@ BEGIN
 	-- The caller must be
 	--    the owner or the Uploader of the collar parameter file
 	--    or the owner of to collar to delete the parameter assignment
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] WHERE [FileId] = @FileId AND ([Owner] = @Caller OR [UploadUser] = @Caller))
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] AS F
+	                        JOIN [dbo].[CollarParameters] AS P ON P.FileId = F.FileId
+	                       WHERE [ParameterId] = @ParameterId AND ([Owner] = @Caller OR [UploadUser] = @Caller))
 	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
+		IF NOT EXISTS (SELECT 1 FROM dbo.Collars AS C
+	                        JOIN [dbo].[CollarParameters] AS P ON P.CollarManufacturer = C.CollarManufacturer AND P.CollarId = C.CollarId
+	                       WHERE [ParameterId] = @ParameterId AND [Manager] = @Caller)
 		BEGIN
-			DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner of the collar, or the owner or the Uploader of the collar parameter file (Id = '+str(@FileId)+') to delete it.';
+			DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner of the related collar, or the owner/uploader of the related collar parameter file to delete it.';
 			RAISERROR(@message1, 18, 0)
 			RETURN (1)
 		END
@@ -6338,7 +6354,7 @@ BEGIN
 
 	-- deleting a non-existant file will silently succeed.
 	-- All other verification is handled by primary/foreign key and column constraints.
-	DELETE FROM dbo.CollarParameters WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND FileId = @FileId;
+	DELETE FROM dbo.CollarParameters WHERE [ParameterId] = @ParameterId;
 END
 GO
 SET ANSI_NULLS ON
