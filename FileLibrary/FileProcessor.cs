@@ -18,7 +18,7 @@ namespace FileLibrary
     {
         public bool ProcessLocally { get; set; }
 
-        public void ProcessAll()
+        public void ProcessAll(Action<Exception, CollarFile, ArgosPlatform> handler = null, ProjectInvestigator pi = null)
         {
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViewsDataContext();
@@ -36,112 +36,6 @@ namespace FileLibrary
                 }
         }
 
-        public void ProcessPath(string path, Project project = null)
-        {
-            var database = new AnimalMovementDataContext();
-            if (System.IO.File.Exists(path))
-                ProcessFile(database, path, project);
-            else if (System.IO.Directory.Exists(path))
-                ProcessFolder(database, path, project);
-            throw new InvalidOperationException(path + "is not a folder or file");
-        }
-
-        void ProcessFolder(AnimalMovementDataContext database, string folderPath, Project project = null)
-        {
-            foreach (var file in System.IO.Directory.EnumerateFiles(folderPath))
-                try
-                {
-                    ProcessFile(database, System.IO.Path.Combine(folderPath, file), project);
-                }
-                catch (Exception ex)
-                {
-                    LogGeneralError("ERROR: " + ex.Message + " processing file " + file + " in " + folderPath);
-                }
-        }
-
-        #region process filepath
-
-        static Byte[] _fileContents;
-        static Byte[] _fileHash;
-
-        void ProcessFile(AnimalMovementDataContext database, string filePath, Project project = null)
-        {
-            if (project == null)
-            {
-                LogGeneralError("You must provide a project a project before the file or folder.");
-                return;
-            }
-
-            LoadAndHashFile(filePath);
-            if (_fileContents == null)
-                return;
-            if (AbortBecauseDuplicate(database, filePath))
-                return;
-            ArgosFile argos;
-            char format = GuessFileFormat(out argos);
-            if (argos == null)
-            {
-                LogGeneralWarning("Skipping file '" + filePath + "' is not a known Argos file type.");
-                return;
-            }
-
-            var file = new CollarFile
-            {
-                ProjectId = project.ProjectId,
-                FileName = System.IO.Path.GetFileName(filePath),
-                CollarManufacturer = "Telonics",
-                Status = 'A',
-                Contents = _fileContents,
-            };
-            database.CollarFiles.InsertOnSubmit(file);
-            database.SubmitChanges();
-            LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, file.FileName));
-
-            if (ProcessLocally)
-                ProcessFile(file, argos);
-            else
-                database.ArgosFile_Process(file.FileId);
-        }
-
-        static void LoadAndHashFile(string path)
-        {
-            try
-            {
-                _fileContents = System.IO.File.ReadAllBytes(path);
-            }
-            catch (Exception ex)
-            {
-                LogGeneralError("The file cannot be read: " + ex.Message);
-                return;
-            }
-            _fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(_fileContents);
-        }
-
-        static bool AbortBecauseDuplicate(AnimalMovementDataContext database, string path)
-        {
-            var duplicate = database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
-            if (duplicate == null)
-                return false;
-            var msg = String.Format("Skipping {2}, the contents have already been loaded as file '{0}' in project '{1}'.", path,
-                                    duplicate.FileName, duplicate.Project.ProjectName);
-            LogGeneralWarning(msg);
-            return true;
-        }
-
-        static char GuessFileFormat(out ArgosFile argos)
-        {
-            //FIXME - These will throw an exception if the contents is not the correct format
-            argos = new ArgosEmailFile(_fileContents);
-            if (argos.GetPrograms().Any())
-                return 'E';
-            argos = new ArgosAwsFile(_fileContents);
-            if (argos.GetPrograms().Any())
-                return 'F';
-            argos = null;
-            return '?';
-        }
-
-        #endregion
 
         public void ProcessId(int fileId)
         {
@@ -163,7 +57,7 @@ namespace FileLibrary
             }
         }
 
-        internal void ProcessFile(CollarFile file)
+        public void ProcessFile(CollarFile file)
         {
             try
             {
@@ -191,7 +85,7 @@ namespace FileLibrary
             }
         }
 
-        static void ProcessFile(CollarFile file, ArgosFile argos)
+        internal void ProcessFile(CollarFile file, ArgosFile argos)
         {
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViewsDataContext();
@@ -420,6 +314,11 @@ namespace FileLibrary
 
         #endregion
 
+
+        public void ProcessPartialFile(CollarFile file, ArgosPlatform platform)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [Serializable]
