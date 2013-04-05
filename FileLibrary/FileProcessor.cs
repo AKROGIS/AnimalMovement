@@ -14,13 +14,12 @@ namespace FileLibrary
         {
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViewsDataContext();
-            var query = from item in views.NeverProcessedArgosFiles
-                        join file in database.CollarFiles on item.FileId equals file.FileId
-                        where (pi == null || file.ProjectInvestigator == pi ||
-                               (file.Project != null && file.Project.ProjectInvestigator1 == pi))
-                        select file;
-            foreach (var file in query)
+            foreach (var item in views.NeverProcessedArgosFiles)
             {
+                var file = database.CollarFiles.First(f => f.FileId == item.FileId);
+                if (pi != null && file.ProjectInvestigator != pi && (file.Project == null ||
+                    file.Project.ProjectInvestigator1 != pi))
+                    continue;
                 try
                 {
                     ProcessFile(file);
@@ -32,23 +31,22 @@ namespace FileLibrary
                     handler(ex, file, null);
                 }
             }
-            var query2 = from item in views.PartiallyProcessedArgosFiles
-                         join file in database.CollarFiles on item.FileId equals file.FileId
-                         join platform in database.ArgosPlatforms on item.PlatformId equals platform.PlatformId
-                         where (pi == null || file.ProjectInvestigator == pi ||
-                                (file.Project != null && file.Project.ProjectInvestigator1 == pi))
-                         select new {file, platform};
-            foreach (var pair in query2)
+            foreach (var item in views.PartiallyProcessedArgosFiles)
             {
+                var file = database.CollarFiles.First(f => f.FileId == item.FileId);
+                var platform = database.ArgosPlatforms.First(p => p.PlatformId == item.PlatformId);
+                if (pi != null && file.ProjectInvestigator != pi && (file.Project == null ||
+                    file.Project.ProjectInvestigator1 != pi))
+                    continue;
                 try
                 {
-                    ProcessPartialFile(pair.file, pair.platform);
+                    ProcessPartialFile(file, platform);
                 }
                 catch (Exception ex)
                 {
                     if (handler == null)
                         throw;
-                    handler(ex, pair.file, pair.platform);
+                    handler(ex, file, platform);
                 }
             }
         }
