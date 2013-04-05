@@ -53,9 +53,10 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsProjectEditor = Database.IsEditor(Project.ProjectId, CurrentUser) ?? false;
+            var databaseFunctions = new AnimalMovementFunctions();
+            IsProjectEditor = databaseFunctions.IsEditor(Project.ProjectId, CurrentUser) ?? false;
             ProjectCodeTextBox.Text = Project.ProjectId;
-            AnimalIdTextBox.Text = Database.NextAnimalId(Project.ProjectId);
+            AnimalIdTextBox.Text = databaseFunctions.NextAnimalId(Project.ProjectId);
             GenderComboBox.DataSource = Database.LookupGenders;
             GenderComboBox.DisplayMember = "Sex";
             GenderComboBox.SelectedIndex = 0;

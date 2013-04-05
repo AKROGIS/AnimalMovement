@@ -9,6 +9,8 @@ namespace AnimalMovement
     internal partial class FileDetailsForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
+        private AnimalMovementViews DatabaseViews { get; set; }
+        private AnimalMovementFunctions DatabaseFunctions { get; set; }
         private string CurrentUser { get; set; }
         private int FileId { get; set; }
         private CollarFile File { get; set; }
@@ -26,7 +28,9 @@ namespace AnimalMovement
 
         private void LoadDataContext()
         {
- 	        Database = new AnimalMovementDataContext();
+            Database = new AnimalMovementDataContext();
+            DatabaseViews = new AnimalMovementViews();
+            DatabaseFunctions = new AnimalMovementFunctions();
             File = Database.CollarFiles.FirstOrDefault(f => f.FileId == FileId);
             if (File == null)
             {
@@ -34,7 +38,7 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsFileEditor = Database.IsEditor(File.ProjectId, CurrentUser) ?? false;
+            IsFileEditor = DatabaseFunctions.IsEditor(File.ProjectId, CurrentUser) ?? false;
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarFileFormat.Name;
@@ -58,8 +62,7 @@ namespace AnimalMovement
 
         private void UpdateCollarFixes()
         {
-            var db = new AnimalMovementViewsDataContext();
-            var data = from fix in db.AnimalFixesByFiles
+            var data = from fix in DatabaseViews.AnimalFixesByFiles
                        where fix.FileId == FileId
                        select fix;
             FixInfoDataGridView.DataSource = data;

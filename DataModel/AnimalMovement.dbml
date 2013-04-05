@@ -558,15 +558,6 @@
     <Parameter Name="Description" Parameter="description" Type="System.String" DbType="NVarChar(4000)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Name="dbo.NextAnimalId" Method="NextAnimalId" IsComposable="true">
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="VarChar(32)" />
-    <Return Type="System.String" />
-  </Function>
-  <Function Name="dbo.IsEditor" Method="IsEditor" IsComposable="true">
-    <Parameter Name="Project" Parameter="project" Type="System.String" DbType="VarChar(32)" />
-    <Parameter Name="User" Parameter="user" Type="System.String" DbType="NVarChar(128)" />
-    <Return Type="System.Boolean" />
-  </Function>
   <Function Name="dbo.CollarFixes_UpdateUnhideFix" Method="CollarFixes_UpdateUnhideFix">
     <Parameter Name="FixId" Parameter="fixId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
@@ -577,11 +568,6 @@
     <Parameter Name="Email" Parameter="email" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="Phone" Parameter="phone" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
-  </Function>
-  <Function Name="dbo.IsFixEditor" Method="IsFixEditor" IsComposable="true">
-    <Parameter Name="FixId" Parameter="fixId" Type="System.Int32" DbType="Int" />
-    <Parameter Name="User" Parameter="user" Type="System.String" DbType="NVarChar(128)" />
-    <Return Type="System.Boolean" />
   </Function>
   <Function Id="FunctionId8" Name="dbo.ProjectEditor_Delete" Method="ProjectEditor_Delete">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
@@ -679,10 +665,6 @@
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Name="dbo.ArgosFile_ClearProcessingResults" Method="ArgosFile_ClearProcessingResults">
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Return Type="System.Int32" />
-  </Function>
   <Function Id="FunctionId20" Name="dbo.ArgosDownloads_Insert" Method="ArgosDownloads_Insert">
     <Parameter Name="ProgramId" Parameter="programId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="PlatformId" Parameter="platformId" Type="System.String" DbType="NVarChar(255)" />
@@ -739,10 +721,6 @@
     <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
     <Parameter Name="Notes" Parameter="notes" Type="System.String" DbType="NVarChar(MAX)" />
     <Parameter Name="Active" Parameter="active" Type="System.Boolean" DbType="Bit" />
-    <Return Type="System.Int32" />
-  </Function>
-  <Function Name="dbo.ArgosFile_Process" Method="ArgosFile_Process">
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
   <Function Id="FunctionId26" Name="dbo.CollarFile_Update" Method="CollarFile_Update">

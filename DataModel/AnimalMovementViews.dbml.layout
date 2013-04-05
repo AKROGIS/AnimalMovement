@@ -1,21 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="AnimalMovementViews">
-  <DataContextMoniker Name="/AnimalMovementViewsDataContext" />
+  <DataContextMoniker Name="/AnimalMovementViews" />
   <nestedChildShapes>
     <classShape Id="19af6e8d-997f-444a-8a90-00b7205f93d0" absoluteBounds="1.375, 2.875, 2, 2.3478011067708335">
-      <DataClassMoniker Name="/AnimalMovementViewsDataContext/AnimalFixesByFile" />
+      <DataClassMoniker Name="/AnimalMovementViews/AnimalFixesByFile" />
       <nestedChildShapes>
         <elementListCompartment Id="dca2ef59-24f6-49b6-86e0-6dc4255b71c0" absoluteBounds="1.3899999999999997, 3.335, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
     <classShape Id="401fa5e3-55d1-4ada-9ae3-2a6a6d6034cf" absoluteBounds="6.125, 2.875, 2, 1.1939925130208333">
-      <DataClassMoniker Name="/AnimalMovementViewsDataContext/PartiallyProcessedArgosFiles" />
+      <DataClassMoniker Name="/AnimalMovementViews/PartiallyProcessedArgosFiles" />
       <nestedChildShapes>
         <elementListCompartment Id="8bc72b5f-e7bb-42a4-8870-c97b00019e19" absoluteBounds="6.1400000000000006, 3.335, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
     <classShape Id="e9f2c9c3-7f30-4dc0-a7d0-b5c18dbcc7da" absoluteBounds="3.75, 2.875, 2, 1.0016910807291668">
-      <DataClassMoniker Name="/AnimalMovementViewsDataContext/NeverProcessedArgosFiles" />
+      <DataClassMoniker Name="/AnimalMovementViews/NeverProcessedArgosFiles" />
       <nestedChildShapes>
         <elementListCompartment Id="7f58b3f3-7877-41dd-80aa-c546e7e5eb5a" absoluteBounds="3.7649999999999997, 3.335, 1.9700000000000002, 0.44169108072916669" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>

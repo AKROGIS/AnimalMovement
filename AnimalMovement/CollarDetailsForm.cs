@@ -16,6 +16,8 @@ namespace AnimalMovement
     internal partial class CollarDetailsForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
+        private AnimalMovementViews DatabaseViews { get; set; }
+        private AnimalMovementFunctions DatabaseFunctions { get; set; }
         private string ManufacturerId { get; set; }
         private string CollarId { get; set; }
         private string CurrentUser { get; set; }
@@ -51,6 +53,8 @@ namespace AnimalMovement
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
+            DatabaseFunctions = new AnimalMovementFunctions();
+            DatabaseViews = new AnimalMovementViews();
             Collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == ManufacturerId && c.CollarId == CollarId);
             if (Collar == null)
             {
@@ -85,17 +89,15 @@ namespace AnimalMovement
         {
             if (Collar == null)
                 return;
-            var db = new AnimalMovementViewsDataContext();
-            FilesDataGridView.DataSource = db.CollarFixesByFile(Collar.CollarManufacturer, Collar.CollarId);
+            FilesDataGridView.DataSource = DatabaseViews.CollarFixesByFile(Collar.CollarManufacturer, Collar.CollarId);
         }
 
         private void SetFixesGrid()
         {
             if (Collar == null)
                 return;
-            var db = new AnimalMovementViewsDataContext();
-            FixConflictsDataGridView.DataSource = db.ConflictingFixes(Collar.CollarManufacturer, Collar.CollarId, 36500); //last 100 years
-            var summary = db.CollarFixSummary(Collar.CollarManufacturer, Collar.CollarId).FirstOrDefault();
+            FixConflictsDataGridView.DataSource = DatabaseViews.ConflictingFixes(Collar.CollarManufacturer, Collar.CollarId, 36500); //last 100 years
+            var summary = DatabaseViews.CollarFixSummary(Collar.CollarManufacturer, Collar.CollarId).FirstOrDefault();
             SummaryLabel.Text = summary == null
                               ? "There are NO fixes."
                               : (summary.Count == summary.Unique
@@ -316,7 +318,7 @@ namespace AnimalMovement
                 UnhideFixButton.Enabled = false;
                 return;
             }
-            bool isEditor = Database.IsFixEditor(selectedFix.FixId, CurrentUser) ?? false;
+            bool isEditor = DatabaseFunctions.IsFixEditor(selectedFix.FixId, CurrentUser) ?? false;
             bool isHidden = selectedFix.HiddenBy != null;
             UnhideFixButton.Enabled = isEditor && isHidden;
         }

@@ -13,6 +13,8 @@ namespace AnimalMovement
     internal partial class AnimalDetailsForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
+        private AnimalMovementViews DatabaseViews { get; set; }
+        private AnimalMovementFunctions DatabaseFunctions { get; set; }
         private string ProjectId { get; set; }
         private string AnimalId { get; set; }
         private string CurrentUser { get; set; }
@@ -48,6 +50,8 @@ namespace AnimalMovement
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
+            DatabaseFunctions = new AnimalMovementFunctions();
+            DatabaseViews = new AnimalMovementViews();
             Animal = Database.Animals.FirstOrDefault(a => a.ProjectId == ProjectId && a.AnimalId == AnimalId);
             if (Animal == null)
             {
@@ -55,7 +59,7 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsAnimalEditor = Database.IsEditor(Animal.ProjectId, CurrentUser) ?? false;
+            IsAnimalEditor = DatabaseFunctions.IsEditor(Animal.ProjectId, CurrentUser) ?? false;
             ProjectTextBox.Text = Animal.Project.ProjectName;
             AnimalIdTextBox.Text = Animal.AnimalId;
             SpeciesComboBox.DataSource = Database.LookupSpecies;
@@ -77,8 +81,7 @@ namespace AnimalMovement
         {
             if (Animal == null)
                 return;
-            var db = new AnimalMovementViewsDataContext();
-            var summary = db.AnimalLocationSummary(Animal.ProjectId, Animal.AnimalId).FirstOrDefault();
+            var summary = DatabaseViews.AnimalLocationSummary(Animal.ProjectId, Animal.AnimalId).FirstOrDefault();
             if (summary == null)
             {
                 SummaryLabel.Text = "There are NO locations.";

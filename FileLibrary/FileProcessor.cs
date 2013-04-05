@@ -13,7 +13,7 @@ namespace FileLibrary
         public static void ProcessAll(Action<Exception, CollarFile, ArgosPlatform> handler = null, ProjectInvestigator pi = null)
         {
             var database = new AnimalMovementDataContext();
-            var views = new AnimalMovementViewsDataContext();
+            var views = new AnimalMovementViews();
             foreach (var item in views.NeverProcessedArgosFiles)
             {
                 var file = database.CollarFiles.First(f => f.FileId == item.FileId);
@@ -55,14 +55,16 @@ namespace FileLibrary
         public static void ProcessFile(CollarFile file)
         {
             ArgosFile argos = GetArgosFile(file);
-            ProcessFile(file, argos);
+            if (!ProcessOnServer(file))
+                ProcessFile(file, argos);
         }
 
 
         public static void ProcessPartialFile(CollarFile file, ArgosPlatform platform)
         {
             ArgosFile argos = GetArgosFile(file);
-            ProcessPartialFile(file, argos, platform);
+            if (!ProcessOnServer(file, platform))
+                ProcessPartialFile(file, argos, platform);
         }
 
 
@@ -89,20 +91,30 @@ namespace FileLibrary
         }
 
 
-        private static void ProcessFile(CollarFile file, ArgosFile argos)
+        private static bool ProcessOnServer(CollarFile file, ArgosPlatform platform = null)
         {
-            var database = new AnimalMovementDataContext();
-            var views = new AnimalMovementViewsDataContext();
-
             if (NeedTelonicsSoftware(file) && !HaveAccessToTelonicsSoftware())
             {
                 if (OnDatabaseServer())
                     throw new InvalidOperationException("No access to Telonics software to process files.");
-                database.ArgosFile_Process(file.FileId);
-                return;
+                var database = new AnimalMovementFunctions();
+                if (platform == null)
+                    database.ArgosFile_Process(file.FileId);
+                else
+                    database.ArgosFile_ProcessPlatform(file.FileId, platform.PlatformId);
+                return true;
             }
-            
-            database.ArgosFile_ClearProcessingResults(file.FileId);
+            return false;
+        }
+
+
+        private static void ProcessFile(CollarFile file, ArgosFile argos)
+        {
+            var database = new AnimalMovementDataContext();
+            var databaseViews = new AnimalMovementViews();
+            var databaseFunctions = new AnimalMovementFunctions();
+
+            databaseFunctions.ArgosFile_ClearProcessingResults(file.FileId);
 
             var transmissionGroups = from transmission in argos.GetTransmissions()
                                      group transmission by transmission.PlatformId
@@ -130,7 +142,7 @@ namespace FileLibrary
             foreach (var item in transmissionGroups)
             {
                 var parameterSets =
-                    views.GetTelonicsParametersForArgosDates(item.Platform, item.First, item.Last)
+                    databaseViews.GetTelonicsParametersForArgosDates(item.Platform, item.First, item.Last)
                           .OrderBy(c => c.StartDate)
                           .ToList();
                 if (parameterSets.Count == 0)
@@ -300,7 +312,7 @@ namespace FileLibrary
 
         static bool OnDatabaseServer()
         {
-            var database = new AnimalMovementViewsDataContext();
+            var database = new AnimalMovementViews();
             return database.Connection.DataSource == Environment.MachineName;
         }
 
@@ -311,7 +323,7 @@ namespace FileLibrary
 
         static bool NeedTelonicsSoftware(CollarFile file)
         {
-            var database = new AnimalMovementViewsDataContext();
+            var database = new AnimalMovementViews();
             var hasGen4 = database.FileHasGen4Data(file.FileId);
             //I should never get null; limitation of Linq to SQL
             return hasGen4.HasValue && hasGen4.Value;

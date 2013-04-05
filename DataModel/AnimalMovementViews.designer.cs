@@ -23,7 +23,7 @@ namespace DataModel
 	
 	
 	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="Animal_Movement")]
-	public partial class AnimalMovementViewsDataContext : System.Data.Linq.DataContext
+	public partial class AnimalMovementViews : System.Data.Linq.DataContext
 	{
 		
 		private static System.Data.Linq.Mapping.MappingSource mappingSource = new AttributeMappingSource();
@@ -32,31 +32,31 @@ namespace DataModel
     partial void OnCreated();
     #endregion
 		
-		public AnimalMovementViewsDataContext() : 
+		public AnimalMovementViews() : 
 				base(global::DataModel.Properties.Settings.Default.Animal_MovementConnectionString, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public AnimalMovementViewsDataContext(string connection) : 
+		public AnimalMovementViews(string connection) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public AnimalMovementViewsDataContext(System.Data.IDbConnection connection) : 
+		public AnimalMovementViews(System.Data.IDbConnection connection) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public AnimalMovementViewsDataContext(string connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
+		public AnimalMovementViews(string connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();
 		}
 		
-		public AnimalMovementViewsDataContext(System.Data.IDbConnection connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
+		public AnimalMovementViews(System.Data.IDbConnection connection, System.Data.Linq.Mapping.MappingSource mappingSource) : 
 				base(connection, mappingSource)
 		{
 			OnCreated();

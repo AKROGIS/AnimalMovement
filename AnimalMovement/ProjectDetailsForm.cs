@@ -22,6 +22,7 @@ namespace AnimalMovement
     {
 
         private AnimalMovementDataContext Database { get; set; }
+        private AnimalMovementFunctions DatabaseFunctions { get; set; }
         private string CurrentUser { get; set; }
         private string ProjectId { get; set; }
         private Project Project { get; set; }
@@ -72,6 +73,7 @@ namespace AnimalMovement
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
+            DatabaseFunctions = new AnimalMovementFunctions();
             Project = Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);
             if (Database == null || Project == null || ProjectId == null || CurrentUser == null)
             {
@@ -80,7 +82,7 @@ namespace AnimalMovement
                 return;
             }
             IsProjectInvestigator = IsCurrentUserTheInvestigatorForThisProject();
-            IsEditor = Database.IsEditor(Project.ProjectId, CurrentUser) ?? false;
+            IsEditor = DatabaseFunctions.IsEditor(Project.ProjectId, CurrentUser) ?? false;
             ProjectCodeTextBox.Text = Project.ProjectId;
             DescriptionTextBox.Text = Project.Description;
             UnitTextBox.Text = Project.UnitCode;
