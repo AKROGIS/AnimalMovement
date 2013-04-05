@@ -218,7 +218,7 @@ namespace FileLibrary
                         var data = Encoding.UTF8.GetBytes(String.Join("\n", lines));
                         var collarFile = new CollarFile
                         {
-                            ProjectId = file.Project.ProjectId,
+                            Project = file.Project,
                             FileName = Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameterSet.CollarId + ".csv",
                             CollarManufacturer = parameterSet.CollarManufacturer,
                             CollarId = parameterSet.CollarId,
