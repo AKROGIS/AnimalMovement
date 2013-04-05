@@ -41,11 +41,8 @@ namespace ArgosProcessor
         {
             try
             {
-                //TODO check availability of TDC.exe (and options like TDC timeout) to set FileProcessor options
-                var processor = new FileProcessor { ProcessLocally = true };
-
                 if (args.Length == 0)
-                    processor.ProcessAll(handleException);
+                    FileProcessor.ProcessAll(handleException);
                 else
                 {
                     ArgosPlatform platform = null;
@@ -81,11 +78,11 @@ namespace ArgosProcessor
                             }
                         }
                         if (args.Length == 1 && pi != null)
-                            processor.ProcessAll(handleException, pi);
+                            FileProcessor.ProcessAll(handleException, pi);
                         if (file != null && platform != null)
                             try
                             {
-                                processor.ProcessPartialFile(file, platform);
+                                FileProcessor.ProcessPartialFile(file, platform);
                             }
                             catch (Exception ex)
                             {
@@ -94,7 +91,7 @@ namespace ArgosProcessor
                         if (file != null && platform == null)
                             try
                             {
-                                processor.ProcessFile(file);
+                                FileProcessor.ProcessFile(file);
                             }
                             catch (Exception ex)
                             {
@@ -111,7 +108,14 @@ namespace ArgosProcessor
 
         private static void handleException(Exception ex, CollarFile file, ArgosPlatform platform)
         {
-            throw new NotImplementedException();
+            if (file == null)
+            {
+                Console.WriteLine("Processor exception handler called without a collar: {0}", ex.Message);
+                return;
+            }
+            var db = new AnimalMovementDataContext();
+            db.ArgosFileProcessingIssues_Insert(file.FileId, ex.Message, platform == null ? null : platform.PlatformId,
+                                                null, null);
         }
 
         private static bool ClearCollarFile(string arg)

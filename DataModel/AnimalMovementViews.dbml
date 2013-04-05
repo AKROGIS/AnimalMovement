@@ -92,4 +92,8 @@
       <Column Name="EndDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
     </ElementType>
   </Function>
+  <Function Name="dbo.FileHasGen4Data" Method="FileHasGen4Data" IsComposable="true">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Return Type="System.Boolean" />
+  </Function>
 </Database>

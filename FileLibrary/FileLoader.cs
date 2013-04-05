@@ -132,7 +132,7 @@ namespace FileLibrary
             database.SubmitChanges();
             LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, file.FileName));
 
-            (new FileProcessor()).ProcessFile(file, argos);
+            FileProcessor.ProcessFile(file);
 
         }
 

@@ -154,7 +154,7 @@ namespace ArgosDownloader
         {
             if (program == null && platform == null)
             {
-                AddErrorToEmail(_admin, null, null, "Downloader exception handler called without a program or platform.");
+                AddErrorToEmail(_admin, null, null, "Downloader exception handler called without a program or platform: " + ex.Message);
                 return;
             }
             string errors = null;

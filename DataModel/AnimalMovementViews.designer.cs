@@ -121,6 +121,12 @@ namespace DataModel
 		{
 			return this.CreateMethodCallQuery<GetTelonicsParametersForArgosDatesResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), platformID, startDate, endDate);
 		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.FileHasGen4Data", IsComposable=true)]
+		public System.Nullable<bool> FileHasGen4Data([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
+		{
+			return ((System.Nullable<bool>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId).ReturnValue));
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.AnimalFixesByFile")]

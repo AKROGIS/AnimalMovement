@@ -1,95 +1,109 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Security.Cryptography;
 using System.Text;
 using DataModel;
 using Telonics;
 
-
-//TODO - When loading an Argos file, we need to populate the ArgosDownloadSummary Table.
-//TODO - Error handling/logging need to be rethunk to support a library.
-//TODO - Need method to Process(CollarFile,ArgosPlatform)
-//TODO - ProcessAll need to check for partial files
-
 namespace FileLibrary
 {
-    public class FileProcessor
+    public static class FileProcessor
     {
-        public bool ProcessLocally { get; set; }
-
-        public void ProcessAll(Action<Exception, CollarFile, ArgosPlatform> handler = null, ProjectInvestigator pi = null)
+        public static void ProcessAll(Action<Exception, CollarFile, ArgosPlatform> handler = null, ProjectInvestigator pi = null)
         {
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViewsDataContext();
-            foreach (var file in views.NeverProcessedArgosFiles)
+            var query = from item in views.NeverProcessedArgosFiles
+                        join file in database.CollarFiles on item.FileId equals file.FileId
+                        where (pi == null || file.ProjectInvestigator == pi ||
+                               (file.Project != null && file.Project.ProjectInvestigator1 == pi))
+                        select file;
+            foreach (var file in query)
+            {
                 try
                 {
-                    if (ProcessLocally)
-                        ProcessId(file.FileId);
-                    else
-                        database.ArgosFile_Process(file.FileId);
+                    ProcessFile(file);
                 }
                 catch (Exception ex)
                 {
-                    LogFileMessage(file.FileId, "ERROR: " + ex.Message + "processing " + (ProcessLocally ? "locally" : "in database"));
+                    if (handler == null)
+                        throw;
+                    handler(ex, file, null);
                 }
-        }
-
-
-        public void ProcessId(int fileId)
-        {
-            var database = new AnimalMovementDataContext();
-            if (ProcessLocally)
+            }
+            var query2 = from item in views.PartiallyProcessedArgosFiles
+                         join file in database.CollarFiles on item.FileId equals file.FileId
+                         join platform in database.ArgosPlatforms on item.PlatformId equals platform.PlatformId
+                         where (pi == null || file.ProjectInvestigator == pi ||
+                                (file.Project != null && file.Project.ProjectInvestigator1 == pi))
+                         select new {file, platform};
+            foreach (var pair in query2)
             {
-                var file = database.CollarFiles.FirstOrDefault(f => f.FileId == fileId && (f.Format == 'E' || f.Format == 'F' || f.Format == 'G'));
-                if (file == null)
+                try
                 {
-                    var msg = String.Format("{0} is not an Id for an Argos file in the database.", fileId);
-                    LogGeneralError(msg);
-                    return;
+                    ProcessPartialFile(pair.file, pair.platform);
                 }
-                ProcessFile(file);
-            }
-            else
-            {
-                database.ArgosFile_Process(fileId);
-            }
-        }
-
-        public void ProcessFile(CollarFile file)
-        {
-            try
-            {
-                ArgosFile argos;
-                switch (file.Format)
+                catch (Exception ex)
                 {
-                    case 'E':
-                        argos = new ArgosEmailFile(file.Contents.ToArray());
-                        break;
-                    case 'F':
-                        argos = new ArgosAwsFile(file.Contents.ToArray());
-                        break;
-                    case 'G':
-                        argos = new DebevekFile(file.Contents.ToArray());
-                        break;
-                    default:
-                        LogGeneralError("Unrecognized File Format: " + file.Format);
-                        return;
+                    if (handler == null)
+                        throw;
+                    handler(ex, pair.file, pair.platform);
                 }
-                ProcessFile(file, argos);
-            }
-            catch (Exception ex)
-            {
-                LogFileMessage(file.FileId, "ERROR: " + ex.Message);
             }
         }
 
-        internal void ProcessFile(CollarFile file, ArgosFile argos)
+
+        public static void ProcessFile(CollarFile file)
+        {
+            ArgosFile argos = GetArgosFile(file);
+            ProcessFile(file, argos);
+        }
+
+
+        public static void ProcessPartialFile(CollarFile file, ArgosPlatform platform)
+        {
+            ArgosFile argos = GetArgosFile(file);
+            ProcessPartialFile(file, argos, platform);
+        }
+
+
+        private static ArgosFile GetArgosFile(CollarFile file)
+        {
+            switch (file.Format)
+            {
+                case 'E':
+                    return new ArgosEmailFile(file.Contents.ToArray());
+                case 'F':
+                    return new ArgosAwsFile(file.Contents.ToArray());
+                case 'G':
+                    return new DebevekFile(file.Contents.ToArray());
+                default:
+                    throw new InvalidOperationException("Unsupported file format: " + file.Format +
+                                                        " (supported formats are E,F,G)");
+            }
+        }
+
+
+        private static void ProcessPartialFile(CollarFile file, ArgosFile argos, ArgosPlatform platform)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        private static void ProcessFile(CollarFile file, ArgosFile argos)
         {
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViewsDataContext();
 
+            if (NeedTelonicsSoftware(file) && !HaveAccessToTelonicsSoftware())
+            {
+                if (OnDatabaseServer())
+                    throw new InvalidOperationException("No access to Telonics software to process files.");
+                database.ArgosFile_Process(file.FileId);
+                return;
+            }
+            
             database.ArgosFile_ClearProcessingResults(file.FileId);
 
             var transmissionGroups = from transmission in argos.GetTransmissions()
@@ -112,7 +126,7 @@ namespace FileLibrary
                 else if (awsFile.MaxResponseReached.Value)
                     msg = String.Format("This file is truncated.  The Argos server could not return all the data requested.");
                 if (msg != null)
-                    LogFileMessage(file.FileId, msg);
+                    LogIssueForFile(file.FileId, msg);
             }
 
             foreach (var item in transmissionGroups)
@@ -124,19 +138,19 @@ namespace FileLibrary
                 if (parameterSets.Count == 0)
                 {
                     var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}", item.Platform, item.First, item.Last);
-                    LogFileMessage(file.FileId, msg, item.Platform);
+                    LogIssueForFile(file.FileId, msg, item.Platform);
                     continue;
                 }
                 if (parameterSets[0].StartDate != null && item.First < parameterSets[0].StartDate)
                 {
                     var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}", item.Platform, item.First, parameterSets[0].StartDate);
-                    LogFileMessage(file.FileId, msg, item.Platform);
+                    LogIssueForFile(file.FileId, msg, item.Platform);
                 }
                 int lastIndex = parameterSets.Count - 1;
                 if (parameterSets[lastIndex].EndDate != null && parameterSets[lastIndex].EndDate < item.Last)
                 {
                     var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}", item.Platform, parameterSets[lastIndex].EndDate, item.Last);
-                    LogFileMessage(file.FileId, msg, item.Platform);
+                    LogIssueForFile(file.FileId, msg, item.Platform);
                 }
                 foreach (var parameterSet in parameterSets)
                 {
@@ -149,7 +163,6 @@ namespace FileLibrary
                     try
                     {
                         IProcessor processor = null;
-                        char format = '?';
                         string issue = null;
                         switch (file.Format)
                         {
@@ -170,11 +183,9 @@ namespace FileLibrary
                                                     parameterSet.PlatformId, start, end,
                                                     parameterSet.CollarId, ex.Message);
                                         }
-                                        format = 'D';
                                         break;
                                     case "Gen4":
                                         processor = GetGen4Processor(parameterSet);
-                                        format = 'C';
                                         break;
                                     default:
                                         issue =
@@ -187,11 +198,11 @@ namespace FileLibrary
                                 break;
                             case 'G':
                                 processor = new DebevekProcessor();
-                                format = 'B';
                                 break;
                             default:
-                                //This is programming error, as we should have already checked for this condition
-                                throw new InvalidOperationException("Unsupported CollarFile Format '" + format +"'.");
+                                issue = String.Format("Unsupported CollarFile Format '" + file.Format +
+                                                      "'. (supported formats are E,F,G)");
+                                break;
                         }
                         if (processor == null)
                             issue =
@@ -201,7 +212,7 @@ namespace FileLibrary
                                     parameterSet.CollarId);
                         if (issue != null)
                         {
-                            LogFileMessage(file.FileId, issue, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
+                            LogIssueForFile(file.FileId, issue, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
                             continue;
                         }
                         var transmissions = item.Transmissions.Where(t => start <= t.DateTime && t.DateTime <= end);
@@ -210,7 +221,7 @@ namespace FileLibrary
                         var collarFile = new CollarFile
                         {
                             ProjectId = file.Project.ProjectId,
-                            FileName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameterSet.CollarId + ".csv",
+                            FileName = Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameterSet.CollarId + ".csv",
                             CollarManufacturer = parameterSet.CollarManufacturer,
                             CollarId = parameterSet.CollarId,
                             Status = file.Status,
@@ -235,11 +246,12 @@ namespace FileLibrary
                                 "ERROR {5} adding Argos {0} transmissions from {1:g} to {2:g} to Collar {3}/{4}",
                                 parameterSet.PlatformId, start, end,
                                 parameterSet.CollarManufacturer, parameterSet.CollarId, ex.Message);
-                        LogFileMessage(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
+                        LogIssueForFile(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
                     }
                 }
             }
         }
+
 
         private static IProcessor GetGen3Processor(GetTelonicsParametersForArgosDatesResult parameterSet)
         {
@@ -250,75 +262,65 @@ namespace FileLibrary
             return new Gen3Processor(TimeSpan.FromMinutes(parameterSet.Gen3Period.Value));
         }
 
+
         private static IProcessor GetGen4Processor(GetTelonicsParametersForArgosDatesResult parameterSet)
         {
-            var processor = new Gen4Processor(parameterSet.Contents.ToArray());
-            string tdcExe = Settings.GetSystemDefault("tdc_exe");
-            string batchFile = Settings.GetSystemDefault("tdc_batch_file_format");
-            int timeout;
-            Int32.TryParse(Settings.GetSystemDefault("tdc_timeout"), out timeout);
-            if (!String.IsNullOrEmpty(tdcExe))
-                processor.TdcExecutable = tdcExe;
-            if (!String.IsNullOrEmpty(batchFile))
-                processor.BatchFileTemplate = batchFile;
-            if (timeout != 0)
-                processor.TdcTimeout = timeout;
+            var processor = new Gen4Processor(parameterSet.Contents.ToArray())
+                {
+                    BatchFileTemplate = Properties.Settings.Default.TdcBatchFileFormat,
+                    TdcExecutable = Properties.Settings.Default.TdcPathToExecutable,
+                    TdcTimeout = Properties.Settings.Default.TdcMillisecondTimeout
+                };
             return processor;
         }
 
+
         #region Logging
 
-        static void LogFileMessage(int fileid, string message, string platform = null, string collarMfgr = null, string collarId = null)
+        static void LogIssueForFile(int fileid, string message, string platform = null, string collarMfgr = null, string collarId = null)
         {
-            try
+            var issue = new ArgosFileProcessingIssue
             {
-                var issue = new ArgosFileProcessingIssue
-                {
-                    FileId = fileid,
-                    Issue = message,
-                    PlatformId = platform,
-                    CollarManufacturer = collarMfgr,
-                    CollarId = collarId
-                };
-                var database = new AnimalMovementDataContext();
-                database.ArgosFileProcessingIssues.InsertOnSubmit(issue);
-                database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                LogFatalError("Exception Logging Message in Database: " + ex.Message);
-            }
-        }
-
-        static void LogFatalError(string error)
-        {
-            LogGeneralError(error);
-            throw new ProcessingException();
-        }
-
-        static void LogGeneralWarning(string warning)
-        {
-            LogGeneralMessage("Warning: " + warning);
-        }
-
-        static void LogGeneralError(string error)
-        {
-            LogGeneralMessage("ERROR: " + error);
+                FileId = fileid,
+                Issue = message,
+                PlatformId = platform,
+                CollarManufacturer = collarMfgr,
+                CollarId = collarId
+            };
+            var database = new AnimalMovementDataContext();
+            database.ArgosFileProcessingIssues.InsertOnSubmit(issue);
+            database.SubmitChanges();
         }
 
         static void LogGeneralMessage(string message)
         {
             Console.WriteLine(message);
-            System.IO.File.AppendAllText("ArgosProcessor.log", message);
+            File.AppendAllText("ArgosProcessor.log", message);
         }
 
         #endregion
 
-
-        public void ProcessPartialFile(CollarFile file, ArgosPlatform platform)
+        static bool OnDatabaseServer()
         {
-            throw new NotImplementedException();
+            var database = new AnimalMovementViewsDataContext();
+            return database.Connection.DataSource == Environment.MachineName;
         }
+
+        static bool HaveAccessToTelonicsSoftware()
+        {
+            return File.Exists(Properties.Settings.Default.TdcPathToExecutable);
+        }
+
+        static bool NeedTelonicsSoftware(CollarFile file)
+        {
+            var database = new AnimalMovementViewsDataContext();
+            var hasGen4 = database.FileHasGen4Data(file.FileId);
+            //I should never get null; limitation of Linq to SQL
+            return hasGen4.HasValue && hasGen4.Value;
+        }
+
+
+
     }
 
     [Serializable]

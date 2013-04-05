@@ -75,7 +75,7 @@ namespace FileLibrary
             CollarFile file = FileLoader.LoadProgram(program, days, results, errors);
             if (file == null)
                 return;
-            new FileProcessor().ProcessFile(file);
+            FileProcessor.ProcessFile(file);
         }
 
 
@@ -103,7 +103,7 @@ namespace FileLibrary
             CollarFile file = FileLoader.LoadPlatfrom(platform, days, results, errors);
             if (file == null)
                 return;
-            new FileProcessor().ProcessFile(file);
+            FileProcessor.ProcessFile(file);
         }
     }
 }
