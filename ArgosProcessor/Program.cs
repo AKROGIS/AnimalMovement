@@ -106,8 +106,9 @@ namespace ArgosProcessor
             if (!Int32.TryParse(fileId, out id) || id < 1)
                 return null;
             var database = new AnimalMovementDataContext();
-            //FIXME only get files with Argos Data
-            return database.CollarFiles.FirstOrDefault(f => f.FileId == id);
+            return (from collar in database.CollarFiles
+                    where collar.LookupCollarFileFormat.ArgosData == 'Y' && collar.FileId == id
+                    select collar).FirstOrDefault();
         }
 
         private static ArgosPlatform GetPlatform(string platformId)
