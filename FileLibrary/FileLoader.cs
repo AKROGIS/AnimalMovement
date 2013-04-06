@@ -4,6 +4,8 @@ using System.Security.Cryptography;
 using DataModel;
 using Telonics;
 
+//FIXME - this file needs massive cleanup!
+
 namespace FileLibrary
 {
     static public class FileLoader

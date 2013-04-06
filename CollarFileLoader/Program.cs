@@ -8,6 +8,7 @@ namespace CollarFileLoader
 {
     static class Program
     {
+        //TODO - cleanup this file!
         /// <summary>
         /// This program may be run by a user from the command line to load multiple files/folder of files.
         /// The program may also be used by a user to process all unprocessed files.
@@ -47,6 +48,9 @@ namespace CollarFileLoader
                 else
                 {
                     Project project = null;
+                    //TODO - Add option for owner
+                    //TODO - Use option processing like other files
+                    //TODO - provide exception handler for processing a folder
                     foreach (var arg in args)
                     {
                         try

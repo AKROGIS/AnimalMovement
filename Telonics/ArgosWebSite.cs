@@ -4,6 +4,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 
+//FIXME - use settings to define URLS min/max days, etc.
 namespace Telonics
 {
     /// <summary>
