@@ -148,7 +148,7 @@ namespace FileLibrary
                     LogIssueForFile(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer,
                                     parameterSet.CollarId);
                 }
-            LogGeneralMessage("Finished processing transmissions");
+            LogGeneralMessage("  Finished processing transmissions");
         }
 
 
@@ -324,7 +324,7 @@ namespace FileLibrary
                 try
                 {
                     File.AppendAllText(Properties.Settings.Default.FileProcessorLogFilePath,
-                                       String.Format("{0}: {1}", DateTime.Now, message));
+                                       String.Format("{0}: {1}" + Environment.NewLine, DateTime.Now, message));
                 }
                 catch (Exception ex)
                 {
@@ -351,7 +351,7 @@ namespace FileLibrary
                 try
                 {
                     File.AppendAllText(Properties.Settings.Default.FileProcessorLogFilePath,
-                                       String.Format("{0}: {1}", DateTime.Now, message));
+                                       String.Format("{0}: {1}" + Environment.NewLine, DateTime.Now, message));
                 }
                 catch (Exception ex)
                 {
