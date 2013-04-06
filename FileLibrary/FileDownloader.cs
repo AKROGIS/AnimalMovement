@@ -52,6 +52,12 @@ namespace FileLibrary
         }
 
 
+        //TODO - finish documentation
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="program"></param>
+        /// <param name="daysToRetrieve"></param>
         public static void DownloadArgosProgram(ArgosProgram program, int? daysToRetrieve = null)
         {
             int daysSinceLastDownload;
@@ -79,6 +85,12 @@ namespace FileLibrary
         }
 
 
+        //TODO - finish documentation
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="platform"></param>
+        /// <param name="daysToRetrieve"></param>
         public static void DownloadArgosPlatform(ArgosPlatform platform, int? daysToRetrieve = null)
         {
             int daysSinceLastDownload;

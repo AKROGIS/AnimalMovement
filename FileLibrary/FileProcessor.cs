@@ -13,6 +13,15 @@ namespace FileLibrary
     {
         #region Public API
 
+        /// <summary>
+        /// Find and process all of the Argos files that need full or partial processing
+        /// </summary>
+        /// <param name="handler">Delegate to handle exceptions on each file, so that processing can continue.
+        /// If the handler is null, processing will stop on first exception.
+        /// The handler can throw it's own exception to halt further processing</param>
+        /// <param name="pi">A project investigator.
+        /// If provided, only files owned by or in projects managed by the given PI will be processed
+        /// If null, then all files needing processing will be processed</param>
         public static void ProcessAll(Action<Exception, CollarFile, ArgosPlatform> handler = null,
                                       ProjectInvestigator pi = null)
         {
@@ -56,8 +65,16 @@ namespace FileLibrary
         }
 
 
+        /// <summary>
+        /// Full or partial processing of Telonics data in an Argos file
+        /// </summary>
+        /// <param name="file">The collar file with Argos data to processes.  Must not be null</param>
+        /// <param name="platform">The Argos platform in the file to process.
+        /// If this is null, then all the platforms will be processed.</param>
         public static void ProcessFile(CollarFile file, ArgosPlatform platform = null)
         {
+            if (file == null)
+                throw new ArgumentNullException("file","No collar file was provided to process.");
             if (!ProcessOnServer(file, platform))
                 ProcessFile(file, GetArgosFile(file), platform);
         }
