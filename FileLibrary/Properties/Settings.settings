@@ -17,5 +17,20 @@
     <Setting Name="TdcBatchFileFormat" Type="System.String" Scope="Application">
       <Value Profile="(Default)">&lt;BatchSettings&gt;&lt;ArgosFile&gt;{0}&lt;/ArgosFile&gt;&lt;ParameterFile&gt;{1}&lt;/ParameterFile&gt;&lt;OutputFolder&gt;{2}&lt;/OutputFolder&gt;&lt;BatchLog&gt;{3}&lt;/BatchLog&gt;&lt;MoveFiles&gt;false&lt;/MoveFiles&gt;&lt;GoogleEarth&gt;false&lt;/GoogleEarth&gt;&lt;/BatchSettings&gt;</Value>
     </Setting>
+    <Setting Name="FileProcessorLogFilePath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ArgosProcessor.log</Value>
+    </Setting>
+    <Setting Name="LogMessagesToConsole" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LogMessagesToLogFile" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="LogErrorsToConsole" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="LogErrorsToLogFile" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

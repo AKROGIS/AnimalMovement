@@ -69,5 +69,50 @@ namespace FileLibrary.Properties {
                 return ((string)(this["TdcBatchFileFormat"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ArgosProcessor.log")]
+        public string FileProcessorLogFilePath {
+            get {
+                return ((string)(this["FileProcessorLogFilePath"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LogMessagesToConsole {
+            get {
+                return ((bool)(this["LogMessagesToConsole"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LogMessagesToLogFile {
+            get {
+                return ((bool)(this["LogMessagesToLogFile"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LogErrorsToConsole {
+            get {
+                return ((bool)(this["LogErrorsToConsole"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LogErrorsToLogFile {
+            get {
+                return ((bool)(this["LogErrorsToLogFile"]));
+            }
+        }
     }
 }
