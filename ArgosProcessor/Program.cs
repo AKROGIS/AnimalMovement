@@ -7,6 +7,13 @@ namespace ArgosProcessor
 {
     internal static class Program
     {
+        /// <summary>
+        /// Full or partially processes telonics data in argos files
+        /// </summary>
+        /// <param name="args">
+        /// FIXME - document arguments
+        /// !!! must provide platform first to do partial processing
+        /// </param>
         private static void Main(string[] args)
         {
             try
