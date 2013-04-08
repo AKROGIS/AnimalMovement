@@ -6,7 +6,7 @@ using FileLibrary;
 
 namespace CollarFileLoader
 {
-    static class Program
+    internal static class Program
     {
         //TODO - cleanup this documentation!
         /// <summary>
@@ -39,7 +39,7 @@ namespace CollarFileLoader
         /// If TDC.exe is not available, then the FileProcessor will request that the database
         /// invoke the file processor on the server.
         /// </remarks>
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {
@@ -49,7 +49,9 @@ namespace CollarFileLoader
                     if (owner != null)
                         FileLoader.LoadPath(Environment.CurrentDirectory, HandleException, null, owner);
                     else
-                        Console.WriteLine("Since you ({0}) are not a project investigator, you must specify a project or an owner to load files", caller);
+                        Console.WriteLine(
+                            "Since you ({0}) are not a project investigator, you must specify a project or an owner to load files",
+                            caller);
                 else
                 {
                     Project project = null;
@@ -73,12 +75,14 @@ namespace CollarFileLoader
                         if (path != null)
                         {
                             if (project == null && owner == null)
-                                Console.WriteLine("Since you ({0}) are not a project investigator, you must specify a project or an owner before a path", caller);
+                                Console.WriteLine(
+                                    "Since you ({0}) are not a project investigator, you must specify a project or an owner before a path",
+                                    caller);
                             else
                                 FileLoader.LoadPath(path, HandleException, project, owner);
                             continue;
                         }
-                        Console.WriteLine("argument: {0} is not a known project, project investigator or path",arg);
+                        Console.WriteLine("argument: {0} is not a known project, project investigator or path", arg);
                     }
                 }
             }
@@ -90,8 +94,8 @@ namespace CollarFileLoader
 
         private static void HandleException(Exception ex, string path, Project project, ProjectInvestigator manager)
         {
-            Console.WriteLine("Unable to load file: {0} for project: {1} or manager: {2} reason: {3}", path, project.ProjectId, manager.Login, ex.Message);
-            return;
+            Console.WriteLine("Unable to load file: {0} for project: {1} or manager: {2} reason: {3}", path,
+                              project.ProjectId, manager.Login, ex.Message);
         }
 
         private static Project GetProject(string projectId)
