@@ -8,7 +8,7 @@ namespace CollarFileLoader
 {
     static class Program
     {
-        //TODO - cleanup this file!
+        //TODO - cleanup this documentation!
         /// <summary>
         /// This program may be run by a user from the command line to load multiple files/folder of files.
         /// The program may also be used by a user to process all unprocessed files.
@@ -43,30 +43,42 @@ namespace CollarFileLoader
         {
             try
             {
+                string caller = Environment.UserDomainName + @"\" + Environment.UserName;
+                ProjectInvestigator owner = GetOwner(caller);
                 if (args.Length == 0)
-                    FileLoader.LoadFolder(Environment.CurrentDirectory);
+                    if (owner != null)
+                        FileLoader.LoadPath(Environment.CurrentDirectory, HandleException, null, owner);
+                    else
+                        Console.WriteLine("Since you ({0}) are not a project investigator, you must specify a project or an owner to load files", caller);
                 else
                 {
                     Project project = null;
-                    //TODO - Add option for owner
-                    //TODO - Use option processing like other files
-                    //TODO - provide exception handler for processing a folder
                     foreach (var arg in args)
                     {
-                        try
+                        var projectArg = GetProject(arg);
+                        if (projectArg != null)
                         {
-                            string path;
-                            if (arg.StartsWith("/p:"))
-                                project = GetProject(arg.Substring(3));
-                            else if ((path = GetFullPath(arg)) != null)
-                                FileLoader.LoadPath(path, project);
+                            project = projectArg;
+                            owner = null;
+                            continue;
+                        }
+                        var ownerArg = GetOwner(arg);
+                        if (ownerArg != null)
+                        {
+                            owner = ownerArg;
+                            project = null;
+                            continue;
+                        }
+                        var path = GetFullPath(arg);
+                        if (path != null)
+                        {
+                            if (project == null && owner == null)
+                                Console.WriteLine("Since you ({0}) are not a project investigator, you must specify a project or an owner before a path", caller);
                             else
-                                Console.WriteLine("Ignoring argument '{0}'.  Each argument must be a file, folder or /p:ProjectId", arg);
+                                FileLoader.LoadPath(path, HandleException, project, owner);
+                            continue;
                         }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Exception {0} on argument '{1}'.", ex.Message, arg);
-                        }
+                        Console.WriteLine("argument: {0} is not a known project, project investigator or path",arg);
                     }
                 }
             }
@@ -76,10 +88,36 @@ namespace CollarFileLoader
             }
         }
 
+        private static void HandleException(Exception ex, string path, Project project, ProjectInvestigator manager)
+        {
+            Console.WriteLine("Unable to load file: {0} for project: {1} or manager: {2} reason: {3}", path, project.ProjectId, manager.Login, ex.Message);
+            return;
+        }
+
         private static Project GetProject(string projectId)
         {
+            projectId = projectId.Normalize();
+            if (projectId.StartsWith("/p:", StringComparison.OrdinalIgnoreCase))
+                projectId = projectId.Substring(3);
+            if (projectId.StartsWith("/project:", StringComparison.OrdinalIgnoreCase))
+                projectId = projectId.Substring(9);
             var database = new AnimalMovementDataContext();
             return database.Projects.FirstOrDefault(p => p.ProjectId == projectId);
+        }
+
+        private static ProjectInvestigator GetOwner(string owner)
+        {
+            owner = owner.Normalize();
+            if (owner.StartsWith("/m:", StringComparison.OrdinalIgnoreCase))
+                owner = owner.Substring(3);
+            if (owner.StartsWith("/manager:", StringComparison.OrdinalIgnoreCase))
+                owner = owner.Substring(9);
+            if (owner.StartsWith("/o:", StringComparison.OrdinalIgnoreCase))
+                owner = owner.Substring(3);
+            if (owner.StartsWith("/owner:", StringComparison.OrdinalIgnoreCase))
+                owner = owner.Substring(7);
+            var database = new AnimalMovementDataContext();
+            return database.ProjectInvestigators.FirstOrDefault(p => p.Login == owner);
         }
 
         private static string GetFullPath(string potentialPath)

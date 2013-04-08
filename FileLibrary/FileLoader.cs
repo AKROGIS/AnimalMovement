@@ -74,71 +74,79 @@ namespace FileLibrary
 
         #endregion
 
-        public static void LoadPath(string path, Project project = null, ProjectInvestigator manager = null)
+        public static void LoadPath(string path, Action<Exception, string, Project, ProjectInvestigator> handler = null, Project project = null, ProjectInvestigator manager = null, Collar collar = null, char status = 'A', bool allowDups = false)
         {
+            if (path == null)
+                throw new ArgumentNullException("path", "A path must be provided");
+            if (project != null && manager != null)
+                throw new InvalidOperationException(String.Format("Project: {0} and Manager: {1} cannot both be non-null.", project.ProjectId, manager.Login));
+
             if (System.IO.File.Exists(path))
-                LoadFilePath(path, project);
-            else if (System.IO.Directory.Exists(path))
-                LoadFolder(path, project);
-            throw new InvalidOperationException(path + "is not a folder or file");
+            {
+                LoadFilePath(path, project, manager, collar, status, allowDups);
+            }
+            else
+            {
+                if (System.IO.Directory.Exists(path))
+                {
+                    foreach (var file in System.IO.Directory.EnumerateFiles(path))
+                        try
+                        {
+                            LoadFilePath(file, project, manager, collar, status, allowDups);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (handler == null)
+                                throw;
+                            handler(ex, file, project, manager)
+                        }
+                }
+                else
+                {
+                    throw new InvalidOperationException(path + " is not a folder or file");
+                }
+            }
         }
 
-        public static void LoadFolder(string folderPath, Project project = null)
+
+
+        private static void LoadFilePath(string filePath, Project project, ProjectInvestigator owner, Collar collar, char status, bool allowDups)
         {
-            foreach (var file in System.IO.Directory.EnumerateFiles(folderPath))
-                try
-                {
-                    LoadFilePath(System.IO.Path.Combine(folderPath, file), project);
-                }
-                catch (Exception ex)
-                {
-                    LogGeneralError("ERROR: " + ex.Message + " processing file " + file + " in " + folderPath);
-                }
-        }
+            /*
+             * var file = new file(...);
+             * if file.IsDup & !allowDups
+             * throw exception
+             * 
+             */
 
-
-        static Byte[] _fileContents;
-        static Byte[] _fileHash;
-
-        public static void LoadFilePath(string filePath, Project project = null)
-        {
             var database = new AnimalMovementDataContext();
-            if (project == null)
-            {
-                LogGeneralError("You must provide a project a project before the file or folder.");
-                return;
-            }
 
-            LoadAndHashFile(filePath);
-            if (_fileContents == null)
-                return;
-            if (AbortBecauseDuplicate(database, filePath))
-                return;
-            ArgosFile argos;
-            GuessFileFormat(out argos);
-            if (argos == null)
-            {
-                LogGeneralWarning("Skipping file '" + filePath + "' is not a known Argos file type.");
-                return;
-            }
+            var fileContents = System.IO.File.ReadAllBytes(path);
+            var fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(fileContents);
+            var duplicate = database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == fileHash);
+            if (duplicate != null && !allowDups)
+                throw new InvalidOperationException(String.Format("Skipping {2}, the contents have already been loaded as file '{0}' {1} '{2}'.", path,
+                                    duplicate.FileName, duplicate.Project == null ? "for manager" : "in project", 
+                                                        duplicate.Project == null ? duplicate.Owner : duplicate.Project.ProjectName));
 
+            //FIXME can I use objects from different contexts like this?
             var file = new CollarFile
             {
-                ProjectId = project.ProjectId,
+                Project = project,
                 FileName = System.IO.Path.GetFileName(filePath),
-                CollarManufacturer = "Telonics",
-                Status = 'A',
-                Contents = _fileContents,
+                Collar = collar,
+                ProjectInvestigator = owner,
+                Status = status,
+                Contents = fileContents,
             };
             database.CollarFiles.InsertOnSubmit(file);
             database.SubmitChanges();
-            LogGeneralMessage(String.Format("Loaded file {0}, {1} for processing.", file.FileId, file.FileName));
 
-            FileProcessor.ProcessFile(file);
-
+            if (file.LookupCollarFileFormat.ArgosData = 'Y')
+                FileProcessor.ProcessFile(file);
         }
 
-        static void LoadAndHashFile(string path)
+        static void xxLoadAndHashFile(string path)
         {
             try
             {
@@ -152,7 +160,7 @@ namespace FileLibrary
             _fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(_fileContents);
         }
 
-        static bool AbortBecauseDuplicate(AnimalMovementDataContext database, string path)
+        static bool xxAbortBecauseDuplicate(AnimalMovementDataContext database, string path)
         {
             var duplicate = database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
             if (duplicate == null)
@@ -163,33 +171,66 @@ namespace FileLibrary
             return true;
         }
 
-        static char GuessFileFormat(out ArgosFile argos)
+        public static bool IsKnownFileFormat(string path)
         {
-            //FIXME - These will throw an exception if the contents is not the correct format
-            argos = new ArgosEmailFile(_fileContents);
-            if (argos.GetPrograms().Any())
-                return 'E';
-            argos = new ArgosAwsFile(_fileContents);
-            if (argos.GetPrograms().Any())
-                return 'F';
-            argos = null;
-            return '?';
+            try
+            {
+                return FileFormat (System.IO.File.ReadAllBytes(path)) != '?';
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
-        static void LogGeneralWarning(string warning)
+        public static char? GuessFileFormat()
         {
-            LogGeneralMessage("Warning: " + warning);
+            try {
+                //FIXME - These will throw an exception if the contents is not the correct format
+                argos = new ArgosEmailFile(_fileContents);
+                if (argos.GetPrograms().Any())
+                    return 'E';
+                argos = new ArgosAwsFile(_fileContents);
+                if (argos.GetPrograms().Any())
+                    return 'F';
+                argos = null;
+                return null;
+            } catch (Exception ex) {
+                return null;
+            }
         }
 
-        static void LogGeneralError(string error)
+        //This should be kept in sync with CollarInfo.cs in the SqlServer_Files project
+        private static char FileFormat(Byte[] data)
         {
-            LogGeneralMessage("ERROR: " + error);
+            //get the first line of the file
+            var fileHeader = ReadHeader(data, Encoding.UTF8, 500).Trim().Normalize();  //database for header is only 450 char
+            char code = '?';
+            var db = new SettingsDataContext();
+            foreach (var format in db.LookupCollarFileHeaders)
+            {
+                var header = format.Header.Normalize();
+                var fileFormat = format.FileFormat; //.GetChar() is not implemented
+                var regex = format.Regex;
+                if (fileHeader.StartsWith(header, StringComparison.OrdinalIgnoreCase) ||
+                    (regex != null && new Regex(regex).IsMatch(fileHeader)))
+                {
+                    code = format;
+                    break;
+                }
+            }
+            if (code == '?' && (new ArgosEmailFile(data)).GetPrograms().Any())
+                // We already checked for ArgosAwsFile with the header
+                code = 'E';
+            return code;
         }
-
-        static void LogGeneralMessage(string message)
+        
+        private static string ReadHeader(Byte[] bytes, Encoding enc, int maxLength)
         {
-            Console.WriteLine(message);
-            System.IO.File.AppendAllText("ArgosProcessor.log", message);
+            var length = Math.Min(bytes.Length, maxLength);
+            using (var stream = new MemoryStream(bytes, 0, length))
+                using (var reader = new StreamReader(stream, enc))
+                    return reader.ReadLine();
         }
 
 
