@@ -5,6 +5,7 @@ using System.Text;
 using System.Web;
 
 //FIXME - use settings to define URLS min/max days, etc.
+//FIXME - use new feature to get platform list.
 namespace Telonics
 {
     /// <summary>
@@ -53,7 +54,9 @@ namespace Telonics
         }
 
         private const string _argosUrl = @"http://ws-argos.clsamerica.com/argosDws/services/DixService";
-
+        //The french server also works, but the generic addresses at http://www.argos-system.org or http://ws-argos.argos-system.org do not.
+        //private const string _argosUrl = @"http://ws-argos.cls.fr/argosDws/services/DixService";
+        
         //Argos soap request for messages as CSV
         private const string _csvRequest = @"
 <soap:Envelope xmlns:soap=""http://www.w3.org/2003/05/soap-envelope"" xmlns:argos=""http://service.dataxmldistribution.argos.cls.fr/types"">
