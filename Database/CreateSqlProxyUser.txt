@@ -48,7 +48,9 @@ TDC:  Telonics Data Convertor - for Gen 4 Argos files (email/web) and datalog (*
       Current version: http://www.telonics.com/software/setup-TDCv2.02.exe
 	  Notes: Should be installed for all users
 			 Device drivers do not need to be installed on the server
-	        
+
+The following are not used:
+			 
 DU: Download Utility for Gen2 & Gen3 GPS - for Gen3 Datalog files (.tdf)
 	http://www.telonics.com/software/du-3.php
 	Current version: http://www.telonics.com/software/DU-Setup-1.41.exe
@@ -61,8 +63,24 @@ ADC-T03: Argos data translator for Gen3 collars
 			    The username and organization is not important
 
 
+Configure Account to use Telonics software
+==========================================
+Log on with the new account
+(be sure to check the domain, and use the local machine name if necessary)
+autorize the telonics software for this user
+The Telonics Data Convertor Auth Code is: (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
+The Telonics ADC-T03 Auth Code is: (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
+The Telonics Download Utility Auth code is  (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
+Set up appropriate defaults for the software.
+
+
+
 Set up database to use proxy account
 ====================================
+1. Create instance login to match windows user
+2. Create Database user for instance login
+3. Add user to ArgosProcessor Role
+ 
 using a sysadmin account, issue the following SQL to Sql Server:
 
 -- To allow advanced options to be changed.
@@ -162,21 +180,13 @@ EXEC sp_addrolemember 'ArgosProcessor', '_MACHINE_\sql_proxy'
 GO
 
 
-Configure Account to use Telonics software
-==========================================
-Log on with the new account
-(be sure to check the domain, and use the local machine name if necessary)
-autorize the telonics software for this user
-The Telonics Data Convertor Auth Code is: (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
-The Telonics ADC-T03 Auth Code is: (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
-The Telonics Download Utility Auth code is  (see T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable)
-Set up appropriate defaults for the software.
-
 
 Install ArgosProcessor exe in users path
 ========================================
-Edit the settings file with connection and application path
+Edit the ArgosProcessor.exe.config with connection and application path
+Edit the ArgosDownloader.exe.config with connection string
 
+Set these two programs to run as scheduled tasks
 
 
 ********************************************
