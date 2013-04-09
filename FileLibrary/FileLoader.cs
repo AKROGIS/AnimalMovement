@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -7,12 +8,17 @@ using System.Text.RegularExpressions;
 using DataModel;
 using Telonics;
 
-//FIXME - Figure out the public and internal API, make it clear and consistent
+//FIXME can I use objects from different data contexts?
 
 namespace FileLibrary
 {
-    static public class FileLoader
+    public class FileLoader
     {
+
+        #region Public API
+
+        #region Static Methods
+
         #region AWS loaders
 
         internal static CollarFile LoadProgram(ArgosProgram program, int days,
@@ -116,88 +122,310 @@ namespace FileLibrary
         }
 
 
+        #endregion
 
+        #region Public Properties
+
+        public Project Project { get; set; }
+        public ProjectInvestigator Owner { get; set; }
+        public Collar Collar { get; set; }
+        public char Status { get; set; }
+        public bool AllowDuplicates { get; set; }
+
+        public AnimalMovementDataContext Database { get; private set; }
+        public string FilePath { get; private set; }
+        public Byte[] Contents { get; private set; }
+        public Lazy<char?> Format { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        public FileLoader(string filePath)
+        {
+            Contents = File.ReadAllBytes(filePath);
+            if (Contents == null || Contents.Length == 0)
+                throw new ArgumentException("File contents is empty or unavailable","filePath");
+            Database = new AnimalMovementDataContext();
+            FilePath = filePath;
+            Status = 'A';
+            Format = new Lazy<char?>(() => GetFormat(Contents));
+        }
+
+        #endregion
+
+        #region Public Instance Methods
+
+        public CollarFile Load()
+        {
+            Validate();
+            var file = new CollarFile
+            {
+                Project = Project,
+                FileName = Path.GetFileName(FilePath),
+                Collar = Collar,
+                ProjectInvestigator = Owner,
+                Status = Status,
+                Contents = Contents,
+            };
+            Database.CollarFiles.InsertOnSubmit(file);
+            Database.SubmitChanges();
+            return file;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Private methods
+
+        // This is a template for client side usage
         private static void LoadFilePath(string filePath, Project project, ProjectInvestigator owner, Collar collar,
                                          char status, bool allowDups)
         {
-            /*
-             * var file = new file(...);
-             * if file.IsDup & !allowDups
-             * throw exception
-             * 
-             */
-
-            var database = new AnimalMovementDataContext();
-
-            var fileContents = File.ReadAllBytes(filePath);
-            if (!allowDups)
-            {
-                var fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(fileContents);
-                var duplicate = database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == fileHash);
-                if (duplicate != null)
-                    throw new InvalidOperationException(
-                        String.Format("Skipping {0}, the contents have already been loaded as file '{1}' {2} '{3}'.",
-                                      filePath,
-                                      duplicate.FileName, duplicate.Project == null ? "for manager" : "in project",
-                                      duplicate.Project == null ? duplicate.Owner : duplicate.Project.ProjectName));
-            }
-            //FIXME can I use objects from different contexts like this?
-            var file = new CollarFile
+            var fileLoader = new FileLoader(filePath)
                 {
                     Project = project,
-                    FileName = Path.GetFileName(filePath),
+                    Owner = owner,
                     Collar = collar,
-                    ProjectInvestigator = owner,
                     Status = status,
-                    Contents = fileContents,
+                    AllowDuplicates = allowDups
                 };
-            database.CollarFiles.InsertOnSubmit(file);
-            database.SubmitChanges();
-
+            var file = fileLoader.Load();
             if (file.LookupCollarFileFormat.ArgosData == 'Y')
                 FileProcessor.ProcessFile(file);
         }
 
 
-        public static bool IsKnownFileFormat(string path)
+        private void Validate()
         {
+            //Do client side validation to save a round trip to the database if we know the insert will fail
+            //This logic should be consistent with the database rules
+
+            // one and only one of Project and Owner must be specified
+            if (Owner == null && Project == null)
+                throw new InvalidOperationException("One of project or owner must be specified.");
+            if (Owner != null && Project != null)
+                throw new InvalidOperationException("Both project and owner cannot be specified simultaneously.");
+
+            //Check Status
+            if (Status != 'A' && Status != 'I')
+                throw new InvalidOperationException(
+                    String.Format("A status of '{0}' is not acceptable.  Acceptable values are 'A' and 'I'.", Status));
+
+            //Deny duplicates
+
+            if (!AllowDuplicates)
+            {
+                var duplicate = GetDuplicate();
+                if (duplicate != null)
+                    throw new InvalidOperationException(
+                        String.Format("The contents of {0} have already been loaded as file '{1}' {2} '{3}'.",
+                                      FilePath,
+                                      duplicate.FileName, duplicate.Project == null ? "for manager" : "in project",
+                                      duplicate.Project == null ? duplicate.Owner : duplicate.Project.ProjectName));
+            }
+
+            //Unknown format
+            if (Format.Value == null)
+                throw new InvalidOperationException(
+                    String.Format("The contents of {0} are not in a recognizable format.", FilePath));
+
+            //Try and guess the collar if one is required and not provided 
+            if (CollarIsRequired)
+            {
+                if (Collar == null)
+                    Collar = GetCollarFromFile();
+                if (Collar == null)
+                    throw new InvalidOperationException(
+                        String.Format(
+                            "The format of {0} requires a valid collar but none was provided " +
+                            "nor could it be determined from the filename or contents.",
+                            FilePath));
+            }
+        }
+
+
+        private CollarFile GetDuplicate()
+        {
+            var fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(Contents);
+            return Database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == fileHash);
+        }
+
+
+        #region Collar from file
+
+        private Collar GetCollarFromFile()
+        {
+            if (!Format.Value.HasValue)
+                return null;
+
+            string argosId = null;
+            if (Format.Value.Value == 'B')
+                argosId = GetArgosFromFormatB();
+            if (Format.Value.Value == 'D')
+                argosId = GetArgosFromFormatD();
+
+            //If we have an ArgosId and it maps to one and only one collar, then use it.
+            if (argosId != null)
+            {
+                try
+                {
+                    return Database.ArgosDeployments.Single(d => d.PlatformId == argosId).Collar;
+                }
+                catch (Exception)
+                {
+                   return null;
+                }
+            }
+
+            if (Format.Value.Value == 'C')
+            {
+                string ctn = GetCtnFromFormatC();
+                var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+                if (collar != null)
+                    return collar;
+                //Try without the Alpha suffix
+                if (ctn.Length != 7 && !Char.IsUpper(ctn[6]))
+                    return null;
+                ctn = ctn.Substring(0, 6);
+                return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+            }
+            return null;
+        }
+
+
+        private string GetArgosFromFormatB()
+        {
+            //the first column is the Argos ID, if more than one, then return none
             try
             {
-                return FileFormat(File.ReadAllBytes(path)) != '?';
+                var checkForHeader = true;
+                var db = new SettingsDataContext();
+                string argosId = null;
+                var header = db.LookupCollarFileHeaders.First(h => h.FileFormat == 'B').Header;
+                foreach (var line in ReadLines(Contents, Encoding.UTF8))
+                {
+                    //skip the first line if it looks like the header
+                    if (checkForHeader && line.Normalize().StartsWith(header, StringComparison.OrdinalIgnoreCase))
+                    {
+                        checkForHeader = false;
+                        continue;
+                    }
+                    //skip empty/blank lines
+                    if (string.IsNullOrEmpty(line.Replace(',', ' ').Trim()))
+                        continue;
+                    var newArgosId = line.Substring(0, line.IndexOf(",", StringComparison.OrdinalIgnoreCase));
+                    if (argosId == null)
+                    {
+                        argosId = newArgosId;
+                        checkForHeader = false;
+                    }
+                    if (newArgosId != argosId)
+                        return null;
+                }
+                return argosId;
             }
             catch (Exception)
             {
-                return false;
+                return null;
             }
         }
 
+
+        private string GetArgosFromFormatD()
+        {
+            //the third column is the Argos ID, if more than one, then return none
+            try
+            {
+                var checkForHeader = true;
+                var db = new SettingsDataContext();
+                string argosId = null;
+                var header = db.LookupCollarFileHeaders.First(h => h.FileFormat == 'D').Header;
+                foreach (var line in ReadLines(Contents, Encoding.UTF8))
+                {
+                    if (checkForHeader && line.Normalize().StartsWith(header, StringComparison.OrdinalIgnoreCase))
+                    {
+                        checkForHeader = false;
+                        continue;
+                    }
+                    //skip empty/blank lines
+                    if (string.IsNullOrEmpty(line.Replace(',', ' ').Trim()))
+                        continue;
+                    var newArgosId = line.Split(new[] { '\t', ',' })[2];
+                    if (argosId == null)
+                    {
+                        argosId = newArgosId;
+                        checkForHeader = false;
+                    }
+                    if (newArgosId != argosId)
+                        return null;
+                }
+                return argosId;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+
+        private string GetCtnFromFormatC()
+        {
+            //In the D format, the 7th line (approx) is 'CTN,649024A'
+            var line = ReadLines(Contents, Encoding.UTF8)
+                .Skip(5).Take(4).FirstOrDefault(l => l.Normalize().StartsWith("CTN,", StringComparison.OrdinalIgnoreCase));
+            return line == null ? null : line.Substring(4);
+        }
+
+        private static IEnumerable<string> ReadLines(Byte[] bytes, Encoding enc)
+        {
+            using (var stream = new MemoryStream(bytes, 0, bytes.Length))
+            using (var reader = new StreamReader(stream, enc))
+                yield return reader.ReadLine();
+        }
+
+
+        private bool CollarIsRequired
+        {
+            get { return Database.LookupCollarFileFormats.Any(f => f.Code == Format.Value && f.ArgosData == 'N'); }
+        }
+
+        #endregion
+
+        #region File format
 
         //This should be kept in sync with CollarInfo.cs in the SqlServer_Files project
-        private static char FileFormat(Byte[] data)
+        private static char? GetFormat(Byte[] data)
         {
-            //get the first line of the file
-            var fileHeader = ReadHeader(data, Encoding.UTF8, 500).Trim().Normalize();
-                //database for header is only 450 char
-            char code = '?';
-            var db = new SettingsDataContext();
-            foreach (var format in db.LookupCollarFileHeaders)
+            try
             {
-                var header = format.Header.Normalize();
-                var regex = format.Regex;
-                if (fileHeader.StartsWith(header, StringComparison.OrdinalIgnoreCase) ||
-                    (regex != null && new Regex(regex).IsMatch(fileHeader)))
+                //get the first line of the file
+                var fileHeader = ReadHeader(data, Encoding.UTF8, 500).Trim().Normalize();
+                //database for header is only 450 char
+                char code = '?';
+                var db = new SettingsDataContext();
+                foreach (var format in db.LookupCollarFileHeaders)
                 {
-                    code = format.FileFormat;
-                    break;
+                    var header = format.Header.Normalize();
+                    var regex = format.Regex;
+                    if (fileHeader.StartsWith(header, StringComparison.OrdinalIgnoreCase) ||
+                        (regex != null && new Regex(regex).IsMatch(fileHeader)))
+                    {
+                        code = format.FileFormat;
+                        break;
+                    }
                 }
+                if (code == '?' && (new ArgosEmailFile(data)).GetPrograms().Any())
+                    // We already checked for ArgosAwsFile with the header
+                    code = 'E';
+                return code == '?' ? (char?)null : code;
             }
-            //FIXME - ArgosEmailFile may throw an exception if the contents is not the correct format
-            if (code == '?' && (new ArgosEmailFile(data)).GetPrograms().Any())
-                // We already checked for ArgosAwsFile with the header
-                code = 'E';
-            return code;
+            catch (Exception)
+            {
+                return null;
+            }
         }
-
 
         private static string ReadHeader(Byte[] bytes, Encoding enc, int maxLength)
         {
@@ -206,5 +434,9 @@ namespace FileLibrary
             using (var reader = new StreamReader(stream, enc))
                 return reader.ReadLine();
         }
+
+        #endregion
+
+        #endregion
     }
 }
