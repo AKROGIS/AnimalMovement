@@ -239,14 +239,6 @@ namespace DataModel
 			}
 		}
 		
-		public System.Data.Linq.Table<CollarFile> CollarFiles
-		{
-			get
-			{
-				return this.GetTable<CollarFile>();
-			}
-		}
-		
 		public System.Data.Linq.Table<LookupCollarFileFormat> LookupCollarFileFormats
 		{
 			get
@@ -268,6 +260,14 @@ namespace DataModel
 			get
 			{
 				return this.GetTable<ArgosDeployment>();
+			}
+		}
+		
+		public System.Data.Linq.Table<CollarFile> CollarFiles
+		{
+			get
+			{
+				return this.GetTable<CollarFile>();
 			}
 		}
 		
@@ -414,33 +414,6 @@ namespace DataModel
 			this.ArgosProgram_Update(original.ProgramId, obj.ProgramId, obj.ProgramName, obj.UserName, obj.Password, obj.Manager, ((System.Nullable<System.DateTime>)(obj.StartDate)), ((System.Nullable<System.DateTime>)(obj.EndDate)), obj.Notes, ((System.Nullable<bool>)(obj.Active)));
 		}
 		
-		private void InsertCollarFile(CollarFile obj)
-		{
-			System.Nullable<int> p1 = obj.FileId;
-			System.Nullable<char> p2 = obj.Format;
-			System.Nullable<System.DateTime> p3 = obj.UploadDate;
-			string p4 = obj.UserName;
-			System.Data.Linq.Binary p5 = obj.Sha1Hash;
-			this.CollarFile_Insert(obj.FileName, ((System.Nullable<char>)(obj.Status)), obj.Contents, obj.ProjectId, obj.Owner, ((System.Nullable<int>)(obj.ParentFileId)), obj.CollarManufacturer, obj.CollarId, ref p1, ref p2, ref p3, ref p4, ref p5);
-			obj.FileId = p1.GetValueOrDefault();
-			obj.Format = p2.GetValueOrDefault();
-			obj.UploadDate = p3.GetValueOrDefault();
-			obj.UserName = p4;
-			obj.Sha1Hash = p5;
-		}
-		
-		private void UpdateCollarFile(CollarFile obj)
-		{
-			CollarFile original = ((CollarFile)(CollarFiles.GetOriginalEntityState(obj)));
-			this.CollarFile_Update(((System.Nullable<int>)(original.FileId)), obj.FileName, obj.CollarManufacturer, obj.CollarId, obj.ProjectId, obj.Owner);
-		}
-		
-		private void DeleteCollarFile(CollarFile obj)
-		{
-			CollarFile original = ((CollarFile)(CollarFiles.GetOriginalEntityState(obj)));
-			this.CollarFile_Delete(((System.Nullable<int>)(original.FileId)));
-		}
-		
 		private void InsertCollarParameter(CollarParameter obj)
 		{
 			System.Nullable<int> p1 = obj.ParameterId;
@@ -477,6 +450,33 @@ namespace DataModel
 		{
 			ArgosDeployment original = ((ArgosDeployment)(ArgosDeployments.GetOriginalEntityState(obj)));
 			this.ArgosDeployment_Delete(((System.Nullable<int>)(original.DeploymentId)));
+		}
+		
+		private void InsertCollarFile(CollarFile obj)
+		{
+			System.Nullable<int> p1 = obj.FileId;
+			System.Nullable<char> p2 = obj.Format;
+			System.Nullable<System.DateTime> p3 = obj.UploadDate;
+			string p4 = obj.UserName;
+			System.Data.Linq.Binary p5 = obj.Sha1Hash;
+			this.CollarFile_Insert(obj.FileName, ((System.Nullable<char>)(obj.Status)), obj.Contents, obj.ProjectId, obj.Owner, ((System.Nullable<int>)(obj.ParentFileId)), ((System.Nullable<int>)(obj.ArgosDeploymentId)), ((System.Nullable<int>)(obj.CollarParameterId)), obj.CollarManufacturer, obj.CollarId, ref p1, ref p2, ref p3, ref p4, ref p5);
+			obj.FileId = p1.GetValueOrDefault();
+			obj.Format = p2.GetValueOrDefault();
+			obj.UploadDate = p3.GetValueOrDefault();
+			obj.UserName = p4;
+			obj.Sha1Hash = p5;
+		}
+		
+		private void UpdateCollarFile(CollarFile obj)
+		{
+			CollarFile original = ((CollarFile)(CollarFiles.GetOriginalEntityState(obj)));
+			this.CollarFile_Update(((System.Nullable<int>)(original.FileId)), obj.FileName, obj.CollarManufacturer, obj.CollarId, obj.ProjectId, obj.Owner);
+		}
+		
+		private void DeleteCollarFile(CollarFile obj)
+		{
+			CollarFile original = ((CollarFile)(CollarFiles.GetOriginalEntityState(obj)));
+			this.CollarFile_Delete(((System.Nullable<int>)(original.FileId)));
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Delete")]
@@ -689,18 +689,6 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Insert")]
-		public int CollarFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ParentFileId", DbType="Int")] System.Nullable<int> parentFileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] ref System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UploadDate", DbType="DateTime2")] ref System.Nullable<System.DateTime> uploadDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UserName", DbType="NVarChar(128)")] ref string userName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Sha1Hash", DbType="VarBinary(8000)")] ref System.Data.Linq.Binary sha1Hash)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileName, status, contents, projectId, owner, parentFileId, collarManufacturer, collarId, fileId, format, uploadDate, userName, sha1Hash);
-			fileId = ((System.Nullable<int>)(result.GetParameterValue(8)));
-			format = ((System.Nullable<char>)(result.GetParameterValue(9)));
-			uploadDate = ((System.Nullable<System.DateTime>)(result.GetParameterValue(10)));
-			userName = ((string)(result.GetParameterValue(11)));
-			sha1Hash = ((System.Data.Linq.Binary)(result.GetParameterValue(12)));
-			return ((int)(result.ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_Insert")]
 		public int CollarDeployment_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RetrievalDate", DbType="DateTime2")] System.Nullable<System.DateTime> retrievalDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentId", DbType="Int")] ref System.Nullable<int> deploymentId)
 		{
@@ -761,6 +749,18 @@ namespace DataModel
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), platformId, collarManufacturer, collarId, startDate, endDate, deploymentId);
 			deploymentId = ((System.Nullable<int>)(result.GetParameterValue(5)));
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Insert")]
+		public int CollarFile_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Contents", DbType="VarBinary(MAX)")] System.Data.Linq.Binary contents, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ParentFileId", DbType="Int")] System.Nullable<int> parentFileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ArgosDeploymentId", DbType="Int")] System.Nullable<int> argosDeploymentId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarParameterId", DbType="Int")] System.Nullable<int> collarParameterId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] ref System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] ref System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UploadDate", DbType="DateTime2")] ref System.Nullable<System.DateTime> uploadDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UserName", DbType="NVarChar(128)")] ref string userName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Sha1Hash", DbType="VarBinary(8000)")] ref System.Data.Linq.Binary sha1Hash)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileName, status, contents, projectId, owner, parentFileId, argosDeploymentId, collarParameterId, collarManufacturer, collarId, fileId, format, uploadDate, userName, sha1Hash);
+			fileId = ((System.Nullable<int>)(result.GetParameterValue(10)));
+			format = ((System.Nullable<char>)(result.GetParameterValue(11)));
+			uploadDate = ((System.Nullable<System.DateTime>)(result.GetParameterValue(12)));
+			userName = ((string)(result.GetParameterValue(13)));
+			sha1Hash = ((System.Data.Linq.Binary)(result.GetParameterValue(14)));
 			return ((int)(result.ReturnValue));
 		}
 	}
@@ -3113,11 +3113,11 @@ namespace DataModel
 		
 		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
 		
-		private EntitySet<CollarFile> _CollarFiles;
-		
 		private EntitySet<CollarParameter> _CollarParameters;
 		
 		private EntitySet<ArgosDeployment> _ArgosDeployments;
+		
+		private EntitySet<CollarFile> _CollarFiles;
 		
 		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
 		
@@ -3160,9 +3160,9 @@ namespace DataModel
 			this._CollarFixes = new EntitySet<CollarFix>(new Action<CollarFix>(this.attach_CollarFixes), new Action<CollarFix>(this.detach_CollarFixes));
 			this._CollarDeployments = new EntitySet<CollarDeployment>(new Action<CollarDeployment>(this.attach_CollarDeployments), new Action<CollarDeployment>(this.detach_CollarDeployments));
 			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
-			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
 			this._CollarParameters = new EntitySet<CollarParameter>(new Action<CollarParameter>(this.attach_CollarParameters), new Action<CollarParameter>(this.detach_CollarParameters));
 			this._ArgosDeployments = new EntitySet<ArgosDeployment>(new Action<ArgosDeployment>(this.attach_ArgosDeployments), new Action<ArgosDeployment>(this.detach_ArgosDeployments));
+			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
 			this._LookupCollarManufacturer = default(EntityRef<LookupCollarManufacturer>);
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
 			this._LookupCollarModel = default(EntityRef<LookupCollarModel>);
@@ -3460,19 +3460,6 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarFile", Storage="_CollarFiles", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
-		public EntitySet<CollarFile> CollarFiles
-		{
-			get
-			{
-				return this._CollarFiles;
-			}
-			set
-			{
-				this._CollarFiles.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarParameter", Storage="_CollarParameters", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
 		public EntitySet<CollarParameter> CollarParameters
 		{
@@ -3496,6 +3483,19 @@ namespace DataModel
 			set
 			{
 				this._ArgosDeployments.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarFile", Storage="_CollarFiles", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
+		public EntitySet<CollarFile> CollarFiles
+		{
+			get
+			{
+				return this._CollarFiles;
+			}
+			set
+			{
+				this._CollarFiles.Assign(value);
 			}
 		}
 		
@@ -3657,18 +3657,6 @@ namespace DataModel
 			entity.Collar = null;
 		}
 		
-		private void attach_CollarFiles(CollarFile entity)
-		{
-			this.SendPropertyChanging();
-			entity.Collar = this;
-		}
-		
-		private void detach_CollarFiles(CollarFile entity)
-		{
-			this.SendPropertyChanging();
-			entity.Collar = null;
-		}
-		
 		private void attach_CollarParameters(CollarParameter entity)
 		{
 			this.SendPropertyChanging();
@@ -3688,6 +3676,18 @@ namespace DataModel
 		}
 		
 		private void detach_ArgosDeployments(ArgosDeployment entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = null;
+		}
+		
+		private void attach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = this;
+		}
+		
+		private void detach_CollarFiles(CollarFile entity)
 		{
 			this.SendPropertyChanging();
 			entity.Collar = null;
@@ -5532,720 +5532,6 @@ namespace DataModel
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarFiles")]
-	public partial class CollarFile : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _FileId;
-		
-		private string _FileName;
-		
-		private System.DateTime _UploadDate;
-		
-		private string _ProjectId;
-		
-		private string _UserName;
-		
-		private string _CollarManufacturer;
-		
-		private string _CollarId;
-		
-		private char _Format;
-		
-		private char _Status;
-		
-		private System.Data.Linq.Link<System.Data.Linq.Binary> _Contents;
-		
-		private System.Nullable<int> _ParentFileId;
-		
-		private string _Owner;
-		
-		private System.Data.Linq.Binary _Sha1Hash;
-		
-		private EntitySet<CollarFix> _CollarFixes;
-		
-		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
-		
-		private EntitySet<ArgosDownload> _ArgosDownloads;
-		
-		private EntitySet<CollarFile> _CollarFiles;
-		
-		private EntityRef<CollarFile> _CollarFile1;
-		
-		private EntityRef<Collar> _Collar;
-		
-		private EntityRef<LookupFileStatus> _LookupFileStatus;
-		
-		private EntityRef<ProjectInvestigator> _ProjectInvestigator;
-		
-		private EntityRef<Project> _Project;
-		
-		private EntityRef<LookupCollarFileFormat> _LookupCollarFileFormat;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnFileIdChanging(int value);
-    partial void OnFileIdChanged();
-    partial void OnFileNameChanging(string value);
-    partial void OnFileNameChanged();
-    partial void OnUploadDateChanging(System.DateTime value);
-    partial void OnUploadDateChanged();
-    partial void OnProjectIdChanging(string value);
-    partial void OnProjectIdChanged();
-    partial void OnUserNameChanging(string value);
-    partial void OnUserNameChanged();
-    partial void OnCollarManufacturerChanging(string value);
-    partial void OnCollarManufacturerChanged();
-    partial void OnCollarIdChanging(string value);
-    partial void OnCollarIdChanged();
-    partial void OnFormatChanging(char value);
-    partial void OnFormatChanged();
-    partial void OnStatusChanging(char value);
-    partial void OnStatusChanged();
-    partial void OnContentsChanging(System.Data.Linq.Binary value);
-    partial void OnContentsChanged();
-    partial void OnParentFileIdChanging(System.Nullable<int> value);
-    partial void OnParentFileIdChanged();
-    partial void OnOwnerChanging(string value);
-    partial void OnOwnerChanged();
-    partial void OnSha1HashChanging(System.Data.Linq.Binary value);
-    partial void OnSha1HashChanged();
-    #endregion
-		
-		public CollarFile()
-		{
-			this._CollarFixes = new EntitySet<CollarFix>(new Action<CollarFix>(this.attach_CollarFixes), new Action<CollarFix>(this.detach_CollarFixes));
-			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
-			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
-			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
-			this._CollarFile1 = default(EntityRef<CollarFile>);
-			this._Collar = default(EntityRef<Collar>);
-			this._LookupFileStatus = default(EntityRef<LookupFileStatus>);
-			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
-			this._Project = default(EntityRef<Project>);
-			this._LookupCollarFileFormat = default(EntityRef<LookupCollarFileFormat>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int FileId
-		{
-			get
-			{
-				return this._FileId;
-			}
-			set
-			{
-				if ((this._FileId != value))
-				{
-					this.OnFileIdChanging(value);
-					this.SendPropertyChanging();
-					this._FileId = value;
-					this.SendPropertyChanged("FileId");
-					this.OnFileIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileName", DbType="NVarChar(255) NOT NULL", CanBeNull=false)]
-		public string FileName
-		{
-			get
-			{
-				return this._FileName;
-			}
-			set
-			{
-				if ((this._FileName != value))
-				{
-					this.OnFileNameChanging(value);
-					this.SendPropertyChanging();
-					this._FileName = value;
-					this.SendPropertyChanged("FileName");
-					this.OnFileNameChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UploadDate", AutoSync=AutoSync.OnInsert, DbType="DateTime2 NOT NULL", IsDbGenerated=true)]
-		public System.DateTime UploadDate
-		{
-			get
-			{
-				return this._UploadDate;
-			}
-			set
-			{
-				if ((this._UploadDate != value))
-				{
-					this.OnUploadDateChanging(value);
-					this.SendPropertyChanging();
-					this._UploadDate = value;
-					this.SendPropertyChanged("UploadDate");
-					this.OnUploadDateChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectId", DbType="VarChar(16)")]
-		public string ProjectId
-		{
-			get
-			{
-				return this._ProjectId;
-			}
-			set
-			{
-				if ((this._ProjectId != value))
-				{
-					if (this._Project.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnProjectIdChanging(value);
-					this.SendPropertyChanging();
-					this._ProjectId = value;
-					this.SendPropertyChanged("ProjectId");
-					this.OnProjectIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", AutoSync=AutoSync.OnInsert, DbType="NVarChar(128) NOT NULL", CanBeNull=false, IsDbGenerated=true)]
-		public string UserName
-		{
-			get
-			{
-				return this._UserName;
-			}
-			set
-			{
-				if ((this._UserName != value))
-				{
-					this.OnUserNameChanging(value);
-					this.SendPropertyChanging();
-					this._UserName = value;
-					this.SendPropertyChanged("UserName");
-					this.OnUserNameChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16)")]
-		public string CollarManufacturer
-		{
-			get
-			{
-				return this._CollarManufacturer;
-			}
-			set
-			{
-				if ((this._CollarManufacturer != value))
-				{
-					if (this._Collar.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCollarManufacturerChanging(value);
-					this.SendPropertyChanging();
-					this._CollarManufacturer = value;
-					this.SendPropertyChanged("CollarManufacturer");
-					this.OnCollarManufacturerChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16)")]
-		public string CollarId
-		{
-			get
-			{
-				return this._CollarId;
-			}
-			set
-			{
-				if ((this._CollarId != value))
-				{
-					if (this._Collar.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCollarIdChanging(value);
-					this.SendPropertyChanging();
-					this._CollarId = value;
-					this.SendPropertyChanged("CollarId");
-					this.OnCollarIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Format", AutoSync=AutoSync.OnInsert, DbType="Char(1) NOT NULL", IsDbGenerated=true)]
-		public char Format
-		{
-			get
-			{
-				return this._Format;
-			}
-			set
-			{
-				if ((this._Format != value))
-				{
-					if (this._LookupCollarFileFormat.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnFormatChanging(value);
-					this.SendPropertyChanging();
-					this._Format = value;
-					this.SendPropertyChanged("Format");
-					this.OnFormatChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Status", DbType="Char(1) NOT NULL")]
-		public char Status
-		{
-			get
-			{
-				return this._Status;
-			}
-			set
-			{
-				if ((this._Status != value))
-				{
-					if (this._LookupFileStatus.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnStatusChanging(value);
-					this.SendPropertyChanging();
-					this._Status = value;
-					this.SendPropertyChanged("Status");
-					this.OnStatusChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Contents", DbType="VarBinary(MAX) NOT NULL", CanBeNull=false, UpdateCheck=UpdateCheck.Never)]
-		public System.Data.Linq.Binary Contents
-		{
-			get
-			{
-				return this._Contents.Value;
-			}
-			set
-			{
-				if ((this._Contents.Value != value))
-				{
-					this.OnContentsChanging(value);
-					this.SendPropertyChanging();
-					this._Contents.Value = value;
-					this.SendPropertyChanged("Contents");
-					this.OnContentsChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ParentFileId", DbType="Int")]
-		public System.Nullable<int> ParentFileId
-		{
-			get
-			{
-				return this._ParentFileId;
-			}
-			set
-			{
-				if ((this._ParentFileId != value))
-				{
-					if (this._CollarFile1.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnParentFileIdChanging(value);
-					this.SendPropertyChanging();
-					this._ParentFileId = value;
-					this.SendPropertyChanged("ParentFileId");
-					this.OnParentFileIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Owner", DbType="NVarChar(128)")]
-		public string Owner
-		{
-			get
-			{
-				return this._Owner;
-			}
-			set
-			{
-				if ((this._Owner != value))
-				{
-					if (this._ProjectInvestigator.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnOwnerChanging(value);
-					this.SendPropertyChanging();
-					this._Owner = value;
-					this.SendPropertyChanged("Owner");
-					this.OnOwnerChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.OnInsert, DbType="VarBinary(8000)", IsDbGenerated=true)]
-		public System.Data.Linq.Binary Sha1Hash
-		{
-			get
-			{
-				return this._Sha1Hash;
-			}
-			set
-			{
-				if ((this._Sha1Hash != value))
-				{
-					this.OnSha1HashChanging(value);
-					this.SendPropertyChanging();
-					this._Sha1Hash = value;
-					this.SendPropertyChanged("Sha1Hash");
-					this.OnSha1HashChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_CollarFix", Storage="_CollarFixes", ThisKey="FileId", OtherKey="FileId")]
-		public EntitySet<CollarFix> CollarFixes
-		{
-			get
-			{
-				return this._CollarFixes;
-			}
-			set
-			{
-				this._CollarFixes.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="FileId", OtherKey="FileId")]
-		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
-		{
-			get
-			{
-				return this._ArgosFileProcessingIssues;
-			}
-			set
-			{
-				this._ArgosFileProcessingIssues.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosDownload", Storage="_ArgosDownloads", ThisKey="FileId", OtherKey="FileId")]
-		public EntitySet<ArgosDownload> ArgosDownloads
-		{
-			get
-			{
-				return this._ArgosDownloads;
-			}
-			set
-			{
-				this._ArgosDownloads.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_CollarFile", Storage="_CollarFiles", ThisKey="FileId", OtherKey="ParentFileId")]
-		public EntitySet<CollarFile> CollarFiles
-		{
-			get
-			{
-				return this._CollarFiles;
-			}
-			set
-			{
-				this._CollarFiles.Assign(value);
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_CollarFile", Storage="_CollarFile1", ThisKey="ParentFileId", OtherKey="FileId", IsForeignKey=true)]
-		public CollarFile CollarFile1
-		{
-			get
-			{
-				return this._CollarFile1.Entity;
-			}
-			set
-			{
-				CollarFile previousValue = this._CollarFile1.Entity;
-				if (((previousValue != value) 
-							|| (this._CollarFile1.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._CollarFile1.Entity = null;
-						previousValue.CollarFiles.Remove(this);
-					}
-					this._CollarFile1.Entity = value;
-					if ((value != null))
-					{
-						value.CollarFiles.Add(this);
-						this._ParentFileId = value.FileId;
-					}
-					else
-					{
-						this._ParentFileId = default(Nullable<int>);
-					}
-					this.SendPropertyChanged("CollarFile1");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarFile", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true)]
-		public Collar Collar
-		{
-			get
-			{
-				return this._Collar.Entity;
-			}
-			set
-			{
-				Collar previousValue = this._Collar.Entity;
-				if (((previousValue != value) 
-							|| (this._Collar.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Collar.Entity = null;
-						previousValue.CollarFiles.Remove(this);
-					}
-					this._Collar.Entity = value;
-					if ((value != null))
-					{
-						value.CollarFiles.Add(this);
-						this._CollarManufacturer = value.CollarManufacturer;
-						this._CollarId = value.CollarId;
-					}
-					else
-					{
-						this._CollarManufacturer = default(string);
-						this._CollarId = default(string);
-					}
-					this.SendPropertyChanged("Collar");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupFileStatus_CollarFile", Storage="_LookupFileStatus", ThisKey="Status", OtherKey="Code", IsForeignKey=true)]
-		public LookupFileStatus LookupFileStatus
-		{
-			get
-			{
-				return this._LookupFileStatus.Entity;
-			}
-			set
-			{
-				LookupFileStatus previousValue = this._LookupFileStatus.Entity;
-				if (((previousValue != value) 
-							|| (this._LookupFileStatus.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._LookupFileStatus.Entity = null;
-						previousValue.CollarFiles.Remove(this);
-					}
-					this._LookupFileStatus.Entity = value;
-					if ((value != null))
-					{
-						value.CollarFiles.Add(this);
-						this._Status = value.Code;
-					}
-					else
-					{
-						this._Status = default(char);
-					}
-					this.SendPropertyChanged("LookupFileStatus");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_CollarFile", Storage="_ProjectInvestigator", ThisKey="Owner", OtherKey="Login", IsForeignKey=true)]
-		public ProjectInvestigator ProjectInvestigator
-		{
-			get
-			{
-				return this._ProjectInvestigator.Entity;
-			}
-			set
-			{
-				ProjectInvestigator previousValue = this._ProjectInvestigator.Entity;
-				if (((previousValue != value) 
-							|| (this._ProjectInvestigator.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._ProjectInvestigator.Entity = null;
-						previousValue.CollarFiles.Remove(this);
-					}
-					this._ProjectInvestigator.Entity = value;
-					if ((value != null))
-					{
-						value.CollarFiles.Add(this);
-						this._Owner = value.Login;
-					}
-					else
-					{
-						this._Owner = default(string);
-					}
-					this.SendPropertyChanged("ProjectInvestigator");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Project_CollarFile", Storage="_Project", ThisKey="ProjectId", OtherKey="ProjectId", IsForeignKey=true)]
-		public Project Project
-		{
-			get
-			{
-				return this._Project.Entity;
-			}
-			set
-			{
-				Project previousValue = this._Project.Entity;
-				if (((previousValue != value) 
-							|| (this._Project.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Project.Entity = null;
-						previousValue.CollarFiles.Remove(this);
-					}
-					this._Project.Entity = value;
-					if ((value != null))
-					{
-						value.CollarFiles.Add(this);
-						this._ProjectId = value.ProjectId;
-					}
-					else
-					{
-						this._ProjectId = default(string);
-					}
-					this.SendPropertyChanged("Project");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarFileFormat_CollarFile", Storage="_LookupCollarFileFormat", ThisKey="Format", OtherKey="Code", IsForeignKey=true)]
-		public LookupCollarFileFormat LookupCollarFileFormat
-		{
-			get
-			{
-				return this._LookupCollarFileFormat.Entity;
-			}
-			set
-			{
-				LookupCollarFileFormat previousValue = this._LookupCollarFileFormat.Entity;
-				if (((previousValue != value) 
-							|| (this._LookupCollarFileFormat.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._LookupCollarFileFormat.Entity = null;
-						previousValue.CollarFiles.Remove(this);
-					}
-					this._LookupCollarFileFormat.Entity = value;
-					if ((value != null))
-					{
-						value.CollarFiles.Add(this);
-						this._Format = value.Code;
-					}
-					else
-					{
-						this._Format = default(char);
-					}
-					this.SendPropertyChanged("LookupCollarFileFormat");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-		
-		private void attach_CollarFixes(CollarFix entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile = this;
-		}
-		
-		private void detach_CollarFixes(CollarFix entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile = null;
-		}
-		
-		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile = this;
-		}
-		
-		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile = null;
-		}
-		
-		private void attach_ArgosDownloads(ArgosDownload entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile = this;
-		}
-		
-		private void detach_ArgosDownloads(ArgosDownload entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile = null;
-		}
-		
-		private void attach_CollarFiles(CollarFile entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile1 = this;
-		}
-		
-		private void detach_CollarFiles(CollarFile entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile1 = null;
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.LookupCollarFileFormats")]
 	public partial class LookupCollarFileFormat : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -6493,6 +5779,8 @@ namespace DataModel
 		
 		private System.Nullable<System.DateTime> _EndDate;
 		
+		private EntitySet<CollarFile> _CollarFiles;
+		
 		private EntityRef<CollarParameterFile> _CollarParameterFile;
 		
 		private EntityRef<Collar> _Collar;
@@ -6519,6 +5807,7 @@ namespace DataModel
 		
 		public CollarParameter()
 		{
+			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
 			this._CollarParameterFile = default(EntityRef<CollarParameterFile>);
 			this._Collar = default(EntityRef<Collar>);
 			OnCreated();
@@ -6676,6 +5965,19 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarParameter_CollarFile", Storage="_CollarFiles", ThisKey="ParameterId", OtherKey="CollarParameterId")]
+		public EntitySet<CollarFile> CollarFiles
+		{
+			get
+			{
+				return this._CollarFiles;
+			}
+			set
+			{
+				this._CollarFiles.Assign(value);
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarParameterFile_CollarParameter", Storage="_CollarParameterFile", ThisKey="FileId", OtherKey="FileId", IsForeignKey=true, DeleteRule="CASCADE")]
 		public CollarParameterFile CollarParameterFile
 		{
@@ -6765,6 +6067,18 @@ namespace DataModel
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
+		
+		private void attach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarParameter = this;
+		}
+		
+		private void detach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarParameter = null;
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosDeployments")]
@@ -6784,6 +6098,8 @@ namespace DataModel
 		private System.Nullable<System.DateTime> _StartDate;
 		
 		private System.Nullable<System.DateTime> _EndDate;
+		
+		private EntitySet<CollarFile> _CollarFiles;
 		
 		private EntityRef<ArgosPlatform> _ArgosPlatform;
 		
@@ -6809,6 +6125,7 @@ namespace DataModel
 		
 		public ArgosDeployment()
 		{
+			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
 			this._ArgosPlatform = default(EntityRef<ArgosPlatform>);
 			this._Collar = default(EntityRef<Collar>);
 			OnCreated();
@@ -6946,6 +6263,19 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosDeployment_CollarFile", Storage="_CollarFiles", ThisKey="DeploymentId", OtherKey="ArgosDeploymentId")]
+		public EntitySet<CollarFile> CollarFiles
+		{
+			get
+			{
+				return this._CollarFiles;
+			}
+			set
+			{
+				this._CollarFiles.Assign(value);
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosDeployment", Storage="_ArgosPlatform", ThisKey="PlatformId", OtherKey="PlatformId", IsForeignKey=true)]
 		public ArgosPlatform ArgosPlatform
 		{
@@ -7034,6 +6364,862 @@ namespace DataModel
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
+		}
+		
+		private void attach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosDeployment = this;
+		}
+		
+		private void detach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosDeployment = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarFiles")]
+	public partial class CollarFile : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _FileId;
+		
+		private string _FileName;
+		
+		private System.DateTime _UploadDate;
+		
+		private string _ProjectId;
+		
+		private string _UserName;
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarId;
+		
+		private char _Format;
+		
+		private char _Status;
+		
+		private System.Data.Linq.Link<System.Data.Linq.Binary> _Contents;
+		
+		private System.Nullable<int> _ParentFileId;
+		
+		private string _Owner;
+		
+		private System.Data.Linq.Binary _Sha1Hash;
+		
+		private System.Nullable<int> _ArgosDeploymentId;
+		
+		private System.Nullable<int> _CollarParameterId;
+		
+		private EntitySet<CollarFix> _CollarFixes;
+		
+		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
+		
+		private EntitySet<ArgosDownload> _ArgosDownloads;
+		
+		private EntitySet<CollarFile> _CollarFiles;
+		
+		private EntityRef<ArgosDeployment> _ArgosDeployment;
+		
+		private EntityRef<CollarFile> _CollarFile1;
+		
+		private EntityRef<CollarParameter> _CollarParameter;
+		
+		private EntityRef<Collar> _Collar;
+		
+		private EntityRef<LookupCollarFileFormat> _LookupCollarFileFormat;
+		
+		private EntityRef<LookupFileStatus> _LookupFileStatus;
+		
+		private EntityRef<ProjectInvestigator> _ProjectInvestigator;
+		
+		private EntityRef<Project> _Project;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnFileIdChanging(int value);
+    partial void OnFileIdChanged();
+    partial void OnFileNameChanging(string value);
+    partial void OnFileNameChanged();
+    partial void OnUploadDateChanging(System.DateTime value);
+    partial void OnUploadDateChanged();
+    partial void OnProjectIdChanging(string value);
+    partial void OnProjectIdChanged();
+    partial void OnUserNameChanging(string value);
+    partial void OnUserNameChanged();
+    partial void OnCollarManufacturerChanging(string value);
+    partial void OnCollarManufacturerChanged();
+    partial void OnCollarIdChanging(string value);
+    partial void OnCollarIdChanged();
+    partial void OnFormatChanging(char value);
+    partial void OnFormatChanged();
+    partial void OnStatusChanging(char value);
+    partial void OnStatusChanged();
+    partial void OnContentsChanging(System.Data.Linq.Binary value);
+    partial void OnContentsChanged();
+    partial void OnParentFileIdChanging(System.Nullable<int> value);
+    partial void OnParentFileIdChanged();
+    partial void OnOwnerChanging(string value);
+    partial void OnOwnerChanged();
+    partial void OnSha1HashChanging(System.Data.Linq.Binary value);
+    partial void OnSha1HashChanged();
+    partial void OnArgosDeploymentIdChanging(System.Nullable<int> value);
+    partial void OnArgosDeploymentIdChanged();
+    partial void OnCollarParameterIdChanging(System.Nullable<int> value);
+    partial void OnCollarParameterIdChanged();
+    #endregion
+		
+		public CollarFile()
+		{
+			this._CollarFixes = new EntitySet<CollarFix>(new Action<CollarFix>(this.attach_CollarFixes), new Action<CollarFix>(this.detach_CollarFixes));
+			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
+			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
+			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
+			this._ArgosDeployment = default(EntityRef<ArgosDeployment>);
+			this._CollarFile1 = default(EntityRef<CollarFile>);
+			this._CollarParameter = default(EntityRef<CollarParameter>);
+			this._Collar = default(EntityRef<Collar>);
+			this._LookupCollarFileFormat = default(EntityRef<LookupCollarFileFormat>);
+			this._LookupFileStatus = default(EntityRef<LookupFileStatus>);
+			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
+			this._Project = default(EntityRef<Project>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int FileId
+		{
+			get
+			{
+				return this._FileId;
+			}
+			set
+			{
+				if ((this._FileId != value))
+				{
+					this.OnFileIdChanging(value);
+					this.SendPropertyChanging();
+					this._FileId = value;
+					this.SendPropertyChanged("FileId");
+					this.OnFileIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileName", DbType="NVarChar(255) NOT NULL", CanBeNull=false)]
+		public string FileName
+		{
+			get
+			{
+				return this._FileName;
+			}
+			set
+			{
+				if ((this._FileName != value))
+				{
+					this.OnFileNameChanging(value);
+					this.SendPropertyChanging();
+					this._FileName = value;
+					this.SendPropertyChanged("FileName");
+					this.OnFileNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UploadDate", AutoSync=AutoSync.OnInsert, DbType="DateTime2 NOT NULL", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		public System.DateTime UploadDate
+		{
+			get
+			{
+				return this._UploadDate;
+			}
+			set
+			{
+				if ((this._UploadDate != value))
+				{
+					this.OnUploadDateChanging(value);
+					this.SendPropertyChanging();
+					this._UploadDate = value;
+					this.SendPropertyChanged("UploadDate");
+					this.OnUploadDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectId", DbType="VarChar(16)")]
+		public string ProjectId
+		{
+			get
+			{
+				return this._ProjectId;
+			}
+			set
+			{
+				if ((this._ProjectId != value))
+				{
+					if (this._Project.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnProjectIdChanging(value);
+					this.SendPropertyChanging();
+					this._ProjectId = value;
+					this.SendPropertyChanged("ProjectId");
+					this.OnProjectIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_UserName", AutoSync=AutoSync.OnInsert, DbType="NVarChar(128) NOT NULL", CanBeNull=false, IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		public string UserName
+		{
+			get
+			{
+				return this._UserName;
+			}
+			set
+			{
+				if ((this._UserName != value))
+				{
+					this.OnUserNameChanging(value);
+					this.SendPropertyChanging();
+					this._UserName = value;
+					this.SendPropertyChanged("UserName");
+					this.OnUserNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16)")]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarManufacturerChanging(value);
+					this.SendPropertyChanging();
+					this._CollarManufacturer = value;
+					this.SendPropertyChanged("CollarManufacturer");
+					this.OnCollarManufacturerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16)")]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarIdChanging(value);
+					this.SendPropertyChanging();
+					this._CollarId = value;
+					this.SendPropertyChanged("CollarId");
+					this.OnCollarIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Format", AutoSync=AutoSync.OnInsert, DbType="Char(1) NOT NULL", IsDbGenerated=true)]
+		public char Format
+		{
+			get
+			{
+				return this._Format;
+			}
+			set
+			{
+				if ((this._Format != value))
+				{
+					if (this._LookupCollarFileFormat.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnFormatChanging(value);
+					this.SendPropertyChanging();
+					this._Format = value;
+					this.SendPropertyChanged("Format");
+					this.OnFormatChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Status", DbType="Char(1) NOT NULL")]
+		public char Status
+		{
+			get
+			{
+				return this._Status;
+			}
+			set
+			{
+				if ((this._Status != value))
+				{
+					if (this._LookupFileStatus.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnStatusChanging(value);
+					this.SendPropertyChanging();
+					this._Status = value;
+					this.SendPropertyChanged("Status");
+					this.OnStatusChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Contents", DbType="VarBinary(MAX) NOT NULL", CanBeNull=false, UpdateCheck=UpdateCheck.Never)]
+		public System.Data.Linq.Binary Contents
+		{
+			get
+			{
+				return this._Contents.Value;
+			}
+			set
+			{
+				if ((this._Contents.Value != value))
+				{
+					this.OnContentsChanging(value);
+					this.SendPropertyChanging();
+					this._Contents.Value = value;
+					this.SendPropertyChanged("Contents");
+					this.OnContentsChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ParentFileId", DbType="Int")]
+		public System.Nullable<int> ParentFileId
+		{
+			get
+			{
+				return this._ParentFileId;
+			}
+			set
+			{
+				if ((this._ParentFileId != value))
+				{
+					if (this._CollarFile1.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnParentFileIdChanging(value);
+					this.SendPropertyChanging();
+					this._ParentFileId = value;
+					this.SendPropertyChanged("ParentFileId");
+					this.OnParentFileIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Owner", DbType="NVarChar(128)")]
+		public string Owner
+		{
+			get
+			{
+				return this._Owner;
+			}
+			set
+			{
+				if ((this._Owner != value))
+				{
+					if (this._ProjectInvestigator.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnOwnerChanging(value);
+					this.SendPropertyChanging();
+					this._Owner = value;
+					this.SendPropertyChanged("Owner");
+					this.OnOwnerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.OnInsert, DbType="VarBinary(8000)", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		public System.Data.Linq.Binary Sha1Hash
+		{
+			get
+			{
+				return this._Sha1Hash;
+			}
+			set
+			{
+				if ((this._Sha1Hash != value))
+				{
+					this.OnSha1HashChanging(value);
+					this.SendPropertyChanging();
+					this._Sha1Hash = value;
+					this.SendPropertyChanged("Sha1Hash");
+					this.OnSha1HashChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ArgosDeploymentId", DbType="Int")]
+		public System.Nullable<int> ArgosDeploymentId
+		{
+			get
+			{
+				return this._ArgosDeploymentId;
+			}
+			set
+			{
+				if ((this._ArgosDeploymentId != value))
+				{
+					if (this._ArgosDeployment.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnArgosDeploymentIdChanging(value);
+					this.SendPropertyChanging();
+					this._ArgosDeploymentId = value;
+					this.SendPropertyChanged("ArgosDeploymentId");
+					this.OnArgosDeploymentIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarParameterId", DbType="Int")]
+		public System.Nullable<int> CollarParameterId
+		{
+			get
+			{
+				return this._CollarParameterId;
+			}
+			set
+			{
+				if ((this._CollarParameterId != value))
+				{
+					if (this._CollarParameter.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarParameterIdChanging(value);
+					this.SendPropertyChanging();
+					this._CollarParameterId = value;
+					this.SendPropertyChanged("CollarParameterId");
+					this.OnCollarParameterIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_CollarFix", Storage="_CollarFixes", ThisKey="FileId", OtherKey="FileId")]
+		public EntitySet<CollarFix> CollarFixes
+		{
+			get
+			{
+				return this._CollarFixes;
+			}
+			set
+			{
+				this._CollarFixes.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="FileId", OtherKey="FileId")]
+		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
+		{
+			get
+			{
+				return this._ArgosFileProcessingIssues;
+			}
+			set
+			{
+				this._ArgosFileProcessingIssues.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosDownload", Storage="_ArgosDownloads", ThisKey="FileId", OtherKey="FileId")]
+		public EntitySet<ArgosDownload> ArgosDownloads
+		{
+			get
+			{
+				return this._ArgosDownloads;
+			}
+			set
+			{
+				this._ArgosDownloads.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_CollarFile", Storage="_CollarFiles", ThisKey="FileId", OtherKey="ParentFileId")]
+		public EntitySet<CollarFile> CollarFiles
+		{
+			get
+			{
+				return this._CollarFiles;
+			}
+			set
+			{
+				this._CollarFiles.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosDeployment_CollarFile", Storage="_ArgosDeployment", ThisKey="ArgosDeploymentId", OtherKey="DeploymentId", IsForeignKey=true)]
+		public ArgosDeployment ArgosDeployment
+		{
+			get
+			{
+				return this._ArgosDeployment.Entity;
+			}
+			set
+			{
+				ArgosDeployment previousValue = this._ArgosDeployment.Entity;
+				if (((previousValue != value) 
+							|| (this._ArgosDeployment.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ArgosDeployment.Entity = null;
+						previousValue.CollarFiles.Remove(this);
+					}
+					this._ArgosDeployment.Entity = value;
+					if ((value != null))
+					{
+						value.CollarFiles.Add(this);
+						this._ArgosDeploymentId = value.DeploymentId;
+					}
+					else
+					{
+						this._ArgosDeploymentId = default(Nullable<int>);
+					}
+					this.SendPropertyChanged("ArgosDeployment");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_CollarFile", Storage="_CollarFile1", ThisKey="ParentFileId", OtherKey="FileId", IsForeignKey=true)]
+		public CollarFile CollarFile1
+		{
+			get
+			{
+				return this._CollarFile1.Entity;
+			}
+			set
+			{
+				CollarFile previousValue = this._CollarFile1.Entity;
+				if (((previousValue != value) 
+							|| (this._CollarFile1.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._CollarFile1.Entity = null;
+						previousValue.CollarFiles.Remove(this);
+					}
+					this._CollarFile1.Entity = value;
+					if ((value != null))
+					{
+						value.CollarFiles.Add(this);
+						this._ParentFileId = value.FileId;
+					}
+					else
+					{
+						this._ParentFileId = default(Nullable<int>);
+					}
+					this.SendPropertyChanged("CollarFile1");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarParameter_CollarFile", Storage="_CollarParameter", ThisKey="CollarParameterId", OtherKey="ParameterId", IsForeignKey=true)]
+		public CollarParameter CollarParameter
+		{
+			get
+			{
+				return this._CollarParameter.Entity;
+			}
+			set
+			{
+				CollarParameter previousValue = this._CollarParameter.Entity;
+				if (((previousValue != value) 
+							|| (this._CollarParameter.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._CollarParameter.Entity = null;
+						previousValue.CollarFiles.Remove(this);
+					}
+					this._CollarParameter.Entity = value;
+					if ((value != null))
+					{
+						value.CollarFiles.Add(this);
+						this._CollarParameterId = value.ParameterId;
+					}
+					else
+					{
+						this._CollarParameterId = default(Nullable<int>);
+					}
+					this.SendPropertyChanged("CollarParameter");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarFile", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true)]
+		public Collar Collar
+		{
+			get
+			{
+				return this._Collar.Entity;
+			}
+			set
+			{
+				Collar previousValue = this._Collar.Entity;
+				if (((previousValue != value) 
+							|| (this._Collar.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Collar.Entity = null;
+						previousValue.CollarFiles.Remove(this);
+					}
+					this._Collar.Entity = value;
+					if ((value != null))
+					{
+						value.CollarFiles.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+						this._CollarId = value.CollarId;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+						this._CollarId = default(string);
+					}
+					this.SendPropertyChanged("Collar");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarFileFormat_CollarFile", Storage="_LookupCollarFileFormat", ThisKey="Format", OtherKey="Code", IsForeignKey=true)]
+		public LookupCollarFileFormat LookupCollarFileFormat
+		{
+			get
+			{
+				return this._LookupCollarFileFormat.Entity;
+			}
+			set
+			{
+				LookupCollarFileFormat previousValue = this._LookupCollarFileFormat.Entity;
+				if (((previousValue != value) 
+							|| (this._LookupCollarFileFormat.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._LookupCollarFileFormat.Entity = null;
+						previousValue.CollarFiles.Remove(this);
+					}
+					this._LookupCollarFileFormat.Entity = value;
+					if ((value != null))
+					{
+						value.CollarFiles.Add(this);
+						this._Format = value.Code;
+					}
+					else
+					{
+						this._Format = default(char);
+					}
+					this.SendPropertyChanged("LookupCollarFileFormat");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupFileStatus_CollarFile", Storage="_LookupFileStatus", ThisKey="Status", OtherKey="Code", IsForeignKey=true)]
+		public LookupFileStatus LookupFileStatus
+		{
+			get
+			{
+				return this._LookupFileStatus.Entity;
+			}
+			set
+			{
+				LookupFileStatus previousValue = this._LookupFileStatus.Entity;
+				if (((previousValue != value) 
+							|| (this._LookupFileStatus.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._LookupFileStatus.Entity = null;
+						previousValue.CollarFiles.Remove(this);
+					}
+					this._LookupFileStatus.Entity = value;
+					if ((value != null))
+					{
+						value.CollarFiles.Add(this);
+						this._Status = value.Code;
+					}
+					else
+					{
+						this._Status = default(char);
+					}
+					this.SendPropertyChanged("LookupFileStatus");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_CollarFile", Storage="_ProjectInvestigator", ThisKey="Owner", OtherKey="Login", IsForeignKey=true)]
+		public ProjectInvestigator ProjectInvestigator
+		{
+			get
+			{
+				return this._ProjectInvestigator.Entity;
+			}
+			set
+			{
+				ProjectInvestigator previousValue = this._ProjectInvestigator.Entity;
+				if (((previousValue != value) 
+							|| (this._ProjectInvestigator.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ProjectInvestigator.Entity = null;
+						previousValue.CollarFiles.Remove(this);
+					}
+					this._ProjectInvestigator.Entity = value;
+					if ((value != null))
+					{
+						value.CollarFiles.Add(this);
+						this._Owner = value.Login;
+					}
+					else
+					{
+						this._Owner = default(string);
+					}
+					this.SendPropertyChanged("ProjectInvestigator");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Project_CollarFile", Storage="_Project", ThisKey="ProjectId", OtherKey="ProjectId", IsForeignKey=true)]
+		public Project Project
+		{
+			get
+			{
+				return this._Project.Entity;
+			}
+			set
+			{
+				Project previousValue = this._Project.Entity;
+				if (((previousValue != value) 
+							|| (this._Project.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Project.Entity = null;
+						previousValue.CollarFiles.Remove(this);
+					}
+					this._Project.Entity = value;
+					if ((value != null))
+					{
+						value.CollarFiles.Add(this);
+						this._ProjectId = value.ProjectId;
+					}
+					else
+					{
+						this._ProjectId = default(string);
+					}
+					this.SendPropertyChanged("Project");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_CollarFixes(CollarFix entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile = this;
+		}
+		
+		private void detach_CollarFixes(CollarFix entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile = null;
+		}
+		
+		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile = this;
+		}
+		
+		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile = null;
+		}
+		
+		private void attach_ArgosDownloads(ArgosDownload entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile = this;
+		}
+		
+		private void detach_ArgosDownloads(ArgosDownload entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile = null;
+		}
+		
+		private void attach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile1 = this;
+		}
+		
+		private void detach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile1 = null;
 		}
 	}
 }
