@@ -52,12 +52,11 @@ namespace FileLibrary
         }
 
 
-        //TODO - finish documentation
         /// <summary>
-        /// 
+        /// Retrieves data for an Argos Program from the Argos Web Server
         /// </summary>
-        /// <param name="program"></param>
-        /// <param name="daysToRetrieve"></param>
+        /// <param name="program">The Argos Program (contains Platforms) to retrieve from the server</param>
+        /// <param name="daysToRetrieve">The number of most recent days to retrieve from the server</param>
         public static void DownloadArgosProgram(ArgosProgram program, int? daysToRetrieve = null)
         {
             int daysSinceLastDownload;
@@ -85,12 +84,11 @@ namespace FileLibrary
         }
 
 
-        //TODO - finish documentation
         /// <summary>
-        /// 
+        /// Retrieves data for an Argos Platform from the Argos Web Server
         /// </summary>
-        /// <param name="platform"></param>
-        /// <param name="daysToRetrieve"></param>
+        /// <param name="platform">The Argos Platform to retrieve from the server</param>
+        /// <param name="daysToRetrieve">The number of most recent days to retrieve from the server</param>
         public static void DownloadArgosPlatform(ArgosPlatform platform, int? daysToRetrieve = null)
         {
             int daysSinceLastDownload;

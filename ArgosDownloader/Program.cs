@@ -9,7 +9,7 @@ using FileLibrary;
 
 namespace ArgosDownloader
 {
-    public static class Program
+    internal static class Program
     {
 
         static private Dictionary<string, string> _emails;
@@ -26,7 +26,7 @@ namespace ArgosDownloader
         /// All args are checked to see if they are a program identifier, and if so the program is downloaded.
         /// If an arg is not a program it is checked to see if it is a platform identifier, and if so the platform
         ///   is downloaded.
-        ///  as a program, if it is not a validor as a platform if it the integer is not a program.
+        ///  as a program, if it is not a valid or as a platform if it the integer is not a program.
         /// If there is only one arg and that arg is a project investigator, then download all programs and
         ///   platforms for that PI
         /// If there is only one arg and that arg in the form /d:XX, where XX is an integer, then download
@@ -48,6 +48,11 @@ namespace ArgosDownloader
         /// Any argument in the form /platform:XXXX where XXX is a valid PlatformId will be processed as a platform.
         /// All other args are ignored with an error message to the console.
         /// </param>
+        /// <remarks>
+        /// If the downloaded data contains raw Gen4 data and if a copy of TDC.exe is NOT available (the path is specified
+        /// in the config file) then this program will request that the database invoke the file processor on the server,
+        /// otherwise, this program will process the downloaded data locally and send the results to the database.
+        /// </remarks>
         private static void Main(string[] args)
         {
             try

@@ -81,6 +81,8 @@ namespace FileLibrary
 
         #endregion
 
+        #region private methods
+
         private static void ProcessFile(CollarFile file, ArgosFile argos, ArgosPlatform platform)
         {
             LogGeneralMessage(String.Format("Start local processing of file {0}", file.FileId));
@@ -378,5 +380,6 @@ namespace FileLibrary
 
         #endregion
 
+        #endregion
     }
 }

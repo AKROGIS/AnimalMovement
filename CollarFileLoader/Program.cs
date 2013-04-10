@@ -8,36 +8,38 @@ namespace CollarFileLoader
 {
     internal static class Program
     {
-        //TODO - cleanup this documentation!
         /// <summary>
-        /// This program may be run by a user from the command line to load multiple files/folder of files.
-        /// The program may also be used by a user to process all unprocessed files.
-        /// This program may be called by the database with a single integer argument which will be a
-        /// FileId for a record in the CollarFiles table.
-        /// If the file(s) is an Argos file (email or downloads), then the file is summerized and processed
-        /// locally or on the server depending on the availablity of the TDC.exe for processing.
-        /// The processing determines which collars were using the argos platform during the period of the
-        /// transmissions, and extracts the GPS locations for each transmission based on the active parameters
-        /// for the collar during each range of transmissions.
-        /// Any errors will be written to the Console.  The database obtains the console output from this program.
-        /// Nothing is written to the console on success.
-        /// The processor will write any file specific issues, i.e. unknown platform, missing parameters, etc
-        /// to the Argos to the ArgosFileProcessingIssues table in the database
+        /// Attempts to load multiple files or folder of files into the database.
+        /// The collar is determined from the contents if possible and necessary.  It is not possible
+        /// to explicitely specify the collar to use, because 1) in most cases it is not necessary,
+        /// especially in the case of bulk loading a folder (then primary purpose of this command),
+        /// and 2) it would be too easy to make errors that cannot be checked for.  Files will be
+        /// loaded as active, and duplicates will not be allowed.  If you need more flexibility,
+        /// then use the interface in the Animal Movements application.
         /// </summary>
         /// <param name="args">
-        /// This program takes zero or more arguments.
-        /// If there are no arguments, then the database is queried to get all files that need processing.
-        /// for each arg that is an int, the int is assumed to be a FileId in the CollarFiles table
-        /// for each arg that is a path (file or folder), the file (or all files in the folder) is
-        ///   loaded into the CollarFiles table and then processed.
-        /// an the arg in the form /p:XXXX, defines the project to which subsequent files are loaded
-        /// any other args are ignored with a warning.
+        /// If no arguments are provided, then the program will attempt to load all files in current directory
+        /// in the database, for the current user.  It is an error if the calling user is not a project investigator
+        /// If the argument matches /o[wner]:xxx or /m[anager]:xxx or xxx, and xxx is a login (domain\username) of a project
+        ///   investigator in the database, then the subsequent files will be associated with this project investigator.
+        ///   Specifying a valid project investigator will clear a previously set project.  The person running this 
+        ///   program must have the necessary database permissions (typically this means being the project investigator
+        ///   or and assistant to the project investigator).
+        /// If the argument matches /p[roject]:xxx or xxx, and xxx is a project id in the database then the remaining
+        ///   files will be associated with this project. Specifying a valid project will clear the project investigator.
+        ///   The person running this program must have the necessary database permissions (typically this means being
+        ///   an editor on the project).
+        /// In the highly unlikely case that an argument is both a project id and a project investigator login, then
+        ///   the tie will go to the project.
+        /// If the argument is a file (relative or absolute) then that file is read and loaded if possible
+        /// If the argument is a folder (relative or absolute) then all the files in the folder are read and loaded
+        ///   if possible.
+        /// All other args are ignored with a warning.
         /// </param>
         /// <remarks>
-        /// If a copy of TDC.exe is available from this program, then the FileProcessor will be
-        /// make use of it to process the files locally and send the results to the database.
-        /// If TDC.exe is not available, then the FileProcessor will request that the database
-        /// invoke the file processor on the server.
+        /// If the a file contains raw Gen4 data and if a copy of TDC.exe is NOT available (the path is specified
+        /// in the config file) then this program will request that the database invoke the file processor on the server,
+        /// otherwise, this program will process the file locally and send the results to the database.
         /// </remarks>
         private static void Main(string[] args)
         {

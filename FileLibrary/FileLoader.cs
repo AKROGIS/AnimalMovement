@@ -19,6 +19,15 @@ namespace FileLibrary
 
         #region AWS loaders
 
+        /// <summary>
+        /// Loads and logs the download data for an Argos Program
+        /// </summary>
+        /// <param name="program">The Argos ProgramId that this data is for</param>
+        /// <param name="days">The number of days that are included in this data set</param>
+        /// <param name="results">The data returned from the Argos Web Server (may be null)</param>
+        /// <param name="errors">Any errors returned by the Argos Web Server (may be null)</param>
+        /// <returns>Returns the newly created collar file, complete with database calculated fields</returns>
+        /// <remarks>Only one of results and errors can be non-null.</remarks>
         internal static CollarFile LoadProgram(ArgosProgram program, int days,
                                                ArgosWebSite.ArgosWebResult results, string errors)
         {
@@ -52,6 +61,15 @@ namespace FileLibrary
             return file;
         }
 
+        /// <summary>
+        /// Loads and logs the download data for an Argos Platform
+        /// </summary>
+        /// <param name="platform">The Argos PlatformId that this data is for</param>
+        /// <param name="days">The number of days that are included in this data set</param>
+        /// <param name="results">The data returned from the Argos Web Server (may be null)</param>
+        /// <param name="errors">Any errors returned by the Argos Web Server (may be null)</param>
+        /// <returns>Returns the newly created collar file, complete with database calculated fields</returns>
+        /// <remarks>Only one of results and errors can be non-null.</remarks>
         internal static CollarFile LoadPlatfrom(ArgosPlatform platform, int days,
                                                 ArgosWebSite.ArgosWebResult results, string errors)
         {
@@ -87,6 +105,20 @@ namespace FileLibrary
 
         #endregion
 
+        /// <summary>
+        /// Attempts to load the file (or all the files in a folder) into the database
+        /// </summary>
+        /// <param name="path">A complete file or folder path to data that will be loaded</param>
+        /// <param name="handler">Delegate to handle exceptions on each file, so that processing can continue.
+        /// If the handler is null, processing will stop on first exception.
+        /// The handler can throw it's own exception to halt further processing</param>
+        /// <param name="project">Associate the new file with this Project (optional)</param>
+        /// <param name="manager">Associate the new file with this Project Investigator (optional)</param>
+        /// <param name="collar">This file contains data for this collar.  Not required for files with Argos data, or
+        /// if the collar can be determined from the file contents</param>
+        /// <param name="status">The new file should be (A)ctive (generate fixes, default) or (I)nactive (no fixes)</param>
+        /// <param name="allowDups">File will not be rejected if the contents match an existing file</param>
+        /// <remarks>Only one of project and manager can be non-null.</remarks>
         public static void LoadPath(string path, Action<Exception, string, Project, ProjectInvestigator> handler = null,
                                     Project project = null, ProjectInvestigator manager = null, Collar collar = null,
                                     char status = 'A', bool allowDups = false)
@@ -130,29 +162,84 @@ namespace FileLibrary
 
         #region Public Properties
 
+        /// <summary>
+        /// Associate the new file with this Project
+        /// </summary>
         public Project Project { get; set; }
+
+        /// <summary>
+        /// Associate the new file with this Project Investigator
+        /// </summary>
         public ProjectInvestigator Owner { get; set; }
+
+        /// <summary>
+        /// This file contains data for this collar.  This is the user provide collar, it may be null.
+        /// If this is null and the format of the file requres a collar, and it can be determined from the contents
+        /// then this property will contain the derived collar after the insert.
+        /// </summary>
         public Collar Collar { get; set; }
+
+        /// <summary>
+        /// The new file should be (A)ctive (generate fixes) or (I)nactive (no fixes)
+        /// </summary>
         public char Status { get; set; }
+
+        /// <summary>
+        /// File will not be rejected if the contents match an existing file
+        /// </summary>
         public bool AllowDuplicates { get; set; }
 
+        /// <summary>
+        /// Used by the FileProcessor to link a results file with it source data
+        /// </summary>
         internal int? ParentFileId { get; set; }
+        /// <summary>
+        /// Used by the FileProcessor to link a results file with Argos deployment used
+        /// </summary>
         internal int? ArgosDeploymentId { get; set; }
+        /// <summary>
+        /// Used by the FileProcessor to link a results file with the Collar parameters used
+        /// </summary>
         internal int? CollarParameterId { get; set; }
 
+        /// <summary>
+        /// The data context in which the CollarFile is created
+        /// </summary>
         public AnimalMovementDataContext Database { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string FilePath { get; private set; }
+
+        /// <summary>
+        /// The path to the data of this collar file
+        /// </summary>
         public Byte[] Contents { get; private set; }
+
+        /// <summary>
+        /// The binary contents of the collar file
+        /// </summary>
         public Lazy<char?> Format { get; private set; }
 
         #endregion
 
         #region Constructors
 
+        /// <summary>
+        /// Create a new fileprocessor with the name and contents of the file at the file path
+        /// </summary>
+        /// <param name="filePath">The complete operating system path to the file contents</param> 
         public FileLoader(string filePath)
             : this(filePath, File.ReadAllBytes(filePath))
         { }
 
+        /// <summary>
+        /// Create a new fileprocessor with the contents provided, and the name provided
+        /// </summary>
+        /// <param name="filePath">The file name. If a complete path is provided, only the file name is used</param>
+        /// <param name="contents">The binary contents of the file</param>
+        /// <remarks>This is provided for internal methods like the file processor that create the contents dynamically</remarks>
         internal FileLoader(string filePath, Byte[] contents)
         {
             if (contents == null || contents.Length == 0)
@@ -168,6 +255,10 @@ namespace FileLibrary
 
         #region Public Instance Methods
 
+        /// <summary>
+        /// Validates and loads the file to the database
+        /// </summary>
+        /// <returns>Returns the newly created collar file, complete with database calculated fields</returns>
         public CollarFile Load()
         {
             Validate();
