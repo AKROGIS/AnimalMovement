@@ -185,20 +185,20 @@ namespace FileLibrary
             var transmissionSubset = transmissions.Where(t => start <= t.DateTime && t.DateTime <= end);
             var lines = processor.ProcessTransmissions(transmissionSubset, argos);
             var data = Encoding.UTF8.GetBytes(String.Join("\n", lines));
-            var collarFile = new CollarFile
+            var filename = Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameters.CollarId + ".csv";
+            var fileLoader = new FileLoader(filename, data)
                 {
                     Project = file.Project,
-                    FileName = Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameters.CollarId + ".csv",
-                    CollarManufacturer = parameters.CollarManufacturer,
-                    CollarId = parameters.CollarId,
+                    Owner = file.ProjectInvestigator,
+                    Collar = new Collar {CollarManufacturer = parameters.CollarManufacturer,
+                                         CollarId = parameters.CollarId},
                     Status = file.Status,
                     ParentFileId = file.FileId,
-                    Contents = data,
-                    Owner = file.Owner
+                    ArgosDeploymentId = parameters.DeploymentId,
+                    CollarParameterId = parameters.ParameterId,
+                    AllowDuplicates = true
                 };
-            var database = new AnimalMovementDataContext();
-            database.CollarFiles.InsertOnSubmit(collarFile);
-            database.SubmitChanges();
+            fileLoader.Load();
             var message =
                 String.Format(
                     "    Successfully added Argos {0} transmissions from {1:g} to {2:g} to Collar {3}/{4}",
