@@ -95,7 +95,7 @@ namespace CollarFileLoader
         private static void HandleException(Exception ex, string path, Project project, ProjectInvestigator manager)
         {
             Console.WriteLine("Unable to load file: {0} for project: {1} or manager: {2} reason: {3}", path,
-                              project.ProjectId, manager.Login, ex.Message);
+                project == null ? "<null>" : project.ProjectId, manager == null ? "<null>" : manager.Login, ex.Message);
         }
 
         private static Project GetProject(string projectId)

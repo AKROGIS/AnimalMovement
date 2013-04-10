@@ -220,7 +220,7 @@ namespace FileLibrary
                 var duplicate = GetDuplicate();
                 if (duplicate != null)
                     throw new InvalidOperationException(
-                        String.Format("The contents of {0} have already been loaded as file '{1}' {2} '{3}'.",
+                        String.Format("The contents have already been loaded as file '{1}' {2} '{3}'.",
                                       FilePath,
                                       duplicate.FileName, duplicate.Project == null ? "for manager" : "in project",
                                       duplicate.Project == null ? duplicate.Owner : duplicate.Project.ProjectName));
@@ -228,8 +228,7 @@ namespace FileLibrary
 
             //Unknown format
             if (Format.Value == null)
-                throw new InvalidOperationException(
-                    String.Format("The contents of {0} are not in a recognizable format.", FilePath));
+                throw new InvalidOperationException("The contents are not in a recognizable format.");
 
             //Try and guess the collar if one is required and not provided 
             if (CollarIsRequired)
@@ -238,10 +237,8 @@ namespace FileLibrary
                     Collar = GetCollarFromFile();
                 if (Collar == null)
                     throw new InvalidOperationException(
-                        String.Format(
-                            "The format of {0} requires a valid collar but none was provided " +
-                            "nor could it be determined from the filename or contents.",
-                            FilePath));
+                            "The format requires a valid collar but none was provided " +
+                            "nor could it be determined from the filename or contents.");
             }
         }
 
