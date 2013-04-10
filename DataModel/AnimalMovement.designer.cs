@@ -427,6 +427,7 @@ namespace DataModel
 			obj.UploadDate = p3.GetValueOrDefault();
 			obj.UserName = p4;
 			obj.Sha1Hash = p5;
+		    obj.LookupCollarFileFormat = LookupCollarFileFormats.First(l => l.Code == obj.Format);
 		}
 		
 		private void UpdateCollarFile(CollarFile obj)
