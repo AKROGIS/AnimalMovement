@@ -8,8 +8,6 @@ using System.Text.RegularExpressions;
 using DataModel;
 using Telonics;
 
-//FIXME can I use objects from different data contexts?
-
 namespace FileLibrary
 {
     public class FileLoader
@@ -159,12 +157,16 @@ namespace FileLibrary
         public CollarFile Load()
         {
             Validate();
+            // The entity objects I got from the callers (i.e. Project, Owner, Collar)
+            // came from a foreign DataContext, so they cannot be used to create a new
+            // entity in this datacontext.
             var file = new CollarFile
             {
-                Project = Project,
+                ProjectId = Project == null ? null : Project.ProjectId,
                 FileName = Path.GetFileName(FilePath),
-                Collar = Collar,
-                ProjectInvestigator = Owner,
+                CollarManufacturer = Collar == null ? null : Collar.CollarManufacturer,
+                CollarId = Collar == null ? null : Collar.CollarId,
+                Owner = Owner == null ? null : Owner.Login,
                 Status = Status,
                 Contents = Contents,
             };
@@ -214,7 +216,6 @@ namespace FileLibrary
                     String.Format("A status of '{0}' is not acceptable.  Acceptable values are 'A' and 'I'.", Status));
 
             //Deny duplicates
-
             if (!AllowDuplicates)
             {
                 var duplicate = GetDuplicate();
