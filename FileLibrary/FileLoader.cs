@@ -220,8 +220,7 @@ namespace FileLibrary
                 var duplicate = GetDuplicate();
                 if (duplicate != null)
                     throw new InvalidOperationException(
-                        String.Format("The contents have already been loaded as file '{1}' {2} '{3}'.",
-                                      FilePath,
+                        String.Format("The contents have already been loaded as file '{0}' {1} '{2}'.",
                                       duplicate.FileName, duplicate.Project == null ? "for manager" : "in project",
                                       duplicate.Project == null ? duplicate.Owner : duplicate.Project.ProjectName));
             }
@@ -279,6 +278,8 @@ namespace FileLibrary
             if (Format.Value.Value == 'C')
             {
                 string ctn = GetCtnFromFormatC();
+                if (ctn == null)
+                    return null;
                 var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
                 if (collar != null)
                     return collar;
@@ -379,7 +380,8 @@ namespace FileLibrary
         {
             using (var stream = new MemoryStream(bytes, 0, bytes.Length))
             using (var reader = new StreamReader(stream, enc))
-                yield return reader.ReadLine();
+                while(reader.Peek() >= 0)
+                    yield return reader.ReadLine();
         }
 
 
