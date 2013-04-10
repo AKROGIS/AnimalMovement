@@ -304,16 +304,51 @@
    GROUP BY Sha1Hash
      HAVING COUNT(*) > 1
 
------------ ERROR: Children/Parent files that are out of sync.
-     SELECT P.FileId, P.FileName, P.ProjectId, P.Owner, P.Status,
-            C.FileId, C.FileName, C.ProjectId, C.Owner, C.Status
+----------- Collar File Business rule: A CollarFile with a parent, must have the same owner, project, and status as the parent
+     SELECT C.FileId, C.ParentFileId, P.[FileName], P.UploadDate, C.[Owner], P.[Owner], C.ProjectId, P.ProjectId
        FROM CollarFiles AS P
-  LEFT JOIN CollarFiles AS C
-         ON P.FileId = C.ParentFileId
-      WHERE C.[Status] <> P.[Status]
-         OR C.ProjectId <> P.ProjectId
-         OR C.[Owner] <> P.[Owner]
+ INNER JOIN CollarFiles AS C
+         ON C.ParentFileId = P.FileId
+      WHERE C.[Owner] != P.[Owner] or C.ProjectId != P.ProjectId
+         OR (C.[Owner] IS NULL AND P.[Owner] IS NOT NULL)
+         OR (C.[Owner] IS NOT NULL AND P.[Owner] IS NULL)
+         OR (C.ProjectId IS NULL AND P.ProjectId IS NOT NULL)
+         OR (C.ProjectId IS NOT NULL AND P.ProjectId IS NULL)
+         OR C.[Status] != P.[Status]
 
+----------- Collar File Business rule: must have one and only one non-null value for (Owner,ProjectId)
+     SELECT FileId, ProjectId, [Owner]
+       FROM Collarfiles
+      WHERE (ProjectId IS NOT NULL AND [Owner] IS NOT NULL)
+         OR (ProjectId IS NULL AND [Owner] IS NULL)
+
+----------- Collar File Business rule: A Collar Mfgr/Id is required unless the file format has Argos data.
+     SELECT C.FileId, C.[FileName], C.CollarManufacturer, C.CollarId, C.[Format], F.ArgosData
+       FROM Collarfiles AS C
+ INNER JOIN LookupCollarFileFormats AS F
+         ON C.Format = F.Code
+      WHERE (C.CollarId IS NULL AND F.ArgosData = 'N')
+         OR (C.CollarId IS NOT NULL AND F.ArgosData = 'Y')
+
+----------- Collar File Business rule: ArgosProgramId and CollarParameterId must be non-null only when parent has ArgosData
+     SELECT C.FileId, C.[FileName], C.ArgosDeploymentId, C.CollarParameterId, C.[Format], F.ArgosData
+       FROM CollarFiles AS P
+ INNER JOIN CollarFiles AS C
+         ON C.ParentFileId = P.FileId
+ INNER JOIN LookupCollarFileFormats AS F
+         ON P.Format = F.Code
+      WHERE ((C.ArgosDeploymentId IS NULL OR C.CollarParameterId IS NULL) AND F.ArgosData = 'Y')
+         OR ((C.ArgosDeploymentId IS NOT NULL OR C.CollarParameterId IS NOT NULL) AND F.ArgosData = 'N')
+
+----------- Collar File Business rule: All Collar files with ArgosData must be summerized
+     SELECT C.FileId, C.[FileName], C.ArgosDeploymentId, C.CollarParameterId, C.[Format], F.ArgosData
+       FROM CollarFiles AS C
+ INNER JOIN LookupCollarFileFormats AS F
+         ON C.Format = F.Code
+  LEFT JOIN ArgosFilePlatformDates AS A
+         ON C.FileId = A.FileId
+      WHERE (A.FileId IS NULL AND F.ArgosData = 'Y')
+         OR (A.FileId IS NOT NULL AND F.ArgosData = 'N')
 
 
 

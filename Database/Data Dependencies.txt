@@ -292,28 +292,28 @@ Format
   - It is computed by the database from the Contents on creation and cannot be inserted by
     the user, or changed once inserted 
 ArgosDeploymentId
-  - is a nullable key in the ArgosDeployments table.
+  - is a nullable key in the ArgosDeployments table.  Update and Delete No Action
+    required by after triggers, so CollarFiles must be deleted before ArgosDeployments
   - It is inserted by only the external file processors so that a results file can be
     linked back to the ArgosDeployment that was in effect when this file was created.
 	This file may need to be deleted or updated if the ArgosDeployment changes.
   - This column is not visible to clients, except on insert, where it defaults to null.
     It can be manipulated (subject to FK constraints) by the SA.
-  - The ParentFileId must be set if this property is non-null.  However, this property can
-    be null even if ParentFileId is non-null, e.g. Datalog file processing
+  - ArgosDeploymentId must be non-null if and only if the parent has ArgosData
   - There is no simple way to verify (on insert) that this property is correct.  If this
-    property is set incorrectly by the user or the SA, then all gets are off, so only
+    property is set incorrectly by the user or the SA, then all bets are off, so only
     use the FileProcessor to insert generated files.
 CollarParameterId
-  - is a nullable key in the CollarParameters table.
+  - is a nullable key in the CollarParameters table.  Update and Delete No Action
+    required by after triggers, so CollarFiles must be deleted before CollarParameters
   - It is inserted by only the external file processors so that a results file can be
     linked back to the CollarParameter that was in effect when this file was created.
 	This file may need to be deleted or updated if the CollarParameter changes.
   - This column is not visible to clients, except on insert, where it defaults to null.
     It can be manipulated (subject to FK constraints) by the SA.
-  - The ParentId must be set if this property is non-null.  However, this property can
-    be null even if ParentFileId is non-null, e.g. Debevek file processing
+  - CollarParameterId must be non-null if and only if the parent has ArgosData
   - There is no simple way to verify (on insert) that this property is correct.  If this
-    property is set incorrectly by the user or the SA, then all gets are off, so only
+    property is set incorrectly by the user or the SA, then all bets are off, so only
     use the FileProcessor to insert generated files.
 
 If a file has a non-null ParentFileId

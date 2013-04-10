@@ -4814,11 +4814,15 @@ BEGIN
     END
 
 
-    -- Business Rule: ArgosDeploymentId and CollarParameterId can only be non-null id ParentFileId is non-null
+    -- Business Rule: ArgosDeploymentId and CollarParameterId must be non-null if and only if the ParentFile has argos data
     IF EXISTS (    SELECT 1
-                     FROM inserted 
-                    WHERE (ArgosDeploymentId IS NOT NULL OR CollarParameterId IS NOT NULL)
-                      AND ParentFileId IS NULL
+                     FROM inserted AS C
+               INNER JOIN CollarFiles AS P
+                       ON C.ParentFileId = P.FileId 
+               INNER JOIN LookupCollarFileFormats AS F
+                       ON P.Format = F.Code
+                    WHERE ((C.ArgosDeploymentId IS NOT NULL OR C.CollarParameterId IS NOT NULL) AND F.ArgosData = 'N')
+                       OR ((C.ArgosDeploymentId IS NULL OR C.CollarParameterId IS NULL) AND F.ArgosData = 'Y')
               )
     BEGIN
         RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
