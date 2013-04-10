@@ -75,11 +75,17 @@
   <Function Name="dbo.DaysSinceLastDownload" Method="DaysSinceLastDownload" IsComposable="true">
     <Return Type="System.Int32" />
   </Function>
+  <Function Name="dbo.FileHasGen4Data" Method="FileHasGen4Data" IsComposable="true">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Return Type="System.Boolean" />
+  </Function>
   <Function Name="dbo.GetTelonicsParametersForArgosDates" Method="GetTelonicsParametersForArgosDates" IsComposable="true">
     <Parameter Name="PlatformID" Parameter="platformID" Type="System.String" DbType="VarChar(8)" />
     <Parameter Name="StartDate" Parameter="startDate" Type="System.DateTime" DbType="DateTime2" />
     <Parameter Name="EndDate" Parameter="endDate" Type="System.DateTime" DbType="DateTime2" />
     <ElementType Name="GetTelonicsParametersForArgosDatesResult">
+      <Column Name="DeploymentId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ParameterId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
       <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
       <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
@@ -91,9 +97,5 @@
       <Column Name="StartDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Column Name="EndDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
     </ElementType>
-  </Function>
-  <Function Name="dbo.FileHasGen4Data" Method="FileHasGen4Data" IsComposable="true">
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Return Type="System.Boolean" />
   </Function>
 </Database>

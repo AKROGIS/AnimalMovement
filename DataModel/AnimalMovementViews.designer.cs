@@ -116,16 +116,16 @@ namespace DataModel
 			return ((System.Nullable<int>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod()))).ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.GetTelonicsParametersForArgosDates", IsComposable=true)]
-		public IQueryable<GetTelonicsParametersForArgosDatesResult> GetTelonicsParametersForArgosDates([global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformID", DbType="VarChar(8)")] string platformID, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate)
-		{
-			return this.CreateMethodCallQuery<GetTelonicsParametersForArgosDatesResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), platformID, startDate, endDate);
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.FileHasGen4Data", IsComposable=true)]
 		public System.Nullable<bool> FileHasGen4Data([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
 		{
 			return ((System.Nullable<bool>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId).ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.GetTelonicsParametersForArgosDates", IsComposable=true)]
+		public IQueryable<GetTelonicsParametersForArgosDatesResult> GetTelonicsParametersForArgosDates([global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformID", DbType="VarChar(8)")] string platformID, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StartDate", DbType="DateTime2")] System.Nullable<System.DateTime> startDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="EndDate", DbType="DateTime2")] System.Nullable<System.DateTime> endDate)
+		{
+			return this.CreateMethodCallQuery<GetTelonicsParametersForArgosDatesResult>(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), platformID, startDate, endDate);
 		}
 	}
 	
@@ -821,6 +821,10 @@ namespace DataModel
 	public partial class GetTelonicsParametersForArgosDatesResult
 	{
 		
+		private int _DeploymentId;
+		
+		private int _ParameterId;
+		
 		private string _PlatformId;
 		
 		private string _CollarManufacturer;
@@ -843,6 +847,38 @@ namespace DataModel
 		
 		public GetTelonicsParametersForArgosDatesResult()
 		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DeploymentId", DbType="Int NOT NULL")]
+		public int DeploymentId
+		{
+			get
+			{
+				return this._DeploymentId;
+			}
+			set
+			{
+				if ((this._DeploymentId != value))
+				{
+					this._DeploymentId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ParameterId", DbType="Int NOT NULL")]
+		public int ParameterId
+		{
+			get
+			{
+				return this._ParameterId;
+			}
+			set
+			{
+				if ((this._ParameterId != value))
+				{
+					this._ParameterId = value;
+				}
+			}
 		}
 		
 		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PlatformId", DbType="VarChar(8) NOT NULL", CanBeNull=false)]

@@ -1662,7 +1662,8 @@ CREATE FUNCTION [dbo].[GetTelonicsParametersForArgosDates]
 RETURNS TABLE 
 AS
     RETURN
-     SELECT A.PlatformId, A.CollarManufacturer, A.CollarId, C.CollarModel, P.Gen3Period, F.Format, F.FileName, F.Contents,
+     SELECT A.DeploymentId, P.ParameterId, A.PlatformId, A.CollarManufacturer, A.CollarId, C.CollarModel,
+            P.Gen3Period, F.Format, F.[FileName], F.Contents,
             CASE WHEN (A.StartDate IS NOT NULL AND P.StartDate IS NOT NULL)
                  THEN (CASE WHEN A.StartDate < P.StartDate THEN P.StartDate ELSE A.StartDate END)
                  ELSE (CASE WHEN A.StartDate IS NULL THEN P.StartDate ELSE A.StartDate END) END AS StartDate,
