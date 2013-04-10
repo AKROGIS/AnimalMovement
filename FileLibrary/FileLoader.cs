@@ -46,6 +46,9 @@ namespace FileLibrary
                 };
             database.ArgosDownloads.InsertOnSubmit(log);
             database.SubmitChanges();
+            //Linq TO SQL Insert with SPROC dos not set associations, and provides not partial methods to expand
+            if (file != null)
+                file.LookupCollarFileFormat = database.LookupCollarFileFormats.First(l => l.Code == file.Format);
             return file;
         }
 
@@ -76,6 +79,9 @@ namespace FileLibrary
                 };
             database.ArgosDownloads.InsertOnSubmit(log);
             database.SubmitChanges();
+            //Linq TO SQL Insert with SPROC dos not set associations, and provides not partial methods to expand
+            if (file != null)
+                file.LookupCollarFileFormat = database.LookupCollarFileFormats.First(l => l.Code == file.Format);
             return file;
         }
 
@@ -172,6 +178,8 @@ namespace FileLibrary
             };
             Database.CollarFiles.InsertOnSubmit(file);
             Database.SubmitChanges();
+            //Linq TO SQL Insert with SPROC dos not set associations, and provides not partial methods to expand
+            file.LookupCollarFileFormat = Database.LookupCollarFileFormats.First(l => l.Code == file.Format);
             return file;
         }
 
