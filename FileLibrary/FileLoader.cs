@@ -150,10 +150,14 @@ namespace FileLibrary
         #region Constructors
 
         public FileLoader(string filePath)
+            : this(filePath, File.ReadAllBytes(filePath))
+        { }
+
+        internal FileLoader(string filePath, Byte[] contents)
         {
-            Contents = File.ReadAllBytes(filePath);
-            if (Contents == null || Contents.Length == 0)
-                throw new ArgumentException("File contents is empty or unavailable","filePath");
+            if (contents == null || contents.Length == 0)
+                throw new ArgumentException("File contents is empty or unavailable", "contents");
+            Contents = contents;
             Database = new AnimalMovementDataContext();
             FilePath = filePath;
             Status = 'A';
