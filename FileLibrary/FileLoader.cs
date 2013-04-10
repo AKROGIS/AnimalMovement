@@ -136,6 +136,10 @@ namespace FileLibrary
         public char Status { get; set; }
         public bool AllowDuplicates { get; set; }
 
+        internal int? ParentFileId { get; set; }
+        internal int? ArgosDeploymentId { get; set; }
+        internal int? CollarParameterId { get; set; }
+
         public AnimalMovementDataContext Database { get; private set; }
         public string FilePath { get; private set; }
         public Byte[] Contents { get; private set; }
@@ -175,6 +179,9 @@ namespace FileLibrary
                 Owner = Owner == null ? null : Owner.Login,
                 Status = Status,
                 Contents = Contents,
+                ParentFileId = ParentFileId,
+                ArgosDeploymentId = ArgosDeploymentId,
+                CollarParameterId = CollarParameterId
             };
             Database.CollarFiles.InsertOnSubmit(file);
             Database.SubmitChanges();
