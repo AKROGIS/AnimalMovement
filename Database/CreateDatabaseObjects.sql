@@ -1481,27 +1481,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[ArgosFilePlatformDates](
-	[FileId] [int] NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NULL,
-	[FirstTransmission] [datetime2](7) NOT NULL,
-	[LastTransmission] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ArgosFileProcessingIssues](
 	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[FileId] [int] NOT NULL,
@@ -1565,152 +1544,22 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 22, 2013
--- Description: Un-processes the transmissions for a single platform in a file.
---              This is a helper (sub) procedure, and is not available to
---              be called directly by user code
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_UnProcessPlatform] 
-    @FileId INT,
-    @PlatformId VARCHAR(255)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Find result files derived from @FileId and @PlatformId
-
-    -- FAIL - depends on ArgosDeployments which has been changed. prompting the need to unprocess
-     SELECT F.FileId
-       FROM CollarFiles AS F
- INNER JOIN CollarFiles AS P
-         ON P.FileId = F.ParentFileId
- INNER JOIN ArgosDeployments AS D
-         ON D.CollarId = F.CollarId
- INNER JOIN LookupCollarFileFormats AS F2
-         ON P.Format = F2.Code
-      WHERE D.PlatformId = @PlatformId
-        AND F2.ArgosData = 'Y'
-
-
-         -- FAIL - finds all results for a source file with the @Platform (also requires date range).
-    DECLARE @StartDate datetime2(7) = '2010-01-01'
-    DECLARE @EndDate datetime2(7) = '2010-01-01'
-
-     SELECT F.FileId, F.ParentFileId, F.Format, A.FirstTransmission, A.LastTransmission
-       FROM CollarFiles AS F
- INNER JOIN ArgosFilePlatformDates AS A
-         ON A.FileId = F.ParentFileId AND A.PlatformId = @PlatformId
-      WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, @StartDate, @EndDate) = 1
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[ArgosDeployments](
-	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+CREATE TABLE [dbo].[ArgosFilePlatformDates](
+	[FileId] [int] NOT NULL,
 	[PlatformId] [varchar](8) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
- CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
+	[ProgramId] [varchar](8) NULL,
+	[FirstTransmission] [datetime2](7) NOT NULL,
+	[LastTransmission] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
 (
-	[DeploymentId] ASC
+	[FileId] ASC,
+	[PlatformId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeployments] 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeployments] 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 8, 2013
--- Description:	Returns a table of Telonics processing parameters
---              for the Argos Id in the date range. 
--- Example:     SELECT * FROM GetTelonicsParametersForArgosDates('37470', '2008-03-01', '2014-03-01') ORDER BY StartDate
--- Caller need to check that the results cover the entire requested date range
--- Caller should order the results by startdate, then check the following:
---   if @StartDate < firstrecord.startDate(and not null) then Missing parameters
---   if @EndDate > lastrecord.EndDate(and not null) more missing parameters
--- =============================================
-CREATE FUNCTION [dbo].[GetTelonicsParametersForArgosDates] 
-(
-    @PlatformID VARCHAR(8),
-    @StartDate DATETIME2(7),
-    @EndDate DATETIME2(7)
-)
-RETURNS TABLE 
-AS
-    RETURN
-     SELECT A.DeploymentId, P.ParameterId, A.PlatformId, A.CollarManufacturer, A.CollarId, C.CollarModel,
-            P.Gen3Period, F.Format, F.[FileName], F.Contents,
-            CASE WHEN (A.StartDate IS NOT NULL AND P.StartDate IS NOT NULL)
-                 THEN (CASE WHEN A.StartDate < P.StartDate THEN P.StartDate ELSE A.StartDate END)
-                 ELSE (CASE WHEN A.StartDate IS NULL THEN P.StartDate ELSE A.StartDate END) END AS StartDate,
-            CASE WHEN (A.EndDate IS NOT NULL AND P.EndDate IS NOT NULL)
-                 THEN (CASE WHEN A.EndDate < P.EndDate THEN A.EndDate ELSE P.EndDate END)
-                 ELSE (CASE WHEN A.EndDate IS NULL THEN P.EndDate ELSE A.EndDate END) END AS EndDate
-       FROM ArgosDeployments AS A
- INNER JOIN Collars AS C
-         ON A.CollarManufacturer = C.CollarManufacturer AND A.CollarId = C.CollarId
- INNER JOIN CollarParameters AS P
-         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-  LEFT JOIN CollarParameterFiles AS F
-         ON P.FileId = F.FileId
-      WHERE A.PlatformId = @PlatformID
-        AND (A.StartDate IS NULL OR A.StartDate < @EndDate)
-        AND (P.StartDate IS NULL OR P.StartDate < @EndDate)
-        AND (A.EndDate IS NULL OR @StartDate < A.EndDate)
-        AND (P.EndDate IS NULL OR @StartDate < P.EndDate)
-        AND (   (CollarModel = 'Gen3' AND P.Gen3Period IS NOT NULL)
-             OR (CollarModel = 'Gen4' AND P.FileId IS NOT NULL))
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 4, 2013
--- Description:	Returns a bit (boolean) if this file has transmissions that map       
---              to a Gen4 collar.  With this, we know if we need to use TDC.exe 
--- =============================================
-
-CREATE FUNCTION [dbo].[FileHasGen4Data] 
-(
-	@FileId INT
-)
-RETURNS BIT
-AS
-BEGIN
-	IF EXISTS(   SELECT 1
-				   FROM ArgosFilePlatformDates AS D
-			CROSS APPLY GetTelonicsParametersForArgosDates(D.PlatformId, D.FirstTransmission, D.LastTransmission) AS P
-				  WHERE D.FileId = @FileId AND P.CollarModel = 'Gen4'
-			 )
-		RETURN 1
-	RETURN 0
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -1847,6 +1696,83 @@ BEGIN
 		RETURN
 	END
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 22, 2013
+-- Description: Un-processes the transmissions for a single platform in a file.
+--              This is a helper (sub) procedure, and is not available to
+--              be called directly by user code
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_UnProcessPlatform] 
+    @FileId INT,
+    @PlatformId VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Find result files derived from @FileId and @PlatformId
+
+    -- FAIL - depends on ArgosDeployments which has been changed. prompting the need to unprocess
+     SELECT F.FileId
+       FROM CollarFiles AS F
+ INNER JOIN CollarFiles AS P
+         ON P.FileId = F.ParentFileId
+ INNER JOIN ArgosDeployments AS D
+         ON D.CollarId = F.CollarId
+ INNER JOIN LookupCollarFileFormats AS F2
+         ON P.Format = F2.Code
+      WHERE D.PlatformId = @PlatformId
+        AND F2.ArgosData = 'Y'
+
+
+         -- FAIL - finds all results for a source file with the @Platform (also requires date range).
+    DECLARE @StartDate datetime2(7) = '2010-01-01'
+    DECLARE @EndDate datetime2(7) = '2010-01-01'
+
+     SELECT F.FileId, F.ParentFileId, F.Format, A.FirstTransmission, A.LastTransmission
+       FROM CollarFiles AS F
+ INNER JOIN ArgosFilePlatformDates AS A
+         ON A.FileId = F.ParentFileId AND A.PlatformId = @PlatformId
+      WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, @StartDate, @EndDate) = 1
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosDeployments](
+	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
+(
+	[DeploymentId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeployments] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeployments] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 GO
 SET ANSI_NULLS ON
 GO
@@ -2375,6 +2301,106 @@ BEGIN
                ON D.FileId = F.FileId
 
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 8, 2013
+-- Description:	Returns a table of Telonics processing parameters
+--              for the Argos Id in the date range. 
+-- Example:     SELECT * FROM GetTelonicsParametersForArgosDates('37470', '2008-03-01', '2014-03-01') ORDER BY StartDate
+-- Caller need to check that the results cover the entire requested date range
+-- Caller should order the results by startdate, then check the following:
+--   if @StartDate < firstrecord.startDate(and not null) then Missing parameters
+--   if @EndDate > lastrecord.EndDate(and not null) more missing parameters
+-- =============================================
+CREATE FUNCTION [dbo].[GetTelonicsParametersForArgosDates] 
+(
+    @PlatformID VARCHAR(8),
+    @StartDate DATETIME2(7),
+    @EndDate DATETIME2(7)
+)
+RETURNS TABLE 
+AS
+    RETURN
+     SELECT A.DeploymentId, P.ParameterId, A.PlatformId, A.CollarManufacturer, A.CollarId, C.CollarModel,
+            P.Gen3Period, F.Format, F.[FileName], F.Contents,
+            CASE WHEN (A.StartDate IS NOT NULL AND P.StartDate IS NOT NULL)
+                 THEN (CASE WHEN A.StartDate < P.StartDate THEN P.StartDate ELSE A.StartDate END)
+                 ELSE (CASE WHEN A.StartDate IS NULL THEN P.StartDate ELSE A.StartDate END) END AS StartDate,
+            CASE WHEN (A.EndDate IS NOT NULL AND P.EndDate IS NOT NULL)
+                 THEN (CASE WHEN A.EndDate < P.EndDate THEN A.EndDate ELSE P.EndDate END)
+                 ELSE (CASE WHEN A.EndDate IS NULL THEN P.EndDate ELSE A.EndDate END) END AS EndDate
+       FROM ArgosDeployments AS A
+ INNER JOIN Collars AS C
+         ON A.CollarManufacturer = C.CollarManufacturer AND A.CollarId = C.CollarId
+ INNER JOIN CollarParameters AS P
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+  LEFT JOIN CollarParameterFiles AS F
+         ON P.FileId = F.FileId
+      WHERE A.PlatformId = @PlatformID
+        AND (A.StartDate IS NULL OR A.StartDate < @EndDate)
+        AND (P.StartDate IS NULL OR P.StartDate < @EndDate)
+        AND (A.EndDate IS NULL OR @StartDate < A.EndDate)
+        AND (P.EndDate IS NULL OR @StartDate < P.EndDate)
+        AND (   (CollarModel = 'Gen3' AND P.Gen3Period IS NOT NULL)
+             OR (CollarModel = 'Gen4' AND P.FileId IS NOT NULL))
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 4, 2013
+-- Description:	Returns a bit (boolean) if we need to use TDC.exe on this file
+--              This is true for files of Gen4 datalog files (format 'H')
+--              Email and AWS files ('E', 'F'), may have only Gen3 collars in them
+--              Check if the file has transmissions that map to a Gen4 collar.
+-- =============================================
+
+CREATE FUNCTION [dbo].[FileHasGen4Data] 
+(
+	@FileId INT
+)
+RETURNS BIT
+AS
+BEGIN
+	IF EXISTS(   SELECT 1
+				   FROM ArgosFilePlatformDates AS D
+			CROSS APPLY GetTelonicsParametersForArgosDates(D.PlatformId, D.FirstTransmission, D.LastTransmission) AS P
+				  WHERE D.FileId = @FileId AND P.CollarModel = 'Gen4'
+			 )
+		RETURN 1
+	IF EXISTS(   SELECT 1
+	               FROM CollarFiles
+	              WHERE FileId = @FileId AND Format = 'H'
+	         )
+	    RETURN 1
+	RETURN 0
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[DataLog_NeverProcessed]
+AS
+----------- DataLog_NeverProcessed
+-----------   Is a file of format 'H' (It has no Argos transmissions),
+-----------   but no child files, and no processing issues
+     SELECT P.FileId
+       FROM CollarFiles AS P      
+  LEFT JOIN CollarFiles AS C
+         ON P.FileId = C.ParentFileId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = P.FileId
+      WHERE P.Format = 'H'
+        AND C.FileId IS NULL
+        AND I.FileId IS NULL
 GO
 SET ANSI_NULLS ON
 GO
