@@ -4580,7 +4580,7 @@ BEGIN
 	SET NOCOUNT ON;
 
 	IF NOT EXISTS (SELECT 1 FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F
-	               ON C.Format = F.Code WHERE FileId = @FileId AND F.ArgosData = 'Y')
+	               ON C.Format = F.Code WHERE FileId = @FileId AND (F.ArgosData = 'Y' OR C.Format = 'H'))
 	BEGIN
 		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid file in a suitable format.';
 		RAISERROR(@message1, 18, 0)

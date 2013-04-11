@@ -134,7 +134,7 @@ Batch completed at: 2012.12.17 22:32:27
                 var logLines = File.ReadAllLines(logFilePath);
                 errors = String.Join("\n", logLines.Where(line => !String.IsNullOrWhiteSpace(line) &&
                                                                   !line.StartsWith("Batch started at:") &&
-                                                                  !line.StartsWith("Processing file:") &&
+                                                                  !line.StartsWith("Processing") &&
                                                                   !line.EndsWith("successfully.") &&
                                                                   !line.EndsWith("Using default settings instead.") &&  //warning when run as Sql server impersonated proxy account
                                                                   !line.StartsWith("Batch completed at:")));
