@@ -386,21 +386,21 @@ namespace FileLibrary
                 }
             }
 
+            string ctn = null;
             if (Format.Value.Value == 'C')
-            {
-                string ctn = GetCtnFromFormatC();
-                if (ctn == null)
-                    return null;
-                var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
-                if (collar != null)
-                    return collar;
-                //Try without the Alpha suffix
-                if (ctn.Length != 7 && !Char.IsUpper(ctn[6]))
-                    return null;
-                ctn = ctn.Substring(0, 6);
-                return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
-            }
-            return null;
+                ctn = GetCtnFromFormatC();
+            if (Format.Value.Value == 'H')
+                ctn = GetCtnFromFormatH();
+            if (ctn == null)
+                return null;
+            var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+            if (collar != null)
+                return collar;
+            //Try without the Alpha suffix
+            if (ctn.Length != 7 && !Char.IsUpper(ctn[6]))
+                return null;
+            ctn = ctn.Substring(0, 6);
+            return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
         }
 
 
@@ -481,11 +481,25 @@ namespace FileLibrary
 
         private string GetCtnFromFormatC()
         {
-            //In the D format, the 7th line (approx) is 'CTN,649024A'
+            //In the C format, the 7th or 8th line is 'CTN,649024A'
             var line = ReadLines(Contents, Encoding.UTF8)
                 .Skip(5).Take(4).FirstOrDefault(l => l.Normalize().StartsWith("CTN,", StringComparison.OrdinalIgnoreCase));
             return line == null ? null : line.Substring(4);
         }
+
+
+        private string GetCtnFromFormatH()
+        {
+            //the H format has 4th line begins with 'unitRecord,621500A,'
+            var line = ReadLines(Contents, Encoding.UTF8).Skip(3).FirstOrDefault();
+            if (line == null)
+            return null;
+            var tokens = line.Split(',');
+            if (tokens.Length < 2)
+                return null;
+            return tokens[1];
+        }
+
 
         private static IEnumerable<string> ReadLines(Byte[] bytes, Encoding enc)
         {
