@@ -83,7 +83,7 @@ namespace Telonics
         public override string ToString()
         {
             //.net4.0 required for Join(string, IEnumerable<string>)
-            return String.Join("\n", _lines.ToArray());
+            return String.Join(Environment.NewLine, _lines.ToArray());
         }
 
         public class ArgosLocation

@@ -132,12 +132,13 @@ Unable to load the the parameter file: "C:\..\23.tpf".This file may require a ne
 Batch completed at: 2012.12.17 22:32:27
 */
                 var logLines = File.ReadAllLines(logFilePath);
-                errors = String.Join("\n", logLines.Where(line => !String.IsNullOrWhiteSpace(line) &&
-                                                                  !line.StartsWith("Batch started at:") &&
-                                                                  !line.StartsWith("Processing") &&
-                                                                  !line.EndsWith("successfully.") &&
-                                                                  !line.EndsWith("Using default settings instead.") &&  //warning when run as Sql server impersonated proxy account
-                                                                  !line.StartsWith("Batch completed at:")));
+                errors = String.Join(Environment.NewLine,
+                                     logLines.Where(line => !String.IsNullOrWhiteSpace(line) &&
+                                                            !line.StartsWith("Batch started at:") &&
+                                                            !line.StartsWith("Processing") &&
+                                                            !line.EndsWith("successfully.") &&
+                                                            !line.EndsWith( "Using default settings instead.") && //warning when run as Sql server impersonated proxy account
+                                                            !line.StartsWith("Batch completed at:")));
                 if (!String.IsNullOrEmpty(errors))
                     throw new InvalidOperationException("TDC Execution error " + errors);
 
