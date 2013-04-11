@@ -9,7 +9,7 @@ namespace TelonicsTest
     static class MainClass
     {
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             //TestCrc();
             //TestArgosEmailFile();
@@ -17,8 +17,14 @@ namespace TelonicsTest
             //TestArgosAwsGen4File();
             //TestBits();
             //TestArgosFolder();
+            TestGetPlatformList();
+        }
+
+        public static void TestGetPlatformList()
+        {
             string error;
-            var res = ArgosWebSite.GetPlatformList("JBURCH", "LOUGAROU", out error);
+            var result = ArgosWebSite.GetPlatformList("JBURCH", "LOUGAROU", out error);
+            Console.WriteLine(error ?? result.ToString());
         }
 
         public static void TestArgosEmailFile()
