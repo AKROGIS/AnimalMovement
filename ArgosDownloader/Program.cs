@@ -18,7 +18,8 @@ namespace ArgosDownloader
         /// <summary>
         /// Downloads Argos Programs and Platforms from the Argos Server, then uploads and processes the files.
         /// Any processing errors are written to the database, any other errors are emailed to the system admin,
-        /// and optionally the PI of the platform/program.
+        /// and optionally the PI of the platform/program.  This prgram is intended to be run in the background
+        /// as a scheduled daily task.
         /// </summary>
         /// <param name="args">
         /// If there are no args, then process all active programs and platforms for all users. (An active platform

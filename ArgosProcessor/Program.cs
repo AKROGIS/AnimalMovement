@@ -13,26 +13,26 @@ namespace ArgosProcessor
         /// argument (to fully process that file), or with two arguments, platformid and fileid (to partially
         /// process that file for just the single platform).  When a file is fully or partially processed, it
         /// clears any prior processing results and issues, to prevent duplicates.
+        /// Any processing errors are written to the database, any other errors are written to the console.
         /// </summary>
         /// <param name="args">
-        /// If there are no args then ask the database for a list of files that
-        ///   need processing and process them all.
-        /// If there is only one argument, and that argument is the login (domain\username) of a project
-        ///   investigator in the database, then process all the files beloinging to that PI (and his projects)
-        ///   that need processing.
+        /// If there are no args then ask the database for a list of files that need processing and process them all.
+        /// If there is only one argument and that argument is the login (domain\username) of a project
+        ///   investigator in the database, then process all the files that belong to the PI or his projects and
+        ///   need processing.
         /// If the argument matches /np[latform], or '/na[rgos]', then the remaining files will be fully processed
         /// If the argument matches /nf[ile], then the next argos platform specified will not be used to
         ///   partially process the previously specified file
-        /// If the argument matches /a[rgos]:xxx or /p[latform]:xxx and xxx is a platform id in the database,
-        ///   or if the argument is a platform id in the database, then the previously specified file (or
-        ///   the next file if no has been specified) will be partially processed for only this platform.
-        /// if the argument matches /f[ile]:xxx, and xxx is a fileid in the database, or if the argument is a
-        ///   fileid in the database, then the file will be partially processed if an argos platform has been
-        ///   provided as a prior argument, otherwise it will be fully processed
+        /// If the argument matches /a[rgos]:xxx or /p[latform]:xxx or xxx and xxx is a platform id in the
+        ///   database, then the previously specified file (or the next file if no has been specified) will be
+        ///   partially processed for only this platform.
+        /// if the argument matches /f[ile]:xxx or xxx, and xxx is a fileid in the database, then the file will
+        ///   be partially processed if an argos platform has been provided as a prior argument, otherwise it will
+        ///   be fully processed.
+        /// In the unlikely event that an argument matches a valid platform and a valid file, then the tie will go
+        ///   to the file.
         /// Any other argument is ignored with a warning
         /// Note:
-        ///   if no prefix (e.g. /f:) is provide, and the argument matches both a platform and a file it will
-        ///     be treated as a file.
         ///   A project investigator login will be accepted as an argument in any position, but is only
         ///     meaningful as the first and only argument
         ///   If you want to partially process a file, you must provide the Argos platform first
@@ -51,9 +51,9 @@ namespace ArgosProcessor
         /// </param>
         /// <remarks>
         /// If a copy of TDC.exe is available from this program (as specified in the config file),
-        /// then the FileProcessor will be make use of it to process the files locally and send the
-        /// results to the database, otherwise the FileProcessor will request that the database
-        /// invoke the file processor on the server.
+        /// then the processor will be make use of it to process the files locally and send the
+        /// results to the database, otherwise the processor will request that the database
+        /// invoke the ArgosProcessor on the server.
         /// </remarks>
         private static void Main(string[] args)
         {
