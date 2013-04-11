@@ -86,6 +86,14 @@ namespace DataModel
 			}
 		}
 		
+		public System.Data.Linq.Table<NeverProcessedDataLogFiles> NeverProcessedDataLogFiles
+		{
+			get
+			{
+				return this.GetTable<NeverProcessedDataLogFiles>();
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.AnimalLocationSummary", IsComposable=true)]
 		public IQueryable<AnimalLocationSummaryResult> AnimalLocationSummary([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId)
 		{
@@ -334,6 +342,33 @@ namespace DataModel
 		private int _FileId;
 		
 		public NeverProcessedArgosFiles()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL")]
+		public int FileId
+		{
+			get
+			{
+				return this._FileId;
+			}
+			set
+			{
+				if ((this._FileId != value))
+				{
+					this._FileId = value;
+				}
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.DataLog_NeverProcessed")]
+	public partial class NeverProcessedDataLogFiles
+	{
+		
+		private int _FileId;
+		
+		public NeverProcessedDataLogFiles()
 		{
 		}
 		

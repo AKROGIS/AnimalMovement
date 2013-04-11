@@ -23,6 +23,11 @@
       <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
     </Type>
   </Table>
+  <Table Name="dbo.DataLog_NeverProcessed" Member="NeverProcessedDataLogFiles">
+    <Type Name="NeverProcessedDataLogFiles">
+      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
   <Function Name="dbo.AnimalLocationSummary" Method="AnimalLocationSummary" IsComposable="true">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
