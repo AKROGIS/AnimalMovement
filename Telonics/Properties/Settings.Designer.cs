@@ -145,10 +145,10 @@ namespace Telonics.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute(@"<soap:Envelope xmlns:soap=""""http://www.w3.org/2003/05/soap-envelope"""" xmlns:argos=""""http://service.dataxmldistribution.argos.cls.fr/types"""">
 <soap:Header/>
 <soap:Body>
-<argos:xmlRequest>
+<argos:platformListRequest>
 <argos:username>{0}</argos:username>
 <argos:password>{1}</argos:password>
-</argos:xmlRequest>
+</argos:platformListRequest>
 </soap:Body>
 </soap:Envelope>")]
         public string ArgosPlatformListSoapRequest {
