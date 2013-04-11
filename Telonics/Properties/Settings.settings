@@ -9,16 +9,73 @@
       <Value Profile="(Default)">20000</Value>
     </Setting>
     <Setting Name="TdcArgosBatchFileFormat" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">&lt;BatchSettings&gt;&lt;ArgosFile&gt;{0}&lt;/ArgosFile&gt;&lt;ParameterFile&gt;{1}&lt;/ParameterFile&gt;&lt;OutputFolder&gt;{2}&lt;/OutputFolder&gt;&lt;BatchLog&gt;{3}&lt;/BatchLog&gt;&lt;MoveFiles&gt;false&lt;/MoveFiles&gt;&lt;GoogleEarth&gt;false&lt;/GoogleEarth&gt;&lt;/BatchSettings&gt;</Value>
+      <Value Profile="(Default)">&lt;BatchSettings&gt;
+ &lt;ArgosFile&gt;{0}&lt;/ArgosFile&gt;
+ &lt;ParameterFile&gt;{1}&lt;/ParameterFile&gt;
+ &lt;OutputFolder&gt;{2}&lt;/OutputFolder&gt;
+ &lt;BatchLog&gt;{3}&lt;/BatchLog&gt;
+ &lt;MoveFiles&gt;false&lt;/MoveFiles&gt;
+ &lt;GoogleEarth&gt;false&lt;/GoogleEarth&gt;
+&lt;/BatchSettings&gt;</Value>
     </Setting>
     <Setting Name="TdcDatalogBatchFileFormat" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">&lt;BatchSettings&gt;&lt;DatalogFile&gt;{0}&lt;/DatalogFile&gt;&lt;OutputFolder&gt;{1}&lt;/OutputFolder&gt;&lt;BatchLog&gt;{2}&lt;/BatchLog&gt;&lt;MoveFiles&gt;false&lt;/MoveFiles&gt;&lt;GoogleEarth&gt;false&lt;/GoogleEarth&gt;&lt;/BatchSettings&gt;</Value>
+      <Value Profile="(Default)">&lt;BatchSettings&gt;
+ &lt;DatalogFile&gt;{0}&lt;/DatalogFile&gt;
+ &lt;OutputFolder&gt;{1}&lt;/OutputFolder&gt;
+ &lt;BatchLog&gt;{2}&lt;/BatchLog&gt;
+ &lt;MoveFiles&gt;false&lt;/MoveFiles&gt;
+ &lt;GoogleEarth&gt;false&lt;/GoogleEarth&gt;
+&lt;/BatchSettings&gt;</Value>
     </Setting>
     <Setting Name="ArgosServerMinDownloadDays" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="ArgosServerMaxDownloadDays" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="ArgosUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://ws-argos.clsamerica.com/argosDws/services/DixService</Value>
+    </Setting>
+    <Setting Name="ArgosPlatformSoapRequest" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">&lt;soap:Envelope xmlns:soap=""http://www.w3.org/2003/05/soap-envelope"" xmlns:argos=""http://service.dataxmldistribution.argos.cls.fr/types""&gt;
+&lt;soap:Header/&gt;
+&lt;soap:Body&gt;
+&lt;argos:csvRequest&gt;
+&lt;argos:username&gt;{0}&lt;/argos:username&gt;
+&lt;argos:password&gt;{1}&lt;/argos:password&gt;
+&lt;argos:platformId&gt;{2}&lt;/argos:platformId&gt;
+&lt;argos:nbDaysFromNow&gt;{3}&lt;/argos:nbDaysFromNow&gt;
+&lt;argos:displayLocation&gt;true&lt;/argos:displayLocation&gt;
+&lt;argos:displayDiagnostic&gt;true&lt;/argos:displayDiagnostic&gt;
+&lt;argos:displayRawData&gt;true&lt;/argos:displayRawData&gt;
+&lt;argos:displayImageLocation&gt;true&lt;/argos:displayImageLocation&gt;
+&lt;argos:displayHexId&gt;true&lt;/argos:displayHexId&gt;
+&lt;argos:showHeader&gt;true&lt;/argos:showHeader&gt;
+&lt;/argos:csvRequest&gt;
+&lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</Value>
+    </Setting>
+    <Setting Name="ArgosProgramSoapRequest" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">&lt;soap:Envelope xmlns:soap=""http://www.w3.org/2003/05/soap-envelope"" xmlns:argos=""http://service.dataxmldistribution.argos.cls.fr/types""&gt;
+&lt;soap:Header/&gt;
+&lt;soap:Body&gt;
+&lt;argos:csvRequest&gt;
+&lt;argos:username&gt;{0}&lt;/argos:username&gt;
+&lt;argos:password&gt;{1}&lt;/argos:password&gt;
+&lt;argos:programNumber&gt;{2}&lt;/argos:programNumber&gt;
+&lt;argos:nbDaysFromNow&gt;{3}&lt;/argos:nbDaysFromNow&gt;
+&lt;argos:displayLocation&gt;true&lt;/argos:displayLocation&gt;
+&lt;argos:displayDiagnostic&gt;true&lt;/argos:displayDiagnostic&gt;
+&lt;argos:displayRawData&gt;true&lt;/argos:displayRawData&gt;
+&lt;argos:displayImageLocation&gt;true&lt;/argos:displayImageLocation&gt;
+&lt;argos:displayHexId&gt;true&lt;/argos:displayHexId&gt;
+&lt;argos:showHeader&gt;true&lt;/argos:showHeader&gt;
+&lt;/argos:csvRequest&gt;
+&lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</Value>
+    </Setting>
+    <Setting Name="ArgosPlatformListSoapRequest" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

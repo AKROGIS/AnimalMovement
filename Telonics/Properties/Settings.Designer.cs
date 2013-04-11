@@ -43,9 +43,9 @@ namespace Telonics.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<BatchSettings><ArgosFile>{0}</ArgosFile><ParameterFile>{1}</ParameterFile><Outpu" +
-            "tFolder>{2}</OutputFolder><BatchLog>{3}</BatchLog><MoveFiles>false</MoveFiles><G" +
-            "oogleEarth>false</GoogleEarth></BatchSettings>")]
+        [global::System.Configuration.DefaultSettingValueAttribute("<BatchSettings>\r\n <ArgosFile>{0}</ArgosFile>\r\n <ParameterFile>{1}</ParameterFile>" +
+            "\r\n <OutputFolder>{2}</OutputFolder>\r\n <BatchLog>{3}</BatchLog>\r\n <MoveFiles>fals" +
+            "e</MoveFiles>\r\n <GoogleEarth>false</GoogleEarth>\r\n</BatchSettings>")]
         public string TdcArgosBatchFileFormat {
             get {
                 return ((string)(this["TdcArgosBatchFileFormat"]));
@@ -54,9 +54,9 @@ namespace Telonics.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<BatchSettings><DatalogFile>{0}</DatalogFile><OutputFolder>{1}</OutputFolder><Bat" +
-            "chLog>{2}</BatchLog><MoveFiles>false</MoveFiles><GoogleEarth>false</GoogleEarth>" +
-            "</BatchSettings>")]
+        [global::System.Configuration.DefaultSettingValueAttribute("<BatchSettings>\r\n <DatalogFile>{0}</DatalogFile>\r\n <OutputFolder>{1}</OutputFolde" +
+            "r>\r\n <BatchLog>{2}</BatchLog>\r\n <MoveFiles>false</MoveFiles>\r\n <GoogleEarth>fals" +
+            "e</GoogleEarth>\r\n</BatchSettings>")]
         public string TdcDatalogBatchFileFormat {
             get {
                 return ((string)(this["TdcDatalogBatchFileFormat"]));
@@ -78,6 +78,74 @@ namespace Telonics.Properties {
         public int ArgosServerMaxDownloadDays {
             get {
                 return ((int)(this["ArgosServerMaxDownloadDays"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://ws-argos.clsamerica.com/argosDws/services/DixService")]
+        public string ArgosUrl {
+            get {
+                return ((string)(this["ArgosUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<soap:Envelope xmlns:soap=""""http://www.w3.org/2003/05/soap-envelope"""" xmlns:argos=""""http://service.dataxmldistribution.argos.cls.fr/types"""">
+<soap:Header/>
+<soap:Body>
+<argos:csvRequest>
+<argos:username>{0}</argos:username>
+<argos:password>{1}</argos:password>
+<argos:platformId>{2}</argos:platformId>
+<argos:nbDaysFromNow>{3}</argos:nbDaysFromNow>
+<argos:displayLocation>true</argos:displayLocation>
+<argos:displayDiagnostic>true</argos:displayDiagnostic>
+<argos:displayRawData>true</argos:displayRawData>
+<argos:displayImageLocation>true</argos:displayImageLocation>
+<argos:displayHexId>true</argos:displayHexId>
+<argos:showHeader>true</argos:showHeader>
+</argos:csvRequest>
+</soap:Body>
+</soap:Envelope>")]
+        public string ArgosPlatformSoapRequest {
+            get {
+                return ((string)(this["ArgosPlatformSoapRequest"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(@"<soap:Envelope xmlns:soap=""""http://www.w3.org/2003/05/soap-envelope"""" xmlns:argos=""""http://service.dataxmldistribution.argos.cls.fr/types"""">
+<soap:Header/>
+<soap:Body>
+<argos:csvRequest>
+<argos:username>{0}</argos:username>
+<argos:password>{1}</argos:password>
+<argos:programNumber>{2}</argos:programNumber>
+<argos:nbDaysFromNow>{3}</argos:nbDaysFromNow>
+<argos:displayLocation>true</argos:displayLocation>
+<argos:displayDiagnostic>true</argos:displayDiagnostic>
+<argos:displayRawData>true</argos:displayRawData>
+<argos:displayImageLocation>true</argos:displayImageLocation>
+<argos:displayHexId>true</argos:displayHexId>
+<argos:showHeader>true</argos:showHeader>
+</argos:csvRequest>
+</soap:Body>
+</soap:Envelope>")]
+        public string ArgosProgramSoapRequest {
+            get {
+                return ((string)(this["ArgosProgramSoapRequest"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ArgosPlatformListSoapRequest {
+            get {
+                return ((string)(this["ArgosPlatformListSoapRequest"]));
             }
         }
     }
