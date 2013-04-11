@@ -58,6 +58,7 @@ using System.Runtime.InteropServices;
 //TODO - Build a tool to hide locations outside a reasonable (user provided) range
 //TODO - provide datasheet views of collars, animals, deployments, and maybe files and fixes
 //TODO - Pass the TPF filename to the Gen4 processor, since the filename (currently temp) is written to the output file
+//TODO - Add an ArcGIS tool for creating a mortality date
 
 //To NOT do or fix:
 //  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date
