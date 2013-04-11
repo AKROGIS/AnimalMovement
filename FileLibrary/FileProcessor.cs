@@ -14,7 +14,7 @@ namespace FileLibrary
         #region Public API
 
         /// <summary>
-        /// Find and process all of the Argos files that need full or partial processing
+        /// Find and process all of the Argos or DataLog files that need full or partial processing
         /// </summary>
         /// <param name="handler">Delegate to handle exceptions on each file, so that processing can continue.
         /// If the handler is null, processing will stop on first exception.
@@ -27,9 +27,11 @@ namespace FileLibrary
         {
             var database = new AnimalMovementDataContext();
             var views = new AnimalMovementViews();
-            foreach (var item in views.NeverProcessedArgosFiles)
+            foreach (var fileId in
+                views.NeverProcessedArgosFiles.Select(x => x.FileId)
+                     .Concat(views.NeverProcessedDataLogFiles.Select(x => x.FileId)))
             {
-                var file = database.CollarFiles.First(f => f.FileId == item.FileId);
+                var file = database.CollarFiles.First(f => f.FileId == fileId);
                 if (pi != null && file.ProjectInvestigator != pi && (file.Project == null ||
                                                                      file.Project.ProjectInvestigator1 != pi))
                     continue;
@@ -74,14 +76,44 @@ namespace FileLibrary
         public static void ProcessFile(CollarFile file, ArgosPlatform platform = null)
         {
             if (file == null)
-                throw new ArgumentNullException("file","No collar file was provided to process.");
+                throw new ArgumentNullException("file", "No collar file was provided to process.");
             if (!ProcessOnServer(file, platform))
-                ProcessFile(file, GetArgosFile(file), platform);
+                if (file.Format == 'H')
+                    ProcessDataLogFile(file);
+                else
+                    ProcessFile(file, GetArgosFile(file), platform);
         }
 
         #endregion
 
         #region private methods
+
+        private static void ProcessDataLogFile(CollarFile file)
+        {
+            LogGeneralMessage(String.Format("Start local processing of file {0}", file.FileId));
+            var databaseFunctions = new AnimalMovementFunctions();
+            databaseFunctions.ArgosFile_ClearProcessingResults(file.FileId);
+
+            var processor = new Gen4Processor(null);
+            var lines = processor.ProcessDataLog(file.Contents.ToArray());
+            var data = Encoding.UTF8.GetBytes(String.Join("\n", lines));
+            var filename = Path.GetFileNameWithoutExtension(file.FileName) + "_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
+            var fileLoader = new FileLoader(filename, data)
+            {
+                Project = file.Project,
+                Owner = file.ProjectInvestigator,
+                Collar = new Collar
+                {
+                    CollarManufacturer = file.CollarManufacturer,
+                    CollarId = file.CollarId
+                },
+                Status = file.Status,
+                ParentFileId = file.FileId,
+                AllowDuplicates = true
+            };
+            fileLoader.Load();
+            LogGeneralMessage("Finished local processing of file");
+        }
 
         private static void ProcessFile(CollarFile file, ArgosFile argos, ArgosPlatform platform)
         {

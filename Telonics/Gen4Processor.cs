@@ -32,10 +32,10 @@ namespace Telonics
             return ProcessFile(text);
         }
 
-        public void ProcessDataLog(Byte[] contents)
+        public IEnumerable<string> ProcessDataLog(Byte[] contents)
         {
             Format = Gen4Format.Datalog;
-            ProcessFile(Encoding.UTF8.GetString(contents));
+            return ProcessFile(Encoding.UTF8.GetString(contents));
         }
 
         #endregion
