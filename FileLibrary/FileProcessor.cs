@@ -96,7 +96,8 @@ namespace FileLibrary
 
             var processor = new Gen4Processor(null);
             var lines = processor.ProcessDataLog(file.Contents.ToArray());
-            var data = Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, lines));
+            //Add a newline, so that it matches the exactly matches the direct output from TDC
+            var data = Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, lines) + Environment.NewLine);
             var filename = Path.GetFileNameWithoutExtension(file.FileName) + "_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
             var fileLoader = new FileLoader(filename, data)
             {
@@ -218,7 +219,7 @@ namespace FileLibrary
             var processor = GetProcessor(file, parameters);
             var transmissionSubset = transmissions.Where(t => start <= t.DateTime && t.DateTime <= end);
             var lines = processor.ProcessTransmissions(transmissionSubset, argos);
-            var data = Encoding.UTF8.GetBytes(String.Join("\n", lines));
+            var data = Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, lines) + Environment.NewLine);
             var filename = Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameters.CollarId + ".csv";
             var fileLoader = new FileLoader(filename, data)
                 {
