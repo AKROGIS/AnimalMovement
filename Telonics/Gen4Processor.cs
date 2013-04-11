@@ -17,37 +17,13 @@ namespace Telonics
 
     public class Gen4Processor : IProcessor
     {
-
-        #region Private Constants (Default values for public properties)
-
-        //tdcExecutable is the full path to the TDC executable file
-        //batchTemplate is a format string for XML content with the following parameters:
-        // {0} is the full path of the argos input file (only one is allowed)
-        // {1} is the full path of the TPF file
-        // {2} is the full path of a folder for the output files
-        // {3} is the full path of a file of the log file - can be the empty string if no log is needed
-        private const string DefaultTdcExecutable = @"C:\Program Files (x86)\Telonics\Data Converter\TDC.exe";
-        private const string DefaultBatchFileTemplate = @"
-<BatchSettings>
-  <ArgosFile>{0}</ArgosFile>
-  <ParameterFile>{1}</ParameterFile>
-  <OutputFolder>{2}</OutputFolder>
-  <BatchLog>{3}</BatchLog>
-  <MoveFiles>false</MoveFiles>
-  <GoogleEarth>false</GoogleEarth>
-</BatchSettings>";
-        private const int DefaultTdcTimeout = 20000;
-
-        #endregion
-
         #region Public API
 
         public Gen4Processor(Byte[] tpfFile)
         {
             TpfFile = tpfFile;
-            TdcExecutable = DefaultTdcExecutable;
-            BatchFileTemplate = DefaultBatchFileTemplate;
-            TdcTimeout = DefaultTdcTimeout;
+            TdcExecutable = Properties.Settings.Default.TdcPathToExecutable;
+            TdcTimeout = Properties.Settings.Default.TdcMillisecondTimeout;
         }
 
         public Byte[] TpfFile { get; private set; }
@@ -112,13 +88,18 @@ namespace Telonics
                 {
                     case Gen4Format.Datalog:
                         if (BatchFileTemplate == null)
-                            BatchFileTemplate = DataLogBatchFileTemplate;
+                            BatchFileTemplate = Properties.Settings.Default.TdcDatalogBatchFileFormat;
                         batchCommands = String.Format(BatchFileTemplate, dataFilePath, outputFolder, logFilePath);
                         break;
-                    default:
+                    case Gen4Format.Email:
+                    case Gen4Format.WebService:
+                        if (BatchFileTemplate == null)
+                            BatchFileTemplate = Properties.Settings.Default.TdcArgosBatchFileFormat;
                         batchCommands = String.Format(BatchFileTemplate, dataFilePath, tpfPath, outputFolder,
                                                       logFilePath);
                         break;
+                    default:
+                        throw new InvalidOperationException("Unsupported Telonics data format");
                 }
                 File.WriteAllText(batchFilePath, batchCommands);
                 
