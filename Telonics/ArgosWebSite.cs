@@ -83,6 +83,8 @@ namespace Telonics
         private const string _platform = "<argos:platformId>{0}</argos:platformId>";
         private const string _program = "<argos:programNumber>{0}</argos:programNumber>";
 
+        public static readonly int MinDays = Properties.Settings.Default.ArgosServerMinDownloadDays;
+        public static readonly int MaxDays = Properties.Settings.Default.ArgosServerMaxDownloadDays;
 
         /// <summary>
         /// Queries the Argos Web Services, and returns the results for a collar.

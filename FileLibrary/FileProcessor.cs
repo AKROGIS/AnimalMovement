@@ -250,12 +250,7 @@ namespace FileLibrary
         {
             if (parameters.Format != 'A' || parameters.Contents == null)
                 throw new InvalidOperationException("Invalid parameter file format or contents for Gen4 processor");
-            return new Gen4Processor(parameters.Contents.ToArray())
-                {
-                    BatchFileTemplate = Properties.Settings.Default.TdcBatchFileFormat,
-                    TdcExecutable = Properties.Settings.Default.TdcPathToExecutable,
-                    TdcTimeout = Properties.Settings.Default.TdcMillisecondTimeout
-                };
+            return new Gen4Processor(parameters.Contents.ToArray());
         }
 
         #endregion
@@ -289,7 +284,8 @@ namespace FileLibrary
 
         private static bool HaveAccessToTelonicsSoftware()
         {
-            return File.Exists(Properties.Settings.Default.TdcPathToExecutable);
+            var pathToTdc = new Gen4Processor(null).TdcExecutable;
+            return File.Exists(pathToTdc);
         }
 
         private static bool NeedTelonicsSoftware(CollarFile file)

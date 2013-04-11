@@ -71,8 +71,8 @@ namespace FileLibrary
                                           select log.TimeStamp).FirstOrDefault();
                 daysSinceLastDownload = (DateTime.Now - dateOfLastDownload).Days;
             }
-            var days = Math.Min(Properties.Settings.Default.ArgosServerMaxDownloadDays, daysSinceLastDownload);
-            if (days < Properties.Settings.Default.ArgosServerMinDownloadDays)
+            var days = Math.Min(ArgosWebSite.MaxDays, daysSinceLastDownload);
+            if (days < ArgosWebSite.MinDays)
                 return;
             string errors;
             var results = ArgosWebSite.GetProgram(program.UserName, program.Password, program.ProgramId, days,
@@ -103,8 +103,8 @@ namespace FileLibrary
                                           select log.TimeStamp).FirstOrDefault();
                 daysSinceLastDownload = (DateTime.Now - dateOfLastDownload).Days;
             }
-            var days = Math.Min(Properties.Settings.Default.ArgosServerMaxDownloadDays, daysSinceLastDownload);
-            if (days < Properties.Settings.Default.ArgosServerMinDownloadDays)
+            var days = Math.Min(ArgosWebSite.MaxDays, daysSinceLastDownload);
+            if (days < ArgosWebSite.MinDays)
                 return;
             var program = platform.ArgosProgram;
             string errors;

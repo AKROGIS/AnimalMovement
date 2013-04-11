@@ -25,53 +25,6 @@ namespace FileLibrary.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public int ArgosServerMinDownloadDays {
-            get {
-                return ((int)(this["ArgosServerMinDownloadDays"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int ArgosServerMaxDownloadDays {
-            get {
-                return ((int)(this["ArgosServerMaxDownloadDays"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Program Files (x86)\\Telonics\\Data Converter\\TDC.exe")]
-        public string TdcPathToExecutable {
-            get {
-                return ((string)(this["TdcPathToExecutable"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("20000")]
-        public int TdcMillisecondTimeout {
-            get {
-                return ((int)(this["TdcMillisecondTimeout"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<BatchSettings><ArgosFile>{0}</ArgosFile><ParameterFile>{1}</ParameterFile><Outpu" +
-            "tFolder>{2}</OutputFolder><BatchLog>{3}</BatchLog><MoveFiles>false</MoveFiles><G" +
-            "oogleEarth>false</GoogleEarth></BatchSettings>")]
-        public string TdcBatchFileFormat {
-            get {
-                return ((string)(this["TdcBatchFileFormat"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("ArgosProcessor.log")]
         public string FileProcessorLogFilePath {
             get {
