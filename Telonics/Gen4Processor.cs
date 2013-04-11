@@ -8,13 +8,6 @@ using System.Text;
 
 namespace Telonics
 {
-    public enum Gen4Format
-    {
-        Email = 0,  //default
-        WebService,
-        Datalog
-    }
-
     public class Gen4Processor : IProcessor
     {
         #region Public API

@@ -66,6 +66,7 @@
     <Compile Include="DebevekFile.cs" />
     <Compile Include="DebevekProcessor.cs" />
     <Compile Include="Gen3Processor.cs" />
+    <Compile Include="Gen4Format.cs" />
     <Compile Include="Gen4Processor.cs" />
     <Compile Include="IProcessor.cs" />
     <Compile Include="NoMessagesException.cs" />
