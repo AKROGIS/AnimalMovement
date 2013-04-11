@@ -63,8 +63,6 @@ namespace ArgosProcessor
                     FileProcessor.ProcessAll(handleException);
                 else
                 {
-                    //Future - build a dictionary of platforms for collars
-                    // c1 p1 p2 c2 c3 c4 p2 p3 p4
                     ArgosPlatform platform = null;
                     CollarFile file = null;
                     ProjectInvestigator pi = null;
