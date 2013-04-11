@@ -34,7 +34,7 @@ namespace Telonics.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("20000")]
         public int TdcMillisecondTimeout {
             get {
                 return ((int)(this["TdcMillisecondTimeout"]));
