@@ -304,7 +304,7 @@ namespace FileLibrary
                     AllowDuplicates = allowDups
                 };
             var file = fileLoader.Load();
-            if (file.LookupCollarFileFormat.ArgosData == 'Y')
+            if (file.LookupCollarFileFormat.ArgosData == 'Y' || file.Format == 'H')
                 FileProcessor.ProcessFile(file);
         }
 
