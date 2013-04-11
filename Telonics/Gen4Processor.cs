@@ -3,10 +3,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 
 namespace Telonics
 {
+    public enum Gen4Format
+    {
+        Email = 0,  //default
+        WebService,
+        Datalog
+    }
+
     public class Gen4Processor : IProcessor
     {
 
@@ -46,12 +54,19 @@ namespace Telonics
         public string TdcExecutable { get; set; }
         public string BatchFileTemplate { get; set; }
         public int TdcTimeout { get; set; }
+        public Gen4Format Format { get; set; }
 
         public IEnumerable<string> ProcessTransmissions(IEnumerable<ArgosTransmission> transmissions, ArgosFile file)
         {
             string text = file.Header ?? "";
             text += String.Join(Environment.NewLine, transmissions.Select(t => t.ToString()));
             return ProcessFile(text);
+        }
+
+        public void ProcessDataLog(Byte[] contents)
+        {
+            Format = Gen4Format.Datalog;
+            ProcessFile(Encoding.UTF8.GetString(contents));
         }
 
         #endregion
@@ -71,15 +86,19 @@ namespace Telonics
             {
                 if (!File.Exists(TdcExecutable))
                     throw new InvalidOperationException("TDC Execution error - TDC not found at " + TdcExecutable);
-                
-                // save the tpf file to the file system
-                tpfPath = Path.GetTempFileName();
-                File.WriteAllBytes(tpfPath, TpfFile);
-                
+
+                //The datalog format has the tpf file embeded
+                if (Format != Gen4Format.Datalog)
+                {
+                    // save the tpf file to the file system
+                    tpfPath = Path.GetTempFileName();
+                    File.WriteAllBytes(tpfPath, TpfFile);
+                }
+
                 // write the argos file transmission to the filesystem
                 dataFilePath = Path.GetTempFileName();
                 //TDC batch mode uses the aws extension to determine file type 
-                if (fileContents.StartsWith("\"programNumber\";\"platformId\";"))
+                if (Format == Gen4Format.WebService || fileContents.StartsWith("\"programNumber\";\"platformId\";"))
                     dataFilePath = dataFilePath + ".aws";
                 File.WriteAllText(dataFilePath, fileContents);
                 
@@ -88,7 +107,19 @@ namespace Telonics
                 outputFolder = GetNewTempDirectory();
 
                 //Create the batch file and save it to the filesystem
-                string batchCommands = String.Format(BatchFileTemplate, dataFilePath, tpfPath, outputFolder, logFilePath);
+                string batchCommands;
+                switch (Format)
+                {
+                    case Gen4Format.Datalog:
+                        if (BatchFileTemplate == null)
+                            BatchFileTemplate = DataLogBatchFileTemplate;
+                        batchCommands = String.Format(BatchFileTemplate, dataFilePath, outputFolder, logFilePath);
+                        break;
+                    default:
+                        batchCommands = String.Format(BatchFileTemplate, dataFilePath, tpfPath, outputFolder,
+                                                      logFilePath);
+                        break;
+                }
                 File.WriteAllText(batchFilePath, batchCommands);
                 
                 //  Run TDC with the batch file
