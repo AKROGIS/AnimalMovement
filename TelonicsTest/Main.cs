@@ -12,11 +12,13 @@ namespace TelonicsTest
         public static void Main(string[] args)
         {
             //TestCrc();
-            TestArgosEmailFile();
-            TestArgosAwsGen3File();
-            TestArgosAwsGen4File();
+            //TestArgosEmailFile();
+            //TestArgosAwsGen3File();
+            //TestArgosAwsGen4File();
             //TestBits();
             //TestArgosFolder();
+            string error;
+            var res = ArgosWebSite.GetPlatformList("JBURCH", "LOUGAROU", out error);
         }
 
         public static void TestArgosEmailFile()

@@ -4,8 +4,6 @@ using System.Net;
 using System.Text;
 using System.Web;
 
-//FIXME - use settings to define URLS min/max days, etc.
-//FIXME - use new feature to get platform list.
 namespace Telonics
 {
     /// <summary>
@@ -79,7 +77,7 @@ namespace Telonics
             if (error != null)
                 return null;
             var request = String.Format(ArgosPlatformSoapRequest, username, password, collar, days);
-            return GetCsv(request, out error);
+            return GetArgosWebResult(request, out error);
         }
 
         /// <summary>
@@ -97,8 +95,25 @@ namespace Telonics
             if (error != null)
                 return null;
             var request = String.Format(ArgosProgramSoapRequest, username, password, program, days);
-            return GetCsv(request, out error);
+            return GetArgosWebResult(request, out error);
         }
+
+        /// <summary>
+        /// Queries the Argos Web Services, and returns the list of platforms (collars) for a program (collection of collars).
+        /// </summary>
+        /// <param name="username">A user name assigned by the Argos Web Service</param>
+        /// <param name="password">The user's password</param>
+        /// <param name="error">Contains any errors encountered; null with no errors</param>
+        /// <returns>Returns the results from the web server.  If null check the error output parameter</returns>
+        static public ArgosWebResult GetPlatformList(string username, string password, out string error)
+        {
+            error = CheckParameters(username, password, "no selector required", MinDays);
+            if (error != null)
+                return null;
+            var request = String.Format(ArgosPlatformListSoapRequest, username, password);
+            return GetArgosWebResult(request, out error);
+        }
+
 
         static private string CheckParameters(string username, string password, string selector, int days)
         {
@@ -132,7 +147,7 @@ namespace Telonics
             return error;
         }
 
-        static private ArgosWebResult GetCsv(string request, out string error)
+        static private ArgosWebResult GetArgosWebResult(string request, out string error)
         {
             error = null;
             try
