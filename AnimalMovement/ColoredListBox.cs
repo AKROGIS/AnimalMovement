@@ -62,6 +62,8 @@ namespace AnimalMovement
 
         public void SetItemColor(int index, Color color)
         {
+            if (_colorList.ContainsKey(index))
+                _colorList.Remove(index);
             _colorList.Add(index, color);
         }
 
