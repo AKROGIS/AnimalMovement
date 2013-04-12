@@ -157,7 +157,7 @@ namespace AnimalMovement
                          select new FileListItem
                                       {
                                           File = file,
-                                          Name = file.FileName,
+                                          Name = file.FileName + (file.Status == 'I' ? " (Inactive)" : ""),
                                           CanDelete = file.ParentFileId == null && !file.ArgosDownloads.Any()
                                       };
             var sortedList = query.OrderBy(f => f.File.Status).ThenByDescending(f => f.File.UploadDate).ToList();
