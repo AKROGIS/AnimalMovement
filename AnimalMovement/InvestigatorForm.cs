@@ -346,7 +346,10 @@ namespace AnimalMovement
                             Name = file.FileName + (file.Status == 'I' ? " (Inactive)" : ""),
                             CanDelete = file.ParentFileId == null && !file.ArgosDownloads.Any()
                         };
-            var sortedList = query.OrderBy(f => f.File.Status).ThenByDescending(f => f.File.UploadDate).ToList();
+            var sortedList = query.OrderBy(f => f.File.Status)
+                                  .ThenByDescending(f => f.File.ParentFileId ?? f.File.FileId)
+                                  .ThenByDescending(f => f.File.FileId)
+                                  .ToList();
             CollarFilesListBox.DataSource = sortedList;
             CollarFilesListBox.DisplayMember = "Name";
             CollarFilesListBox.ClearItemColors();
