@@ -336,7 +336,7 @@ namespace AnimalMovement
                         {
                             File = file,
                             Name = file.FileName,
-                            CanDelete = true
+                            CanDelete = file.ParentFileId == null && !file.ArgosDownloads.Any()
                         };
             var sortedList = query.OrderBy(f => f.Name).ToList();
             CollarFilesListBox.DataSource = sortedList;
@@ -344,10 +344,10 @@ namespace AnimalMovement
             CollarFilesListBox.ClearItemColors();
             for (int i = 0; i < sortedList.Count; i++)
             {
-                if (sortedList[i].File.Status == 'I')
-                    CollarFilesListBox.SetItemColor(i, Color.DarkGray);
                 if (sortedList[i].File.ParentFileId != null)
                     CollarFilesListBox.SetItemColor(i, Color.Brown);
+                if (sortedList[i].File.Status == 'I')
+                    CollarFilesListBox.SetItemColor(i, Color.DarkGray);
             }
             CollarFilesTab.Text = sortedList.Count < 5 ? "Collar Files" : String.Format("Collar Files ({0})", sortedList.Count);
         }
