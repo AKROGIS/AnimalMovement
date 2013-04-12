@@ -586,5 +586,41 @@ namespace AnimalMovement.Properties {
                 this["InvestigatorFormActiveTab"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool InvestigatorFormShowEmailFiles {
+            get {
+                return ((bool)(this["InvestigatorFormShowEmailFiles"]));
+            }
+            set {
+                this["InvestigatorFormShowEmailFiles"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool InvestigatorFormShowDownloadFiles {
+            get {
+                return ((bool)(this["InvestigatorFormShowDownloadFiles"]));
+            }
+            set {
+                this["InvestigatorFormShowDownloadFiles"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool InvestigatorFormShowDerivedFiles {
+            get {
+                return ((bool)(this["InvestigatorFormShowDerivedFiles"]));
+            }
+            set {
+                this["InvestigatorFormShowDerivedFiles"] = value;
+            }
+        }
     }
 }

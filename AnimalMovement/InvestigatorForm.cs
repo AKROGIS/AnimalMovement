@@ -62,7 +62,6 @@ namespace AnimalMovement
         {
             InitializeComponent();
             RestoreWindow();
-            ProjectInvestigatorTabs.SelectedIndex = Properties.Settings.Default.InvestigatorFormActiveTab;
             CurrentUser = user;
             InvestigatorLogin = investigator;
             IsMyProfile = String.Equals(user, investigator, StringComparison.InvariantCultureIgnoreCase);
@@ -73,13 +72,21 @@ namespace AnimalMovement
         private void InvestigatorForm_Load(object sender, EventArgs e)
         {
             LoadDataContext();
-            ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
+            ShowEmailFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowEmailFiles;
+            ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDownloadFiles;
+            ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDerivedFiles;
+            ProjectInvestigatorTabs.SelectedIndex = Properties.Settings.Default.InvestigatorFormActiveTab;
+            if (ProjectInvestigatorTabs.SelectedIndex == 0)
+                ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
             Properties.Settings.Default.InvestigatorFormActiveTab = ProjectInvestigatorTabs.SelectedIndex;
+            Properties.Settings.Default.InvestigatorFormShowEmailFiles = ShowEmailFilesCheckBox.Checked;
+            Properties.Settings.Default.InvestigatorFormShowDownloadFiles = ShowDownloadFilesCheckBox.Checked;
+            Properties.Settings.Default.InvestigatorFormShowDerivedFiles = ShowDerivedFilesCheckBox.Checked;
         }
 
         private void LoadDataContext()
@@ -249,6 +256,7 @@ namespace AnimalMovement
         }
 
         #endregion
+
 
         #region Collar List
 
