@@ -73,6 +73,7 @@ namespace AnimalMovement
         private void InvestigatorForm_Load(object sender, EventArgs e)
         {
             LoadDataContext();
+            ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -89,10 +90,6 @@ namespace AnimalMovement
             NameTextBox.Text = Investigator.Name;
             EmailTextBox.Text = Investigator.Email;
             PhoneTextBox.Text = Investigator.Phone;
-            LoadProjectList();
-            LoadCollarList();
-            LoadCollarFileList();
-            LoadParameterFileList();
         }
 
         private bool CanDeleteCollar(Collar collar)
@@ -347,7 +344,7 @@ namespace AnimalMovement
                 if (sortedList[i].File.Status == 'I')
                     ParameterFilesListBox.SetItemColor(i, Color.DarkGray);
             }
-            CollarFilesTab.Text = sortedList.Count < 5 ? "Files" : String.Format("Files ({0})", sortedList.Count);
+            CollarFilesTab.Text = sortedList.Count < 5 ? "Collar Files" : String.Format("Collar Files ({0})", sortedList.Count);
         }
 
         private void AddCollarFileButton_Click(object sender, EventArgs e)
@@ -469,7 +466,6 @@ namespace AnimalMovement
         }
 
         #endregion
-        
 
 
         private void OnDatabaseChanged()
@@ -477,6 +473,26 @@ namespace AnimalMovement
             EventHandler handle = DatabaseChanged;
             if (handle != null)
                 handle(this, EventArgs.Empty);
+        }
+
+
+        private void ProjectInvestigatorTabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (ProjectInvestigatorTabs.SelectedIndex)
+            {
+                case 0:
+                    LoadProjectList();
+                    break;
+                case 1:
+                    LoadCollarList();
+                    break;
+                case 2:
+                    LoadCollarFileList();
+                    break;
+                case 3:
+                    LoadParameterFileList();
+                    break;
+            }
         }
 
     }

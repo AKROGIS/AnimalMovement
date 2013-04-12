@@ -46,7 +46,7 @@ namespace AnimalMovement
             CollarIdTextBox.Text = File.CollarId;
             UserNameTextBox.Text = File.UserName;
             UploadDateTextBox.Text = File.UploadDate.ToString(CultureInfo.CurrentCulture);
-            ProjectTextBox.Text = File.Project.ProjectName;
+            ProjectTextBox.Text = File.Project == null ? "" : File.Project.ProjectName;
             StatusTextBox.Text = File.LookupFileStatus.Name;
             UpdateCollarFixes();
             EnableForm();

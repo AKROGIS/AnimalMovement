@@ -354,6 +354,7 @@
             this.ProjectInvestigatorTabs.SelectedIndex = 0;
             this.ProjectInvestigatorTabs.Size = new System.Drawing.Size(669, 374);
             this.ProjectInvestigatorTabs.TabIndex = 8;
+            this.ProjectInvestigatorTabs.SelectedIndexChanged += new System.EventHandler(this.ProjectInvestigatorTabs_SelectedIndexChanged);
             // 
             // ProjectsTab
             // 
@@ -394,7 +395,7 @@
             this.CollarFilesTab.Padding = new System.Windows.Forms.Padding(3);
             this.CollarFilesTab.Size = new System.Drawing.Size(661, 348);
             this.CollarFilesTab.TabIndex = 2;
-            this.CollarFilesTab.Text = "Files";
+            this.CollarFilesTab.Text = "Collar Files";
             this.CollarFilesTab.UseVisualStyleBackColor = true;
             // 
             // CollarFilesListBox
