@@ -345,7 +345,9 @@ namespace AnimalMovement
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (sortedList[i].File.Status == 'I')
-                    ParameterFilesListBox.SetItemColor(i, Color.DarkGray);
+                    CollarFilesListBox.SetItemColor(i, Color.DarkGray);
+                if (sortedList[i].File.ParentFileId != null)
+                    CollarFilesListBox.SetItemColor(i, Color.Brown);
             }
             CollarFilesTab.Text = sortedList.Count < 5 ? "Collar Files" : String.Format("Collar Files ({0})", sortedList.Count);
         }
