@@ -55,8 +55,7 @@ namespace AnimalMovement
         {
             InitializeComponent();
             RestoreWindow();
-            splitContainer1.SplitterDistance = Properties.Settings.Default.InvestigatorFormSplitter1Distance;
-            splitContainer2.SplitterDistance = Properties.Settings.Default.InvestigatorFormSplitter2Distance;
+            ProjectInvestigatorTabs.SelectedIndex = Properties.Settings.Default.InvestigatorFormActiveTab;
             CurrentUser = user;
             InvestigatorLogin = investigator;
             IsMyProfile = String.Equals(user, investigator, StringComparison.InvariantCultureIgnoreCase);
@@ -72,8 +71,7 @@ namespace AnimalMovement
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            Properties.Settings.Default.InvestigatorFormSplitter1Distance = splitContainer1.SplitterDistance;
-            Properties.Settings.Default.InvestigatorFormSplitter2Distance = splitContainer2.SplitterDistance;
+            Properties.Settings.Default.InvestigatorFormActiveTab = ProjectInvestigatorTabs.SelectedIndex;
         }
 
         private void LoadDataContext()
@@ -196,7 +194,7 @@ namespace AnimalMovement
             var sortedList = query.OrderBy(p => p.Name).ToList();
             ProjectsListBox.DataSource = sortedList;
             ProjectsListBox.DisplayMember = "Name";
-            ProjectsListLabel.Text = sortedList.Count < 5 ? "Projects" : String.Format("Projects ({0})", sortedList.Count);
+            ProjectsTab.Text = sortedList.Count < 5 ? "Projects" : String.Format("Projects ({0})", sortedList.Count);
         }
 
         private void AddProjectButton_Click(object sender, EventArgs e)
@@ -269,7 +267,7 @@ namespace AnimalMovement
                 if (sortedList[i].Collar.DisposalDate != null)
                     CollarsListBox.SetItemColor(i, Color.DarkGray);
             }
-            CollarsListLabel.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
+            CollarsTab.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
         }
 
         private void AddCollarButton_Click(object sender, EventArgs e)
@@ -340,7 +338,7 @@ namespace AnimalMovement
                 if (sortedList[i].File.Status == 'I')
                     FilesListBox.SetItemColor(i, Color.DarkGray);
             }
-            FilesListLabel.Text = sortedList.Count < 5 ? "Collar Parameter Files" : String.Format("Collar Parameter Files ({0})", sortedList.Count);
+            ParameterFilesTab.Text = sortedList.Count < 5 ? "Collar Parameter Files" : String.Format("Collar Parameter Files ({0})", sortedList.Count);
         }
 
         private void AddFileButton_Click(object sender, EventArgs e)

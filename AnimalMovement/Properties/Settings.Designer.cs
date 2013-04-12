@@ -457,18 +457,6 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("147")]
-        public int InvestigatorFormSplitter1Distance {
-            get {
-                return ((int)(this["InvestigatorFormSplitter1Distance"]));
-            }
-            set {
-                this["InvestigatorFormSplitter1Distance"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("143")]
         public int ProjectDetailsFormSplitter1Distance {
             get {
@@ -512,18 +500,6 @@ namespace AnimalMovement.Properties {
             }
             set {
                 this["CreateQueryLayerFormSplitter2Distance"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("297")]
-        public int InvestigatorFormSplitter2Distance {
-            get {
-                return ((int)(this["InvestigatorFormSplitter2Distance"]));
-            }
-            set {
-                this["InvestigatorFormSplitter2Distance"] = value;
             }
         }
         
@@ -596,6 +572,18 @@ namespace AnimalMovement.Properties {
             }
             set {
                 this["AddFolderFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int InvestigatorFormActiveTab {
+            get {
+                return ((int)(this["InvestigatorFormActiveTab"]));
+            }
+            set {
+                this["InvestigatorFormActiveTab"] = value;
             }
         }
     }

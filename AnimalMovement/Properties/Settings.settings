@@ -110,9 +110,6 @@
     <Setting Name="RetrieveCollarFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">230, 102</Value>
     </Setting>
-    <Setting Name="InvestigatorFormSplitter1Distance" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">147</Value>
-    </Setting>
     <Setting Name="ProjectDetailsFormSplitter1Distance" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">143</Value>
     </Setting>
@@ -124,9 +121,6 @@
     </Setting>
     <Setting Name="CreateQueryLayerFormSplitter2Distance" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">112</Value>
-    </Setting>
-    <Setting Name="InvestigatorFormSplitter2Distance" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">297</Value>
     </Setting>
     <Setting Name="CollarParameterFileDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
@@ -145,6 +139,9 @@
     </Setting>
     <Setting Name="AddFolderFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">284, 317</Value>
+    </Setting>
+    <Setting Name="InvestigatorFormActiveTab" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>
