@@ -56,11 +56,11 @@
             this.ProjectTabs = new System.Windows.Forms.TabControl();
             this.AnimalsTabPage = new System.Windows.Forms.TabPage();
             this.FilesTabPage = new System.Windows.Forms.TabPage();
-            this.EditorTabPage = new System.Windows.Forms.TabPage();
-            this.ReportsTabPage = new System.Windows.Forms.TabPage();
             this.ShowEmailFilesCheckBox = new System.Windows.Forms.CheckBox();
             this.ShowDownloadFilesCheckBox = new System.Windows.Forms.CheckBox();
             this.ShowDerivedFilesCheckBox = new System.Windows.Forms.CheckBox();
+            this.EditorTabPage = new System.Windows.Forms.TabPage();
+            this.ReportsTabPage = new System.Windows.Forms.TabPage();
             this.ProjectTabs.SuspendLayout();
             this.AnimalsTabPage.SuspendLayout();
             this.FilesTabPage.SuspendLayout();
@@ -391,7 +391,7 @@
             this.AnimalsTabPage.Location = new System.Drawing.Point(4, 22);
             this.AnimalsTabPage.Name = "AnimalsTabPage";
             this.AnimalsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.AnimalsTabPage.Size = new System.Drawing.Size(605, 208);
+            this.AnimalsTabPage.Size = new System.Drawing.Size(523, 237);
             this.AnimalsTabPage.TabIndex = 1;
             this.AnimalsTabPage.Text = "Animals";
             this.AnimalsTabPage.UseVisualStyleBackColor = true;
@@ -413,33 +413,11 @@
             this.FilesTabPage.Text = "Files";
             this.FilesTabPage.UseVisualStyleBackColor = true;
             // 
-            // EditorTabPage
-            // 
-            this.EditorTabPage.Controls.Add(this.EditorsListBox);
-            this.EditorTabPage.Controls.Add(this.AddEditorButton);
-            this.EditorTabPage.Controls.Add(this.DeleteEditorButton);
-            this.EditorTabPage.Location = new System.Drawing.Point(4, 22);
-            this.EditorTabPage.Name = "EditorTabPage";
-            this.EditorTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.EditorTabPage.Size = new System.Drawing.Size(605, 208);
-            this.EditorTabPage.TabIndex = 3;
-            this.EditorTabPage.Text = "Editors";
-            this.EditorTabPage.UseVisualStyleBackColor = true;
-            // 
-            // ReportsTabPage
-            // 
-            this.ReportsTabPage.Location = new System.Drawing.Point(4, 22);
-            this.ReportsTabPage.Name = "ReportsTabPage";
-            this.ReportsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.ReportsTabPage.Size = new System.Drawing.Size(605, 220);
-            this.ReportsTabPage.TabIndex = 4;
-            this.ReportsTabPage.Text = "QC Reports";
-            this.ReportsTabPage.UseVisualStyleBackColor = true;
-            // 
             // ShowEmailFilesCheckBox
             // 
             this.ShowEmailFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowEmailFilesCheckBox.AutoSize = true;
+            this.ShowEmailFilesCheckBox.ForeColor = System.Drawing.Color.MediumBlue;
             this.ShowEmailFilesCheckBox.Location = new System.Drawing.Point(88, 215);
             this.ShowEmailFilesCheckBox.Name = "ShowEmailFilesCheckBox";
             this.ShowEmailFilesCheckBox.Size = new System.Drawing.Size(86, 17);
@@ -452,7 +430,8 @@
             // 
             this.ShowDownloadFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowDownloadFilesCheckBox.AutoSize = true;
-            this.ShowDownloadFilesCheckBox.Location = new System.Drawing.Point(181, 216);
+            this.ShowDownloadFilesCheckBox.ForeColor = System.Drawing.Color.DarkMagenta;
+            this.ShowDownloadFilesCheckBox.Location = new System.Drawing.Point(180, 215);
             this.ShowDownloadFilesCheckBox.Name = "ShowDownloadFilesCheckBox";
             this.ShowDownloadFilesCheckBox.Size = new System.Drawing.Size(109, 17);
             this.ShowDownloadFilesCheckBox.TabIndex = 47;
@@ -464,6 +443,7 @@
             // 
             this.ShowDerivedFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowDerivedFilesCheckBox.AutoSize = true;
+            this.ShowDerivedFilesCheckBox.ForeColor = System.Drawing.Color.Brown;
             this.ShowDerivedFilesCheckBox.Location = new System.Drawing.Point(297, 215);
             this.ShowDerivedFilesCheckBox.Name = "ShowDerivedFilesCheckBox";
             this.ShowDerivedFilesCheckBox.Size = new System.Drawing.Size(93, 17);
@@ -471,6 +451,29 @@
             this.ShowDerivedFilesCheckBox.Text = "Show Derived";
             this.ShowDerivedFilesCheckBox.UseVisualStyleBackColor = true;
             this.ShowDerivedFilesCheckBox.CheckedChanged += new System.EventHandler(this.ShowFilesCheckBox_CheckedChanged);
+            // 
+            // EditorTabPage
+            // 
+            this.EditorTabPage.Controls.Add(this.EditorsListBox);
+            this.EditorTabPage.Controls.Add(this.AddEditorButton);
+            this.EditorTabPage.Controls.Add(this.DeleteEditorButton);
+            this.EditorTabPage.Location = new System.Drawing.Point(4, 22);
+            this.EditorTabPage.Name = "EditorTabPage";
+            this.EditorTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.EditorTabPage.Size = new System.Drawing.Size(523, 237);
+            this.EditorTabPage.TabIndex = 3;
+            this.EditorTabPage.Text = "Editors";
+            this.EditorTabPage.UseVisualStyleBackColor = true;
+            // 
+            // ReportsTabPage
+            // 
+            this.ReportsTabPage.Location = new System.Drawing.Point(4, 22);
+            this.ReportsTabPage.Name = "ReportsTabPage";
+            this.ReportsTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.ReportsTabPage.Size = new System.Drawing.Size(523, 237);
+            this.ReportsTabPage.TabIndex = 4;
+            this.ReportsTabPage.Text = "QC Reports";
+            this.ReportsTabPage.UseVisualStyleBackColor = true;
             // 
             // ProjectDetailsForm
             // 

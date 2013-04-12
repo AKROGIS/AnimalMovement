@@ -168,10 +168,16 @@ namespace AnimalMovement
             {
                 if (sortedList[i].File.ParentFileId != null)
                     FilesListBox.SetItemColor(i, Color.Brown);
+                if (sortedList[i].File.Format == 'E')
+                    FilesListBox.SetItemColor(i, Color.MediumBlue);
+                if (sortedList[i].File.Format == 'F')
+                    FilesListBox.SetItemColor(i, Color.DarkMagenta);
                 if (sortedList[i].File.Status == 'I')
-                    FilesListBox.SetItemColor(i, Color.DarkGray);
-                if (sortedList[i].File.ParentFileId != null && sortedList[i].File.Status == 'I')
-                    FilesListBox.SetItemColor(i, Color.Tan);
+                {
+                    //Dim color of inactive files
+                    var c = FilesListBox.GetItemColor(i);
+                    FilesListBox.SetItemColor(i, ControlPaint.Light(c, 1.4f));
+                }
             }
             FilesTabPage.Text = sortedList.Count < 5 ? "Files" : String.Format("Files ({0})", sortedList.Count);
         }
