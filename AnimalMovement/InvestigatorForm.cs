@@ -43,7 +43,14 @@ namespace AnimalMovement
             public Collar Collar { get; set; }
         }
 
-        class FileListItem
+        class CollarFileListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public CollarFile File { get; set; }
+        }
+
+        class ParameterFileListItem
         {
             public string Name { get; set; }
             public bool CanDelete { get; set; }
@@ -84,7 +91,8 @@ namespace AnimalMovement
             PhoneTextBox.Text = Investigator.Phone;
             LoadProjectList();
             LoadCollarList();
-            LoadFileList();
+            LoadCollarFileList();
+            LoadParameterFileList();
         }
 
         private bool CanDeleteCollar(Collar collar)
@@ -172,11 +180,11 @@ namespace AnimalMovement
             PhoneTextBox.Enabled = editModeEnabled;
             AddCollarButton.Enabled = !editModeEnabled && IsMyProfile;
             AddProjectButton.Enabled = !editModeEnabled && IsMyProfile;
-            AddFileButton.Enabled = !editModeEnabled && IsMyProfile;
+            AddParameterFileButton.Enabled = !editModeEnabled && IsMyProfile;
             //Set the Delete/Info buttons based on what is selected
             CollarsListBox_SelectedIndexChanged(null, null);
             ProjectsListBox_SelectedIndexChanged(null, null);
-            FilesListBox_SelectedIndexChanged(null, null);
+            ParameterFilesListBox_SelectedIndexChanged(null, null);
         }
 
         #region Project List
@@ -317,42 +325,115 @@ namespace AnimalMovement
 
         #endregion
 
-        #region Parameter File List
 
-        private void LoadFileList()
+        #region Collar File List
+
+        private void LoadCollarFileList()
         {
-            var query = from file in Database.CollarParameterFiles
+            var query = from file in Database.CollarFiles
                         where file.ProjectInvestigator == Investigator
-                        select new FileListItem
+                        select new CollarFileListItem
                         {
                             File = file,
                             Name = file.FileName,
                             CanDelete = true
                         };
             var sortedList = query.OrderBy(f => f.Name).ToList();
-            FilesListBox.DataSource = sortedList;
-            FilesListBox.DisplayMember = "Name";
-            FilesListBox.ClearItemColors();
+            CollarFilesListBox.DataSource = sortedList;
+            CollarFilesListBox.DisplayMember = "Name";
+            CollarFilesListBox.ClearItemColors();
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (sortedList[i].File.Status == 'I')
-                    FilesListBox.SetItemColor(i, Color.DarkGray);
+                    ParameterFilesListBox.SetItemColor(i, Color.DarkGray);
             }
-            ParameterFilesTab.Text = sortedList.Count < 5 ? "Collar Parameter Files" : String.Format("Collar Parameter Files ({0})", sortedList.Count);
+            CollarFilesTab.Text = sortedList.Count < 5 ? "Files" : String.Format("Files ({0})", sortedList.Count);
         }
 
-        private void AddFileButton_Click(object sender, EventArgs e)
+        private void AddCollarFileButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddFileForm(CurrentUser);
+            //Adding projects in this context is not supported.
+            //var form = newAddProjectForm(Database, CurrentUser);
+            if (form.ShowDialog(this) != DialogResult.Cancel)
+                LoadCollarFileList();
+        }
+
+        private void DeleteCollarFilesButton_Click(object sender, EventArgs e)
+        {
+            foreach (CollarFileListItem item in CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>().Where(item => item.CanDelete))
+                Database.CollarFiles.DeleteOnSubmit(item.File);
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (Exception ex)
+            {
+                string msg = "Unable to delete one or more of the selected files\n" +
+                                "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            LoadDataContext();
+        }
+
+        private void InfoCollarFileButton_Click(object sender, EventArgs e)
+        {
+            var file = ((CollarFileListItem)CollarFilesListBox.SelectedItem).File;
+            var form = new FileDetailsForm(file.FileId, CurrentUser);
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.Show(this);
+        }
+
+        private void CollarFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            InfoCollarFileButton.Enabled = false;
+            DeleteCollarFilesButton.Enabled = false;
+            if (EditSaveButton.Text == "Save")
+                return;
+            InfoCollarFileButton.Enabled = CollarFilesListBox.SelectedItems.Count == 1;
+            if (IsMyProfile && CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>().Any(item => item.CanDelete))
+                DeleteCollarFilesButton.Enabled = true;
+        }
+
+        #endregion
+
+
+        #region Parameter File List
+
+        private void LoadParameterFileList()
+        {
+            var query = from file in Database.CollarParameterFiles
+                        where file.ProjectInvestigator == Investigator
+                        select new ParameterFileListItem
+                        {
+                            File = file,
+                            Name = file.FileName,
+                            CanDelete = true
+                        };
+            var sortedList = query.OrderBy(f => f.Name).ToList();
+            ParameterFilesListBox.DataSource = sortedList;
+            ParameterFilesListBox.DisplayMember = "Name";
+            ParameterFilesListBox.ClearItemColors();
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (sortedList[i].File.Status == 'I')
+                    ParameterFilesListBox.SetItemColor(i, Color.DarkGray);
+            }
+            ParameterFilesTab.Text = sortedList.Count < 5 ? "Parameter Files" : String.Format("Parameter Files ({0})", sortedList.Count);
+        }
+
+        private void AddParameterFileButton_Click(object sender, EventArgs e)
         {
             var form = new AddCollarParameterFileForm(CurrentUser);
             //Adding projects in this context is not supported.
             //var form = newAddProjectForm(Database, CurrentUser);
             if (form.ShowDialog(this) != DialogResult.Cancel)
-                LoadFileList();
+                LoadParameterFileList();
         }
 
-        private void DeleteFilesButton_Click(object sender, EventArgs e)
+        private void DeleteParameterFilesButton_Click(object sender, EventArgs e)
         {
-            foreach (FileListItem item in FilesListBox.SelectedItems.Cast<FileListItem>().Where(item => item.CanDelete))
+            foreach (ParameterFileListItem item in ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>().Where(item => item.CanDelete))
                 Database.CollarParameterFiles.DeleteOnSubmit(item.File);
             try
             {
@@ -367,27 +448,29 @@ namespace AnimalMovement
             LoadDataContext();
         }
 
-        private void InfoFileButton_Click(object sender, EventArgs e)
+        private void InfoParameterFileButton_Click(object sender, EventArgs e)
         {
-            var file = ((FileListItem)FilesListBox.SelectedItem).File;
+            var file = ((ParameterFileListItem)ParameterFilesListBox.SelectedItem).File;
             var form = new CollarParameterFileDetailsForm(file.FileId, CurrentUser);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }
 
-        private void FilesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void ParameterFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            InfoFileButton.Enabled = false;
-            DeleteFilesButton.Enabled = false;
+            InfoParameterFileButton.Enabled = false;
+            DeleteParameterFilesButton.Enabled = false;
             if (EditSaveButton.Text == "Save")
                 return;
-            InfoFileButton.Enabled = FilesListBox.SelectedItems.Count == 1;
-            if (IsMyProfile && FilesListBox.SelectedItems.Cast<FileListItem>().Any(item => item.CanDelete))
-                DeleteFilesButton.Enabled = true;
+            InfoParameterFileButton.Enabled = ParameterFilesListBox.SelectedItems.Count == 1;
+            if (IsMyProfile && ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>().Any(item => item.CanDelete))
+                DeleteParameterFilesButton.Enabled = true;
 
         }
 
         #endregion
+        
+
 
         private void OnDatabaseChanged()
         {

@@ -46,19 +46,24 @@
             this.AddCollarButton = new System.Windows.Forms.Button();
             this.ProjectsListBox = new System.Windows.Forms.ListBox();
             this.CollarsListBox = new AnimalMovement.ColoredListBox();
-            this.FilesListBox = new AnimalMovement.ColoredListBox();
-            this.InfoFileButton = new System.Windows.Forms.Button();
-            this.DeleteFilesButton = new System.Windows.Forms.Button();
-            this.AddFileButton = new System.Windows.Forms.Button();
+            this.ParameterFilesListBox = new AnimalMovement.ColoredListBox();
+            this.InfoParameterFileButton = new System.Windows.Forms.Button();
+            this.DeleteParameterFilesButton = new System.Windows.Forms.Button();
+            this.AddParameterFileButton = new System.Windows.Forms.Button();
             this.ProjectInvestigatorTabs = new System.Windows.Forms.TabControl();
             this.ProjectsTab = new System.Windows.Forms.TabPage();
             this.CollarsTab = new System.Windows.Forms.TabPage();
-            this.FilesTab = new System.Windows.Forms.TabPage();
+            this.CollarFilesTab = new System.Windows.Forms.TabPage();
+            this.CollarFilesListBox = new AnimalMovement.ColoredListBox();
+            this.InfoCollarFileButton = new System.Windows.Forms.Button();
+            this.AddCollarFileButton = new System.Windows.Forms.Button();
+            this.DeleteCollarFilesButton = new System.Windows.Forms.Button();
             this.ParameterFilesTab = new System.Windows.Forms.TabPage();
             this.ReportsTab = new System.Windows.Forms.TabPage();
             this.ProjectInvestigatorTabs.SuspendLayout();
             this.ProjectsTab.SuspendLayout();
             this.CollarsTab.SuspendLayout();
+            this.CollarFilesTab.SuspendLayout();
             this.ParameterFilesTab.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -277,62 +282,62 @@
             this.CollarsListBox.SelectedIndexChanged += new System.EventHandler(this.CollarsListBox_SelectedIndexChanged);
             this.CollarsListBox.DoubleClick += new System.EventHandler(this.InfoCollarButton_Click);
             // 
-            // FilesListBox
+            // ParameterFilesListBox
             // 
-            this.FilesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.ParameterFilesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.FilesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.FilesListBox.FormattingEnabled = true;
-            this.FilesListBox.IntegralHeight = false;
-            this.FilesListBox.Location = new System.Drawing.Point(6, 6);
-            this.FilesListBox.Name = "FilesListBox";
-            this.FilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.FilesListBox.Size = new System.Drawing.Size(649, 306);
-            this.FilesListBox.TabIndex = 35;
-            this.FilesListBox.SelectedIndexChanged += new System.EventHandler(this.FilesListBox_SelectedIndexChanged);
-            this.FilesListBox.DoubleClick += new System.EventHandler(this.InfoFileButton_Click);
+            this.ParameterFilesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.ParameterFilesListBox.FormattingEnabled = true;
+            this.ParameterFilesListBox.IntegralHeight = false;
+            this.ParameterFilesListBox.Location = new System.Drawing.Point(6, 6);
+            this.ParameterFilesListBox.Name = "ParameterFilesListBox";
+            this.ParameterFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.ParameterFilesListBox.Size = new System.Drawing.Size(649, 306);
+            this.ParameterFilesListBox.TabIndex = 35;
+            this.ParameterFilesListBox.SelectedIndexChanged += new System.EventHandler(this.ParameterFilesListBox_SelectedIndexChanged);
+            this.ParameterFilesListBox.DoubleClick += new System.EventHandler(this.InfoParameterFileButton_Click);
             // 
-            // InfoFileButton
+            // InfoParameterFileButton
             // 
-            this.InfoFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.InfoFileButton.FlatAppearance.BorderSize = 0;
-            this.InfoFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.InfoFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.InfoFileButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoFileButton.Location = new System.Drawing.Point(61, 318);
-            this.InfoFileButton.Name = "InfoFileButton";
-            this.InfoFileButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoFileButton.TabIndex = 38;
-            this.InfoFileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.InfoFileButton.UseVisualStyleBackColor = true;
-            this.InfoFileButton.Click += new System.EventHandler(this.InfoFileButton_Click);
+            this.InfoParameterFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoParameterFileButton.FlatAppearance.BorderSize = 0;
+            this.InfoParameterFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoParameterFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.InfoParameterFileButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoParameterFileButton.Location = new System.Drawing.Point(61, 318);
+            this.InfoParameterFileButton.Name = "InfoParameterFileButton";
+            this.InfoParameterFileButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoParameterFileButton.TabIndex = 38;
+            this.InfoParameterFileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.InfoParameterFileButton.UseVisualStyleBackColor = true;
+            this.InfoParameterFileButton.Click += new System.EventHandler(this.InfoParameterFileButton_Click);
             // 
-            // DeleteFilesButton
+            // DeleteParameterFilesButton
             // 
-            this.DeleteFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.DeleteFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DeleteFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteFilesButton.Location = new System.Drawing.Point(36, 318);
-            this.DeleteFilesButton.Name = "DeleteFilesButton";
-            this.DeleteFilesButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteFilesButton.TabIndex = 37;
-            this.DeleteFilesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.DeleteFilesButton.UseVisualStyleBackColor = true;
-            this.DeleteFilesButton.Click += new System.EventHandler(this.DeleteFilesButton_Click);
+            this.DeleteParameterFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteParameterFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DeleteParameterFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeleteParameterFilesButton.Location = new System.Drawing.Point(36, 318);
+            this.DeleteParameterFilesButton.Name = "DeleteParameterFilesButton";
+            this.DeleteParameterFilesButton.Size = new System.Drawing.Size(24, 24);
+            this.DeleteParameterFilesButton.TabIndex = 37;
+            this.DeleteParameterFilesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.DeleteParameterFilesButton.UseVisualStyleBackColor = true;
+            this.DeleteParameterFilesButton.Click += new System.EventHandler(this.DeleteParameterFilesButton_Click);
             // 
-            // AddFileButton
+            // AddParameterFileButton
             // 
-            this.AddFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.AddFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AddFileButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddFileButton.Location = new System.Drawing.Point(6, 318);
-            this.AddFileButton.Name = "AddFileButton";
-            this.AddFileButton.Size = new System.Drawing.Size(24, 24);
-            this.AddFileButton.TabIndex = 36;
-            this.AddFileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.AddFileButton.UseVisualStyleBackColor = true;
-            this.AddFileButton.Click += new System.EventHandler(this.AddFileButton_Click);
+            this.AddParameterFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddParameterFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.AddParameterFileButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddParameterFileButton.Location = new System.Drawing.Point(6, 318);
+            this.AddParameterFileButton.Name = "AddParameterFileButton";
+            this.AddParameterFileButton.Size = new System.Drawing.Size(24, 24);
+            this.AddParameterFileButton.TabIndex = 36;
+            this.AddParameterFileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.AddParameterFileButton.UseVisualStyleBackColor = true;
+            this.AddParameterFileButton.Click += new System.EventHandler(this.AddParameterFileButton_Click);
             // 
             // ProjectInvestigatorTabs
             // 
@@ -341,7 +346,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ProjectInvestigatorTabs.Controls.Add(this.ProjectsTab);
             this.ProjectInvestigatorTabs.Controls.Add(this.CollarsTab);
-            this.ProjectInvestigatorTabs.Controls.Add(this.FilesTab);
+            this.ProjectInvestigatorTabs.Controls.Add(this.CollarFilesTab);
             this.ProjectInvestigatorTabs.Controls.Add(this.ParameterFilesTab);
             this.ProjectInvestigatorTabs.Controls.Add(this.ReportsTab);
             this.ProjectInvestigatorTabs.Location = new System.Drawing.Point(18, 116);
@@ -378,22 +383,83 @@
             this.CollarsTab.Text = "Collars";
             this.CollarsTab.UseVisualStyleBackColor = true;
             // 
-            // FilesTab
+            // CollarFilesTab
             // 
-            this.FilesTab.Location = new System.Drawing.Point(4, 22);
-            this.FilesTab.Name = "FilesTab";
-            this.FilesTab.Padding = new System.Windows.Forms.Padding(3);
-            this.FilesTab.Size = new System.Drawing.Size(661, 348);
-            this.FilesTab.TabIndex = 2;
-            this.FilesTab.Text = "Files";
-            this.FilesTab.UseVisualStyleBackColor = true;
+            this.CollarFilesTab.Controls.Add(this.CollarFilesListBox);
+            this.CollarFilesTab.Controls.Add(this.InfoCollarFileButton);
+            this.CollarFilesTab.Controls.Add(this.AddCollarFileButton);
+            this.CollarFilesTab.Controls.Add(this.DeleteCollarFilesButton);
+            this.CollarFilesTab.Location = new System.Drawing.Point(4, 22);
+            this.CollarFilesTab.Name = "CollarFilesTab";
+            this.CollarFilesTab.Padding = new System.Windows.Forms.Padding(3);
+            this.CollarFilesTab.Size = new System.Drawing.Size(661, 348);
+            this.CollarFilesTab.TabIndex = 2;
+            this.CollarFilesTab.Text = "Files";
+            this.CollarFilesTab.UseVisualStyleBackColor = true;
+            // 
+            // CollarFilesListBox
+            // 
+            this.CollarFilesListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.CollarFilesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.CollarFilesListBox.FormattingEnabled = true;
+            this.CollarFilesListBox.IntegralHeight = false;
+            this.CollarFilesListBox.Location = new System.Drawing.Point(6, 6);
+            this.CollarFilesListBox.Name = "CollarFilesListBox";
+            this.CollarFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.CollarFilesListBox.Size = new System.Drawing.Size(649, 306);
+            this.CollarFilesListBox.TabIndex = 39;
+            this.CollarFilesListBox.SelectedIndexChanged += new System.EventHandler(this.CollarFilesListBox_SelectedIndexChanged);
+            this.CollarFilesListBox.DoubleClick += new System.EventHandler(this.InfoCollarFileButton_Click);
+            // 
+            // InfoCollarFileButton
+            // 
+            this.InfoCollarFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoCollarFileButton.FlatAppearance.BorderSize = 0;
+            this.InfoCollarFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoCollarFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.InfoCollarFileButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoCollarFileButton.Location = new System.Drawing.Point(61, 318);
+            this.InfoCollarFileButton.Name = "InfoCollarFileButton";
+            this.InfoCollarFileButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoCollarFileButton.TabIndex = 42;
+            this.InfoCollarFileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.InfoCollarFileButton.UseVisualStyleBackColor = true;
+            this.InfoCollarFileButton.Click += new System.EventHandler(this.InfoCollarFileButton_Click);
+            // 
+            // AddCollarFileButton
+            // 
+            this.AddCollarFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddCollarFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.AddCollarFileButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddCollarFileButton.Location = new System.Drawing.Point(6, 318);
+            this.AddCollarFileButton.Name = "AddCollarFileButton";
+            this.AddCollarFileButton.Size = new System.Drawing.Size(24, 24);
+            this.AddCollarFileButton.TabIndex = 40;
+            this.AddCollarFileButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.AddCollarFileButton.UseVisualStyleBackColor = true;
+            this.AddCollarFileButton.Click += new System.EventHandler(this.AddCollarFileButton_Click);
+            // 
+            // DeleteCollarFilesButton
+            // 
+            this.DeleteCollarFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteCollarFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DeleteCollarFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeleteCollarFilesButton.Location = new System.Drawing.Point(36, 318);
+            this.DeleteCollarFilesButton.Name = "DeleteCollarFilesButton";
+            this.DeleteCollarFilesButton.Size = new System.Drawing.Size(24, 24);
+            this.DeleteCollarFilesButton.TabIndex = 41;
+            this.DeleteCollarFilesButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.DeleteCollarFilesButton.UseVisualStyleBackColor = true;
+            this.DeleteCollarFilesButton.Click += new System.EventHandler(this.DeleteCollarFilesButton_Click);
             // 
             // ParameterFilesTab
             // 
-            this.ParameterFilesTab.Controls.Add(this.FilesListBox);
-            this.ParameterFilesTab.Controls.Add(this.InfoFileButton);
-            this.ParameterFilesTab.Controls.Add(this.AddFileButton);
-            this.ParameterFilesTab.Controls.Add(this.DeleteFilesButton);
+            this.ParameterFilesTab.Controls.Add(this.ParameterFilesListBox);
+            this.ParameterFilesTab.Controls.Add(this.InfoParameterFileButton);
+            this.ParameterFilesTab.Controls.Add(this.AddParameterFileButton);
+            this.ParameterFilesTab.Controls.Add(this.DeleteParameterFilesButton);
             this.ParameterFilesTab.Location = new System.Drawing.Point(4, 22);
             this.ParameterFilesTab.Name = "ParameterFilesTab";
             this.ParameterFilesTab.Padding = new System.Windows.Forms.Padding(3);
@@ -437,6 +503,7 @@
             this.ProjectInvestigatorTabs.ResumeLayout(false);
             this.ProjectsTab.ResumeLayout(false);
             this.CollarsTab.ResumeLayout(false);
+            this.CollarFilesTab.ResumeLayout(false);
             this.ParameterFilesTab.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -463,15 +530,19 @@
         private System.Windows.Forms.Button AddCollarButton;
         private System.Windows.Forms.ListBox ProjectsListBox;
         private ColoredListBox CollarsListBox;
-        private ColoredListBox FilesListBox;
-        private System.Windows.Forms.Button InfoFileButton;
-        private System.Windows.Forms.Button DeleteFilesButton;
-        private System.Windows.Forms.Button AddFileButton;
+        private ColoredListBox ParameterFilesListBox;
+        private System.Windows.Forms.Button InfoParameterFileButton;
+        private System.Windows.Forms.Button DeleteParameterFilesButton;
+        private System.Windows.Forms.Button AddParameterFileButton;
         private System.Windows.Forms.TabControl ProjectInvestigatorTabs;
         private System.Windows.Forms.TabPage ProjectsTab;
         private System.Windows.Forms.TabPage CollarsTab;
-        private System.Windows.Forms.TabPage FilesTab;
+        private System.Windows.Forms.TabPage CollarFilesTab;
         private System.Windows.Forms.TabPage ParameterFilesTab;
         private System.Windows.Forms.TabPage ReportsTab;
+        private ColoredListBox CollarFilesListBox;
+        private System.Windows.Forms.Button InfoCollarFileButton;
+        private System.Windows.Forms.Button AddCollarFileButton;
+        private System.Windows.Forms.Button DeleteCollarFilesButton;
     }
 }
