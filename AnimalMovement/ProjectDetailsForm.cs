@@ -57,17 +57,23 @@ namespace AnimalMovement
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            Properties.Settings.Default.ProjectDetailsFormSplitter1Distance = splitContainer1.SplitterDistance;
-            Properties.Settings.Default.ProjectDetailsFormSplitter2Distance = splitContainer2.SplitterDistance;
+            Properties.Settings.Default.ProjectDetailsFormActiveTab = ProjectTabs.SelectedIndex;
+            Properties.Settings.Default.ProjectDetailsFormShowEmailFiles = ShowEmailFilesCheckBox.Checked;
+            Properties.Settings.Default.ProjectDetailsFormShowDownloadFiles = ShowDownloadFilesCheckBox.Checked;
+            Properties.Settings.Default.ProjectDetailsFormShowDerivedFiles = ShowDerivedFilesCheckBox.Checked;
         }
 
         private void SetupForm()
         {
             InitializeComponent();
             RestoreWindow();
-            splitContainer1.SplitterDistance = Properties.Settings.Default.ProjectDetailsFormSplitter1Distance;
-            splitContainer2.SplitterDistance = Properties.Settings.Default.ProjectDetailsFormSplitter2Distance;
             LoadDataContext();
+            ShowEmailFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowEmailFiles;
+            ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowDownloadFiles;
+            ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowDerivedFiles;
+            ProjectTabs.SelectedIndex = Properties.Settings.Default.ProjectDetailsFormActiveTab;
+            if (ProjectTabs.SelectedIndex == 0)
+                ProjectTabs_SelectedIndexChanged(null, null);
         }
 
         private void LoadDataContext()
@@ -88,9 +94,6 @@ namespace AnimalMovement
             UnitTextBox.Text = Project.UnitCode;
             ProjectNameTextBox.Text = Project.ProjectName;
             InvestigatorTextBox.Text = Project.ProjectInvestigator;
-            SetEditorList();
-            SetAnimalList();
-            SetFileList();
             //Whenever we load the datasource, we should reenable the form (we may not have the permissions we did)
             EnableForm();
         }
@@ -130,7 +133,7 @@ namespace AnimalMovement
                 if (sortedList[i].Animal.MortalityDate != null)
                     AnimalsListBox.SetItemColor(i, Color.DarkGray);
             }
-            AnimalListLabel.Text = sortedList.Count < 5 ? "Animals" : String.Format("Animals ({0})", sortedList.Count);
+            AnimalsTabPage.Text = sortedList.Count < 5 ? "Animals" : String.Format("Animals ({0})", sortedList.Count);
         }
 
         private static string GetName(Animal animal)
@@ -147,12 +150,15 @@ namespace AnimalMovement
         private void SetFileList()
         {
             var query =  from file in Database.CollarFiles
-                                      where file.Project == Project
-                                      select new FileListItem
+                                      where file.Project == Project &&
+                               (ShowDerivedFilesCheckBox.Checked || file.ParentFileId == null) &&
+                               (ShowEmailFilesCheckBox.Checked || file.Format != 'E') &&
+                               (ShowDownloadFilesCheckBox.Checked || file.Format != 'F')
+                         select new FileListItem
                                       {
                                           File = file,
-                                          Name = file.FileName + " (" + file.Status + ")",
-                                          CanDelete = file.ParentFileId == null
+                                          Name = file.FileName,
+                                          CanDelete = file.ParentFileId == null && !file.ArgosDownloads.Any()
                                       };
             var sortedList = query.OrderBy(f => f.File.Status).ThenByDescending(f => f.File.UploadDate).ToList();
             FilesListBox.DataSource = sortedList;
@@ -160,10 +166,14 @@ namespace AnimalMovement
             FilesListBox.ClearItemColors();
             for (int i = 0; i < sortedList.Count; i++)
             {
+                if (sortedList[i].File.ParentFileId != null)
+                    FilesListBox.SetItemColor(i, Color.Brown);
                 if (sortedList[i].File.Status == 'I')
                     FilesListBox.SetItemColor(i, Color.DarkGray);
+                if (sortedList[i].File.ParentFileId != null && sortedList[i].File.Status == 'I')
+                    FilesListBox.SetItemColor(i, Color.Tan);
             }
-            FilesListLabel.Text = sortedList.Count < 5 ? "Files" : String.Format("Files ({0})", sortedList.Count);
+            FilesTabPage.Text = sortedList.Count < 5 ? "Files" : String.Format("Files ({0})", sortedList.Count);
         }
 
         private bool CanDeleteAnimal(Animal animal)
@@ -421,6 +431,29 @@ namespace AnimalMovement
             InfoFilesButton.Enabled = FilesListBox.SelectedItems.Count == 1;
             if (IsEditor && FilesListBox.SelectedItems.Cast<FileListItem>().Any(item => item.CanDelete))
                 DeleteFilesButton.Enabled = true;
+        }
+
+
+        private void ProjectTabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (ProjectTabs.SelectedIndex)
+            {
+                case 0:
+                    SetAnimalList();
+                    break;
+                case 1:
+                    SetFileList();
+                    break;
+                case 2:
+                    SetEditorList();
+                    break;
+            }
+        }
+
+
+        private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            SetFileList();
         }
 
         #endregion

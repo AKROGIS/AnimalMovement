@@ -457,30 +457,6 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("143")]
-        public int ProjectDetailsFormSplitter1Distance {
-            get {
-                return ((int)(this["ProjectDetailsFormSplitter1Distance"]));
-            }
-            set {
-                this["ProjectDetailsFormSplitter1Distance"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("176")]
-        public int ProjectDetailsFormSplitter2Distance {
-            get {
-                return ((int)(this["ProjectDetailsFormSplitter2Distance"]));
-            }
-            set {
-                this["ProjectDetailsFormSplitter2Distance"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("185")]
         public int CreateQueryLayerFormSplitter1Distance {
             get {
@@ -620,6 +596,54 @@ namespace AnimalMovement.Properties {
             }
             set {
                 this["InvestigatorFormShowDerivedFiles"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ProjectDetailsFormActiveTab {
+            get {
+                return ((int)(this["ProjectDetailsFormActiveTab"]));
+            }
+            set {
+                this["ProjectDetailsFormActiveTab"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ProjectDetailsFormShowEmailFiles {
+            get {
+                return ((bool)(this["ProjectDetailsFormShowEmailFiles"]));
+            }
+            set {
+                this["ProjectDetailsFormShowEmailFiles"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ProjectDetailsFormShowDownloadFiles {
+            get {
+                return ((bool)(this["ProjectDetailsFormShowDownloadFiles"]));
+            }
+            set {
+                this["ProjectDetailsFormShowDownloadFiles"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ProjectDetailsFormShowDerivedFiles {
+            get {
+                return ((bool)(this["ProjectDetailsFormShowDerivedFiles"]));
+            }
+            set {
+                this["ProjectDetailsFormShowDerivedFiles"] = value;
             }
         }
     }

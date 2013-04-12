@@ -110,12 +110,6 @@
     <Setting Name="RetrieveCollarFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">230, 102</Value>
     </Setting>
-    <Setting Name="ProjectDetailsFormSplitter1Distance" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">143</Value>
-    </Setting>
-    <Setting Name="ProjectDetailsFormSplitter2Distance" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">176</Value>
-    </Setting>
     <Setting Name="CreateQueryLayerFormSplitter1Distance" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">185</Value>
     </Setting>
@@ -150,6 +144,18 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="InvestigatorFormShowDerivedFiles" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ProjectDetailsFormActiveTab" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="ProjectDetailsFormShowEmailFiles" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ProjectDetailsFormShowDownloadFiles" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ProjectDetailsFormShowDerivedFiles" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
