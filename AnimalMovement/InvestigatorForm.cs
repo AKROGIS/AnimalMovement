@@ -328,7 +328,10 @@ namespace AnimalMovement
         private void LoadCollarFileList()
         {
             var query = from file in Database.CollarFiles
-                        where file.ProjectInvestigator == Investigator
+                        where file.ProjectInvestigator == Investigator &&
+                              (ShowDerivedFilesCheckBox.Checked || file.ParentFileId == null) &&
+                              (ShowEmailFilesCheckBox.Checked || file.Format != 'E') &&
+                              (ShowDownloadFilesCheckBox.Checked || file.Format != 'F')
                         select new CollarFileListItem
                         {
                             File = file,
@@ -493,6 +496,12 @@ namespace AnimalMovement
                     LoadParameterFileList();
                     break;
             }
+        }
+
+
+        private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadCollarFileList();
         }
 
     }

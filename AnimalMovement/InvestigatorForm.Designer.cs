@@ -58,6 +58,9 @@
             this.InfoCollarFileButton = new System.Windows.Forms.Button();
             this.AddCollarFileButton = new System.Windows.Forms.Button();
             this.DeleteCollarFilesButton = new System.Windows.Forms.Button();
+            this.ShowEmailFilesCheckBox = new System.Windows.Forms.CheckBox();
+            this.ShowDownloadFilesCheckBox = new System.Windows.Forms.CheckBox();
+            this.ShowDerivedFilesCheckBox = new System.Windows.Forms.CheckBox();
             this.ParameterFilesTab = new System.Windows.Forms.TabPage();
             this.ReportsTab = new System.Windows.Forms.TabPage();
             this.ProjectInvestigatorTabs.SuspendLayout();
@@ -74,7 +77,7 @@
             this.LoginTextBox.Enabled = false;
             this.LoginTextBox.Location = new System.Drawing.Point(93, 12);
             this.LoginTextBox.Name = "LoginTextBox";
-            this.LoginTextBox.Size = new System.Drawing.Size(591, 20);
+            this.LoginTextBox.Size = new System.Drawing.Size(354, 20);
             this.LoginTextBox.TabIndex = 0;
             // 
             // label1
@@ -121,7 +124,7 @@
             this.PhoneTextBox.Location = new System.Drawing.Point(93, 90);
             this.PhoneTextBox.MaxLength = 100;
             this.PhoneTextBox.Name = "PhoneTextBox";
-            this.PhoneTextBox.Size = new System.Drawing.Size(591, 20);
+            this.PhoneTextBox.Size = new System.Drawing.Size(354, 20);
             this.PhoneTextBox.TabIndex = 3;
             // 
             // EmailTextBox
@@ -132,7 +135,7 @@
             this.EmailTextBox.Location = new System.Drawing.Point(93, 64);
             this.EmailTextBox.MaxLength = 200;
             this.EmailTextBox.Name = "EmailTextBox";
-            this.EmailTextBox.Size = new System.Drawing.Size(591, 20);
+            this.EmailTextBox.Size = new System.Drawing.Size(354, 20);
             this.EmailTextBox.TabIndex = 2;
             // 
             // NameTextBox
@@ -143,7 +146,7 @@
             this.NameTextBox.Location = new System.Drawing.Point(93, 38);
             this.NameTextBox.MaxLength = 100;
             this.NameTextBox.Name = "NameTextBox";
-            this.NameTextBox.Size = new System.Drawing.Size(591, 20);
+            this.NameTextBox.Size = new System.Drawing.Size(354, 20);
             this.NameTextBox.TabIndex = 1;
             // 
             // DoneCancelButton
@@ -162,7 +165,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(609, 496);
+            this.EditSaveButton.Location = new System.Drawing.Point(372, 496);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 6;
@@ -352,7 +355,7 @@
             this.ProjectInvestigatorTabs.Location = new System.Drawing.Point(18, 116);
             this.ProjectInvestigatorTabs.Name = "ProjectInvestigatorTabs";
             this.ProjectInvestigatorTabs.SelectedIndex = 0;
-            this.ProjectInvestigatorTabs.Size = new System.Drawing.Size(669, 374);
+            this.ProjectInvestigatorTabs.Size = new System.Drawing.Size(432, 374);
             this.ProjectInvestigatorTabs.TabIndex = 8;
             this.ProjectInvestigatorTabs.SelectedIndexChanged += new System.EventHandler(this.ProjectInvestigatorTabs_SelectedIndexChanged);
             // 
@@ -390,10 +393,13 @@
             this.CollarFilesTab.Controls.Add(this.InfoCollarFileButton);
             this.CollarFilesTab.Controls.Add(this.AddCollarFileButton);
             this.CollarFilesTab.Controls.Add(this.DeleteCollarFilesButton);
+            this.CollarFilesTab.Controls.Add(this.ShowEmailFilesCheckBox);
+            this.CollarFilesTab.Controls.Add(this.ShowDownloadFilesCheckBox);
+            this.CollarFilesTab.Controls.Add(this.ShowDerivedFilesCheckBox);
             this.CollarFilesTab.Location = new System.Drawing.Point(4, 22);
             this.CollarFilesTab.Name = "CollarFilesTab";
             this.CollarFilesTab.Padding = new System.Windows.Forms.Padding(3);
-            this.CollarFilesTab.Size = new System.Drawing.Size(661, 348);
+            this.CollarFilesTab.Size = new System.Drawing.Size(424, 348);
             this.CollarFilesTab.TabIndex = 2;
             this.CollarFilesTab.Text = "Collar Files";
             this.CollarFilesTab.UseVisualStyleBackColor = true;
@@ -409,7 +415,7 @@
             this.CollarFilesListBox.Location = new System.Drawing.Point(6, 6);
             this.CollarFilesListBox.Name = "CollarFilesListBox";
             this.CollarFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.CollarFilesListBox.Size = new System.Drawing.Size(649, 306);
+            this.CollarFilesListBox.Size = new System.Drawing.Size(412, 306);
             this.CollarFilesListBox.TabIndex = 39;
             this.CollarFilesListBox.SelectedIndexChanged += new System.EventHandler(this.CollarFilesListBox_SelectedIndexChanged);
             this.CollarFilesListBox.DoubleClick += new System.EventHandler(this.InfoCollarFileButton_Click);
@@ -455,6 +461,42 @@
             this.DeleteCollarFilesButton.UseVisualStyleBackColor = true;
             this.DeleteCollarFilesButton.Click += new System.EventHandler(this.DeleteCollarFilesButton_Click);
             // 
+            // ShowEmailFilesCheckBox
+            // 
+            this.ShowEmailFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ShowEmailFilesCheckBox.AutoSize = true;
+            this.ShowEmailFilesCheckBox.Location = new System.Drawing.Point(102, 324);
+            this.ShowEmailFilesCheckBox.Name = "ShowEmailFilesCheckBox";
+            this.ShowEmailFilesCheckBox.Size = new System.Drawing.Size(86, 17);
+            this.ShowEmailFilesCheckBox.TabIndex = 43;
+            this.ShowEmailFilesCheckBox.Text = "Show Emails";
+            this.ShowEmailFilesCheckBox.UseVisualStyleBackColor = true;
+            this.ShowEmailFilesCheckBox.CheckedChanged += new System.EventHandler(this.ShowFilesCheckBox_CheckedChanged);
+            // 
+            // ShowDownloadFilesCheckBox
+            // 
+            this.ShowDownloadFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ShowDownloadFilesCheckBox.AutoSize = true;
+            this.ShowDownloadFilesCheckBox.Location = new System.Drawing.Point(195, 325);
+            this.ShowDownloadFilesCheckBox.Name = "ShowDownloadFilesCheckBox";
+            this.ShowDownloadFilesCheckBox.Size = new System.Drawing.Size(109, 17);
+            this.ShowDownloadFilesCheckBox.TabIndex = 44;
+            this.ShowDownloadFilesCheckBox.Text = "Show Downloads";
+            this.ShowDownloadFilesCheckBox.UseVisualStyleBackColor = true;
+            this.ShowDownloadFilesCheckBox.CheckedChanged += new System.EventHandler(this.ShowFilesCheckBox_CheckedChanged);
+            // 
+            // ShowDerivedFilesCheckBox
+            // 
+            this.ShowDerivedFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ShowDerivedFilesCheckBox.AutoSize = true;
+            this.ShowDerivedFilesCheckBox.Location = new System.Drawing.Point(311, 324);
+            this.ShowDerivedFilesCheckBox.Name = "ShowDerivedFilesCheckBox";
+            this.ShowDerivedFilesCheckBox.Size = new System.Drawing.Size(93, 17);
+            this.ShowDerivedFilesCheckBox.TabIndex = 45;
+            this.ShowDerivedFilesCheckBox.Text = "Show Derived";
+            this.ShowDerivedFilesCheckBox.UseVisualStyleBackColor = true;
+            this.ShowDerivedFilesCheckBox.CheckedChanged += new System.EventHandler(this.ShowFilesCheckBox_CheckedChanged);
+            // 
             // ParameterFilesTab
             // 
             this.ParameterFilesTab.Controls.Add(this.ParameterFilesListBox);
@@ -484,7 +526,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.DoneCancelButton;
-            this.ClientSize = new System.Drawing.Size(699, 531);
+            this.ClientSize = new System.Drawing.Size(462, 531);
             this.Controls.Add(this.ProjectInvestigatorTabs);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
@@ -497,7 +539,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.LoginTextBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.MinimumSize = new System.Drawing.Size(350, 350);
+            this.MinimumSize = new System.Drawing.Size(470, 350);
             this.Name = "InvestigatorForm";
             this.Text = "Project Investigator Details";
             this.Load += new System.EventHandler(this.InvestigatorForm_Load);
@@ -505,6 +547,7 @@
             this.ProjectsTab.ResumeLayout(false);
             this.CollarsTab.ResumeLayout(false);
             this.CollarFilesTab.ResumeLayout(false);
+            this.CollarFilesTab.PerformLayout();
             this.ParameterFilesTab.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -545,5 +588,8 @@
         private System.Windows.Forms.Button InfoCollarFileButton;
         private System.Windows.Forms.Button AddCollarFileButton;
         private System.Windows.Forms.Button DeleteCollarFilesButton;
+        private System.Windows.Forms.CheckBox ShowDerivedFilesCheckBox;
+        private System.Windows.Forms.CheckBox ShowDownloadFilesCheckBox;
+        private System.Windows.Forms.CheckBox ShowEmailFilesCheckBox;
     }
 }
