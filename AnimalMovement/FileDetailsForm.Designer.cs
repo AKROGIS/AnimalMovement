@@ -61,6 +61,8 @@
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
             this.SourceFileButton = new System.Windows.Forms.Button();
+            this.OwnerTextBox = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.FixInfoDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -77,7 +79,7 @@
             // 
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(260, 38);
+            this.label5.Location = new System.Drawing.Point(406, 38);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(48, 13);
             this.label5.TabIndex = 24;
@@ -87,7 +89,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(248, 12);
+            this.label4.Location = new System.Drawing.Point(394, 12);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(60, 13);
             this.label4.TabIndex = 23;
@@ -105,7 +107,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(14, 41);
+            this.label1.Location = new System.Drawing.Point(14, 38);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(38, 13);
             this.label1.TabIndex = 20;
@@ -116,10 +118,10 @@
             this.FileNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.FileNameTextBox.Enabled = false;
-            this.FileNameTextBox.Location = new System.Drawing.Point(58, 38);
+            this.FileNameTextBox.Location = new System.Drawing.Point(58, 35);
             this.FileNameTextBox.MaxLength = 255;
             this.FileNameTextBox.Name = "FileNameTextBox";
-            this.FileNameTextBox.Size = new System.Drawing.Size(162, 20);
+            this.FileNameTextBox.Size = new System.Drawing.Size(308, 20);
             this.FileNameTextBox.TabIndex = 3;
             // 
             // FormatTextBox
@@ -129,7 +131,7 @@
             this.FormatTextBox.Enabled = false;
             this.FormatTextBox.Location = new System.Drawing.Point(58, 61);
             this.FormatTextBox.Name = "FormatTextBox";
-            this.FormatTextBox.Size = new System.Drawing.Size(162, 20);
+            this.FormatTextBox.Size = new System.Drawing.Size(308, 20);
             this.FormatTextBox.TabIndex = 5;
             // 
             // ProjectTextBox
@@ -139,14 +141,14 @@
             this.ProjectTextBox.Enabled = false;
             this.ProjectTextBox.Location = new System.Drawing.Point(58, 87);
             this.ProjectTextBox.Name = "ProjectTextBox";
-            this.ProjectTextBox.Size = new System.Drawing.Size(162, 20);
+            this.ProjectTextBox.Size = new System.Drawing.Size(308, 20);
             this.ProjectTextBox.TabIndex = 7;
             // 
             // CollarManufacturerTextBox
             // 
             this.CollarManufacturerTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarManufacturerTextBox.Enabled = false;
-            this.CollarManufacturerTextBox.Location = new System.Drawing.Point(314, 9);
+            this.CollarManufacturerTextBox.Location = new System.Drawing.Point(460, 9);
             this.CollarManufacturerTextBox.Name = "CollarManufacturerTextBox";
             this.CollarManufacturerTextBox.Size = new System.Drawing.Size(162, 20);
             this.CollarManufacturerTextBox.TabIndex = 2;
@@ -155,7 +157,7 @@
             // 
             this.CollarIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarIdTextBox.Enabled = false;
-            this.CollarIdTextBox.Location = new System.Drawing.Point(314, 35);
+            this.CollarIdTextBox.Location = new System.Drawing.Point(460, 35);
             this.CollarIdTextBox.MaxLength = 16;
             this.CollarIdTextBox.Name = "CollarIdTextBox";
             this.CollarIdTextBox.Size = new System.Drawing.Size(162, 20);
@@ -165,7 +167,7 @@
             // 
             this.UploadDateTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UploadDateTextBox.Enabled = false;
-            this.UploadDateTextBox.Location = new System.Drawing.Point(314, 61);
+            this.UploadDateTextBox.Location = new System.Drawing.Point(460, 61);
             this.UploadDateTextBox.Name = "UploadDateTextBox";
             this.UploadDateTextBox.Size = new System.Drawing.Size(162, 20);
             this.UploadDateTextBox.TabIndex = 6;
@@ -174,7 +176,7 @@
             // 
             this.UserNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UserNameTextBox.Enabled = false;
-            this.UserNameTextBox.Location = new System.Drawing.Point(314, 87);
+            this.UserNameTextBox.Location = new System.Drawing.Point(460, 87);
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(162, 20);
             this.UserNameTextBox.TabIndex = 8;
@@ -182,7 +184,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 15);
+            this.label3.Location = new System.Drawing.Point(14, 12);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(38, 13);
             this.label3.TabIndex = 41;
@@ -190,18 +192,16 @@
             // 
             // FileIdTextBox
             // 
-            this.FileIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.FileIdTextBox.Enabled = false;
-            this.FileIdTextBox.Location = new System.Drawing.Point(58, 12);
+            this.FileIdTextBox.Location = new System.Drawing.Point(58, 9);
             this.FileIdTextBox.Name = "FileIdTextBox";
-            this.FileIdTextBox.Size = new System.Drawing.Size(162, 20);
+            this.FileIdTextBox.Size = new System.Drawing.Size(65, 20);
             this.FileIdTextBox.TabIndex = 1;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 116);
+            this.label7.Location = new System.Drawing.Point(129, 12);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(40, 13);
             this.label7.TabIndex = 43;
@@ -212,16 +212,16 @@
             this.StatusTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.StatusTextBox.Enabled = false;
-            this.StatusTextBox.Location = new System.Drawing.Point(58, 113);
+            this.StatusTextBox.Location = new System.Drawing.Point(175, 9);
             this.StatusTextBox.Name = "StatusTextBox";
-            this.StatusTextBox.Size = new System.Drawing.Size(162, 20);
+            this.StatusTextBox.Size = new System.Drawing.Size(191, 20);
             this.StatusTextBox.TabIndex = 9;
             // 
             // label8
             // 
             this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(238, 64);
+            this.label8.Location = new System.Drawing.Point(384, 64);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(70, 13);
             this.label8.TabIndex = 44;
@@ -231,7 +231,7 @@
             // 
             this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(237, 90);
+            this.label9.Location = new System.Drawing.Point(383, 90);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(71, 13);
             this.label9.TabIndex = 45;
@@ -240,7 +240,7 @@
             // ChangeStatusButton
             // 
             this.ChangeStatusButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ChangeStatusButton.Location = new System.Drawing.Point(238, 111);
+            this.ChangeStatusButton.Location = new System.Drawing.Point(384, 111);
             this.ChangeStatusButton.Name = "ChangeStatusButton";
             this.ChangeStatusButton.Size = new System.Drawing.Size(116, 23);
             this.ChangeStatusButton.TabIndex = 10;
@@ -251,7 +251,7 @@
             // ShowContentsButton
             // 
             this.ShowContentsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ShowContentsButton.Location = new System.Drawing.Point(360, 111);
+            this.ShowContentsButton.Location = new System.Drawing.Point(506, 111);
             this.ShowContentsButton.Name = "ShowContentsButton";
             this.ShowContentsButton.Size = new System.Drawing.Size(116, 23);
             this.ShowContentsButton.TabIndex = 11;
@@ -294,7 +294,7 @@
             this.FixInfoDataGridView.ReadOnly = true;
             this.FixInfoDataGridView.RowHeadersVisible = false;
             this.FixInfoDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.FixInfoDataGridView.Size = new System.Drawing.Size(463, 146);
+            this.FixInfoDataGridView.Size = new System.Drawing.Size(609, 245);
             this.FixInfoDataGridView.TabIndex = 12;
             // 
             // FileIdColumn
@@ -374,7 +374,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(12, 329);
+            this.DoneCancelButton.Location = new System.Drawing.Point(12, 428);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 46;
@@ -386,7 +386,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(401, 329);
+            this.EditSaveButton.Location = new System.Drawing.Point(547, 428);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 47;
@@ -397,7 +397,7 @@
             // SourceFileButton
             // 
             this.SourceFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SourceFileButton.Location = new System.Drawing.Point(360, 140);
+            this.SourceFileButton.Location = new System.Drawing.Point(506, 140);
             this.SourceFileButton.Name = "SourceFileButton";
             this.SourceFileButton.Size = new System.Drawing.Size(116, 23);
             this.SourceFileButton.TabIndex = 48;
@@ -405,11 +405,32 @@
             this.SourceFileButton.UseVisualStyleBackColor = true;
             this.SourceFileButton.Click += new System.EventHandler(this.SourceFileButton_Click);
             // 
+            // OwnerTextBox
+            // 
+            this.OwnerTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.OwnerTextBox.Enabled = false;
+            this.OwnerTextBox.Location = new System.Drawing.Point(58, 111);
+            this.OwnerTextBox.Name = "OwnerTextBox";
+            this.OwnerTextBox.Size = new System.Drawing.Size(308, 20);
+            this.OwnerTextBox.TabIndex = 49;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(9, 114);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(41, 13);
+            this.label11.TabIndex = 50;
+            this.label11.Text = "Owner:";
+            // 
             // FileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(492, 364);
+            this.ClientSize = new System.Drawing.Size(638, 463);
+            this.Controls.Add(this.OwnerTextBox);
+            this.Controls.Add(this.label11);
             this.Controls.Add(this.SourceFileButton);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
@@ -480,5 +501,7 @@
         private System.Windows.Forms.Button DoneCancelButton;
         private System.Windows.Forms.Button EditSaveButton;
         private System.Windows.Forms.Button SourceFileButton;
+        private System.Windows.Forms.TextBox OwnerTextBox;
+        private System.Windows.Forms.Label label11;
     }
 }

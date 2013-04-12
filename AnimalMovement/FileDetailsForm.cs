@@ -42,11 +42,12 @@ namespace AnimalMovement
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarFileFormat.Name;
-            CollarManufacturerTextBox.Text = File.Collar == null ? "" : File.Collar.LookupCollarManufacturer.Name.Trim();
+            CollarManufacturerTextBox.Text = File.Collar == null ? "" : File.Collar.LookupCollarManufacturer.Name;
             CollarIdTextBox.Text = File.CollarId;
             UserNameTextBox.Text = File.UserName;
             UploadDateTextBox.Text = File.UploadDate.ToString(CultureInfo.CurrentCulture);
             ProjectTextBox.Text = File.Project == null ? "" : File.Project.ProjectName;
+            OwnerTextBox.Text = File.ProjectInvestigator == null ? "" : File.ProjectInvestigator.Name;
             StatusTextBox.Text = File.LookupFileStatus.Name;
             UpdateCollarFixes();
             EnableForm();
