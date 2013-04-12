@@ -354,8 +354,16 @@ namespace AnimalMovement
             {
                 if (sortedList[i].File.ParentFileId != null)
                     CollarFilesListBox.SetItemColor(i, Color.Brown);
+                if (sortedList[i].File.Format == 'E')
+                    CollarFilesListBox.SetItemColor(i, Color.MediumBlue);
+                if (sortedList[i].File.Format == 'F')
+                    CollarFilesListBox.SetItemColor(i, Color.DarkMagenta);
                 if (sortedList[i].File.Status == 'I')
-                    CollarFilesListBox.SetItemColor(i, Color.DarkGray);
+                {
+                    //Dim color of inactive files
+                    var c = CollarFilesListBox.GetItemColor(i);
+                    CollarFilesListBox.SetItemColor(i, ControlPaint.Light(c, 1.4f));
+                }
             }
             CollarFilesTab.Text = sortedList.Count < 5 ? "Collar Files" : String.Format("Collar Files ({0})", sortedList.Count);
         }

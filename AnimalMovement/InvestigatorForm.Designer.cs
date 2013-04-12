@@ -368,7 +368,7 @@
             this.ProjectsTab.Location = new System.Drawing.Point(4, 22);
             this.ProjectsTab.Name = "ProjectsTab";
             this.ProjectsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ProjectsTab.Size = new System.Drawing.Size(661, 348);
+            this.ProjectsTab.Size = new System.Drawing.Size(424, 348);
             this.ProjectsTab.TabIndex = 0;
             this.ProjectsTab.Text = "Projects";
             this.ProjectsTab.UseVisualStyleBackColor = true;
@@ -382,7 +382,7 @@
             this.CollarsTab.Location = new System.Drawing.Point(4, 22);
             this.CollarsTab.Name = "CollarsTab";
             this.CollarsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.CollarsTab.Size = new System.Drawing.Size(661, 348);
+            this.CollarsTab.Size = new System.Drawing.Size(424, 348);
             this.CollarsTab.TabIndex = 1;
             this.CollarsTab.Text = "Collars";
             this.CollarsTab.UseVisualStyleBackColor = true;
@@ -465,6 +465,7 @@
             // 
             this.ShowEmailFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowEmailFilesCheckBox.AutoSize = true;
+            this.ShowEmailFilesCheckBox.ForeColor = System.Drawing.Color.MediumBlue;
             this.ShowEmailFilesCheckBox.Location = new System.Drawing.Point(102, 324);
             this.ShowEmailFilesCheckBox.Name = "ShowEmailFilesCheckBox";
             this.ShowEmailFilesCheckBox.Size = new System.Drawing.Size(86, 17);
@@ -477,6 +478,7 @@
             // 
             this.ShowDownloadFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowDownloadFilesCheckBox.AutoSize = true;
+            this.ShowDownloadFilesCheckBox.ForeColor = System.Drawing.Color.DarkMagenta;
             this.ShowDownloadFilesCheckBox.Location = new System.Drawing.Point(195, 325);
             this.ShowDownloadFilesCheckBox.Name = "ShowDownloadFilesCheckBox";
             this.ShowDownloadFilesCheckBox.Size = new System.Drawing.Size(109, 17);
@@ -489,6 +491,7 @@
             // 
             this.ShowDerivedFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowDerivedFilesCheckBox.AutoSize = true;
+            this.ShowDerivedFilesCheckBox.ForeColor = System.Drawing.Color.Brown;
             this.ShowDerivedFilesCheckBox.Location = new System.Drawing.Point(311, 324);
             this.ShowDerivedFilesCheckBox.Name = "ShowDerivedFilesCheckBox";
             this.ShowDerivedFilesCheckBox.Size = new System.Drawing.Size(93, 17);
@@ -506,7 +509,7 @@
             this.ParameterFilesTab.Location = new System.Drawing.Point(4, 22);
             this.ParameterFilesTab.Name = "ParameterFilesTab";
             this.ParameterFilesTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ParameterFilesTab.Size = new System.Drawing.Size(661, 348);
+            this.ParameterFilesTab.Size = new System.Drawing.Size(424, 348);
             this.ParameterFilesTab.TabIndex = 3;
             this.ParameterFilesTab.Text = "Parameter Files";
             this.ParameterFilesTab.UseVisualStyleBackColor = true;
@@ -516,7 +519,7 @@
             this.ReportsTab.Location = new System.Drawing.Point(4, 22);
             this.ReportsTab.Name = "ReportsTab";
             this.ReportsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ReportsTab.Size = new System.Drawing.Size(661, 348);
+            this.ReportsTab.Size = new System.Drawing.Size(424, 348);
             this.ReportsTab.TabIndex = 4;
             this.ReportsTab.Text = "QC Reports";
             this.ReportsTab.UseVisualStyleBackColor = true;
