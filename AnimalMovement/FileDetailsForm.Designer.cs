@@ -63,7 +63,10 @@
             this.SourceFileButton = new System.Windows.Forms.Button();
             this.OwnerTextBox = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
+            this.ChildFilesDataGridView = new System.Windows.Forms.DataGridView();
+            this.GridViewLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.FixInfoDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ChildFilesDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // label6
@@ -79,7 +82,7 @@
             // 
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(406, 38);
+            this.label5.Location = new System.Drawing.Point(280, 38);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(48, 13);
             this.label5.TabIndex = 24;
@@ -89,7 +92,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(394, 12);
+            this.label4.Location = new System.Drawing.Point(268, 12);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(60, 13);
             this.label4.TabIndex = 23;
@@ -121,7 +124,7 @@
             this.FileNameTextBox.Location = new System.Drawing.Point(58, 35);
             this.FileNameTextBox.MaxLength = 255;
             this.FileNameTextBox.Name = "FileNameTextBox";
-            this.FileNameTextBox.Size = new System.Drawing.Size(308, 20);
+            this.FileNameTextBox.Size = new System.Drawing.Size(182, 20);
             this.FileNameTextBox.TabIndex = 3;
             // 
             // FormatTextBox
@@ -131,7 +134,7 @@
             this.FormatTextBox.Enabled = false;
             this.FormatTextBox.Location = new System.Drawing.Point(58, 61);
             this.FormatTextBox.Name = "FormatTextBox";
-            this.FormatTextBox.Size = new System.Drawing.Size(308, 20);
+            this.FormatTextBox.Size = new System.Drawing.Size(182, 20);
             this.FormatTextBox.TabIndex = 5;
             // 
             // ProjectTextBox
@@ -141,14 +144,14 @@
             this.ProjectTextBox.Enabled = false;
             this.ProjectTextBox.Location = new System.Drawing.Point(58, 87);
             this.ProjectTextBox.Name = "ProjectTextBox";
-            this.ProjectTextBox.Size = new System.Drawing.Size(308, 20);
+            this.ProjectTextBox.Size = new System.Drawing.Size(182, 20);
             this.ProjectTextBox.TabIndex = 7;
             // 
             // CollarManufacturerTextBox
             // 
             this.CollarManufacturerTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarManufacturerTextBox.Enabled = false;
-            this.CollarManufacturerTextBox.Location = new System.Drawing.Point(460, 9);
+            this.CollarManufacturerTextBox.Location = new System.Drawing.Point(334, 9);
             this.CollarManufacturerTextBox.Name = "CollarManufacturerTextBox";
             this.CollarManufacturerTextBox.Size = new System.Drawing.Size(162, 20);
             this.CollarManufacturerTextBox.TabIndex = 2;
@@ -157,7 +160,7 @@
             // 
             this.CollarIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarIdTextBox.Enabled = false;
-            this.CollarIdTextBox.Location = new System.Drawing.Point(460, 35);
+            this.CollarIdTextBox.Location = new System.Drawing.Point(334, 35);
             this.CollarIdTextBox.MaxLength = 16;
             this.CollarIdTextBox.Name = "CollarIdTextBox";
             this.CollarIdTextBox.Size = new System.Drawing.Size(162, 20);
@@ -167,7 +170,7 @@
             // 
             this.UploadDateTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UploadDateTextBox.Enabled = false;
-            this.UploadDateTextBox.Location = new System.Drawing.Point(460, 61);
+            this.UploadDateTextBox.Location = new System.Drawing.Point(334, 61);
             this.UploadDateTextBox.Name = "UploadDateTextBox";
             this.UploadDateTextBox.Size = new System.Drawing.Size(162, 20);
             this.UploadDateTextBox.TabIndex = 6;
@@ -176,7 +179,7 @@
             // 
             this.UserNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UserNameTextBox.Enabled = false;
-            this.UserNameTextBox.Location = new System.Drawing.Point(460, 87);
+            this.UserNameTextBox.Location = new System.Drawing.Point(334, 87);
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(162, 20);
             this.UserNameTextBox.TabIndex = 8;
@@ -214,14 +217,14 @@
             this.StatusTextBox.Enabled = false;
             this.StatusTextBox.Location = new System.Drawing.Point(175, 9);
             this.StatusTextBox.Name = "StatusTextBox";
-            this.StatusTextBox.Size = new System.Drawing.Size(191, 20);
+            this.StatusTextBox.Size = new System.Drawing.Size(65, 20);
             this.StatusTextBox.TabIndex = 9;
             // 
             // label8
             // 
             this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(384, 64);
+            this.label8.Location = new System.Drawing.Point(258, 64);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(70, 13);
             this.label8.TabIndex = 44;
@@ -231,7 +234,7 @@
             // 
             this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(383, 90);
+            this.label9.Location = new System.Drawing.Point(257, 90);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(71, 13);
             this.label9.TabIndex = 45;
@@ -240,7 +243,7 @@
             // ChangeStatusButton
             // 
             this.ChangeStatusButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ChangeStatusButton.Location = new System.Drawing.Point(384, 111);
+            this.ChangeStatusButton.Location = new System.Drawing.Point(258, 111);
             this.ChangeStatusButton.Name = "ChangeStatusButton";
             this.ChangeStatusButton.Size = new System.Drawing.Size(116, 23);
             this.ChangeStatusButton.TabIndex = 10;
@@ -251,7 +254,7 @@
             // ShowContentsButton
             // 
             this.ShowContentsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ShowContentsButton.Location = new System.Drawing.Point(506, 111);
+            this.ShowContentsButton.Location = new System.Drawing.Point(380, 111);
             this.ShowContentsButton.Name = "ShowContentsButton";
             this.ShowContentsButton.Size = new System.Drawing.Size(116, 23);
             this.ShowContentsButton.TabIndex = 11;
@@ -288,13 +291,13 @@
             this.Column2,
             this.Column4,
             this.Column3});
-            this.FixInfoDataGridView.Location = new System.Drawing.Point(13, 177);
+            this.FixInfoDataGridView.Location = new System.Drawing.Point(13, 208);
             this.FixInfoDataGridView.MultiSelect = false;
             this.FixInfoDataGridView.Name = "FixInfoDataGridView";
             this.FixInfoDataGridView.ReadOnly = true;
             this.FixInfoDataGridView.RowHeadersVisible = false;
             this.FixInfoDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.FixInfoDataGridView.Size = new System.Drawing.Size(609, 245);
+            this.FixInfoDataGridView.Size = new System.Drawing.Size(483, 209);
             this.FixInfoDataGridView.TabIndex = 12;
             // 
             // FileIdColumn
@@ -374,7 +377,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(12, 428);
+            this.DoneCancelButton.Location = new System.Drawing.Point(12, 423);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 46;
@@ -386,7 +389,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(547, 428);
+            this.EditSaveButton.Location = new System.Drawing.Point(421, 423);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 47;
@@ -397,7 +400,7 @@
             // SourceFileButton
             // 
             this.SourceFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SourceFileButton.Location = new System.Drawing.Point(506, 140);
+            this.SourceFileButton.Location = new System.Drawing.Point(380, 140);
             this.SourceFileButton.Name = "SourceFileButton";
             this.SourceFileButton.Size = new System.Drawing.Size(116, 23);
             this.SourceFileButton.TabIndex = 48;
@@ -412,7 +415,7 @@
             this.OwnerTextBox.Enabled = false;
             this.OwnerTextBox.Location = new System.Drawing.Point(58, 111);
             this.OwnerTextBox.Name = "OwnerTextBox";
-            this.OwnerTextBox.Size = new System.Drawing.Size(308, 20);
+            this.OwnerTextBox.Size = new System.Drawing.Size(182, 20);
             this.OwnerTextBox.TabIndex = 49;
             // 
             // label11
@@ -424,17 +427,48 @@
             this.label11.TabIndex = 50;
             this.label11.Text = "Owner:";
             // 
+            // ChildFilesDataGridView
+            // 
+            this.ChildFilesDataGridView.AllowUserToAddRows = false;
+            this.ChildFilesDataGridView.AllowUserToDeleteRows = false;
+            this.ChildFilesDataGridView.AllowUserToOrderColumns = true;
+            this.ChildFilesDataGridView.AllowUserToResizeRows = false;
+            this.ChildFilesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ChildFilesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ChildFilesDataGridView.Location = new System.Drawing.Point(13, 208);
+            this.ChildFilesDataGridView.MultiSelect = false;
+            this.ChildFilesDataGridView.Name = "ChildFilesDataGridView";
+            this.ChildFilesDataGridView.ReadOnly = true;
+            this.ChildFilesDataGridView.RowHeadersVisible = false;
+            this.ChildFilesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.ChildFilesDataGridView.Size = new System.Drawing.Size(483, 209);
+            this.ChildFilesDataGridView.TabIndex = 51;
+            this.ChildFilesDataGridView.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ChildFilesDataGridView_CellContentDoubleClick);
+            // 
+            // GridViewLabel
+            // 
+            this.GridViewLabel.AutoSize = true;
+            this.GridViewLabel.Location = new System.Drawing.Point(13, 189);
+            this.GridViewLabel.Name = "GridViewLabel";
+            this.GridViewLabel.Size = new System.Drawing.Size(113, 13);
+            this.GridViewLabel.TabIndex = 52;
+            this.GridViewLabel.Text = "Summary of fixes in file";
+            // 
             // FileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(638, 463);
+            this.ClientSize = new System.Drawing.Size(512, 458);
+            this.Controls.Add(this.GridViewLabel);
             this.Controls.Add(this.OwnerTextBox);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.SourceFileButton);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
             this.Controls.Add(this.FixInfoDataGridView);
+            this.Controls.Add(this.ChildFilesDataGridView);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.ShowContentsButton);
             this.Controls.Add(this.ChangeStatusButton);
@@ -461,6 +495,7 @@
             this.Name = "FileDetailsForm";
             this.Text = "FileDetailsForm";
             ((System.ComponentModel.ISupportInitialize)(this.FixInfoDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ChildFilesDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -503,5 +538,7 @@
         private System.Windows.Forms.Button SourceFileButton;
         private System.Windows.Forms.TextBox OwnerTextBox;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.DataGridView ChildFilesDataGridView;
+        private System.Windows.Forms.Label GridViewLabel;
     }
 }

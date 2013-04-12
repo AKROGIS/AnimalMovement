@@ -49,24 +49,46 @@ namespace AnimalMovement
             ProjectTextBox.Text = File.Project == null ? "" : File.Project.ProjectName;
             OwnerTextBox.Text = File.ProjectInvestigator == null ? "" : File.ProjectInvestigator.Name;
             StatusTextBox.Text = File.LookupFileStatus.Name;
-            UpdateCollarFixes();
             EnableForm();
+            SetParentChildFiles();
             DoneCancelButton.Focus();
-            SourceFileButton.Visible = File.ParentFileId != null;
+        }
+
+        private void SetParentChildFiles()
+        {
+            var fileHasChildren = Database.CollarFiles.Any(f => f.ParentFileId == File.FileId);
+            var fileHasParent = File.ParentFileId != null;
+            SourceFileButton.Visible = fileHasParent;
+            GridViewLabel.Text = fileHasChildren ? "Files derived from this file" : "Summary of fixes in file";
+            ChildFilesDataGridView.Visible = fileHasChildren;
+            FixInfoDataGridView.Visible = !fileHasChildren;
+            if (fileHasChildren)
+            {
+                var data = from file in Database.CollarFiles
+                           where file.ParentFileId == File.FileId
+                           select new
+                               {
+                                   file.FileId,
+                                   file.FileName,
+                                   Format = file.LookupCollarFileFormat.Name,
+                                   Status = file.LookupFileStatus.Name,
+                                   file.Collar
+                               };
+                ChildFilesDataGridView.DataSource = data;
+            }
+            else
+            {
+                var data = from fix in DatabaseViews.AnimalFixesByFiles
+                           where fix.FileId == FileId
+                           select fix;
+                FixInfoDataGridView.DataSource = data;
+            }
         }
 
         private void UpdateDataSource()
         {
             File.CollarId = CollarIdTextBox.Text.NullifyIfEmpty();
             File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
-        }
-
-        private void UpdateCollarFixes()
-        {
-            var data = from fix in DatabaseViews.AnimalFixesByFiles
-                       where fix.FileId == FileId
-                       select fix;
-            FixInfoDataGridView.DataSource = data;
         }
 
         private void ShowContentsButton_Click(object sender, EventArgs e)
@@ -107,10 +129,18 @@ namespace AnimalMovement
 
         private void SourceFileButton_Click(object sender, EventArgs e)
         {
-            //If the user make changes in the info dialog, they happen in a different context, so we need to reload this context if changes were made
             if (File.ParentFileId == null)
                 return;
             var form = new FileDetailsForm(File.ParentFileId.Value, CurrentUser);
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.Show(this);
+        }
+
+        private void ChildFilesDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //I can't use the DataSource here, because it is an anoymous type.
+            var fileId = (int)ChildFilesDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new FileDetailsForm(fileId, CurrentUser);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }
