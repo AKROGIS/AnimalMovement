@@ -193,12 +193,17 @@ namespace AnimalMovement
             EnableUpload();
         }
 
-        #endregion
-
         private void CollarComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             EnableUpload();
         }
+
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        #endregion
 
     }
 }

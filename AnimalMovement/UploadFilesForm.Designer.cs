@@ -51,6 +51,7 @@
             this.UploadButton = new System.Windows.Forms.Button();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.HelpButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.statusGroupBox.SuspendLayout();
@@ -81,7 +82,7 @@
             this.FolderNameTextBox.Location = new System.Drawing.Point(69, 44);
             this.FolderNameTextBox.Name = "FolderNameTextBox";
             this.FolderNameTextBox.Size = new System.Drawing.Size(295, 20);
-            this.FolderNameTextBox.TabIndex = 5;
+            this.FolderNameTextBox.TabIndex = 3;
             this.FolderNameTextBox.TextChanged += new System.EventHandler(this.FolderNameTextBox_TextChanged);
             // 
             // AllowDuplicatesCheckBox
@@ -90,7 +91,7 @@
             this.AllowDuplicatesCheckBox.Location = new System.Drawing.Point(6, 70);
             this.AllowDuplicatesCheckBox.Name = "AllowDuplicatesCheckBox";
             this.AllowDuplicatesCheckBox.Size = new System.Drawing.Size(102, 17);
-            this.AllowDuplicatesCheckBox.TabIndex = 7;
+            this.AllowDuplicatesCheckBox.TabIndex = 5;
             this.AllowDuplicatesCheckBox.Text = "Allow duplicates";
             this.AllowDuplicatesCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -122,7 +123,7 @@
             this.FileNameTextBox.Location = new System.Drawing.Point(69, 18);
             this.FileNameTextBox.Name = "FileNameTextBox";
             this.FileNameTextBox.Size = new System.Drawing.Size(295, 20);
-            this.FileNameTextBox.TabIndex = 2;
+            this.FileNameTextBox.TabIndex = 1;
             this.FileNameTextBox.TextChanged += new System.EventHandler(this.FileNameTextBox_TextChanged);
             // 
             // FileBrowserButton
@@ -131,7 +132,7 @@
             this.FileBrowserButton.Location = new System.Drawing.Point(370, 15);
             this.FileBrowserButton.Name = "FileBrowserButton";
             this.FileBrowserButton.Size = new System.Drawing.Size(24, 24);
-            this.FileBrowserButton.TabIndex = 1;
+            this.FileBrowserButton.TabIndex = 2;
             this.FileBrowserButton.Text = "...";
             this.FileBrowserButton.UseVisualStyleBackColor = true;
             this.FileBrowserButton.Click += new System.EventHandler(this.FileBrowserButton_Click);
@@ -171,7 +172,7 @@
             this.ClearCollarButton.Location = new System.Drawing.Point(349, 71);
             this.ClearCollarButton.Name = "ClearCollarButton";
             this.ClearCollarButton.Size = new System.Drawing.Size(45, 21);
-            this.ClearCollarButton.TabIndex = 10;
+            this.ClearCollarButton.TabIndex = 9;
             this.ClearCollarButton.Text = "Clear";
             this.ClearCollarButton.UseVisualStyleBackColor = true;
             this.ClearCollarButton.Click += new System.EventHandler(this.ClearCollarButton_Click);
@@ -194,7 +195,7 @@
             this.InvestigatorComboBox.Location = new System.Drawing.Point(95, 44);
             this.InvestigatorComboBox.Name = "InvestigatorComboBox";
             this.InvestigatorComboBox.Size = new System.Drawing.Size(299, 21);
-            this.InvestigatorComboBox.TabIndex = 5;
+            this.InvestigatorComboBox.TabIndex = 7;
             this.InvestigatorComboBox.SelectedIndexChanged += new System.EventHandler(this.InvestigatorComboBox_SelectedIndexChanged);
             // 
             // CollarComboBox
@@ -206,7 +207,7 @@
             this.CollarComboBox.Location = new System.Drawing.Point(95, 71);
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(248, 21);
-            this.CollarComboBox.TabIndex = 6;
+            this.CollarComboBox.TabIndex = 8;
             this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // ProjectComboBox
@@ -218,7 +219,7 @@
             this.ProjectComboBox.Location = new System.Drawing.Point(95, 18);
             this.ProjectComboBox.Name = "ProjectComboBox";
             this.ProjectComboBox.Size = new System.Drawing.Size(299, 21);
-            this.ProjectComboBox.TabIndex = 4;
+            this.ProjectComboBox.TabIndex = 6;
             this.ProjectComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
             // 
             // InvestigatorRadioButton
@@ -263,7 +264,6 @@
             this.StatusActiveRadioButton.Name = "StatusActiveRadioButton";
             this.StatusActiveRadioButton.Size = new System.Drawing.Size(243, 17);
             this.StatusActiveRadioButton.TabIndex = 1;
-            this.StatusActiveRadioButton.TabStop = true;
             this.StatusActiveRadioButton.Tag = "A";
             this.StatusActiveRadioButton.Text = "Upload for archive and generation of locations";
             this.StatusActiveRadioButton.UseVisualStyleBackColor = true;
@@ -275,7 +275,6 @@
             this.StatusInactiveRadioButton.Name = "StatusInactiveRadioButton";
             this.StatusInactiveRadioButton.Size = new System.Drawing.Size(134, 17);
             this.StatusInactiveRadioButton.TabIndex = 0;
-            this.StatusInactiveRadioButton.TabStop = true;
             this.StatusInactiveRadioButton.Tag = "I";
             this.StatusInactiveRadioButton.Text = "Upload for archive only";
             this.StatusInactiveRadioButton.UseVisualStyleBackColor = true;
@@ -287,7 +286,7 @@
             this.CancelButton.Location = new System.Drawing.Point(256, 291);
             this.CancelButton.Name = "CancelButton";
             this.CancelButton.Size = new System.Drawing.Size(75, 23);
-            this.CancelButton.TabIndex = 10;
+            this.CancelButton.TabIndex = 13;
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
             this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -298,7 +297,7 @@
             this.UploadButton.Location = new System.Drawing.Point(337, 291);
             this.UploadButton.Name = "UploadButton";
             this.UploadButton.Size = new System.Drawing.Size(75, 23);
-            this.UploadButton.TabIndex = 11;
+            this.UploadButton.TabIndex = 14;
             this.UploadButton.Text = "Upload";
             this.UploadButton.UseVisualStyleBackColor = true;
             this.UploadButton.Click += new System.EventHandler(this.UploadButton_Click);
@@ -309,11 +308,23 @@
             this.openFileDialog.FileName = "CollarData";
             this.openFileDialog.Filter = "CSV File|*.csv|DAT File|*.dat|TSV File|*.tsv|Text Files|*.txt|All Files|*.*";
             // 
+            // HelpButton
+            // 
+            this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.HelpButton.Location = new System.Drawing.Point(175, 291);
+            this.HelpButton.Name = "HelpButton";
+            this.HelpButton.Size = new System.Drawing.Size(75, 23);
+            this.HelpButton.TabIndex = 12;
+            this.HelpButton.Text = "Help";
+            this.HelpButton.UseVisualStyleBackColor = true;
+            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            // 
             // UploadFilesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(424, 326);
+            this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.CancelButton);
             this.Controls.Add(this.UploadButton);
             this.Controls.Add(this.statusGroupBox);
@@ -357,5 +368,6 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.Button ClearCollarButton;
+        private System.Windows.Forms.Button HelpButton;
     }
 }
