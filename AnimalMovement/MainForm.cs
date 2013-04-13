@@ -75,7 +75,7 @@ namespace AnimalMovement
 
         private void BulkUploadButton_Click(object sender, EventArgs e)
         {
-            var form = new AddFolderForm(_currentUser);
+            var form = new UploadFilesForm();
             form.Show(this);
         }
 

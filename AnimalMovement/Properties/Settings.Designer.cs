@@ -646,5 +646,29 @@ namespace AnimalMovement.Properties {
                 this["ProjectDetailsFormShowDerivedFiles"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point UploadFilesFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["UploadFilesFormLocation"]));
+            }
+            set {
+                this["UploadFilesFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("440, 364")]
+        public global::System.Drawing.Size UploadFilesFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["UploadFilesFormSize"]));
+            }
+            set {
+                this["UploadFilesFormSize"] = value;
+            }
+        }
     }
 }
