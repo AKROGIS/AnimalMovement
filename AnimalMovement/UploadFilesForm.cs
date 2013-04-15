@@ -200,7 +200,7 @@ namespace AnimalMovement
 
         private void HelpButton_Click(object sender, EventArgs e)
         {
-
+            MessageBox.Show("Help not available yet");
         }
 
         #endregion
