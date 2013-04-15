@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
+using FileLibrary;
 
 namespace AnimalMovement
 {
@@ -115,7 +116,16 @@ namespace AnimalMovement
                 FileNameTextBox.Text = string.Join(";", openFileDialog.FileNames);
                 if (openFileDialog.FileNames.Length == 1)
                 {
-                    var format = 'B'; //TODO get format
+                    char? format;
+                    try
+                    {
+                        format = new FileLoader(openFileDialog.FileNames[0]).Format.Value;
+                    }
+                    catch (Exception)
+                    {
+                        CollarIsRequired = false;
+                        return;
+                    }
                     if (format == 'A' || format == 'D')
                         CollarIsRequired = true;
                 }
