@@ -99,6 +99,32 @@ namespace AnimalMovement
             CollarComboBox.SelectedItem = currentCollar;
         }
 
+        private void UploadPath(string path)
+        {
+            //Fixme - the UI hangs now.
+            FileLoader.LoadPath(path, HandleException,
+                                ProjectRadioButton.Checked ? (Project) ProjectComboBox.SelectedItem : null,
+                                InvestigatorRadioButton.Checked
+                                    ? (ProjectInvestigator) InvestigatorComboBox.SelectedItem
+                                    : null,
+                                (Collar) CollarComboBox.SelectedItem,
+                                StatusActiveRadioButton.Checked ? 'A' : 'I', AllowDuplicatesCheckBox.Checked);
+            //FIXME Load Path with single file does not use HandleException
+            //Fixme - need to get progress update events
+            //Fixme - need to cancel upload
+            //Fixme this should be triggered by an event on FileLoader
+            OnDatabaseChanged();
+        }
+
+        private static void HandleException(Exception ex, string path, Project project, ProjectInvestigator manager)
+        {
+            //FIXME - disctinguish between no load and load but no process errors
+            var msg = String.Format("Unable to load file: {0} for project: {1} or manager: {2} reason: {3}", path,
+                project == null ? "<null>" : project.ProjectId, manager == null ? "<null>" : manager.Login, ex.Message);
+            MessageBox.Show(msg, "File Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+
         private void OnDatabaseChanged()
         {
             EventHandler handle = DatabaseChanged;
@@ -150,7 +176,11 @@ namespace AnimalMovement
 
         private void UploadButton_Click(object sender, EventArgs e)
         {
-            OnDatabaseChanged();
+            if (FolderRadioButton.Checked)
+                UploadPath(FolderNameTextBox.Text);
+            else
+                foreach (var path in FileNameTextBox.Text.Split(';'))
+                    UploadPath(path);
         }
 
         private void FileRadioButton_CheckedChanged(object sender, EventArgs e)

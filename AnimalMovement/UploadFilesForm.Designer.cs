@@ -61,7 +61,9 @@
             // 
             this.openFileDialog.DefaultExt = "csv";
             this.openFileDialog.FileName = "CollarData";
-            this.openFileDialog.Filter = "CSV File|*.csv|DAT File|*.dat|TSV File|*.tsv|Text Files|*.txt|All Files|*.*";
+            this.openFileDialog.Filter = "CSV File|*.csv|Web Download|*.aws|Telonics DataLog|*.tdf|Text Files|*.txt|DAT Fil" +
+    "e|*.dat|TSV File|*.tsv|All Files|*.*";
+            this.openFileDialog.Multiselect = true;
             // 
             // cancelButton
             // 

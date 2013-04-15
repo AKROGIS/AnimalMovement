@@ -282,13 +282,9 @@ namespace AnimalMovement
         private void AddFilesButton_Click(object sender, EventArgs e)
         {
             //The add happens in a new context, so we need to reload this context if changes were made
-            var form = new AddFileForm(ProjectId, CurrentUser);
-            //Adding files in this context is not supported.
-            //var form = new AddFileForm(Database, Project, CurrentUser);
-            if (form.ShowDialog(this) == DialogResult.Cancel)
-                return;
-            OnDatabaseChanged();
-            LoadDataContext();
+            var form = new UploadFilesForm(ProjectId);
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.Show(this);
         }
 
         private void DeleteFilesButton_Click(object sender, EventArgs e)
