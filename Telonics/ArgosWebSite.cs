@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web;
+using System.Xml.Linq;
 
 namespace Telonics
 {
@@ -105,13 +108,25 @@ namespace Telonics
         /// <param name="password">The user's password</param>
         /// <param name="error">Contains any errors encountered; null with no errors</param>
         /// <returns>Returns the results from the web server.  If null check the error output parameter</returns>
-        static public ArgosWebResult GetPlatformList(string username, string password, out string error)
+        static public IEnumerable<Tuple<string,string>> GetPlatformList(string username, string password, out string error)
         {
             error = CheckParameters(username, password, "no selector required", MinDays);
             if (error != null)
                 return null;
             var request = String.Format(ArgosPlatformListSoapRequest, username, password);
-            return GetArgosWebResult(request, out error);
+            var response = GetArgosWebResult(request, out error);
+            var xml = XDocument.Load(new StringReader(response.ToString()));
+            var list = new List<Tuple<string, string>>();
+            foreach (var program in xml.Descendants("program"))
+            {
+                list.AddRange(
+                    program.Descendants("platform")
+                           .Select(
+                               platform =>
+                               new Tuple<string, string>((string) program.Element("programNumber"),
+                                                         (string) platform.Element("platformId"))));
+            }
+            return list;
         }
 
 

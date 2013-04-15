@@ -23,8 +23,12 @@ namespace TelonicsTest
         public static void TestGetPlatformList()
         {
             string error;
-            var result = ArgosWebSite.GetPlatformList("BURCH", "LOUGAROU", out error);
-            Console.WriteLine(error ?? result.ToString());
+            var result = ArgosWebSite.GetPlatformList("xxx", "xxx", out error);
+            if (error != null)
+                Console.WriteLine(error);
+            else
+                foreach (var tuple in result)
+                    Console.WriteLine("Program: {0}, Platform: {1}", tuple.Item1, tuple.Item2);
         }
 
         public static void TestArgosEmailFile()
