@@ -23,7 +23,7 @@ namespace TelonicsTest
         public static void TestGetPlatformList()
         {
             string error;
-            var result = ArgosWebSite.GetPlatformList("JBURCH", "LOUGAROU", out error);
+            var result = ArgosWebSite.GetPlatformList("BURCH", "LOUGAROU", out error);
             Console.WriteLine(error ?? result.ToString());
         }
 
