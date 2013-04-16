@@ -106,7 +106,11 @@ namespace AnimalMovement
 
         private void UploadPath(string path)
         {
-            //Fixme - the UI hangs now.
+            UploadButton.Text = "Working...";
+            UploadButton.Enabled = false;
+            Cursor.Current = Cursors.WaitCursor;
+            Application.DoEvents();
+
             FileLoader.LoadPath(path, HandleException,
                                 ProjectRadioButton.Checked ? (Project) ProjectComboBox.SelectedItem : null,
                                 InvestigatorRadioButton.Checked
