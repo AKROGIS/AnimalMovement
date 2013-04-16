@@ -104,7 +104,7 @@
             this.PeriodTextBox.Location = new System.Drawing.Point(342, 85);
             this.PeriodTextBox.MaxLength = 200;
             this.PeriodTextBox.Name = "PeriodTextBox";
-            this.PeriodTextBox.Size = new System.Drawing.Size(126, 20);
+            this.PeriodTextBox.Size = new System.Drawing.Size(101, 20);
             this.PeriodTextBox.TabIndex = 9;
             this.toolTip1.SetToolTip(this.PeriodTextBox, "Period (in minutes) between fixes.  Only for processing Argos messages from Telon" +
         "ics Gen 3 collars");
@@ -113,7 +113,7 @@
             // 
             this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(251, 62);
+            this.label9.Location = new System.Drawing.Point(226, 62);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(60, 13);
             this.label9.TabIndex = 51;
@@ -122,7 +122,7 @@
             // FrequencyTextBox
             // 
             this.FrequencyTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.FrequencyTextBox.Location = new System.Drawing.Point(315, 59);
+            this.FrequencyTextBox.Location = new System.Drawing.Point(290, 59);
             this.FrequencyTextBox.MaxLength = 32;
             this.FrequencyTextBox.Name = "FrequencyTextBox";
             this.FrequencyTextBox.Size = new System.Drawing.Size(153, 20);
@@ -145,7 +145,7 @@
             this.SerialNumberTextBox.Location = new System.Drawing.Point(90, 59);
             this.SerialNumberTextBox.MaxLength = 100;
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
-            this.SerialNumberTextBox.Size = new System.Drawing.Size(154, 20);
+            this.SerialNumberTextBox.Size = new System.Drawing.Size(129, 20);
             this.SerialNumberTextBox.TabIndex = 7;
             this.toolTip1.SetToolTip(this.SerialNumberTextBox, "For Telonics collars this is the same as the ID (optional)");
             // 
@@ -153,7 +153,7 @@
             // 
             this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(270, 36);
+            this.label7.Location = new System.Drawing.Point(245, 36);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(41, 13);
             this.label7.TabIndex = 47;
@@ -178,7 +178,7 @@
             this.ManagerComboBox.FormattingEnabled = true;
             this.ManagerComboBox.Location = new System.Drawing.Point(90, 6);
             this.ManagerComboBox.Name = "ManagerComboBox";
-            this.ManagerComboBox.Size = new System.Drawing.Size(154, 21);
+            this.ManagerComboBox.Size = new System.Drawing.Size(129, 21);
             this.ManagerComboBox.TabIndex = 3;
             this.toolTip1.SetToolTip(this.ManagerComboBox, "If you assign this collar to another PI you will not be able to edit it.");
             // 
@@ -187,7 +187,7 @@
             this.ModelComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ModelComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ModelComboBox.FormattingEnabled = true;
-            this.ModelComboBox.Location = new System.Drawing.Point(315, 6);
+            this.ModelComboBox.Location = new System.Drawing.Point(290, 6);
             this.ModelComboBox.Name = "ModelComboBox";
             this.ModelComboBox.Size = new System.Drawing.Size(153, 21);
             this.ModelComboBox.TabIndex = 4;
@@ -210,13 +210,13 @@
             this.NotesTextBox.Location = new System.Drawing.Point(90, 111);
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
-            this.NotesTextBox.Size = new System.Drawing.Size(378, 134);
+            this.NotesTextBox.Size = new System.Drawing.Size(353, 188);
             this.NotesTextBox.TabIndex = 10;
             // 
             // OwnerTextBox
             // 
             this.OwnerTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.OwnerTextBox.Location = new System.Drawing.Point(315, 33);
+            this.OwnerTextBox.Location = new System.Drawing.Point(290, 33);
             this.OwnerTextBox.MaxLength = 100;
             this.OwnerTextBox.Name = "OwnerTextBox";
             this.OwnerTextBox.Size = new System.Drawing.Size(153, 20);
@@ -227,7 +227,7 @@
             // 
             this.CollarIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarIdTextBox.Enabled = false;
-            this.CollarIdTextBox.Location = new System.Drawing.Point(319, 7);
+            this.CollarIdTextBox.Location = new System.Drawing.Point(294, 7);
             this.CollarIdTextBox.MaxLength = 50;
             this.CollarIdTextBox.Name = "CollarIdTextBox";
             this.CollarIdTextBox.ReadOnly = true;
@@ -241,7 +241,7 @@
             this.ArgosIdTextBox.Location = new System.Drawing.Point(90, 33);
             this.ArgosIdTextBox.MaxLength = 16;
             this.ArgosIdTextBox.Name = "ArgosIdTextBox";
-            this.ArgosIdTextBox.Size = new System.Drawing.Size(81, 20);
+            this.ArgosIdTextBox.Size = new System.Drawing.Size(56, 20);
             this.ArgosIdTextBox.TabIndex = 5;
             this.toolTip1.SetToolTip(this.ArgosIdTextBox, "For Telonics collars this is the Argos Id");
             // 
@@ -258,7 +258,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(272, 9);
+            this.label4.Location = new System.Drawing.Point(247, 9);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(39, 13);
             this.label4.TabIndex = 36;
@@ -269,7 +269,7 @@
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(267, 10);
+            this.label2.Location = new System.Drawing.Point(242, 10);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(48, 13);
             this.label2.TabIndex = 35;
@@ -289,7 +289,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(90, 251);
+            this.DoneCancelButton.Location = new System.Drawing.Point(90, 305);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 20;
@@ -302,7 +302,7 @@
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
             this.EditSaveButton.Enabled = false;
-            this.EditSaveButton.Location = new System.Drawing.Point(393, 251);
+            this.EditSaveButton.Location = new System.Drawing.Point(368, 305);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 26;
@@ -319,7 +319,7 @@
             this.ManufacturerTextBox.MaxLength = 50;
             this.ManufacturerTextBox.Name = "ManufacturerTextBox";
             this.ManufacturerTextBox.ReadOnly = true;
-            this.ManufacturerTextBox.Size = new System.Drawing.Size(154, 20);
+            this.ManufacturerTextBox.Size = new System.Drawing.Size(129, 20);
             this.ManufacturerTextBox.TabIndex = 1;
             // 
             // DeploymentDataGridView
@@ -345,7 +345,7 @@
             this.DeploymentDataGridView.ReadOnly = true;
             this.DeploymentDataGridView.RowHeadersVisible = false;
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.DeploymentDataGridView.Size = new System.Drawing.Size(462, 172);
+            this.DeploymentDataGridView.Size = new System.Drawing.Size(437, 293);
             this.DeploymentDataGridView.TabIndex = 11;
             this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.AnimalInfoButton_Click);
             // 
@@ -418,7 +418,7 @@
             // DeployRetrieveButton
             // 
             this.DeployRetrieveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.DeployRetrieveButton.Location = new System.Drawing.Point(393, 184);
+            this.DeployRetrieveButton.Location = new System.Drawing.Point(368, 305);
             this.DeployRetrieveButton.Name = "DeployRetrieveButton";
             this.DeployRetrieveButton.Size = new System.Drawing.Size(75, 23);
             this.DeployRetrieveButton.TabIndex = 24;
@@ -429,7 +429,7 @@
             // DeleteDeploymentButton
             // 
             this.DeleteDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.DeleteDeploymentButton.Location = new System.Drawing.Point(313, 184);
+            this.DeleteDeploymentButton.Location = new System.Drawing.Point(288, 305);
             this.DeleteDeploymentButton.Name = "DeleteDeploymentButton";
             this.DeleteDeploymentButton.Size = new System.Drawing.Size(75, 23);
             this.DeleteDeploymentButton.TabIndex = 22;
@@ -449,7 +449,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 33);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(484, 308);
+            this.tabControl1.Size = new System.Drawing.Size(459, 362);
             this.tabControl1.TabIndex = 54;
             // 
             // tabPage1
@@ -478,7 +478,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(476, 282);
+            this.tabPage1.Size = new System.Drawing.Size(451, 336);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -488,7 +488,7 @@
             this.HasGpsCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.HasGpsCheckBox.AutoSize = true;
             this.HasGpsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.HasGpsCheckBox.Location = new System.Drawing.Point(177, 35);
+            this.HasGpsCheckBox.Location = new System.Drawing.Point(152, 35);
             this.HasGpsCheckBox.Name = "HasGpsCheckBox";
             this.HasGpsCheckBox.Size = new System.Drawing.Size(67, 17);
             this.HasGpsCheckBox.TabIndex = 83;
@@ -517,7 +517,7 @@
             this.DisposalDateTimePicker.Location = new System.Drawing.Point(90, 85);
             this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
             this.DisposalDateTimePicker.ShowCheckBox = true;
-            this.DisposalDateTimePicker.Size = new System.Drawing.Size(154, 20);
+            this.DisposalDateTimePicker.Size = new System.Drawing.Size(129, 20);
             this.DisposalDateTimePicker.TabIndex = 81;
             this.toolTip1.SetToolTip(this.DisposalDateTimePicker, "The date the collar was lost, destroyed, or retired");
             this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
@@ -531,7 +531,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(476, 282);
+            this.tabPage2.Size = new System.Drawing.Size(451, 336);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Animals";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -539,7 +539,7 @@
             // AnimalInfoButton
             // 
             this.AnimalInfoButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.AnimalInfoButton.Location = new System.Drawing.Point(232, 184);
+            this.AnimalInfoButton.Location = new System.Drawing.Point(207, 305);
             this.AnimalInfoButton.Name = "AnimalInfoButton";
             this.AnimalInfoButton.Size = new System.Drawing.Size(75, 23);
             this.AnimalInfoButton.TabIndex = 25;
@@ -556,7 +556,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(476, 282);
+            this.tabPage3.Size = new System.Drawing.Size(451, 336);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Fixes";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -564,7 +564,7 @@
             // UnhideFixButton
             // 
             this.UnhideFixButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.UnhideFixButton.Location = new System.Drawing.Point(393, 184);
+            this.UnhideFixButton.Location = new System.Drawing.Point(368, 305);
             this.UnhideFixButton.Name = "UnhideFixButton";
             this.UnhideFixButton.Size = new System.Drawing.Size(75, 23);
             this.UnhideFixButton.TabIndex = 3;
@@ -589,7 +589,7 @@
             this.FixConflictsDataGridView.ReadOnly = true;
             this.FixConflictsDataGridView.RowHeadersVisible = false;
             this.FixConflictsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.FixConflictsDataGridView.Size = new System.Drawing.Size(462, 127);
+            this.FixConflictsDataGridView.Size = new System.Drawing.Size(437, 248);
             this.FixConflictsDataGridView.TabIndex = 2;
             this.FixConflictsDataGridView.SelectionChanged += new System.EventHandler(this.FixConflictsDataGridView_SelectionChanged);
             // 
@@ -619,7 +619,7 @@
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(476, 282);
+            this.tabPage4.Size = new System.Drawing.Size(451, 336);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Files";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -627,7 +627,7 @@
             // FileInfoButton
             // 
             this.FileInfoButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.FileInfoButton.Location = new System.Drawing.Point(393, 184);
+            this.FileInfoButton.Location = new System.Drawing.Point(368, 305);
             this.FileInfoButton.Name = "FileInfoButton";
             this.FileInfoButton.Size = new System.Drawing.Size(75, 23);
             this.FileInfoButton.TabIndex = 26;
@@ -652,7 +652,7 @@
             this.FilesDataGridView.ReadOnly = true;
             this.FilesDataGridView.RowHeadersVisible = false;
             this.FilesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.FilesDataGridView.Size = new System.Drawing.Size(462, 172);
+            this.FilesDataGridView.Size = new System.Drawing.Size(437, 293);
             this.FilesDataGridView.TabIndex = 0;
             this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);
             // 
@@ -660,7 +660,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 341);
+            this.ClientSize = new System.Drawing.Size(459, 395);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.ManufacturerTextBox);
             this.Controls.Add(this.label3);
