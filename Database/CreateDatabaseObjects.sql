@@ -5400,6 +5400,7 @@ GO
 CREATE PROCEDURE [dbo].[CollarFile_Update] 
 	@FileId INT, 
 	@FileName NVARCHAR(255) = NULL,
+	@Status CHAR(1),
 	@CollarManufacturer NVARCHAR(255),
 	@CollarId NVARCHAR(255),
 	@ProjectId NVARCHAR(255),
@@ -5453,7 +5454,7 @@ BEGIN
     
     -- Do the update
 	UPDATE [dbo].[CollarFiles]
-	   SET [FileName] = @FileName, [CollarManufacturer] = @CollarManufacturer,
+	   SET [FileName] = @FileName, [Status] = @Status, [CollarManufacturer] = @CollarManufacturer,
 	       [CollarId] = @CollarId, [ProjectId] = @ProjectId, [Owner] = @Owner
 	 WHERE [FileId] = @FileId
 

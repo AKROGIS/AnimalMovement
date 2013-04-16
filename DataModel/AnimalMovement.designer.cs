@@ -470,7 +470,7 @@ namespace DataModel
 		private void UpdateCollarFile(CollarFile obj)
 		{
 			CollarFile original = ((CollarFile)(CollarFiles.GetOriginalEntityState(obj)));
-			this.CollarFile_Update(((System.Nullable<int>)(original.FileId)), obj.FileName, obj.CollarManufacturer, obj.CollarId, obj.ProjectId, obj.Owner);
+			this.CollarFile_Update(((System.Nullable<int>)(original.FileId)), obj.FileName, ((System.Nullable<char>)(obj.Status)), obj.CollarManufacturer, obj.CollarId, obj.ProjectId, obj.Owner);
 		}
 		
 		private void DeleteCollarFile(CollarFile obj)
@@ -675,13 +675,6 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Update")]
-		public int CollarFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, fileName, collarManufacturer, collarId, projectId, owner);
-			return ((int)(result.ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Delete")]
 		public int CollarFile_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
 		{
@@ -761,6 +754,13 @@ namespace DataModel
 			uploadDate = ((System.Nullable<System.DateTime>)(result.GetParameterValue(12)));
 			userName = ((string)(result.GetParameterValue(13)));
 			sha1Hash = ((System.Data.Linq.Binary)(result.GetParameterValue(14)));
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarFile_Update")]
+		public int CollarFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, fileName, status, collarManufacturer, collarId, projectId, owner);
 			return ((int)(result.ReturnValue));
 		}
 	}

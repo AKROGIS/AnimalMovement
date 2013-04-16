@@ -515,6 +515,7 @@
     <UpdateFunction FunctionId="FunctionId32">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
       <Argument Parameter="fileName" Member="FileName" />
+      <Argument Parameter="status" Member="Status" />
       <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
       <Argument Parameter="collarId" Member="CollarId" />
       <Argument Parameter="projectId" Member="ProjectId" />
@@ -731,15 +732,6 @@
     <Parameter Name="Active" Parameter="active" Type="System.Boolean" DbType="Bit" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId32" Name="dbo.CollarFile_Update" Method="CollarFile_Update">
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
-    <Return Type="System.Int32" />
-  </Function>
   <Function Id="FunctionId33" Name="dbo.CollarFile_Delete" Method="CollarFile_Delete">
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
@@ -828,6 +820,16 @@
     <Parameter Name="UploadDate" Parameter="uploadDate" Type="System.DateTime" DbType="DateTime2" Direction="InOut" />
     <Parameter Name="UserName" Parameter="userName" Type="System.String" DbType="NVarChar(128)" Direction="InOut" />
     <Parameter Name="Sha1Hash" Parameter="sha1Hash" Type="System.Data.Linq.Binary" DbType="VarBinary(8000)" Direction="InOut" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId32" Name="dbo.CollarFile_Update" Method="CollarFile_Update">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Status" Parameter="status" Type="System.Char" DbType="Char(1)" />
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
     <Return Type="System.Int32" />
   </Function>
 </Database>
