@@ -134,7 +134,7 @@ namespace FileLibrary
             {
                 try
                 {
-                    LoadFilePath(path, project, manager, collar, status, allowDups);
+                    LoadAndProcessFilePath(path, project, manager, collar, status, allowDups);
                 }
                 catch (Exception ex)
                 {
@@ -150,7 +150,7 @@ namespace FileLibrary
                     foreach (var file in Directory.EnumerateFiles(path))
                         try
                         {
-                            LoadFilePath(file, project, manager, collar, status, allowDups);
+                            LoadAndProcessFilePath(file, project, manager, collar, status, allowDups);
                         }
                         catch (Exception ex)
                         {
@@ -328,7 +328,7 @@ namespace FileLibrary
         #region Private methods
 
         // This is a template for client side usage
-        private static void LoadFilePath(string filePath, Project project, ProjectInvestigator owner, Collar collar,
+        private static void LoadAndProcessFilePath(string filePath, Project project, ProjectInvestigator owner, Collar collar,
                                          char status, bool allowDups)
         {
             var fileLoader = new FileLoader(filePath)

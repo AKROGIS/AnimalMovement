@@ -76,6 +76,7 @@ namespace AnimalMovement
 
         private void EnableUpload()
         {
+            UploadButton.Text = "Upload";
             var haveDataSource = (FileRadioButton.Checked && !String.IsNullOrEmpty(FileNameTextBox.Text)) ||
                                  (FolderRadioButton.Checked && !String.IsNullOrEmpty(FolderNameTextBox.Text));
             var haveAssociation = (ProjectRadioButton.Checked && ProjectComboBox.SelectedItem != null) ||
@@ -111,6 +112,10 @@ namespace AnimalMovement
             Cursor.Current = Cursors.WaitCursor;
             Application.DoEvents();
 
+            //FIXME - Revise Fileloader to use events we can subscribe to - this will require using instances instead of a static method
+            //FIXME - Revise Fileloader to have hooks that can allow it to be canceled.
+            //FIXME - Run FileLoader on a background thread
+            //FIXME - Display a progress bar updated by events from the FileLoader
             FileLoader.LoadPath(path, HandleException,
                                 ProjectRadioButton.Checked ? (Project) ProjectComboBox.SelectedItem : null,
                                 InvestigatorRadioButton.Checked
@@ -118,17 +123,19 @@ namespace AnimalMovement
                                     : null,
                                 (Collar) CollarComboBox.SelectedItem,
                                 StatusActiveRadioButton.Checked ? 'A' : 'I', AllowDuplicatesCheckBox.Checked);
-            //Fixme - need to get progress update events
-            //Fixme - need to cancel upload
-            //Fixme this should be triggered by an event on FileLoader
+            
+            //FIXME - OnDatabaseChanged() should be called in response to a FileLoader FinishedLoading event
+            //for now, we will assume that at least one file loaded and we need to update the caller
             OnDatabaseChanged();
-            //fixme - only close on success.
-            Close();
+
+            //FIXME - This should not be done here, but in some FileLoader Done event
+            Cursor.Current = Cursors.Default;
+            UploadButton.Text = "Close";
         }
 
         private static void HandleException(Exception ex, string path, Project project, ProjectInvestigator manager)
         {
-            //FIXME - disctinguish between no load and load but no process errors
+            //FIXME - disctinguish between loading and processing (loaded fine) errors
             var msg = String.Format("Unable to load file: {0} for project: {1} or manager: {2} reason: {3}", path,
                 project == null ? "<null>" : project.ProjectId, manager == null ? "<null>" : manager.Login, ex.Message);
             MessageBox.Show(msg, "File Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -173,6 +180,8 @@ namespace AnimalMovement
 
         private void UploadButton_Click(object sender, EventArgs e)
         {
+            if(UploadButton.Text == "Close")
+                Close();
             if (FolderRadioButton.Checked)
                 UploadPath(FolderNameTextBox.Text);
             else
