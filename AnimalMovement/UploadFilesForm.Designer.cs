@@ -219,6 +219,7 @@
             this.InvestigatorRadioButton.TabIndex = 3;
             this.InvestigatorRadioButton.Text = "Investigator:";
             this.InvestigatorRadioButton.UseVisualStyleBackColor = true;
+            this.InvestigatorRadioButton.CheckedChanged += new System.EventHandler(this.ProjectRadioButton_CheckedChanged);
             // 
             // ProjectRadioButton
             // 
@@ -289,6 +290,7 @@
             this.FolderRadioButton.TabIndex = 3;
             this.FolderRadioButton.Text = "Folder:";
             this.FolderRadioButton.UseVisualStyleBackColor = true;
+            this.FolderRadioButton.CheckedChanged += new System.EventHandler(this.FileRadioButton_CheckedChanged);
             // 
             // FileNameTextBox
             // 

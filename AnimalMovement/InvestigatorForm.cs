@@ -373,11 +373,10 @@ namespace AnimalMovement
 
         private void AddCollarFileButton_Click(object sender, EventArgs e)
         {
-            var form = new AddFileForm(CurrentUser);
-            //Adding projects in this context is not supported.
-            //var form = newAddProjectForm(Database, CurrentUser);
-            if (form.ShowDialog(this) != DialogResult.Cancel)
-                LoadCollarFileList();
+            //The add happens in a new context, so we need to reload this context if changes were made
+            var form = new UploadFilesForm(null, Investigator);
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.Show(this);
         }
 
         private void DeleteCollarFilesButton_Click(object sender, EventArgs e)

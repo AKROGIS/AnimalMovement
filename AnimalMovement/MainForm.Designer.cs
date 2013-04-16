@@ -33,7 +33,6 @@
             this.ProjectsButton = new System.Windows.Forms.Button();
             this.GenerateMapButton = new System.Windows.Forms.Button();
             this.MyProfileButton = new System.Windows.Forms.Button();
-            this.BulkUploadButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // UploadButton
@@ -53,7 +52,7 @@
             // 
             this.QuitButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.QuitButton.Location = new System.Drawing.Point(12, 159);
+            this.QuitButton.Location = new System.Drawing.Point(12, 133);
             this.QuitButton.Name = "QuitButton";
             this.QuitButton.Size = new System.Drawing.Size(205, 23);
             this.QuitButton.TabIndex = 5;
@@ -79,7 +78,7 @@
             this.GenerateMapButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GenerateMapButton.Enabled = false;
-            this.GenerateMapButton.Location = new System.Drawing.Point(12, 128);
+            this.GenerateMapButton.Location = new System.Drawing.Point(12, 99);
             this.GenerateMapButton.Name = "GenerateMapButton";
             this.GenerateMapButton.Size = new System.Drawing.Size(205, 23);
             this.GenerateMapButton.TabIndex = 4;
@@ -99,25 +98,11 @@
             this.MyProfileButton.UseVisualStyleBackColor = true;
             this.MyProfileButton.Click += new System.EventHandler(this.MyProfileButton_Click);
             // 
-            // BulkUploadButton
-            // 
-            this.BulkUploadButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.BulkUploadButton.Enabled = false;
-            this.BulkUploadButton.Location = new System.Drawing.Point(14, 99);
-            this.BulkUploadButton.Name = "BulkUploadButton";
-            this.BulkUploadButton.Size = new System.Drawing.Size(205, 23);
-            this.BulkUploadButton.TabIndex = 6;
-            this.BulkUploadButton.Text = "Bulk Upload Collar Data";
-            this.BulkUploadButton.UseVisualStyleBackColor = true;
-            this.BulkUploadButton.Click += new System.EventHandler(this.BulkUploadButton_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(231, 194);
-            this.Controls.Add(this.BulkUploadButton);
+            this.ClientSize = new System.Drawing.Size(231, 168);
             this.Controls.Add(this.MyProfileButton);
             this.Controls.Add(this.GenerateMapButton);
             this.Controls.Add(this.ProjectsButton);
@@ -138,6 +123,5 @@
         private System.Windows.Forms.Button ProjectsButton;
         private System.Windows.Forms.Button GenerateMapButton;
         private System.Windows.Forms.Button MyProfileButton;
-        private System.Windows.Forms.Button BulkUploadButton;
     }
 }

@@ -10,16 +10,17 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
-        private string ProjectId { get; set; }
+        //private string ProjectId { get; set; }
         private Project Project { get; set; }
         private ProjectInvestigator Investigator { get; set; }
         private bool CollarIsRequired { get; set; }
         internal event EventHandler DatabaseChanged;
 
 
-        internal UploadFilesForm(string projectId = null)
+        internal UploadFilesForm(Project project = null, ProjectInvestigator pi = null)
         {
-            ProjectId = projectId;
+            Project = project;
+            Investigator = pi;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             SetupForm();
         }
@@ -31,7 +32,8 @@ namespace AnimalMovement
             LoadDataContext();
             EnableUpload();
             FileRadioButton.Checked = true;
-            ProjectRadioButton.Checked = true;
+            ProjectRadioButton.Checked = Project != null;
+            InvestigatorRadioButton.Checked = !ProjectRadioButton.Checked;
         }
 
         private void LoadDataContext()
@@ -44,28 +46,31 @@ namespace AnimalMovement
 
         private void LoadProjectList()
         {
-            var query = from p in Database.Projects
-                        where p.ProjectInvestigator == CurrentUser ||
-                              p.ProjectEditors.Any(u => u.Editor == CurrentUser)
-                        select p;
-            var myProjects = query.ToList();
-            ProjectComboBox.DataSource = myProjects;
+            //The Project I was given does not have object equality with projects in this data context
+            var projects = (from p in Database.Projects
+                            where p.ProjectInvestigator == CurrentUser ||
+                                  p.ProjectEditors.Any(u => u.Editor == CurrentUser)
+                            select p).ToList();
+            var selectedProject =
+                projects.FirstOrDefault(
+                    p =>
+                    Project == null ? p.ProjectId == Settings.GetDefaultProject() : p.ProjectId == Project.ProjectId);
 
-            if (ProjectId == null)
-                ProjectId = Settings.GetDefaultProject();
-            Project = ProjectId == null
-                    ? myProjects.FirstOrDefault()
-                    : Project = myProjects.FirstOrDefault(p => p.ProjectId == ProjectId);
+            ProjectComboBox.DataSource = projects;
+            ProjectComboBox.SelectedItem = selectedProject;
             ProjectComboBox.DisplayMember = "ProjectName";
-            ProjectComboBox.SelectedItem = Project;
         }
 
         private void LoadInvestigatorList()
         {
-            //var investigators = Database.ProjectInvestigators.ToList();
-            InvestigatorComboBox.DataSource = Database.ProjectInvestigators;
+            //The Investigator I was given does not have object equality with investigators in this data context
+            var investigators = Database.ProjectInvestigators.ToList();
+            var selectedInvestigator =
+                investigators.FirstOrDefault(
+                    i => Investigator == null ? i.Login == CurrentUser : i.Login == Investigator.Login);
+            InvestigatorComboBox.DataSource = investigators;
+            InvestigatorComboBox.SelectedItem = selectedInvestigator;
             InvestigatorComboBox.DisplayMember = "Name";
-            InvestigatorComboBox.SelectedItem = Database.ProjectInvestigators.FirstOrDefault(i => i.Login == CurrentUser);
         }
 
 
@@ -191,18 +196,18 @@ namespace AnimalMovement
 
         private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Project = ProjectComboBox.SelectedItem as Project;
-            if (Project != null)
-                Settings.SetDefaultProject(Project.ProjectId);
+            var project = ProjectComboBox.SelectedItem as Project;
+            if (project != null)
+                Settings.SetDefaultProject(project.ProjectId);
             EnableUpload();
             RefreshCollarComboBox();
         }
 
         private void InvestigatorComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Investigator = InvestigatorComboBox.SelectedItem as ProjectInvestigator;
-            if (Investigator != null)
-                Settings.SetDefaultProject(Project.ProjectId);
+            //Investigator = InvestigatorComboBox.SelectedItem as ProjectInvestigator;
+            //if (Investigator != null)
+            //    Settings.SetDefaultProject(Project.ProjectId);
             EnableUpload();
             RefreshCollarComboBox();
         }
