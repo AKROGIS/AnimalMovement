@@ -15,7 +15,6 @@ using System.Runtime.InteropServices;
 //FIXME - DATABASE - Hide the ArgosPlatforms.Password from all but the Manager, and the Download API
 //FIXME - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
 //FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
-//TODO - DATABASE - Replace the hardcoded sql_proxy name with a system setting
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Add more unit testing.
@@ -32,9 +31,6 @@ using System.Runtime.InteropServices;
 //TODO - Document the optimal "getting started" process, and make sure the code supports it
 //TODO - Build UI to add/edit/delete Argos Projects and Platforms
 //TODO - Add Icon or collar coding to Collar List to signify (VHF only, PTT only, Storeonboard GPS, GPS+Argos)
-//TODO - Simplify display of files.  honor heirachy, add dummy parents for email and AWS files
-//TODO - Provide UI to upload multiple emails (folder?) in one operation
-//TODO - Provide tool to upload and process Gen3 (*.tfb) and Gen4 (*.tdf) store on board source data
 //TODO - Provide some global QAQC tools - I.e. show all collars with conflict in the last x days
 //TODO - Provide some global QAQC tools - I.e. show all collars with multiple parameter files
 //TODO - Provide some global QAQC tools - I.e. show files with overlapping fix dates
