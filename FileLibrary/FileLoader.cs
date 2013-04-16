@@ -132,7 +132,16 @@ namespace FileLibrary
 
             if (File.Exists(path))
             {
-                LoadFilePath(path, project, manager, collar, status, allowDups);
+                try
+                {
+                    LoadFilePath(path, project, manager, collar, status, allowDups);
+                }
+                catch (Exception ex)
+                {
+                    if (handler == null)
+                        throw;
+                    handler(ex, path, project, manager);
+                }
             }
             else
             {

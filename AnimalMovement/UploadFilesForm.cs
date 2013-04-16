@@ -114,7 +114,6 @@ namespace AnimalMovement
                                     : null,
                                 (Collar) CollarComboBox.SelectedItem,
                                 StatusActiveRadioButton.Checked ? 'A' : 'I', AllowDuplicatesCheckBox.Checked);
-            //FIXME Load Path with single file does not use HandleException
             //Fixme - need to get progress update events
             //Fixme - need to cancel upload
             //Fixme this should be triggered by an event on FileLoader
