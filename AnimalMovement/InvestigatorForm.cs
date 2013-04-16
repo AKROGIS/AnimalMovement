@@ -187,6 +187,7 @@ namespace AnimalMovement
             AddParameterFileButton.Enabled = !editModeEnabled && IsMyProfile;
             //Set the Delete/Info buttons based on what is selected
             CollarsListBox_SelectedIndexChanged(null, null);
+            CollarFilesListBox_SelectedIndexChanged(null, null);
             ProjectsListBox_SelectedIndexChanged(null, null);
             ParameterFilesListBox_SelectedIndexChanged(null, null);
         }
