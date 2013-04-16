@@ -104,7 +104,9 @@ namespace AnimalMovement
             Cursor.Current = Cursors.WaitCursor;
             try
             {
-                File.Status = (File.Status == 'A' ? 'I' : 'A');
+                File.LookupFileStatus = (File.Status == 'A'
+                                             ? Database.LookupFileStatus.First(s => s.Code == 'I')
+                                             : Database.LookupFileStatus.First(s => s.Code == 'A'));
                 Database.SubmitChanges();
             }
             catch (Exception ex)

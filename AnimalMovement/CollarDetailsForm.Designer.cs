@@ -74,6 +74,7 @@
             this.label11 = new System.Windows.Forms.Label();
             this.SummaryLabel = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.ChangeStatusButton = new System.Windows.Forms.Button();
             this.FileInfoButton = new System.Windows.Forms.Button();
             this.FilesDataGridView = new System.Windows.Forms.DataGridView();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
@@ -614,6 +615,7 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.ChangeStatusButton);
             this.tabPage4.Controls.Add(this.FileInfoButton);
             this.tabPage4.Controls.Add(this.FilesDataGridView);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
@@ -623,6 +625,17 @@
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Files";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // ChangeStatusButton
+            // 
+            this.ChangeStatusButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.ChangeStatusButton.Location = new System.Drawing.Point(287, 305);
+            this.ChangeStatusButton.Name = "ChangeStatusButton";
+            this.ChangeStatusButton.Size = new System.Drawing.Size(75, 23);
+            this.ChangeStatusButton.TabIndex = 27;
+            this.ChangeStatusButton.Text = "Deactivate";
+            this.ChangeStatusButton.UseVisualStyleBackColor = true;
+            this.ChangeStatusButton.Click += new System.EventHandler(this.ChangeStatusButton_Click);
             // 
             // FileInfoButton
             // 
@@ -647,13 +660,13 @@
             this.FilesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.FilesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.FilesDataGridView.Location = new System.Drawing.Point(6, 6);
-            this.FilesDataGridView.MultiSelect = false;
             this.FilesDataGridView.Name = "FilesDataGridView";
             this.FilesDataGridView.ReadOnly = true;
             this.FilesDataGridView.RowHeadersVisible = false;
             this.FilesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.FilesDataGridView.Size = new System.Drawing.Size(437, 293);
             this.FilesDataGridView.TabIndex = 0;
+            this.FilesDataGridView.SelectionChanged += new System.EventHandler(this.FilesDataGridView_SelectionChanged);
             this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);
             // 
             // CollarDetailsForm
@@ -735,5 +748,6 @@
         private System.Windows.Forms.DateTimePicker DisposalDateTimePicker;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.CheckBox HasGpsCheckBox;
+        private System.Windows.Forms.Button ChangeStatusButton;
     }
 }

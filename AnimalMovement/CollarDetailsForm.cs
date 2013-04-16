@@ -53,6 +53,7 @@ namespace AnimalMovement
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
+            Database.Log = Console.Out;
             DatabaseFunctions = new AnimalMovementFunctions();
             DatabaseViews = new AnimalMovementViews();
             Collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == ManufacturerId && c.CollarId == CollarId);
@@ -371,6 +372,55 @@ namespace AnimalMovement
                 DisposalDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
                 DisposalDateTimePicker.Value = Collar.DisposalDate.Value.ToLocalTime();
             }
+        }
+
+        private void ChangeStatusButton_Click(object sender, EventArgs e)
+        {
+            //If the button is labeled/enabled correctly, then the user wants to change the status of all the selected files
+            var newStatus = Database.LookupFileStatus.First(s => s.Code == 'A');
+            if (ChangeStatusButton.Text == "Deactivate")
+                newStatus = Database.LookupFileStatus.First(s => s.Code == 'I');
+
+            var fileIds = FilesDataGridView.SelectedRows.Cast<DataGridViewRow>()
+                                           .Select(row => (int) row.Cells["FileId"].Value).ToList();
+            var files = Database.CollarFiles.Where(f => fileIds.Contains(f.FileId));
+            foreach (var collarFile in files)
+                collarFile.LookupFileStatus = newStatus;
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (Exception ex)
+            {
+                string msg = "Unable to change the status.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Cursor.Current = Cursors.Default;
+                return;
+            }
+            Cursor.Current = Cursors.Default;
+            OnDatabaseChanged();
+            LoadDataContext();
+        }
+
+
+        private void FilesDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            FileInfoButton.Enabled = FilesDataGridView.SelectedRows.Count == 1;
+            if (FilesDataGridView.SelectedRows.Count < 1)
+            {
+                ChangeStatusButton.Enabled = false;
+                return;
+            }
+            ChangeStatusButton.Enabled = true;
+            ChangeStatusButton.Text = "Deactivate";
+            var firstRowStatus = (string) FilesDataGridView.SelectedRows[0].Cells["Status"].Value;
+            if (firstRowStatus != "Active")
+                ChangeStatusButton.Text = "Activate";
+            if (FilesDataGridView.SelectedRows.Cast<DataGridViewRow>()
+                                 .Any(row => (string) row.Cells["Status"].Value != firstRowStatus))
+                ChangeStatusButton.Enabled = false;
         }
 
     }
