@@ -46,6 +46,7 @@ namespace FileLibrary
                     };
                 database.CollarFiles.InsertOnSubmit(file);
             }
+            //Linq to SQL does not return the PK (timestamp) of the new ArgosDownload object, so don't use it in this data context
             var log = new ArgosDownload
                 {
                     ProgramId = program.ProgramId,
@@ -88,6 +89,7 @@ namespace FileLibrary
                     };
                 database.CollarFiles.InsertOnSubmit(file);
             }
+            //Linq to SQL does not return the PK (timestamp) of the new ArgosDownload object, so don't use it in this data context
             var log = new ArgosDownload
                 {
                     PlatformId = platform.PlatformId,
