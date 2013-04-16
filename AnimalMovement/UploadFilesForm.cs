@@ -140,23 +140,8 @@ namespace AnimalMovement
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 FileNameTextBox.Text = string.Join(";", openFileDialog.FileNames);
-                if (openFileDialog.FileNames.Length == 1)
-                {
-                    char? format;
-                    try
-                    {
-                        format = new FileLoader(openFileDialog.FileNames[0]).Format.Value;
-                    }
-                    catch (Exception)
-                    {
-                        CollarIsRequired = false;
-                        return;
-                    }
-                    if (format == 'A' || format == 'D')
-                        CollarIsRequired = true;
-                }
-                else
-                    CollarIsRequired = false;
+                CollarIsRequired = openFileDialog.FileNames.Length == 1 &&
+                                   new FileLoader(FileNameTextBox.Text).CollarIsRequired;
             }
         }
 

@@ -193,10 +193,12 @@ namespace FileLibrary
         /// Used by the FileProcessor to link a results file with it source data
         /// </summary>
         internal int? ParentFileId { get; set; }
+
         /// <summary>
         /// Used by the FileProcessor to link a results file with Argos deployment used
         /// </summary>
         internal int? ArgosDeploymentId { get; set; }
+
         /// <summary>
         /// Used by the FileProcessor to link a results file with the Collar parameters used
         /// </summary>
@@ -208,19 +210,41 @@ namespace FileLibrary
         public AnimalMovementDataContext Database { get; private set; }
 
         /// <summary>
-        /// 
+        /// The path to the data of this collar file
         /// </summary>
         public string FilePath { get; private set; }
 
         /// <summary>
-        /// The path to the data of this collar file
+        /// The binary contents of the collar file
         /// </summary>
         public Byte[] Contents { get; private set; }
 
         /// <summary>
-        /// The binary contents of the collar file
+        /// The Format that the file thinks it is.
+        /// No exceptions are thrown.  Null is returned if unknown or undeterminable.
         /// </summary>
-        public Lazy<char?> Format { get; private set; }
+        public LookupCollarFileFormat Format
+        {
+            get { return LazyFormat.Value; }
+        }
+
+        /// <summary>
+        /// The collar that the file thinks it belongs to.
+        /// The file's collar must be in the database or null is returned.
+        /// No exceptions are thrown.  Null is returned instead.
+        /// </summary>
+        public Collar FileCollar {
+            get { return LazyFileCollar.Value; }
+        }
+
+        /// <summary>
+        /// True if the client is required to provide a collar specification for this file.
+        /// No exceptions are thrown. If Format is null (unknown or undeterminable), then return false.
+        /// </summary>
+        public bool CollarIsRequired
+        {
+            get { return FileFormatRequiresCollar && Collar == null && FileCollar == null; }
+        }
 
         #endregion
 
@@ -248,7 +272,8 @@ namespace FileLibrary
             Database = new AnimalMovementDataContext();
             FilePath = filePath;
             Status = 'A';
-            Format = new Lazy<char?>(() => GetFormat(Contents));
+            LazyFormat = new Lazy<LookupCollarFileFormat>(GetFormat);
+            LazyFileCollar = new Lazy<Collar>(GetFileCollar);
         }
 
         #endregion
@@ -262,9 +287,11 @@ namespace FileLibrary
         public CollarFile Load()
         {
             Validate();
+            if (FileFormatRequiresCollar && Collar == null)
+                Collar = FileCollar;
             // The entity objects I got from the callers (i.e. Project, Owner, Collar)
-            // came from a foreign DataContext, so they cannot be used to create a new
-            // entity in this datacontext.
+            // came from a foreign DataContext, so they cannot be used as associated
+            // entities with a new entity in this datacontext.
             var file = new CollarFile
             {
                 ProjectId = Project == null ? null : Project.ProjectId,
@@ -337,18 +364,15 @@ namespace FileLibrary
             }
 
             //Unknown format
-            if (Format.Value == null)
+            if (Format == null)
                 throw new InvalidOperationException("The contents are not in a recognizable format.");
 
-            //Try and guess the collar if one is required and not provided 
+            //Are we missing a collar when one is required
             if (CollarIsRequired)
             {
-                if (Collar == null)
-                    Collar = GetCollarFromFile();
-                if (Collar == null)
-                    throw new InvalidOperationException(
-                            "The format requires a valid collar but none was provided " +
-                            "nor could it be determined from the filename or contents.");
+                throw new InvalidOperationException(
+                    "The format requires a valid collar but none was provided " +
+                    "nor could it be determined from the filename or contents.");
             }
         }
 
@@ -362,45 +386,51 @@ namespace FileLibrary
 
         #region Collar from file
 
-        private Collar GetCollarFromFile()
+        private bool FileFormatRequiresCollar
         {
-            if (!Format.Value.HasValue)
+            get { return Format != null && Format.ArgosData == 'N'; }
+        }
+
+        private Lazy<Collar> LazyFileCollar { get; set; }
+
+        private Collar GetFileCollar()
+        {
+            if (Format == null)
                 return null;
 
-            string argosId = null;
-            if (Format.Value.Value == 'B')
-                argosId = GetArgosFromFormatB();
-            if (Format.Value.Value == 'D')
-                argosId = GetArgosFromFormatD();
-
-            //If we have an ArgosId and it maps to one and only one collar, then use it.
-            if (argosId != null)
+            try
             {
-                try
-                {
-                    return Database.ArgosDeployments.Single(d => d.PlatformId == argosId).Collar;
-                }
-                catch (Exception)
-                {
-                   return null;
-                }
-            }
+                string argosId = null;
+                if (Format.Code == 'B')
+                    argosId = GetArgosFromFormatB();
+                if (Format.Code == 'D')
+                    argosId = GetArgosFromFormatD();
 
-            string ctn = null;
-            if (Format.Value.Value == 'C')
-                ctn = GetCtnFromFormatC();
-            if (Format.Value.Value == 'H')
-                ctn = GetCtnFromFormatH();
-            if (ctn == null)
+                //If we have an ArgosId and it maps to one and only one collar, then use it.
+                if (argosId != null)
+                    return Database.ArgosDeployments.Single(d => d.PlatformId == argosId).Collar;
+
+                string ctn = null;
+                if (Format.Code == 'C')
+                    ctn = GetCtnFromFormatC();
+                if (Format.Code == 'H')
+                    ctn = GetCtnFromFormatH();
+                if (ctn == null)
+                    return null;
+                var collar =
+                    Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+                if (collar != null)
+                    return collar;
+                //Try without the Alpha suffix
+                if (ctn.Length != 7 && !Char.IsUpper(ctn[6]))
+                    return null;
+                ctn = ctn.Substring(0, 6);
+                return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+            }
+            catch (Exception)
+            {
                 return null;
-            var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
-            if (collar != null)
-                return collar;
-            //Try without the Alpha suffix
-            if (ctn.Length != 7 && !Char.IsUpper(ctn[6]))
-                return null;
-            ctn = ctn.Substring(0, 6);
-            return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+            }
         }
 
 
@@ -509,25 +539,21 @@ namespace FileLibrary
                     yield return reader.ReadLine();
         }
 
-
-        private bool CollarIsRequired
-        {
-            get { return Database.LookupCollarFileFormats.Any(f => f.Code == Format.Value && f.ArgosData == 'N'); }
-        }
-
         #endregion
 
         #region File format
 
+        private Lazy<LookupCollarFileFormat> LazyFormat { get; set; }
+
         //This should be kept in sync with CollarInfo.cs in the SqlServer_Files project
-        private static char? GetFormat(Byte[] data)
+        private LookupCollarFileFormat GetFormat()
         {
             try
             {
-                //get the first line of the file
-                var fileHeader = ReadHeader(data, Encoding.UTF8, 500).Trim().Normalize();
-                //database for header is only 450 char
                 char code = '?';
+                //get the first line of the file
+                var fileHeader = ReadHeader(Contents, Encoding.UTF8, 500).Trim().Normalize();
+                //database for header is only 450 char
                 var db = new SettingsDataContext();
                 foreach (var format in db.LookupCollarFileHeaders)
                 {
@@ -540,10 +566,10 @@ namespace FileLibrary
                         break;
                     }
                 }
-                if (code == '?' && (new ArgosEmailFile(data)).GetPrograms().Any())
+                if (code == '?' && (new ArgosEmailFile(Contents)).GetPrograms().Any())
                     // We already checked for ArgosAwsFile with the header
                     code = 'E';
-                return code == '?' ? (char?)null : code;
+                return Database.LookupCollarFileFormats.FirstOrDefault(f => f.Code == code);
             }
             catch (Exception)
             {
