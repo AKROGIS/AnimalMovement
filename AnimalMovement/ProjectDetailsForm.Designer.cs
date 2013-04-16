@@ -232,7 +232,7 @@
             this.EditorsListBox.Location = new System.Drawing.Point(3, 3);
             this.EditorsListBox.Name = "EditorsListBox";
             this.EditorsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.EditorsListBox.Size = new System.Drawing.Size(599, 173);
+            this.EditorsListBox.Size = new System.Drawing.Size(517, 201);
             this.EditorsListBox.TabIndex = 11;
             this.EditorsListBox.SelectedIndexChanged += new System.EventHandler(this.EditorsListBox_SelectedIndexChanged);
             // 
@@ -241,7 +241,7 @@
             this.AddEditorButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddEditorButton.Enabled = false;
             this.AddEditorButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddEditorButton.Location = new System.Drawing.Point(3, 181);
+            this.AddEditorButton.Location = new System.Drawing.Point(3, 210);
             this.AddEditorButton.Name = "AddEditorButton";
             this.AddEditorButton.Size = new System.Drawing.Size(24, 24);
             this.AddEditorButton.TabIndex = 12;
@@ -253,7 +253,7 @@
             this.DeleteEditorButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteEditorButton.Enabled = false;
             this.DeleteEditorButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteEditorButton.Location = new System.Drawing.Point(30, 181);
+            this.DeleteEditorButton.Location = new System.Drawing.Point(30, 210);
             this.DeleteEditorButton.Name = "DeleteEditorButton";
             this.DeleteEditorButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteEditorButton.TabIndex = 13;
@@ -271,7 +271,7 @@
             this.AnimalsListBox.Location = new System.Drawing.Point(3, 3);
             this.AnimalsListBox.Name = "AnimalsListBox";
             this.AnimalsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.AnimalsListBox.Size = new System.Drawing.Size(599, 173);
+            this.AnimalsListBox.Size = new System.Drawing.Size(517, 201);
             this.AnimalsListBox.TabIndex = 21;
             this.AnimalsListBox.SelectedIndexChanged += new System.EventHandler(this.AnimalsListBox_SelectedIndexChanged);
             this.AnimalsListBox.DoubleClick += new System.EventHandler(this.InfoAnimalsButton_Click);
@@ -281,7 +281,7 @@
             this.AddAnimalButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddAnimalButton.Enabled = false;
             this.AddAnimalButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddAnimalButton.Location = new System.Drawing.Point(3, 181);
+            this.AddAnimalButton.Location = new System.Drawing.Point(3, 210);
             this.AddAnimalButton.Name = "AddAnimalButton";
             this.AddAnimalButton.Size = new System.Drawing.Size(24, 24);
             this.AddAnimalButton.TabIndex = 22;
@@ -293,7 +293,7 @@
             this.DeleteAnimalsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteAnimalsButton.Enabled = false;
             this.DeleteAnimalsButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteAnimalsButton.Location = new System.Drawing.Point(30, 181);
+            this.DeleteAnimalsButton.Location = new System.Drawing.Point(30, 210);
             this.DeleteAnimalsButton.Name = "DeleteAnimalsButton";
             this.DeleteAnimalsButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteAnimalsButton.TabIndex = 23;
@@ -306,7 +306,7 @@
             this.InfoAnimalsButton.FlatAppearance.BorderSize = 0;
             this.InfoAnimalsButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoAnimalsButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoAnimalsButton.Location = new System.Drawing.Point(55, 181);
+            this.InfoAnimalsButton.Location = new System.Drawing.Point(55, 210);
             this.InfoAnimalsButton.Name = "InfoAnimalsButton";
             this.InfoAnimalsButton.Size = new System.Drawing.Size(24, 24);
             this.InfoAnimalsButton.TabIndex = 24;
@@ -324,7 +324,7 @@
             this.FilesListBox.Location = new System.Drawing.Point(3, 3);
             this.FilesListBox.Name = "FilesListBox";
             this.FilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.FilesListBox.Size = new System.Drawing.Size(517, 202);
+            this.FilesListBox.Size = new System.Drawing.Size(517, 201);
             this.FilesListBox.TabIndex = 31;
             this.FilesListBox.SelectedIndexChanged += new System.EventHandler(this.FilesListBox_SelectedIndexChanged);
             this.FilesListBox.DoubleClick += new System.EventHandler(this.InfoFilesButton_Click);
@@ -359,7 +359,7 @@
             this.InfoFilesButton.FlatAppearance.BorderSize = 0;
             this.InfoFilesButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoFilesButton.Location = new System.Drawing.Point(58, 210);
+            this.InfoFilesButton.Location = new System.Drawing.Point(55, 210);
             this.InfoFilesButton.Name = "InfoFilesButton";
             this.InfoFilesButton.Size = new System.Drawing.Size(24, 24);
             this.InfoFilesButton.TabIndex = 34;
