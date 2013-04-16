@@ -114,6 +114,8 @@ namespace AnimalMovement
             //Fixme - need to cancel upload
             //Fixme this should be triggered by an event on FileLoader
             OnDatabaseChanged();
+            //fixme - only close on success.
+            Close();
         }
 
         private static void HandleException(Exception ex, string path, Project project, ProjectInvestigator manager)
@@ -142,6 +144,7 @@ namespace AnimalMovement
                 FileNameTextBox.Text = string.Join(";", openFileDialog.FileNames);
                 CollarIsRequired = openFileDialog.FileNames.Length == 1 &&
                                    new FileLoader(FileNameTextBox.Text).CollarIsRequired;
+                EnableUpload();
             }
         }
 
@@ -151,6 +154,7 @@ namespace AnimalMovement
             {
                 FolderNameTextBox.Text = folderBrowserDialog.SelectedPath;
                 CollarIsRequired = false;
+                EnableUpload();
             }
         }
 
