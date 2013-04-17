@@ -1691,30 +1691,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPrograms](
-	[ProgramId] [varchar](8) NOT NULL,
-	[ProgramName] [nvarchar](255) NULL,
-	[UserName] [sysname] NOT NULL,
-	[Password] [nvarchar](128) NOT NULL,
-	[Manager] [sysname] NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
-	[Notes] [nvarchar](max) NULL,
-	[Active] [bit] NULL,
- CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 22, 2013
@@ -1933,6 +1909,69 @@ CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeploy
 (
 	[PlatformId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 21, 2013
+-- Description: Enforce the business rules for deleting ArgosDeployment
+-- =============================================
+CREATE TRIGGER [dbo].[AfterArgosDeploymentDelete] 
+   ON  [dbo].[ArgosDeployments] 
+   AFTER DELETE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- delete files based on this deployment
+    DELETE C
+      FROM CollarFiles AS C
+      JOIN deleted AS D
+        ON D.DeploymentId = C.ArgosDeploymentId
+
+    -- we do not need to update issues, because the now unprocessed transmissions 
+    -- (without issues) will be reflected in the query ArgosFile_NeedsPartialProcessing
+    
+    -- If this deployment is related to a non-gps collar then delete all fixes for this collar
+    -- during the time of the deployment (A collar can only have one deployment at any time,
+    -- so all the fixes for that collar must be associated with this deployment)
+    DELETE F
+      FROM CollarFixes AS F
+      JOIN Collars AS C
+        ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+      JOIN deleted as D
+        ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+     WHERE C.HasGps = 0
+       AND (F.FixDate <= D.EndDate OR D.EndDate IS NULL)
+       AND (D.StartDate <= F.FixDate  OR D.StartDate IS NULL)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPrograms](
+	[ProgramId] [varchar](8) NOT NULL,
+	[ProgramName] [nvarchar](255) NULL,
+	[UserName] [sysname] NOT NULL,
+	[Password] [nvarchar](128) NOT NULL,
+	[Manager] [sysname] NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+	[Notes] [nvarchar](max) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -4074,79 +4113,6 @@ BEGIN
     END
     CLOSE insert_deployment_cursor;
     DEALLOCATE insert_deployment_cursor;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 21, 2013
--- Description: Enforce the business rules for deleting ArgosDeployment
--- =============================================
-CREATE TRIGGER [dbo].[AfterArgosDeploymentDelete] 
-   ON  [dbo].[ArgosDeployments] 
-   AFTER DELETE
-AS 
-BEGIN
-    SET NOCOUNT ON;
-    -- Partialy unprocess the transmissions which overlap the deleted deployment
-    /*
-      In this example a1 is an argos platform with 3 deployments on two collars (c1, c2).
-      Processing a source file (with transmissions in each deployment range) will
-      result in 3 files (for 2 collars) for a1, and other files for other platforms.
-      
-      a1,c1  d1 \
-      ..     ..  - f1c1
-      a1,c1  d2 /
-      a1,c2  d3 \
-      ..     ..  - f2c2
-      a1,c2  d4 /
-      a1,c1  d5 \
-      ..     ..  - f3c1
-      a1,c1  d6 /
-      a2        \
-      ..         - many additional files
-      an        /
-      
-      Deleting one deployment should delete only one result file.
-      However once a result file is created, it is not trivial to tie it back to a deployment
-      except by collar, which as we can see in the example will still delete two files.
-      While it is possible to have a single source file with multiple deployments (through
-      concatenating Argos emails) it is unlikely since there must be a refurbishment between
-      deployments.  So in almost all cases, there will only be one deployment for each Argos
-      platform in a source file.  Unprocessing by (FileId,PlatformId), and not
-      (FileId, PlatformId, CollarId) or (FileId, PlatformId, CollarId, StartDate, EndDate)
-      should be simpler.  However, if we unprocess all results for a (FileId,PlatformId), then
-      we must reprocess the (FileId,PlatformId) after the deployment has been deleted to
-      replace the files that should not have been deleted.
-     */  
-    -- May be part of a batch delete (unlikely, and only by SA as all others must use SP)
-    -- Triggers always execute in the context of a transaction, so the following code is all or nothing.
-
-    DECLARE @FileId int;
-    DECLARE @PlatformId varchar(8);
-    DECLARE delete_deployment_cursor CURSOR FOR
-          -- select all files (by platform) with transmissions that overlap all deleted deployments
-             SELECT A.FileId, A.PlatformId
-               FROM deleted AS d
-         INNER JOIN ArgosFilePlatformDates AS A
-                 ON A.PlatformId = d.PlatformId
-              WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, d.StartDate, d.EndDate) = 1
-        
-    OPEN delete_deployment_cursor;
-
-    FETCH NEXT FROM delete_deployment_cursor INTO @FileId, @PlatformId;
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        EXEC dbo.ArgosFile_UnProcessPlatform @FileId, @PlatformId
-        EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
-        FETCH NEXT FROM delete_deployment_cursor INTO @FileId, @PlatformId;
-    END
-    CLOSE delete_deployment_cursor;
-    DEALLOCATE delete_deployment_cursor;
 END
 GO
 SET ANSI_NULLS ON
