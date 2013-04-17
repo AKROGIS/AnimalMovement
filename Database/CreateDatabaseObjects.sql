@@ -1481,108 +1481,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[ArgosFileProcessingIssues](
-	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[FileId] [int] NOT NULL,
-	[Issue] [nvarchar](max) NOT NULL,
-	[PlatformId] [varchar](8) NULL,
-	[CollarManufacturer] [varchar](16) NULL,
-	[CollarId] [varchar](16) NULL,
- CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
-(
-	[IssueId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues] 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 22, 2013
--- Description: Processes only the transmission for a single platform in a file.
---              This is a helper (sub) procedure, and is not available to
---              be called directly by user code
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
-	@FileId INT,
-	@PlatformId VARCHAR(255)
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- If this can be called by clients, then do some parameter validation.
-	
-	-- The unprocessing should have happened already.
-	-- Process the (file,platformId) with xp_cmdshell - See ArgosFile_Process for details
-	-- If we can't process this file, then set an issue that will flag this as undone.
-	INSERT INTO [dbo].[ArgosFileProcessingIssues]
-				([FileId], [Issue], [PlatformId])
-		 VALUES (@FileId, 'Process this (file,platform) a deployment or parameter as changed',  @PlatformId)
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFilePlatformDates](
-	[FileId] [int] NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NULL,
-	[FirstTransmission] [datetime2](7) NOT NULL,
-	[LastTransmission] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
-AS
------------ ArgosFile_NeedsPartialProcessing
------------   Is a (file,platform) where the file has the correct transmissions,
------------   and there are special processing issues for the platform
------------   (relies on files of correct format having been summerized) 
-     SELECT T.FileId, T.PlatformId
-       FROM ArgosFilePlatformDates AS T         
- INNER JOIN ArgosFileProcessingIssues AS I
-         ON I.FileId = T.FileId AND T.PlatformId = I.PlatformId
-      WHERE I.Issue Like 'Process%'
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ArgosDownloads](
 	[TimeStamp] [datetime2](7) NOT NULL,
 	[ProgramId] [varchar](8) NULL,
@@ -1701,12 +1599,160 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPrograms](
+	[ProgramId] [varchar](8) NOT NULL,
+	[ProgramName] [nvarchar](255) NULL,
+	[UserName] [sysname] NOT NULL,
+	[Password] [nvarchar](128) NOT NULL,
+	[Manager] [sysname] NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+	[Notes] [nvarchar](max) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 22, 2013
+--              Description: Processes only the transmission for a single platform in a file.
+--              This may be called by the Argos Processor library by a client not on the server
+--              It will call the Argos Processor library on the server.
+--              Ignore any failures.  If this really needs to happen, then it will be caught when
+--              the Argos Processor runs as a scheduled on the server.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
+    @FileId INT,
+    @PlatformId VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+         
+    -- Validate permission for this operation
+    -- controlled by execute permissions on SP	
+    
+    -- FIXME - use xp-cmdshell to call Argos processor (see ArgosFile_Process)
+    
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Create the stored procedure to generate an error using 
+-- RAISERROR. The original error information is used to
+-- construct the msg_str for RAISERROR.
+-- must be called from a CATCH block
+-- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
+CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
+    -- Return if there is no error information to retrieve.
+    IF ERROR_NUMBER() IS NULL
+        RETURN;
+
+    DECLARE 
+        @ErrorMessage    NVARCHAR(4000),
+        @ErrorNumber     INT,
+        @ErrorSeverity   INT,
+        @ErrorState      INT,
+        @ErrorLine       INT,
+        @ErrorProcedure  NVARCHAR(200);
+
+    -- Assign variables to error-handling functions that 
+    -- capture information for RAISERROR.
+    SELECT 
+        @ErrorNumber = ERROR_NUMBER(),
+        @ErrorSeverity = ERROR_SEVERITY(),
+        @ErrorState = ERROR_STATE(),
+        @ErrorLine = ERROR_LINE(),
+        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
+
+    -- Build the message string that will contain original
+    -- error information.
+    SELECT @ErrorMessage = 
+        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
+            'Message: '+ ERROR_MESSAGE();
+
+    -- Raise an error: msg_str parameter of RAISERROR will contain
+    -- the original error information.
+    RAISERROR 
+        (
+        @ErrorMessage, 
+        @ErrorSeverity, 
+        1,               
+        @ErrorNumber,    -- parameter: original error number.
+        @ErrorSeverity,  -- parameter: original error severity.
+        @ErrorState,     -- parameter: original error state.
+        @ErrorProcedure, -- parameter: original error procedure name.
+        @ErrorLine       -- parameter: original error line number.
+        );
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFileProcessingIssues](
+	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileId] [int] NOT NULL,
+	[Issue] [nvarchar](max) NOT NULL,
+	[PlatformId] [varchar](8) NULL,
+	[CollarManufacturer] [varchar](16) NULL,
+	[CollarId] [varchar](16) NULL,
+ CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
+(
+	[IssueId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues] 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 22, 2013
 -- Description: Un-processes the transmissions for a single platform in a file.
---              This is a helper (sub) procedure, and is not available to
---              be called directly by user code
+--              This is called by the AfterArgosDeploymentDelete and
+--              AfterArgosDeploymentUpdate triggers.  It is also called by the
+--              Argos Processor in response a to an ArgosFile_ProcessPlatform request.
+--              It may be that a client might want to call this (though I doubt it)
+--              nevertheless, it won't hurt, since the results can be regenerated
+--              (and will be if the Argos Processor is running a scheduled task with no parameters).
+--              When called by the delete trigger, it must clear the results files and issues.
+--              Usually when the Argos Processor calls this, there are no results/issues
+--              (that is how it got included in the query ArgosFile_NeedsPartialProcessing),
+--              but it may get called in other situations, besides, it doesn't hurt to try to
+--              delete items that do not exits.
 -- =============================================
 CREATE PROCEDURE [dbo].[ArgosFile_UnProcessPlatform] 
     @FileId INT,
@@ -1714,33 +1760,55 @@ CREATE PROCEDURE [dbo].[ArgosFile_UnProcessPlatform]
 AS
 BEGIN
     SET NOCOUNT ON;
+    
+    -- Validate permission for this operation
+    -- controlled by execute permissions on SP	
 
-    -- Find result files derived from @FileId and @PlatformId
+    -- wrap the two operations in a transaction
+    BEGIN TRY
+        BEGIN TRANSACTION
+            -- Find and delete all result files derived from @FileId and @PlatformId
+             DELETE F
+               FROM CollarFiles AS F
+         INNER JOIN ArgosDeployments AS D
+                 ON F.ArgosDeploymentId = D.DeploymentId
+              WHERE D.PlatformId = @PlatformId  -- result file is based on the platform specified
+                AND F.ParentFileId = @FileId  -- parent is the file specified
 
-    -- FAIL - depends on ArgosDeployments which has been changed. prompting the need to unprocess
-     SELECT F.FileId
-       FROM CollarFiles AS F
- INNER JOIN CollarFiles AS P
-         ON P.FileId = F.ParentFileId
- INNER JOIN ArgosDeployments AS D
-         ON D.CollarId = F.CollarId
- INNER JOIN LookupCollarFileFormats AS F2
-         ON P.Format = F2.Code
-      WHERE D.PlatformId = @PlatformId
-        AND F2.ArgosData = 'Y'
+            -- Find and delete all issues for this @FileId and @PlatformId
+            DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId AND PlatformId = @PlatformId
 
-
-         -- FAIL - finds all results for a source file with the @Platform (also requires date range).
-    DECLARE @StartDate datetime2(7) = '2010-01-01'
-    DECLARE @EndDate datetime2(7) = '2010-01-01'
-
-     SELECT F.FileId, F.ParentFileId, F.Format, A.FirstTransmission, A.LastTransmission
-       FROM CollarFiles AS F
- INNER JOIN ArgosFilePlatformDates AS A
-         ON A.FileId = F.ParentFileId AND A.PlatformId = @PlatformId
-      WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, @StartDate, @EndDate) = 1
-
+        COMMIT TRANSACTION
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        EXEC [dbo].[Utility_RethrowError]
+        RETURN 1
+    END CATCH
+ 
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFilePlatformDates](
+	[FileId] [int] NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NULL,
+	[FirstTransmission] [datetime2](7) NOT NULL,
+	[LastTransmission] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -1773,30 +1841,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeploy
 (
 	[PlatformId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPrograms](
-	[ProgramId] [varchar](8) NOT NULL,
-	[ProgramName] [nvarchar](255) NULL,
-	[UserName] [sysname] NOT NULL,
-	[Password] [nvarchar](128) NOT NULL,
-	[Manager] [sysname] NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
-	[Notes] [nvarchar](max) NULL,
-	[Active] [bit] NULL,
- CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -2674,6 +2718,37 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
+AS
+----------- ArgosFile_NeedsPartialProcessing
+----------- Files/platforms that can and should be processed (do it as soon as possible)
+-----------   Is a (file,platform) where the file has transmissions
+-----------   that can be processed (overlapping deployment/parameters)
+-----------   but there is no results file, and no processing issues.
+	 SELECT A.FileId, A.PlatformId
+	   FROM ArgosFilePlatformDates AS A
+  LEFT JOIN CollarFiles AS C
+		 ON C.ParentFileId = A.FileId
+  LEFT JOIN ArgosDeployments AS D
+		 ON D.DeploymentId = C.ArgosDeploymentId
+		AND D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+		AND D.PlatformId = A.PlatformId
+  LEFT JOIN CollarParameters AS P
+         ON P.ParameterId = C.CollarParameterId
+        AND P.CollarManufacturer = C.CollarManufacturer AND P.CollarId = C.CollarId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+		 ON I.PlatformId = A.PlatformId AND I.FileId = A.FileId
+	  WHERE A.FileId IS NOT NULL AND A.PlatformId IS NOT NULL
+        AND (D.StartDate IS NULL OR D.StartDate < A.FirstTransmission)
+        AND (P.StartDate IS NULL OR P.StartDate < A.FirstTransmission)
+        AND (D.EndDate IS NULL OR A.LastTransmission < D.EndDate)
+        AND (P.EndDate IS NULL OR A.LastTransmission < P.EndDate)
+	    AND C.FileId IS NULL  AND I.IssueId IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TRIGGER [dbo].[UpdateMovementAfterLocationUpdate] 
 ON [dbo].[Locations]
 AFTER UPDATE AS
@@ -3239,57 +3314,6 @@ CREATE TABLE [dbo].[Settings](
 	[Key] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- Create the stored procedure to generate an error using 
--- RAISERROR. The original error information is used to
--- construct the msg_str for RAISERROR.
--- must be called from a CATCH block
--- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
-CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
-    -- Return if there is no error information to retrieve.
-    IF ERROR_NUMBER() IS NULL
-        RETURN;
-
-    DECLARE 
-        @ErrorMessage    NVARCHAR(4000),
-        @ErrorNumber     INT,
-        @ErrorSeverity   INT,
-        @ErrorState      INT,
-        @ErrorLine       INT,
-        @ErrorProcedure  NVARCHAR(200);
-
-    -- Assign variables to error-handling functions that 
-    -- capture information for RAISERROR.
-    SELECT 
-        @ErrorNumber = ERROR_NUMBER(),
-        @ErrorSeverity = ERROR_SEVERITY(),
-        @ErrorState = ERROR_STATE(),
-        @ErrorLine = ERROR_LINE(),
-        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
-
-    -- Build the message string that will contain original
-    -- error information.
-    SELECT @ErrorMessage = 
-        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
-            'Message: '+ ERROR_MESSAGE();
-
-    -- Raise an error: msg_str parameter of RAISERROR will contain
-    -- the original error information.
-    RAISERROR 
-        (
-        @ErrorMessage, 
-        @ErrorSeverity, 
-        1,               
-        @ErrorNumber,    -- parameter: original error number.
-        @ErrorSeverity,  -- parameter: original error severity.
-        @ErrorState,     -- parameter: original error state.
-        @ErrorProcedure, -- parameter: original error procedure name.
-        @ErrorLine       -- parameter: original error line number.
-        );
 GO
 SET ANSI_NULLS ON
 GO
@@ -7325,6 +7349,10 @@ GO
 GRANT EXECUTE ON [dbo].[ArgosFile_Process] TO [ArgosProcessor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosFile_Process] TO [Editor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosFile_UnProcessPlatform] TO [ArgosProcessor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosFile_UnProcessPlatform] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosFileProcessingIssues_Insert] TO [ArgosProcessor] AS [dbo]
 GO
