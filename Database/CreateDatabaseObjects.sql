@@ -859,7 +859,8 @@ GO
 -- Description:	Add the fixes for a CollarFile Data
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarFixes_Insert] 
-    @FileId INT
+    @FileId INT,
+    @DeploymentId INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -1049,6 +1050,7 @@ BEGIN
             AND I.Longitude IS NOT NULL
             AND I.LocationDate < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
             AND C.HasGps = 0
+            AND (@DeploymentId IS NULL OR @DeploymentId = D.DeploymentId)
        GROUP BY C.CollarManufacturer, C.CollarId, I.LocationDate, I.Latitude, I.Longitude
     END
     
@@ -1074,6 +1076,7 @@ BEGIN
            AND I.[locationDate] IS NOT NULL
            AND I.[locationDate] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
            AND C.HasGps = 0
+           AND (@DeploymentId IS NULL OR @DeploymentId = D.DeploymentId)
     END
 
     --IF @Format = 'G'  -- Debevek Format
@@ -1718,52 +1721,22 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- Create the stored procedure to generate an error using 
--- RAISERROR. The original error information is used to
--- construct the msg_str for RAISERROR.
--- must be called from a CATCH block
--- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
-CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
-    -- Return if there is no error information to retrieve.
-    IF ERROR_NUMBER() IS NULL
-        RETURN;
-
-    DECLARE 
-        @ErrorMessage    NVARCHAR(4000),
-        @ErrorNumber     INT,
-        @ErrorSeverity   INT,
-        @ErrorState      INT,
-        @ErrorLine       INT,
-        @ErrorProcedure  NVARCHAR(200);
-
-    -- Assign variables to error-handling functions that 
-    -- capture information for RAISERROR.
-    SELECT 
-        @ErrorNumber = ERROR_NUMBER(),
-        @ErrorSeverity = ERROR_SEVERITY(),
-        @ErrorState = ERROR_STATE(),
-        @ErrorLine = ERROR_LINE(),
-        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
-
-    -- Build the message string that will contain original
-    -- error information.
-    SELECT @ErrorMessage = 
-        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
-            'Message: '+ ERROR_MESSAGE();
-
-    -- Raise an error: msg_str parameter of RAISERROR will contain
-    -- the original error information.
-    RAISERROR 
-        (
-        @ErrorMessage, 
-        @ErrorSeverity, 
-        1,               
-        @ErrorNumber,    -- parameter: original error number.
-        @ErrorSeverity,  -- parameter: original error severity.
-        @ErrorState,     -- parameter: original error state.
-        @ErrorProcedure, -- parameter: original error procedure name.
-        @ErrorLine       -- parameter: original error line number.
-        );
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFilePlatformDates](
+	[FileId] [int] NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NULL,
+	[FirstTransmission] [datetime2](7) NOT NULL,
+	[LastTransmission] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[PlatformId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -1801,82 +1774,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[Ar
 (
 	[PlatformId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 22, 2013
--- Description: Un-processes the transmissions for a single platform in a file.
---              This is called by the AfterArgosDeploymentDelete and
---              AfterArgosDeploymentUpdate triggers.  It is also called by the
---              Argos Processor in response a to an ArgosFile_ProcessPlatform request.
---              It may be that a client might want to call this (though I doubt it)
---              nevertheless, it won't hurt, since the results can be regenerated
---              (and will be if the Argos Processor is running a scheduled task with no parameters).
---              When called by the delete trigger, it must clear the results files and issues.
---              Usually when the Argos Processor calls this, there are no results/issues
---              (that is how it got included in the query ArgosFile_NeedsPartialProcessing),
---              but it may get called in other situations, besides, it doesn't hurt to try to
---              delete items that do not exits.
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_UnProcessPlatform] 
-    @FileId INT,
-    @PlatformId VARCHAR(255)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Validate permission for this operation
-    -- controlled by execute permissions on SP	
-
-    -- wrap the two operations in a transaction
-    BEGIN TRY
-        BEGIN TRANSACTION
-            -- Find and delete all result files derived from @FileId and @PlatformId
-             DELETE F
-               FROM CollarFiles AS F
-         INNER JOIN ArgosDeployments AS D
-                 ON F.ArgosDeploymentId = D.DeploymentId
-              WHERE D.PlatformId = @PlatformId  -- result file is based on the platform specified
-                AND F.ParentFileId = @FileId  -- parent is the file specified
-
-            -- Find and delete all issues for this @FileId and @PlatformId
-            DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId AND PlatformId = @PlatformId
-
-        COMMIT TRANSACTION
-    END TRY
-    BEGIN CATCH
-        IF XACT_STATE() <> 0
-            ROLLBACK TRANSACTION;
-        EXEC [dbo].[Utility_RethrowError]
-        RETURN 1
-    END CATCH
- 
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFilePlatformDates](
-	[FileId] [int] NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NULL,
-	[FirstTransmission] [datetime2](7) NOT NULL,
-	[LastTransmission] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[PlatformId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -3358,6 +3255,112 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- Create the stored procedure to generate an error using 
+-- RAISERROR. The original error information is used to
+-- construct the msg_str for RAISERROR.
+-- must be called from a CATCH block
+-- pilfered from http://msdn.microsoft.com/en-us/library/ms179296.aspx
+CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
+    -- Return if there is no error information to retrieve.
+    IF ERROR_NUMBER() IS NULL
+        RETURN;
+
+    DECLARE 
+        @ErrorMessage    NVARCHAR(4000),
+        @ErrorNumber     INT,
+        @ErrorSeverity   INT,
+        @ErrorState      INT,
+        @ErrorLine       INT,
+        @ErrorProcedure  NVARCHAR(200);
+
+    -- Assign variables to error-handling functions that 
+    -- capture information for RAISERROR.
+    SELECT 
+        @ErrorNumber = ERROR_NUMBER(),
+        @ErrorSeverity = ERROR_SEVERITY(),
+        @ErrorState = ERROR_STATE(),
+        @ErrorLine = ERROR_LINE(),
+        @ErrorProcedure = ISNULL(ERROR_PROCEDURE(), '-');
+
+    -- Build the message string that will contain original
+    -- error information.
+    SELECT @ErrorMessage = 
+        N'Error %d, Level %d, State %d, Procedure %s, Line %d, ' + 
+            'Message: '+ ERROR_MESSAGE();
+
+    -- Raise an error: msg_str parameter of RAISERROR will contain
+    -- the original error information.
+    RAISERROR 
+        (
+        @ErrorMessage, 
+        @ErrorSeverity, 
+        1,               
+        @ErrorNumber,    -- parameter: original error number.
+        @ErrorSeverity,  -- parameter: original error severity.
+        @ErrorState,     -- parameter: original error state.
+        @ErrorProcedure, -- parameter: original error procedure name.
+        @ErrorLine       -- parameter: original error line number.
+        );
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 22, 2013
+-- Description: Un-processes the transmissions for a single platform in a file.
+--              This is called by the AfterArgosDeploymentDelete and
+--              AfterArgosDeploymentUpdate triggers.  It is also called by the
+--              Argos Processor in response a to an ArgosFile_ProcessPlatform request.
+--              It may be that a client might want to call this (though I doubt it)
+--              nevertheless, it won't hurt, since the results can be regenerated
+--              (and will be if the Argos Processor is running a scheduled task with no parameters).
+--              When called by the delete trigger, it must clear the results files and issues.
+--              Usually when the Argos Processor calls this, there are no results/issues
+--              (that is how it got included in the query ArgosFile_NeedsPartialProcessing),
+--              but it may get called in other situations, besides, it doesn't hurt to try to
+--              delete items that do not exits.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_UnProcessPlatform] 
+    @FileId INT,
+    @PlatformId VARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate permission for this operation
+    -- controlled by execute permissions on SP	
+
+    -- wrap the two operations in a transaction
+    BEGIN TRY
+        BEGIN TRANSACTION
+            -- Find and delete all result files derived from @FileId and @PlatformId
+             DELETE F
+               FROM CollarFiles AS F
+         INNER JOIN ArgosDeployments AS D
+                 ON F.ArgosDeploymentId = D.DeploymentId
+              WHERE D.PlatformId = @PlatformId  -- result file is based on the platform specified
+                AND F.ParentFileId = @FileId  -- parent is the file specified
+
+            -- Find and delete all issues for this @FileId and @PlatformId
+            DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId AND PlatformId = @PlatformId
+
+        COMMIT TRANSACTION
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        EXEC [dbo].[Utility_RethrowError]
+        RETURN 1
+    END CATCH
+ 
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 16, 2013
@@ -3932,28 +3935,13 @@ BEGIN
             ELSE
             BEGIN
                 --Platform has changed. Use delete/insert procedure
+                -- This should match the delete/insert triggers (see it for comments)
                 --Delete:
-                DECLARE delete_platform_update_deployment_cursor CURSOR FOR
-                      -- select all files (by platform) with transmissions that overlap all deleted deployments
-                         SELECT A.FileId, A.PlatformId
-                           FROM deleted AS d
-                     INNER JOIN ArgosFilePlatformDates AS A
-                             ON A.PlatformId = d.PlatformId
-                          WHERE dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, d.StartDate, d.EndDate) = 1
-                    
-                OPEN delete_platform_update_deployment_cursor;
+                DELETE C
+                  FROM CollarFiles AS C
+                  JOIN deleted AS D
+                    ON D.DeploymentId = C.ArgosDeploymentId
 
-                FETCH NEXT FROM delete_platform_update_deployment_cursor INTO @FileId, @PlatformId;
-
-                WHILE @@FETCH_STATUS = 0
-                BEGIN
-                    EXEC dbo.ArgosFile_UnProcessPlatform @FileId, @PlatformId
-                    EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
-                    FETCH NEXT FROM delete_platform_update_deployment_cursor INTO @FileId, @PlatformId;
-                END
-                CLOSE delete_platform_update_deployment_cursor;
-                DEALLOCATE delete_platform_update_deployment_cursor;
-                
                 --Insert:
                 DECLARE insert_platform_update_deployment_cursor CURSOR FOR 
                       -- select all files (by platform) with processing issues for this platform
@@ -3971,17 +3959,60 @@ BEGIN
 
                 WHILE @@FETCH_STATUS = 0
                 BEGIN
+                    DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId AND PlatformId = @PlatformId
                     EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
                     FETCH NEXT FROM insert_platform_update_deployment_cursor INTO @FileId, @PlatformId;
                 END
                 CLOSE insert_platform_update_deployment_cursor;
                 DEALLOCATE insert_platform_update_deployment_cursor;
+     
             END
         END 
         FETCH NEXT FROM update_deployment_cursor INTO @DeploymentId,@OldPlatform,@NewPlatform,@OldMfgr,@NewMfgr,@OldCollar,@NewCollar,@OldStart,@NewStart,@OldEnd,@NewEnd
     END
     CLOSE update_deployment_cursor;
     DEALLOCATE update_deployment_cursor;
+    
+    -- We need to deal with the E&F files with non-GPS collars.  We do not anticipate a lot of non-gps collars, so I
+    -- will handle this a brute force delete and insert.
+    -- This should match the delete/insert triggers (see it for comments)
+    -- Delete:
+    DELETE F
+      FROM CollarFixes AS F
+      JOIN Collars AS C
+        ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+      JOIN deleted as D
+        ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+     WHERE C.HasGps = 0
+       AND (F.FixDate <= D.EndDate OR D.EndDate IS NULL)
+       AND (D.StartDate <= F.FixDate  OR D.StartDate IS NULL)
+    
+    -- Insert:
+    DECLARE insert_platform_update_deployment_cursor2 CURSOR FOR 
+             SELECT A.FileId, I.DeploymentId
+               FROM inserted AS I
+         INNER JOIN Collars AS C
+                 ON C.CollarManufacturer = I.CollarManufacturer AND C.CollarId = I.CollarId
+         INNER JOIN ArgosFilePlatformDates AS A
+                 ON A.PlatformId = I.PlatformId
+         INNER JOIN CollarFiles AS F
+                 ON F.FileId = A.FileId
+              WHERE C.HasGps = 0
+                AND (F.Format = 'E' OR F.Format = 'F')
+                AND dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, I.StartDate, I.EndDate) = 1
+        
+    OPEN insert_platform_update_deployment_cursor2;
+
+    FETCH NEXT FROM insert_platform_update_deployment_cursor2 INTO @FileId, @DeploymentId;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC dbo.CollarFixes_Insert @FileId, @DeploymentId
+        FETCH NEXT FROM insert_deployment_cursor2 INTO @FileId, @DeploymentId;
+    END
+    CLOSE insert_platform_update_deployment_cursor2;
+    DEALLOCATE insert_platform_update_deployment_cursor2;
+
 END
 GO
 SET ANSI_NULLS ON
@@ -4108,11 +4139,43 @@ BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId AND PlatformId = @PlatformId
         EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
         FETCH NEXT FROM insert_deployment_cursor INTO @FileId, @PlatformId;
     END
     CLOSE insert_deployment_cursor;
     DEALLOCATE insert_deployment_cursor;
+    
+    
+    -- If this deployment is for a non-gps collar,
+    -- then E & F files with transmission that overlapping the platform in this deployment
+    -- should have collarfixes inserted for this just this deployment
+    DECLARE @DeploymentId INT;
+    DECLARE insert_deployment_cursor2 CURSOR FOR 
+             SELECT A.FileId, I.DeploymentId
+               FROM inserted AS I
+         INNER JOIN Collars AS C
+                 ON C.CollarManufacturer = I.CollarManufacturer AND C.CollarId = I.CollarId
+         INNER JOIN ArgosFilePlatformDates AS A
+                 ON A.PlatformId = I.PlatformId
+         INNER JOIN CollarFiles AS F
+                 ON F.FileId = A.FileId
+              WHERE C.HasGps = 0
+                AND (F.Format = 'E' OR F.Format = 'F')
+                AND dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, I.StartDate, I.EndDate) = 1
+        
+    OPEN insert_deployment_cursor2;
+
+    FETCH NEXT FROM insert_deployment_cursor2 INTO @FileId, @DeploymentId;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC dbo.CollarFixes_Insert @FileId, @DeploymentId
+        FETCH NEXT FROM insert_deployment_cursor2 INTO @FileId, @DeploymentId;
+    END
+    CLOSE insert_deployment_cursor2;
+    DEALLOCATE insert_deployment_cursor2;
+     
 END
 GO
 SET ANSI_NULLS ON
