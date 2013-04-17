@@ -1,0 +1,152 @@
+--- C:/Users/resarwas/Desktop/old_trigger.sql	Wed Apr 17 13:33:44 2013
++++ C:/Users/resarwas/Desktop/new_trigger.sql	Wed Apr 17 13:34:59 2013
+@@ -111,7 +111,7 @@
+       even the platform) for a results file, we cannot select just the collar files to change.
+       It might be possible to do something more clever, but my head already hurts, so I will
+       simply handle it safely as follows.
+-    Else if the platform changed, or thre were multiple items changing,
++    Else if the platform changed, or there were multiple items changing,
+       use the brute force delete/insert method. 
+     */
+ 
+@@ -120,6 +120,7 @@
+     -- to keep the logic manageble, I will create a cursor to handle each deployment separately.
+     
+     DECLARE @FileId int;
++    DECLARE @DeploymentId int;
+     DECLARE @PlatformId varchar(255);
+     DECLARE @OldPlatform varchar(255), @NewPlatform varchar(255);
+     DECLARE @OldMfgr varchar(255), @NewMfgr varchar(255);
+@@ -127,8 +128,9 @@
+     DECLARE @OldStart datetime2(7), @NewStart datetime2(7);
+     DECLARE @OldEnd datetime2(7), @NewEnd datetime2(7);
+     DECLARE update_deployment_cursor CURSOR FOR 
+-          -- select all files (by platform) with processing issues for this platform
+-             SELECT D.PlatformId, I.PlatformId, D.CollarManufacturer, I.CollarManufacturer,
++          -- get the new and old values of the deployment
++             SELECT I.DeploymentId,
++                    D.PlatformId, I.PlatformId, D.CollarManufacturer, I.CollarManufacturer,
+                     D.CollarId, I.CollarId, D.StartDate, I.StartDate, D.EndDate, I.EndDate
+                FROM inserted AS I
+                JOIN deleted AS D
+@@ -136,36 +138,48 @@
+         
+     OPEN update_deployment_cursor;
+ 
+-    FETCH NEXT FROM update_deployment_cursor INTO @OldPlatform,@NewPlatform,@OldMfgr,@NewMfgr,@OldCollar,@NewCollar,@OldStart,@NewStart,@OldEnd,@NewEnd
++    FETCH NEXT FROM update_deployment_cursor INTO @DeploymentId,@OldPlatform,@NewPlatform,@OldMfgr,@NewMfgr,@OldCollar,@NewCollar,@OldStart,@NewStart,@OldEnd,@NewEnd
+ 
+     WHILE @@FETCH_STATUS = 0
+     BEGIN
+         IF (@OldPlatform = @NewPlatform AND @OldMfgr = @NewMfgr AND @OldCollar = @NewCollar)
++        -- only the dates have changes
+         BEGIN
+             -- End Shrunk
+             IF ((@NewEnd IS NOT NULL AND @OldEnd IS NULL) OR @NewEnd < @OldEnd)
+             BEGIN
+-                -- Create a processing issue for any files with transmission outside the new date range
+--- FIXME - I should check that this file is processed, i.e. has results or issues
+-                -- All files with PlatformDates should be processed, and creating an issue will flag it for processing 
++                -- Create a processing issue for:
++                --  any parent files of files created with this deployment with transmission outside the new date range
+                 INSERT INTO [dbo].[ArgosFileProcessingIssues]
+                             ([FileId], [Issue], [PlatformId])
+-                     SELECT FileId, 'No Collar for Argos Platform from ' + 
++                     SELECT P.FileId, 'No Collar for Argos Platform from ' + 
+                             CONVERT(varchar(20), @newEnd, 20) + ' to ' + CONVERT(varchar(20), LastTransmission, 20), PlatformId
+-                       FROM ArgosFilePlatformDates
+-                      WHERE @newEnd < LastTransmission
++                       FROM CollarFiles AS C
++                 INNER JOIN CollarFiles AS P
++                         ON P.FileId = C.ParentFileId
++                 INNER JOIN ArgosFilePlatformDates AS S
++                         ON S.FileId = P.FileId
++                      WHERE C.ArgosDeploymentId = @DeploymentId
++                        AND S.PlatformId = @OldPlatform
++                        AND @newEnd < LastTransmission
+             END
+             -- Start Shrunk
+             IF ((@NewStart IS NOT NULL AND @OldStart IS NULL) OR @OldStart < @NewStart)
+             BEGIN
+-                -- Create a processing issue for any files with transmission outside the new date range
+--- FIXME - I should check that this file is processed, i.e. has results or issues
++                -- Create a processing issue for:
++                --  any parent files of files created with this deployment with transmission outside the new date range
+                 INSERT INTO [dbo].[ArgosFileProcessingIssues]
+                             ([FileId], [Issue], [PlatformId])
+-                     SELECT FileId, 'No Collar for Argos Platform from ' + 
++                     SELECT P.FileId, 'No Collar for Argos Platform from ' + 
+                             CONVERT(varchar(20), FirstTransmission, 20) + ' to ' + CONVERT(varchar(20), @newStart, 20), PlatformId
+-                       FROM ArgosFilePlatformDates
+-                      WHERE FirstTransmission < @newStart
++                       FROM CollarFiles AS C
++                 INNER JOIN CollarFiles AS P
++                         ON P.FileId = C.ParentFileId
++                 INNER JOIN ArgosFilePlatformDates AS S
++                         ON S.FileId = P.FileId
++                      WHERE C.ArgosDeploymentId = @DeploymentId
++                        AND S.PlatformId = @OldPlatform
++                        AND FirstTransmission < @newStart
+             END
+             -- End Grew
+             IF ((@OldEnd IS NOT NULL AND @NewEnd IS NULL) OR @OldEnd < @NewEnd)
+@@ -223,19 +237,12 @@
+             IF (@OldPlatform = @NewPlatform)
+             BEGIN
+                 -- only the collar has changed; find all the collar files and update them
++                -- I need a cursor, because changing the collar of an active file is a multi-step process
+                 DECLARE update_collar_deployment_cursor CURSOR FOR 
+                       -- find the result files from the old collar and the platform
+-                      
+---FIXME without logic for the limiting to the platform, we will select too many files
+-                      
+-                         SELECT F.FileId
+-                           FROM CollarFiles AS F
+-                           JOIN CollarFiles AS P
+-                             ON F.ParentFileId = P.FileId
+-                      LEFT JOIN LookupCollarFileFormats AS F2
+-                             ON P.Format = F2.Code
+-                          WHERE F2.ArgosData = 'Y'
+-                            AND F.CollarManufacturer = @OldMfgr AND F.CollarId = @OldCollar
++                         SELECT FileId
++                           FROM CollarFiles
++                          WHERE ArgosDeploymentId = @DeploymentId
+                    
+                 OPEN update_collar_deployment_cursor;
+ 
+@@ -243,9 +250,15 @@
+ 
+                 WHILE @@FETCH_STATUS = 0
+                 BEGIN
+-                    EXEC dbo.CollarFile_UpdateStatus @FileId, 'I'
+-                    UPDATE CollarFiles SET CollarManufacturer = @NewMfgr, CollarId = @NewCollar WHERE FileId = @FileId
+-                    EXEC dbo.CollarFile_UpdateStatus @FileId, 'A'
++                    IF EXISTS (SELECT 1 FROM CollarFiles WHERE [Status] = 'I' AND FileId = @FileId)
++                        UPDATE CollarFiles SET CollarManufacturer = @NewMfgr, CollarId = @NewCollar WHERE FileId = @FileId
++                    ELSE
++                    BEGIN
++                        -- I must do this in several steps, as we can't change the Collar of an Active file 
++                        UPDATE CollarFiles SET [Status] = 'I' WHERE FileId = @FileId
++                        UPDATE CollarFiles SET CollarManufacturer = @NewMfgr, CollarId = @NewCollar WHERE FileId = @FileId
++                        UPDATE CollarFiles SET [Status] = 'A' WHERE FileId = @FileId
++                    END
+                     FETCH NEXT FROM update_collar_deployment_cursor INTO @FileId;
+                 END
+                 CLOSE update_collar_deployment_cursor;
+@@ -300,7 +313,7 @@
+                 DEALLOCATE insert_platform_update_deployment_cursor;
+             END
+         END 
+-        FETCH NEXT FROM update_deployment_cursor INTO @OldPlatform,@NewPlatform,@OldMfgr,@NewMfgr,@OldCollar,@NewCollar,@OldStart,@NewStart,@OldEnd,@NewEnd
++        FETCH NEXT FROM update_deployment_cursor INTO @DeploymentId,@OldPlatform,@NewPlatform,@OldMfgr,@NewMfgr,@OldCollar,@NewCollar,@OldStart,@NewStart,@OldEnd,@NewEnd
+     END
+     CLOSE update_deployment_cursor;
+     DEALLOCATE update_deployment_cursor;
+@@ -309,6 +322,4 @@
+ SET ANSI_NULLS ON
+ GO
+ SET QUOTED_IDENTIFIER ON
+-GO
+-SET ANSI_PADDING ON
+ GO
+\ No newline at end of file
