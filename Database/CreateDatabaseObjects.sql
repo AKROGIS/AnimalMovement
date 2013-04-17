@@ -3320,6 +3320,52 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 16, 2013
+-- Description: Clears all the prior results from processing an Argos file.
+--              Anyone in the Editor or ArgosProcessor role can run this command
+--              since the file can always be reprocessed.
+--              It is harmless to call this on a file that has not been processed.
+--              It is also harmless to call this on a file of the wrong type.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_ClearProcessingResults] 
+    @FileId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate permission for this operation
+    -- controlled by execute permissions on SP	
+
+    -- wrap the two operations in a transaction
+    BEGIN TRY
+        BEGIN TRANSACTION
+
+            --Delete any existing sub files; this must be done in a cursor to call the SP
+            --We can't call the SPROC, because it will deny deleting a sub file
+            --Fortunately, the SPROC doesn't do anything more than a delete
+            --(the rest of the work is done in the trigger)
+            DELETE FROM [dbo].[CollarFiles] WHERE [FileId] IN (SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId)
+
+            -- Delete any prior processing issues
+            DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId
+
+        COMMIT TRANSACTION
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        EXEC [dbo].[Utility_RethrowError]
+        RETURN 1
+    END CATCH
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
 -- Author:		Regan Sarwas
 -- Create date: April 3, 2012
 -- Description:	Add/Remove Locations when Deployment is updated
@@ -4583,46 +4629,6 @@ BEGIN
 	INSERT INTO [dbo].[ArgosFileProcessingIssues]
 				([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
 		 VALUES (@FileId,  @Issue,  @PlatformId,  @CollarManufacturer,  @CollarId)
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 16, 2013
--- Description: Clears all the prior results from processing an Argos file.
---              Anyone in the Editor or ArgosProcessor role can run this command
---              since the file can always be reprocessed.
---              It is harmless to call this on a file that has not been processed.
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_ClearProcessingResults] 
-	@FileId INT
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	IF NOT EXISTS (SELECT 1 FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F
-	               ON C.Format = F.Code WHERE FileId = @FileId AND (F.ArgosData = 'Y' OR C.Format = 'H'))
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid file in a suitable format.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Validate permission for this operation
-	-- controlled by execute permissions on SP	
-	
-	--Delete any existing sub files; this must be done in a cursor to call the SP
-	--We can't call the SPROC, because it will deny deleting a sub file
-	--Fortunately, the SPROC doesn't do anything more than a delete
-	--(the rest of the work is done in the trigger)
-	DELETE FROM [dbo].[CollarFiles] WHERE [FileId] IN (SELECT FileId FROM CollarFiles WHERE ParentFileId = @FileId)
-
-	-- Delete any prior processing issues
-	DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId
-
 END
 GO
 SET ANSI_NULLS ON
