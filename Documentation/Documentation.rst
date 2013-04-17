@@ -1,3 +1,178 @@
+===========================
+Animal Movements
+===========================
+
+.. contents:: Table of Contents
+   :depth: 2
+
+Loading Store on Board Data
+===========================
+
+Gen4 datalog files (\*.tdf) files can be uploaded directly to the database. The database
+will archive this file and use Telonics Data Convertor (TDC) software in the background
+to create a \*.csv file that is used to create the collar fixes. Because of the binary
+format for the Gen3 download
+files (\*.tfb), and because the Telonics Data Download Utility V1.41, cannot be run in the
+background, it is not possible to upload these files directly.  If you have \*.tfb files,
+you must first use the Telonics Data Download Utility V1.41 to create a \*.csv file, and
+then follow the remaining instructions.
+
+
+Tell the database that you have retrieved the collar
+------------------------------------------------------------------------------------------
+
+
+This not required to see your data, but it is good bookkeeping.  By doing this, the
+database is able to hide any fixes that occur after the retrieval date/time.  It also
+frees the collar up for potential redeployment on another animal.
+
+This task is most efficiently done with deactivating old files, so the step by step
+instructions are in the next section.
+
+
+Deactivate old files
+------------------------------------------------------------------------------------------
+
+This is not required to see your data, but it has several benefits.
+
++  It can speed up the database.  The new fixes will in most cases, hide fixes that were
+   received by email or web services download.  This effort of finding and hiding
+   overlapping fixes is removed if the old files are first deactivated.
++  It will remove any fixes that were altered in the Argos transmission.  If a GPS fix
+   that was transmitted via Argos was slightly altered in time, it will not be hidden
+   by the new store-on-board data.  It is also possible that the time is the same, but
+   the location is different.  The database considers this a conflict that requires
+   attention (by default the last data in wins, so your store-on-board data will hide
+   the Argos data).  These errors are more common with Gen3 data.
+
+To retrieve collars and deactivate old files, use this step-by-step procedure
+
+1.  Start the Animal Movements application.
+#.  Click on the **Project Investigator Details** button in the main menu.
+    If you are not a project
+    investigator you will not see this button and you cannot perform this task.
+    
+.. image:: images/sob-mainmenu.png
+
+3.  Click on the **Collars** tab in the **Project Investigator Details** form.
+
+.. image:: images/sob-pi-details.png
+
+4.  Double click on deployed collar that was recently retrieved.
+    Deployed collars will list the animal it is deployed on.
+#.  Click on the **Animals** tab in the **Collar Details** form.
+
+.. image:: images/sob-collar-details.png
+
+6.  Click on the **Retrieve** button.
+#.  Enter the date and time the collar was removed from the animal. The time should be
+    local time, not GPS (UTC) time.  Providing the time is optional (it defaults to 12
+    noon), but is recommended, as it will ensure that fixes on that day before retrieval
+    are retained, while those after the retrieval are hidden.
+
+.. image:: images/sob-retrieve-collar.png
+
+8.  Press the **Retrieve** button 
+#.  Click on the **Files** tab in the **Collar Details** form.
+
+.. image:: images/sob-collar-details-files.png
+
+10. Select all the files that were from the deployment that was just retrieved.  If this
+    collar has only been deployed on this one animal, and if have not loaded your
+    store-on-board data yet, then you will want to select all files.  Use control-click
+    or shift-click to select multiple files.  Do not select any *Inactive* files.  If all
+    the selected files are *Active*, then the button at the bottom of the form will be
+    labeled *Deactivate*, and it will be enabled.
+#.  Click the **Deactivate** button
+#.  Close the **Collar Details** form, and repeat at step 4 until all the collars have
+    been retrieved.
+
+     
+Load the store-on-board data
+------------------------------------------------------------------------------------------
+
+You can bulk load an entire folder, or a selection of one or more files.  While selecting
+a folder seems most convenient, you will need to make sure that only the files you want to
+load are in the folder.  Any files not recognized as valid collar data files will result
+in an error message.  In addition, if the folder contains \*.tdf and the resulting \*.csv
+files, the program will load both files.  Since the database will create it's own version
+of the CSV file from the \*.tdf file, you will redundant data in the database.
+I recommend loading by file, and selecting just the files you want to load.
+
+Most likely if you are a project investigator, you have access to the Telonics Data
+Convertor (TDC) software to download you collars and create \*.csv files from your \*.tdf
+files.  You can upload either type of file.  If you upload the \*.tdf file, then the
+application (if it can find the TDC software on your computer) or the database (otherwise)
+will create and upload the \*.csv file, and link it to the \*.tdf file.  I recommended
+that you upload the \*.tdf files for several reasons
+
+1. The \*.tdf file will be archived in the database.
+#. The \*.tdf file includes the collar paramters in effect while deployed.
+#. The \*.tdf file could be re-processed in the future if there is some concern that it
+   may have been processed incorrectly.
+
+Uploaded files can be associated with a Project Investigator, or a Project.  This
+association only determines where the file is listed in the Animal Movements application.
+I recommend that all files are associated with a project, unless a file contains data for
+multiple collars.  In this case, the file should be associated with the appropriate
+project investigator.
+
+Step-by-step instructions for loading multiple Gen4 store-on-board data files.
+
+1.  Start the Animal Movements application.
+#.  Click on the **Project List** button in the main menu.
+
+.. image:: images/sob-mainmenu-project.png
+
+3.  Double click on the project that the new collar data is for.
+
+.. image:: images/sob-project-list.png
+
+4.  Click on the **Files** tab in the **Project Details** form.
+
+.. image:: images/sob-project-details.png
+
+5.  Click the green plus sign at the bottom of the file list.  If this
+    button is greyed-out, then you cannot add files to this project.
+    You must be the owning project investigator or an editor on the project to add files.
+    
+
+6.  Click the **Browse** button for **File(s)** on the **Upload Collar Location Data**
+    form.
+
+.. image:: images/sob-upload-collar.png
+
+7.  In the **Open** dialog box, change the file type to **Telonics Datalog (\*.tdf)**
+
+.. image:: images/sob-file-open.png
+
+8.  Select the desired files.  You can select multiple files by draging your mouse across
+    the file names, or use control-click or shift-click to select multiple files.
+#.  Click the **Open** button to close the dialog box, and proceed.
+#.  The **Upload** button on the on the **Upload Collar Location Data**
+    form should now be enabled.
+#.  In the *Associate file with* section leave all the **Collar** pick list blank .
+    This will allow the application to determine the collar from the file contents.
+    If you are **not** using CTN numbers as the collar Id, then you must load the files
+    individually and manually assign the collar id for each file.
+#.  Click the **Upload** button.  It may take several seconds to a minute to upload and
+    process each file, depending on the availability of the TDC software, your network
+    speed, the presence of active overlapping files for this collar, and the current
+    workload on the database server. Depending on the server set up, the processing may
+    not occur immediately, but may be schedules to occur in a batch at some later date.
+#.  If the uploading/processing completed without errors or warnings, then the dialog
+    box will close automatically.
+#.  The uploaded files should appear at the top of the files list in the **Project
+    Details** form.  To see the derived \*.csv files, click on the **Show Derived**
+    check box.  If there are no derived files (they will be colored brown to match the
+    **Show Derived** check box text, then the server has scheduled the processing for
+    later.  At NPS, batch processing occurs every 10 minutes, if it was unable to be
+    performed immediately for some reason.
+    
+.. image:: images/sob-project-details-2.png
+
+
+
 Editing Location Data
 =====================
 
@@ -11,12 +186,12 @@ Resolving Conflicting Fixes
 Coming soon.
 
 
-Hidding Bogus Fixes
+Hiding Bogus Fixes
 -------------------
 
-There is no way to change the time or location of a fix.  Nor should you.  You cannot aad-hoc location.
+There is no way to change the time or location of a fix.  Nor should you.  You cannot add an ad-hoc location.
 All fix data must come from the raw collar data.  This ensures a defensible dataset.
-You can however decide that some location data is *bad*, and eliminate this from dispaly and analysis.
+You can however decide that some location data is *bad*, and eliminate this from display and analysis.
 These hidden locations are available for review, and can be *un-hidden* if your assessment of the data
 changes in the future.
 
@@ -51,7 +226,7 @@ Using a bounding box to hide extreme locations
 There may be a tool to put in geographic coordinates that define the extreme boundaries of your project area.
 Any locations that occur outside those bounds will automatically be hidden.  This is easy to do in the database,
 and can be problematic in ArcMap.  There is a current limitation in ArcMap when you zoom out too far (so that more than one hemisphere is displayed
-- easy to do in alaska, where anything above 90 degrees north is in the other hemisphere).  In this case, the
+- easy to do in Alaska, where anything above 90 degrees north is in the other hemisphere).  In this case, the
 database returns no locations, so you cannot see the data to hide the bogus locations.
 
 This database feature will be coming soon.
@@ -63,7 +238,7 @@ Using ArcMap to Identify Bad Locations
 There are primarily two was to identify bad locations in ArcMap.
 
 1. Visual Review.  Some bad fixes are visually obvious when reviewing the movement vectors.
-   These will show up as a spike from and immediatly returning to a cluster of locations.
+   These will show up as a spike from and immediately returning to a cluster of locations.
 
 .. image:: images/ArcMapTools_HideLocations.png
 
@@ -71,23 +246,23 @@ There are primarily two was to identify bad locations in ArcMap.
    suspect locations.  this is easiest to do if you first define a definition query on the locations and movement
    layers to limit the data to just one animal.
 
-	a. In ArcMap, right click on the Movement Vectors layer and select Open Attributes
+    a. In ArcMap, right click on the Movement Vectors layer and select Open Attributes
 
-	b. Right click on either the speed, duration, or distance column and sort.  High speeds, short durations,
-	   or large distances are all the result of suspect locations.
+    b. Right click on either the speed, duration, or distance column and sort.  High speeds, short durations,
+       or large distances are all the result of suspect locations.
 
-	c. When you identify a movement vector that is suspect, note the start and ending time.
+    c. When you identify a movement vector that is suspect, note the start and ending time.
 
-	d. Open the attribute table for the location data.
+    d. Open the attribute table for the location data.
 
-	e. Scroll to the locations at the start and end time.
+    e. Scroll to the locations at the start and end time.
 
-	f. Select each location, starting two locations before the suspect vector,
-	   and proceeding to two locations after the suspect vector, and watch the animals progress
-	   on the map.  In this way, it is usually quite easy to identify which end of the vector is the bad location.
+    f. Select each location, starting two locations before the suspect vector,
+       and proceeding to two locations after the suspect vector, and watch the animals progress
+       on the map.  In this way, it is usually quite easy to identify which end of the vector is the bad location.
 
 
-Hidding Location
+Hiding Location
 ----------------
 
 1. Use the ArcMap Selection tool to select the unwanted location(s).
@@ -101,10 +276,10 @@ Hidding Location
 
 If you turn on the invalid locations layer, you will see these points have been removed from the valid locations/vectors layers
 and added to the invalid locations layer.  If you want to re-activate them, select the points in the invalid locations layer, click the paw print,
-and then select No to unhide these locations.
+and then select No to un-hide these locations.
 
 
-Un-Hidding Locations
+Un-Hiding Locations
 --------------------
 
 coming soon.
@@ -154,7 +329,7 @@ ArcMap Tools
 ============
 
 
-1. Open ArcMap, and make sure that the Animal Movements Addin is loaded.
+1. Open ArcMap, and make sure that the Animal Movements Add-In is loaded.
    If you select *Customize->Add-In Manager...* from the ArcMap menu, you should see the following:
 
 .. image:: images/ArcMapTools_Add-In-Manager.png
