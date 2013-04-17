@@ -376,7 +376,11 @@ editor priveleges since they uploaded the file.
 Updates
 -------
 Status: If the status changes, add/remove CollarFixes for related data in format specific
-        tables 
+        tables.  If a parent changes, then this change must be propagated to the child
+		files.  Therefore, a child's status will generally mirror the parent's, the
+		exception is that a child can be set to inactive when the parent is still active.
+		This is to support the situation where only some of the children of a multi-collar
+		parent are "replaced" by store-on-board data.
 Collar: Only allowed when a file is inactive, since fixes for a file are dependent on
         knowing the collar of a file
 Project: No effect on processing, will appear in a different project list

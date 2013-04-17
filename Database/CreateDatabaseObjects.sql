@@ -4679,7 +4679,11 @@ BEGIN
     END
 
 
-    -- Business Rule: A CollarFile with a parent, must have the same owner, project, and status
+    -- Business Rule: A CollarFile with a parent, must have the same owner, project
+    --                If the status of the parent is A, then the status of a child can be A or I
+    --                If the status of the parent is I, then the status of a child must be I
+    --                If a parent changes status, then that change propugates to the child 
+    --                regardless of the childs existing value.
     -- step 1, make sure I am in sync with my parents
         -- case 1: parent is also being updated
         IF EXISTS (SELECT 1 FROM inserted AS C
@@ -4691,9 +4695,7 @@ BEGIN
                               OR C.[ProjectId] <> P.[ProjectId]
                               OR (C.[ProjectId] IS NULL AND P.[ProjectId] IS NOT NULL)
                               OR (C.[ProjectId] IS NOT NULL AND P.[ProjectId] IS NULL)
-                              OR C.[Status] <> P.[Status]
-                              OR (C.[Status] IS NULL AND P.[Status] IS NOT NULL)
-                              OR (C.[Status] IS NOT NULL AND P.[Status] IS NULL)
+                              OR (C.[Status] = 'A' AND P.[Status] = 'I') -- all other combos are allowed
                   )
         -- case 2: parent is not being updated
         OR EXISTS (SELECT 1 FROM inserted AS C
@@ -4707,9 +4709,7 @@ BEGIN
                               OR C.[ProjectId] <> P.[ProjectId]
                               OR (C.[ProjectId] IS NULL AND P.[ProjectId] IS NOT NULL)
                               OR (C.[ProjectId] IS NOT NULL AND P.[ProjectId] IS NULL)
-                              OR C.[Status] <> P.[Status]
-                              OR (C.[Status] IS NULL AND P.[Status] IS NOT NULL)
-                              OR (C.[Status] IS NOT NULL AND P.[Status] IS NULL)
+                              OR (C.[Status] = 'A' AND P.[Status] = 'I') -- all other combos are allowed
                   )
         BEGIN
             RAISERROR('Integrity Violation. A CollarFile with a parent, must have the same owner, project and status as the parent', 18, 0)
