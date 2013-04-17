@@ -314,7 +314,7 @@
          OR (C.[Owner] IS NOT NULL AND P.[Owner] IS NULL)
          OR (C.ProjectId IS NULL AND P.ProjectId IS NOT NULL)
          OR (C.ProjectId IS NOT NULL AND P.ProjectId IS NULL)
-         OR C.[Status] != P.[Status]
+         OR (C.[Status] = 'A' AND P.[Status] = 'I')
 
 ----------- Collar File Business rule: must have one and only one non-null value for (Owner,ProjectId)
      SELECT FileId, ProjectId, [Owner]
