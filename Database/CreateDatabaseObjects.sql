@@ -445,7 +445,7 @@ BEGIN
 			RETURN 1
 		END	
 	END
-	-- We should never get here
+	-- @StartDate1 IS NULL and @EndDate1 IS NULL, so we are guaranteed to overlap 
 	RETURN 1
 END
 GO
@@ -1975,39 +1975,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Feb 27, 2013
--- Description: Ensure Data integerity on Collar Insert
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarInsert] 
-			ON [dbo].[Collars] 
-			AFTER INSERT
-AS 
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Business Rule: Collars that share an (non-null) Argos ID must have unique disposal dates
-	
-	IF EXISTS (    SELECT 1
-	                 FROM inserted AS i
-	           INNER JOIN Collars AS C
-	                   ON i.ArgosId = C.ArgosId
-	                WHERE i.ArgosId IS NOT NULL
-	                  AND (i.DisposalDate = C.DisposalDate OR (i.DisposalDate IS NULL AND C.DisposalDate IS NULL))
-	                  AND NOT (i.CollarManufacturer = C.CollarManufacturer AND i.CollarId = C.CollarId)
-              )
-	BEGIN
-		RAISERROR('Collar Integrity Violation. Collars that share a non-null Argos ID must have unique disposal dates.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[ArgosPrograms](
@@ -2606,31 +2573,33 @@ GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: Feb 20, 2013
--- Description: Add/Remove Locations when Disposal Date is updated
+-- Description: Ensure data integrity on Collar Updates
 -- =============================================
-CREATE TRIGGER [dbo].[AfterCollarDisposalDateUpdate] 
+CREATE TRIGGER [dbo].[AfterCollarUpdate] 
 			ON [dbo].[Collars] 
 			AFTER UPDATE
 AS 
 BEGIN
 	SET NOCOUNT ON;
 	
-	--Disposal date is the change that this trigger cares about.
-	--Note: this just means that DisposalDate was included in the update statement,
-	--      it does not mean that the value in this column has changed for all the
-	--      rows updated. 
+	-- FIXME: If we change the disposal date we might want to check
+	--   Argos Deployments, and Parameter End dates (I've done collardeployments)
+	
+	-- FIXME: If we change the HasGPS, then we need to consider the PPT fixes in some files
+	
+	-- FIXME: If we change the model, then we may need to do change how files are processed
+	
+	-- FIXME: are changes to PK allowed? if so, are they cascading to all related tables
+	
 	IF UPDATE ([DisposalDate])
 	BEGIN
 
 		-- triggers always execute in the context of a transaction
 		-- so the following code is all or nothing.
 
-/* LOGIC:
-    delete locations where new disposal date < fix date AND (fix date < old disposal date OR old disposal date is null) 
-       add locations where old disposal date < fix date AND (fix date < new disposal date OR new disposal date is null)
-*/
+	-- Business Rule: A CollarDeployment cannot begin after the disposal date of a collar.
+	--                Note that the retrieval date can be after the disposal date (it may never be retrieved) 
 
-	-- Check for violations with deployment dates
 	-- i.e. illegal to deploy a collar after it is disposed, or dispose a collar before it is deployed.
 	-- We do not need to check disposal date on collar creation, because a new collar has NO deployments
 	IF EXISTS (SELECT 1
@@ -2646,7 +2615,11 @@ BEGIN
 	END
 
 
-   
+	-- Business Rule: No collar locations after a disposal date
+    -- LOGIC:
+    --   delete locations where new disposal date < fix date AND (fix date < old disposal date OR old disposal date is null) 
+    --      add locations where old disposal date < fix date AND (fix date < new disposal date OR new disposal date is null)
+
 		DELETE L FROM dbo.Locations as L
 				   -- Join to the collar that created this location
 		   INNER JOIN CollarFixes as F
