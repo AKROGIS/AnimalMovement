@@ -164,5 +164,8 @@
     <Setting Name="UploadFilesFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">440, 364</Value>
     </Setting>
+    <Setting Name="CollarDetailsFormActiveTab" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
