@@ -94,39 +94,6 @@ DaysSinceLastDownload (SVF)
 	ArgosDownloads
 		ErrorMessage
 		TimeStamp
-
-DownloadableAndAnalyzableCollar (view)
-	ArgosDownloads
-		TimeStamp
-		ErrorMessage
-	ArgosPlatforms
-		PlatformId
-		Status
-	ArgosPrograms
-		UserName
-		Password
-		Status
-		EndDate
-	Collars
-		CollarManufacturer
-		CollarId
-		CollarModel
-		DisposalDate
-		Gen3Period
-	CollarDeployments
-		ProjectId
-		RetreivalDate
-	CollarParameterFiles
-		Contents
-		FileId
-		Format
-		Status
-	CollarParameters
-		EndDate
-	ProjectInvestigators
-		Email
-	Settings
-		Value
 		
 GetTelonicsParametersForArgosDates (TVF)
 	ArgosDeployments

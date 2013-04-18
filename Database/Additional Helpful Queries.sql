@@ -245,15 +245,15 @@
    ORDER BY CTN
 
 ----------- ERROR Collar Parameters with no TPF File 
-     SELECT C.*
-       FROM CollarParameters AS C
+     SELECT P.*
+       FROM CollarParameters AS P
   LEFT JOIN CollarParameterFiles AS F
-         ON C.FileId = F.FileId
+         ON P.FileId = F.FileId
   LEFT JOIN AllTpfFileData AS T
-         ON C.CollarId = T.CTN AND C.FileId = T.FileId
+         ON P.CollarId = T.CTN AND P.FileId = T.FileId
       WHERE (F.Format IS NULL OR F.Format = 'A')
         AND T.CTN IS NULL
-        AND C.Gen3Period IS NULL
+        AND P.Gen3Period IS NULL
 
 ----------- ERROR - Duplicate collars (id, status, timestamp) in TPF file
      SELECT CTN, [Platform], [Status], FileId, [FileName], [TimeStamp]
