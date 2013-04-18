@@ -1736,7 +1736,7 @@ BEGIN
                            ON RM.role_principal_id = R.principal_id 
                         WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
 	BEGIN
-		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
+		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must be the owner ('+ISNULL(@Owner,'<NULL>')+'), or have uploaded the file, or be an editor on this project ('+ISNULL(@ProjectId,'<NULL>')+') to process the collar file.';
 		RAISERROR(@message2, 18, 0)
 		RETURN (1)
 	END
@@ -1745,7 +1745,7 @@ BEGIN
 	-- Clear any (if any) prior processing results
 	-- This will ensure that the database is setup to respond to a query for all
 	-- files needing partial processing, should the xp_cmdshell not work. 
-	EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
+	EXEC dbo.ArgosFile_UnProcessPlatform @FileId, @PlatformId
  
 	-- Run the External command
 	DECLARE @exe nvarchar (255);
@@ -1823,6 +1823,7 @@ AS
         AND (D.EndDate IS NULL OR A.LastTransmission < D.EndDate)
         AND (P.EndDate IS NULL OR A.LastTransmission < P.EndDate)
 	    AND C.FileId IS NULL  AND I.IssueId IS NULL
+		AND A.FileId NOT IN (SELECT FileId FROM ArgosFile_NeverProcessed)
 GO
 SET ANSI_NULLS ON
 GO
@@ -5923,7 +5924,7 @@ BEGIN
                            ON RM.role_principal_id = R.principal_id 
                         WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
 	BEGIN
-		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must have uploaded the file, or be an editor on this project ('+@ProjectId+') to process the collar file.';
+		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must be the owner ('+ISNULL(@Owner,'<NULL>')+'), or have uploaded the file, or be an editor on this project ('+ISNULL(@ProjectId,'<NULL>')+') to process the collar file.';
 		RAISERROR(@message2, 18, 0)
 		RETURN (1)
 	END
