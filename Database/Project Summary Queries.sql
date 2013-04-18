@@ -36,7 +36,7 @@
                      )
  
 ----------- Active files in a project with no fixes
-     SELECT CF.ProjectId, CF.[FileName], PF.[FileName] AS Parent, CF.Format, C.CollarModel, C.CollarId, C.ArgosId
+     SELECT CF.ProjectId, CF.[FileName], PF.[FileName] AS Parent, CF.Format, C.CollarModel, C.CollarId, D.PlatformId
        FROM CollarFiles AS CF
  INNER JOIN Collars as C
          ON CF.CollarManufacturer = C.CollarManufacturer AND CF.CollarId = C.CollarId
@@ -44,6 +44,8 @@
          ON CF.ParentFileId = PF.FileId
   LEFT JOIN CollarFixes AS X
          ON CF.FileId = X.FileId
+  LEFT JOIN ArgosDeployments AS D
+         ON CF.ArgosDeploymentId = D.DeploymentId
  INNER JOIN LookupCollarFileFormats AS F
          ON CF.Format = F.Code
       WHERE F.ArgosData = 'N'

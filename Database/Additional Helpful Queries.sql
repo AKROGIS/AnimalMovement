@@ -23,7 +23,7 @@
 
  
 ----------- Collars where Argos downloads have yielded no data
-     SELECT C.Manager, C.CollarModel, C.ArgosId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
+     SELECT C.Manager, C.CollarModel, A.PlatformId AS ArgosId, C.CollarId AS CTN, D.ProjectId, D.AnimalId
        FROM Collars AS C
   LEFT JOIN CollarDeployments AS D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
@@ -37,7 +37,7 @@
                           )
         AND C.DisposalDate IS NULL
         AND D.RetrievalDate IS NULL
-   ORDER BY C.Manager, C.CollarModel, C.ArgosId
+   ORDER BY C.Manager, C.CollarModel, A.PlatformId
   
 
 ----------- ERROR: ArgosFiles_WithoutSummary
@@ -204,10 +204,12 @@
 
 ----------- Warning - Mismatch in Collar TPF Data (Changes in Frequency are permissible)
      SELECT C.*, T.*
-       FROM Collars AS C
+       FROM ArgosDeployments AS D
  INNER JOIN AllTpfFileData AS T
-         ON C.CollarId = T.CTN 
-      WHERE C.ArgosId <> T.[Platform]
+         ON D.CollarId = T.CTN 
+ INNER JOIN Collars AS C
+         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId 
+      WHERE D.PlatformId <> T.[Platform]
          OR C.Frequency <> T.Frequency
 
 ----------- The following queries should return no records
@@ -260,11 +262,11 @@
    ORDER BY CTN
 
 ----------- ERROR - Mismatch in Collar TPF Data (Changes in Frequency are permissible)
-     SELECT C.*, T.*
-       FROM Collars AS C
+     SELECT D.*, T.*
+       FROM ArgosDeployments AS D
  INNER JOIN AllTpfFileData AS T
-         ON C.CollarId = T.CTN 
-      WHERE C.ArgosId <> T.[Platform]
+         ON D.CollarId = T.CTN 
+      WHERE D.PlatformId <> T.[Platform]
 
 ----------- TPF TimeStamp check
      SELECT C.*, T.[TimeStamp], DATEDIFF(day,T.[TimeStamp], C.StartDate) as diff
@@ -377,78 +379,6 @@
 				   HAVING COUNT (*) > 1
             )
    ORDER BY PlatformId, startdate
-
-
------------ Show days between this collars disposal, and the next collars start
------------     Assumes all collars have a Alpha suffix, and that there are no gaps.
------------     if there is an A version, and then a C version with no B version, the results will be incorrect.
------------     Inspect for those manually
-     SELECT C1.CollarId, C1.DisposalDate, C2.NextCollar, P.StartDate, P.EndDate, DATEDIFF(DAY, C1.DisposalDate, P.StartDate) AS [Days]
-       FROM Collars AS C1
- INNER JOIN (SELECT CollarManufacturer, CollarID, LEFT(CollarId,6) + CHAR(ASCII(SUBSTRING(collarId,7,1)) + 1) AS NextCollar 
-               FROM Collars
-              WHERE CollarManufacturer = 'Telonics' AND CollarModel = 'Gen4') AS C2
-         ON C1.CollarManufacturer = C2.CollarManufacturer AND C1.CollarId = C2.CollarId
- INNER JOIN CollarParameters AS P
-         ON C2.CollarManufacturer = P.CollarManufacturer AND C2.NextCollar = P.CollarId
-      WHERE C1.ArgosId IN (SELECT ArgosId FROM Collars GROUP BY ArgosId HAVING COUNT(*) > 1)
-
-
------------ Show days between this collars disposal, and the next collars start
------------     There should be not be two consecutive NULL disposal Dates.
------------     The disposal date should be the Start Date of the subsequent record
-     SELECT C.ArgosId, C.CollarId, C.DisposalDate, P.StartDate
-       FROM Collars AS C
-  LEFT JOIN CollarParameters AS P
-         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-      WHERE C.ArgosId IN (SELECT ArgosId FROM Collars GROUP BY ArgosId HAVING COUNT(*) > 1)
-   ORDER BY C.ArgosId, C.CollarId
-
-
------------ Collar Deployment Dates for Collars sharing an Argos Id
------------     This needs to be reviewed sequentially for errors and issues.
-     SELECT C.ArgosId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
-            CONVERT(VARCHAR(10), D.RetrievalDate, 101) AS Retrieved,  CONVERT(VARCHAR(10), C.DisposalDate, 101) AS Disposed
-       FROM Collars AS C
-  LEFT JOIN CollarDeployments AS D
-         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE C.ArgosId IN (SELECT ArgosId FROM Collars GROUP BY ArgosId HAVING COUNT(*) > 1)
-   ORDER BY C.ArgosId , C.CollarId, D.DeploymentDate
-
-
------------ ERROR - Collar Deployments that need to be fixed
-     SELECT C.Manager, C.ArgosId, C.CollarId, CONVERT(VARCHAR(10), D.DeploymentDate, 101) As Deployed,
-            CONVERT(VARCHAR(10), D.RetrievalDate, 101) AS Retrieved,  CONVERT(VARCHAR(10), C.DisposalDate, 101) AS Disposed
-       FROM Collars AS C
-  LEFT JOIN CollarDeployments AS D
-         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE C.ArgosId IN (
-                -- ERROR - Collar deployed after they are disposed
-                SELECT DISTINCT C.ArgosId
-                  FROM Collars AS C
-             LEFT JOIN CollarDeployments AS D
-                    ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-                 WHERE C.DisposalDate < D.DeploymentDate OR C.DisposalDate < D.RetrievalDate
-                    OR (D.DeploymentDate IS NOT NULL AND D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
-            )
-   ORDER BY C.ArgosId, C.CollarId, D.DeploymentDate
-
-
------------ FIXMES - Files on collars with deployment errors
-     SELECT C.ArgosId, C.CollarId, F.FileId, F.FileName, F.Format, F.Status
-       FROM Collars AS C
-  LEFT JOIN CollarFiles AS F
-         ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
-      WHERE C.ArgosId IN (
-                -- ERROR - Collar deployed after they are disposed
-                SELECT DISTINCT C.ArgosId
-                  FROM Collars AS C
-             LEFT JOIN CollarDeployments AS D
-                    ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-                 WHERE C.DisposalDate < D.DeploymentDate OR C.DisposalDate < D.RetrievalDate
-                    OR (D.DeploymentDate IS NOT NULL AND D.RetrievalDate IS NULL AND C.DisposalDate IS NOT NULL)
-            )
-   ORDER BY C.ArgosId, C.CollarId, F.FileId
 
 
 
@@ -662,15 +592,15 @@
 
 
 ----------- Show all the records for an ArgosId
-    DECLARE @ArgosID VARCHAR(16) = '37779'
-     SELECT * FROM Collars WHERE ArgosId = @ArgosID
-     SELECT * FROM CollarDeployments WHERE CollarId IN (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
-     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) ORDER BY fileid
-     SELECT FileId, CollarId FROM CollarFixes WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID) GROUP BY FileId, CollarId ORDER BY fileid
-     SELECT * FROM AllTpfFileData WHERE Platform = @ArgosID
-     SELECT * FROM CollarParameters WHERE CollarId in (SELECT CollarID FROM Collars WHERE ArgosId = @ArgosID)
-     SELECT * FROM ArgosDeployments WHERE PlatformId = @ArgosID
-     SELECT * FROM ArgosDownloads WHERE PlatformId = @ArgosID
+    DECLARE @PlatformID VARCHAR(16) = '37779'
+     SELECT * FROM Collars AS C JOIN ArgosDeployments AS D on D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId WHERE D.PlatformId = @PlatformID
+     SELECT * FROM CollarDeployments WHERE CollarId IN (SELECT CollarID FROM ArgosDeployments WHERE PlatformId = @PlatformID)
+     SELECT FileId, CollarId, [FileName], [Format], [Status] FROM CollarFiles WHERE CollarId in (SELECT CollarID FROM ArgosDeployments WHERE PlatformId = @PlatformID) ORDER BY fileid
+     SELECT FileId, CollarId FROM CollarFixes WHERE CollarId in (SELECT CollarID FROM ArgosDeployments WHERE PlatformId = @PlatformID) GROUP BY FileId, CollarId ORDER BY fileid
+     SELECT * FROM AllTpfFileData WHERE Platform = @PlatformID
+     SELECT * FROM CollarParameters WHERE CollarId in (SELECT CollarID FROM ArgosDeployments WHERE PlatformId = @PlatformID)
+     SELECT * FROM ArgosDeployments WHERE PlatformId = @PlatformID
+     SELECT * FROM ArgosDownloads WHERE PlatformId = @PlatformID
 
 
 /*

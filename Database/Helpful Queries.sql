@@ -63,12 +63,14 @@
 
 ----------- Collars Not Currently Deployed
      SELECT L.Name, C.CollarId, C.CollarModel, C.Frequency, 
-            C.SerialNumber, C.ArgosId, C.Owner, C.Manager, C.Notes
+            C.SerialNumber, AD.PlatformId AS ArgosId, C.[Owner], C.Manager, C.Notes
        FROM dbo.Collars AS C
  INNER JOIN dbo.CollarDeployments D
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId 
  INNER JOIN dbo.LookupCollarManufacturers AS L
          ON C.CollarManufacturer = L.CollarManufacturer
+  LEFT JOIN ArgosDeployments AS AD
+         ON AD.CollarManufacturer = C.CollarManufacturer AND AD.CollarId = C.CollarId
   LEFT JOIN (
              ------ CurrentDeployments
              SELECT DeploymentId
@@ -181,12 +183,14 @@
 ----------- WARNING_ActiveArgosPlatformsWithAnalysisProblems
 ----------- -- Active Argos platforms with active PPF or without Gen3period or TPF file
      SELECT C.Manager, CD.ProjectId, CD.AnimalId, C.CollarModel, C.CollarId AS CTN,
-            A.PlatformId AS ArgosId, C.Gen3Period, CPF.[FileName] AS ParameterFile
+            A.PlatformId AS ArgosId, CP.Gen3Period, CPF.[FileName] AS ParameterFile
        FROM ArgosPlatforms AS A
  INNER JOIN ArgosPrograms AS P
          ON A.ProgramId = P.ProgramId
+ INNER JOIN ArgosDeployments AS AD
+         ON AD.PlatformId = A.PlatformId
  INNER JOIN Collars AS C
-         ON C.ArgosId = A.PlatformId
+         ON C.CollarManufacturer = AD.CollarManufacturer AND C.CollarId = AD.CollarId
  INNER JOIN CollarDeployments as CD
          ON C.CollarManufacturer = CD.CollarManufacturer AND C.CollarId = CD.CollarId
   LEFT JOIN CollarParameters as CP
@@ -207,7 +211,7 @@
         AND (C.DisposalDate IS NULL OR getdate() < C.DisposalDate)
         AND (CD.RetrievalDate IS NULL OR getdate() < CD.RetrievalDate)
         AND (  (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3' AND CPF.Format <> 'B')
-            OR (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3' AND C.Gen3Period IS NULL)
+            OR (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3' AND CP.Gen3Period IS NULL)
             OR (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4' AND CPF.Format IS NULL)
             OR (C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4' AND CPF.Format <> 'A')
             )
@@ -215,7 +219,7 @@
 
 ----------- WARNING_AllTelonicGen4CollarsWithoutActiveTpfFile
 ----------- -- All Telonics Gen4 Argos Collars without a active TPF File
-     SELECT C.Manager, CD.ProjectId, CD.AnimalId, C.CollarId as CTN, C.ArgosId as ArgosID,  
+     SELECT C.Manager, CD.ProjectId, CD.AnimalId, C.CollarId as CTN, AD.PlatformId AS ArgosId,  
             C.Frequency, C.DisposalDate, CD.RetrievalDate, C.Notes,
             CPF.[FileName] AS ParameterFile, CPF.Format, CPF.[Status]
        FROM Collars AS C
@@ -225,8 +229,10 @@
          ON C.CollarManufacturer = CP.CollarManufacturer AND C.CollarId = CP.CollarId
   LEFT JOIN CollarParameterFiles as CPF
          ON CP.FileId = CPF.FileId           
+  LEFT JOIN ArgosDeployments AS AD
+         ON AD.CollarManufacturer = C.CollarManufacturer AND AD.CollarId = C.CollarId
       WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4'
-        AND C.ArgosId IS NOT NULL
+        AND AD.PlatformId IS NOT NULL
         AND (CPF.Format IS NULL -- no parameter file
          OR C.CollarId NOT IN ( -- collars with active TPF files
                SELECT CP.CollarId
@@ -238,22 +244,25 @@
 
 
 ----------- WARNING_ArgosPlatformsNotInCollars
------------ -- Known Argos Platforms that are not in the Collars table 
+----------- -- Known Argos Platforms that are never deployed 
      SELECT A.Manager, P.ProgramId, P.PlatformId, P.Active, P.Notes
        FROM ArgosPlatforms AS P
  INNER JOIN ArgosPrograms AS A
          ON P.ProgramId = A.ProgramId
-  LEFT JOIN Collars AS C
-         ON P.PlatformId = C.ArgosId
-      WHERE C.CollarManufacturer IS NULL
+  LEFT JOIN ArgosDeployments AS D
+         ON D.PlatformId = P.PlatformId
+      WHERE D.PlatformId IS NULL
+   ORDER BY A.ProgramId
 
 
 ----------- WARNING_ArgosPlatformsNotTelonicsGen3or4
------------ -- Known Argos Platforms that are not a Telonics Gen3/4 GPS Collars 
+----------- -- Deployed Argos Platforms that are not on a Telonics Gen3/4 GPS Collars 
      SELECT P.*, C.*
        FROM ArgosPlatforms AS P
+  LEFT JOIN ArgosDeployments AS D
+         ON D.PlatformId = P.PlatformId
   LEFT JOIN Collars AS C
-         ON P.PlatformId = C.ArgosId
+         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
       WHERE C.CollarManufacturer IS NOT NULL
         AND C.CollarManufacturer <> 'Telonics' OR C.CollarModel NOT IN ('Gen3', 'Gen4')
 
@@ -272,35 +281,25 @@
          ON cp.FileId = cpf.FileId
 
 
------------ WARNING_TelonicArgosCollarsWithNoPlatform
------------ -- Telonics Gen3/4 Argos GPS Collars with no matching record in ArgosPlatforms
-    SELECT C.Manager, C.Owner, C.CollarModel, C.CollarId as CTN, C.ArgosId as ArgosID, C.Frequency, C.DisposalDate
-      FROM Collars AS C
- LEFT JOIN ArgosPlatforms AS P
-        ON P.PlatformId = C.ArgosId
-     WHERE C.ArgosId IS NOT NULL
-       AND P.PlatformId IS NULL
-       AND C.CollarManufacturer = 'Telonics' AND C.CollarModel IN ('Gen3', 'Gen4')
-
-
 ----------- WARNING_TelonicsCollarsMissingArgosId
-     SELECT CollarId, CollarModel, Manager, DisposalDate
-       FROM Collars
-      WHERE CollarManufacturer = 'Telonics' AND CollarModel IN ('Gen3', 'Gen4')
-        AND ArgosId IS NULL
+     SELECT C.CollarId, CollarModel, Manager, DisposalDate
+       FROM Collars AS C
+  LEFT JOIN ArgosDeployments AS D
+         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel IN ('Gen3', 'Gen4')
+        AND D.PlatformId IS NULL
 
 
------------ WARNING_TelonicsCollarsSharingAnArgosId
-     SELECT C1.ArgosId, C1.CollarId, C1.DisposalDate, C1.Manager
-       FROM dbo.Collars AS C1
+----------- Collars Sharing An ArgosId
+     SELECT C.*
+       FROM Collars AS C
  INNER JOIN (
-             SELECT ArgosId
-               FROM dbo.Collars
-              WHERE CollarManufacturer = 'Telonics' AND CollarModel IN ('Gen3', 'Gen4')
-           GROUP BY ArgosId, DisposalDate
+             SELECT CollarManufacturer, CollarId
+               FROM ArgosDeployments AS D
+           GROUP BY CollarManufacturer, CollarId
              HAVING COUNT(*) > 1
             ) AS C2
-         ON C1.ArgosId = C2.ArgosId
+         ON C2.CollarManufacturer = C.CollarManufacturer AND C2.CollarId = C.CollarId
 
 
 ----------- WARNING_TelonicsGen3CollarsWithActivePpfFile
@@ -312,11 +311,12 @@
 
 
 ----------- WARNING_TelonicsGen3CollarsWithoutPeriod
-     SELECT CollarId, Manager, Gen3Period
-       FROM Collars
-      WHERE CollarManufacturer = 'Telonics' AND CollarModel = 'Gen3'
-        AND Gen3Period IS NULL
-        AND ArgosId IS NOT NULL
+     SELECT C.CollarId, Manager
+       FROM Collars AS C
+  LEFT JOIN CollarParameters AS P
+         ON P.CollarManufacturer = C.CollarManufacturer AND P.CollarId = C.CollarId
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
+        AND P.Gen3Period IS NULL
 
 
 ----------- WARNING_TelonicsGenParameterFileMismatch
