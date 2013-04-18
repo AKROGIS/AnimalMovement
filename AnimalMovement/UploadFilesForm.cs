@@ -130,6 +130,7 @@ namespace AnimalMovement
 
             //FIXME - This should not be done here, but in some FileLoader Done event
             Cursor.Current = Cursors.Default;
+            UploadButton.Enabled = true;
             UploadButton.Text = "Close";
         }
 
