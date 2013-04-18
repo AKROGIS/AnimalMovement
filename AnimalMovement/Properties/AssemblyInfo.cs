@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 //FIXME - DATABASE - CollarUpdate Trigger - check for Disposal Date/ArgosId conflict; check for disposalDate/parameter startdate conflict
 //FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
-//TODO - Capture issues from argos processing in database for review/correection.
 //TODO - When a new collar is added to the database, we need to create Argos deployments, and update old Argos deployments
 //TODO - When a new TPF file for an existing Collar is added, the old parameters should be ended.
 //TODO - When Updating the Disposal Date of a collar consider adding an end date to the collar parameter (this is not a database requirement)
@@ -13,19 +12,16 @@ using System.Runtime.InteropServices;
 //TODO - Create tab on collar details to show Collar Parametes used on this process this collar
 
 //FIXME - DATABASE - Hide the ArgosPlatforms.Password from all but the Manager, and the Download API
-//FIXME - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
 //FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a new collar is added, or properties (ArgosId, HasGps, Gen3period, Model, DispDate) are changed, then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
-//TODO - DATABASE - Add more unit testing.
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
 //TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
 //TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
 //TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings -- Need special exception for sql_proxy
-//TODO - DATABASE - Fix permissions for processing files, check collar owner, program owner
-//TODO - DATABASE - Add a Release Date to the collardeployment - this will make a lot of logic way more complicated.
+//TODO - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
+//TODO - DATABASE - Add more unit testing.
 
-//FIXME - Adding a AWS file manually will not get it processed, needs to be a special case in the file upload
 //TODO - Add option in UI for requesting no emails be send from the Telonics downloader
 //TODO - provide user interface for checking on status of downloads
 //TODO - Document the optimal "getting started" process, and make sure the code supports it
