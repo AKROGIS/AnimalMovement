@@ -53,7 +53,7 @@ namespace AnimalMovement
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
-            Database.Log = Console.Out;
+            //Database.Log = Console.Out;
             DatabaseFunctions = new AnimalMovementFunctions();
             DatabaseViews = new AnimalMovementViews();
             Collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == ManufacturerId && c.CollarId == CollarId);
@@ -72,12 +72,10 @@ namespace AnimalMovement
             ModelComboBox.DataSource = Database.LookupCollarModels.Where(m => m.CollarManufacturer == Collar.CollarManufacturer);
             ModelComboBox.DisplayMember = "CollarModel";
             ModelComboBox.SelectedItem = Collar.LookupCollarModel;
-            ArgosIdTextBox.Text = Collar.ArgosId;
             HasGpsCheckBox.Checked = Collar.HasGps;
             OwnerTextBox.Text = Collar.Owner;
             SerialNumberTextBox.Text = Collar.SerialNumber;
             FrequencyTextBox.Text = Collar.Frequency.HasValue ?  Collar.Frequency.Value.ToString(CultureInfo.InvariantCulture) : null;
-            PeriodTextBox.Text = Collar.Gen3Period.ToString();
             NotesTextBox.Text = Collar.Notes;
             SetDeploymentDataGrid();
             SetFixesGrid();
@@ -128,13 +126,10 @@ namespace AnimalMovement
         {
             Collar.ProjectInvestigator = (ProjectInvestigator)ManagerComboBox.SelectedItem;
             Collar.LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem;
-            Collar.ArgosId = ArgosIdTextBox.Text;
             Collar.HasGps = HasGpsCheckBox.Checked;
             Collar.Owner = OwnerTextBox.Text;
             Collar.SerialNumber = SerialNumberTextBox.Text;
             Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull() ?? 0;
-            int period;
-            Collar.Gen3Period = Int32.TryParse(PeriodTextBox.Text, out period) ? period : (int?)null;
             Collar.Notes = NotesTextBox.Text;
             if (DisposalDateTimePicker.Checked)
                 Collar.DisposalDate = DisposalDateTimePicker.Value.ToUniversalTime();
@@ -155,13 +150,11 @@ namespace AnimalMovement
             bool editModeEnabled = EditSaveButton.Text == "Save";
             ManagerComboBox.Enabled = editModeEnabled;
             ModelComboBox.Enabled = editModeEnabled;
-            ArgosIdTextBox.Enabled = editModeEnabled;
             HasGpsCheckBox.Enabled = editModeEnabled;
             OwnerTextBox.Enabled = editModeEnabled;
             SerialNumberTextBox.Enabled = editModeEnabled;
             FrequencyTextBox.Enabled = editModeEnabled;
             DisposalDateTimePicker.Enabled = editModeEnabled;
-            PeriodTextBox.Enabled = editModeEnabled;
             NotesTextBox.Enabled = editModeEnabled;
 
             AnimalInfoButton.Enabled = !editModeEnabled && DeploymentDataGridView.RowCount > 0;

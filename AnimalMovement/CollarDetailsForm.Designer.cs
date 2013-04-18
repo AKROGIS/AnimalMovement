@@ -29,21 +29,17 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.label10 = new System.Windows.Forms.Label();
-            this.PeriodTextBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.FrequencyTextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.SerialNumberTextBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
             this.ManagerComboBox = new System.Windows.Forms.ComboBox();
             this.ModelComboBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.NotesTextBox = new System.Windows.Forms.TextBox();
             this.OwnerTextBox = new System.Windows.Forms.TextBox();
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
-            this.ArgosIdTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -61,54 +57,34 @@
             this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DeployRetrieveButton = new System.Windows.Forms.Button();
             this.DeleteDeploymentButton = new System.Windows.Forms.Button();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.CollarTabControl = new System.Windows.Forms.TabControl();
+            this.GeneralTabPage = new System.Windows.Forms.TabPage();
             this.HasGpsCheckBox = new System.Windows.Forms.CheckBox();
             this.label12 = new System.Windows.Forms.Label();
             this.DisposalDateTimePicker = new System.Windows.Forms.DateTimePicker();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.AnimalsTabPage = new System.Windows.Forms.TabPage();
             this.AnimalInfoButton = new System.Windows.Forms.Button();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.FixesTabPage = new System.Windows.Forms.TabPage();
             this.UnhideFixButton = new System.Windows.Forms.Button();
             this.FixConflictsDataGridView = new System.Windows.Forms.DataGridView();
             this.label11 = new System.Windows.Forms.Label();
             this.SummaryLabel = new System.Windows.Forms.Label();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.FilesTabPage = new System.Windows.Forms.TabPage();
             this.ChangeStatusButton = new System.Windows.Forms.Button();
             this.FileInfoButton = new System.Windows.Forms.Button();
             this.FilesDataGridView = new System.Windows.Forms.DataGridView();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.ArgosTabPage = new System.Windows.Forms.TabPage();
+            this.ParametersTabPage = new System.Windows.Forms.TabPage();
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).BeginInit();
-            this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
-            this.tabPage3.SuspendLayout();
+            this.CollarTabControl.SuspendLayout();
+            this.GeneralTabPage.SuspendLayout();
+            this.AnimalsTabPage.SuspendLayout();
+            this.FixesTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FixConflictsDataGridView)).BeginInit();
-            this.tabPage4.SuspendLayout();
+            this.FilesTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FilesDataGridView)).BeginInit();
             this.SuspendLayout();
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(251, 88);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(85, 13);
-            this.label10.TabIndex = 53;
-            this.label10.Text = "Period (minutes):";
-            this.toolTip1.SetToolTip(this.label10, "Instructions on downloading collar data from mfgr (currently not used)");
-            // 
-            // PeriodTextBox
-            // 
-            this.PeriodTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.PeriodTextBox.Location = new System.Drawing.Point(342, 85);
-            this.PeriodTextBox.MaxLength = 200;
-            this.PeriodTextBox.Name = "PeriodTextBox";
-            this.PeriodTextBox.Size = new System.Drawing.Size(101, 20);
-            this.PeriodTextBox.TabIndex = 9;
-            this.toolTip1.SetToolTip(this.PeriodTextBox, "Period (in minutes) between fixes.  Only for processing Argos messages from Telon" +
-        "ics Gen 3 collars");
             // 
             // label9
             // 
@@ -126,13 +102,13 @@
             this.FrequencyTextBox.Location = new System.Drawing.Point(290, 59);
             this.FrequencyTextBox.MaxLength = 32;
             this.FrequencyTextBox.Name = "FrequencyTextBox";
-            this.FrequencyTextBox.Size = new System.Drawing.Size(153, 20);
+            this.FrequencyTextBox.Size = new System.Drawing.Size(73, 20);
             this.FrequencyTextBox.TabIndex = 8;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(8, 62);
+            this.label8.Location = new System.Drawing.Point(8, 40);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(76, 13);
             this.label8.TabIndex = 49;
@@ -143,7 +119,7 @@
             // 
             this.SerialNumberTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SerialNumberTextBox.Location = new System.Drawing.Point(90, 59);
+            this.SerialNumberTextBox.Location = new System.Drawing.Point(90, 36);
             this.SerialNumberTextBox.MaxLength = 100;
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
             this.SerialNumberTextBox.Size = new System.Drawing.Size(129, 20);
@@ -160,16 +136,6 @@
             this.label7.TabIndex = 47;
             this.label7.Text = "Owner:";
             this.toolTip1.SetToolTip(this.label7, "This should be an organization (NPS, FWS, USGS, AKF&G,  etc)");
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(14, 36);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(49, 13);
-            this.label6.TabIndex = 46;
-            this.label6.Text = "Argos Id:";
-            this.toolTip1.SetToolTip(this.label6, "Leave this empty if the collar does not use the Argos system");
             // 
             // ManagerComboBox
             // 
@@ -208,10 +174,10 @@
             this.NotesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.NotesTextBox.Location = new System.Drawing.Point(90, 111);
+            this.NotesTextBox.Location = new System.Drawing.Point(90, 88);
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
-            this.NotesTextBox.Size = new System.Drawing.Size(353, 188);
+            this.NotesTextBox.Size = new System.Drawing.Size(353, 211);
             this.NotesTextBox.TabIndex = 10;
             // 
             // OwnerTextBox
@@ -235,21 +201,10 @@
             this.CollarIdTextBox.Size = new System.Drawing.Size(153, 20);
             this.CollarIdTextBox.TabIndex = 2;
             // 
-            // ArgosIdTextBox
-            // 
-            this.ArgosIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ArgosIdTextBox.Location = new System.Drawing.Point(90, 33);
-            this.ArgosIdTextBox.MaxLength = 16;
-            this.ArgosIdTextBox.Name = "ArgosIdTextBox";
-            this.ArgosIdTextBox.Size = new System.Drawing.Size(56, 20);
-            this.ArgosIdTextBox.TabIndex = 5;
-            this.toolTip1.SetToolTip(this.ArgosIdTextBox, "For Telonics collars this is the Argos Id");
-            // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(48, 114);
+            this.label5.Location = new System.Drawing.Point(46, 88);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(38, 13);
             this.label5.TabIndex = 37;
@@ -279,7 +234,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(34, 9);
+            this.label1.Location = new System.Drawing.Point(32, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(52, 13);
             this.label1.TabIndex = 34;
@@ -438,58 +393,56 @@
             this.DeleteDeploymentButton.UseVisualStyleBackColor = true;
             this.DeleteDeploymentButton.Click += new System.EventHandler(this.DeleteDeploymentButton_Click);
             // 
-            // tabControl1
+            // CollarTabControl
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.CollarTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Location = new System.Drawing.Point(0, 33);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(459, 362);
-            this.tabControl1.TabIndex = 54;
+            this.CollarTabControl.Controls.Add(this.GeneralTabPage);
+            this.CollarTabControl.Controls.Add(this.AnimalsTabPage);
+            this.CollarTabControl.Controls.Add(this.ArgosTabPage);
+            this.CollarTabControl.Controls.Add(this.ParametersTabPage);
+            this.CollarTabControl.Controls.Add(this.FilesTabPage);
+            this.CollarTabControl.Controls.Add(this.FixesTabPage);
+            this.CollarTabControl.Location = new System.Drawing.Point(0, 33);
+            this.CollarTabControl.Name = "CollarTabControl";
+            this.CollarTabControl.SelectedIndex = 0;
+            this.CollarTabControl.Size = new System.Drawing.Size(459, 362);
+            this.CollarTabControl.TabIndex = 54;
             // 
-            // tabPage1
+            // GeneralTabPage
             // 
-            this.tabPage1.Controls.Add(this.HasGpsCheckBox);
-            this.tabPage1.Controls.Add(this.label12);
-            this.tabPage1.Controls.Add(this.DisposalDateTimePicker);
-            this.tabPage1.Controls.Add(this.NotesTextBox);
-            this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.DoneCancelButton);
-            this.tabPage1.Controls.Add(this.EditSaveButton);
-            this.tabPage1.Controls.Add(this.label4);
-            this.tabPage1.Controls.Add(this.label10);
-            this.tabPage1.Controls.Add(this.label5);
-            this.tabPage1.Controls.Add(this.PeriodTextBox);
-            this.tabPage1.Controls.Add(this.ArgosIdTextBox);
-            this.tabPage1.Controls.Add(this.label9);
-            this.tabPage1.Controls.Add(this.FrequencyTextBox);
-            this.tabPage1.Controls.Add(this.OwnerTextBox);
-            this.tabPage1.Controls.Add(this.label8);
-            this.tabPage1.Controls.Add(this.SerialNumberTextBox);
-            this.tabPage1.Controls.Add(this.ModelComboBox);
-            this.tabPage1.Controls.Add(this.label7);
-            this.tabPage1.Controls.Add(this.ManagerComboBox);
-            this.tabPage1.Controls.Add(this.label6);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(451, 336);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "General";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            this.GeneralTabPage.Controls.Add(this.HasGpsCheckBox);
+            this.GeneralTabPage.Controls.Add(this.label12);
+            this.GeneralTabPage.Controls.Add(this.DisposalDateTimePicker);
+            this.GeneralTabPage.Controls.Add(this.NotesTextBox);
+            this.GeneralTabPage.Controls.Add(this.label1);
+            this.GeneralTabPage.Controls.Add(this.DoneCancelButton);
+            this.GeneralTabPage.Controls.Add(this.EditSaveButton);
+            this.GeneralTabPage.Controls.Add(this.label4);
+            this.GeneralTabPage.Controls.Add(this.label5);
+            this.GeneralTabPage.Controls.Add(this.label9);
+            this.GeneralTabPage.Controls.Add(this.FrequencyTextBox);
+            this.GeneralTabPage.Controls.Add(this.OwnerTextBox);
+            this.GeneralTabPage.Controls.Add(this.label8);
+            this.GeneralTabPage.Controls.Add(this.SerialNumberTextBox);
+            this.GeneralTabPage.Controls.Add(this.ModelComboBox);
+            this.GeneralTabPage.Controls.Add(this.label7);
+            this.GeneralTabPage.Controls.Add(this.ManagerComboBox);
+            this.GeneralTabPage.Location = new System.Drawing.Point(4, 22);
+            this.GeneralTabPage.Name = "GeneralTabPage";
+            this.GeneralTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.GeneralTabPage.Size = new System.Drawing.Size(451, 336);
+            this.GeneralTabPage.TabIndex = 0;
+            this.GeneralTabPage.Text = "General";
+            this.GeneralTabPage.UseVisualStyleBackColor = true;
             // 
             // HasGpsCheckBox
             // 
             this.HasGpsCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.HasGpsCheckBox.AutoSize = true;
             this.HasGpsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.HasGpsCheckBox.Location = new System.Drawing.Point(152, 35);
+            this.HasGpsCheckBox.Location = new System.Drawing.Point(376, 61);
             this.HasGpsCheckBox.Name = "HasGpsCheckBox";
             this.HasGpsCheckBox.Size = new System.Drawing.Size(67, 17);
             this.HasGpsCheckBox.TabIndex = 83;
@@ -500,7 +453,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(8, 88);
+            this.label12.Location = new System.Drawing.Point(8, 65);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(76, 13);
             this.label12.TabIndex = 82;
@@ -515,7 +468,7 @@
             this.DisposalDateTimePicker.CustomFormat = " ";
             this.DisposalDateTimePicker.Enabled = false;
             this.DisposalDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.DisposalDateTimePicker.Location = new System.Drawing.Point(90, 85);
+            this.DisposalDateTimePicker.Location = new System.Drawing.Point(90, 62);
             this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
             this.DisposalDateTimePicker.ShowCheckBox = true;
             this.DisposalDateTimePicker.Size = new System.Drawing.Size(129, 20);
@@ -523,19 +476,19 @@
             this.toolTip1.SetToolTip(this.DisposalDateTimePicker, "The date the collar was lost, destroyed, or retired");
             this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
             // 
-            // tabPage2
+            // AnimalsTabPage
             // 
-            this.tabPage2.Controls.Add(this.AnimalInfoButton);
-            this.tabPage2.Controls.Add(this.DeploymentDataGridView);
-            this.tabPage2.Controls.Add(this.DeleteDeploymentButton);
-            this.tabPage2.Controls.Add(this.DeployRetrieveButton);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(451, 336);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Animals";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.AnimalsTabPage.Controls.Add(this.AnimalInfoButton);
+            this.AnimalsTabPage.Controls.Add(this.DeploymentDataGridView);
+            this.AnimalsTabPage.Controls.Add(this.DeleteDeploymentButton);
+            this.AnimalsTabPage.Controls.Add(this.DeployRetrieveButton);
+            this.AnimalsTabPage.Location = new System.Drawing.Point(4, 22);
+            this.AnimalsTabPage.Name = "AnimalsTabPage";
+            this.AnimalsTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.AnimalsTabPage.Size = new System.Drawing.Size(451, 336);
+            this.AnimalsTabPage.TabIndex = 1;
+            this.AnimalsTabPage.Text = "Animals";
+            this.AnimalsTabPage.UseVisualStyleBackColor = true;
             // 
             // AnimalInfoButton
             // 
@@ -548,19 +501,19 @@
             this.AnimalInfoButton.UseVisualStyleBackColor = true;
             this.AnimalInfoButton.Click += new System.EventHandler(this.AnimalInfoButton_Click);
             // 
-            // tabPage3
+            // FixesTabPage
             // 
-            this.tabPage3.Controls.Add(this.UnhideFixButton);
-            this.tabPage3.Controls.Add(this.FixConflictsDataGridView);
-            this.tabPage3.Controls.Add(this.label11);
-            this.tabPage3.Controls.Add(this.SummaryLabel);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(451, 336);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Fixes";
-            this.tabPage3.UseVisualStyleBackColor = true;
+            this.FixesTabPage.Controls.Add(this.UnhideFixButton);
+            this.FixesTabPage.Controls.Add(this.FixConflictsDataGridView);
+            this.FixesTabPage.Controls.Add(this.label11);
+            this.FixesTabPage.Controls.Add(this.SummaryLabel);
+            this.FixesTabPage.Location = new System.Drawing.Point(4, 22);
+            this.FixesTabPage.Name = "FixesTabPage";
+            this.FixesTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.FixesTabPage.Size = new System.Drawing.Size(451, 336);
+            this.FixesTabPage.TabIndex = 2;
+            this.FixesTabPage.Text = "Fixes";
+            this.FixesTabPage.UseVisualStyleBackColor = true;
             // 
             // UnhideFixButton
             // 
@@ -613,18 +566,18 @@
             this.SummaryLabel.TabIndex = 0;
             this.SummaryLabel.Text = "Summary";
             // 
-            // tabPage4
+            // FilesTabPage
             // 
-            this.tabPage4.Controls.Add(this.ChangeStatusButton);
-            this.tabPage4.Controls.Add(this.FileInfoButton);
-            this.tabPage4.Controls.Add(this.FilesDataGridView);
-            this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(451, 336);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Files";
-            this.tabPage4.UseVisualStyleBackColor = true;
+            this.FilesTabPage.Controls.Add(this.ChangeStatusButton);
+            this.FilesTabPage.Controls.Add(this.FileInfoButton);
+            this.FilesTabPage.Controls.Add(this.FilesDataGridView);
+            this.FilesTabPage.Location = new System.Drawing.Point(4, 22);
+            this.FilesTabPage.Name = "FilesTabPage";
+            this.FilesTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.FilesTabPage.Size = new System.Drawing.Size(451, 336);
+            this.FilesTabPage.TabIndex = 3;
+            this.FilesTabPage.Text = "Files";
+            this.FilesTabPage.UseVisualStyleBackColor = true;
             // 
             // ChangeStatusButton
             // 
@@ -669,12 +622,32 @@
             this.FilesDataGridView.SelectionChanged += new System.EventHandler(this.FilesDataGridView_SelectionChanged);
             this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);
             // 
+            // ArgosTabPage
+            // 
+            this.ArgosTabPage.Location = new System.Drawing.Point(4, 22);
+            this.ArgosTabPage.Name = "ArgosTabPage";
+            this.ArgosTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.ArgosTabPage.Size = new System.Drawing.Size(451, 336);
+            this.ArgosTabPage.TabIndex = 4;
+            this.ArgosTabPage.Text = "Argos";
+            this.ArgosTabPage.UseVisualStyleBackColor = true;
+            // 
+            // ParametersTabPage
+            // 
+            this.ParametersTabPage.Location = new System.Drawing.Point(4, 22);
+            this.ParametersTabPage.Name = "ParametersTabPage";
+            this.ParametersTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.ParametersTabPage.Size = new System.Drawing.Size(451, 336);
+            this.ParametersTabPage.TabIndex = 5;
+            this.ParametersTabPage.Text = "Parameters";
+            this.ParametersTabPage.UseVisualStyleBackColor = true;
+            // 
             // CollarDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(459, 395);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.CollarTabControl);
             this.Controls.Add(this.ManufacturerTextBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.CollarIdTextBox);
@@ -684,14 +657,14 @@
             this.Name = "CollarDetailsForm";
             this.Text = "Collar Details";
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).EndInit();
-            this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage3.ResumeLayout(false);
-            this.tabPage3.PerformLayout();
+            this.CollarTabControl.ResumeLayout(false);
+            this.GeneralTabPage.ResumeLayout(false);
+            this.GeneralTabPage.PerformLayout();
+            this.AnimalsTabPage.ResumeLayout(false);
+            this.FixesTabPage.ResumeLayout(false);
+            this.FixesTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FixConflictsDataGridView)).EndInit();
-            this.tabPage4.ResumeLayout(false);
+            this.FilesTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.FilesDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -700,21 +673,17 @@
 
         #endregion
 
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox PeriodTextBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox FrequencyTextBox;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox SerialNumberTextBox;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ComboBox ManagerComboBox;
         private System.Windows.Forms.ComboBox ModelComboBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox NotesTextBox;
         private System.Windows.Forms.TextBox OwnerTextBox;
         private System.Windows.Forms.TextBox CollarIdTextBox;
-        private System.Windows.Forms.TextBox ArgosIdTextBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label2;
@@ -732,16 +701,16 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DeployDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn RetrieveDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn DeploymentColumn;
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.TabControl CollarTabControl;
+        private System.Windows.Forms.TabPage GeneralTabPage;
+        private System.Windows.Forms.TabPage AnimalsTabPage;
+        private System.Windows.Forms.TabPage FixesTabPage;
         private System.Windows.Forms.DataGridView FixConflictsDataGridView;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label SummaryLabel;
         private System.Windows.Forms.Button AnimalInfoButton;
         private System.Windows.Forms.Button UnhideFixButton;
-        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.TabPage FilesTabPage;
         private System.Windows.Forms.DataGridView FilesDataGridView;
         private System.Windows.Forms.Button FileInfoButton;
         private System.Windows.Forms.Label label12;
@@ -749,5 +718,7 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.CheckBox HasGpsCheckBox;
         private System.Windows.Forms.Button ChangeStatusButton;
+        private System.Windows.Forms.TabPage ArgosTabPage;
+        private System.Windows.Forms.TabPage ParametersTabPage;
     }
 }
