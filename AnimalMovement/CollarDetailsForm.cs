@@ -345,16 +345,15 @@ namespace AnimalMovement
                     Start = a.StartDate == null ? "Long ago" : a.StartDate.Value.ToString("g"),
                     End = a.EndDate == null ? "Never" : a.EndDate.Value.ToString("g")
                 }).ToList();
-
+            ArgosDataGridView.Columns[0].Visible = false;
+            EnableArgosControls();
         }
 
         private void EnableArgosControls()
         {
             AddArgosButton.Enabled = !IsEditMode && IsEditor;
-            DeleteArgosButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count > 0 &&
-                                            ParametersDataGridView.Columns.Count > 0;
-            InfoArgosButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1 &&
-                                          ParametersDataGridView.Columns.Count > 0;
+            DeleteArgosButton.Enabled = !IsEditMode && IsEditor && ArgosDataGridView.SelectedRows.Count > 0;
+            InfoArgosButton.Enabled = !IsEditMode && ArgosDataGridView.SelectedRows.Count == 1;
         }
 
         private void ArgosDataChanged()
@@ -439,18 +438,15 @@ namespace AnimalMovement
                               .ToList();
                     break;
             }
-            if (ParametersDataGridView.Columns.Count > 0)
-                ParametersDataGridView.Columns[0].Visible = false;
+            ParametersDataGridView.Columns[0].Visible = false;
             EnableParametersControls();
         }
 
         private void EnableParametersControls()
         {
             AddParameterButton.Enabled = !IsEditMode && IsEditor;
-            DeleteParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count > 0 &&
-                                            ParametersDataGridView.Columns.Count > 0;
-            InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1 &&
-                                          ParametersDataGridView.Columns.Count > 0;
+            DeleteParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count > 0;
+            InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1;
         }
 
         private void ParametersDataChanged()
