@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
@@ -16,7 +17,7 @@ namespace AnimalMovement
         private string CurrentUser { get; set; }
         private Collar Collar { get; set; }
         private bool Deployed { get; set; }
-        private bool IsCollarOwner { get; set; }
+        private bool IsEditor { get; set; }
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
@@ -43,7 +44,7 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsCollarOwner = string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase);
+            IsEditor = string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase);
             Deployed = Collar.CollarDeployments.Any(d => d.RetrievalDate == null);
             ManufacturerTextBox.Text = Collar.LookupCollarManufacturer.Name;
             CollarIdTextBox.Text = Collar.CollarId;
@@ -103,7 +104,7 @@ namespace AnimalMovement
             SerialNumberTextBox.Text = Collar.SerialNumber;
             FrequencyTextBox.Text = Collar.Frequency.HasValue ? Collar.Frequency.Value.ToString(CultureInfo.InvariantCulture) : null;
             NotesTextBox.Text = Collar.Notes;
-            EditSaveButton.Enabled = IsCollarOwner;
+            EditSaveButton.Enabled = IsEditor;
             ConfigureDatePicker();
             SetEditingControls();
         }
@@ -138,8 +139,8 @@ namespace AnimalMovement
             NotesTextBox.Enabled = IsEditMode;
 
             AnimalInfoButton.Enabled = !IsEditMode && DeploymentDataGridView.RowCount > 0;
-            DeleteDeploymentButton.Enabled = !IsEditMode && IsCollarOwner && DeploymentDataGridView.RowCount > 0;
-            DeployRetrieveButton.Enabled = !IsEditMode && IsCollarOwner;
+            DeleteDeploymentButton.Enabled = !IsEditMode && IsEditor && DeploymentDataGridView.RowCount > 0;
+            DeployRetrieveButton.Enabled = !IsEditMode && IsEditor;
             ChangeFileStatusButton.Enabled = !IsEditMode;
         }
 
@@ -274,9 +275,7 @@ namespace AnimalMovement
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             Cursor.Current = Cursors.Default;
-            OnDatabaseChanged();
-            LoadDataContext();
-            SetupAnimalsTab();
+            AnimalDataChanged();
         }
 
         private void DeployRetrieveButton_Click(object sender, EventArgs e)
@@ -309,11 +308,8 @@ namespace AnimalMovement
                 return;
             }
             Cursor.Current = Cursors.Default;
-            OnDatabaseChanged();
-            LoadDataContext();
-            SetupAnimalsTab();
+            AnimalDataChanged();
         }
-
 
         private void AnimalInfoButton_Click(object sender, EventArgs e)
         {
@@ -323,7 +319,15 @@ namespace AnimalMovement
             if (item == null)
                 return;
             var form = new AnimalDetailsForm(item.Deployment.ProjectId, item.AnimalId, CurrentUser);
+            form.DatabaseChanged += (o, x) => AnimalDataChanged();
             form.Show(this);
+        }
+
+        private void AnimalDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupAnimalsTab();
         }
 
         #endregion
@@ -333,22 +337,79 @@ namespace AnimalMovement
 
         private void SetupArgosTab()
         {
-            ArgoDataGridView.DataSource =
+            ArgosDataGridView.DataSource =
                 Collar.ArgosDeployments.Select(a => new
                 {
+                    Id = a.DeploymentId,
                     Argos_Id = a.PlatformId,
                     Start = a.StartDate == null ? "Long ago" : a.StartDate.Value.ToString("g"),
                     End = a.EndDate == null ? "Never" : a.EndDate.Value.ToString("g")
                 }).ToList();
+
+        }
+
+        private void EnableArgosControls()
+        {
+            AddArgosButton.Enabled = !IsEditMode && IsEditor;
+            DeleteArgosButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count > 0 &&
+                                            ParametersDataGridView.Columns.Count > 0;
+            InfoArgosButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1 &&
+                                          ParametersDataGridView.Columns.Count > 0;
+        }
+
+        private void ArgosDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupArgosTab();
+        }
+
+
+        private void AddArgosButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddArgosDeploymentForm(Collar);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteArgosButton_Click(object sender, EventArgs e)
+        {
+            if (ArgosDataGridView.SelectedRows.Count < 1 || ArgosDataGridView.Columns.Count < 1)
+                return;
+            foreach (DataGridViewRow row in ArgosDataGridView.SelectedRows)
+            {
+                var deploymentId = (int)row.Cells[0].Value;
+                var argosDeployment = Collar.ArgosDeployments.First(d => d.DeploymentId == deploymentId);
+                Database.ArgosDeployments.DeleteOnSubmit(argosDeployment);
+            }
+            if (SubmitChanges())
+                ArgosDataChanged();
+        }
+
+        private void InfoArgosButton_Click(object sender, EventArgs e)
+        {
+            if (ArgosDataGridView.SelectedRows.Count < 1 || ArgosDataGridView.Columns.Count < 1)
+                return;
+            var deploymentId = (int)ArgosDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new ArgosDeploymentDetailsForm(deploymentId);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void ArgosDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            InfoArgosButton_Click(sender, e);
+        }
+
+        private void ArgosDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableArgosControls();
         }
 
         #endregion
 
 
         #region Parameters Tab
-
-        //TODO - View parameter file info on the Collar Dialog
-        //TODO - Identify collars with multiple parameter files, so dates can be added
 
         private void SetupParametersTab()
         {
@@ -360,7 +421,8 @@ namespace AnimalMovement
                             p =>
                             new
                                 {
-                                    Period = p.Gen3Period < 60 ? p.Gen3Period + " min" : p.Gen3Period/60 + " hrs",
+                                    Id = p.ParameterId,
+                                    Period = p.Gen3Period < 60 ? p.Gen3Period + " min" : p.Gen3Period / 60 + " hrs",
                                     File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
                                     Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
                                     End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("g")
@@ -369,6 +431,7 @@ namespace AnimalMovement
                 case "Gen4":
                     ParametersDataGridView.DataSource =
                         Collar.CollarParameters.Select(p => new {
+                            Id = p.ParameterId,
                             File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
                             Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
                             End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("g")
@@ -376,6 +439,66 @@ namespace AnimalMovement
                               .ToList();
                     break;
             }
+            if (ParametersDataGridView.Columns.Count > 0)
+                ParametersDataGridView.Columns[0].Visible = false;
+            EnableParametersControls();
+        }
+
+        private void EnableParametersControls()
+        {
+            AddParameterButton.Enabled = !IsEditMode && IsEditor;
+            DeleteParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count > 0 &&
+                                            ParametersDataGridView.Columns.Count > 0;
+            InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1 &&
+                                          ParametersDataGridView.Columns.Count > 0;
+        }
+
+        private void ParametersDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupParametersTab();
+        }
+
+        private void AddParameterButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddCollarParametersForm(Collar);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteParameterButton_Click(object sender, EventArgs e)
+        {
+            if (ParametersDataGridView.SelectedRows.Count < 1 || ParametersDataGridView.Columns.Count < 1)
+                return;
+            foreach (DataGridViewRow row in ParametersDataGridView.SelectedRows)
+            {
+                var parameterId = (int) row.Cells[0].Value;
+                var collarParameter = Collar.CollarParameters.First(p => p.ParameterId == parameterId);
+                Database.CollarParameters.DeleteOnSubmit(collarParameter);
+            }
+            if (SubmitChanges())
+                ParametersDataChanged();
+        }
+
+        private void InfoParameterButton_Click(object sender, EventArgs e)
+        {
+            if (ParametersDataGridView.SelectedRows.Count < 1 || ParametersDataGridView.Columns.Count < 1)
+                return;
+            var parameterId = (int)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new CollarParametersDetailsForm(parameterId, CurrentUser);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void ParametersDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            InfoParameterButton_Click(sender, e);
+        }
+
+        private void ParametersDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableParametersControls();
         }
 
         #endregion
@@ -394,7 +517,7 @@ namespace AnimalMovement
         private void EnableFileButtons()
         {
             FileInfoButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode && FilesDataGridView.SelectedRows.Count == 1;
-            ChangeFileStatusButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode;
+            ChangeFileStatusButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode && IsEditor;
             if (FilesDataGridView.SelectedRows.Count > 1)
             {
                 var firstRowStatus = (string)FilesDataGridView.SelectedRows[0].Cells["Status"].Value;
@@ -413,12 +536,8 @@ namespace AnimalMovement
             if (item == null)
                 return;
             var form = new FileDetailsForm(item.FileId, CurrentUser);
+            form.DatabaseChanged += (o, x) => FileDataChanged();
             form.Show(this);
-        }
-
-        private void FilesDataGridView_SelectionChanged(object sender, EventArgs e)
-        {
-            EnableFileButtons();
         }
 
         private void ChangeFileStatusButton_Click(object sender, EventArgs e)
@@ -447,9 +566,19 @@ namespace AnimalMovement
                 return;
             }
             Cursor.Current = Cursors.Default;
+            FileDataChanged();
+        }
+
+        private void FileDataChanged()
+        {
             OnDatabaseChanged();
             LoadDataContext();
             SetupFilesTab();
+        }
+
+        private void FilesDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableFileButtons();
         }
 
         #endregion
@@ -515,6 +644,27 @@ namespace AnimalMovement
 
         #endregion
 
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
 
         private void OnDatabaseChanged()
         {
