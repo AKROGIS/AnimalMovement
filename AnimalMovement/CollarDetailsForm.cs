@@ -17,6 +17,7 @@ namespace AnimalMovement
         private Collar Collar { get; set; }
         private bool Deployed { get; set; }
         private bool IsCollarOwner { get; set; }
+        private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
         internal CollarDetailsForm(string mfgrId, string collarId, string user)
@@ -126,19 +127,20 @@ namespace AnimalMovement
 
         private void SetEditingControls()
         {
-            bool editModeEnabled = EditSaveButton.Text == "Save";
-            ManagerComboBox.Enabled = editModeEnabled;
-            ModelComboBox.Enabled = editModeEnabled;
-            HasGpsCheckBox.Enabled = editModeEnabled;
-            OwnerTextBox.Enabled = editModeEnabled;
-            SerialNumberTextBox.Enabled = editModeEnabled;
-            FrequencyTextBox.Enabled = editModeEnabled;
-            DisposalDateTimePicker.Enabled = editModeEnabled;
-            NotesTextBox.Enabled = editModeEnabled;
+            IsEditMode = EditSaveButton.Text == "Save";
+            ManagerComboBox.Enabled = IsEditMode;
+            ModelComboBox.Enabled = IsEditMode;
+            HasGpsCheckBox.Enabled = IsEditMode;
+            OwnerTextBox.Enabled = IsEditMode;
+            SerialNumberTextBox.Enabled = IsEditMode;
+            FrequencyTextBox.Enabled = IsEditMode;
+            DisposalDateTimePicker.Enabled = IsEditMode;
+            NotesTextBox.Enabled = IsEditMode;
 
-            AnimalInfoButton.Enabled = !editModeEnabled && DeploymentDataGridView.RowCount > 0;
-            DeleteDeploymentButton.Enabled = !editModeEnabled && IsCollarOwner && DeploymentDataGridView.RowCount > 0;
-            DeployRetrieveButton.Enabled = !editModeEnabled && IsCollarOwner;
+            AnimalInfoButton.Enabled = !IsEditMode && DeploymentDataGridView.RowCount > 0;
+            DeleteDeploymentButton.Enabled = !IsEditMode && IsCollarOwner && DeploymentDataGridView.RowCount > 0;
+            DeployRetrieveButton.Enabled = !IsEditMode && IsCollarOwner;
+            ChangeFileStatusButton.Enabled = !IsEditMode;
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
@@ -183,6 +185,7 @@ namespace AnimalMovement
                 SetEditingControls();
                 //Reset state from database
                 LoadDataContext();
+                SetupGeneralTab();
             }
             else
             {
@@ -272,7 +275,7 @@ namespace AnimalMovement
             }
             Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
-            Deployed = Collar.CollarDeployments.Any(d => d.RetrievalDate == null);
+            LoadDataContext();
             SetupAnimalsTab();
         }
 
@@ -308,6 +311,7 @@ namespace AnimalMovement
             Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
             LoadDataContext();
+            SetupAnimalsTab();
         }
 
 
@@ -329,7 +333,13 @@ namespace AnimalMovement
 
         private void SetupArgosTab()
         {
-            
+            ArgoDataGridView.DataSource =
+                Collar.ArgosDeployments.Select(a => new
+                {
+                    Argos_Id = a.PlatformId,
+                    Start = a.StartDate == null ? "Long ago" : a.StartDate.Value.ToString("d"),
+                    End = a.EndDate == null ? "Never" : a.EndDate.Value.ToString("d")
+                }).ToList();
         }
 
         #endregion
@@ -342,7 +352,26 @@ namespace AnimalMovement
 
         private void SetupParametersTab()
         {
-            
+            switch (Collar.CollarModel)
+            {
+                case "Gen3":
+                    ParametersDataGridView.DataSource =
+                        Collar.CollarParameters.Select(
+                            p =>
+                            new
+                                {
+                                    Period = p.Gen3Period < 60 ? p.Gen3Period + " min" : p.Gen3Period/60 + " hrs",
+                                    File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
+                                    Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("d"),
+                                    End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("d")
+                                }).ToList();
+                    break;
+                case "Gen4":
+                    ParametersDataGridView.DataSource =
+                        Collar.CollarParameters.Select(p => new {p.CollarParameterFile.FileName, p.StartDate, p.EndDate})
+                              .ToList();
+                    break;
+            }
         }
 
         #endregion
@@ -355,6 +384,21 @@ namespace AnimalMovement
             if (Collar == null)
                 return;
             FilesDataGridView.DataSource = DatabaseViews.CollarFixesByFile(Collar.CollarManufacturer, Collar.CollarId);
+            EnableFileButtons();
+        }
+
+        private void EnableFileButtons()
+        {
+            FileInfoButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode && FilesDataGridView.SelectedRows.Count == 1;
+            ChangeFileStatusButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode;
+            if (FilesDataGridView.SelectedRows.Count > 1)
+            {
+                var firstRowStatus = (string)FilesDataGridView.SelectedRows[0].Cells["Status"].Value;
+                ChangeFileStatusButton.Text = firstRowStatus != "Active" ? "Activate" : "Deactivate";
+                if (FilesDataGridView.SelectedRows.Cast<DataGridViewRow>()
+                                     .Any(row => (string)row.Cells["Status"].Value != firstRowStatus))
+                    ChangeFileStatusButton.Enabled = false;
+            }
         }
 
         private void FileInfoButton_Click(object sender, EventArgs e)
@@ -366,25 +410,11 @@ namespace AnimalMovement
                 return;
             var form = new FileDetailsForm(item.FileId, CurrentUser);
             form.Show(this);
-
         }
 
         private void FilesDataGridView_SelectionChanged(object sender, EventArgs e)
         {
-            FileInfoButton.Enabled = FilesDataGridView.SelectedRows.Count == 1;
-            if (FilesDataGridView.SelectedRows.Count < 1)
-            {
-                ChangeFileStatusButton.Enabled = false;
-                return;
-            }
-            ChangeFileStatusButton.Enabled = true;
-            ChangeFileStatusButton.Text = "Deactivate";
-            var firstRowStatus = (string)FilesDataGridView.SelectedRows[0].Cells["Status"].Value;
-            if (firstRowStatus != "Active")
-                ChangeFileStatusButton.Text = "Activate";
-            if (FilesDataGridView.SelectedRows.Cast<DataGridViewRow>()
-                                 .Any(row => (string)row.Cells["Status"].Value != firstRowStatus))
-                ChangeFileStatusButton.Enabled = false;
+            EnableFileButtons();
         }
 
         private void ChangeFileStatusButton_Click(object sender, EventArgs e)
@@ -415,6 +445,7 @@ namespace AnimalMovement
             Cursor.Current = Cursors.Default;
             OnDatabaseChanged();
             LoadDataContext();
+            SetupFilesTab();
         }
 
         #endregion
@@ -470,7 +501,10 @@ namespace AnimalMovement
                 string msg = "Unable to update the fix.\n" +
                              "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
+            OnDatabaseChanged();
+            LoadDataContext();
             SetupFixesTab();
         }
 
