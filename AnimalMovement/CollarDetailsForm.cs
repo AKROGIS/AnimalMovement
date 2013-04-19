@@ -337,8 +337,8 @@ namespace AnimalMovement
                 Collar.ArgosDeployments.Select(a => new
                 {
                     Argos_Id = a.PlatformId,
-                    Start = a.StartDate == null ? "Long ago" : a.StartDate.Value.ToString("d"),
-                    End = a.EndDate == null ? "Never" : a.EndDate.Value.ToString("d")
+                    Start = a.StartDate == null ? "Long ago" : a.StartDate.Value.ToString("g"),
+                    End = a.EndDate == null ? "Never" : a.EndDate.Value.ToString("g")
                 }).ToList();
         }
 
@@ -362,13 +362,17 @@ namespace AnimalMovement
                                 {
                                     Period = p.Gen3Period < 60 ? p.Gen3Period + " min" : p.Gen3Period/60 + " hrs",
                                     File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
-                                    Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("d"),
-                                    End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("d")
+                                    Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
+                                    End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("g")
                                 }).ToList();
                     break;
                 case "Gen4":
                     ParametersDataGridView.DataSource =
-                        Collar.CollarParameters.Select(p => new {p.CollarParameterFile.FileName, p.StartDate, p.EndDate})
+                        Collar.CollarParameters.Select(p => new {
+                            File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
+                            Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
+                            End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("g")
+                        })
                               .ToList();
                     break;
             }
