@@ -486,7 +486,7 @@ namespace AnimalMovement
             if (ParametersDataGridView.SelectedRows.Count < 1 || ParametersDataGridView.Columns.Count < 1)
                 return;
             var parameterId = (int)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
-            var form = new CollarParametersDetailsForm(parameterId, CurrentUser);
+            var form = new CollarParametersDetailsForm(parameterId);
             form.DatabaseChanged += (o, x) => ParametersDataChanged();
             form.Show(this);
         }
