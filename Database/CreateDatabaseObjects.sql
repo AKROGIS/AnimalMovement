@@ -1715,7 +1715,7 @@ BEGIN
 	  FROM CollarFiles AS C
 	  JOIN ArgosFilePlatformDates AS D
 	    ON D.FileId = C.FileId
-	 WHERE C.FileId = @FileId AND [Status] = 'A' AND D.PlatformId = @PlatformId
+	 WHERE C.FileId = @FileId AND D.PlatformId = @PlatformId
 	IF @ProjectId IS NULL AND @Owner IS NULL
 	BEGIN
 		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
