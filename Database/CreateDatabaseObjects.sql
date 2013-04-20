@@ -550,13 +550,11 @@ CREATE TABLE [dbo].[Collars](
 	[CollarModel] [varchar](24) NOT NULL,
 	[Manager] [sysname] NOT NULL,
 	[Owner] [nvarchar](100) NULL,
-	[ArgosId] [varchar](16) NULL,
 	[SerialNumber] [varchar](100) NULL,
 	[Frequency] [float] NULL,
 	[HasGps] [bit] NOT NULL,
 	[Notes] [nvarchar](max) NULL,
 	[DisposalDate] [datetime2](7) NULL,
-	[Gen3Period] [int] NULL,
  CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
 (
 	[CollarManufacturer] ASC,
@@ -1534,13 +1532,11 @@ CREATE PROCEDURE [dbo].[Collar_Update]
 	@CollarModel NVARCHAR(255) = NULL, 
 	@Manager sysname = NULL, 
 	@Owner NVARCHAR(255) = NULL, 
-	@ArgosId NVARCHAR(255) = NULL, 
 	@SerialNumber NVARCHAR(255) = NULL, 
 	@Frequency FLOAT = NULL, 
 	@HasGps BIT = 0, 
 	@Notes NVARCHAR(max) = NULL,
-	@DisposalDate DATETIME2(7) = NULL,
-	@Gen3Period INT = NULL
+	@DisposalDate DATETIME2(7) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -1583,11 +1579,6 @@ BEGIN
 		SELECT @Owner = [Owner] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 	END
 	
-	IF @ArgosId IS NULL
-	BEGIN
-		SELECT @ArgosId = [ArgosId] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
 	IF @SerialNumber IS NULL
 	BEGIN
 		SELECT @SerialNumber = [SerialNumber] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
@@ -1604,13 +1595,11 @@ BEGIN
 	UPDATE dbo.Collars SET [CollarModel] = nullif(@CollarModel,''),
 						   [Manager] = nullif(@Manager,''),
 						   [Owner] = nullif(@Owner,''),
-						   [ArgosId] = nullif(@ArgosId,''),
 						   [SerialNumber] = nullif(@SerialNumber,''),
 						   [Frequency] = @Frequency,
 						   [HasGps] = @HasGps,
 						   [Notes] = nullif(@Notes,''),
-						   [DisposalDate] = @DisposalDate,
-						   [Gen3Period] = @Gen3Period
+						   [DisposalDate] = @DisposalDate
 					 WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 
 END
@@ -3257,14 +3246,12 @@ CREATE PROCEDURE [dbo].[Collar_Insert]
 	@CollarId NVARCHAR(255), 
 	@CollarModel NVARCHAR(255), 
 	@Manager NVARCHAR(255) = NULL, -- null defaults to caller
-	@Owner NVARCHAR(255) = NULL, 
-	@ArgosId NVARCHAR(255) = NULL, 
+	@Owner NVARCHAR(255) = NULL,  
 	@SerialNumber NVARCHAR(255) = NULL, 
 	@Frequency FLOAT = NULL, 
 	@HasGps BIT = 0, 
 	@Notes NVARCHAR(max) = NULL,
-	@DisposalDate DATETIME2(7) = NULL,
-	@Gen3Period INT = NULL
+	@DisposalDate DATETIME2(7) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -4539,8 +4526,6 @@ BEGIN
                                           @StartDate, @EndDate)
     SET @DeploymentId = SCOPE_IDENTITY()
 END
-
-GRANT EXECUTE ON [dbo].[ArgosDeployment_Insert] TO [Investigator] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -7386,6 +7371,8 @@ GO
 GRANT EXECUTE ON [dbo].[Animal_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosDeployment_Delete] TO [Investigator] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosDeployment_Insert] TO [Investigator] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosDeployment_Update] TO [Investigator] AS [dbo]
 GO

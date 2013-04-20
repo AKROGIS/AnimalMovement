@@ -98,11 +98,10 @@ namespace AnimalMovement
             var owner = (ProjectInvestigator) OwnerComboBox.SelectedItem;
             //A collar is only required with a ppf file, which means a telonics gen 3 collar.
             //The AlternaitveID (i.e. Argos ID) is used as the identifier since the ppf files are usually named with the argos id.
-            var query = Database.Collars.Where(c => c.ProjectInvestigator == owner && c.CollarModel == "Gen3"
-                && c.ArgosId != null);
-            var collars = query.ToList();
-            CollarComboBox.DataSource = collars;
-            CollarComboBox.DisplayMember = "ArgosId";
+            var query = Database.ArgosDeployments.Where(d => d.Collar.ProjectInvestigator == owner && d.Collar.CollarModel == "Gen3");
+            var deployments = query.ToList();
+            CollarComboBox.DataSource = deployments;
+            CollarComboBox.DisplayMember = "PlatformId";
         }
  
         private void EnableUpload()
@@ -190,7 +189,7 @@ namespace AnimalMovement
                     else
                         continue;
                 }
-                if (collar.ArgosId != collar1.ArgosId || collar.Frequency != collar1.Frequency)
+                if (collar.ArgosDeployments.All(d => d.PlatformId != collar1.ArgosId) || collar.Frequency != collar1.Frequency)
                 {
                     string msg = String.Format(
                         "The database record for collar (CTN: {0})\n" +
@@ -198,7 +197,8 @@ namespace AnimalMovement
                         "Database Argos ID: {2}\n" + "TPF file Argos ID: {3}\n" +
                         "Database Frequency: {4}\n" + "TPF file Frequency: {5}\n" +
                         "This collar is being skipped.", collar1.Ctn, file,
-                        collar.ArgosId, collar1.ArgosId, collar.Frequency ,collar1.Frequency);
+                        String.Join(", ", collar.ArgosDeployments.Select(d => d.PlatformId)),
+                        collar1.ArgosId, collar.Frequency, collar1.Frequency);
                     MessageBox.Show(msg, "Consistancy Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     continue;
                 }
@@ -216,7 +216,7 @@ namespace AnimalMovement
         private bool UploadPpfFile(string file)
         {
             var owner = (ProjectInvestigator)OwnerComboBox.SelectedItem;
-            var collar = (Collar)CollarComboBox.SelectedItem;
+            var collar = ((ArgosDeployment)CollarComboBox.SelectedItem).Collar;
             var format = (LookupCollarParameterFileFormat)FormatComboBox.SelectedItem;
             CollarParameterFile paramFile = UploadParameterFile(owner, format, file);
             if (paramFile == null)
@@ -272,7 +272,7 @@ namespace AnimalMovement
                 CollarManufacturer = "Telonics",
                 CollarId = tpfCollar.Ctn,
                 CollarModel = "Gen4",
-                ArgosId = tpfCollar.ArgosId,
+                //ArgosId = tpfCollar.ArgosId,
                 HasGps = true, //guess
                 //DisposalDate = ???,
                 //Owner = ???,
@@ -298,7 +298,7 @@ namespace AnimalMovement
 
         private void DisposeOfPreviousVersionOfCollar(TpfCollar tpfCollar)
         {
-            var conflictingCollar = Database.Collars.FirstOrDefault(c => c.ArgosId == tpfCollar.ArgosId && c.DisposalDate == null);
+            var conflictingCollar = Database.Collars.FirstOrDefault(c => c.ArgosDeployments.Any(d => d.PlatformId == tpfCollar.ArgosId) && c.DisposalDate == null);
             if (conflictingCollar == null)
                 return;
 

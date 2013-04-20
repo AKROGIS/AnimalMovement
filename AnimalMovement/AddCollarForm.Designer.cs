@@ -33,19 +33,15 @@
             this.label11 = new System.Windows.Forms.Label();
             this.DisposalDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.HasGpsCheckBox = new System.Windows.Forms.CheckBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.PeriodTextBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.FrequencyTextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.SerialNumberTextBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
             this.ManagerComboBox = new System.Windows.Forms.ComboBox();
             this.ModelComboBox = new System.Windows.Forms.ComboBox();
             this.OwnerTextBox = new System.Windows.Forms.TextBox();
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
-            this.ArgosIdTextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -60,7 +56,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(15, 255);
+            this.label11.Location = new System.Drawing.Point(15, 203);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(76, 13);
             this.label11.TabIndex = 86;
@@ -75,7 +71,7 @@
             this.DisposalDateTimePicker.Checked = false;
             this.DisposalDateTimePicker.CustomFormat = "";
             this.DisposalDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.DisposalDateTimePicker.Location = new System.Drawing.Point(95, 249);
+            this.DisposalDateTimePicker.Location = new System.Drawing.Point(95, 197);
             this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
             this.DisposalDateTimePicker.ShowCheckBox = true;
             this.DisposalDateTimePicker.Size = new System.Drawing.Size(259, 20);
@@ -97,32 +93,10 @@
             this.toolTip1.SetToolTip(this.HasGpsCheckBox, "Check this box if the collar has an onboard GPS");
             this.HasGpsCheckBox.UseVisualStyleBackColor = true;
             // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(6, 226);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(85, 13);
-            this.label10.TabIndex = 33;
-            this.label10.Text = "Period (minutes):";
-            this.toolTip1.SetToolTip(this.label10, "Instructions on downloading collar data from mfgr (currently not used)");
-            // 
-            // PeriodTextBox
-            // 
-            this.PeriodTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.PeriodTextBox.Location = new System.Drawing.Point(95, 223);
-            this.PeriodTextBox.MaxLength = 200;
-            this.PeriodTextBox.Name = "PeriodTextBox";
-            this.PeriodTextBox.Size = new System.Drawing.Size(259, 20);
-            this.PeriodTextBox.TabIndex = 19;
-            this.toolTip1.SetToolTip(this.PeriodTextBox, "Period (in minutes) between fixes.  Only for processing Argos messages from Telon" +
-        "ics Gen 3 collars");
-            // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(29, 200);
+            this.label9.Location = new System.Drawing.Point(29, 174);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(60, 13);
             this.label9.TabIndex = 31;
@@ -133,7 +107,7 @@
             // 
             this.FrequencyTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.FrequencyTextBox.Location = new System.Drawing.Point(95, 197);
+            this.FrequencyTextBox.Location = new System.Drawing.Point(95, 171);
             this.FrequencyTextBox.MaxLength = 32;
             this.FrequencyTextBox.Name = "FrequencyTextBox";
             this.FrequencyTextBox.Size = new System.Drawing.Size(259, 20);
@@ -143,7 +117,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(13, 174);
+            this.label8.Location = new System.Drawing.Point(13, 148);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(76, 13);
             this.label8.TabIndex = 29;
@@ -154,10 +128,10 @@
             // 
             this.SerialNumberTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SerialNumberTextBox.Location = new System.Drawing.Point(95, 171);
+            this.SerialNumberTextBox.Location = new System.Drawing.Point(95, 145);
             this.SerialNumberTextBox.MaxLength = 100;
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
-            this.SerialNumberTextBox.Size = new System.Drawing.Size(259, 20);
+            this.SerialNumberTextBox.Size = new System.Drawing.Size(188, 20);
             this.SerialNumberTextBox.TabIndex = 17;
             this.toolTip1.SetToolTip(this.SerialNumberTextBox, "For Telonics collars this is the CTN number without the alpha suffix (optional)");
             // 
@@ -170,16 +144,6 @@
             this.label7.TabIndex = 27;
             this.label7.Text = "Owner:";
             this.toolTip1.SetToolTip(this.label7, "This should be an organization (NPS, FWS, USGS, AKF&G,  etc)");
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(40, 148);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(49, 13);
-            this.label6.TabIndex = 26;
-            this.label6.Text = "Argos Id:";
-            this.toolTip1.SetToolTip(this.label6, "For Telonics collars this is the Argos Id");
             // 
             // ManagerComboBox
             // 
@@ -231,17 +195,6 @@
         "");
             this.CollarIdTextBox.TextChanged += new System.EventHandler(this.CollarIdTextBox_TextChanged);
             // 
-            // ArgosIdTextBox
-            // 
-            this.ArgosIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ArgosIdTextBox.Location = new System.Drawing.Point(95, 145);
-            this.ArgosIdTextBox.MaxLength = 16;
-            this.ArgosIdTextBox.Name = "ArgosIdTextBox";
-            this.ArgosIdTextBox.Size = new System.Drawing.Size(188, 20);
-            this.ArgosIdTextBox.TabIndex = 15;
-            this.toolTip1.SetToolTip(this.ArgosIdTextBox, "For Telonics collars this is the Argos Id");
-            // 
             // label4
             // 
             this.label4.AutoSize = true;
@@ -276,7 +229,7 @@
             // CreateButton
             // 
             this.CreateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.CreateButton.Location = new System.Drawing.Point(289, 379);
+            this.CreateButton.Location = new System.Drawing.Point(289, 307);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(65, 23);
             this.CreateButton.TabIndex = 21;
@@ -288,7 +241,7 @@
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(218, 379);
+            this.cancelButton.Location = new System.Drawing.Point(218, 307);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(65, 23);
             this.cancelButton.TabIndex = 20;
@@ -321,16 +274,16 @@
             this.NotesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.NotesTextBox.Location = new System.Drawing.Point(95, 275);
+            this.NotesTextBox.Location = new System.Drawing.Point(95, 223);
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
-            this.NotesTextBox.Size = new System.Drawing.Size(259, 98);
+            this.NotesTextBox.Size = new System.Drawing.Size(259, 78);
             this.NotesTextBox.TabIndex = 99;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(53, 275);
+            this.label5.Location = new System.Drawing.Point(53, 223);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(38, 13);
             this.label5.TabIndex = 15;
@@ -342,18 +295,15 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(376, 412);
+            this.ClientSize = new System.Drawing.Size(376, 342);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.DisposalDateTimePicker);
             this.Controls.Add(this.HasGpsCheckBox);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.PeriodTextBox);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.FrequencyTextBox);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.SerialNumberTextBox);
             this.Controls.Add(this.label7);
-            this.Controls.Add(this.label6);
             this.Controls.Add(this.ManagerComboBox);
             this.Controls.Add(this.ModelComboBox);
             this.Controls.Add(this.label3);
@@ -363,7 +313,6 @@
             this.Controls.Add(this.NotesTextBox);
             this.Controls.Add(this.OwnerTextBox);
             this.Controls.Add(this.CollarIdTextBox);
-            this.Controls.Add(this.ArgosIdTextBox);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label2);
@@ -384,7 +333,6 @@
         private System.Windows.Forms.TextBox NotesTextBox;
         private System.Windows.Forms.TextBox OwnerTextBox;
         private System.Windows.Forms.TextBox CollarIdTextBox;
-        private System.Windows.Forms.TextBox ArgosIdTextBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label2;
@@ -393,14 +341,11 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox ModelComboBox;
         private System.Windows.Forms.ComboBox ManagerComboBox;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox SerialNumberTextBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox FrequencyTextBox;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox PeriodTextBox;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.CheckBox HasGpsCheckBox;
         private System.Windows.Forms.DateTimePicker DisposalDateTimePicker;

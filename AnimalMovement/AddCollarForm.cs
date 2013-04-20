@@ -111,12 +111,9 @@ namespace AnimalMovement
                 CreateButton.Enabled = false;
                 return;
             }
-            int period;
             var collar = new Collar
                 {
-                    ArgosId = ArgosIdTextBox.Text.NullifyIfEmpty(),
                     CollarId = CollarIdTextBox.Text.NullifyIfEmpty(),
-                    Gen3Period = Int32.TryParse(PeriodTextBox.Text, out period) ? period : (int?)null,
                     Frequency = FrequencyTextBox.Text.DoubleOrNull(),
                     HasGps = HasGpsCheckBox.Checked,
                     DisposalDate = DisposalDateTimePicker.Checked ? DisposalDateTimePicker.Value : (DateTime?)null,
