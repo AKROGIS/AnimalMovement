@@ -3946,7 +3946,7 @@ BEGIN
                    
                 OPEN update_collar_deployment_cursor;
 
-                FETCH NEXT FROM update_collar_deployment_cursor INTO @FileId, @PlatformId;
+                FETCH NEXT FROM update_collar_deployment_cursor INTO @FileId;
 
                 WHILE @@FETCH_STATUS = 0
                 BEGIN

@@ -366,7 +366,7 @@ namespace AnimalMovement
         private void AddArgosButton_Click(object sender, EventArgs e)
         {
             var form = new AddArgosDeploymentForm(Collar);
-            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }
 
@@ -390,7 +390,7 @@ namespace AnimalMovement
                 return;
             var deploymentId = (int)ArgosDataGridView.SelectedRows[0].Cells[0].Value;
             var form = new ArgosDeploymentDetailsForm(deploymentId);
-            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }
 
