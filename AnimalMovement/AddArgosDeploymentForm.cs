@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using DataModel;
 
 //TODO - Add button to add new Argos Platform
-//TODO - Add button to fix validation errors
 
 namespace AnimalMovement
 {
@@ -84,7 +83,7 @@ namespace AnimalMovement
             if (Collar.ArgosDeployments.Any(deployment =>
                                             DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
                                                          deployment.EndDate ?? DateTime.MaxValue, start, end)))
-                return "This collar has another Argos Id during your  date range.";
+                return "This collar has another Argos Id during your date range.";
             
             //An Argos Platform cannot be on two collars at the same time.
             //I must create a list, because it cannot translate the second lambda to SQL
@@ -174,6 +173,7 @@ namespace AnimalMovement
 
         private void FixItButton_Click(object sender, EventArgs e)
         {
+            //TODO - implement FIxIt code
             MessageBox.Show("Not Implemented Yet.");
         }
 
