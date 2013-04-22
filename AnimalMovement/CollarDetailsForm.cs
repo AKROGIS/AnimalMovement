@@ -389,7 +389,7 @@ namespace AnimalMovement
             if (ArgosDataGridView.SelectedRows.Count < 1 || ArgosDataGridView.Columns.Count < 1)
                 return;
             var deploymentId = (int)ArgosDataGridView.SelectedRows[0].Cells[0].Value;
-            var form = new ArgosDeploymentDetailsForm(deploymentId);
+            var form = new ArgosDeploymentDetailsForm(deploymentId, true);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }

@@ -13,12 +13,16 @@ namespace AnimalMovement
         private int DeploymentId { get; set; }
         private ArgosDeployment ArgosDeployment { get; set; }
         private bool IsEditor { get; set; }
+        private bool LockCollar { get; set; }
+        private bool LockArgos { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        public ArgosDeploymentDetailsForm(int deploymentId)
+        public ArgosDeploymentDetailsForm(int deploymentId, bool lockCollar = false, bool lockArgos = false)
         {
             InitializeComponent();
             DeploymentId = deploymentId;
+            LockCollar = lockCollar;
+            LockArgos = lockArgos;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
             LoadDefaultFormContents();  //Called before events are triggered
@@ -27,7 +31,7 @@ namespace AnimalMovement
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
-            Database.Log = Console.Out;
+            //Database.Log = Console.Out;
             //Get an ArgosDeployment in this data context
             ArgosDeployment =
                     Database.ArgosDeployments.FirstOrDefault(d => d.DeploymentId == DeploymentId);
@@ -67,8 +71,8 @@ namespace AnimalMovement
             EditSaveButton.Enabled = IsEditor;
             var inEditMode = EditSaveButton.Text == "Save";
             EditSaveButton.Enabled = inEditMode;
-            CollarComboBox.Enabled = inEditMode;
-            ArgosComboBox.Enabled = inEditMode;
+            CollarComboBox.Enabled = inEditMode && !LockCollar;
+            ArgosComboBox.Enabled = inEditMode && !LockArgos;
             StartDateTimePicker.Enabled = inEditMode;
             EndDateTimePicker.Enabled = inEditMode;
             ValidateForm();
