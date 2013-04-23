@@ -6358,7 +6358,7 @@ BEGIN
 	-- to do this, upload the same file as F2
 	IF EXISTS (SELECT 1 FROM [dbo].[CollarParameters]
 				WHERE [CollarManufacturer] = @CollarManufacturer AND [CollarId] = @CollarId
-				  AND [FileId] <> @FileId  -- don't check for overlap with myself
+				  AND [ParameterId] <> @ParameterId  -- don't check for overlap with myself
 				  AND [dbo].[DoDateRangesOverlap]([StartDate], [EndDate], @StartDate, @EndDate) = 1
 			  )
 	BEGIN
@@ -6366,7 +6366,7 @@ BEGIN
 		RAISERROR(@message4, 18, 0)
 		RETURN (1)
 	END
-	
+
 
 	-- All other verification is handled by primary/foreign key and column constraints.
 	UPDATE [dbo].[CollarParameters] SET [CollarManufacturer] = @CollarManufacturer, [CollarId] = @CollarId, [FileId] = @FileId,

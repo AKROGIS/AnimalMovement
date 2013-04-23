@@ -48,12 +48,16 @@ namespace AnimalMovement
             Gen3PeriodTextBox.Visible = CollarParameter.Collar.CollarModel == "Gen3";
             Gen3TimeUnitComboBox.Visible = CollarParameter.Collar.CollarModel == "Gen3";
             ClearFileButton.Visible = CollarParameter.Collar.CollarModel == "Gen3";
-            Gen3TimeUnitComboBox.SelectedIndex = 0;
             FileComboBox.Size = new System.Drawing.Size(CollarParameter.Collar.CollarModel == "Gen3" ? 119 : 172, FileComboBox.Size.Height);
             LoadFileComboBox();
             LoadCollarComboBox();
             LoadDatePickers();
-            Gen3PeriodTextBox.Text = CollarParameter.Gen3Period.ToString();
+            Gen3TimeUnitComboBox.SelectedIndex = 0;
+            if (CollarParameter.Gen3Period != null)
+                if (CollarParameter.Gen3Period%60 == 0)
+                    Gen3PeriodTextBox.Text = (CollarParameter.Gen3Period/60).ToString();
+                else
+                    Gen3TimeUnitComboBox.SelectedIndex = 1;
         }
 
         private void LoadFileComboBox()
@@ -84,13 +88,11 @@ namespace AnimalMovement
             FileComboBox.DataSource = files;
             FileComboBox.DisplayMember = "Name";
             FileComboBox.ValueMember = "FileId";
-            FileComboBox.SelectedItem = files.FirstOrDefault(f => f.FileId == CollarParameter.FileId);
+            FileComboBox.SelectedValue = CollarParameter.FileId;
         }
 
         private void LoadCollarComboBox()
         {
-            if (CollarParameter.Collar.CollarModel == "Gen3")
-                FileComboBox.SelectedItem = null;
             var collarQuery = from collar in Database.Collars
                               where collar.Manager == CollarParameter.Collar.Manager
                               select collar;
@@ -124,6 +126,7 @@ namespace AnimalMovement
             Gen3PeriodTextBox.Enabled = inEditMode;
             ClearFileButton.Enabled = inEditMode;
             BrowseButton.Enabled = inEditMode;
+            Gen3TimeUnitComboBox.Enabled = inEditMode;
             ValidateForm();
         }
 
@@ -192,10 +195,10 @@ namespace AnimalMovement
             if ((newFile == null && CollarParameter.FileId != null) || (newFile != null && CollarParameter.FileId != newFile.FileId))
                 CollarParameter.CollarParameterFile = newFile;
 
-            int? period = CollarParameter.Collar.CollarModel != "Gen3"
-                              ? (int?)null
-                              : Int32.Parse(Gen3PeriodTextBox.Text) *
-                                (((string)Gen3TimeUnitComboBox.SelectedItem) == "Hours" ? 60 : 1);
+            int? period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text)
+                              ? (int?) null
+                              : Int32.Parse(Gen3PeriodTextBox.Text)*
+                                (((string) Gen3TimeUnitComboBox.SelectedItem) == "Hours" ? 60 : 1);
             CollarParameter.Gen3Period = period;
 
             CollarParameter.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date : (DateTime?) null;

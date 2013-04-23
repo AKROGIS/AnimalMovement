@@ -147,7 +147,7 @@ namespace AnimalMovement
         private bool AddParameters()
         {
             //TODO add warning about PPF files
-            int? period = Collar.CollarModel != "Gen3"
+            int? period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text)
                               ? (int?) null
                               : Int32.Parse(Gen3PeriodTextBox.Text)*
                                 (((string) Gen3TimeUnitComboBox.SelectedItem) == "Hours" ? 60 : 1);

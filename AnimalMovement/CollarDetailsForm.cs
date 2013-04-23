@@ -420,7 +420,7 @@ namespace AnimalMovement
                             new
                                 {
                                     Id = p.ParameterId,
-                                    Period = p.Gen3Period < 60 ? p.Gen3Period + " min" : p.Gen3Period / 60 + " hrs",
+                                    Period = p.Gen3Period % 60 == 0 ? p.Gen3Period / 60 + " hrs" : p.Gen3Period + " min",
                                     File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
                                     Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
                                     End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("g")
