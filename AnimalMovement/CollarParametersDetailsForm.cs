@@ -88,7 +88,10 @@ namespace AnimalMovement
             FileComboBox.DataSource = files;
             FileComboBox.DisplayMember = "Name";
             FileComboBox.ValueMember = "FileId";
-            FileComboBox.SelectedValue = CollarParameter.FileId;
+            if (CollarParameter.FileId == null)
+                FileComboBox.SelectedItem = null;
+            else
+                FileComboBox.SelectedValue = CollarParameter.FileId;
         }
 
         private void LoadCollarComboBox()
@@ -136,7 +139,7 @@ namespace AnimalMovement
             if (error != null)
                 ValidationTextBox.Text = error;
             ValidationTextBox.Visible = error != null;
-            EditSaveButton.Enabled = error == null;
+            EditSaveButton.Enabled = error == null || EditSaveButton.Text != "Save";
             FixItButton.Visible = error != null;
         }
 
@@ -161,10 +164,10 @@ namespace AnimalMovement
                 return "The end date must be after the start date";
 
             //A collar cannot have multiple Parameters at the same time
-            if (CollarParameter.Collar.CollarParameters.Any(param =>
-                                                            param.ParameterId != CollarParameter.ParameterId &&
-                                                            DatesOverlap(param.StartDate ?? DateTime.MinValue,
-                                                                         param.EndDate ?? DateTime.MaxValue, start, end)))
+            if (collar.CollarParameters.Any(param =>
+                                            param.ParameterId != CollarParameter.ParameterId &&
+                                            DatesOverlap(param.StartDate ?? DateTime.MinValue,
+                                                         param.EndDate ?? DateTime.MaxValue, start, end)))
                 return "This collar has another set of parameters during your date range.";
 
             //TODO - for Gen4 TPF files, validate start date and collar match
