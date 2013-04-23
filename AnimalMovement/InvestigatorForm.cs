@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using DataModel;
 using System.Linq;
 
@@ -98,27 +102,6 @@ namespace AnimalMovement
             EmailTextBox.Text = Investigator.Email;
             PhoneTextBox.Text = Investigator.Phone;
         }
-
-        private bool CanDeleteCollar(Collar collar)
-        {
-            return !Database.CollarDeployments.Any(cd => cd.Collar == collar) &&
-                   !Database.CollarFixes.Any(cd => cd.Collar == collar);
-        }
-
-        private string BuildCollarText(Collar collar)
-        {
-            string name = collar.ToString();
-            var animals = from deployment in Database.CollarDeployments
-                          where deployment.Collar == collar && deployment.RetrievalDate == null
-                          select deployment.Animal;
-            var animal = animals.FirstOrDefault();
-            if (animal != null)
-                name += " on " + animal;
-            if (collar.DisposalDate != null)
-                name = String.Format("{0} (disp:{1:M/d/yy})", name, collar.DisposalDate.Value.ToLocalTime());
-            return name;
-        }
-
 
         private void UpdateDataSource()
         {
@@ -284,6 +267,26 @@ namespace AnimalMovement
             CollarsTab.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
         }
 
+        private bool CanDeleteCollar(Collar collar)
+        {
+            return !Database.CollarDeployments.Any(cd => cd.Collar == collar) &&
+                   !Database.CollarFixes.Any(cd => cd.Collar == collar);
+        }
+
+        private string BuildCollarText(Collar collar)
+        {
+            string name = collar.ToString();
+            var animals = from deployment in Database.CollarDeployments
+                          where deployment.Collar == collar && deployment.RetrievalDate == null
+                          select deployment.Animal;
+            var animal = animals.FirstOrDefault();
+            if (animal != null)
+                name += " on " + animal;
+            if (collar.DisposalDate != null)
+                name = String.Format("{0} (disp:{1:M/d/yy})", name, collar.DisposalDate.Value.ToLocalTime());
+            return name;
+        }
+
         private void AddCollarButton_Click(object sender, EventArgs e)
         {
             var form = new AddCollarForm(CurrentUser);
@@ -327,6 +330,16 @@ namespace AnimalMovement
             InfoCollarButton.Enabled = CollarsListBox.SelectedItems.Count == 1;
             if (IsMyProfile && CollarsListBox.SelectedItems.Cast<CollarListItem>().Any(item => item.CanDelete))
                 DeleteCollarsButton.Enabled = true;
+        }
+
+        #endregion
+
+
+        #region Argos Programs
+
+        private void LoadArgosList()
+        {
+            //TODO - provide implementation
         }
 
         #endregion
@@ -416,6 +429,11 @@ namespace AnimalMovement
                 DeleteCollarFilesButton.Enabled = true;
         }
 
+        private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadCollarFileList();
+        }
+
         #endregion
 
 
@@ -492,6 +510,81 @@ namespace AnimalMovement
         #endregion
 
 
+        #region Assistants
+
+        private void LoadAssistantsList()
+        {
+            //TODO - provide implementation
+        }
+
+        #endregion
+
+
+        #region QC Reports
+
+        private XDocument _queryDocument;
+
+        private void LoadQCReports()
+        {
+            var xmlFilePath = Properties.Settings.Default.InvestigatorReportsXml;
+            string error = null;
+            try
+            {
+                _queryDocument = XDocument.Load(xmlFilePath);
+            }
+            catch (Exception ex)
+            {
+                error = String.Format("Unable to load '{0}': {1}", xmlFilePath, ex.Message);
+                _queryDocument = null;
+            }
+            if (error != null)
+            {
+                ReportDescriptionTextBox.Text = error;
+                MessageBox.Show(error, "Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ReportComboBox.DataSource = null;
+                return;
+            }
+            var names = new List<string>{"Pick a report"};
+            names.AddRange(_queryDocument.Descendants("name").Select(i => i.Value.Trim()));
+            ReportComboBox.DataSource = names;
+        }
+
+        private void ReportComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var reports = _queryDocument.Descendants("report");
+            var report = _queryDocument.Descendants("report")
+                                       .FirstOrDefault(
+                                           r => ((string) r.Element("name")).Trim() == (string) ReportComboBox.SelectedItem);
+            ReportDescriptionTextBox.Text = report == null ? null : (string) report.Element("description");
+            FillDataGrid(report == null ? null : (string)report.Element("query"));
+        }
+
+        private void FillDataGrid(string sql)
+        {
+            if (String.IsNullOrEmpty(sql))
+            {
+                ReportDataGridView.DataSource = null;
+                return;
+            }
+            var command = new SqlCommand(sql, (SqlConnection)Database.Connection);
+            command.Parameters.Add(new SqlParameter("@PI", SqlDbType.NVarChar) { Value = InvestigatorLogin });
+            var dataAdapter = new SqlDataAdapter(command);
+            var table = new DataTable();
+            try
+            {
+                dataAdapter.Fill(table);
+            }
+            catch (Exception ex)
+            {
+                table.Columns.Add("Error");
+                table.Rows.Add(ex.Message);
+            }
+            ReportDataGridView.DataSource = new BindingSource { DataSource = table };
+        }
+
+        #endregion
+
+
         private void OnDatabaseChanged()
         {
             EventHandler handle = DatabaseChanged;
@@ -511,19 +604,21 @@ namespace AnimalMovement
                     LoadCollarList();
                     break;
                 case 2:
-                    LoadCollarFileList();
+                    LoadArgosList();
                     break;
                 case 3:
+                    LoadCollarFileList();
+                    break;
+                case 4:
                     LoadParameterFileList();
+                    break;
+                case 5:
+                    LoadAssistantsList();
+                    break;
+                case 6:
+                    LoadQCReports();
                     break;
             }
         }
-
-
-        private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            LoadCollarFileList();
-        }
-
     }
 }

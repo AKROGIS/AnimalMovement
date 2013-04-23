@@ -682,5 +682,17 @@ namespace AnimalMovement.Properties {
                 this["CollarDetailsFormActiveTab"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("InvestigatorReports.xml")]
+        public string InvestigatorReportsXml {
+            get {
+                return ((string)(this["InvestigatorReportsXml"]));
+            }
+            set {
+                this["InvestigatorReportsXml"] = value;
+            }
+        }
     }
 }

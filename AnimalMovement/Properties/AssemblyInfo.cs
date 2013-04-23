@@ -22,7 +22,6 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
 //TODO - DATABASE - Add more unit testing.
 
-//TODO - Add option in UI for requesting no emails be send from the Telonics downloader
 //TODO - provide user interface for checking on status of downloads
 //TODO - Document the optimal "getting started" process, and make sure the code supports it
 //TODO - Build UI to add/edit/delete Argos Projects and Platforms
