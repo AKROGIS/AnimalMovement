@@ -108,8 +108,18 @@ namespace AnimalMovement
 
         private string ValidateError()
         {
+            //We must have a file or a period for Gen3
+            var hasFile = FileComboBox.SelectedItem != null;
+            if (Collar.CollarModel == "Gen3" && !hasFile && String.IsNullOrEmpty(Gen3PeriodTextBox.Text))
+                return "You must provide a file or a time period for this collar";
+            //We must have a file or all others
+            if (Collar.CollarModel != "Gen3" && !hasFile)
+                return "You must provide a file for this collar";
+
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value : DateTime.MinValue;
             var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value : DateTime.MaxValue;
+            if (end < start)
+                return "The end date must be after the start date";
 
             //A collar cannot have multiple Parameters at the same time
             if (Collar.CollarParameters.Any(param =>
@@ -121,14 +131,16 @@ namespace AnimalMovement
 
             //Check Gen3 Period
             int period;
-            if (Collar.CollarModel == "Gen3" && !Int32.TryParse(Gen3PeriodTextBox.Text, out period))
+            if (Collar.CollarModel == "Gen3" &&
+                !String.IsNullOrEmpty(Gen3PeriodTextBox.Text) &&
+                !Int32.TryParse(Gen3PeriodTextBox.Text, out period))
                 return "The time period must be a whole number";
             return null;
         }
 
         private bool DatesOverlap(DateTime start1, DateTime end1, DateTime start2, DateTime end2)
         {
-            //touching is not considere overlapping.
+            //touching is not considered overlapping.
             return (start2 < end1 && start1 < end2);
         }
 

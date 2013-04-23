@@ -102,7 +102,9 @@ namespace AnimalMovement
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value : DateTime.MinValue;
             var end   =   EndDateTimePicker.Checked ?   EndDateTimePicker.Value : DateTime.MaxValue;
-            
+            if (end < start)
+                return "The end date must be after the start date";
+
             //A collar cannot have multiple Argos Platforms at the same time
             if (collar.ArgosDeployments.Any(deployment =>
                                             deployment.DeploymentId != ArgosDeployment.DeploymentId &&

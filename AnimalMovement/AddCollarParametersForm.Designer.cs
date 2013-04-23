@@ -80,7 +80,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(26, 98);
+            this.label4.Location = new System.Drawing.Point(25, 71);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(86, 13);
             this.label4.TabIndex = 22;
@@ -91,7 +91,7 @@
             this.FileComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.FileComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.FileComboBox.FormattingEnabled = true;
-            this.FileComboBox.Location = new System.Drawing.Point(118, 66);
+            this.FileComboBox.Location = new System.Drawing.Point(117, 39);
             this.FileComboBox.Name = "FileComboBox";
             this.FileComboBox.Size = new System.Drawing.Size(119, 21);
             this.FileComboBox.TabIndex = 21;
@@ -101,7 +101,7 @@
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(29, 124);
+            this.label3.Location = new System.Drawing.Point(28, 97);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(83, 13);
             this.label3.TabIndex = 20;
@@ -111,7 +111,7 @@
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(35, 70);
+            this.label2.Location = new System.Drawing.Point(34, 43);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(77, 13);
             this.label2.TabIndex = 19;
@@ -123,7 +123,7 @@
             this.StartDateTimePicker.Checked = false;
             this.StartDateTimePicker.CustomFormat = " ";
             this.StartDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.StartDateTimePicker.Location = new System.Drawing.Point(118, 92);
+            this.StartDateTimePicker.Location = new System.Drawing.Point(117, 65);
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.ShowCheckBox = true;
             this.StartDateTimePicker.Size = new System.Drawing.Size(200, 20);
@@ -136,7 +136,7 @@
             this.EndDateTimePicker.Checked = false;
             this.EndDateTimePicker.CustomFormat = " ";
             this.EndDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.EndDateTimePicker.Location = new System.Drawing.Point(118, 118);
+            this.EndDateTimePicker.Location = new System.Drawing.Point(117, 91);
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.ShowCheckBox = true;
             this.EndDateTimePicker.Size = new System.Drawing.Size(200, 20);
@@ -190,7 +190,7 @@
             // Gen3PeriodTextBox
             // 
             this.Gen3PeriodTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Gen3PeriodTextBox.Location = new System.Drawing.Point(118, 38);
+            this.Gen3PeriodTextBox.Location = new System.Drawing.Point(118, 117);
             this.Gen3PeriodTextBox.Name = "Gen3PeriodTextBox";
             this.Gen3PeriodTextBox.Size = new System.Drawing.Size(119, 20);
             this.Gen3PeriodTextBox.TabIndex = 26;
@@ -202,7 +202,7 @@
             // 
             this.Gen3Label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Gen3Label.AutoSize = true;
-            this.Gen3Label.Location = new System.Drawing.Point(7, 41);
+            this.Gen3Label.Location = new System.Drawing.Point(7, 120);
             this.Gen3Label.Name = "Gen3Label";
             this.Gen3Label.Size = new System.Drawing.Size(105, 13);
             this.Gen3Label.TabIndex = 25;
@@ -215,7 +215,7 @@
             this.Gen3TimeUnitComboBox.Items.AddRange(new object[] {
             "Hours",
             "Minutes"});
-            this.Gen3TimeUnitComboBox.Location = new System.Drawing.Point(243, 38);
+            this.Gen3TimeUnitComboBox.Location = new System.Drawing.Point(243, 117);
             this.Gen3TimeUnitComboBox.Name = "Gen3TimeUnitComboBox";
             this.Gen3TimeUnitComboBox.Size = new System.Drawing.Size(75, 21);
             this.Gen3TimeUnitComboBox.TabIndex = 27;
@@ -223,7 +223,7 @@
             // BrowseButton
             // 
             this.BrowseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.BrowseButton.Location = new System.Drawing.Point(296, 65);
+            this.BrowseButton.Location = new System.Drawing.Point(295, 38);
             this.BrowseButton.Name = "BrowseButton";
             this.BrowseButton.Size = new System.Drawing.Size(23, 23);
             this.BrowseButton.TabIndex = 28;
@@ -235,7 +235,7 @@
             // 
             this.ClearFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ClearFileButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.ClearFileButton.Location = new System.Drawing.Point(243, 65);
+            this.ClearFileButton.Location = new System.Drawing.Point(242, 38);
             this.ClearFileButton.Name = "ClearFileButton";
             this.ClearFileButton.Size = new System.Drawing.Size(47, 23);
             this.ClearFileButton.TabIndex = 29;
