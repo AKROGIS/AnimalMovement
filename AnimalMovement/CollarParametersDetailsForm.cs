@@ -181,7 +181,7 @@ namespace AnimalMovement
             return null;
         }
 
-        private bool DatesOverlap(DateTime start1, DateTime end1, DateTime start2, DateTime end2)
+        private static bool DatesOverlap(DateTime start1, DateTime end1, DateTime start2, DateTime end2)
         {
             //touching is not considered overlapping.
             return (start2 < end1 && start1 < end2);

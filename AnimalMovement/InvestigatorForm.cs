@@ -551,7 +551,6 @@ namespace AnimalMovement
 
         private void ReportComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var reports = _queryDocument.Descendants("report");
             var report = _queryDocument.Descendants("report")
                                        .FirstOrDefault(
                                            r => ((string) r.Element("name")).Trim() == (string) ReportComboBox.SelectedItem);
