@@ -1,9 +1,38 @@
 -- PI summary statistics
 -- ===============================================
 
-    DECLARE @PI NVARCHAR(255) = 'NPS\BBorg'
+    DECLARE @PI NVARCHAR(255) = 'NPS\JWBurch'
     DECLARE @LastXdays INT = 30  -- Number of days in the past to consider
 
+     SELECT TPF.[FileName], TPF.CTN, TPF.[Platform], TPF.Frequency, TPF.[TimeStamp]
+       FROM AllTpfFileData AS TPF
+ INNER JOIN CollarParameterFiles as F
+         ON F.FileId = TPF.FileId
+      WHERE F.[Owner] = @PI
+   ORDER BY TPF.[FileName], TPF.CTN
+
+----------- Downloads in the last 10 days 
+     SELECT D.*
+       FROM ArgosDownloads AS D
+  LEFT JOIN ArgosPrograms AS P
+         ON P.ProgramId = D.ProgramId
+  LEFT JOIN ArgosPlatforms AS P1
+         ON P1.PlatformId = D.PlatformId
+  LEFT JOIN ArgosPrograms AS P2
+         ON P1.ProgramId = P2.ProgramId
+      WHERE DATEDIFF(day, [TimeStamp], GETDATE()) < 10
+        AND (P.Manager = @PI OR P2.Manager = @PI)
+   ORDER BY [TimeStamp] DESC
+        
+----------- Argos files that have not been processed 
+     SELECT F.[FileName], F.UploadDate, F.UserName, L.Name, F.[Status]
+       FROM CollarFiles AS F
+ INNER JOIN ArgosFile_NeverProcessed AS U
+         ON U.FileId = F.FileId
+ INNER JOIN LookupCollarFileFormats AS L
+         ON L.Code = F.Format
+        AND F.[Owner] = @PI
+        
 ----------- Notice: Collars without Gps
      SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.Frequency, HasGps, D.PlatformId AS ArgosId
        FROM Collars AS C
@@ -149,9 +178,9 @@
         AND D.RetrievalDate IS NULL -- only show current animal
         AND C.Manager = @PI
    ORDER BY C.Manager, C.CollarModel, A.PlatformId
-
+   
 ----------- Argos Platforms I have downloaded, but which I cannot process
-     SELECT I.PlatformId
+     SELECT I.PlatformId AS [Argos Id], I.Issue
        FROM ArgosFileProcessingIssues AS I
        JOIN ArgosPlatforms AS P1
          ON I.PlatformId = P1.PlatformId
@@ -159,7 +188,7 @@
          ON P1.ProgramId = P2.ProgramId
       WHERE I.PlatformId IS NOT NULL
         AND P2.Manager = @PI
-   GROUP BY I.PlatformId
+   GROUP BY I.PlatformId, I.Issue
 
 ----------- Conflicting fixes for all of a PI's collars in the last X days (SLOW!!)
      SELECT C.CollarManufacturer, C.CollarId, F.*

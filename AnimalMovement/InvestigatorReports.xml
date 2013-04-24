@@ -1,5 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <reports>
+  <!--If a query has the string '@PI' it will be replaced with the current project investigator-->
+  <report>
+    <name>All Collars</name>
+    <description>
+      <![CDATA[List all collars.  To copy this data into Excel or another application, select the rows to copy (click the top left corner to select all rows), then press Ctrl-C, then paste into the other application.]]>
+    </description>
+    <query>
+      <![CDATA[
+      SELECT * FROM Collars WHERE Manager = @PI
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Summary of TPF data</name>
+    <description>
+      <![CDATA[List all collars in each TPF (Telonics Parameter File).]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT TPF.[FileName], TPF.CTN, TPF.[Platform], TPF.Frequency, TPF.[TimeStamp]
+       FROM AllTpfFileData AS TPF
+ INNER JOIN CollarParameterFiles as F
+         ON F.FileId = TPF.FileId
+      WHERE F.[Owner] = @PI
+   ORDER BY TPF.[FileName], TPF.CTN
+      ]]>
+    </query>
+  </report>
   <report>
     <name>Collars without GPS</name>
     <description>
@@ -94,9 +122,45 @@
     </query>
   </report>
   <report>
+    <name>Collars in multiple TPF files</name>
+    <description>
+      <![CDATA[A collar in multiple TPF files should have multiple parameter assignments to ensure that the data is correctly processed to match the parameters in effect when the data was collected.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
+       FROM AllTpfFileData AS T
+  LEFT JOIN CollarParameters AS P
+         ON T.FileId = P.FileId AND T.CTN = P.CollarId
+  LEFT JOIN Collars AS C
+         ON C.CollarManufacturer = 'Telonics' AND T.CTN = C.CollarId
+      WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
+        AND C.Manager = @PI
+   ORDER BY T.CTN, T.[Status]
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Active dates for each collar</name>
+    <description>
+      <![CDATA[Lists the dates that each collar has been active (deployed)]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarManufacturer, C.CollarId, MIN(D.DeploymentDate) AS [FirstDeployment], MAX(D.RetrievalDate) AS [LastRetrieval],C.DisposalDate
+       FROM Collars as C
+  LEFT JOIN CollarDeployments AS D
+         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+      WHERE C.Manager = @PI
+   GROUP BY C.CollarManufacturer, C.CollarId, C.DisposalDate
+   ORDER BY C.CollarManufacturer, C.CollarId
+      ]]>
+    </query>
+  </report>
+  <report>
     <name>Count of unused fixes for each collar</name>
     <description>
-      <![CDATA[A list of the fixes not assigned to an animal.  Typically these are fixes occur outside the dates of a deployment, or after a mortality.]]>
+      <![CDATA[A list of the fixes not assigned to an animal.  Typically these are fixes occur outside the dates of a deployment, or after a mortality.  Collars with a large number of fixes, may not be properly assigned.]]>
     </description>
     <query>
       <![CDATA[
@@ -153,6 +217,11 @@
     </query>
   </report>
   <report>
+    <name>---------------</name>
+    <description></description>
+    <query></query>
+  </report>
+  <report>
     <name>Argos Platforms with no downloaded data</name>
     <description>
       <![CDATA[The list of Argos platforms in the database that do not have any downloaded data.  These may be platforms that are required to process historic Argos email data, but the Argos Id has been retired.]]>
@@ -172,6 +241,32 @@
       WHERE T.PlatformId IS NULL
         AND P2.Manager = @PI
    ORDER BY P2.Manager, P.PlatformId
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Active Collar/Animal where Argos downloads have produced no fixes</name>
+    <description>
+      <![CDATA[Active collars should get new fixes from the downloaded Argos data.  Any collars in this list should be investigated.  The download files should be checked.  It may be that the collar is failed, or that the database has an error.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.Manager, C.CollarModel, C.CollarId AS CTN, A.PlatformId AS ArgosId, D.ProjectId, D.AnimalId
+       FROM Collars AS C
+  LEFT JOIN CollarDeployments AS D
+         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+  LEFT JOIN ArgosDeployments AS A
+         ON C.CollarManufacturer = A.CollarManufacturer AND C.CollarId = A.CollarId
+      WHERE A.PlatformId IN (
+                            SELECT PlatformId
+                              FROM ArgosDownloads
+                          GROUP BY PlatformId
+                HAVING Max(FileID) IS NULL
+            )
+        AND C.DisposalDate IS NULL  -- only show active collars
+        AND D.RetrievalDate IS NULL -- only show current animal
+        AND C.Manager = @PI
+   ORDER BY C.Manager, C.CollarModel, A.PlatformId
       ]]>
     </query>
   </report>
@@ -235,6 +330,44 @@ CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer,C.CollarId, 30
        FROM Collars AS C
 CROSS APPLY (SELECT * FROM CollarFixSummary (c.CollarManufacturer,c.CollarId)) AS F
       WHERE C.Manager = @PI
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Downloads in the last 10 days</name>
+    <description>
+      <![CDATA[List the successful and unsuccessful download attempts in the last 10 days]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT D.*
+       FROM ArgosDownloads AS D
+  LEFT JOIN ArgosPrograms AS P
+         ON P.ProgramId = D.ProgramId
+  LEFT JOIN ArgosPlatforms AS P1
+         ON P1.PlatformId = D.PlatformId
+  LEFT JOIN ArgosPrograms AS P2
+         ON P1.ProgramId = P2.ProgramId
+      WHERE DATEDIFF(day, [TimeStamp], GETDATE()) < 10
+        AND (P.Manager = @PI OR P2.Manager = @PI)
+   ORDER BY [TimeStamp] DESC
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Argos files that have not been processed</name>
+    <description>
+      <![CDATA[List all Argos files you have in the database that have never been processed]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT F.[FileName], F.UploadDate, F.UserName, L.Name, F.[Status]
+       FROM CollarFiles AS F
+ INNER JOIN ArgosFile_NeverProcessed AS U
+         ON U.FileId = F.FileId
+ INNER JOIN LookupCollarFileFormats AS L
+         ON L.Code = F.Format
+        AND F.[Owner] = @PI
       ]]>
     </query>
   </report>
