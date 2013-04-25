@@ -75,6 +75,7 @@
             this.LeadComboBox.Name = "LeadComboBox";
             this.LeadComboBox.Size = new System.Drawing.Size(198, 21);
             this.LeadComboBox.TabIndex = 1;
+            this.LeadComboBox.SelectedIndexChanged += new System.EventHandler(this.LeadComboBox_SelectedIndexChanged);
             // 
             // ChangeButton
             // 

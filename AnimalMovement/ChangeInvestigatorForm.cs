@@ -13,16 +13,16 @@ namespace AnimalMovement
         private ProjectInvestigator ProjectInvestigator { get; set; }
         private Project Project { get; set; }
 
-        internal ChangeInvestigatorForm(string projectId, string user)
+        internal ChangeInvestigatorForm(string projectId)
         {
             InitializeComponent();
             RestoreWindow();
             ProjectId = projectId;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
-            LoadFormFromDatabase();
+            LoadDataContext();
         }
 
-        private void LoadFormFromDatabase()
+        private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
             Project = Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);
@@ -38,37 +38,46 @@ namespace AnimalMovement
             if (Project == null)
             {
                 MessageBox.Show("The project ID '" + ProjectId + "' was not found in the database.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                DialogResult = DialogResult.Cancel;
+                DialogResult = DialogResult.Cancel; //Closes form
                 return;
             }
             if (ProjectInvestigator == null)
             {
                 MessageBox.Show("You '" + CurrentUser + "' are not a Project Investigator in the database.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                DialogResult = DialogResult.Cancel;
+                DialogResult = DialogResult.Cancel; //Closes form
                 return;
             }
             if (ProjectInvestigator != Project.ProjectInvestigator1)
             {
-                MessageBox.Show("You '" + CurrentUser + "' are not a Project Investigator in the database.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                DialogResult = DialogResult.Cancel;
+                MessageBox.Show("You '" + CurrentUser + "' are not the Project Investigator for the project '" + ProjectId +"'", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult = DialogResult.Cancel; //Closes form
             }
+            EnableChangeButton();
+        }
+
+        private void LeadComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableChangeButton();
+        }
+
+        private void EnableChangeButton()
+        {
+            ChangeButton.Enabled = LeadComboBox.SelectedItem != Project.ProjectInvestigator1;
         }
 
         private void ChangeButton_Click(object sender, EventArgs e)
         {
-            if (LeadComboBox.SelectedItem == Project.ProjectInvestigator1)
-                DialogResult = DialogResult.Cancel;
-
             try
             {
                 Project.ProjectInvestigator1 = (ProjectInvestigator)LeadComboBox.SelectedItem;
                 Database.SubmitChanges();
-                DialogResult = DialogResult.OK;
+                DialogResult = DialogResult.OK; //Closes form
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Unable To Update Project", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
     }
 }

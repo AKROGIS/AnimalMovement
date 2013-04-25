@@ -234,7 +234,7 @@ namespace AnimalMovement
 
         private void EditInvestigatorButton_Click(object sender, EventArgs e)
         {
-            var form = new ChangeInvestigatorForm(Project.ProjectId, CurrentUser);
+            var form = new ChangeInvestigatorForm(Project.ProjectId);
             if (form.ShowDialog(this) == DialogResult.Cancel)
                 return;
             OnDatabaseChanged();
