@@ -85,7 +85,7 @@
             this.ShowDerivedFilesCheckBox = new System.Windows.Forms.CheckBox();
             this.ParameterFilesTab = new System.Windows.Forms.TabPage();
             this.AssistantsTab = new System.Windows.Forms.TabPage();
-            this.AssitantsListBox = new System.Windows.Forms.ListBox();
+            this.AssistantsListBox = new System.Windows.Forms.ListBox();
             this.AddAssistantButton = new System.Windows.Forms.Button();
             this.DeleteAssistantButton = new System.Windows.Forms.Button();
             this.ReportsTab = new System.Windows.Forms.TabPage();
@@ -818,7 +818,7 @@
             // 
             // AssistantsTab
             // 
-            this.AssistantsTab.Controls.Add(this.AssitantsListBox);
+            this.AssistantsTab.Controls.Add(this.AssistantsListBox);
             this.AssistantsTab.Controls.Add(this.AddAssistantButton);
             this.AssistantsTab.Controls.Add(this.DeleteAssistantButton);
             this.AssistantsTab.Location = new System.Drawing.Point(4, 22);
@@ -829,18 +829,18 @@
             this.AssistantsTab.Text = "Assistants";
             this.AssistantsTab.UseVisualStyleBackColor = true;
             // 
-            // AssitantsListBox
+            // AssistantsListBox
             // 
-            this.AssitantsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.AssistantsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.AssitantsListBox.FormattingEnabled = true;
-            this.AssitantsListBox.IntegralHeight = false;
-            this.AssitantsListBox.Location = new System.Drawing.Point(3, 6);
-            this.AssitantsListBox.Name = "AssitantsListBox";
-            this.AssitantsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.AssitantsListBox.Size = new System.Drawing.Size(487, 309);
-            this.AssitantsListBox.TabIndex = 14;
+            this.AssistantsListBox.FormattingEnabled = true;
+            this.AssistantsListBox.IntegralHeight = false;
+            this.AssistantsListBox.Location = new System.Drawing.Point(3, 6);
+            this.AssistantsListBox.Name = "AssistantsListBox";
+            this.AssistantsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.AssistantsListBox.Size = new System.Drawing.Size(487, 309);
+            this.AssistantsListBox.TabIndex = 14;
             // 
             // AddAssistantButton
             // 
@@ -852,6 +852,7 @@
             this.AddAssistantButton.Size = new System.Drawing.Size(24, 24);
             this.AddAssistantButton.TabIndex = 15;
             this.AddAssistantButton.UseVisualStyleBackColor = true;
+            this.AddAssistantButton.Click += new System.EventHandler(this.AddAssistantButton_Click);
             // 
             // DeleteAssistantButton
             // 
@@ -863,6 +864,7 @@
             this.DeleteAssistantButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteAssistantButton.TabIndex = 16;
             this.DeleteAssistantButton.UseVisualStyleBackColor = true;
+            this.DeleteAssistantButton.Click += new System.EventHandler(this.DeleteAssistantButton_Click);
             // 
             // ReportsTab
             // 
@@ -1024,7 +1026,7 @@
         private System.Windows.Forms.Button InfoPlatformButton;
         private System.Windows.Forms.Button AddPlatformButton;
         private System.Windows.Forms.TabPage AssistantsTab;
-        private System.Windows.Forms.ListBox AssitantsListBox;
+        private System.Windows.Forms.ListBox AssistantsListBox;
         private System.Windows.Forms.Button AddAssistantButton;
         private System.Windows.Forms.Button DeleteAssistantButton;
         private ColoredListBox PlatformsListBox;

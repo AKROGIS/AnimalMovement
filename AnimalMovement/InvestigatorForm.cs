@@ -103,6 +103,9 @@ namespace AnimalMovement
             PhoneTextBox.Text = Investigator.Phone;
         }
 
+
+        #region General
+
         private void UpdateDataSource()
         {
             Investigator.Name = NameTextBox.Text;
@@ -174,6 +177,9 @@ namespace AnimalMovement
             ProjectsListBox_SelectedIndexChanged(null, null);
             ParameterFilesListBox_SelectedIndexChanged(null, null);
         }
+
+        #endregion
+
 
         #region Project List
 
@@ -514,7 +520,34 @@ namespace AnimalMovement
 
         private void LoadAssistantsList()
         {
-            //TODO - provide implementation
+            var assistants = Investigator.ProjectInvestigatorAssistants;
+            AssistantsListBox.DataSource = assistants;
+            AssistantsListBox.DisplayMember = "Assistant";
+        }
+
+        private void AssistantDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            LoadAssistantsList();
+        }
+
+        private void AddAssistantButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddEditorForm(null, null);//, Investigator);
+            form.DatabaseChanged += (o, x) => AssistantDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteAssistantButton_Click(object sender, EventArgs e)
+        {
+            foreach (var item in AssistantsListBox.SelectedItems)
+            {
+                var assistant = (ProjectInvestigatorAssistant)item;
+                Database.ProjectInvestigatorAssistants.DeleteOnSubmit(assistant);
+            }
+            if (SubmitChanges())
+                AssistantDataChanged();
         }
 
         #endregion
@@ -591,7 +624,6 @@ namespace AnimalMovement
                 handle(this, EventArgs.Empty);
         }
 
-
         private void ProjectInvestigatorTabs_SelectedIndexChanged(object sender, EventArgs e)
         {
             switch (ProjectInvestigatorTabs.SelectedIndex)
@@ -619,5 +651,27 @@ namespace AnimalMovement
                     break;
             }
         }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
     }
 }
