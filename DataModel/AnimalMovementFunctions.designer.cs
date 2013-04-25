@@ -62,12 +62,6 @@ namespace DataModel
 			OnCreated();
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.IsEditor", IsComposable=true)]
-		public System.Nullable<bool> IsEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Project", DbType="VarChar(32)")] string project, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
-		{
-			return ((System.Nullable<bool>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), project, user).ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.IsFixEditor", IsComposable=true)]
 		public System.Nullable<bool> IsFixEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FixId", DbType="Int")] System.Nullable<int> fixId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
 		{
@@ -106,6 +100,18 @@ namespace DataModel
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId);
 			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.IsProjectEditor", IsComposable=true)]
+		public System.Nullable<bool> IsProjectEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Project", DbType="VarChar(32)")] string project, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
+		{
+			return ((System.Nullable<bool>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), project, user).ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.IsInvestigatorEditor", IsComposable=true)]
+		public System.Nullable<bool> IsInvestigatorEditor([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectInvestigator", DbType="NVarChar(128)")] string projectInvestigator, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="User", DbType="NVarChar(128)")] string user)
+		{
+			return ((System.Nullable<bool>)(this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectInvestigator, user).ReturnValue));
 		}
 	}
 	

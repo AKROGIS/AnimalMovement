@@ -63,6 +63,7 @@ namespace DataModel
     partial void InsertLookupCollarFileFormat(LookupCollarFileFormat instance);
     partial void UpdateLookupCollarFileFormat(LookupCollarFileFormat instance);
     partial void DeleteLookupCollarFileFormat(LookupCollarFileFormat instance);
+    partial void UpdateProjectInvestigatorAssistant(ProjectInvestigatorAssistant instance);
     #endregion
 		
 		public AnimalMovementDataContext() : 
@@ -268,6 +269,14 @@ namespace DataModel
 			get
 			{
 				return this.GetTable<Collar>();
+			}
+		}
+		
+		public System.Data.Linq.Table<ProjectInvestigatorAssistant> ProjectInvestigatorAssistants
+		{
+			get
+			{
+				return this.GetTable<ProjectInvestigatorAssistant>();
 			}
 		}
 		
@@ -478,6 +487,17 @@ namespace DataModel
 		{
 			Collar original = ((Collar)(Collars.GetOriginalEntityState(obj)));
 			this.Collar_Delete(original.CollarManufacturer, original.CollarId);
+		}
+		
+		private void InsertProjectInvestigatorAssistant(ProjectInvestigatorAssistant obj)
+		{
+			this.ProjectInvestigatorAssistant_Insert(obj.ProjectInvestigator, obj.Assistant);
+		}
+		
+		private void DeleteProjectInvestigatorAssistant(ProjectInvestigatorAssistant obj)
+		{
+			ProjectInvestigatorAssistant original = ((ProjectInvestigatorAssistant)(ProjectInvestigatorAssistants.GetOriginalEntityState(obj)));
+			this.ProjectInvestigatorAssistant_Delete(original.ProjectInvestigator, original.Assistant);
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Delete")]
@@ -762,6 +782,20 @@ namespace DataModel
 		public int Collar_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarModel", DbType="NVarChar(255)")] string collarModel, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Manager", DbType="NVarChar(128)")] string manager, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SerialNumber", DbType="NVarChar(255)")] string serialNumber, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Frequency", DbType="Float")] System.Nullable<double> frequency, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="HasGps", DbType="Bit")] System.Nullable<bool> hasGps, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Notes", DbType="NVarChar(MAX)")] string notes, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DisposalDate", DbType="DateTime2")] System.Nullable<System.DateTime> disposalDate)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, collarModel, manager, owner, serialNumber, frequency, hasGps, notes, disposalDate);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ProjectInvestigatorAssistant_Insert")]
+		public int ProjectInvestigatorAssistant_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectInvestigator", DbType="NVarChar(128)")] string projectInvestigator, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Assistant", DbType="NVarChar(128)")] string assistant)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectInvestigator, assistant);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ProjectInvestigatorAssistant_Delete")]
+		public int ProjectInvestigatorAssistant_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectInvestigator", DbType="NVarChar(128)")] string projectInvestigator, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Assistant", DbType="NVarChar(128)")] string assistant)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectInvestigator, assistant);
 			return ((int)(result.ReturnValue));
 		}
 	}
@@ -1983,6 +2017,8 @@ namespace DataModel
 		
 		private EntitySet<Collar> _Collars;
 		
+		private EntitySet<ProjectInvestigatorAssistant> _ProjectInvestigatorAssistants;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -2004,6 +2040,7 @@ namespace DataModel
 			this._ArgosPrograms = new EntitySet<ArgosProgram>(new Action<ArgosProgram>(this.attach_ArgosPrograms), new Action<ArgosProgram>(this.detach_ArgosPrograms));
 			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
 			this._Collars = new EntitySet<Collar>(new Action<Collar>(this.attach_Collars), new Action<Collar>(this.detach_Collars));
+			this._ProjectInvestigatorAssistants = new EntitySet<ProjectInvestigatorAssistant>(new Action<ProjectInvestigatorAssistant>(this.attach_ProjectInvestigatorAssistants), new Action<ProjectInvestigatorAssistant>(this.detach_ProjectInvestigatorAssistants));
 			OnCreated();
 		}
 		
@@ -2152,6 +2189,19 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_ProjectInvestigatorAssistant", Storage="_ProjectInvestigatorAssistants", ThisKey="Login", OtherKey="ProjectInvestigator")]
+		public EntitySet<ProjectInvestigatorAssistant> ProjectInvestigatorAssistants
+		{
+			get
+			{
+				return this._ProjectInvestigatorAssistants;
+			}
+			set
+			{
+				this._ProjectInvestigatorAssistants.Assign(value);
+			}
+		}
+		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -2230,6 +2280,18 @@ namespace DataModel
 		{
 			this.SendPropertyChanging();
 			entity.ProjectInvestigator = null;
+		}
+		
+		private void attach_ProjectInvestigatorAssistants(ProjectInvestigatorAssistant entity)
+		{
+			this.SendPropertyChanging();
+			entity.ProjectInvestigator1 = this;
+		}
+		
+		private void detach_ProjectInvestigatorAssistants(ProjectInvestigatorAssistant entity)
+		{
+			this.SendPropertyChanging();
+			entity.ProjectInvestigator1 = null;
 		}
 	}
 	
@@ -7175,6 +7237,133 @@ namespace DataModel
 		{
 			this.SendPropertyChanging();
 			entity.Collar = null;
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ProjectInvestigatorAssistants")]
+	public partial class ProjectInvestigatorAssistant : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _ProjectInvestigator;
+		
+		private string _Assistant;
+		
+		private EntityRef<ProjectInvestigator> _ProjectInvestigator1;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnProjectInvestigatorChanging(string value);
+    partial void OnProjectInvestigatorChanged();
+    partial void OnAssistantChanging(string value);
+    partial void OnAssistantChanged();
+    #endregion
+		
+		public ProjectInvestigatorAssistant()
+		{
+			this._ProjectInvestigator1 = default(EntityRef<ProjectInvestigator>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ProjectInvestigator", DbType="NVarChar(128) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string ProjectInvestigator
+		{
+			get
+			{
+				return this._ProjectInvestigator;
+			}
+			set
+			{
+				if ((this._ProjectInvestigator != value))
+				{
+					if (this._ProjectInvestigator1.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnProjectInvestigatorChanging(value);
+					this.SendPropertyChanging();
+					this._ProjectInvestigator = value;
+					this.SendPropertyChanged("ProjectInvestigator");
+					this.OnProjectInvestigatorChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Assistant", DbType="NVarChar(128) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string Assistant
+		{
+			get
+			{
+				return this._Assistant;
+			}
+			set
+			{
+				if ((this._Assistant != value))
+				{
+					this.OnAssistantChanging(value);
+					this.SendPropertyChanging();
+					this._Assistant = value;
+					this.SendPropertyChanged("Assistant");
+					this.OnAssistantChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_ProjectInvestigatorAssistant", Storage="_ProjectInvestigator1", ThisKey="ProjectInvestigator", OtherKey="Login", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
+		public ProjectInvestigator ProjectInvestigator1
+		{
+			get
+			{
+				return this._ProjectInvestigator1.Entity;
+			}
+			set
+			{
+				ProjectInvestigator previousValue = this._ProjectInvestigator1.Entity;
+				if (((previousValue != value) 
+							|| (this._ProjectInvestigator1.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ProjectInvestigator1.Entity = null;
+						previousValue.ProjectInvestigatorAssistants.Remove(this);
+					}
+					this._ProjectInvestigator1.Entity = value;
+					if ((value != null))
+					{
+						value.ProjectInvestigatorAssistants.Add(this);
+						this._ProjectInvestigator = value.Login;
+					}
+					else
+					{
+						this._ProjectInvestigator = default(string);
+					}
+					this.SendPropertyChanged("ProjectInvestigator1");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
 		}
 	}
 }

@@ -117,6 +117,7 @@
       <Association Name="ProjectInvestigator_ArgosProgram" Member="ArgosPrograms" ThisKey="Login" OtherKey="Manager" Type="ArgosProgram" />
       <Association Name="ProjectInvestigator_CollarFile" Member="CollarFiles" ThisKey="Login" OtherKey="Owner" Type="CollarFile" />
       <Association Name="ProjectInvestigator_Collar" Member="Collars" ThisKey="Login" OtherKey="Manager" Type="Collar" />
+      <Association Name="ProjectInvestigator_ProjectInvestigatorAssistant" Member="ProjectInvestigatorAssistants" ThisKey="Login" OtherKey="ProjectInvestigator" Type="ProjectInvestigatorAssistant" />
     </Type>
     <UpdateFunction FunctionId="FunctionId9">
       <Argument Parameter="login" Member="Login" Version="Original" />
@@ -519,6 +520,21 @@
       <Argument Parameter="collarId" Member="CollarId" Version="Original" />
     </DeleteFunction>
   </Table>
+  <Table Name="dbo.ProjectInvestigatorAssistants" Member="ProjectInvestigatorAssistants">
+    <Type Name="ProjectInvestigatorAssistant">
+      <Column Name="ProjectInvestigator" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Assistant" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="ProjectInvestigator_ProjectInvestigatorAssistant" Member="ProjectInvestigator1" ThisKey="ProjectInvestigator" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+    <InsertFunction FunctionId="FunctionId34">
+      <Argument Parameter="projectInvestigator" Member="ProjectInvestigator" />
+      <Argument Parameter="assistant" Member="Assistant" />
+    </InsertFunction>
+    <DeleteFunction FunctionId="FunctionId35">
+      <Argument Parameter="projectInvestigator" Member="ProjectInvestigator" Version="Original" />
+      <Argument Parameter="assistant" Member="Assistant" Version="Original" />
+    </DeleteFunction>
+  </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />
@@ -820,6 +836,16 @@
     <Parameter Name="HasGps" Parameter="hasGps" Type="System.Boolean" DbType="Bit" />
     <Parameter Name="Notes" Parameter="notes" Type="System.String" DbType="NVarChar(MAX)" />
     <Parameter Name="DisposalDate" Parameter="disposalDate" Type="System.DateTime" DbType="DateTime2" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId34" Name="dbo.ProjectInvestigatorAssistant_Insert" Method="ProjectInvestigatorAssistant_Insert">
+    <Parameter Name="ProjectInvestigator" Parameter="projectInvestigator" Type="System.String" DbType="NVarChar(128)" />
+    <Parameter Name="Assistant" Parameter="assistant" Type="System.String" DbType="NVarChar(128)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId35" Name="dbo.ProjectInvestigatorAssistant_Delete" Method="ProjectInvestigatorAssistant_Delete">
+    <Parameter Name="ProjectInvestigator" Parameter="projectInvestigator" Type="System.String" DbType="NVarChar(128)" />
+    <Parameter Name="Assistant" Parameter="assistant" Type="System.String" DbType="NVarChar(128)" />
     <Return Type="System.Int32" />
   </Function>
 </Database>
