@@ -33,37 +33,6 @@ namespace AnimalMovement
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        // ReSharper disable UnusedAutoPropertyAccessor.Local
-        // public accessors are used by the control when these classes are accessed through the Datasource
-        class ProjectListItem
-        {
-            public string Name { get; set; }
-            public bool CanDelete { get; set; }
-            public Project Project { get; set; }
-        }
-
-        class CollarListItem
-        {
-            public string Name { get; set; }
-            public bool CanDelete { get; set; }
-            public Collar Collar { get; set; }
-        }
-
-        class CollarFileListItem
-        {
-            public string Name { get; set; }
-            public bool CanDelete { get; set; }
-            public CollarFile File { get; set; }
-        }
-
-        class ParameterFileListItem
-        {
-            public string Name { get; set; }
-            public bool CanDelete { get; set; }
-            public CollarParameterFile File { get; set; }
-        }
-        // ReSharper restore UnusedAutoPropertyAccessor.Local
-
         internal InvestigatorForm(string investigator)
         {
             InitializeComponent();
@@ -73,11 +42,22 @@ namespace AnimalMovement
             LoadDataContext();
         }
 
-        private void InvestigatorForm_Load(object sender, EventArgs e)
+        private void LoadDataContext()
         {
-            if (ProjectInvestigatorTabs.SelectedIndex == 0)
-                ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
+            Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
+            Investigator = Database.ProjectInvestigators.First(pi => pi.Login == InvestigatorLogin);
+            if (Investigator == null)
+                throw new InvalidOperationException("Investigator Form not provided a valid Collar Investigator Id.");
+
+            var functions = new AnimalMovementFunctions();
+            IsInvestigator = Investigator == Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
+            IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
+            SetupGeneral();
         }
+
+
+        #region Form Control
 
         protected override void OnLoad(EventArgs e)
         {
@@ -85,6 +65,9 @@ namespace AnimalMovement
             ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDownloadFiles;
             ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDerivedFiles;
             ProjectInvestigatorTabs.SelectedIndex = Properties.Settings.Default.InvestigatorFormActiveTab;
+            if (ProjectInvestigatorTabs.SelectedIndex == 0)
+                //if new index is zero, index changed event will not fire, so fire it manually
+                ProjectInvestigatorTabs_SelectedIndexChanged(null,null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -96,43 +79,30 @@ namespace AnimalMovement
             Properties.Settings.Default.InvestigatorFormShowDerivedFiles = ShowDerivedFilesCheckBox.Checked;
         }
 
-        private void LoadDataContext()
-        {
-            Database = new AnimalMovementDataContext();
-            Investigator = Database.ProjectInvestigators.First(pi => pi.Login == InvestigatorLogin);
-            if (Investigator == null)
-                throw new InvalidOperationException("Investigator Form not provided a valid Collar Investigator Id.");
-
-            var functions = new AnimalMovementFunctions();
-            IsInvestigator = Investigator == Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
-            IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
-            SetupGeneral();
-        }
-
         private void ProjectInvestigatorTabs_SelectedIndexChanged(object sender, EventArgs e)
         {
             switch (ProjectInvestigatorTabs.SelectedIndex)
             {
                 case 0:
-                    LoadProjectList();
+                    SetupProjectTab();
                     break;
                 case 1:
-                    LoadCollarList();
+                    SetupCollarsTab();
                     break;
                 case 2:
-                    LoadArgosList();
+                    SetupArgosTab();
                     break;
                 case 3:
-                    LoadCollarFileList();
+                    SetupCollarFilesTab();
                     break;
                 case 4:
-                    LoadParameterFileList();
+                    SetupParameterFilesTab();
                     break;
                 case 5:
-                    LoadAssistantsList();
+                    SetupAssistantsTab();
                     break;
                 case 6:
-                    LoadQCReports();
+                    SetupReportsTab();
                     break;
             }
         }
@@ -165,6 +135,9 @@ namespace AnimalMovement
                 handle(this, EventArgs.Empty);
         }
 
+        #endregion
+
+
         #region General
 
         private void SetupGeneral()
@@ -173,14 +146,16 @@ namespace AnimalMovement
             NameTextBox.Text = Investigator.Name;
             EmailTextBox.Text = Investigator.Email;
             PhoneTextBox.Text = Investigator.Phone;
-            SetEditingControls();
+            EnableGeneralControls();
         }
 
-        private void UpdateDataSource()
+        private void EnableGeneralControls()
         {
-            Investigator.Name = NameTextBox.Text;
-            Investigator.Email = EmailTextBox.Text;
-            Investigator.Phone = PhoneTextBox.Text;
+            EditSaveButton.Enabled = IsInvestigator;
+            IsEditMode = EditSaveButton.Text == "Save";
+            NameTextBox.Enabled = IsEditMode;
+            EmailTextBox.Enabled = IsEditMode;
+            PhoneTextBox.Enabled = IsEditMode;
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
@@ -191,25 +166,19 @@ namespace AnimalMovement
                 // The user wants to edit, Enable form
                 EditSaveButton.Text = "Save";
                 DoneCancelButton.Text = "Cancel";
-                SetEditingControls();
+                EnableGeneralControls();
             }
             else
             {
                 //User is saving
-                try
+                UpdateDataSource();
+                if (SubmitChanges())
                 {
-                    UpdateDataSource();
-                    Database.SubmitChanges();
                     OnDatabaseChanged();
+                    EditSaveButton.Text = "Edit";
+                    DoneCancelButton.Text = "Done";
+                    EnableGeneralControls();
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Unable to save changes", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                EditSaveButton.Text = "Edit";
-                DoneCancelButton.Text = "Done";
-                SetEditingControls();
             }
         }
 
@@ -220,9 +189,10 @@ namespace AnimalMovement
             {
                 DoneCancelButton.Text = "Done";
                 EditSaveButton.Text = "Edit";
-                SetEditingControls();
+                EnableGeneralControls();
                 //Reset state from database
                 LoadDataContext();
+                SetupGeneral();
             }
             else
             {
@@ -230,14 +200,11 @@ namespace AnimalMovement
             }
         }
 
-
-        private void SetEditingControls()
+        private void UpdateDataSource()
         {
-            EditSaveButton.Enabled = IsInvestigator;
-            IsEditMode = EditSaveButton.Text == "Save";
-            NameTextBox.Enabled = IsEditMode;
-            EmailTextBox.Enabled = IsEditMode;
-            PhoneTextBox.Enabled = IsEditMode;
+            Investigator.Name = NameTextBox.Text;
+            Investigator.Email = EmailTextBox.Text;
+            Investigator.Phone = PhoneTextBox.Text;
         }
 
         #endregion
@@ -245,7 +212,17 @@ namespace AnimalMovement
 
         #region Project List
 
-        private void LoadProjectList()
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        class ProjectListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public Project Project { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void SetupProjectTab()
         {
             var query = from project in Database.Projects
                         where project.ProjectInvestigator1 == Investigator
@@ -261,7 +238,7 @@ namespace AnimalMovement
             ProjectsTab.Text = sortedList.Count < 5 ? "Projects" : String.Format("Projects ({0})", sortedList.Count);
         }
 
-        private void EnableProjectTab()
+        private void EnableProjectControls()
         {
             AddProjectButton.Enabled = !IsEditMode && IsInvestigator;
             InfoProjectButton.Enabled = false;
@@ -273,43 +250,39 @@ namespace AnimalMovement
                 DeleteProjectsButton.Enabled = true;
         }
 
+        private void ProjectDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupProjectTab();
+        }
+
         private void AddProjectButton_Click(object sender, EventArgs e)
         {
             var form = new AddProjectForm(CurrentUser);
-            //Adding projects in this context is not supported.
-            //var form = newAddProjectForm(Database, CurrentUser);
-            if (form.ShowDialog(this) != DialogResult.Cancel)
-                LoadProjectList();
+            form.DatabaseChanged += (o, x) => ProjectDataChanged();
+            form.Show(this);
         }
 
         private void DeleteProjectsButton_Click(object sender, EventArgs e)
         {
             foreach (ProjectListItem item in ProjectsListBox.SelectedItems.Cast<ProjectListItem>().Where(item => item.CanDelete))
                 Database.Projects.DeleteOnSubmit(item.Project);
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected projects\n" +
-                                "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            LoadDataContext();
+            if (SubmitChanges())
+                ProjectDataChanged();
         }
 
         private void InfoProjectButton_Click(object sender, EventArgs e)
         {
             var project = ((ProjectListItem)ProjectsListBox.SelectedItem).Project;
             var form = new ProjectDetailsForm(project.ProjectId, CurrentUser);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.DatabaseChanged += (o, args) => ProjectDataChanged();
             form.Show(this);
         }
 
         private void ProjectsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnableProjectTab();
+            EnableProjectControls();
         }
 
         #endregion
@@ -317,7 +290,18 @@ namespace AnimalMovement
 
         #region Collar List
 
-        private void LoadCollarList()
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+
+        class CollarListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public Collar Collar { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void SetupCollarsTab()
         {
             var query = from collar in Database.Collars
                         where collar.ProjectInvestigator == Investigator
@@ -338,10 +322,10 @@ namespace AnimalMovement
                     CollarsListBox.SetItemColor(i, Color.DarkGray);
             }
             CollarsTab.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
-            EnableCollarButtons();
+            EnableCollarControls();
         }
 
-        private void EnableCollarButtons()
+        private void EnableCollarControls()
         {
             AddCollarButton.Enabled = !IsEditMode && IsEditor;
             InfoCollarButton.Enabled = false;
@@ -372,43 +356,39 @@ namespace AnimalMovement
             return name;
         }
 
+        private void CollarDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupCollarsTab();
+        }
+
         private void AddCollarButton_Click(object sender, EventArgs e)
         {
             var form = new AddCollarForm(CurrentUser);
-            //Adding collars in this context is not supported.
-            //var form = new AddCollarForm(Database, CurrentUser);
-            if (form.ShowDialog(this) != DialogResult.Cancel)
-                LoadCollarList();
+            form.DatabaseChanged += (o, x) => CollarDataChanged();
+            form.Show(this);
         }
 
         private void DeleteCollarsButton_Click(object sender, EventArgs e)
         {
             foreach (CollarListItem item in CollarsListBox.SelectedItems.Cast<CollarListItem>().Where(item => item.CanDelete))
                 Database.Collars.DeleteOnSubmit(item.Collar);
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected collars\n" +
-                                "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            LoadDataContext();
+            if (SubmitChanges())
+                CollarDataChanged();
         }
 
         private void InfoCollarButton_Click(object sender, EventArgs e)
         {
             var collar = ((CollarListItem)CollarsListBox.SelectedItem).Collar;
-            var form = new CollarDetailsForm(collar.CollarManufacturer, collar.CollarId, CurrentUser);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            var form = new CollarDetailsForm(collar.CollarManufacturer, collar.CollarId);
+            form.DatabaseChanged += (o, args) => CollarDataChanged();
             form.Show(this);
         }
 
         private void CollarsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnableCollarButtons();
+            EnableCollarControls();
         }
 
         #endregion
@@ -416,9 +396,15 @@ namespace AnimalMovement
 
         #region Argos Programs
 
-        private void LoadArgosList()
+        private void SetupArgosTab()
         {
             //TODO - provide implementation
+            EnableArgosControls();
+        }
+
+        private void EnableArgosControls()
+        {
+            
         }
 
         #endregion
@@ -426,7 +412,17 @@ namespace AnimalMovement
 
         #region Collar File List
 
-        private void LoadCollarFileList()
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        class CollarFileListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public CollarFile File { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void SetupCollarFilesTab()
         {
             var query = from file in Database.CollarFiles
                         where file.ProjectInvestigator == Investigator &&
@@ -462,10 +458,10 @@ namespace AnimalMovement
                 }
             }
             CollarFilesTab.Text = sortedList.Count < 5 ? "Collar Files" : String.Format("Collar Files ({0})", sortedList.Count);
-            EnableCollarFilesTab();
+            EnableCollarFilesControls();
         }
 
-        private void EnableCollarFilesTab()
+        private void EnableCollarFilesControls()
         {
             InfoCollarFileButton.Enabled = false;
             DeleteCollarFilesButton.Enabled = false;
@@ -476,11 +472,17 @@ namespace AnimalMovement
                 DeleteCollarFilesButton.Enabled = true;
         }
 
+        private void CollarFileDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupCollarFilesTab();
+        }
+
         private void AddCollarFileButton_Click(object sender, EventArgs e)
         {
-            //The add happens in a new context, so we need to reload this context if changes were made
             var form = new UploadFilesForm(null, Investigator);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.DatabaseChanged += (o, x) => CollarFileDataChanged();
             form.Show(this);
         }
 
@@ -488,35 +490,26 @@ namespace AnimalMovement
         {
             foreach (CollarFileListItem item in CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>().Where(item => item.CanDelete))
                 Database.CollarFiles.DeleteOnSubmit(item.File);
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected files\n" +
-                                "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            LoadDataContext();
+            if (SubmitChanges())
+                CollarFileDataChanged();
         }
 
         private void InfoCollarFileButton_Click(object sender, EventArgs e)
         {
             var file = ((CollarFileListItem)CollarFilesListBox.SelectedItem).File;
             var form = new FileDetailsForm(file.FileId, CurrentUser);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.DatabaseChanged += (o, args) => CollarFileDataChanged();
             form.Show(this);
         }
 
         private void CollarFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnableCollarFilesTab();
+            EnableCollarFilesControls();
         }
 
         private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            LoadCollarFileList();
+            SetupCollarFilesTab();
         }
 
         #endregion
@@ -524,7 +517,17 @@ namespace AnimalMovement
 
         #region Parameter File List
 
-        private void LoadParameterFileList()
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        class ParameterFileListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public CollarParameterFile File { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void SetupParameterFilesTab()
         {
             var query = from file in Database.CollarParameterFiles
                         where file.ProjectInvestigator == Investigator
@@ -544,10 +547,10 @@ namespace AnimalMovement
                     ParameterFilesListBox.SetItemColor(i, Color.DarkGray);
             }
             ParameterFilesTab.Text = sortedList.Count < 5 ? "Parameter Files" : String.Format("Parameter Files ({0})", sortedList.Count);
-            EnableParameterFilesTab();
+            EnableParameterFilesControls();
         }
 
-        private void EnableParameterFilesTab()
+        private void EnableParameterFilesControls()
         {
             AddParameterFileButton.Enabled = !IsEditMode && IsEditor;
             InfoParameterFileButton.Enabled = false;
@@ -559,43 +562,39 @@ namespace AnimalMovement
                 DeleteParameterFilesButton.Enabled = true;
         }
 
+        private void ParameterFileDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupParameterFilesTab();
+        }
+
         private void AddParameterFileButton_Click(object sender, EventArgs e)
         {
             var form = new AddCollarParameterFileForm(CurrentUser);
-            //Adding projects in this context is not supported.
-            //var form = newAddProjectForm(Database, CurrentUser);
-            if (form.ShowDialog(this) != DialogResult.Cancel)
-                LoadParameterFileList();
+            form.DatabaseChanged += (o, x) => ParameterFileDataChanged();
+            form.Show(this);
         }
 
         private void DeleteParameterFilesButton_Click(object sender, EventArgs e)
         {
             foreach (ParameterFileListItem item in ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>().Where(item => item.CanDelete))
                 Database.CollarParameterFiles.DeleteOnSubmit(item.File);
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected files\n" +
-                                "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            LoadDataContext();
+            if (SubmitChanges())
+                ParameterFileDataChanged();
         }
 
         private void InfoParameterFileButton_Click(object sender, EventArgs e)
         {
             var file = ((ParameterFileListItem)ParameterFilesListBox.SelectedItem).File;
             var form = new CollarParameterFileDetailsForm(file.FileId, CurrentUser);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.DatabaseChanged += (o, args) => ParameterFileDataChanged();
             form.Show(this);
         }
 
         private void ParameterFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnableParameterFilesTab();
+            EnableParameterFilesControls();
         }
 
         #endregion
@@ -603,22 +602,15 @@ namespace AnimalMovement
 
         #region Assistants
 
-        private void LoadAssistantsList()
+        private void SetupAssistantsTab()
         {
             var assistants = Investigator.ProjectInvestigatorAssistants;
             AssistantsListBox.DataSource = assistants;
             AssistantsListBox.DisplayMember = "Assistant";
-            EnableAssistantButtons();
+            EnableAssistantControls();
         }
 
-        private void AssistantDataChanged()
-        {
-            OnDatabaseChanged();
-            LoadDataContext();
-            LoadAssistantsList();
-        }
-
-        private void EnableAssistantButtons()
+        private void EnableAssistantControls()
         {
             AddAssistantButton.Enabled = !IsEditMode && IsInvestigator;
             DeleteAssistantButton.Enabled = !IsEditMode && AssistantsListBox.SelectedItems.Count > 0 &&
@@ -626,6 +618,13 @@ namespace AnimalMovement
                                              (IsEditor && AssistantsListBox.SelectedItems.Count == 1 &&
                                               String.Equals(((ProjectInvestigatorAssistant)AssistantsListBox.SelectedItem).Assistant.Normalize(),
                                                             CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)));
+        }
+
+        private void AssistantDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupAssistantsTab();
         }
 
         private void AddAssistantButton_Click(object sender, EventArgs e)
@@ -638,17 +637,14 @@ namespace AnimalMovement
         private void DeleteAssistantButton_Click(object sender, EventArgs e)
         {
             foreach (var item in AssistantsListBox.SelectedItems)
-            {
-                var assistant = (ProjectInvestigatorAssistant)item;
-                Database.ProjectInvestigatorAssistants.DeleteOnSubmit(assistant);
-            }
+                Database.ProjectInvestigatorAssistants.DeleteOnSubmit((ProjectInvestigatorAssistant)item);
             if (SubmitChanges())
                 AssistantDataChanged();
         }
 
         private void AssistantsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnableAssistantButtons();
+            EnableAssistantControls();
         }
 
         #endregion
@@ -658,7 +654,7 @@ namespace AnimalMovement
 
         private XDocument _queryDocument;
 
-        private void LoadQCReports()
+        private void SetupReportsTab()
         {
             var xmlFilePath = Properties.Settings.Default.InvestigatorReportsXml;
             string error = null;

@@ -20,7 +20,7 @@ namespace AnimalMovement
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal CollarDetailsForm(string mfgrId, string collarId, string user)
+        internal CollarDetailsForm(string mfgrId, string collarId)
         {
             InitializeComponent();
             RestoreWindow();
@@ -38,13 +38,16 @@ namespace AnimalMovement
             DatabaseViews = new AnimalMovementViews();
             Collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == ManufacturerId && c.CollarId == CollarId);
             if (Collar == null)
-            {
-                MessageBox.Show("Collar not found.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
-            var functions = new AnimalMovementFunctions();
-            IsEditor = functions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false;
+                throw new InvalidOperationException("Collar Details Form not provided a valid Collar Id.");
+
+            IsEditor = DatabaseFunctions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false;
+            SetUpHeader();
+        }
+
+        #region Form Controls
+
+        private void SetUpHeader()
+        {
             ManufacturerTextBox.Text = Collar.LookupCollarManufacturer.Name;
             CollarIdTextBox.Text = Collar.CollarId;
         }
@@ -53,6 +56,9 @@ namespace AnimalMovement
         {
             base.OnLoad(e);
             CollarTabs.SelectedIndex = Properties.Settings.Default.CollarDetailsFormActiveTab;
+            if (CollarTabs.SelectedIndex == 0)
+                //if new index is zero, index changed event will not fire, so fire it manually
+                CollarTabs_SelectedIndexChanged(null, null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -113,6 +119,8 @@ namespace AnimalMovement
             if (handle != null)
                 handle(this, EventArgs.Empty);
         }
+
+        #endregion
 
 
         #region General Tab

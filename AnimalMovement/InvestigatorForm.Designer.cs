@@ -951,7 +951,6 @@
             this.MinimumSize = new System.Drawing.Size(470, 350);
             this.Name = "InvestigatorForm";
             this.Text = "Project Investigator Details";
-            this.Load += new System.EventHandler(this.InvestigatorForm_Load);
             this.ProjectInvestigatorTabs.ResumeLayout(false);
             this.ProjectsTab.ResumeLayout(false);
             this.CollarsTab.ResumeLayout(false);
