@@ -37,6 +37,7 @@ namespace AnimalMovement
             if (Collar == null)
                 throw new InvalidOperationException("Add Argos Deployment Form not provided a valid Collar.");
 
+            //Todo - put check in database function to get assistants as well
             IsEditor = string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(),
                                      StringComparison.OrdinalIgnoreCase);
         }
@@ -99,7 +100,7 @@ namespace AnimalMovement
 
         private static bool DatesOverlap(DateTime start1, DateTime end1, DateTime start2, DateTime end2)
         {
-            //touching is not considere overlapping.
+            //touching is not considered overlapping.
             return (start2 < end1 && start1 < end2);
         }
 

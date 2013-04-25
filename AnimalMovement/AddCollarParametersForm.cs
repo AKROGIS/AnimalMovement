@@ -35,6 +35,7 @@ namespace AnimalMovement
             if (Collar == null)
                 throw new InvalidOperationException("Add Collar Parameters Form not provided a valid Collar.");
 
+            //Todo - put check in database function to get assistants as well
             IsEditor = string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(),
                                      StringComparison.OrdinalIgnoreCase);
         }
@@ -116,8 +117,8 @@ namespace AnimalMovement
             if (Collar.CollarModel != "Gen3" && !hasFile)
                 return "You must provide a file for this collar";
 
-            var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value : DateTime.MinValue;
-            var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value : DateTime.MaxValue;
+            var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : DateTime.MinValue;
+            var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
                 return "The end date must be after the start date";
 
@@ -156,8 +157,8 @@ namespace AnimalMovement
                 Collar = Collar,
                 Gen3Period = period,
                 FileId = FileComboBox.SelectedItem == null ? (int?)null : (int)FileComboBox.SelectedValue,
-                StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date : (DateTime?)null,
-                EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date : (DateTime?)null
+                StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : (DateTime?)null,
+                EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : (DateTime?)null
             };
             Database.CollarParameters.InsertOnSubmit(param);
             if (SubmitChanges())

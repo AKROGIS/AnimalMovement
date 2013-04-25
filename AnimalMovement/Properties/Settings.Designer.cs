@@ -694,5 +694,17 @@ namespace AnimalMovement.Properties {
                 this["InvestigatorReportsXml"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int AnimalDetailsFormActiveTab {
+            get {
+                return ((int)(this["AnimalDetailsFormActiveTab"]));
+            }
+            set {
+                this["AnimalDetailsFormActiveTab"] = value;
+            }
+        }
     }
 }

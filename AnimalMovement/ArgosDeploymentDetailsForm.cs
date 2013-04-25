@@ -38,6 +38,7 @@ namespace AnimalMovement
             if (ArgosDeployment == null)
                 throw new InvalidOperationException("Argos Deployments Form not provided a valid Argos Deployment Id.");
 
+            //Todo - put check in database function to get assistants as well
             IsEditor = string.Equals(ArgosDeployment.Collar.Manager.Normalize(), CurrentUser.Normalize(),
                                      StringComparison.OrdinalIgnoreCase);
         }
@@ -142,11 +143,7 @@ namespace AnimalMovement
             ArgosDeployment.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date : (DateTime?) null;
             ArgosDeployment.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date : (DateTime?) null;
 
-            if (SubmitChanges())
-                return true;
-            // The collar now thinks it has a deployment, deleteOnSubmit does not clear it
-            LoadDataContext();
-            return false;
+            return SubmitChanges();
         }
 
         private bool SubmitChanges()

@@ -16,7 +16,6 @@ namespace AnimalMovement
         private string CollarId { get; set; }
         private string CurrentUser { get; set; }
         private Collar Collar { get; set; }
-        private bool Deployed { get; set; }
         private bool IsEditor { get; set; }
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
@@ -27,7 +26,7 @@ namespace AnimalMovement
             RestoreWindow();
             ManufacturerId = mfgrId;
             CollarId = collarId;
-            CurrentUser = user;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
         }
 
@@ -45,7 +44,6 @@ namespace AnimalMovement
                 return;
             }
             IsEditor = string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase);
-            Deployed = Collar.CollarDeployments.Any(d => d.RetrievalDate == null);
             ManufacturerTextBox.Text = Collar.LookupCollarManufacturer.Name;
             CollarIdTextBox.Text = Collar.CollarId;
         }
@@ -85,7 +83,34 @@ namespace AnimalMovement
                     SetupFixesTab();
                     break;
             }
+        }
 
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
         }
 
 
@@ -137,11 +162,6 @@ namespace AnimalMovement
             FrequencyTextBox.Enabled = IsEditMode;
             DisposalDateTimePicker.Enabled = IsEditMode;
             NotesTextBox.Enabled = IsEditMode;
-
-            AnimalInfoButton.Enabled = !IsEditMode && DeploymentDataGridView.RowCount > 0;
-            DeleteDeploymentButton.Enabled = !IsEditMode && IsEditor && DeploymentDataGridView.RowCount > 0;
-            DeployRetrieveButton.Enabled = !IsEditMode && IsEditor;
-            ChangeFileStatusButton.Enabled = !IsEditMode;
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
@@ -158,23 +178,14 @@ namespace AnimalMovement
             {
                 //User is saving
                 UpdateDataSource();
-                try
+                if (SubmitChanges())
                 {
-                    Database.SubmitChanges();
+                    OnDatabaseChanged();
+                    EditSaveButton.Text = "Edit";
+                    DoneCancelButton.Text = "Done";
+                    SetEditingControls();
                 }
-                catch (Exception ex)
-                {
-                    string msg = "Unable to save all the changes.\n" +
-                                 "Error message:\n" + ex.Message;
-                    MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                OnDatabaseChanged();
-                EditSaveButton.Text = "Edit";
-                DoneCancelButton.Text = "Done";
-                SetEditingControls();
             }
-
         }
 
         private void DoneCancelButton_Click(object sender, EventArgs e)
@@ -217,10 +228,7 @@ namespace AnimalMovement
         #endregion
 
 
-        #region Animals Tab
-
-        //FIXME - Allow editing of deployment and retrieval dates
-        //TODO - Move Info and Delete buttons onto the data grid.
+        #region Animal Deployments Tab
 
         // ReSharper disable UnusedAutoPropertyAccessor.Local
         // public accessors are used by the control when these classes are accessed through the Datasource
@@ -252,7 +260,29 @@ namespace AnimalMovement
                     RetrievalDate = d.RetrievalDate.HasValue ? d.RetrievalDate.Value.ToLocalTime() : (DateTime?)null,
                     Deployment = d,
                 };
-            DeployRetrieveButton.Text = Deployed ? "Retrieve" : "Deploy";
+            EnableAnimalControls();
+        }
+
+        private void EnableAnimalControls()
+        {
+            AddDeploymentButton.Enabled = !IsEditMode && IsEditor;
+            DeleteDeploymentButton.Enabled = !IsEditMode && IsEditor && DeploymentDataGridView.SelectedRows.Count > 0;
+            EditDeploymentButton.Enabled = !IsEditMode && IsEditor && DeploymentDataGridView.SelectedRows.Count == 1;
+            InfoAnimalButton.Enabled = !IsEditMode && DeploymentDataGridView.SelectedRows.Count == 1;
+        }
+
+        private void AnimalDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupAnimalsTab();
+        }
+
+        private void AddDeploymentButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddCollarDeploymentForm(Collar);
+            form.DatabaseChanged += (o, x) => AnimalDataChanged();
+            form.Show(this);
         }
 
         private void DeleteDeploymentButton_Click(object sender, EventArgs e)
@@ -262,56 +292,23 @@ namespace AnimalMovement
                 var deployment = (DeploymentDataItem)row.DataBoundItem;
                 Database.CollarDeployments.DeleteOnSubmit(deployment.Deployment);
             }
-            //when we delete a deployment, we may delete locations, which takes time.
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected deployments\n" +
-                                "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            Cursor.Current = Cursors.Default;
-            AnimalDataChanged();
+            if (SubmitChanges())
+                AnimalDataChanged();
         }
 
-        private void DeployRetrieveButton_Click(object sender, EventArgs e)
+        private void EditDeploymentButton_Click(object sender, EventArgs e)
         {
-            if (DeployRetrieveButton.Text == "Retrieve")
-            {
-                CollarDeployment deployment = Collar.CollarDeployments.First(d => d.RetrievalDate == null);
-                var form = new RetrieveCollarForm(deployment);
-                if (form.ShowDialog(this) == DialogResult.Cancel)
-                    return;
-            }
-            else  //Deploy
-            {
-                var form = new DeployCollarForm(Database, Collar, CurrentUser);
-                if (form.ShowDialog(this) == DialogResult.Cancel)
-                    return;
-            }
-            //when we deploy or retrieve a collar, we may add or delete locations, which takes time.
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to save the changes.\n" +
-                             "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Cursor.Current = Cursors.Default;
+            if (DeploymentDataGridView.CurrentRow == null)
                 return;
-            }
-            Cursor.Current = Cursors.Default;
-            AnimalDataChanged();
+            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
+            if (item == null)
+                return;
+            var form = new CollarDeploymentDetailsForm(item.Deployment.DeploymentId, true);
+            form.DatabaseChanged += (o, x) => AnimalDataChanged();
+            form.Show(this);
         }
 
-        private void AnimalInfoButton_Click(object sender, EventArgs e)
+        private void InfoAnimalButton_Click(object sender, EventArgs e)
         {
             if (DeploymentDataGridView.CurrentRow == null)
                 return;
@@ -323,11 +320,9 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void AnimalDataChanged()
+        private void DeploymentDataGridView_SelectionChanged(object sender, EventArgs e)
         {
-            OnDatabaseChanged();
-            LoadDataContext();
-            SetupAnimalsTab();
+            EnableAnimalControls();
         }
 
         #endregion
@@ -638,35 +633,6 @@ namespace AnimalMovement
 
 
         #endregion
-
-
-        private bool SubmitChanges()
-        {
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (SqlException ex)
-            {
-                string msg = "Unable to submit changes to the database.\n" +
-                             "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            finally
-            {
-                Cursor.Current = Cursors.Default;
-            }
-            return true;
-        }
-
-        private void OnDatabaseChanged()
-        {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this, EventArgs.Empty);
-        }
 
     }
 }

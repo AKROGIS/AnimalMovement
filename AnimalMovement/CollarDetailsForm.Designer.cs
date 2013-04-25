@@ -41,6 +41,10 @@
             this.ModelComboBox = new System.Windows.Forms.ComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.ManagerComboBox = new System.Windows.Forms.ComboBox();
+            this.AddDeploymentButton = new System.Windows.Forms.Button();
+            this.DeleteDeploymentButton = new System.Windows.Forms.Button();
+            this.InfoAnimalButton = new System.Windows.Forms.Button();
+            this.EditDeploymentButton = new System.Windows.Forms.Button();
             this.CollarTabs = new System.Windows.Forms.TabControl();
             this.GeneralTabPage = new System.Windows.Forms.TabPage();
             this.NotesTextBox = new System.Windows.Forms.TextBox();
@@ -50,7 +54,6 @@
             this.label9 = new System.Windows.Forms.Label();
             this.FrequencyTextBox = new System.Windows.Forms.TextBox();
             this.AnimalsTabPage = new System.Windows.Forms.TabPage();
-            this.AnimalInfoButton = new System.Windows.Forms.Button();
             this.DeploymentDataGridView = new System.Windows.Forms.DataGridView();
             this.CollarManufacturerColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -59,8 +62,6 @@
             this.DeployDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.RetrieveDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DeleteDeploymentButton = new System.Windows.Forms.Button();
-            this.DeployRetrieveButton = new System.Windows.Forms.Button();
             this.ArgosTabPage = new System.Windows.Forms.TabPage();
             this.ArgosDataGridView = new System.Windows.Forms.DataGridView();
             this.AddArgosButton = new System.Windows.Forms.Button();
@@ -223,6 +224,59 @@
             this.ManagerComboBox.TabIndex = 3;
             this.toolTip1.SetToolTip(this.ManagerComboBox, "If you assign this collar to another PI you will not be able to edit it.");
             // 
+            // AddDeploymentButton
+            // 
+            this.AddDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddDeploymentButton.Enabled = false;
+            this.AddDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddDeploymentButton.Location = new System.Drawing.Point(6, 306);
+            this.AddDeploymentButton.Name = "AddDeploymentButton";
+            this.AddDeploymentButton.Size = new System.Drawing.Size(24, 24);
+            this.AddDeploymentButton.TabIndex = 29;
+            this.toolTip1.SetToolTip(this.AddDeploymentButton, "Deploy this collar on a new animal");
+            this.AddDeploymentButton.UseVisualStyleBackColor = true;
+            this.AddDeploymentButton.Click += new System.EventHandler(this.AddDeploymentButton_Click);
+            // 
+            // DeleteDeploymentButton
+            // 
+            this.DeleteDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteDeploymentButton.Enabled = false;
+            this.DeleteDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeleteDeploymentButton.Location = new System.Drawing.Point(33, 306);
+            this.DeleteDeploymentButton.Name = "DeleteDeploymentButton";
+            this.DeleteDeploymentButton.Size = new System.Drawing.Size(24, 24);
+            this.DeleteDeploymentButton.TabIndex = 30;
+            this.toolTip1.SetToolTip(this.DeleteDeploymentButton, "Delete the selected deployment(s)");
+            this.DeleteDeploymentButton.UseVisualStyleBackColor = true;
+            this.DeleteDeploymentButton.Click += new System.EventHandler(this.DeleteDeploymentButton_Click);
+            // 
+            // InfoAnimalButton
+            // 
+            this.InfoAnimalButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoAnimalButton.FlatAppearance.BorderSize = 0;
+            this.InfoAnimalButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoAnimalButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoAnimalButton.Location = new System.Drawing.Point(84, 306);
+            this.InfoAnimalButton.Name = "InfoAnimalButton";
+            this.InfoAnimalButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoAnimalButton.TabIndex = 31;
+            this.toolTip1.SetToolTip(this.InfoAnimalButton, "Show details on the animal in the selected deployment");
+            this.InfoAnimalButton.UseVisualStyleBackColor = true;
+            this.InfoAnimalButton.Click += new System.EventHandler(this.InfoAnimalButton_Click);
+            // 
+            // EditDeploymentButton
+            // 
+            this.EditDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditDeploymentButton.FlatAppearance.BorderSize = 0;
+            this.EditDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditDeploymentButton.Location = new System.Drawing.Point(60, 306);
+            this.EditDeploymentButton.Name = "EditDeploymentButton";
+            this.EditDeploymentButton.Size = new System.Drawing.Size(24, 24);
+            this.EditDeploymentButton.TabIndex = 32;
+            this.toolTip1.SetToolTip(this.EditDeploymentButton, "Change the selected deployment");
+            this.EditDeploymentButton.UseVisualStyleBackColor = true;
+            this.EditDeploymentButton.Click += new System.EventHandler(this.EditDeploymentButton_Click);
+            // 
             // CollarTabs
             // 
             this.CollarTabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -334,10 +388,11 @@
             // 
             // AnimalsTabPage
             // 
-            this.AnimalsTabPage.Controls.Add(this.AnimalInfoButton);
-            this.AnimalsTabPage.Controls.Add(this.DeploymentDataGridView);
+            this.AnimalsTabPage.Controls.Add(this.EditDeploymentButton);
+            this.AnimalsTabPage.Controls.Add(this.AddDeploymentButton);
             this.AnimalsTabPage.Controls.Add(this.DeleteDeploymentButton);
-            this.AnimalsTabPage.Controls.Add(this.DeployRetrieveButton);
+            this.AnimalsTabPage.Controls.Add(this.InfoAnimalButton);
+            this.AnimalsTabPage.Controls.Add(this.DeploymentDataGridView);
             this.AnimalsTabPage.Location = new System.Drawing.Point(4, 22);
             this.AnimalsTabPage.Name = "AnimalsTabPage";
             this.AnimalsTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -345,17 +400,6 @@
             this.AnimalsTabPage.TabIndex = 1;
             this.AnimalsTabPage.Text = "Animals";
             this.AnimalsTabPage.UseVisualStyleBackColor = true;
-            // 
-            // AnimalInfoButton
-            // 
-            this.AnimalInfoButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.AnimalInfoButton.Location = new System.Drawing.Point(207, 305);
-            this.AnimalInfoButton.Name = "AnimalInfoButton";
-            this.AnimalInfoButton.Size = new System.Drawing.Size(75, 23);
-            this.AnimalInfoButton.TabIndex = 25;
-            this.AnimalInfoButton.Text = "Info";
-            this.AnimalInfoButton.UseVisualStyleBackColor = true;
-            this.AnimalInfoButton.Click += new System.EventHandler(this.AnimalInfoButton_Click);
             // 
             // DeploymentDataGridView
             // 
@@ -382,7 +426,8 @@
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DeploymentDataGridView.Size = new System.Drawing.Size(437, 293);
             this.DeploymentDataGridView.TabIndex = 11;
-            this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.AnimalInfoButton_Click);
+            this.DeploymentDataGridView.SelectionChanged += new System.EventHandler(this.DeploymentDataGridView_SelectionChanged);
+            this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.InfoAnimalButton_Click);
             // 
             // CollarManufacturerColumn
             // 
@@ -449,28 +494,6 @@
             this.DeploymentColumn.Name = "DeploymentColumn";
             this.DeploymentColumn.ReadOnly = true;
             this.DeploymentColumn.Visible = false;
-            // 
-            // DeleteDeploymentButton
-            // 
-            this.DeleteDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.DeleteDeploymentButton.Location = new System.Drawing.Point(288, 305);
-            this.DeleteDeploymentButton.Name = "DeleteDeploymentButton";
-            this.DeleteDeploymentButton.Size = new System.Drawing.Size(75, 23);
-            this.DeleteDeploymentButton.TabIndex = 22;
-            this.DeleteDeploymentButton.Text = "Delete";
-            this.DeleteDeploymentButton.UseVisualStyleBackColor = true;
-            this.DeleteDeploymentButton.Click += new System.EventHandler(this.DeleteDeploymentButton_Click);
-            // 
-            // DeployRetrieveButton
-            // 
-            this.DeployRetrieveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.DeployRetrieveButton.Location = new System.Drawing.Point(368, 305);
-            this.DeployRetrieveButton.Name = "DeployRetrieveButton";
-            this.DeployRetrieveButton.Size = new System.Drawing.Size(75, 23);
-            this.DeployRetrieveButton.TabIndex = 24;
-            this.DeployRetrieveButton.Text = "Deploy";
-            this.DeployRetrieveButton.UseVisualStyleBackColor = true;
-            this.DeployRetrieveButton.Click += new System.EventHandler(this.DeployRetrieveButton_Click);
             // 
             // ArgosTabPage
             // 
@@ -838,8 +861,6 @@
         private System.Windows.Forms.Button EditSaveButton;
         private System.Windows.Forms.TextBox ManufacturerTextBox;
         private System.Windows.Forms.DataGridView DeploymentDataGridView;
-        private System.Windows.Forms.Button DeployRetrieveButton;
-        private System.Windows.Forms.Button DeleteDeploymentButton;
         private System.Windows.Forms.DataGridViewTextBoxColumn CollarManufacturerColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn CollarIdColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn ProjectColumn;
@@ -854,7 +875,6 @@
         private System.Windows.Forms.DataGridView FixConflictsDataGridView;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label SummaryLabel;
-        private System.Windows.Forms.Button AnimalInfoButton;
         private System.Windows.Forms.Button UnhideFixButton;
         private System.Windows.Forms.TabPage FilesTabPage;
         private System.Windows.Forms.DataGridView FilesDataGridView;
@@ -874,5 +894,9 @@
         private System.Windows.Forms.Button AddParameterButton;
         private System.Windows.Forms.Button DeleteParameterButton;
         private System.Windows.Forms.Button InfoParameterButton;
+        private System.Windows.Forms.Button AddDeploymentButton;
+        private System.Windows.Forms.Button DeleteDeploymentButton;
+        private System.Windows.Forms.Button InfoAnimalButton;
+        private System.Windows.Forms.Button EditDeploymentButton;
     }
 }

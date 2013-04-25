@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//FIXME - DATABASE - If there are conflicting collar parameters, the older one should have the end date set to equal the newer one's start date
+//TODO - When adding collar parameters, if an existing one has an earlier start date, and a null end date, then first set the end date to the new start date.
 //TODO - When a new collar is added to the database, we need to create Argos deployments, and update old Argos deployments
 //TODO - When a new TPF file for an existing Collar is added, the old parameters should be ended.
 //TODO - When Updating the Disposal Date of a collar consider adding an end date to the collar parameter (this is not a database requirement)

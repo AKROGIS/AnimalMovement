@@ -38,6 +38,7 @@ namespace AnimalMovement
             if (CollarParameter == null)
                 throw new InvalidOperationException("Collar Parameters Form not provided a valid Collar Parameter Id.");
 
+            //Todo - put check in database function to get assistants as well
             IsEditor = string.Equals(CollarParameter.Collar.Manager.Normalize(), CurrentUser.Normalize(),
                                      StringComparison.OrdinalIgnoreCase);
         }
@@ -207,11 +208,7 @@ namespace AnimalMovement
             CollarParameter.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date : (DateTime?) null;
             CollarParameter.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date : (DateTime?) null;
 
-            if (SubmitChanges())
-                return true;
-            // The collar now thinks it has a parameter, deleteOnSubmit does not clear it
-            LoadDataContext();
-            return false;
+            return SubmitChanges();
         }
 
         private bool SubmitChanges()

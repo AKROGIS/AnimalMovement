@@ -201,7 +201,7 @@
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "AddArgosDeploymentForm";
-            this.Text = "Add Argos Deployment";
+            this.Text = "Add Argos on Collar Deployment";
             this.Load += new System.EventHandler(this.AddArgosDeploymentForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

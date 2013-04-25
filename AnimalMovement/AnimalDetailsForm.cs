@@ -1,41 +1,21 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
-
-//FIXME - Allow editing of deployment and retrieval dates
-//TODO - Delay population of hidden tabs until displayed.
-//TODO - Move Info and Delete buttons onto the data grid.
-//TODO - Add additional location info: hidden locations, centroid, MCP area, average speed
 
 namespace AnimalMovement
 {
     internal partial class AnimalDetailsForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
-        private AnimalMovementViews DatabaseViews { get; set; }
-        private AnimalMovementFunctions DatabaseFunctions { get; set; }
         private string ProjectId { get; set; }
         private string AnimalId { get; set; }
         private string CurrentUser { get; set; }
         private Animal Animal { get; set; }
-        private bool Collared { get; set; }
-        private bool IsAnimalEditor { get; set; }
+        private bool IsEditor { get; set; }
+        private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
-
-        // ReSharper disable UnusedAutoPropertyAccessor.Local
-        // public accessors are used by the control when these classes are accessed through the Datasource
-        class DeploymentDataItem
-        {
-            public string Manufacturer { get; set; }
-            public string CollarId { get; set; }
-            public string Project { get; set; }
-            public string AnimalId { get; set; }
-            public DateTime? DeploymentDate { get; set; }
-            public DateTime? RetrievalDate { get; set; }
-            public CollarDeployment Deployment { get; set; }
-        }
-        // ReSharper restore UnusedAutoPropertyAccessor.Local
 
         internal AnimalDetailsForm(string projectId, string animalId, string user)
         {
@@ -43,15 +23,15 @@ namespace AnimalMovement
             RestoreWindow();
             ProjectId = projectId;
             AnimalId = animalId;
-            CurrentUser = user;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
         }
 
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
-            DatabaseFunctions = new AnimalMovementFunctions();
-            DatabaseViews = new AnimalMovementViews();
+            //Database.Log = Console.Out;
+            //Animal is in a different data context, get them in this DataContext
             Animal = Database.Animals.FirstOrDefault(a => a.ProjectId == ProjectId && a.AnimalId == AnimalId);
             if (Animal == null)
             {
@@ -59,9 +39,74 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsAnimalEditor = DatabaseFunctions.IsEditor(Animal.ProjectId, CurrentUser) ?? false;
+            var functions = new AnimalMovementFunctions();
+            IsEditor = functions.IsEditor(Animal.ProjectId, CurrentUser) ?? false;
+
             ProjectTextBox.Text = Animal.Project.ProjectName;
             AnimalIdTextBox.Text = Animal.AnimalId;
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            AnimalTabsControl.SelectedIndex = Properties.Settings.Default.AnimalDetailsFormActiveTab;
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            Properties.Settings.Default.AnimalDetailsFormActiveTab = AnimalTabsControl.SelectedIndex;
+        }
+
+        private void AnimalTabsControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (AnimalTabsControl.SelectedIndex)
+            {
+                default:
+                    SetupGeneralTab();
+                    break;
+                case 1:
+                    SetupCollarsTab();
+                    break;
+                case 2:
+                    SetupLocationsTab();
+                    break;
+            }
+        }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
+
+        #region General Tab
+
+        private void SetupGeneralTab()
+        {
             SpeciesComboBox.DataSource = Database.LookupSpecies;
             SpeciesComboBox.DisplayMember = "Species";
             SpeciesComboBox.SelectedItem = Animal.LookupSpecies;
@@ -70,52 +115,41 @@ namespace AnimalMovement
             GenderComboBox.SelectedItem = Animal.LookupGender;
             GroupTextBox.Text = Animal.GroupName;
             DescriptionTextBox.Text = Animal.Description;
-            // The datetime picker is set in the form load override, because it worked better there.
-            SetDeploymentDataGrid();
-            SetLocationSummary();
-            Collared = Animal.CollarDeployments.Any(d => d.RetrievalDate == null);
-            EnableForm();
+            SetupMortalityDateTimePicker();
+            EnableGeneralTab();
         }
 
-        private void SetLocationSummary()
+        private void SetupMortalityDateTimePicker()
         {
-            if (Animal == null)
-                return;
-            var summary = DatabaseViews.AnimalLocationSummary(Animal.ProjectId, Animal.AnimalId).FirstOrDefault();
-            if (summary == null)
+            if (Animal.MortalityDate == null)
             {
-                SummaryLabel.Text = "There are NO locations.";
-                TopTextBox.Text = String.Empty;
-                BottomTextBox.Text = String.Empty;
-                LeftTextBox.Text = String.Empty;
-                RightTextBox.Text = String.Empty;
+                var now = DateTime.Now;
+                MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
+                MortatlityDateTimePicker.Checked = false;
+                MortatlityDateTimePicker.CustomFormat = " ";
             }
             else
             {
-                SummaryLabel.Text = String.Format("{0} fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last);
-                TopTextBox.Text = String.Format("{0}", summary.Top);
-                BottomTextBox.Text = String.Format("{0}", summary.Bottom);
-                LeftTextBox.Text = String.Format("{0}", summary.Left);
-                RightTextBox.Text = String.Format("{0}", summary.Right);
+                MortatlityDateTimePicker.Checked = true;
+                MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
+                MortatlityDateTimePicker.Value = Animal.MortalityDate.Value.ToLocalTime();
             }
         }
 
-        private void SetDeploymentDataGrid()
+        private void EnableGeneralTab()
         {
-            DeploymentDataGridView.DataSource =
-                from d in Database.CollarDeployments
-                where d.Animal == Animal
-                orderby d.DeploymentDate
-                select new DeploymentDataItem
-                        {
-                            Manufacturer = d.Collar.LookupCollarManufacturer.Name,
-                            CollarId = d.CollarId,
-                            Project = d.Animal.Project.ProjectName,
-                            AnimalId = d.AnimalId,
-                            DeploymentDate = d.DeploymentDate.ToLocalTime(),
-                            RetrievalDate = d.RetrievalDate.HasValue ? d.RetrievalDate.Value.ToLocalTime() : (DateTime?)null,
-                            Deployment = d,
-                        };
+            EditSaveButton.Enabled = IsEditor;
+            SetEditingControls();
+        }
+
+        private void SetEditingControls()
+        {
+            IsEditMode = EditSaveButton.Text == "Save";
+            SpeciesComboBox.Enabled = IsEditMode;
+            GenderComboBox.Enabled = IsEditMode;
+            GroupTextBox.Enabled = IsEditMode;
+            DescriptionTextBox.Enabled = IsEditMode;
+            MortatlityDateTimePicker.Enabled = IsEditMode;
         }
 
         private void UpdateDataSource()
@@ -128,98 +162,6 @@ namespace AnimalMovement
                 Animal.MortalityDate = MortatlityDateTimePicker.Value.ToUniversalTime();
             else
                 Animal.MortalityDate = null;
-        }
-
-        private void EnableForm()
-        {
-            EditSaveButton.Enabled = IsAnimalEditor;
-            DeployRetrieveButton.Text = Collared ? "Retrieve" : "Deploy";
-            SetEditingControls();
-        }
-
-        private void SetEditingControls()
-        {
-            bool editModeEnabled = EditSaveButton.Text == "Save";
-            SpeciesComboBox.Enabled = editModeEnabled;
-            GenderComboBox.Enabled = editModeEnabled;
-            GroupTextBox.Enabled = editModeEnabled;
-            DescriptionTextBox.Enabled = editModeEnabled;
-            MortatlityDateTimePicker.Enabled = editModeEnabled;
-
-            CollarInfoButton.Enabled = DeploymentDataGridView.RowCount > 0;
-            DeleteDeploymentButton.Enabled = !editModeEnabled && IsAnimalEditor && DeploymentDataGridView.RowCount > 0;
-            DeployRetrieveButton.Enabled = !editModeEnabled && IsAnimalEditor;
-        }
-
-        private void CollarInfoButton_Click(object sender, EventArgs e)
-        {
-            if (DeploymentDataGridView.CurrentRow == null)
-                return;
-            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
-            if (item == null)
-                return;
-            var form = new CollarDetailsForm(item.Deployment.CollarManufacturer, item.CollarId, CurrentUser);
-            form.Show(this);
-        }
-
-        private void DeleteDeploymentButton_Click(object sender, EventArgs e)
-        {
-            foreach (DataGridViewRow row in DeploymentDataGridView.SelectedRows)
-            {
-                var deployment = (DeploymentDataItem)row.DataBoundItem;
-                Database.CollarDeployments.DeleteOnSubmit(deployment.Deployment);
-            }
-            //when we delete a deployment, we may delete locations, which takes time.
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected deployments\n" +
-                                "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            Cursor.Current = Cursors.Default;
-            OnDatabaseChanged();
-            SetDeploymentDataGrid();
-            Collared = Animal.CollarDeployments.Any(d => d.RetrievalDate == null);
-            EnableForm();
-        }
-
-        private void DeployRetrieveButton_Click(object sender, EventArgs e)
-        {
-            if (DeployRetrieveButton.Text == "Retrieve")
-            {
-                CollarDeployment deployment = Animal.CollarDeployments.First(d => d.RetrievalDate == null);
-                var form = new RetrieveCollarForm(deployment);
-                if (form.ShowDialog(this) == DialogResult.Cancel)
-                    return;
-            }
-            else //Deploy
-            {
-                var form = new CollarAnimalForm(Database, Animal);
-                if (form.ShowDialog(this) == DialogResult.Cancel)
-                    return;
-            }
-            //when we deploy or retrieve a collar, we may add or delete locations, which takes time.
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to save the changes.\n" +
-                             "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Cursor.Current = Cursors.Default;
-                return;
-            }
-            Cursor.Current = Cursors.Default;
-            OnDatabaseChanged();
-            LoadDataContext();
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
@@ -276,30 +218,138 @@ namespace AnimalMovement
             MortatlityDateTimePicker.CustomFormat = MortatlityDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
         }
 
-        private void OnDatabaseChanged()
+        #endregion
+
+
+        #region Collar Deployment Tab
+
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        class DeploymentDataItem
         {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this, EventArgs.Empty);
+            public string Manufacturer { get; set; }
+            public string CollarId { get; set; }
+            public string Project { get; set; }
+            public string AnimalId { get; set; }
+            public DateTime? DeploymentDate { get; set; }
+            public DateTime? RetrievalDate { get; set; }
+            public CollarDeployment Deployment { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void SetupCollarsTab()
+        {
+            DeploymentDataGridView.DataSource =
+                from d in Database.CollarDeployments
+                where d.Animal == Animal
+                orderby d.DeploymentDate
+                select new DeploymentDataItem
+                {
+                    Manufacturer = d.Collar.LookupCollarManufacturer.Name,
+                    CollarId = d.CollarId,
+                    Project = d.Animal.Project.ProjectName,
+                    AnimalId = d.AnimalId,
+                    DeploymentDate = d.DeploymentDate.ToLocalTime(),
+                    RetrievalDate = d.RetrievalDate.HasValue ? d.RetrievalDate.Value.ToLocalTime() : (DateTime?)null,
+                    Deployment = d,
+                };
+            EnableCollarControls();
         }
 
-        protected override void OnLoad(EventArgs e)
+        private void EnableCollarControls()
         {
-            base.OnLoad(e);
-            if (Animal.MortalityDate == null)
+            AddDeploymentButton.Enabled = !IsEditMode && IsEditor;
+            DeleteDeploymentButton.Enabled = !IsEditMode && IsEditor && DeploymentDataGridView.SelectedRows.Count > 0;
+            EditDeploymentButton.Enabled = !IsEditMode && IsEditor && DeploymentDataGridView.SelectedRows.Count == 1;
+            InfoCollarButton.Enabled = !IsEditMode && DeploymentDataGridView.SelectedRows.Count == 1;
+        }
+
+        private void CollarDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupCollarsTab();
+        }
+
+        private void AddDeploymentButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddCollarDeploymentForm(null, Animal);
+            form.DatabaseChanged += (o, x) => CollarDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteDeploymentButton_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in DeploymentDataGridView.SelectedRows)
             {
-                var now = DateTime.Now;
-                MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
-                MortatlityDateTimePicker.Checked = false;
-                MortatlityDateTimePicker.CustomFormat = " ";
+                var deployment = (DeploymentDataItem)row.DataBoundItem;
+                Database.CollarDeployments.DeleteOnSubmit(deployment.Deployment);
+            }
+            if (SubmitChanges())
+                CollarDataChanged();
+        }
+
+        private void EditDeploymentButton_Click(object sender, EventArgs e)
+        {
+            if (DeploymentDataGridView.CurrentRow == null)
+                return;
+            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
+            if (item == null)
+                return;
+            var form = new CollarDeploymentDetailsForm(item.Deployment.DeploymentId, false, true);
+            form.DatabaseChanged += (o, x) => CollarDataChanged();
+            form.Show(this);
+        }
+
+        private void InfoCollarButton_Click(object sender, EventArgs e)
+        {
+            if (DeploymentDataGridView.CurrentRow == null)
+                return;
+            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
+            if (item == null)
+                return;
+            var form = new CollarDetailsForm(item.Deployment.CollarManufacturer, item.CollarId, CurrentUser);
+            form.DatabaseChanged += (o, x) => CollarDataChanged();
+            form.Show(this);
+        }
+
+        private void DeploymentDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableCollarControls();
+        }
+
+        #endregion
+
+
+        #region Locations Tab
+
+        //TODO - Add additional location info: hidden locations, centroid, MCP area, average speed
+
+        private void SetupLocationsTab()
+        {
+            if (Animal == null)
+                return;
+            var views = new AnimalMovementViews();
+            var summary = views.AnimalLocationSummary(Animal.ProjectId, Animal.AnimalId).FirstOrDefault();
+            if (summary == null)
+            {
+                SummaryLabel.Text = "There are NO locations.";
+                TopTextBox.Text = String.Empty;
+                BottomTextBox.Text = String.Empty;
+                LeftTextBox.Text = String.Empty;
+                RightTextBox.Text = String.Empty;
             }
             else
             {
-                MortatlityDateTimePicker.Checked = true;
-                MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
-                MortatlityDateTimePicker.Value = Animal.MortalityDate.Value.ToLocalTime();
+                SummaryLabel.Text = String.Format("{0} fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last);
+                TopTextBox.Text = String.Format("{0}", summary.Top);
+                BottomTextBox.Text = String.Format("{0}", summary.Bottom);
+                LeftTextBox.Text = String.Format("{0}", summary.Left);
+                RightTextBox.Text = String.Format("{0}", summary.Right);
             }
         }
+
+        #endregion
 
     }
 }
