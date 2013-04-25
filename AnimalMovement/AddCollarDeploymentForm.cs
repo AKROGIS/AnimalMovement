@@ -46,7 +46,7 @@ namespace AnimalMovement
             LockAnimal = Animal != null;
             //Todo - put check in database function to get assistants as well
             var functions = new AnimalMovementFunctions();
-            IsEditor = (Animal != null && (functions.IsEditor(Animal.ProjectId, CurrentUser) ?? false)) ||
+            IsEditor = (Animal != null && (functions.IsProjectEditor(Animal.ProjectId, CurrentUser) ?? false)) ||
                        (Collar != null && string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(),StringComparison.OrdinalIgnoreCase));
         }
 

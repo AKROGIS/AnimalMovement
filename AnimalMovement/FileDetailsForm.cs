@@ -38,7 +38,7 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsFileEditor = DatabaseFunctions.IsEditor(File.ProjectId, CurrentUser) ?? false;
+            IsFileEditor = DatabaseFunctions.IsProjectEditor(File.ProjectId, CurrentUser) ?? false;
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarFileFormat.Name;

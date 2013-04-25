@@ -40,7 +40,7 @@ namespace AnimalMovement
                 return;
             }
             var functions = new AnimalMovementFunctions();
-            IsEditor = functions.IsEditor(Animal.ProjectId, CurrentUser) ?? false;
+            IsEditor = functions.IsProjectEditor(Animal.ProjectId, CurrentUser) ?? false;
 
             ProjectTextBox.Text = Animal.Project.ProjectName;
             AnimalIdTextBox.Text = Animal.AnimalId;

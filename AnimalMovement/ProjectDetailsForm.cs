@@ -88,7 +88,7 @@ namespace AnimalMovement
                 return;
             }
             IsProjectInvestigator = IsCurrentUserTheInvestigatorForThisProject();
-            IsEditor = DatabaseFunctions.IsEditor(Project.ProjectId, CurrentUser) ?? false;
+            IsEditor = DatabaseFunctions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
             ProjectCodeTextBox.Text = Project.ProjectId;
             DescriptionTextBox.Text = Project.Description;
             UnitTextBox.Text = Project.UnitCode;

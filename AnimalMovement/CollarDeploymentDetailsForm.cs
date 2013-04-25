@@ -41,7 +41,7 @@ namespace AnimalMovement
 
             //Todo - put check in database function to get assistants as well
             var functions = new AnimalMovementFunctions();
-            IsEditor = (functions.IsEditor(CollarDeployment.Animal.ProjectId, CurrentUser) ?? false) ||
+            IsEditor = (functions.IsProjectEditor(CollarDeployment.Animal.ProjectId, CurrentUser) ?? false) ||
                        (string.Equals(CollarDeployment.Collar.Manager.Normalize(), CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase));
         }
 
