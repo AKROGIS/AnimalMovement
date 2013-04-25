@@ -69,6 +69,7 @@
             // 
             this.LeadComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.LeadComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.LeadComboBox.FormattingEnabled = true;
             this.LeadComboBox.Location = new System.Drawing.Point(113, 81);
             this.LeadComboBox.Name = "LeadComboBox";
@@ -114,6 +115,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "ChangeInvestigatorForm";
             this.Text = "Relinquish Project Lead";
+            this.Load += new System.EventHandler(this.ChangeInvestigatorForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

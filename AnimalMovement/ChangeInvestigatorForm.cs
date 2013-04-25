@@ -9,35 +9,54 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
+        private string ProjectId { get; set; }
+        private ProjectInvestigator ProjectInvestigator { get; set; }
         private Project Project { get; set; }
 
         internal ChangeInvestigatorForm(string projectId, string user)
         {
             InitializeComponent();
             RestoreWindow();
-            CurrentUser = user;
-            LoadFormFromDatabase(projectId);
+            ProjectId = projectId;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
+            LoadFormFromDatabase();
         }
 
-        private void LoadFormFromDatabase(string projectId)
+        private void LoadFormFromDatabase()
         {
             Database = new AnimalMovementDataContext();
-            Project = Database.Projects.FirstOrDefault(p => p.ProjectId == projectId);
-            if (Project == null)
-            {
-                MessageBox.Show("The project ID '" + projectId +"' was not found in the database.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                DialogResult = DialogResult.Cancel;
-            }
+            Project = Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);
+            ProjectInvestigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
             LeadComboBox.DataSource = Database.ProjectInvestigators;
             LeadComboBox.ValueMember = "Login";
             LeadComboBox.DisplayMember = "Name";
-            LeadComboBox.SelectedItem = LeadComboBox.Items.Cast<ProjectInvestigator>().First(pi => 
-                string.Equals(pi.Login, CurrentUser, StringComparison.OrdinalIgnoreCase));
+            LeadComboBox.SelectedItem = ProjectInvestigator;
+        }
+
+        private void ChangeInvestigatorForm_Load(object sender, EventArgs e)
+        {
+            if (Project == null)
+            {
+                MessageBox.Show("The project ID '" + ProjectId + "' was not found in the database.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult = DialogResult.Cancel;
+                return;
+            }
+            if (ProjectInvestigator == null)
+            {
+                MessageBox.Show("You '" + CurrentUser + "' are not a Project Investigator in the database.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult = DialogResult.Cancel;
+                return;
+            }
+            if (ProjectInvestigator != Project.ProjectInvestigator1)
+            {
+                MessageBox.Show("You '" + CurrentUser + "' are not a Project Investigator in the database.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DialogResult = DialogResult.Cancel;
+            }
         }
 
         private void ChangeButton_Click(object sender, EventArgs e)
         {
-            if (string.Equals(Project.ProjectInvestigator, (string)LeadComboBox.SelectedValue,StringComparison.OrdinalIgnoreCase))
+            if (LeadComboBox.SelectedItem == Project.ProjectInvestigator1)
                 DialogResult = DialogResult.Cancel;
 
             try
@@ -51,6 +70,5 @@ namespace AnimalMovement
                 MessageBox.Show(ex.Message, "Unable To Update Project", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
     }
 }
