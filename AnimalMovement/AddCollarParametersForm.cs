@@ -35,9 +35,8 @@ namespace AnimalMovement
             if (Collar == null)
                 throw new InvalidOperationException("Add Collar Parameters Form not provided a valid Collar.");
 
-            //Todo - put check in database function to get assistants as well
-            IsEditor = string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(),
-                                     StringComparison.OrdinalIgnoreCase);
+            var functions = new AnimalMovementFunctions();
+            IsEditor = functions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false;
         }
 
         private void LoadDefaultFormContents()

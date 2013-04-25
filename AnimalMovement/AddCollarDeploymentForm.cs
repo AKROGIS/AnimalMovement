@@ -44,10 +44,10 @@ namespace AnimalMovement
                 throw new InvalidOperationException("Add Collar Deployment Form not provided a valid Collar or a valid Animal.");
             LockCollar = Collar != null;
             LockAnimal = Animal != null;
-            //Todo - put check in database function to get assistants as well
+
             var functions = new AnimalMovementFunctions();
             IsEditor = (Animal != null && (functions.IsProjectEditor(Animal.ProjectId, CurrentUser) ?? false)) ||
-                       (Collar != null && string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(),StringComparison.OrdinalIgnoreCase));
+                       (Collar != null && (functions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false));
         }
 
         private void LoadDefaultFormContents()

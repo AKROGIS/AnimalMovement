@@ -43,7 +43,8 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsEditor = string.Equals(Collar.Manager.Normalize(), CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase);
+            var functions = new AnimalMovementFunctions();
+            IsEditor = functions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false;
             ManufacturerTextBox.Text = Collar.LookupCollarManufacturer.Name;
             CollarIdTextBox.Text = Collar.CollarId;
         }

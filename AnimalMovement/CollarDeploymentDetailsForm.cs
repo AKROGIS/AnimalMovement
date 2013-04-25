@@ -39,10 +39,9 @@ namespace AnimalMovement
             if (CollarDeployment == null)
                 throw new InvalidOperationException("Collar Deployments Form not provided a valid Deployment Id.");
 
-            //Todo - put check in database function to get assistants as well
             var functions = new AnimalMovementFunctions();
             IsEditor = (functions.IsProjectEditor(CollarDeployment.Animal.ProjectId, CurrentUser) ?? false) ||
-                       (string.Equals(CollarDeployment.Collar.Manager.Normalize(), CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase));
+                       (functions.IsInvestigatorEditor(CollarDeployment.Collar.Manager, CurrentUser) ?? false);
         }
 
         private void LoadDefaultFormContents()

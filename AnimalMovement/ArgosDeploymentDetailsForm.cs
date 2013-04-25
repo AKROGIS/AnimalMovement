@@ -38,9 +38,9 @@ namespace AnimalMovement
             if (ArgosDeployment == null)
                 throw new InvalidOperationException("Argos Deployments Form not provided a valid Argos Deployment Id.");
 
-            //Todo - put check in database function to get assistants as well
-            IsEditor = string.Equals(ArgosDeployment.Collar.Manager.Normalize(), CurrentUser.Normalize(),
-                                     StringComparison.OrdinalIgnoreCase);
+            var functions = new AnimalMovementFunctions();
+            IsEditor = (functions.IsInvestigatorEditor(ArgosDeployment.Collar.Manager, CurrentUser) ?? false) ||
+                       (functions.IsInvestigatorEditor(ArgosDeployment.ArgosPlatform.ArgosProgram.Manager, CurrentUser) ?? false);
         }
 
         private void LoadDefaultFormContents()

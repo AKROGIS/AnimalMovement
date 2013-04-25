@@ -38,7 +38,8 @@ namespace AnimalMovement
                 Close();
                 return;
             }
-            IsFileEditor = String.Equals(File.Owner, CurrentUser, StringComparison.OrdinalIgnoreCase);
+            var functions = new AnimalMovementFunctions();
+            IsFileEditor = functions.IsInvestigatorEditor(File.Owner, CurrentUser) ?? false;
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarParameterFileFormat.Name;

@@ -147,12 +147,6 @@
     <Compile Include="ChangeInvestigatorForm.Designer.cs">
       <DependentUpon>ChangeInvestigatorForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="CollarAnimalForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CollarAnimalForm.Designer.cs">
-      <DependentUpon>CollarAnimalForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="CollarDetailsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -263,9 +257,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ChangeInvestigatorForm.resx">
       <DependentUpon>ChangeInvestigatorForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CollarAnimalForm.resx">
-      <DependentUpon>CollarAnimalForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CollarDetailsForm.resx">
       <DependentUpon>CollarDetailsForm.cs</DependentUpon>
