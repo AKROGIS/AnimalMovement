@@ -114,15 +114,22 @@ GetTelonicsParametersForArgosDates (TVF)
 		StartDate
 		EndDate
 	
-IsEditor (SVF)
+IsProjectEditor (SVF)
 	Projects
 		ProjectId
 		ProjectInvestigator
 	ProjectEditors
 		Editor
 
+IsInvestigatorEditor (SVF)
+	ProjectInvestigators
+		Login
+	ProjectInvestigatorAssistants
+		ProjectInvestigator
+		Assistant
+
 IsFixEditor (SVF)
-	IsEditor
+	IsProjectEditor
 	CollarFiles
 		Project
 	CollarFixes
