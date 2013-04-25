@@ -841,6 +841,7 @@
             this.AssistantsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.AssistantsListBox.Size = new System.Drawing.Size(487, 309);
             this.AssistantsListBox.TabIndex = 14;
+            this.AssistantsListBox.SelectedIndexChanged += new System.EventHandler(this.AssistantsListBox_SelectedIndexChanged);
             // 
             // AddAssistantButton
             // 

@@ -194,6 +194,21 @@ Locations
 Movements
 	Locations.*
 
+ProjectInvestigatorAssistants
+=============================
+These are DB users in the editor role.
+They have been granted permission by the PI to do anything the PI can do, except
+add or delete assistants (an assistant can delete him/herself).
+and add or delete projects.  They are automatically a project editor on all
+of a PI's project (although they will not appear in the editor list)
+
+ProjectEditors
+==============
+These are DB users in the editor role.
+They can make all changes that a PI can make to a project, except
+add or delete project editors (an editor can delete him/herself).
+they can edit all properties of a project except the PI.
+
 CollarFixes
 ===========
 All writes to this table are done by CollarFixes_Insert, which is not visible to clients

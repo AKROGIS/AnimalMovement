@@ -28,6 +28,9 @@ namespace AnimalMovement
         private string CurrentUser { get; set; }
         private string InvestigatorLogin { get; set; }
         private ProjectInvestigator Investigator { get; set; }
+        private bool IsInvestigator { get; set; }
+        private bool IsEditor { get; set; }
+        private bool IsEditMode { get; set; }
         private bool IsMyProfile { get; set; }
         internal event EventHandler DatabaseChanged;
 
@@ -97,14 +100,24 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             Investigator = Database.ProjectInvestigators.First(pi => pi.Login == InvestigatorLogin);
-            LoginTextBox.Text = InvestigatorLogin;
+            if (Investigator == null)
+                throw new InvalidOperationException("Investigator Form not provided a valid Collar Investigator Id.");
+
+            var functions = new AnimalMovementFunctions();
+            IsInvestigator = Investigator == Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
+            IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
+            SetupGeneral();
+        }
+
+        #region General
+
+        private void SetupGeneral()
+        {
+            LoginTextBox.Text = Investigator.Login;
             NameTextBox.Text = Investigator.Name;
             EmailTextBox.Text = Investigator.Email;
             PhoneTextBox.Text = Investigator.Phone;
         }
-
-
-        #region General
 
         private void UpdateDataSource()
         {
@@ -112,7 +125,6 @@ namespace AnimalMovement
             Investigator.Email = EmailTextBox.Text;
             Investigator.Phone = PhoneTextBox.Text;
         }
-
 
         private void EditSaveButton_Click(object sender, EventArgs e)
         {
@@ -164,13 +176,13 @@ namespace AnimalMovement
 
         private void SetEditingControls()
         {
-            bool editModeEnabled = EditSaveButton.Text == "Save";
-            NameTextBox.Enabled = editModeEnabled;
-            EmailTextBox.Enabled = editModeEnabled;
-            PhoneTextBox.Enabled = editModeEnabled;
-            AddCollarButton.Enabled = !editModeEnabled && IsMyProfile;
-            AddProjectButton.Enabled = !editModeEnabled && IsMyProfile;
-            AddParameterFileButton.Enabled = !editModeEnabled && IsMyProfile;
+            IsEditMode = EditSaveButton.Text == "Save";
+            NameTextBox.Enabled = IsEditMode;
+            EmailTextBox.Enabled = IsEditMode;
+            PhoneTextBox.Enabled = IsEditMode;
+            AddCollarButton.Enabled = !IsEditMode && IsMyProfile;
+            AddProjectButton.Enabled = !IsEditMode && IsMyProfile;
+            AddParameterFileButton.Enabled = !IsEditMode && IsMyProfile;
             //Set the Delete/Info buttons based on what is selected
             CollarsListBox_SelectedIndexChanged(null, null);
             CollarFilesListBox_SelectedIndexChanged(null, null);
@@ -523,6 +535,7 @@ namespace AnimalMovement
             var assistants = Investigator.ProjectInvestigatorAssistants;
             AssistantsListBox.DataSource = assistants;
             AssistantsListBox.DisplayMember = "Assistant";
+            EnableAssistantButtons();
         }
 
         private void AssistantDataChanged()
@@ -530,6 +543,16 @@ namespace AnimalMovement
             OnDatabaseChanged();
             LoadDataContext();
             LoadAssistantsList();
+        }
+
+        private void EnableAssistantButtons()
+        {
+            AddAssistantButton.Enabled = !IsEditMode && IsInvestigator;
+            DeleteAssistantButton.Enabled = !IsEditMode && AssistantsListBox.SelectedItems.Count > 0 &&
+                                            (IsInvestigator ||
+                                             (IsEditor && AssistantsListBox.SelectedItems.Count == 1 &&
+                                              String.Equals(((ProjectInvestigatorAssistant)AssistantsListBox.SelectedItem).Assistant.Normalize(),
+                                                            CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)));
         }
 
         private void AddAssistantButton_Click(object sender, EventArgs e)
@@ -548,6 +571,11 @@ namespace AnimalMovement
             }
             if (SubmitChanges())
                 AssistantDataChanged();
+        }
+
+        private void AssistantsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableAssistantButtons();
         }
 
         #endregion
