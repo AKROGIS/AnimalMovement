@@ -243,7 +243,7 @@ namespace AnimalMovement
 
         private void InvestigatorDetailsButton_Click(object sender, EventArgs e)
         {
-            var form = new InvestigatorForm(Project.ProjectInvestigator, CurrentUser);
+            var form = new InvestigatorForm(Project.ProjectInvestigator);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }

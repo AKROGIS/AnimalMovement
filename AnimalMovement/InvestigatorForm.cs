@@ -31,7 +31,6 @@ namespace AnimalMovement
         private bool IsInvestigator { get; set; }
         private bool IsEditor { get; set; }
         private bool IsEditMode { get; set; }
-        private bool IsMyProfile { get; set; }
         internal event EventHandler DatabaseChanged;
 
         // ReSharper disable UnusedAutoPropertyAccessor.Local
@@ -65,26 +64,27 @@ namespace AnimalMovement
         }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
-        internal InvestigatorForm(string investigator, string user)
+        internal InvestigatorForm(string investigator)
         {
             InitializeComponent();
             RestoreWindow();
-            CurrentUser = user;
             InvestigatorLogin = investigator;
-            IsMyProfile = String.Equals(user, investigator, StringComparison.InvariantCultureIgnoreCase);
-            EditSaveButton.Enabled = IsMyProfile;
-            SetEditingControls();
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
+            LoadDataContext();
         }
 
         private void InvestigatorForm_Load(object sender, EventArgs e)
         {
-            LoadDataContext();
+            if (ProjectInvestigatorTabs.SelectedIndex == 0)
+                ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
             ShowEmailFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowEmailFiles;
             ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDownloadFiles;
             ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDerivedFiles;
             ProjectInvestigatorTabs.SelectedIndex = Properties.Settings.Default.InvestigatorFormActiveTab;
-            if (ProjectInvestigatorTabs.SelectedIndex == 0)
-                ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -109,6 +109,62 @@ namespace AnimalMovement
             SetupGeneral();
         }
 
+        private void ProjectInvestigatorTabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (ProjectInvestigatorTabs.SelectedIndex)
+            {
+                case 0:
+                    LoadProjectList();
+                    break;
+                case 1:
+                    LoadCollarList();
+                    break;
+                case 2:
+                    LoadArgosList();
+                    break;
+                case 3:
+                    LoadCollarFileList();
+                    break;
+                case 4:
+                    LoadParameterFileList();
+                    break;
+                case 5:
+                    LoadAssistantsList();
+                    break;
+                case 6:
+                    LoadQCReports();
+                    break;
+            }
+        }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
         #region General
 
         private void SetupGeneral()
@@ -117,6 +173,7 @@ namespace AnimalMovement
             NameTextBox.Text = Investigator.Name;
             EmailTextBox.Text = Investigator.Email;
             PhoneTextBox.Text = Investigator.Phone;
+            SetEditingControls();
         }
 
         private void UpdateDataSource()
@@ -176,18 +233,11 @@ namespace AnimalMovement
 
         private void SetEditingControls()
         {
+            EditSaveButton.Enabled = IsInvestigator;
             IsEditMode = EditSaveButton.Text == "Save";
             NameTextBox.Enabled = IsEditMode;
             EmailTextBox.Enabled = IsEditMode;
             PhoneTextBox.Enabled = IsEditMode;
-            AddCollarButton.Enabled = !IsEditMode && IsMyProfile;
-            AddProjectButton.Enabled = !IsEditMode && IsMyProfile;
-            AddParameterFileButton.Enabled = !IsEditMode && IsMyProfile;
-            //Set the Delete/Info buttons based on what is selected
-            CollarsListBox_SelectedIndexChanged(null, null);
-            CollarFilesListBox_SelectedIndexChanged(null, null);
-            ProjectsListBox_SelectedIndexChanged(null, null);
-            ParameterFilesListBox_SelectedIndexChanged(null, null);
         }
 
         #endregion
@@ -209,6 +259,18 @@ namespace AnimalMovement
             ProjectsListBox.DataSource = sortedList;
             ProjectsListBox.DisplayMember = "Name";
             ProjectsTab.Text = sortedList.Count < 5 ? "Projects" : String.Format("Projects ({0})", sortedList.Count);
+        }
+
+        private void EnableProjectTab()
+        {
+            AddProjectButton.Enabled = !IsEditMode && IsInvestigator;
+            InfoProjectButton.Enabled = false;
+            DeleteProjectsButton.Enabled = false;
+            if (EditSaveButton.Text == "Save")
+                return;
+            InfoProjectButton.Enabled = ProjectsListBox.SelectedItems.Count == 1;
+            if (IsInvestigator && ProjectsListBox.SelectedItems.Cast<ProjectListItem>().Any(item => item.CanDelete))
+                DeleteProjectsButton.Enabled = true;
         }
 
         private void AddProjectButton_Click(object sender, EventArgs e)
@@ -247,14 +309,7 @@ namespace AnimalMovement
 
         private void ProjectsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            InfoProjectButton.Enabled = false;
-            DeleteProjectsButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoProjectButton.Enabled = ProjectsListBox.SelectedItems.Count == 1;
-            if (IsMyProfile && ProjectsListBox.SelectedItems.Cast<ProjectListItem>().Any(item => item.CanDelete))
-                DeleteProjectsButton.Enabled = true;
-
+            EnableProjectTab();
         }
 
         #endregion
@@ -283,8 +338,20 @@ namespace AnimalMovement
                     CollarsListBox.SetItemColor(i, Color.DarkGray);
             }
             CollarsTab.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
+            EnableCollarButtons();
         }
 
+        private void EnableCollarButtons()
+        {
+            AddCollarButton.Enabled = !IsEditMode && IsEditor;
+            InfoCollarButton.Enabled = false;
+            DeleteCollarsButton.Enabled = false;
+            if (EditSaveButton.Text == "Save")
+                return;
+            InfoCollarButton.Enabled = CollarsListBox.SelectedItems.Count == 1;
+            if (IsInvestigator && CollarsListBox.SelectedItems.Cast<CollarListItem>().Any(item => item.CanDelete))
+                DeleteCollarsButton.Enabled = true;
+        }
         private bool CanDeleteCollar(Collar collar)
         {
             return !Database.CollarDeployments.Any(cd => cd.Collar == collar) &&
@@ -341,13 +408,7 @@ namespace AnimalMovement
 
         private void CollarsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            InfoCollarButton.Enabled = false;
-            DeleteCollarsButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoCollarButton.Enabled = CollarsListBox.SelectedItems.Count == 1;
-            if (IsMyProfile && CollarsListBox.SelectedItems.Cast<CollarListItem>().Any(item => item.CanDelete))
-                DeleteCollarsButton.Enabled = true;
+            EnableCollarButtons();
         }
 
         #endregion
@@ -401,6 +462,18 @@ namespace AnimalMovement
                 }
             }
             CollarFilesTab.Text = sortedList.Count < 5 ? "Collar Files" : String.Format("Collar Files ({0})", sortedList.Count);
+            EnableCollarFilesTab();
+        }
+
+        private void EnableCollarFilesTab()
+        {
+            InfoCollarFileButton.Enabled = false;
+            DeleteCollarFilesButton.Enabled = false;
+            if (EditSaveButton.Text == "Save")
+                return;
+            InfoCollarFileButton.Enabled = CollarFilesListBox.SelectedItems.Count == 1;
+            if (IsInvestigator && CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>().Any(item => item.CanDelete))
+                DeleteCollarFilesButton.Enabled = true;
         }
 
         private void AddCollarFileButton_Click(object sender, EventArgs e)
@@ -438,13 +511,7 @@ namespace AnimalMovement
 
         private void CollarFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            InfoCollarFileButton.Enabled = false;
-            DeleteCollarFilesButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoCollarFileButton.Enabled = CollarFilesListBox.SelectedItems.Count == 1;
-            if (IsMyProfile && CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>().Any(item => item.CanDelete))
-                DeleteCollarFilesButton.Enabled = true;
+            EnableCollarFilesTab();
         }
 
         private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -477,6 +544,19 @@ namespace AnimalMovement
                     ParameterFilesListBox.SetItemColor(i, Color.DarkGray);
             }
             ParameterFilesTab.Text = sortedList.Count < 5 ? "Parameter Files" : String.Format("Parameter Files ({0})", sortedList.Count);
+            EnableParameterFilesTab();
+        }
+
+        private void EnableParameterFilesTab()
+        {
+            AddParameterFileButton.Enabled = !IsEditMode && IsEditor;
+            InfoParameterFileButton.Enabled = false;
+            DeleteParameterFilesButton.Enabled = false;
+            if (EditSaveButton.Text == "Save")
+                return;
+            InfoParameterFileButton.Enabled = ParameterFilesListBox.SelectedItems.Count == 1;
+            if (IsInvestigator && ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>().Any(item => item.CanDelete))
+                DeleteParameterFilesButton.Enabled = true;
         }
 
         private void AddParameterFileButton_Click(object sender, EventArgs e)
@@ -515,14 +595,7 @@ namespace AnimalMovement
 
         private void ParameterFilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            InfoParameterFileButton.Enabled = false;
-            DeleteParameterFilesButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoParameterFileButton.Enabled = ParameterFilesListBox.SelectedItems.Count == 1;
-            if (IsMyProfile && ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>().Any(item => item.CanDelete))
-                DeleteParameterFilesButton.Enabled = true;
-
+            EnableParameterFilesTab();
         }
 
         #endregion
@@ -643,63 +716,6 @@ namespace AnimalMovement
         }
 
         #endregion
-
-
-        private void OnDatabaseChanged()
-        {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this, EventArgs.Empty);
-        }
-
-        private void ProjectInvestigatorTabs_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            switch (ProjectInvestigatorTabs.SelectedIndex)
-            {
-                case 0:
-                    LoadProjectList();
-                    break;
-                case 1:
-                    LoadCollarList();
-                    break;
-                case 2:
-                    LoadArgosList();
-                    break;
-                case 3:
-                    LoadCollarFileList();
-                    break;
-                case 4:
-                    LoadParameterFileList();
-                    break;
-                case 5:
-                    LoadAssistantsList();
-                    break;
-                case 6:
-                    LoadQCReports();
-                    break;
-            }
-        }
-
-        private bool SubmitChanges()
-        {
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (SqlException ex)
-            {
-                string msg = "Unable to submit changes to the database.\n" +
-                             "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            finally
-            {
-                Cursor.Current = Cursors.Default;
-            }
-            return true;
-        }
 
     }
 }
