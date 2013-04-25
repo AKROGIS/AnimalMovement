@@ -22,8 +22,8 @@ namespace AnimalMovement
             InitializeComponent();
             DeploymentId = deploymentId;
             //FIXME - remove locks when CollarDeployments_Update SPROC accepts collars and animals
-            LockCollar = lockCollar;// || true;
-            LockAnimal = lockAnimal;// || true;
+            LockCollar = lockCollar || true;
+            LockAnimal = lockAnimal || true;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
             LoadDefaultFormContents();  //Called before events are triggered
