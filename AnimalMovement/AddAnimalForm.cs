@@ -17,15 +17,10 @@ namespace AnimalMovement
 
         internal AddAnimalForm(Project project)
         {
-            Project = project;
-            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
-            SetupForm();
-        }
-
-        private void SetupForm()
-        {
             InitializeComponent();
             RestoreWindow();
+            Project = project;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
             SetUpControls();
         }
@@ -51,8 +46,7 @@ namespace AnimalMovement
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            var now = DateTime.Now;
-            MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
+            MortatlityDateTimePicker.Value = DateTime.Now.Date + TimeSpan.FromHours(12);
             MortatlityDateTimePicker.Checked = false;
             MortatlityDateTimePicker.CustomFormat = " ";
         }
@@ -72,8 +66,8 @@ namespace AnimalMovement
 
         private void SetUpProjectComboBox()
         {
-            //If given a PI, set that and lock it.
-            //else, set list to me, if I am a PI, plus all PI's I can assist, select null
+            //If given a Project, set that and lock it.
+            //else, set list to all projects I can edit, and select null per the constructor request
             if (Project != null)
                 ProjectComboBox.Items.Add(Project);
             else
@@ -128,7 +122,6 @@ namespace AnimalMovement
                 handle(this, EventArgs.Empty);
         }
 
-
         private void EnableControls()
         {
             CreateButton.Enabled = IsEditor && !string.IsNullOrEmpty(AnimalIdTextBox.Text);
@@ -164,7 +157,7 @@ namespace AnimalMovement
                 return;
             }
             OnDatabaseChanged();
-            DialogResult = DialogResult.OK; //Closes form
+            Close();
         }
 
         private void AnimalIdTextBox_TextChanged(object sender, EventArgs e)

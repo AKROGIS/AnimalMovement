@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -42,6 +43,14 @@ namespace AnimalMovement
             IsEditor = ProjectInvestigator != null && (Functions.IsInvestigatorEditor(ProjectInvestigator.Login, CurrentUser) ?? false);
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            DisposalDateTimePicker.Value = DateTime.Now.Date + TimeSpan.FromHours(12);
+            DisposalDateTimePicker.Checked = false;
+            DisposalDateTimePicker.CustomFormat = " ";
+        }
+
         private void SetUpControls()
         {
             SetUpManagerComboBox();
@@ -60,7 +69,7 @@ namespace AnimalMovement
         private void SetUpManagerComboBox()
         {
             //If given a PI, set that and lock it.
-            //else, set list to me, if I am a PI, plus all PI's I can assist, select null
+            //else, set list to me, if I am a PI, plus all PI's I can assist, and select null per the constructor request
             if (ProjectInvestigator != null)
                 ManagerComboBox.Items.Add(ProjectInvestigator);
             else
@@ -101,6 +110,35 @@ namespace AnimalMovement
                 ManufacturerComboBox.SelectedItem = manufacturer;
         }
 
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
+
         private void EnableControls()
         {
             CreateButton.Enabled = IsEditor && !string.IsNullOrEmpty(CollarIdTextBox.Text);
@@ -133,20 +171,14 @@ namespace AnimalMovement
                     SerialNumber = SerialNumberTextBox.Text.NullifyIfEmpty(),
                 };
             Database.Collars.InsertOnSubmit(collar);
-            try
+            if (!SubmitChanges())
             {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                Database.Collars.DeleteOnSubmit(collar);
-                MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 CollarIdTextBox.Focus();
                 CreateButton.Enabled = false;
                 return;
             }
             OnDatabaseChanged();
-            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void CollarIdTextBox_TextChanged(object sender, EventArgs e)
@@ -179,27 +211,9 @@ namespace AnimalMovement
                 Settings.SetDefaultCollarModel(model.CollarManufacturer, model.CollarModel);
         }
 
-
         private void DisposalDateTimePicker_ValueChanged(object sender, EventArgs e)
         {
             DisposalDateTimePicker.CustomFormat = DisposalDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
-        }
-
-
-        private void OnDatabaseChanged()
-        {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this,EventArgs.Empty);
-        }
-
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-            var now = DateTime.Now;
-            DisposalDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
-            DisposalDateTimePicker.Checked = false;
-            DisposalDateTimePicker.CustomFormat = " ";
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
