@@ -4,7 +4,7 @@
     {
         public override string ToString()
         {
-            return _ProjectId + "/" + _AnimalId;
+            return Project.ProjectName + "/" + _AnimalId;
         }
     }
 }

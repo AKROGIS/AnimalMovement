@@ -381,7 +381,7 @@ namespace AnimalMovement
         private void InfoCollarButton_Click(object sender, EventArgs e)
         {
             var collar = ((CollarListItem)CollarsListBox.SelectedItem).Collar;
-            var form = new CollarDetailsForm(collar.CollarManufacturer, collar.CollarId);
+            var form = new CollarDetailsForm(collar);
             form.DatabaseChanged += (o, args) => CollarDataChanged();
             form.Show(this);
         }

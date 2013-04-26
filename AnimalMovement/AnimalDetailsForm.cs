@@ -9,20 +9,17 @@ namespace AnimalMovement
     internal partial class AnimalDetailsForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
-        private string ProjectId { get; set; }
-        private string AnimalId { get; set; }
         private string CurrentUser { get; set; }
         private Animal Animal { get; set; }
         private bool IsEditor { get; set; }
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal AnimalDetailsForm(string projectId, string animalId)
+        internal AnimalDetailsForm(Animal animal)
         {
             InitializeComponent();
             RestoreWindow();
-            ProjectId = projectId;
-            AnimalId = animalId;
+            Animal = animal;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
         }
@@ -32,13 +29,11 @@ namespace AnimalMovement
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
             //Animal is in a different data context, get them in this DataContext
-            Animal = Database.Animals.FirstOrDefault(a => a.ProjectId == ProjectId && a.AnimalId == AnimalId);
+            if (Animal != null)
+                Animal = Database.Animals.FirstOrDefault(a => a.ProjectId == Animal.ProjectId && a.AnimalId == Animal.AnimalId);
             if (Animal == null)
-            {
-                MessageBox.Show("Animal not found.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
+                throw new InvalidOperationException("Animal Details Form not provided a valid Animal Id.");
+
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsProjectEditor(Animal.ProjectId, CurrentUser) ?? false;
 
@@ -227,13 +222,10 @@ namespace AnimalMovement
         // public accessors are used by the control when these classes are accessed through the Datasource
         class DeploymentDataItem
         {
-            public string Manufacturer { get; set; }
-            public string CollarId { get; set; }
-            public string Project { get; set; }
-            public string AnimalId { get; set; }
+            public CollarDeployment Deployment { get; set; }
+            public Collar Collar { get; set; }
             public DateTime? DeploymentDate { get; set; }
             public DateTime? RetrievalDate { get; set; }
-            public CollarDeployment Deployment { get; set; }
         }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
@@ -245,13 +237,10 @@ namespace AnimalMovement
                 orderby d.DeploymentDate
                 select new DeploymentDataItem
                 {
-                    Manufacturer = d.Collar.LookupCollarManufacturer.Name,
-                    CollarId = d.CollarId,
-                    Project = d.Animal.Project.ProjectName,
-                    AnimalId = d.AnimalId,
+                    Deployment = d,
+                    Collar = d.Collar,
                     DeploymentDate = d.DeploymentDate.ToLocalTime(),
                     RetrievalDate = d.RetrievalDate.HasValue ? d.RetrievalDate.Value.ToLocalTime() : (DateTime?)null,
-                    Deployment = d,
                 };
             EnableCollarControls();
         }
@@ -308,7 +297,7 @@ namespace AnimalMovement
             var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
             if (item == null)
                 return;
-            var form = new CollarDetailsForm(item.Deployment.CollarManufacturer, item.CollarId);
+            var form = new CollarDetailsForm(item.Collar);
             form.DatabaseChanged += (o, x) => CollarDataChanged();
             form.Show(this);
         }

@@ -12,20 +12,17 @@ namespace AnimalMovement
         private AnimalMovementDataContext Database { get; set; }
         private AnimalMovementViews DatabaseViews { get; set; }
         private AnimalMovementFunctions DatabaseFunctions { get; set; }
-        private string ManufacturerId { get; set; }
-        private string CollarId { get; set; }
         private string CurrentUser { get; set; }
         private Collar Collar { get; set; }
         private bool IsEditor { get; set; }
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal CollarDetailsForm(string mfgrId, string collarId)
+        internal CollarDetailsForm(Collar collar)
         {
             InitializeComponent();
             RestoreWindow();
-            ManufacturerId = mfgrId;
-            CollarId = collarId;
+            Collar = collar;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
         }
@@ -34,12 +31,14 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            DatabaseFunctions = new AnimalMovementFunctions();
-            DatabaseViews = new AnimalMovementViews();
-            Collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == ManufacturerId && c.CollarId == CollarId);
+            //Collar is in a different DataContext, get one in this DataContext
+            if (Collar != null)
+                Collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
             if (Collar == null)
                 throw new InvalidOperationException("Collar Details Form not provided a valid Collar Id.");
 
+            DatabaseFunctions = new AnimalMovementFunctions();
+            DatabaseViews = new AnimalMovementViews();
             IsEditor = DatabaseFunctions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false;
             SetUpHeader();
         }
@@ -171,6 +170,7 @@ namespace AnimalMovement
             FrequencyTextBox.Enabled = IsEditMode;
             DisposalDateTimePicker.Enabled = IsEditMode;
             NotesTextBox.Enabled = IsEditMode;
+            //TODO - disable save if frequency is not a double
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
@@ -226,12 +226,11 @@ namespace AnimalMovement
             Collar.HasGps = HasGpsCheckBox.Checked;
             Collar.Owner = OwnerTextBox.Text;
             Collar.SerialNumber = SerialNumberTextBox.Text;
-            Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull() ?? 0;
+            Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull();
             Collar.Notes = NotesTextBox.Text;
-            if (DisposalDateTimePicker.Checked)
-                Collar.DisposalDate = DisposalDateTimePicker.Value.ToUniversalTime();
-            else
-                Collar.DisposalDate = null;
+            Collar.DisposalDate = DisposalDateTimePicker.Checked
+                                      ? (DateTime?) DisposalDateTimePicker.Value.ToUniversalTime()
+                                      : null;
         }
 
         #endregion
@@ -243,13 +242,10 @@ namespace AnimalMovement
         // public accessors are used by the control when these classes are accessed through the Datasource
         class DeploymentDataItem
         {
-            public string Manufacturer { get; set; }
-            public string CollarId { get; set; }
-            public string Project { get; set; }
-            public string AnimalId { get; set; }
+            public CollarDeployment Deployment { get; set; }
+            public Animal Animal { get; set; }
             public DateTime? DeploymentDate { get; set; }
             public DateTime? RetrievalDate { get; set; }
-            public CollarDeployment Deployment { get; set; }
         }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
@@ -261,13 +257,10 @@ namespace AnimalMovement
                 orderby d.DeploymentDate
                 select new DeploymentDataItem
                 {
-                    Manufacturer = d.Collar.LookupCollarManufacturer.Name,
-                    CollarId = d.CollarId,
-                    Project = d.Animal.Project.ProjectName,
-                    AnimalId = d.AnimalId,
-                    DeploymentDate = d.DeploymentDate.ToLocalTime(),
-                    RetrievalDate = d.RetrievalDate.HasValue ? d.RetrievalDate.Value.ToLocalTime() : (DateTime?)null,
                     Deployment = d,
+                    Animal = d.Animal,
+                    DeploymentDate = d.DeploymentDate.ToLocalTime(),
+                    RetrievalDate = d.RetrievalDate.HasValue ? d.RetrievalDate.Value.ToLocalTime() : (DateTime?)null
                 };
             EnableAnimalControls();
         }
@@ -324,7 +317,7 @@ namespace AnimalMovement
             var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
             if (item == null)
                 return;
-            var form = new AnimalDetailsForm(item.Deployment.ProjectId, item.AnimalId);
+            var form = new AnimalDetailsForm(item.Animal);
             form.DatabaseChanged += (o, x) => AnimalDataChanged();
             form.Show(this);
         }

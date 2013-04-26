@@ -349,7 +349,7 @@ namespace AnimalMovement
         {
             //If the user make changes in the info dialog, they happen in a different context, so we need to reload this context if changes were made
             var animal = ((AnimalListItem)AnimalsListBox.SelectedItem).Animal;
-            var form = new AnimalDetailsForm(ProjectId, animal.AnimalId);
+            var form = new AnimalDetailsForm(animal);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }

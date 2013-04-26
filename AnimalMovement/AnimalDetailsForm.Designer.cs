@@ -29,13 +29,6 @@
         private void InitializeComponent()
         {
             this.DeploymentDataGridView = new System.Windows.Forms.DataGridView();
-            this.CollarManufacturerColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ProjectColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.AnimalColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DeployDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.RetrieveDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ProjectTextBox = new System.Windows.Forms.TextBox();
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
@@ -67,6 +60,10 @@
             this.label8 = new System.Windows.Forms.Label();
             this.LeftTextBox = new System.Windows.Forms.TextBox();
             this.SummaryLabel = new System.Windows.Forms.Label();
+            this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DeployDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.RetrieveDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).BeginInit();
             this.AnimalTabsControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -85,13 +82,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DeploymentDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.DeploymentDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.CollarManufacturerColumn,
+            this.DeploymentColumn,
             this.CollarIdColumn,
-            this.ProjectColumn,
-            this.AnimalColumn,
             this.DeployDateColumn,
-            this.RetrieveDateColumn,
-            this.DeploymentColumn});
+            this.RetrieveDateColumn});
             this.DeploymentDataGridView.Location = new System.Drawing.Point(8, 6);
             this.DeploymentDataGridView.Name = "DeploymentDataGridView";
             this.DeploymentDataGridView.ReadOnly = true;
@@ -101,72 +95,6 @@
             this.DeploymentDataGridView.TabIndex = 7;
             this.DeploymentDataGridView.SelectionChanged += new System.EventHandler(this.DeploymentDataGridView_SelectionChanged);
             this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.InfoCollarButton_Click);
-            // 
-            // CollarManufacturerColumn
-            // 
-            this.CollarManufacturerColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.CollarManufacturerColumn.DataPropertyName = "Manufacturer";
-            this.CollarManufacturerColumn.HeaderText = "Manufacturer";
-            this.CollarManufacturerColumn.MinimumWidth = 60;
-            this.CollarManufacturerColumn.Name = "CollarManufacturerColumn";
-            this.CollarManufacturerColumn.ReadOnly = true;
-            this.CollarManufacturerColumn.Width = 95;
-            // 
-            // CollarIdColumn
-            // 
-            this.CollarIdColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.CollarIdColumn.DataPropertyName = "CollarId";
-            this.CollarIdColumn.HeaderText = "Collar";
-            this.CollarIdColumn.MinimumWidth = 60;
-            this.CollarIdColumn.Name = "CollarIdColumn";
-            this.CollarIdColumn.ReadOnly = true;
-            this.CollarIdColumn.Width = 60;
-            // 
-            // ProjectColumn
-            // 
-            this.ProjectColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.ProjectColumn.DataPropertyName = "Project";
-            this.ProjectColumn.HeaderText = "Project";
-            this.ProjectColumn.MinimumWidth = 60;
-            this.ProjectColumn.Name = "ProjectColumn";
-            this.ProjectColumn.ReadOnly = true;
-            this.ProjectColumn.Visible = false;
-            // 
-            // AnimalColumn
-            // 
-            this.AnimalColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.AnimalColumn.DataPropertyName = "AnimalId";
-            this.AnimalColumn.HeaderText = "Animal";
-            this.AnimalColumn.MinimumWidth = 60;
-            this.AnimalColumn.Name = "AnimalColumn";
-            this.AnimalColumn.ReadOnly = true;
-            this.AnimalColumn.Visible = false;
-            // 
-            // DeployDateColumn
-            // 
-            this.DeployDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.DeployDateColumn.DataPropertyName = "DeploymentDate";
-            this.DeployDateColumn.HeaderText = "Deployed";
-            this.DeployDateColumn.MinimumWidth = 80;
-            this.DeployDateColumn.Name = "DeployDateColumn";
-            this.DeployDateColumn.ReadOnly = true;
-            // 
-            // RetrieveDateColumn
-            // 
-            this.RetrieveDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.RetrieveDateColumn.DataPropertyName = "RetrievalDate";
-            this.RetrieveDateColumn.HeaderText = "Retrieved";
-            this.RetrieveDateColumn.MinimumWidth = 80;
-            this.RetrieveDateColumn.Name = "RetrieveDateColumn";
-            this.RetrieveDateColumn.ReadOnly = true;
-            // 
-            // DeploymentColumn
-            // 
-            this.DeploymentColumn.DataPropertyName = "Deployment";
-            this.DeploymentColumn.HeaderText = "Deployment";
-            this.DeploymentColumn.Name = "DeploymentColumn";
-            this.DeploymentColumn.ReadOnly = true;
-            this.DeploymentColumn.Visible = false;
             // 
             // ProjectTextBox
             // 
@@ -518,6 +446,42 @@
             this.SummaryLabel.TabIndex = 0;
             this.SummaryLabel.Text = "Summary";
             // 
+            // DeploymentColumn
+            // 
+            this.DeploymentColumn.DataPropertyName = "Deployment";
+            this.DeploymentColumn.HeaderText = "Deployment";
+            this.DeploymentColumn.Name = "DeploymentColumn";
+            this.DeploymentColumn.ReadOnly = true;
+            this.DeploymentColumn.Visible = false;
+            // 
+            // CollarIdColumn
+            // 
+            this.CollarIdColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.CollarIdColumn.DataPropertyName = "Collar";
+            this.CollarIdColumn.HeaderText = "Collar";
+            this.CollarIdColumn.MinimumWidth = 160;
+            this.CollarIdColumn.Name = "CollarIdColumn";
+            this.CollarIdColumn.ReadOnly = true;
+            this.CollarIdColumn.Width = 160;
+            // 
+            // DeployDateColumn
+            // 
+            this.DeployDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.DeployDateColumn.DataPropertyName = "DeploymentDate";
+            this.DeployDateColumn.HeaderText = "Deployed";
+            this.DeployDateColumn.MinimumWidth = 80;
+            this.DeployDateColumn.Name = "DeployDateColumn";
+            this.DeployDateColumn.ReadOnly = true;
+            // 
+            // RetrieveDateColumn
+            // 
+            this.RetrieveDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.RetrieveDateColumn.DataPropertyName = "RetrievalDate";
+            this.RetrieveDateColumn.HeaderText = "Retrieved";
+            this.RetrieveDateColumn.MinimumWidth = 80;
+            this.RetrieveDateColumn.Name = "RetrieveDateColumn";
+            this.RetrieveDateColumn.ReadOnly = true;
+            // 
             // AnimalDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -547,13 +511,6 @@
         #endregion
 
         private System.Windows.Forms.DataGridView DeploymentDataGridView;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CollarManufacturerColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CollarIdColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ProjectColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn AnimalColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DeployDateColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn RetrieveDateColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DeploymentColumn;
         private System.Windows.Forms.TextBox ProjectTextBox;
         private System.Windows.Forms.Button DoneCancelButton;
         private System.Windows.Forms.Button EditSaveButton;
@@ -585,6 +542,10 @@
         private System.Windows.Forms.Button AddDeploymentButton;
         private System.Windows.Forms.Button DeleteDeploymentButton;
         private System.Windows.Forms.Button InfoCollarButton;
+        private System.Windows.Forms.DataGridViewTextBoxColumn DeploymentColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CollarIdColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn DeployDateColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn RetrieveDateColumn;
 
     }
 }
