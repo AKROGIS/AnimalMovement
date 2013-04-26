@@ -6314,7 +6314,7 @@ namespace DataModel
 		}
 		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_CollarFile", Storage="_CollarFiles", ThisKey="FileId", OtherKey="ParentFileId")]
-		public EntitySet<CollarFile> CollarFiles
+		public EntitySet<CollarFile> SubFiles
 		{
 			get
 			{
@@ -6361,7 +6361,7 @@ namespace DataModel
 		}
 		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_CollarFile", Storage="_CollarFile1", ThisKey="ParentFileId", OtherKey="FileId", IsForeignKey=true)]
-		public CollarFile CollarFile1
+		public CollarFile ParentFile
 		{
 			get
 			{
@@ -6377,19 +6377,19 @@ namespace DataModel
 					if ((previousValue != null))
 					{
 						this._CollarFile1.Entity = null;
-						previousValue.CollarFiles.Remove(this);
+						previousValue.SubFiles.Remove(this);
 					}
 					this._CollarFile1.Entity = value;
 					if ((value != null))
 					{
-						value.CollarFiles.Add(this);
+						value.SubFiles.Add(this);
 						this._ParentFileId = value.FileId;
 					}
 					else
 					{
 						this._ParentFileId = default(Nullable<int>);
 					}
-					this.SendPropertyChanged("CollarFile1");
+					this.SendPropertyChanged("ParentFile");
 				}
 			}
 		}
@@ -6659,13 +6659,13 @@ namespace DataModel
 		private void attach_CollarFiles(CollarFile entity)
 		{
 			this.SendPropertyChanging();
-			entity.CollarFile1 = this;
+			entity.ParentFile = this;
 		}
 		
 		private void detach_CollarFiles(CollarFile entity)
 		{
 			this.SendPropertyChanging();
-			entity.CollarFile1 = null;
+			entity.ParentFile = null;
 		}
 	}
 	

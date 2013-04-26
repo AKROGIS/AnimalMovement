@@ -38,7 +38,8 @@ namespace AnimalMovement
                                      Lead = p.ProjectInvestigator1.Name,
                                      Unit = p.UnitCode,
                                      p.Description,
-                                     CanDelete = p.ProjectInvestigator == CurrentUser && !p.Animals.Any() && !p.CollarFiles.Any()
+                                     CanDelete = p.ProjectInvestigator == CurrentUser && !p.Animals.Any() && !p.CollarFiles.Any(),
+                                     Project = p
                                  };
                 ProjectsGridView.DataSource = myProjects;
             }
@@ -53,11 +54,13 @@ namespace AnimalMovement
                                       Lead = p.ProjectInvestigator1.Name,
                                       Unit = p.UnitCode,
                                       p.Description,
-                                      CanDelete = p.ProjectInvestigator == CurrentUser && !p.Animals.Any() && !p.CollarFiles.Any()
+                                      CanDelete = p.ProjectInvestigator == CurrentUser && !p.Animals.Any() && !p.CollarFiles.Any(),
+                                      Project = p
                                   };
                 ProjectsGridView.DataSource = allProjects;
             }
 
+            ProjectsGridView.Columns[6].Visible = false;
             AddProjectButton.Enabled = db.ProjectInvestigators.Any(pi => pi.Login == CurrentUser);
         }
 
@@ -108,10 +111,10 @@ namespace AnimalMovement
         {
             if (ProjectsGridView.CurrentRow == null)
                 return; //This buttton is only enabled when Current Row is not not null
-            var projectId = (string)ProjectsGridView.CurrentRow.Cells["columnCode"].Value;
-            var form = new ProjectDetailsForm(projectId, CurrentUser);
+            var project = (Project)ProjectsGridView.CurrentRow.Cells[6].Value;
+            var form = new ProjectDetailsForm(project);
             form.DatabaseChanged += (o, args) => { ReloadFromDatabase();
-                                              SelectedRow(projectId);};
+                                              SelectedRow(project.ProjectId);};
             form.Show(this);
         }
 

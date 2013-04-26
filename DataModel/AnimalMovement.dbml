@@ -429,9 +429,9 @@
       <Association Name="CollarFile_CollarFix" Member="CollarFixes" ThisKey="FileId" OtherKey="FileId" Type="CollarFix" />
       <Association Name="CollarFile_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="FileId" OtherKey="FileId" Type="ArgosFileProcessingIssue" />
       <Association Name="CollarFile_ArgosDownload" Member="ArgosDownloads" ThisKey="FileId" OtherKey="FileId" Type="ArgosDownload" />
-      <Association Name="CollarFile_CollarFile" Member="CollarFiles" ThisKey="FileId" OtherKey="ParentFileId" Type="CollarFile" />
+      <Association Name="CollarFile_CollarFile" Member="SubFiles" Storage="_CollarFiles" ThisKey="FileId" OtherKey="ParentFileId" Type="CollarFile" />
       <Association Name="ArgosDeployment_CollarFile" Member="ArgosDeployment" ThisKey="ArgosDeploymentId" OtherKey="DeploymentId" Type="ArgosDeployment" IsForeignKey="true" />
-      <Association Name="CollarFile_CollarFile" Member="CollarFile1" ThisKey="ParentFileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
+      <Association Name="CollarFile_CollarFile" Member="ParentFile" Storage="_CollarFile1" ThisKey="ParentFileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
       <Association Name="CollarParameter_CollarFile" Member="CollarParameter" ThisKey="CollarParameterId" OtherKey="ParameterId" Type="CollarParameter" IsForeignKey="true" />
       <Association Name="LookupCollarFileFormat_CollarFile" Member="LookupCollarFileFormat" ThisKey="Format" OtherKey="Code" Type="LookupCollarFileFormat" IsForeignKey="true" />
       <Association Name="LookupFileStatus_CollarFile" Member="LookupFileStatus" ThisKey="Status" OtherKey="Code" Type="LookupFileStatus" IsForeignKey="true" />

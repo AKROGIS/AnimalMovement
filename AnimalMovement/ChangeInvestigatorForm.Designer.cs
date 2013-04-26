@@ -99,6 +99,7 @@
             this.cancelButton.TabIndex = 5;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
             // ChangeInvestigatorForm
             // 
@@ -116,7 +117,6 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "ChangeInvestigatorForm";
             this.Text = "Relinquish Project Lead";
-            this.Load += new System.EventHandler(this.ChangeInvestigatorForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

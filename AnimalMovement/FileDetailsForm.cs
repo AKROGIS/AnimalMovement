@@ -10,35 +10,38 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private AnimalMovementViews DatabaseViews { get; set; }
-        private AnimalMovementFunctions DatabaseFunctions { get; set; }
         private string CurrentUser { get; set; }
-        private int FileId { get; set; }
         private CollarFile File { get; set; }
         private bool IsFileEditor { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal FileDetailsForm(int fileId, string user)
+        internal FileDetailsForm(CollarFile file)
         {
             InitializeComponent();
             RestoreWindow();
-            FileId = fileId;
-            CurrentUser = user;
+            File = file;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
+            SetUpControls();
         }
 
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
-            DatabaseViews = new AnimalMovementViews();
-            DatabaseFunctions = new AnimalMovementFunctions();
-            File = Database.CollarFiles.FirstOrDefault(f => f.FileId == FileId);
+            //Database.Log = Console.Out;
+            //File is in a different DataContext, get one in this DataContext
+            if (File != null)
+                File = Database.CollarFiles.FirstOrDefault(f => f.FileId == File.FileId);
             if (File == null)
-            {
-                MessageBox.Show("File not found.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
-            IsFileEditor = DatabaseFunctions.IsProjectEditor(File.ProjectId, CurrentUser) ?? false;
+                throw new InvalidOperationException("File Details Form not provided a valid File.");
+
+            DatabaseViews = new AnimalMovementViews();
+            var functions = new AnimalMovementFunctions();
+            IsFileEditor = functions.IsProjectEditor(File.ProjectId, CurrentUser) ?? false;
+        }
+
+        private void SetUpControls()
+        {
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarFileFormat.Name;
@@ -68,6 +71,7 @@ namespace AnimalMovement
                            where file.ParentFileId == File.FileId
                            select new
                                {
+                                   file,
                                    file.FileId,
                                    file.FileName,
                                    Format = file.LookupCollarFileFormat.Name,
@@ -75,11 +79,12 @@ namespace AnimalMovement
                                    file.Collar
                                };
                 ChildFilesDataGridView.DataSource = data;
+                ChildFilesDataGridView.Columns[0].Visible = false;
             }
             else
             {
                 var data = from fix in DatabaseViews.AnimalFixesByFiles
-                           where fix.FileId == FileId
+                           where fix.FileId == File.FileId
                            select fix;
                 FixInfoDataGridView.DataSource = data;
             }
@@ -133,7 +138,7 @@ namespace AnimalMovement
         {
             if (File.ParentFileId == null)
                 return;
-            var form = new FileDetailsForm(File.ParentFileId.Value, CurrentUser);
+            var form = new FileDetailsForm(File.ParentFile);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }
@@ -141,8 +146,8 @@ namespace AnimalMovement
         private void ChildFilesDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             //I can't use the DataSource here, because it is an anoymous type.
-            var fileId = (int)ChildFilesDataGridView.SelectedRows[0].Cells[0].Value;
-            var form = new FileDetailsForm(fileId, CurrentUser);
+            var file = (CollarFile)ChildFilesDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }

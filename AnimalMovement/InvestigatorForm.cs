@@ -274,7 +274,7 @@ namespace AnimalMovement
         private void InfoProjectButton_Click(object sender, EventArgs e)
         {
             var project = ((ProjectListItem)ProjectsListBox.SelectedItem).Project;
-            var form = new ProjectDetailsForm(project.ProjectId, CurrentUser);
+            var form = new ProjectDetailsForm(project);
             form.DatabaseChanged += (o, args) => ProjectDataChanged();
             form.Show(this);
         }
@@ -492,7 +492,7 @@ namespace AnimalMovement
         private void InfoCollarFileButton_Click(object sender, EventArgs e)
         {
             var file = ((CollarFileListItem)CollarFilesListBox.SelectedItem).File;
-            var form = new FileDetailsForm(file.FileId, CurrentUser);
+            var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, args) => CollarFileDataChanged();
             form.Show(this);
         }
@@ -579,7 +579,7 @@ namespace AnimalMovement
         private void InfoParameterFileButton_Click(object sender, EventArgs e)
         {
             var file = ((ParameterFileListItem)ParameterFilesListBox.SelectedItem).File;
-            var form = new CollarParameterFileDetailsForm(file.FileId, CurrentUser);
+            var form = new CollarParameterFileDetailsForm(file);
             form.DatabaseChanged += (o, args) => ParameterFileDataChanged();
             form.Show(this);
         }

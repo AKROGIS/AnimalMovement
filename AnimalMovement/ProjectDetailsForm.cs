@@ -22,9 +22,9 @@ namespace AnimalMovement
     {
 
         private AnimalMovementDataContext Database { get; set; }
-        private AnimalMovementFunctions DatabaseFunctions { get; set; }
+        //private AnimalMovementFunctions DatabaseFunctions { get; set; }
         private string CurrentUser { get; set; }
-        private string ProjectId { get; set; }
+        //private string ProjectId { get; set; }
         private Project Project { get; set; }
         private bool IsProjectInvestigator { get; set; }
         private bool IsEditor { get; set; }
@@ -47,11 +47,24 @@ namespace AnimalMovement
         }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
-        internal ProjectDetailsForm(string projectId, string user)
+        internal ProjectDetailsForm(Project project)
         {
-            ProjectId = projectId;
-            CurrentUser = user;
+            InitializeComponent();
+            RestoreWindow();
+            Project = project;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
+            LoadDataContext();
             SetupForm();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            ShowEmailFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowEmailFiles;
+            ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowDownloadFiles;
+            ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowDerivedFiles;
+            ProjectTabs.SelectedIndex = Properties.Settings.Default.ProjectDetailsFormActiveTab;
+            if (ProjectTabs.SelectedIndex == 0)
+                ProjectTabs_SelectedIndexChanged(null, null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -63,32 +76,23 @@ namespace AnimalMovement
             Properties.Settings.Default.ProjectDetailsFormShowDerivedFiles = ShowDerivedFilesCheckBox.Checked;
         }
 
-        private void SetupForm()
-        {
-            InitializeComponent();
-            RestoreWindow();
-            LoadDataContext();
-            ShowEmailFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowEmailFiles;
-            ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowDownloadFiles;
-            ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowDerivedFiles;
-            ProjectTabs.SelectedIndex = Properties.Settings.Default.ProjectDetailsFormActiveTab;
-            if (ProjectTabs.SelectedIndex == 0)
-                ProjectTabs_SelectedIndexChanged(null, null);
-        }
-
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
-            DatabaseFunctions = new AnimalMovementFunctions();
-            Project = Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);
-            if (Database == null || Project == null || ProjectId == null || CurrentUser == null)
-            {
-                MessageBox.Show("Insufficent information to initialize form.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
-            IsProjectInvestigator = IsCurrentUserTheInvestigatorForThisProject();
-            IsEditor = DatabaseFunctions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
+            //Database.Log = Console.Out;
+            //Project is in a different DataContext, get one in this DataContext
+            if (Project != null)
+                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+            if (Project == null)
+                throw new InvalidOperationException("Collar Details Form not provided a valid Collar.");
+
+            var functions = new AnimalMovementFunctions();
+            IsEditor = functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
+            IsProjectInvestigator = Database.Projects.Any(p => p.ProjectId == Project.ProjectId && p.ProjectInvestigator == CurrentUser);
+        }
+
+        private void SetupForm()
+        {
             ProjectCodeTextBox.Text = Project.ProjectId;
             DescriptionTextBox.Text = Project.Description;
             UnitTextBox.Text = Project.UnitCode;
@@ -224,17 +228,12 @@ namespace AnimalMovement
             FilesListBox_SelectedIndexChanged(null, null);
         }
 
-        private bool IsCurrentUserTheInvestigatorForThisProject()
-        {
-            return Database.Projects.Any(p => p.ProjectId == Project.ProjectId && p.ProjectInvestigator == CurrentUser);
-        }
-
 
         #region form control events
 
         private void EditInvestigatorButton_Click(object sender, EventArgs e)
         {
-            var form = new ChangeInvestigatorForm(Project.ProjectId);
+            var form = new ChangeInvestigatorForm(Project);
             if (form.ShowDialog(this) == DialogResult.Cancel)
                 return;
             OnDatabaseChanged();
@@ -309,7 +308,7 @@ namespace AnimalMovement
         {
             //If the user make changes in the info dialog, they happen in a different context, so we need to reload this context if changes were made
             var file = ((FileListItem)FilesListBox.SelectedItem).File;
-            var form = new FileDetailsForm(file.FileId, CurrentUser);
+            var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
             form.Show(this);
         }

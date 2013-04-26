@@ -14,32 +14,36 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
-        private int FileId { get; set; }
         private CollarParameterFile File { get; set; }
-        private bool IsFileEditor { get; set; }
+        private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal CollarParameterFileDetailsForm(int fileId, string user)
+        internal CollarParameterFileDetailsForm(CollarParameterFile file)
         {
             InitializeComponent();
             RestoreWindow();
-            FileId = fileId;
-            CurrentUser = user;
+            File = file;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
+            SetUpControls();
         }
 
         private void LoadDataContext()
         {
- 	        Database = new AnimalMovementDataContext();
-            File = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == FileId);
+            Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
+            //File is in a different DataContext, get one in this DataContext
+            if (File != null)
+                File = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == File.FileId);
             if (File == null)
-            {
-                MessageBox.Show("File not found.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
+                throw new InvalidOperationException("Collar Parameter File Details Form not provided a valid Parameter File.");
+
             var functions = new AnimalMovementFunctions();
-            IsFileEditor = functions.IsInvestigatorEditor(File.Owner, CurrentUser) ?? false;
+            IsEditor = functions.IsInvestigatorEditor(File.Owner, CurrentUser) ?? false;
+        }
+
+        private void SetUpControls()
+        {
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarParameterFileFormat.Name;
@@ -51,7 +55,7 @@ namespace AnimalMovement
             StatusComboBox.DataSource = Database.LookupFileStatus;
             StatusComboBox.DisplayMember = "Name";
             StatusComboBox.SelectedItem = File.LookupFileStatus;
-            UpdateCollars();
+            CollarsDataGridView.DataSource = Database.CollarParameters.Where(cp => cp.CollarParameterFile == File);
             EnableForm();
             DoneCancelButton.Focus();
         }
@@ -61,15 +65,6 @@ namespace AnimalMovement
             File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
             File.ProjectInvestigator = (ProjectInvestigator)OwnerComboBox.SelectedItem;
             File.LookupFileStatus = (LookupFileStatus)StatusComboBox.SelectedItem;
-        }
-
-        private void UpdateCollars()
-        {
-            //var db = new AnimalMovementViewsDataContext();
-            var data = from collar in Database.CollarParameters
-                       where collar.FileId == FileId
-                       select collar;
-            CollarsDataGridView.DataSource = data;
         }
 
         private void ShowContentsButton_Click(object sender, EventArgs e)
@@ -82,9 +77,8 @@ namespace AnimalMovement
 
         private void EnableForm()
         {
-            EditSaveButton.Enabled = IsFileEditor;
+            EditSaveButton.Enabled = IsEditor;
         }
-
 
         private void EditSaveButton_Click(object sender, EventArgs e)
         {

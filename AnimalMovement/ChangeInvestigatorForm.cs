@@ -9,35 +9,44 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
-        private string ProjectId { get; set; }
+        //private string ProjectId { get; set; }
         private ProjectInvestigator ProjectInvestigator { get; set; }
         private Project Project { get; set; }
 
-        internal ChangeInvestigatorForm(string projectId)
+        internal ChangeInvestigatorForm(Project project)
         {
             InitializeComponent();
             RestoreWindow();
-            ProjectId = projectId;
+            Project = project;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
+            SetUpControls();
         }
 
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
-            Project = Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);
+            //Database.Log = Console.Out;
+            //Project is in a different DataContext, get one in this DataContext
+            if (Project != null)
+                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
             ProjectInvestigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
+        }
+
+        private void SetUpControls()
+        {
             LeadComboBox.DataSource = Database.ProjectInvestigators;
             LeadComboBox.ValueMember = "Login";
             LeadComboBox.DisplayMember = "Name";
             LeadComboBox.SelectedItem = ProjectInvestigator;
         }
 
-        private void ChangeInvestigatorForm_Load(object sender, EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
+            base.OnLoad(e);
             if (Project == null)
             {
-                MessageBox.Show("The project ID '" + ProjectId + "' was not found in the database.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("The Change Investigator Form was not provide a valid project.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 DialogResult = DialogResult.Cancel; //Closes form
                 return;
             }
@@ -49,18 +58,18 @@ namespace AnimalMovement
             }
             if (ProjectInvestigator != Project.ProjectInvestigator1)
             {
-                MessageBox.Show("You '" + CurrentUser + "' are not the Project Investigator for the project '" + ProjectId +"'", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(Project.ProjectInvestigator1.Name + " is the Project Investigator for the project '" + Project.ProjectName + "' not you.", "Invalid Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 DialogResult = DialogResult.Cancel; //Closes form
             }
-            EnableChangeButton();
+            EnableControls();
         }
 
         private void LeadComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnableChangeButton();
+            EnableControls();
         }
 
-        private void EnableChangeButton()
+        private void EnableControls()
         {
             ChangeButton.Enabled = LeadComboBox.SelectedItem != Project.ProjectInvestigator1;
         }
@@ -79,5 +88,9 @@ namespace AnimalMovement
             }
         }
 
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
     }
 }

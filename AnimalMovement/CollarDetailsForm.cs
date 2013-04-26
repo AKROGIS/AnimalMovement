@@ -25,6 +25,7 @@ namespace AnimalMovement
             Collar = collar;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
+            SetUpHeader();
         }
 
         private void LoadDataContext()
@@ -40,7 +41,6 @@ namespace AnimalMovement
             DatabaseFunctions = new AnimalMovementFunctions();
             DatabaseViews = new AnimalMovementViews();
             IsEditor = DatabaseFunctions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false;
-            SetUpHeader();
         }
 
         #region Form Controls
@@ -549,7 +549,10 @@ namespace AnimalMovement
             var item = FilesDataGridView.CurrentRow.DataBoundItem as CollarFixesByFileResult;
             if (item == null)
                 return;
-            var form = new FileDetailsForm(item.FileId, CurrentUser);
+            var file = Database.CollarFiles.FirstOrDefault(f => f.FileId == item.FileId);
+            if (file == null)
+                return;
+            var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, x) => FileDataChanged();
             form.Show(this);
         }
