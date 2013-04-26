@@ -117,5 +117,10 @@ namespace AnimalMovement
             if (handle != null)
                 handle(this, EventArgs.Empty);
         }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
     }
 }
