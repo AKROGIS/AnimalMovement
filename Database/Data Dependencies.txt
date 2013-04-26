@@ -1,3 +1,35 @@
+
+Template Table
+==============
+Description
+-----------
+  What does this table contain, and what is the purpose of these objects
+Relationships
+-------------
+  What objects "own" this object? What are this objects children?
+Attributes
+----------
+  How do we describe these objects, and what are valid values.
+Select
+------
+  Who can view these objects.  Describe any row or column level restrictions
+Create
+------
+  Who can create these objects. If they are created by the system, then include a complete
+  list of the table.attributes.[value]s it is derived from.  This is needed to ensure that
+  changes to those table.attributes.values trigger appropriate changes to these objects.
+Update
+------
+  Who can update these objects. Describe any row or column level restrictions. If they are
+  updated by the system, then include a complete list of the influencing
+  table.attributes.values.
+Delete
+------
+  Who can delete these objects. Describe any row level restrictions. If they are updated
+  by the system, then include a complete list of the influencing table.attributes.values.
+
+
+  
 Derived Data Dependencies by Table
  - only those tables with derived data are listed
  - triggers (or stored procedures) need to be used to maintain the derived data when the
