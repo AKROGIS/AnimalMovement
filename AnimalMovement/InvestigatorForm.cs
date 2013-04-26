@@ -404,7 +404,7 @@ namespace AnimalMovement
 
         private void EnableArgosControls()
         {
-            
+
         }
 
         #endregion

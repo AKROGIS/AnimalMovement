@@ -324,7 +324,7 @@ namespace AnimalMovement
             var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
             if (item == null)
                 return;
-            var form = new AnimalDetailsForm(item.Deployment.ProjectId, item.AnimalId, CurrentUser);
+            var form = new AnimalDetailsForm(item.Deployment.ProjectId, item.AnimalId);
             form.DatabaseChanged += (o, x) => AnimalDataChanged();
             form.Show(this);
         }

@@ -17,7 +17,7 @@ namespace AnimalMovement
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal AnimalDetailsForm(string projectId, string animalId, string user)
+        internal AnimalDetailsForm(string projectId, string animalId)
         {
             InitializeComponent();
             RestoreWindow();
