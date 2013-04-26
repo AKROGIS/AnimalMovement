@@ -35,7 +35,7 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            //Project and Investigator are in a different data context, get them in this DataContext
+            //Project and Investigator are in a different DataContext, get them in this DataContext
             if (Project != null)
                 Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
             if (Investigator != null)

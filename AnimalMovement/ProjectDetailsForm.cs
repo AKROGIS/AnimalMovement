@@ -317,13 +317,9 @@ namespace AnimalMovement
         private void AddAnimalButton_Click(object sender, EventArgs e)
         {
             //The add happens in a new context, so we need to reload this context if changes were made
-            var form = new AddAnimalForm(ProjectId, CurrentUser);
-            //Adding animals in this context is not supported.
-            //var form = new AddAnimalForm(Database, Project, CurrentUser);
-            if (form.ShowDialog(this) == DialogResult.Cancel)
-                return;
-            OnDatabaseChanged();
-            LoadDataContext();
+            var form = new AddAnimalForm(Project);
+            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.Show(this);
         }
 
         private void DeleteAnimalsButton_Click(object sender, EventArgs e)

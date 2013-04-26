@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -8,27 +9,16 @@ namespace AnimalMovement
     internal partial class AddAnimalForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
-        private bool IndependentContext { get; set; }
+        private AnimalMovementFunctions Functions { get; set; }
         private string CurrentUser { get; set; }
-        private string ProjectId { get; set; }
         private Project Project { get; set; }
-        private bool IsProjectEditor { get; set; }
+        private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal AddAnimalForm(string projectId, string user)
+        internal AddAnimalForm(Project project)
         {
-            IndependentContext = true;
-            ProjectId = projectId;
-            CurrentUser = user;
-            SetupForm();
-        }
-
-        internal AddAnimalForm(AnimalMovementDataContext database, Project project, string user)
-        {
-            IndependentContext = false;
-            Database = database;
-            Project = project ;
-            CurrentUser = user;
+            Project = project;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             SetupForm();
         }
 
@@ -37,33 +27,43 @@ namespace AnimalMovement
             InitializeComponent();
             RestoreWindow();
             LoadDataContext();
-            EnableCreate();
+            EnableControls();
         }
 
         private void LoadDataContext()
         {
-            if (IndependentContext)
-            {
-                Database = new AnimalMovementDataContext();
-                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);   
-            }
-            if (Database == null || Project == null || CurrentUser == null)
-            {
-                MessageBox.Show("Insufficent information to initialize form.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
-            var databaseFunctions = new AnimalMovementFunctions();
-            IsProjectEditor = databaseFunctions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
+            Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
+            //Project is in a different DataContext, get one in this DataContext
+            if (Project != null)
+                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);   
+            if (Project == null)
+                throw new InvalidOperationException("Add Animal Form not provided a valid Project.");
+
+            Functions = new AnimalMovementFunctions();
+            IsEditor = Functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
+            SetUpControls();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            var now = DateTime.Now;
+            MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
+            MortatlityDateTimePicker.Checked = false;
+            MortatlityDateTimePicker.CustomFormat = " ";
+        }
+
+        private void SetUpControls()
+        {
             ProjectCodeTextBox.Text = Project.ProjectId;
-            AnimalIdTextBox.Text = databaseFunctions.NextAnimalId(Project.ProjectId);
+            AnimalIdTextBox.Text = Functions.NextAnimalId(Project.ProjectId);
             GenderComboBox.DataSource = Database.LookupGenders;
             GenderComboBox.DisplayMember = "Sex";
             GenderComboBox.SelectedIndex = 0;
-            string species = Settings.GetDefaultSpecies();
             SpeciesComboBox.DataSource = Database.LookupSpecies;
             SpeciesComboBox.DisplayMember = "Species";
-            SelectDefaultSpecies(species);
+            SelectDefaultSpecies(Settings.GetDefaultSpecies());
         }
 
         private void SelectDefaultSpecies(string speciesCode)
@@ -78,9 +78,38 @@ namespace AnimalMovement
             SpeciesComboBox.SelectedIndex = 0;
         }
 
-        private void EnableCreate()
+        private bool SubmitChanges()
         {
-            CreateButton.Enabled = IsProjectEditor && !string.IsNullOrEmpty(AnimalIdTextBox.Text);
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
+
+        private void EnableControls()
+        {
+            CreateButton.Enabled = IsEditor && !string.IsNullOrEmpty(AnimalIdTextBox.Text);
         }
 
         private void CreateButton_Click(object sender, EventArgs e)
@@ -106,28 +135,19 @@ namespace AnimalMovement
                 Description = DescriptionTextBox.Text
             };
             Database.Animals.InsertOnSubmit(animal);
-            if (IndependentContext)
+            if (!SubmitChanges())
             {
-                try
-                {
-                    Database.SubmitChanges();
-                }
-                catch (Exception ex)
-                {
-                    Database.Animals.DeleteOnSubmit(animal);
-                    MessageBox.Show(ex.Message, "Unable to create new animal", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    AnimalIdTextBox.Focus();
-                    CreateButton.Enabled = false;
-                    return;
-                }
+                AnimalIdTextBox.Focus();
+                CreateButton.Enabled = false;
+                return;
             }
             OnDatabaseChanged();
-            DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK; //Closes form
         }
 
         private void AnimalIdTextBox_TextChanged(object sender, EventArgs e)
         {
-            EnableCreate();
+            EnableControls();
         }
 
         private void SpeciesComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -140,22 +160,6 @@ namespace AnimalMovement
         private void MortatlityDateTimePicker_ValueChanged(object sender, EventArgs e)
         {
             MortatlityDateTimePicker.CustomFormat = MortatlityDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
-        }
-
-        private void OnDatabaseChanged()
-        {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this, EventArgs.Empty);
-        }
-
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-            var now = DateTime.Now;
-            MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
-            MortatlityDateTimePicker.Checked = false;
-            MortatlityDateTimePicker.CustomFormat = " ";
         }
 
     }
