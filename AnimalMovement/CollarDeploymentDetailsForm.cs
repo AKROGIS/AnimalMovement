@@ -10,17 +10,16 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
-        private int DeploymentId { get; set; }
         private CollarDeployment CollarDeployment { get; set; }
         private bool IsEditor { get; set; }
         private bool LockCollar { get; set; }
         private bool LockAnimal { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        public CollarDeploymentDetailsForm(int deploymentId, bool lockCollar = false, bool lockAnimal = false)
+        public CollarDeploymentDetailsForm(CollarDeployment collarDeployment, bool lockCollar = false, bool lockAnimal = false)
         {
             InitializeComponent();
-            DeploymentId = deploymentId;
+            CollarDeployment = collarDeployment;
             //FIXME - remove locks when CollarDeployments_Update SPROC accepts collars and animals
             LockCollar = lockCollar || true;
             LockAnimal = lockAnimal || true;
@@ -33,11 +32,12 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            //Get an CollarDeployment in this data context
+            //Get a CollarDeployment in this DataContext
+            if (CollarDeployment != null)
             CollarDeployment =
-                    Database.CollarDeployments.FirstOrDefault(d => d.DeploymentId == DeploymentId);
+                    Database.CollarDeployments.FirstOrDefault(d => d.DeploymentId == CollarDeployment.DeploymentId);
             if (CollarDeployment == null)
-                throw new InvalidOperationException("Collar Deployments Form not provided a valid Deployment Id.");
+                throw new InvalidOperationException("Collar Deployments Form not provided a valid Deployment.");
 
             var functions = new AnimalMovementFunctions();
             IsEditor = (functions.IsProjectEditor(CollarDeployment.Animal.ProjectId, CurrentUser) ?? false) ||

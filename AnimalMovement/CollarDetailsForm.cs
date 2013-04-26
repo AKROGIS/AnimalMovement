@@ -304,7 +304,7 @@ namespace AnimalMovement
             var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
             if (item == null)
                 return;
-            var form = new CollarDeploymentDetailsForm(item.Deployment.DeploymentId, true);
+            var form = new CollarDeploymentDetailsForm(item.Deployment, true);
             form.DatabaseChanged += (o, x) => AnimalDataChanged();
             form.Show(this);
         }
@@ -415,7 +415,7 @@ namespace AnimalMovement
                             p =>
                             new
                                 {
-                                    Id = p.ParameterId,
+                                    Parameter = p,
                                     Period = p.Gen3Period % 60 == 0 ? p.Gen3Period / 60 + " hrs" : p.Gen3Period + " min",
                                     File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
                                     Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
@@ -425,7 +425,7 @@ namespace AnimalMovement
                 case "Gen4":
                     ParametersDataGridView.DataSource =
                         Collar.CollarParameters.Select(p => new {
-                            Id = p.ParameterId,
+                            Parameter = p,
                             File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
                             Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
                             End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("g")
@@ -476,8 +476,8 @@ namespace AnimalMovement
         {
             if (ParametersDataGridView.SelectedRows.Count < 1 || ParametersDataGridView.Columns.Count < 1)
                 return;
-            var parameterId = (int)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
-            var form = new CollarParametersDetailsForm(parameterId, true);
+            var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new CollarParametersDetailsForm(parameter, true);
             form.DatabaseChanged += (o, x) => ParametersDataChanged();
             form.Show(this);
         }

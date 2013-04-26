@@ -26,18 +26,17 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
-        private string InvestigatorLogin { get; set; }
         private ProjectInvestigator Investigator { get; set; }
         private bool IsInvestigator { get; set; }
         private bool IsEditor { get; set; }
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal InvestigatorForm(string investigator)
+        internal InvestigatorForm(ProjectInvestigator investigator)
         {
             InitializeComponent();
             RestoreWindow();
-            InvestigatorLogin = investigator;
+            Investigator = investigator;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
         }
@@ -46,9 +45,12 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            Investigator = Database.ProjectInvestigators.First(pi => pi.Login == InvestigatorLogin);
+            //Database.Log = Console.Out;
+            //Animal is in a different DataContext, get one in this DataContext
+            if (Investigator != null)
+                Investigator = Database.ProjectInvestigators.First(pi => pi.Login == Investigator.Login);
             if (Investigator == null)
-                throw new InvalidOperationException("Investigator Form not provided a valid Collar Investigator Id.");
+                throw new InvalidOperationException("Investigator Form not provided a valid Collar Investigator.");
 
             var functions = new AnimalMovementFunctions();
             IsInvestigator = Investigator == Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
@@ -151,7 +153,7 @@ namespace AnimalMovement
 
         private void EnableGeneralControls()
         {
-            EditSaveButton.Enabled = IsInvestigator;
+            EditSaveButton.Enabled = IsEditor;
             IsEditMode = EditSaveButton.Text == "Save";
             NameTextBox.Enabled = IsEditMode;
             EmailTextBox.Enabled = IsEditMode;
@@ -240,14 +242,11 @@ namespace AnimalMovement
 
         private void EnableProjectControls()
         {
-            AddProjectButton.Enabled = !IsEditMode && IsInvestigator;
-            InfoProjectButton.Enabled = false;
-            DeleteProjectsButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoProjectButton.Enabled = ProjectsListBox.SelectedItems.Count == 1;
-            if (IsInvestigator && ProjectsListBox.SelectedItems.Cast<ProjectListItem>().Any(item => item.CanDelete))
-                DeleteProjectsButton.Enabled = true;
+            AddProjectButton.Enabled = !IsEditMode && IsEditor;
+            DeleteProjectsButton.Enabled = !IsEditMode && IsEditor &&
+                                          ProjectsListBox.SelectedItems.Cast<ProjectListItem>()
+                                                        .Any(item => item.CanDelete);
+            InfoProjectButton.Enabled = !IsEditMode;
         }
 
         private void ProjectDataChanged()
@@ -328,14 +327,12 @@ namespace AnimalMovement
         private void EnableCollarControls()
         {
             AddCollarButton.Enabled = !IsEditMode && IsEditor;
-            InfoCollarButton.Enabled = false;
-            DeleteCollarsButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoCollarButton.Enabled = CollarsListBox.SelectedItems.Count == 1;
-            if (IsInvestigator && CollarsListBox.SelectedItems.Cast<CollarListItem>().Any(item => item.CanDelete))
-                DeleteCollarsButton.Enabled = true;
+            DeleteCollarsButton.Enabled = !IsEditMode && IsEditor &&
+                                          CollarsListBox.SelectedItems.Cast<CollarListItem>()
+                                                        .Any(item => item.CanDelete);
+            InfoCollarButton.Enabled = !IsEditMode;
         }
+
         private bool CanDeleteCollar(Collar collar)
         {
             return !Database.CollarDeployments.Any(cd => cd.Collar == collar) &&
@@ -365,7 +362,7 @@ namespace AnimalMovement
 
         private void AddCollarButton_Click(object sender, EventArgs e)
         {
-            var form = new AddCollarForm(CurrentUser);
+            var form = new AddCollarForm(Investigator);
             form.DatabaseChanged += (o, x) => CollarDataChanged();
             form.Show(this);
         }
@@ -463,13 +460,11 @@ namespace AnimalMovement
 
         private void EnableCollarFilesControls()
         {
-            InfoCollarFileButton.Enabled = false;
-            DeleteCollarFilesButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoCollarFileButton.Enabled = CollarFilesListBox.SelectedItems.Count == 1;
-            if (IsInvestigator && CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>().Any(item => item.CanDelete))
-                DeleteCollarFilesButton.Enabled = true;
+            AddCollarFileButton.Enabled = !IsEditMode && IsEditor;
+            DeleteCollarFilesButton.Enabled = !IsEditMode && IsEditor &&
+                                              CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>()
+                                                                .Any(item => item.CanDelete);
+            InfoCollarFileButton.Enabled = !IsEditMode;
         }
 
         private void CollarFileDataChanged()
@@ -553,13 +548,10 @@ namespace AnimalMovement
         private void EnableParameterFilesControls()
         {
             AddParameterFileButton.Enabled = !IsEditMode && IsEditor;
-            InfoParameterFileButton.Enabled = false;
-            DeleteParameterFilesButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoParameterFileButton.Enabled = ParameterFilesListBox.SelectedItems.Count == 1;
-            if (IsInvestigator && ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>().Any(item => item.CanDelete))
-                DeleteParameterFilesButton.Enabled = true;
+            DeleteParameterFilesButton.Enabled = !IsEditMode && IsEditor &&
+                                              ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>()
+                                                                .Any(item => item.CanDelete);
+            InfoParameterFileButton.Enabled = !IsEditMode;
         }
 
         private void ParameterFileDataChanged()
@@ -696,7 +688,7 @@ namespace AnimalMovement
                 return;
             }
             var command = new SqlCommand(sql, (SqlConnection)Database.Connection);
-            command.Parameters.Add(new SqlParameter("@PI", SqlDbType.NVarChar) { Value = InvestigatorLogin });
+            command.Parameters.Add(new SqlParameter("@PI", SqlDbType.NVarChar) { Value = Investigator.Login });
             var dataAdapter = new SqlDataAdapter(command);
             var table = new DataTable();
             try

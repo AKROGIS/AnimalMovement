@@ -10,17 +10,16 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
-        private int ParameterId { get; set; }
         private CollarParameter CollarParameter { get; set; }
         private bool IsEditor { get; set; }
         private bool LockCollar { get; set; }
         private bool LockFile { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        public CollarParametersDetailsForm(int parameterId, bool lockCollar = false, bool lockFile = false)
+        public CollarParametersDetailsForm(CollarParameter collarParameter, bool lockCollar = false, bool lockFile = false)
         {
             InitializeComponent();
-            ParameterId = parameterId;
+            CollarParameter = collarParameter;
             LockCollar = lockCollar;
             LockFile = lockFile;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
@@ -32,9 +31,10 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            //Collar is in a different data context, get one in this Datacontext
-            CollarParameter =
-                    Database.CollarParameters.FirstOrDefault(p => p.ParameterId == ParameterId);
+            //CollarParameter is in a different DataContext, get one in this DataContext
+            if (CollarParameter != null)
+                CollarParameter =
+                    Database.CollarParameters.FirstOrDefault(p => p.ParameterId == CollarParameter.ParameterId);
             if (CollarParameter == null)
                 throw new InvalidOperationException("Collar Parameters Form not provided a valid Collar Parameter Id.");
 
@@ -289,8 +289,8 @@ namespace AnimalMovement
 
         private void FixItButton_Click(object sender, EventArgs e)
         {
-            //TODO - implement FIxIt code
-            MessageBox.Show("Not Implemented Yet.");
+            //TODO - implement FixIt code
+            MessageBox.Show("You must fix it manually", "Not Implemented");
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)

@@ -27,7 +27,7 @@ namespace AnimalMovement
             InitializeComponent();
             RestoreWindow();
             LoadDataContext();
-            EnableControls();
+            SetUpControls();
         }
 
         private void LoadDataContext()
@@ -42,7 +42,6 @@ namespace AnimalMovement
 
             Functions = new AnimalMovementFunctions();
             IsEditor = Functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
-            SetUpControls();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -64,6 +63,7 @@ namespace AnimalMovement
             SpeciesComboBox.DataSource = Database.LookupSpecies;
             SpeciesComboBox.DisplayMember = "Species";
             SelectDefaultSpecies(Settings.GetDefaultSpecies());
+            EnableControls();
         }
 
         private void SelectDefaultSpecies(string speciesCode)

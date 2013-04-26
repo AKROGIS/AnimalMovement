@@ -31,7 +31,7 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            //Collar and Animal are in a different data context, get them in this DataContext
+            //Collar and Animal are in a different DataContext, get them in this DataContext
             if (Collar != null)
                 Collar =
                     Database.Collars.FirstOrDefault(

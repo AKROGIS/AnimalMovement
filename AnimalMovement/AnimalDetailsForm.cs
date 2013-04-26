@@ -280,7 +280,7 @@ namespace AnimalMovement
             var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
             if (item == null)
                 return;
-            var form = new CollarDeploymentDetailsForm(item.Deployment.DeploymentId, false, true);
+            var form = new CollarDeploymentDetailsForm(item.Deployment, false, true);
             form.DatabaseChanged += (o, x) => CollarDataChanged();
             form.Show(this);
         }

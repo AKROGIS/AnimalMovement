@@ -8,12 +8,13 @@ namespace AnimalMovement
     internal partial class MainForm : BaseForm
     {
         private readonly string _currentUser;
+        private ProjectInvestigator _investigator;
 
         internal MainForm()
         {
             InitializeComponent();
             RestoreWindow();
-            _currentUser = GetUserName();
+            _currentUser = Environment.UserDomainName + "\\" + Environment.UserName;
         }
 
         protected override void OnShown(EventArgs e)
@@ -30,7 +31,7 @@ namespace AnimalMovement
             var db = new AnimalMovementDataContext();
             try
             {
-                MyProfileButton.Visible = db.ProjectInvestigators.Any(pi => pi.Login == _currentUser);                
+                _investigator = db.ProjectInvestigators.FirstOrDefault(pi => pi.Login == _currentUser);                
             }
             catch (Exception ex)
             {
@@ -43,26 +44,22 @@ namespace AnimalMovement
                 return;
             }
             Cursor.Current = Cursors.Default;
+            MyProfileButton.Visible = (_investigator != null);
             MyProfileButton.Text = "Project Investigator Details";
             ProjectsButton.Enabled = true;
             UploadButton.Enabled = true;
             GenerateMapButton.Enabled = true;
         }
 
-        private static string GetUserName()
-        {
-            return Environment.UserDomainName + "\\" + Environment.UserName;
-        }
-
         private void MyProfileButton_Click(object sender, EventArgs e)
         {
-            var form = new InvestigatorForm(_currentUser);
+            var form = new InvestigatorForm(_investigator);
             form.Show(this);
         }
 
         private void ProjectsButton_Click(object sender, EventArgs e)
         {
-            var form = new ProjectsForm(_currentUser);
+            var form = new ProjectsForm();
             form.Show(this);
         }
 

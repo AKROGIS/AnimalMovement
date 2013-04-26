@@ -27,7 +27,7 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            //Collar is in a different data context, get one in this Datacontext
+            //Collar is in a different DataContext, get one in this DataContext
             if (Collar != null)
                 Collar =
                     Database.Collars.FirstOrDefault(
@@ -241,8 +241,8 @@ namespace AnimalMovement
 
         private void FixItButton_Click(object sender, EventArgs e)
         {
-            //TODO - implement FIxIt code
-            MessageBox.Show("Not Implemented Yet.");
+            //TODO - implement FixIt code
+            MessageBox.Show("You must fix it manually", "Not Implemented");
         }
 
         private void CreateButton_Click(object sender, EventArgs e)

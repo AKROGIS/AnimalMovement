@@ -9,11 +9,11 @@ namespace AnimalMovement
     {
         private string CurrentUser { get; set; }
 
-        internal ProjectsForm(string user)
+        internal ProjectsForm()
         {
             InitializeComponent();
             RestoreWindow();
-            CurrentUser = user;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
         }
 
         private void ReviewProjectsForm_Load(object sender, EventArgs e)
