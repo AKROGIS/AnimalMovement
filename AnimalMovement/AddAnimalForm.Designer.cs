@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.ProjectCodeTextBox = new System.Windows.Forms.TextBox();
             this.AnimalIdTextBox = new System.Windows.Forms.TextBox();
             this.GroupTextBox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -44,19 +43,8 @@
             this.cancelButton = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.MortatlityDateTimePicker = new System.Windows.Forms.DateTimePicker();
+            this.ProjectComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
-            // 
-            // ProjectCodeTextBox
-            // 
-            this.ProjectCodeTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ProjectCodeTextBox.Enabled = false;
-            this.ProjectCodeTextBox.Location = new System.Drawing.Point(93, 12);
-            this.ProjectCodeTextBox.MaxLength = 16;
-            this.ProjectCodeTextBox.Name = "ProjectCodeTextBox";
-            this.ProjectCodeTextBox.Size = new System.Drawing.Size(249, 20);
-            this.ProjectCodeTextBox.TabIndex = 34;
-            this.ProjectCodeTextBox.TabStop = false;
             // 
             // AnimalIdTextBox
             // 
@@ -118,11 +106,11 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(32, 15);
+            this.label4.Location = new System.Drawing.Point(44, 15);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(55, 13);
+            this.label4.Size = new System.Drawing.Size(43, 13);
             this.label4.TabIndex = 27;
-            this.label4.Text = "Project Id:";
+            this.label4.Text = "Project:";
             // 
             // label1
             // 
@@ -189,6 +177,7 @@
             this.cancelButton.TabIndex = 42;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
             // label2
             // 
@@ -213,6 +202,16 @@
             this.MortatlityDateTimePicker.TabIndex = 81;
             this.MortatlityDateTimePicker.ValueChanged += new System.EventHandler(this.MortatlityDateTimePicker_ValueChanged);
             // 
+            // ProjectComboBox
+            // 
+            this.ProjectComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ProjectComboBox.FormattingEnabled = true;
+            this.ProjectComboBox.Location = new System.Drawing.Point(93, 12);
+            this.ProjectComboBox.Name = "ProjectComboBox";
+            this.ProjectComboBox.Size = new System.Drawing.Size(249, 21);
+            this.ProjectComboBox.TabIndex = 83;
+            this.ProjectComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
+            // 
             // AddAnimalForm
             // 
             this.AcceptButton = this.CreateButton;
@@ -220,6 +219,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(359, 286);
+            this.Controls.Add(this.ProjectComboBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.MortatlityDateTimePicker);
             this.Controls.Add(this.cancelButton);
@@ -228,7 +228,6 @@
             this.Controls.Add(this.SpeciesComboBox);
             this.Controls.Add(this.DescriptionTextBox);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.ProjectCodeTextBox);
             this.Controls.Add(this.AnimalIdTextBox);
             this.Controls.Add(this.GroupTextBox);
             this.Controls.Add(this.label8);
@@ -247,7 +246,6 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox ProjectCodeTextBox;
         private System.Windows.Forms.TextBox AnimalIdTextBox;
         private System.Windows.Forms.TextBox GroupTextBox;
         private System.Windows.Forms.Label label8;
@@ -263,5 +261,6 @@
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DateTimePicker MortatlityDateTimePicker;
+        private System.Windows.Forms.ComboBox ProjectComboBox;
     }
 }

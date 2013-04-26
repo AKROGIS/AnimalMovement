@@ -36,12 +36,16 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Project is in a different DataContext, get one in this DataContext
             if (Project != null)
-                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);   
+                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+
+            //If Project is not provided, Current user must be a PI or an project editor
             if (Project == null)
-                throw new InvalidOperationException("Add Animal Form not provided a valid Project.");
+                if (!Database.Projects.Any(p => p.ProjectInvestigator == CurrentUser) &&
+                    !Database.ProjectEditors.Any(e => e.Editor == CurrentUser))
+                    throw new InvalidOperationException("Add Animal Form not provided a valid Project or you are not a PI or editor on any projects.");
 
             Functions = new AnimalMovementFunctions();
-            IsEditor = Functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
+            IsEditor = Project != null && (Functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -55,7 +59,7 @@ namespace AnimalMovement
 
         private void SetUpControls()
         {
-            ProjectCodeTextBox.Text = Project.ProjectId;
+            SetUpProjectComboBox();
             AnimalIdTextBox.Text = Functions.NextAnimalId(Project.ProjectId);
             GenderComboBox.DataSource = Database.LookupGenders;
             GenderComboBox.DisplayMember = "Sex";
@@ -64,6 +68,24 @@ namespace AnimalMovement
             SpeciesComboBox.DisplayMember = "Species";
             SelectDefaultSpecies(Settings.GetDefaultSpecies());
             EnableControls();
+        }
+
+        private void SetUpProjectComboBox()
+        {
+            //If given a PI, set that and lock it.
+            //else, set list to me, if I am a PI, plus all PI's I can assist, select null
+            if (Project != null)
+                ProjectComboBox.Items.Add(Project);
+            else
+            {
+                ProjectComboBox.DataSource =
+                    Database.Projects.Where(p => p.ProjectInvestigator == CurrentUser).Concat(
+                        Database.ProjectEditors.Where(e => e.Editor == CurrentUser)
+                                .Select(e => e.Project));
+            }
+            ProjectComboBox.DisplayMember = "ProjectName";
+            ProjectComboBox.Enabled = Project == null;
+            ProjectComboBox.SelectedItem = Project;
         }
 
         private void SelectDefaultSpecies(string speciesCode)
@@ -160,6 +182,19 @@ namespace AnimalMovement
         private void MortatlityDateTimePicker_ValueChanged(object sender, EventArgs e)
         {
             MortatlityDateTimePicker.CustomFormat = MortatlityDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
+        }
+
+        private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var project = ProjectComboBox.SelectedItem as Project;
+            IsEditor = project != null &&
+                       (Functions.IsProjectEditor(project.ProjectId, CurrentUser) ?? false);
+            EnableControls();
+        }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            Close();
         }
 
     }

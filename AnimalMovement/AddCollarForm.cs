@@ -8,55 +8,44 @@ namespace AnimalMovement
     internal partial class AddCollarForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
-        private bool IndependentContext { get; set; }
+        private AnimalMovementFunctions Functions { get; set; }
         private string CurrentUser { get; set; }
         private ProjectInvestigator ProjectInvestigator { get; set; }
-        private bool IsProjectInvestigator { get; set; }
+        private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal AddCollarForm(string user)
-        {
-            IndependentContext = true;
-            CurrentUser = user;
-            SetupForm();
-        }
-
-        internal AddCollarForm(AnimalMovementDataContext database, string user)
-        {
-            IndependentContext = false;
-            Database = database;
-            CurrentUser = user;
-            SetupForm();
-        }
-
-        private void SetupForm()
+        internal AddCollarForm(ProjectInvestigator investigator)
         {
             InitializeComponent();
             RestoreWindow();
+            ProjectInvestigator = investigator;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
-            EnableCreate();
+            SetUpControls();
         }
 
         private void LoadDataContext()
         {
-            if (IndependentContext)
-            {
-                Database = new AnimalMovementDataContext();
-                //gets repointed when we requery Database.ProjectInvestigators later on.
-                //ProjectInvestigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
-            }
-            if (Database == null || CurrentUser == null)
-            {
-                MessageBox.Show("Insufficent information to initialize form.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
-            ManagerComboBox.DataSource = Database.ProjectInvestigators;
-            ProjectInvestigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
-            IsProjectInvestigator = ProjectInvestigator != null;
-            ManagerComboBox.DisplayMember = "Name";
-            ManagerComboBox.SelectedItem = ProjectInvestigator;
-            //  first get the default, then set the datasource, then set the selection to the default.
+
+            Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
+            //ProjectInvestigator is in a different DataContext, get one in this DataContext
+            if (ProjectInvestigator != null)
+                ProjectInvestigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == ProjectInvestigator.Login);
+            //If Project Investigator is not provided, Current user must be a PI or an assistant
+            if (ProjectInvestigator == null)
+                if (!Database.ProjectInvestigators.Any(pi => pi.Login == CurrentUser) &&
+                    !Database.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser))
+                    throw new InvalidOperationException("Add Collar Form not provided a valid Project Investigator or you are not a PI or an assistant.");
+
+            Functions = new AnimalMovementFunctions();
+            IsEditor = ProjectInvestigator != null && (Functions.IsInvestigatorEditor(ProjectInvestigator.Login, CurrentUser) ?? false);
+        }
+
+        private void SetUpControls()
+        {
+            SetUpManagerComboBox();
+                //  first get the default, then set the datasource, then set the selection to the default.
             //    this order is required because setting the datasource sets the selected index to 0 triggering the selectedindex_changed event
             //    the selectedindex_changed event saves the user's selection, which when setting the datasource, overwrites the user's previous
             //    default with the item at index 0, so initialization deletes the user's preference.
@@ -65,6 +54,25 @@ namespace AnimalMovement
             ManufacturerComboBox.DataSource = Database.LookupCollarManufacturers;
             ManufacturerComboBox.DisplayMember = "Name";
             SelectDefaultManufacturer(manufacturerId);
+            EnableControls();
+        }
+
+        private void SetUpManagerComboBox()
+        {
+            //If given a PI, set that and lock it.
+            //else, set list to me, if I am a PI, plus all PI's I can assist, select null
+            if (ProjectInvestigator != null)
+                ManagerComboBox.Items.Add(ProjectInvestigator);
+            else
+            {
+                ManagerComboBox.DataSource =
+                    Database.ProjectInvestigators.Where(pi => pi.Login == CurrentUser).Concat(
+                        Database.ProjectInvestigatorAssistants.Where(a => a.Assistant == CurrentUser)
+                                .Select(a => a.ProjectInvestigator1));
+            }
+            ManagerComboBox.DisplayMember = "Name";
+            ManagerComboBox.Enabled = ProjectInvestigator == null;
+            ManagerComboBox.SelectedItem = ProjectInvestigator;
         }
 
         private void SetUpModelList(string mfgr)
@@ -93,9 +101,9 @@ namespace AnimalMovement
                 ManufacturerComboBox.SelectedItem = manufacturer;
         }
 
-        private void EnableCreate()
+        private void EnableControls()
         {
-            CreateButton.Enabled = IsProjectInvestigator && ProjectInvestigator != null && !string.IsNullOrEmpty(CollarIdTextBox.Text);
+            CreateButton.Enabled = IsEditor && !string.IsNullOrEmpty(CollarIdTextBox.Text);
         }
 
         private void CreateButton_Click(object sender, EventArgs e)
@@ -125,20 +133,17 @@ namespace AnimalMovement
                     SerialNumber = SerialNumberTextBox.Text.NullifyIfEmpty(),
                 };
             Database.Collars.InsertOnSubmit(collar);
-            if (IndependentContext)
+            try
             {
-                try
-                {
-                    Database.SubmitChanges();
-                }
-                catch (Exception ex)
-                {
-                    Database.Collars.DeleteOnSubmit(collar);
-                    MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    CollarIdTextBox.Focus();
-                    CreateButton.Enabled = false;
-                    return;
-                }
+                Database.SubmitChanges();
+            }
+            catch (Exception ex)
+            {
+                Database.Collars.DeleteOnSubmit(collar);
+                MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CollarIdTextBox.Focus();
+                CreateButton.Enabled = false;
+                return;
             }
             OnDatabaseChanged();
             DialogResult = DialogResult.OK;
@@ -146,13 +151,15 @@ namespace AnimalMovement
 
         private void CollarIdTextBox_TextChanged(object sender, EventArgs e)
         {
-            EnableCreate();
+            EnableControls();
         }
 
         private void ManagerComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ProjectInvestigator = ManagerComboBox.SelectedItem as ProjectInvestigator;
-            EnableCreate();
+            var investigator = ManagerComboBox.SelectedItem as ProjectInvestigator;
+            IsEditor = investigator != null &&
+                       (Functions.IsInvestigatorEditor(investigator.Login, CurrentUser) ?? false);
+            EnableControls();
         }
 
         private void ManufacturerComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -193,6 +200,11 @@ namespace AnimalMovement
             DisposalDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
             DisposalDateTimePicker.Checked = false;
             DisposalDateTimePicker.CustomFormat = " ";
+        }
+
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            Close();
         }
 
     }
