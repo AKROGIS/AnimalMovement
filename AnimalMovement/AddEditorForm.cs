@@ -1,5 +1,6 @@
 ﻿using System;
 #if ! NO_ACTIVE_DIRECTORY
+using System.Data.SqlClient;
 using System.DirectoryServices.AccountManagement;
 #endif
 using System.Linq;
@@ -11,78 +12,86 @@ namespace AnimalMovement
     internal partial class AddEditorForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
-        private bool IndependentContext { get; set; }
         private string CurrentUser { get; set; }
-        private string ProjectId { get; set; }
+        private bool LockSelector { get; set; }
         private Project Project { get; set; }
+        private ProjectInvestigator Investigator { get; set; }
         private bool IsProjectInvestigator { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        // ReSharper disable UnusedAutoPropertyAccessor.Local
-        // public accessors are used by the control when these classes are accessed through the Datasource
-        private class EditorListItem
-        {
-            public string DisplayName { get; set; }
-            public string DomainName { get; set; }
-        }
-        // ReSharper restore UnusedAutoPropertyAccessor.Local
-
-        internal AddEditorForm(string projectId, string user)
-        {
-            IndependentContext = true;
-            ProjectId = projectId;
-            CurrentUser = user;
-            SetupForm();
-        }
-
-        internal AddEditorForm(AnimalMovementDataContext database, Project project, string user)
-        {
-            IndependentContext = false;
-            Database = database;
-            Project = project ;
-            CurrentUser = user;
-            SetupForm();
-        }
-
-        private void SetupForm()
+        internal AddEditorForm(Project project, ProjectInvestigator investigator = null, bool lockSelector = false)
         {
             InitializeComponent();
             RestoreWindow();
+            Project = project;
+            Investigator = investigator;
+            LockSelector = lockSelector;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
-            EnableCreate();
+            EnableControls();
         }
 
         private void LoadDataContext()
         {
-            if (IndependentContext)
-            {
-                Database = new AnimalMovementDataContext();
-                //Weirdness: Project points into our datacontext, which gets changed
-                //when we requery the projects table, so setting it here doen't work
-                //Project = Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);   
-            }
-            if (Database == null || ProjectId == null || CurrentUser == null)
-            {
-                MessageBox.Show("Insufficent information to initialize form.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
+            Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
+            //Project and Investigator are in a different data context, get them in this DataContext
+            if (Project != null)
+                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+            if (Investigator != null)
+                Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+            if (Project == null && Investigator == null)
+                throw new InvalidOperationException("Add Editor Form not provided a valid Project or Project Investigator.");
+            if (Project != null && Investigator != null)
+                throw new InvalidOperationException("Add Editor Form cannot have both a valid Project AND Project Investigator.");
+
             IsProjectInvestigator = Database.ProjectInvestigators.Any(pi => pi.Login == CurrentUser);
-            ProjectComboBox.DataSource = Database.Projects.Where(p => p.ProjectInvestigator == CurrentUser);
-            Project = Database.Projects.FirstOrDefault(p => p.ProjectId == ProjectId);
-            ProjectComboBox.DisplayMember = "ProjectName";
-            ProjectComboBox.SelectedItem = Project;
+            SetupControls();
         }
 
-        private void EnableCreate()
+        private void SetupControls()
         {
-            CreateButton.Enabled = IsProjectInvestigator && Project != null && ResultsListBox.SelectedItem != null;
+            if (Investigator != null)
+            {
+                //no one can add editors (assistants) to another PI, so a selector is not appropriate
+                LockSelector = true;
+                SelectorComboBox.Items.Add(Investigator);
+                SelectorComboBox.SelectedItem = Investigator;
+                SelectorComboBox.DisplayMember = "Name";
+                SelectorComboBox.Enabled = false;
+                ProjectLabel.Visible = false;
+                InvestigatorLabel.Visible = true;
+            }
+            if (Project != null)
+            {
+                if (LockSelector)
+                    SelectorComboBox.Items.Add(Project);
+                else
+                    SelectorComboBox.DataSource = Database.Projects.Where(p => p.ProjectInvestigator == CurrentUser);
+                SelectorComboBox.SelectedItem = Project;
+                SelectorComboBox.DisplayMember = "ProjectName";
+                SelectorComboBox.Enabled = !LockSelector;
+                ProjectLabel.Visible = true;
+                InvestigatorLabel.Visible = false;
+            }
+        }
+
+        private void EnableControls()
+        {
+            CreateButton.Enabled = IsProjectInvestigator && SelectorComboBox.SelectedItem != null && ResultsListBox.SelectedItem != null;
         }
 
         private void CreateButton_Click(object sender, EventArgs e)
         {
             string domainName = ((EditorListItem)ResultsListBox.SelectedItem).DomainName;
+            if (Investigator != null)
+                CreateAssistant(domainName);
+            if (Project != null)
+                CreateEditor(domainName);
+        }
 
+        private void CreateEditor(string domainName)
+        {
             if (Database.ProjectEditors.Any(pe => pe.Project == Project && pe.Editor == domainName))
             {
                 MessageBox.Show("The editor is already on the project.  Try again", "Database Error", MessageBoxButtons.OK,
@@ -97,29 +106,63 @@ namespace AnimalMovement
                 Editor = domainName,
             };
             Database.ProjectEditors.InsertOnSubmit(editor);
-            if (IndependentContext)
+            if (!SubmitChanges())
             {
-                try
-                {
-                    Database.SubmitChanges();
-                }
-                catch (Exception ex)
-                {
-                    Database.ProjectEditors.DeleteOnSubmit(editor);
-                    MessageBox.Show(ex.Message, "Unable to create the new editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    EditorTextBox.Focus();
-                    CreateButton.Enabled = false;
-                    return;
-                }
+                Database.ProjectEditors.DeleteOnSubmit(editor);
+                EditorTextBox.Focus();
+                CreateButton.Enabled = false;
+                return;
             }
             OnDatabaseChanged();
-            DialogResult = DialogResult.OK;
+            Close();
         }
 
-        private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void CreateAssistant(string domainName)
         {
-            Project = ProjectComboBox.SelectedItem as Project;
-            EnableCreate();
+            if (Database.ProjectInvestigatorAssistants.Any(a => a.ProjectInvestigator1 == Investigator && a.Assistant == domainName))
+            {
+                MessageBox.Show("The assistant is already helping the investigator.  Try again", "Database Error", MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+                EditorTextBox.Focus();
+                CreateButton.Enabled = false;
+                return;
+            }
+            var assistant = new ProjectInvestigatorAssistant
+            {
+                ProjectInvestigator1 = Investigator,
+                Assistant = domainName,
+            };
+            Database.ProjectInvestigatorAssistants.InsertOnSubmit(assistant);
+            if (!SubmitChanges())
+            {
+                Database.ProjectInvestigatorAssistants.DeleteOnSubmit(assistant);
+                EditorTextBox.Focus();
+                CreateButton.Enabled = false;
+                return;
+            }
+            OnDatabaseChanged();
+            Close();
+        }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
         }
 
         private void OnDatabaseChanged()
@@ -129,10 +172,25 @@ namespace AnimalMovement
                 handle(this, EventArgs.Empty);
         }
 
+        private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableControls();
+        }
+
         private void ResultsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnableCreate();
+            EnableControls();
         }
+
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        private class EditorListItem
+        {
+            public string DisplayName { get; set; }
+            public string DomainName { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
 
         private void FindButton_Click(object sender, EventArgs e)
         {
@@ -154,7 +212,7 @@ namespace AnimalMovement
             ResultsListBox.DisplayMember = "DisplayName";
             var data = query.ToList();
             ResultsListBox.DataSource = data;
-            EnableCreate(); //If the Datasource is empty, then SelectedIndexChanged is not called.
+            EnableControls(); //If the Datasource is empty, then SelectedIndexChanged is not called.
             if (data.Count > 0)
                 ResultsListBox.Focus();
             else

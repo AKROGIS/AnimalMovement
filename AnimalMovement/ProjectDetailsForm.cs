@@ -250,13 +250,9 @@ namespace AnimalMovement
 
         private void AddEditorButton_Click(object sender, EventArgs e)
         {
-            //Adding editors in this context is not supported.
-            //var form = new AddEditorForm(Database, Project, CurrentUser);
-            var form = new AddEditorForm(ProjectId, CurrentUser);
-            if (form.ShowDialog(this) == DialogResult.Cancel)
-                return;
-            OnDatabaseChanged();
-            LoadDataContext();
+            var form = new AddEditorForm(Project, null, true);
+            form.DatabaseChanged += (o, x) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.Show(this);
         }
 
         private void DeleteEditorButton_Click(object sender, EventArgs e)

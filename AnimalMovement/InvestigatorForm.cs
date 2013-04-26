@@ -629,7 +629,7 @@ namespace AnimalMovement
 
         private void AddAssistantButton_Click(object sender, EventArgs e)
         {
-            var form = new AddEditorForm(null, null);//, Investigator);
+            var form = new AddEditorForm(null, Investigator);
             form.DatabaseChanged += (o, x) => AssistantDataChanged();
             form.Show(this);
         }

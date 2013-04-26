@@ -33,10 +33,11 @@
             this.label2 = new System.Windows.Forms.Label();
             this.CreateButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
-            this.ProjectComboBox = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.SelectorComboBox = new System.Windows.Forms.ComboBox();
+            this.InvestigatorLabel = new System.Windows.Forms.Label();
             this.FindButton = new System.Windows.Forms.Button();
             this.ResultsListBox = new System.Windows.Forms.ListBox();
+            this.ProjectLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -90,26 +91,26 @@
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             // 
-            // ProjectComboBox
+            // SelectorComboBox
             // 
-            this.ProjectComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.SelectorComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ProjectComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ProjectComboBox.FormattingEnabled = true;
-            this.ProjectComboBox.Location = new System.Drawing.Point(57, 12);
-            this.ProjectComboBox.Name = "ProjectComboBox";
-            this.ProjectComboBox.Size = new System.Drawing.Size(334, 21);
-            this.ProjectComboBox.TabIndex = 10;
-            this.ProjectComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
+            this.SelectorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.SelectorComboBox.FormattingEnabled = true;
+            this.SelectorComboBox.Location = new System.Drawing.Point(119, 12);
+            this.SelectorComboBox.Name = "SelectorComboBox";
+            this.SelectorComboBox.Size = new System.Drawing.Size(272, 21);
+            this.SelectorComboBox.TabIndex = 10;
+            this.SelectorComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
             // 
-            // label3
+            // InvestigatorLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(8, 15);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(43, 13);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "Project:";
+            this.InvestigatorLabel.AutoSize = true;
+            this.InvestigatorLabel.Location = new System.Drawing.Point(12, 15);
+            this.InvestigatorLabel.Name = "InvestigatorLabel";
+            this.InvestigatorLabel.Size = new System.Drawing.Size(101, 13);
+            this.InvestigatorLabel.TabIndex = 6;
+            this.InvestigatorLabel.Text = "Project Investigator:";
             // 
             // FindButton
             // 
@@ -134,16 +135,26 @@
             this.ResultsListBox.TabIndex = 4;
             this.ResultsListBox.SelectedIndexChanged += new System.EventHandler(this.ResultsListBox_SelectedIndexChanged);
             // 
+            // ProjectLabel
+            // 
+            this.ProjectLabel.AutoSize = true;
+            this.ProjectLabel.Location = new System.Drawing.Point(70, 15);
+            this.ProjectLabel.Name = "ProjectLabel";
+            this.ProjectLabel.Size = new System.Drawing.Size(43, 13);
+            this.ProjectLabel.TabIndex = 11;
+            this.ProjectLabel.Text = "Project:";
+            // 
             // AddEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(405, 246);
+            this.Controls.Add(this.ProjectLabel);
             this.Controls.Add(this.ResultsListBox);
             this.Controls.Add(this.FindButton);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.ProjectComboBox);
+            this.Controls.Add(this.InvestigatorLabel);
+            this.Controls.Add(this.SelectorComboBox);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.CreateButton);
             this.Controls.Add(this.label2);
@@ -167,9 +178,10 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button CreateButton;
         private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.ComboBox ProjectComboBox;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox SelectorComboBox;
+        private System.Windows.Forms.Label InvestigatorLabel;
         private System.Windows.Forms.Button FindButton;
         private System.Windows.Forms.ListBox ResultsListBox;
+        private System.Windows.Forms.Label ProjectLabel;
     }
 }
