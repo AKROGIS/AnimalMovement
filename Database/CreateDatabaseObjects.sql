@@ -6340,8 +6340,8 @@ BEGIN
     IF EXISTS(     SELECT 1 FROM dbo.ProjectInvestigators AS P 
                 LEFT JOIN [dbo].[ProjectInvestigatorAssistants] AS A 
                        ON A.ProjectInvestigator = P.[Login] 
-                    WHERE @User = P.[Login]
-                       OR @User = A.Assistant
+                    WHERE (@User = @ProjectInvestigator AND P.[Login] = @User) 
+                       OR (A.ProjectInvestigator = @ProjectInvestigator AND @User = A.Assistant)
              )
         RETURN 1
     RETURN 0
@@ -7036,24 +7036,31 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE FUNCTION [dbo].[IsProjectEditor] 
 (
-	@Project VARCHAR(32)   = NULL, 
-	@User sysname = NULL
+    @Project VARCHAR(32)   = NULL, 
+    @User sysname = NULL
 )
 RETURNS BIT
 AS
 BEGIN
-	-- Check that @User is in the Investigator or the Editor Role
-	IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
-												   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
-		RETURN 0
-	
-	--Check that the users is either an editor or the PI on the project
-	IF EXISTS( SELECT 1 FROM dbo.Projects AS P 
-				LEFT JOIN dbo.ProjectEditors AS E ON P.ProjectId = E.ProjectId 
-				WHERE P.ProjectId = @Project
-				  AND (E.Editor = @User OR P.ProjectInvestigator = @User))
-		RETURN 1
-	RETURN 0
+    -- Check that @User is in the Investigator or the Editor Role
+    IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
+                                                   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
+        RETURN 0
+    
+    --Check that the users is either an editor or the PI on the project
+    IF EXISTS(     SELECT 1 FROM dbo.Projects AS P 
+                LEFT JOIN dbo.ProjectEditors AS E ON P.ProjectId = E.ProjectId 
+                    WHERE P.ProjectId = @Project
+                      AND (E.Editor = @User OR P.ProjectInvestigator = @User))
+        RETURN 1
+    
+    -- Check if user is an assistant to the PI of the project
+    IF EXISTS( SELECT 1 FROM dbo.Projects AS P
+                 JOIN [dbo].[ProjectInvestigatorAssistants] AS A 
+                   ON A.ProjectInvestigator = P.ProjectInvestigator 
+                WHERE @Project = P.ProjectId AND @User = A.Assistant)
+        RETURN 1	
+    RETURN 0
 END
 GO
 SET ANSI_NULLS ON
