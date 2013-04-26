@@ -45,7 +45,7 @@
             this.DeleteDeploymentButton = new System.Windows.Forms.Button();
             this.InfoAnimalButton = new System.Windows.Forms.Button();
             this.EditDeploymentButton = new System.Windows.Forms.Button();
-            this.CollarTabs = new System.Windows.Forms.TabControl();
+            this.CollarTabControl = new System.Windows.Forms.TabControl();
             this.GeneralTabPage = new System.Windows.Forms.TabPage();
             this.NotesTextBox = new System.Windows.Forms.TextBox();
             this.DoneCancelButton = new System.Windows.Forms.Button();
@@ -55,6 +55,10 @@
             this.FrequencyTextBox = new System.Windows.Forms.TextBox();
             this.AnimalsTabPage = new System.Windows.Forms.TabPage();
             this.DeploymentDataGridView = new System.Windows.Forms.DataGridView();
+            this.AnimalColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DeployDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.RetrieveDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ArgosTabPage = new System.Windows.Forms.TabPage();
             this.ArgosDataGridView = new System.Windows.Forms.DataGridView();
             this.AddArgosButton = new System.Windows.Forms.Button();
@@ -78,11 +82,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.AnimalColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DeployDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.RetrieveDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CollarTabs.SuspendLayout();
+            this.CollarTabControl.SuspendLayout();
             this.GeneralTabPage.SuspendLayout();
             this.AnimalsTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).BeginInit();
@@ -274,23 +274,23 @@
             this.EditDeploymentButton.UseVisualStyleBackColor = true;
             this.EditDeploymentButton.Click += new System.EventHandler(this.EditDeploymentButton_Click);
             // 
-            // CollarTabs
+            // CollarTabControl
             // 
-            this.CollarTabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.CollarTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.CollarTabs.Controls.Add(this.GeneralTabPage);
-            this.CollarTabs.Controls.Add(this.AnimalsTabPage);
-            this.CollarTabs.Controls.Add(this.ArgosTabPage);
-            this.CollarTabs.Controls.Add(this.ParametersTabPage);
-            this.CollarTabs.Controls.Add(this.FilesTabPage);
-            this.CollarTabs.Controls.Add(this.FixesTabPage);
-            this.CollarTabs.Location = new System.Drawing.Point(0, 33);
-            this.CollarTabs.Name = "CollarTabs";
-            this.CollarTabs.SelectedIndex = 0;
-            this.CollarTabs.Size = new System.Drawing.Size(459, 362);
-            this.CollarTabs.TabIndex = 54;
-            this.CollarTabs.SelectedIndexChanged += new System.EventHandler(this.CollarTabs_SelectedIndexChanged);
+            this.CollarTabControl.Controls.Add(this.GeneralTabPage);
+            this.CollarTabControl.Controls.Add(this.AnimalsTabPage);
+            this.CollarTabControl.Controls.Add(this.ArgosTabPage);
+            this.CollarTabControl.Controls.Add(this.ParametersTabPage);
+            this.CollarTabControl.Controls.Add(this.FilesTabPage);
+            this.CollarTabControl.Controls.Add(this.FixesTabPage);
+            this.CollarTabControl.Location = new System.Drawing.Point(0, 33);
+            this.CollarTabControl.Name = "CollarTabControl";
+            this.CollarTabControl.SelectedIndex = 0;
+            this.CollarTabControl.Size = new System.Drawing.Size(459, 362);
+            this.CollarTabControl.TabIndex = 54;
+            this.CollarTabControl.SelectedIndexChanged += new System.EventHandler(this.CollarTabControl_SelectedIndexChanged);
             // 
             // GeneralTabPage
             // 
@@ -422,6 +422,42 @@
             this.DeploymentDataGridView.TabIndex = 11;
             this.DeploymentDataGridView.SelectionChanged += new System.EventHandler(this.DeploymentDataGridView_SelectionChanged);
             this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.InfoAnimalButton_Click);
+            // 
+            // AnimalColumn
+            // 
+            this.AnimalColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.AnimalColumn.DataPropertyName = "Animal";
+            this.AnimalColumn.HeaderText = "Animal";
+            this.AnimalColumn.MinimumWidth = 160;
+            this.AnimalColumn.Name = "AnimalColumn";
+            this.AnimalColumn.ReadOnly = true;
+            this.AnimalColumn.Width = 160;
+            // 
+            // DeployDateColumn
+            // 
+            this.DeployDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.DeployDateColumn.DataPropertyName = "DeploymentDate";
+            this.DeployDateColumn.HeaderText = "Deployed";
+            this.DeployDateColumn.MinimumWidth = 80;
+            this.DeployDateColumn.Name = "DeployDateColumn";
+            this.DeployDateColumn.ReadOnly = true;
+            // 
+            // RetrieveDateColumn
+            // 
+            this.RetrieveDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.RetrieveDateColumn.DataPropertyName = "RetrievalDate";
+            this.RetrieveDateColumn.HeaderText = "Retrieved";
+            this.RetrieveDateColumn.MinimumWidth = 80;
+            this.RetrieveDateColumn.Name = "RetrieveDateColumn";
+            this.RetrieveDateColumn.ReadOnly = true;
+            // 
+            // DeploymentColumn
+            // 
+            this.DeploymentColumn.DataPropertyName = "Deployment";
+            this.DeploymentColumn.HeaderText = "Deployment";
+            this.DeploymentColumn.Name = "DeploymentColumn";
+            this.DeploymentColumn.ReadOnly = true;
+            this.DeploymentColumn.Visible = false;
             // 
             // ArgosTabPage
             // 
@@ -735,48 +771,12 @@
             this.label2.TabIndex = 35;
             this.label2.Text = "Collar Id:";
             // 
-            // AnimalColumn
-            // 
-            this.AnimalColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.AnimalColumn.DataPropertyName = "Animal";
-            this.AnimalColumn.HeaderText = "Animal";
-            this.AnimalColumn.MinimumWidth = 160;
-            this.AnimalColumn.Name = "AnimalColumn";
-            this.AnimalColumn.ReadOnly = true;
-            this.AnimalColumn.Width = 160;
-            // 
-            // DeployDateColumn
-            // 
-            this.DeployDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.DeployDateColumn.DataPropertyName = "DeploymentDate";
-            this.DeployDateColumn.HeaderText = "Deployed";
-            this.DeployDateColumn.MinimumWidth = 80;
-            this.DeployDateColumn.Name = "DeployDateColumn";
-            this.DeployDateColumn.ReadOnly = true;
-            // 
-            // RetrieveDateColumn
-            // 
-            this.RetrieveDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.RetrieveDateColumn.DataPropertyName = "RetrievalDate";
-            this.RetrieveDateColumn.HeaderText = "Retrieved";
-            this.RetrieveDateColumn.MinimumWidth = 80;
-            this.RetrieveDateColumn.Name = "RetrieveDateColumn";
-            this.RetrieveDateColumn.ReadOnly = true;
-            // 
-            // DeploymentColumn
-            // 
-            this.DeploymentColumn.DataPropertyName = "Deployment";
-            this.DeploymentColumn.HeaderText = "Deployment";
-            this.DeploymentColumn.Name = "DeploymentColumn";
-            this.DeploymentColumn.ReadOnly = true;
-            this.DeploymentColumn.Visible = false;
-            // 
             // CollarDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(459, 395);
-            this.Controls.Add(this.CollarTabs);
+            this.Controls.Add(this.CollarTabControl);
             this.Controls.Add(this.ManufacturerTextBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.CollarIdTextBox);
@@ -785,7 +785,7 @@
             this.MinimumSize = new System.Drawing.Size(475, 275);
             this.Name = "CollarDetailsForm";
             this.Text = "Collar Details";
-            this.CollarTabs.ResumeLayout(false);
+            this.CollarTabControl.ResumeLayout(false);
             this.GeneralTabPage.ResumeLayout(false);
             this.GeneralTabPage.PerformLayout();
             this.AnimalsTabPage.ResumeLayout(false);
@@ -825,7 +825,7 @@
         private System.Windows.Forms.Button EditSaveButton;
         private System.Windows.Forms.TextBox ManufacturerTextBox;
         private System.Windows.Forms.DataGridView DeploymentDataGridView;
-        private System.Windows.Forms.TabControl CollarTabs;
+        private System.Windows.Forms.TabControl CollarTabControl;
         private System.Windows.Forms.TabPage GeneralTabPage;
         private System.Windows.Forms.TabPage AnimalsTabPage;
         private System.Windows.Forms.TabPage FixesTabPage;

@@ -29,6 +29,10 @@
         private void InitializeComponent()
         {
             this.DeploymentDataGridView = new System.Windows.Forms.DataGridView();
+            this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DeployDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.RetrieveDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ProjectTextBox = new System.Windows.Forms.TextBox();
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
@@ -43,7 +47,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.AnimalTabsControl = new System.Windows.Forms.TabControl();
+            this.AnimalTabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.label6 = new System.Windows.Forms.Label();
             this.MortatlityDateTimePicker = new System.Windows.Forms.DateTimePicker();
@@ -60,12 +64,8 @@
             this.label8 = new System.Windows.Forms.Label();
             this.LeftTextBox = new System.Windows.Forms.TextBox();
             this.SummaryLabel = new System.Windows.Forms.Label();
-            this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DeployDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.RetrieveDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).BeginInit();
-            this.AnimalTabsControl.SuspendLayout();
+            this.AnimalTabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -95,6 +95,42 @@
             this.DeploymentDataGridView.TabIndex = 7;
             this.DeploymentDataGridView.SelectionChanged += new System.EventHandler(this.DeploymentDataGridView_SelectionChanged);
             this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.InfoCollarButton_Click);
+            // 
+            // DeploymentColumn
+            // 
+            this.DeploymentColumn.DataPropertyName = "Deployment";
+            this.DeploymentColumn.HeaderText = "Deployment";
+            this.DeploymentColumn.Name = "DeploymentColumn";
+            this.DeploymentColumn.ReadOnly = true;
+            this.DeploymentColumn.Visible = false;
+            // 
+            // CollarIdColumn
+            // 
+            this.CollarIdColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.CollarIdColumn.DataPropertyName = "Collar";
+            this.CollarIdColumn.HeaderText = "Collar";
+            this.CollarIdColumn.MinimumWidth = 160;
+            this.CollarIdColumn.Name = "CollarIdColumn";
+            this.CollarIdColumn.ReadOnly = true;
+            this.CollarIdColumn.Width = 160;
+            // 
+            // DeployDateColumn
+            // 
+            this.DeployDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.DeployDateColumn.DataPropertyName = "DeploymentDate";
+            this.DeployDateColumn.HeaderText = "Deployed";
+            this.DeployDateColumn.MinimumWidth = 80;
+            this.DeployDateColumn.Name = "DeployDateColumn";
+            this.DeployDateColumn.ReadOnly = true;
+            // 
+            // RetrieveDateColumn
+            // 
+            this.RetrieveDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.RetrieveDateColumn.DataPropertyName = "RetrievalDate";
+            this.RetrieveDateColumn.HeaderText = "Retrieved";
+            this.RetrieveDateColumn.MinimumWidth = 80;
+            this.RetrieveDateColumn.Name = "RetrieveDateColumn";
+            this.RetrieveDateColumn.ReadOnly = true;
             // 
             // ProjectTextBox
             // 
@@ -243,20 +279,20 @@
             this.label1.TabIndex = 60;
             this.label1.Text = "Species:";
             // 
-            // AnimalTabsControl
+            // AnimalTabControl
             // 
-            this.AnimalTabsControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.AnimalTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.AnimalTabsControl.Controls.Add(this.tabPage1);
-            this.AnimalTabsControl.Controls.Add(this.tabPage2);
-            this.AnimalTabsControl.Controls.Add(this.tabPage3);
-            this.AnimalTabsControl.Location = new System.Drawing.Point(0, 33);
-            this.AnimalTabsControl.Name = "AnimalTabsControl";
-            this.AnimalTabsControl.SelectedIndex = 0;
-            this.AnimalTabsControl.Size = new System.Drawing.Size(449, 188);
-            this.AnimalTabsControl.TabIndex = 79;
-            this.AnimalTabsControl.SelectedIndexChanged += new System.EventHandler(this.AnimalTabsControl_SelectedIndexChanged);
+            this.AnimalTabControl.Controls.Add(this.tabPage1);
+            this.AnimalTabControl.Controls.Add(this.tabPage2);
+            this.AnimalTabControl.Controls.Add(this.tabPage3);
+            this.AnimalTabControl.Location = new System.Drawing.Point(0, 33);
+            this.AnimalTabControl.Name = "AnimalTabControl";
+            this.AnimalTabControl.SelectedIndex = 0;
+            this.AnimalTabControl.Size = new System.Drawing.Size(449, 188);
+            this.AnimalTabControl.TabIndex = 79;
+            this.AnimalTabControl.SelectedIndexChanged += new System.EventHandler(this.AnimalTabControl_SelectedIndexChanged);
             // 
             // tabPage1
             // 
@@ -446,48 +482,12 @@
             this.SummaryLabel.TabIndex = 0;
             this.SummaryLabel.Text = "Summary";
             // 
-            // DeploymentColumn
-            // 
-            this.DeploymentColumn.DataPropertyName = "Deployment";
-            this.DeploymentColumn.HeaderText = "Deployment";
-            this.DeploymentColumn.Name = "DeploymentColumn";
-            this.DeploymentColumn.ReadOnly = true;
-            this.DeploymentColumn.Visible = false;
-            // 
-            // CollarIdColumn
-            // 
-            this.CollarIdColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.CollarIdColumn.DataPropertyName = "Collar";
-            this.CollarIdColumn.HeaderText = "Collar";
-            this.CollarIdColumn.MinimumWidth = 160;
-            this.CollarIdColumn.Name = "CollarIdColumn";
-            this.CollarIdColumn.ReadOnly = true;
-            this.CollarIdColumn.Width = 160;
-            // 
-            // DeployDateColumn
-            // 
-            this.DeployDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.DeployDateColumn.DataPropertyName = "DeploymentDate";
-            this.DeployDateColumn.HeaderText = "Deployed";
-            this.DeployDateColumn.MinimumWidth = 80;
-            this.DeployDateColumn.Name = "DeployDateColumn";
-            this.DeployDateColumn.ReadOnly = true;
-            // 
-            // RetrieveDateColumn
-            // 
-            this.RetrieveDateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.RetrieveDateColumn.DataPropertyName = "RetrievalDate";
-            this.RetrieveDateColumn.HeaderText = "Retrieved";
-            this.RetrieveDateColumn.MinimumWidth = 80;
-            this.RetrieveDateColumn.Name = "RetrieveDateColumn";
-            this.RetrieveDateColumn.ReadOnly = true;
-            // 
             // AnimalDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(449, 221);
-            this.Controls.Add(this.AnimalTabsControl);
+            this.Controls.Add(this.AnimalTabControl);
             this.Controls.Add(this.ProjectTextBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.AnimalIdTextBox);
@@ -497,7 +497,7 @@
             this.Name = "AnimalDetailsForm";
             this.Text = "Animal Details";
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).EndInit();
-            this.AnimalTabsControl.ResumeLayout(false);
+            this.AnimalTabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
@@ -525,7 +525,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TabControl AnimalTabsControl;
+        private System.Windows.Forms.TabControl AnimalTabControl;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.DateTimePicker MortatlityDateTimePicker;

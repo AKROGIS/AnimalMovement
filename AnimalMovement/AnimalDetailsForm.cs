@@ -28,15 +28,21 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            //Animal is in a different data context, get them in this DataContext
+            //Animal is in a different DataContext, get one in this DataContext
             if (Animal != null)
                 Animal = Database.Animals.FirstOrDefault(a => a.ProjectId == Animal.ProjectId && a.AnimalId == Animal.AnimalId);
             if (Animal == null)
-                throw new InvalidOperationException("Animal Details Form not provided a valid Animal Id.");
+                throw new InvalidOperationException("Animal Details Form not provided a valid Animal.");
 
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsProjectEditor(Animal.ProjectId, CurrentUser) ?? false;
+            SetupHeader();
+        }
 
+        #region Form Controls
+
+        private void SetupHeader()
+        {
             ProjectTextBox.Text = Animal.Project.ProjectName;
             AnimalIdTextBox.Text = Animal.AnimalId;
         }
@@ -44,18 +50,21 @@ namespace AnimalMovement
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            AnimalTabsControl.SelectedIndex = Properties.Settings.Default.AnimalDetailsFormActiveTab;
+            AnimalTabControl.SelectedIndex = Properties.Settings.Default.AnimalDetailsFormActiveTab;
+            if (AnimalTabControl.SelectedIndex == 0)
+                //if new index is zero, index changed event will not fire, so fire it manually
+                AnimalTabControl_SelectedIndexChanged(null, null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            Properties.Settings.Default.AnimalDetailsFormActiveTab = AnimalTabsControl.SelectedIndex;
+            Properties.Settings.Default.AnimalDetailsFormActiveTab = AnimalTabControl.SelectedIndex;
         }
 
-        private void AnimalTabsControl_SelectedIndexChanged(object sender, EventArgs e)
+        private void AnimalTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (AnimalTabsControl.SelectedIndex)
+            switch (AnimalTabControl.SelectedIndex)
             {
                 default:
                     SetupGeneralTab();
@@ -97,6 +106,8 @@ namespace AnimalMovement
                 handle(this, EventArgs.Empty);
         }
 
+        #endregion
+
 
         #region General Tab
 
@@ -110,35 +121,28 @@ namespace AnimalMovement
             GenderComboBox.SelectedItem = Animal.LookupGender;
             GroupTextBox.Text = Animal.GroupName;
             DescriptionTextBox.Text = Animal.Description;
-            SetupMortalityDateTimePicker();
-            EnableGeneralTab();
+            ConfigureMortalityDateTimePicker();
+            EnableGeneralControls();
         }
 
-        private void SetupMortalityDateTimePicker()
+        private void ConfigureMortalityDateTimePicker()
         {
             if (Animal.MortalityDate == null)
             {
-                var now = DateTime.Now;
-                MortatlityDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
-                MortatlityDateTimePicker.Checked = false;
+                MortatlityDateTimePicker.Value = DateTime.Now.Date + TimeSpan.FromHours(12);
                 MortatlityDateTimePicker.CustomFormat = " ";
             }
             else
             {
-                MortatlityDateTimePicker.Checked = true;
                 MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
                 MortatlityDateTimePicker.Value = Animal.MortalityDate.Value.ToLocalTime();
             }
+            MortatlityDateTimePicker.Checked = (Animal.MortalityDate != null);
         }
 
-        private void EnableGeneralTab()
+        private void EnableGeneralControls()
         {
             EditSaveButton.Enabled = IsEditor;
-            SetEditingControls();
-        }
-
-        private void SetEditingControls()
-        {
             IsEditMode = EditSaveButton.Text == "Save";
             SpeciesComboBox.Enabled = IsEditMode;
             GenderComboBox.Enabled = IsEditMode;
@@ -153,10 +157,9 @@ namespace AnimalMovement
             Animal.LookupGender = (LookupGender)GenderComboBox.SelectedItem;
             Animal.GroupName = GroupTextBox.Text;
             Animal.Description = DescriptionTextBox.Text;
-            if (MortatlityDateTimePicker.Checked)
-                Animal.MortalityDate = MortatlityDateTimePicker.Value.ToUniversalTime();
-            else
-                Animal.MortalityDate = null;
+            Animal.MortalityDate = MortatlityDateTimePicker.Checked
+                                       ? (DateTime?) MortatlityDateTimePicker.Value.ToUniversalTime()
+                                       : null;
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
@@ -167,29 +170,20 @@ namespace AnimalMovement
                 // The user wants to edit, Enable form
                 EditSaveButton.Text = "Save";
                 DoneCancelButton.Text = "Cancel";
-                SetEditingControls();
+                EnableGeneralControls();
             }
             else
             {
                 //User is saving
                 UpdateDataSource();
-                try
+                if (SubmitChanges())
                 {
-                    Database.SubmitChanges();
+                    OnDatabaseChanged();
+                    EditSaveButton.Text = "Edit";
+                    DoneCancelButton.Text = "Done";
+                    EnableGeneralControls();
                 }
-                catch (Exception ex)
-                {
-                    string msg = "Unable to save all the changes.\n" +
-                                 "Error message:\n" + ex.Message;
-                    MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                OnDatabaseChanged();
-                EditSaveButton.Text = "Edit";
-                DoneCancelButton.Text = "Done";
-                SetEditingControls();
             }
-
         }
 
         private void DoneCancelButton_Click(object sender, EventArgs e)
@@ -198,9 +192,10 @@ namespace AnimalMovement
             {
                 DoneCancelButton.Text = "Done";
                 EditSaveButton.Text = "Edit";
-                SetEditingControls();
+                EnableGeneralControls();
                 //Reset state from database
                 LoadDataContext();
+                SetupGeneralTab();
             }
             else
             {

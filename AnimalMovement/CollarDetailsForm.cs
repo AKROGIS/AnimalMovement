@@ -35,7 +35,7 @@ namespace AnimalMovement
             if (Collar != null)
                 Collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
             if (Collar == null)
-                throw new InvalidOperationException("Collar Details Form not provided a valid Collar Id.");
+                throw new InvalidOperationException("Collar Details Form not provided a valid Collar.");
 
             DatabaseFunctions = new AnimalMovementFunctions();
             DatabaseViews = new AnimalMovementViews();
@@ -54,21 +54,21 @@ namespace AnimalMovement
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            CollarTabs.SelectedIndex = Properties.Settings.Default.CollarDetailsFormActiveTab;
-            if (CollarTabs.SelectedIndex == 0)
+            CollarTabControl.SelectedIndex = Properties.Settings.Default.CollarDetailsFormActiveTab;
+            if (CollarTabControl.SelectedIndex == 0)
                 //if new index is zero, index changed event will not fire, so fire it manually
-                CollarTabs_SelectedIndexChanged(null, null);
+                CollarTabControl_SelectedIndexChanged(null, null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            Properties.Settings.Default.CollarDetailsFormActiveTab = CollarTabs.SelectedIndex;
+            Properties.Settings.Default.CollarDetailsFormActiveTab = CollarTabControl.SelectedIndex;
         }
 
-        private void CollarTabs_SelectedIndexChanged(object sender, EventArgs e)
+        private void CollarTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (CollarTabs.SelectedIndex)
+            switch (CollarTabControl.SelectedIndex)
             {
                 default:
                     SetupGeneralTab();
@@ -138,29 +138,28 @@ namespace AnimalMovement
             FrequencyTextBox.Text = Collar.Frequency.HasValue ? Collar.Frequency.Value.ToString(CultureInfo.InvariantCulture) : null;
             NotesTextBox.Text = Collar.Notes;
             EditSaveButton.Enabled = IsEditor;
-            ConfigureDatePicker();
-            SetEditingControls();
+            ConfigureDisposalDatePicker();
+            EnableGeneralControls();
         }
 
-        private void ConfigureDatePicker()
+        private void ConfigureDisposalDatePicker()
         {
             if (Collar.DisposalDate == null)
             {
-                var now = DateTime.Now;
-                DisposalDateTimePicker.Value = new DateTime(now.Year, now.Month, now.Day, 12, 0, 0);
-                DisposalDateTimePicker.Checked = false;
+                DisposalDateTimePicker.Value = DateTime.Now.Date  + TimeSpan.FromHours(12);
                 DisposalDateTimePicker.CustomFormat = " ";
             }
             else
             {
-                DisposalDateTimePicker.Checked = true;
                 DisposalDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
                 DisposalDateTimePicker.Value = Collar.DisposalDate.Value.ToLocalTime();
             }
+            DisposalDateTimePicker.Checked = (Collar.DisposalDate != null);
         }
 
-        private void SetEditingControls()
+        private void EnableGeneralControls()
         {
+            EditSaveButton.Enabled = IsEditor;
             IsEditMode = EditSaveButton.Text == "Save";
             ManagerComboBox.Enabled = IsEditMode;
             ModelComboBox.Enabled = IsEditMode;
@@ -173,6 +172,20 @@ namespace AnimalMovement
             //TODO - disable save if frequency is not a double
         }
 
+        private void UpdateDataSource()
+        {
+            Collar.ProjectInvestigator = (ProjectInvestigator)ManagerComboBox.SelectedItem;
+            Collar.LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem;
+            Collar.HasGps = HasGpsCheckBox.Checked;
+            Collar.Owner = OwnerTextBox.Text;
+            Collar.SerialNumber = SerialNumberTextBox.Text;
+            Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull();
+            Collar.Notes = NotesTextBox.Text;
+            Collar.DisposalDate = DisposalDateTimePicker.Checked
+                                      ? (DateTime?)DisposalDateTimePicker.Value.ToUniversalTime()
+                                      : null;
+        }
+
         private void EditSaveButton_Click(object sender, EventArgs e)
         {
             //This button is not enabled unless editing is permitted 
@@ -181,7 +194,7 @@ namespace AnimalMovement
                 // The user wants to edit, Enable form
                 EditSaveButton.Text = "Save";
                 DoneCancelButton.Text = "Cancel";
-                SetEditingControls();
+                EnableGeneralControls();
             }
             else
             {
@@ -192,7 +205,7 @@ namespace AnimalMovement
                     OnDatabaseChanged();
                     EditSaveButton.Text = "Edit";
                     DoneCancelButton.Text = "Done";
-                    SetEditingControls();
+                    EnableGeneralControls();
                 }
             }
         }
@@ -203,7 +216,7 @@ namespace AnimalMovement
             {
                 DoneCancelButton.Text = "Done";
                 EditSaveButton.Text = "Edit";
-                SetEditingControls();
+                EnableGeneralControls();
                 //Reset state from database
                 LoadDataContext();
                 SetupGeneralTab();
@@ -217,20 +230,6 @@ namespace AnimalMovement
         private void DisposalDateTimePicker_ValueChanged(object sender, EventArgs e)
         {
             DisposalDateTimePicker.CustomFormat = DisposalDateTimePicker.Checked ? "yyyy-MM-dd HH:mm" : " ";
-        }
-
-        private void UpdateDataSource()
-        {
-            Collar.ProjectInvestigator = (ProjectInvestigator)ManagerComboBox.SelectedItem;
-            Collar.LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem;
-            Collar.HasGps = HasGpsCheckBox.Checked;
-            Collar.Owner = OwnerTextBox.Text;
-            Collar.SerialNumber = SerialNumberTextBox.Text;
-            Collar.Frequency = FrequencyTextBox.Text.DoubleOrNull();
-            Collar.Notes = NotesTextBox.Text;
-            Collar.DisposalDate = DisposalDateTimePicker.Checked
-                                      ? (DateTime?) DisposalDateTimePicker.Value.ToUniversalTime()
-                                      : null;
         }
 
         #endregion
@@ -503,10 +502,10 @@ namespace AnimalMovement
             if (Collar == null)
                 return;
             FilesDataGridView.DataSource = DatabaseViews.CollarFixesByFile(Collar.CollarManufacturer, Collar.CollarId);
-            EnableFileButtons();
+            EnableFileControls();
         }
 
-        private void EnableFileButtons()
+        private void EnableFileControls()
         {
             FileInfoButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode && FilesDataGridView.SelectedRows.Count == 1;
             ChangeFileStatusButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode && IsEditor;
@@ -520,16 +519,11 @@ namespace AnimalMovement
             }
         }
 
-        private void FileInfoButton_Click(object sender, EventArgs e)
+        private void FileDataChanged()
         {
-            if (FilesDataGridView.CurrentRow == null)
-                return;
-            var item = FilesDataGridView.CurrentRow.DataBoundItem as CollarFixesByFileResult;
-            if (item == null)
-                return;
-            var form = new FileDetailsForm(item.FileId, CurrentUser);
-            form.DatabaseChanged += (o, x) => FileDataChanged();
-            form.Show(this);
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupFilesTab();
         }
 
         private void ChangeFileStatusButton_Click(object sender, EventArgs e)
@@ -544,33 +538,25 @@ namespace AnimalMovement
             var files = Database.CollarFiles.Where(f => fileIds.Contains(f.FileId));
             foreach (var collarFile in files)
                 collarFile.LookupFileStatus = newStatus;
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to change the status.\n" +
-                             "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Cursor.Current = Cursors.Default;
-                return;
-            }
-            Cursor.Current = Cursors.Default;
-            FileDataChanged();
+            if (SubmitChanges())
+                FileDataChanged();
         }
 
-        private void FileDataChanged()
+        private void FileInfoButton_Click(object sender, EventArgs e)
         {
-            OnDatabaseChanged();
-            LoadDataContext();
-            SetupFilesTab();
+            if (FilesDataGridView.CurrentRow == null)
+                return;
+            var item = FilesDataGridView.CurrentRow.DataBoundItem as CollarFixesByFileResult;
+            if (item == null)
+                return;
+            var form = new FileDetailsForm(item.FileId, CurrentUser);
+            form.DatabaseChanged += (o, x) => FileDataChanged();
+            form.Show(this);
         }
 
         private void FilesDataGridView_SelectionChanged(object sender, EventArgs e)
         {
-            EnableFileButtons();
+            EnableFileControls();
         }
 
         #endregion
@@ -592,22 +578,28 @@ namespace AnimalMovement
             FixConflictsDataGridView_SelectionChanged(null, null);
         }
 
-        private void FixConflictsDataGridView_SelectionChanged(object sender, EventArgs e)
+        private void EnableFixControls()
+        {
+            UnhideFixButton.Enabled = IsUnhideFixButtonEnabled();
+        }
+
+        private bool IsUnhideFixButtonEnabled()
         {
             if (FixConflictsDataGridView.CurrentRow == null)
-            {
-                UnhideFixButton.Enabled = false;
-                return;
-            }
+                return false;
             var selectedFix = FixConflictsDataGridView.CurrentRow.DataBoundItem as ConflictingFixesResult;
             if (selectedFix == null)
-            {
-                UnhideFixButton.Enabled = false;
-                return;
-            }
+                return false;
             bool isEditor = DatabaseFunctions.IsFixEditor(selectedFix.FixId, CurrentUser) ?? false;
             bool isHidden = selectedFix.HiddenBy != null;
-            UnhideFixButton.Enabled = isEditor && isHidden;
+            return isEditor && isHidden;
+        }
+
+        private void FixDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupFixesTab();
         }
 
         private void UnhideFixButton_Click(object sender, EventArgs e)
@@ -617,22 +609,35 @@ namespace AnimalMovement
             var selectedFix = FixConflictsDataGridView.CurrentRow.DataBoundItem as ConflictingFixesResult;
             if (selectedFix == null)
                 return;
+            if (ExecuteUnhideFix(selectedFix.FixId))
+                FixDataChanged();
+        }
+
+        private bool ExecuteUnhideFix(int fixId)
+        {
+            Cursor.Current = Cursors.WaitCursor;
             try
             {
-                Database.CollarFixes_UpdateUnhideFix(selectedFix.FixId);
+                Database.CollarFixes_UpdateUnhideFix(fixId);
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
                 string msg = "Unable to update the fix.\n" +
                              "Error message:\n" + ex.Message;
                 MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                return false;
             }
-            OnDatabaseChanged();
-            LoadDataContext();
-            SetupFixesTab();
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
         }
 
+        private void FixConflictsDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableFixControls();
+        }
 
         #endregion
 
