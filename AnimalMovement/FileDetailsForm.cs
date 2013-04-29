@@ -45,102 +45,37 @@ namespace AnimalMovement
 
         private void SetUpControls()
         {
-            FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
-            FormatTextBox.Text = File.LookupCollarFileFormat.Name;
-            UserNameTextBox.Text = File.UserName;
-            UploadDateTextBox.Text = File.UploadDate.ToString("g");
-            FileNameTextBox.Text = File.FileName;
-            SetUpCollarComboBox();
-            SetUpProjectAndOwnerComboBoxes();
-            SetUpStatusComboBox();
-            SetParentChildFiles();
+            SetUpHeaderControls();
+            SetTabVisibility();
             EnableControls();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
             DoneCancelButton.Focus();
+            FileTabControl_SelectedIndexChanged(null,null);
         }
 
-        private void SetUpCollarComboBox()
+
+        private void SetTabVisibility()
         {
-            //Show only my collars and collars that belonging to PI that I can assist
-            CollarComboBox.DataSource = from c in Database.Collars
-                                        where c == File.Collar ||
-                                              c.Manager == CurrentUser ||
-                                              c.ProjectInvestigator.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
-                                        select c;
-            CollarComboBox.SelectedItem = File.Collar;
-        }
-
-        private void SetUpProjectAndOwnerComboBoxes()
-        {
-            //I have to do these together because Setting the datasource triggers selectedindex changed, so the last one wins
-
-            //Show only my projects and projects that I can edit and projects belonging to PIs I can assist.
-            ProjectComboBox.DataSource = from p in Database.Projects
-                                         where p == File.Project ||
-                                               p.ProjectInvestigator == CurrentUser ||
-                                               p.ProjectEditors.Any(u => u.Editor == CurrentUser)  ||
-                                               p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
-                                         select p;
-            ProjectComboBox.DisplayMember = "ProjectName";
-
-            // Show me (if I'm a PI), and any PIs that I can assist
-            OwnerComboBox.DataSource = from pi in Database.ProjectInvestigators
-                                       where pi == File.ProjectInvestigator ||
-                                             pi.Login == CurrentUser ||
-                                             pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
-                                       select pi;
-            OwnerComboBox.DisplayMember = "Name";
-
-            if (File.Project == null)
-            {
-                ProjectComboBox.SelectedItem = null;
-                OwnerComboBox.SelectedItem = File.ProjectInvestigator;
-            }
-            else
-            {
-                OwnerComboBox.SelectedItem = null;
-                ProjectComboBox.SelectedItem = File.Project;
-            }
-        }
-
-        private void SetUpStatusComboBox()
-        {
-            StatusComboBox.DataSource = Database.LookupFileStatus;
-            StatusComboBox.DisplayMember = "Name";
-            StatusComboBox.SelectedItem = File.LookupFileStatus;
-        }
-
-        private void SetParentChildFiles()
-        {
+            //TabControl does not support setting TabPage visibility, so we will remove invisible pages
+            var fileCouldHaveChildren = File.LookupCollarFileFormat.ArgosData == 'Y' || File.Format == 'H';
             var fileHasChildren = Database.CollarFiles.Any(f => f.ParentFileId == File.FileId);
-            var fileHasParent = File.ParentFileId != null;
-            SourceFileButton.Visible = fileHasParent;
-            SourceFileLabel.Visible = fileHasParent;
-            GridViewLabel.Text = fileHasChildren ? "Files derived from this file" : "Summary of fixes in file";
-            ChildFilesDataGridView.Visible = fileHasChildren;
-            FixInfoDataGridView.Visible = !fileHasChildren;
-            if (fileHasChildren)
-            {
-                var data = from file in Database.CollarFiles
-                           where file.ParentFileId == File.FileId
-                           select new
-                               {
-                                   file,
-                                   file.FileId,
-                                   file.FileName,
-                                   Format = file.LookupCollarFileFormat.Name,
-                                   Status = file.LookupFileStatus.Name,
-                                   file.Collar
-                               };
-                ChildFilesDataGridView.DataSource = data;
-                ChildFilesDataGridView.Columns[0].Visible = false;
-            }
-            else
-            {
-                var data = from fix in DatabaseViews.AnimalFixesByFiles
-                           where fix.FileId == File.FileId
-                           select fix;
-                FixInfoDataGridView.DataSource = data;
-            }
+
+            FileTabControl.TabPages.Clear();
+            if (File.LookupCollarFileFormat.ArgosData == 'Y')
+                FileTabControl.TabPages.AddRange(new[]{ArgosTabPage});
+
+            if (!fileHasChildren && File.Collar != null && File.Collar.HasGps)
+                FileTabControl.TabPages.AddRange(new[]{GpsFixesTabPage});
+
+            if (File.Collar != null && !File.Collar.HasGps)
+                FileTabControl.TabPages.AddRange(new[]{ArgosFixesTabPage});
+
+            if (fileCouldHaveChildren)
+                FileTabControl.TabPages.AddRange(new[] { ProcessingIssuesTabPage, DerivedFilesTabPage });
         }
 
         private void EnableControls()
@@ -153,26 +88,6 @@ namespace AnimalMovement
             CollarComboBox.Enabled = IsEditMode && File.ParentFile == null && File.LookupCollarFileFormat.ArgosData != 'Y';
             StatusComboBox.Enabled = IsEditMode && (File.ParentFile == null || File.ParentFile.Status == 'A');
             EditSaveButton.Enabled = (IsFileEditor && !IsEditMode) || (IsEditMode && ValidateForm());
-        }
-
-        private bool ValidateForm()
-        {
-            string error = null;
-            if (OwnerComboBox.SelectedItem == null && ProjectComboBox.SelectedItem == null)
-                error = "One of Owner or Project must be set";
-            else if (OwnerComboBox.SelectedItem != null && ProjectComboBox.SelectedItem != null)
-                error = "One of Owner or Project must be empty";
-            else if (CollarComboBox.SelectedItem != File.Collar && File.Status != 'I')
-                error = "You cannot change the collar of an active file";
-            else if (CollarComboBox.SelectedItem != File.Collar && StatusComboBox.SelectedItem != File.LookupFileStatus)
-                error = "You cannot change the collar and the status at the same time";
-            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
-                error = "File must have a collar assignment (unless it has Argos Data)";
-            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
-                error = "If the parent file is inactive, the child must be inactive";
-            ValidationTextBox.Text = error;
-            ValidationTextBox.Visible = error != null; 
-            return error == null;
         }
 
         private void UpdateFile()
@@ -210,6 +125,117 @@ namespace AnimalMovement
             EventHandler handle = DatabaseChanged;
             if (handle != null)
                 handle(this, EventArgs.Empty);
+        }
+
+        private void FileTabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch ((string)FileTabControl.SelectedTab.Tag)
+            {
+                case "Argos":
+                    SetUpArgosTab();
+                    break;
+                case "GpsFixes":
+                    SetUpGpsFixesTab();
+                    break;
+                case "ArgosFixes":
+                    SetUpArgosFixesTab();
+                    break;
+                case "DerivedFiles":
+                    SetUpDerivedFilesTab();
+                    break;
+                case "ProcessingIssues":
+                    SetUpProcessingIssuesTab();
+                    break;
+            }
+
+        }
+
+
+        #region File Header Controls
+
+        private void SetUpHeaderControls()
+        {
+            FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
+            FormatTextBox.Text = File.LookupCollarFileFormat.Name;
+            UserNameTextBox.Text = File.UserName;
+            UploadDateTextBox.Text = File.UploadDate.ToString("g");
+            FileNameTextBox.Text = File.FileName;
+            SetUpCollarComboBox();
+            SetUpProjectAndOwnerComboBoxes();
+            SetUpStatusComboBox();
+            SourceFileButton.Visible = File.ParentFileId != null;
+            SourceFileLabel.Visible = File.ParentFileId != null;
+        }
+
+        private void SetUpCollarComboBox()
+        {
+            //Show only my collars and collars that belonging to PI that I can assist
+            CollarComboBox.DataSource = from c in Database.Collars
+                                        where c == File.Collar ||
+                                              c.Manager == CurrentUser ||
+                                              c.ProjectInvestigator.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                        select c;
+            CollarComboBox.SelectedItem = File.Collar;
+        }
+
+        private void SetUpProjectAndOwnerComboBoxes()
+        {
+            //I have to do these together because Setting the datasource triggers selectedindex changed, so the last one wins
+
+            //Show only my projects and projects that I can edit and projects belonging to PIs I can assist.
+            ProjectComboBox.DataSource = from p in Database.Projects
+                                         where p == File.Project ||
+                                               p.ProjectInvestigator == CurrentUser ||
+                                               p.ProjectEditors.Any(u => u.Editor == CurrentUser) ||
+                                               p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                         select p;
+            ProjectComboBox.DisplayMember = "ProjectName";
+
+            // Show me (if I'm a PI), and any PIs that I can assist
+            OwnerComboBox.DataSource = from pi in Database.ProjectInvestigators
+                                       where pi == File.ProjectInvestigator ||
+                                             pi.Login == CurrentUser ||
+                                             pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                       select pi;
+            OwnerComboBox.DisplayMember = "Name";
+
+            if (File.Project == null)
+            {
+                ProjectComboBox.SelectedItem = null;
+                OwnerComboBox.SelectedItem = File.ProjectInvestigator;
+            }
+            else
+            {
+                OwnerComboBox.SelectedItem = null;
+                ProjectComboBox.SelectedItem = File.Project;
+            }
+        }
+
+        private void SetUpStatusComboBox()
+        {
+            StatusComboBox.DataSource = Database.LookupFileStatus;
+            StatusComboBox.DisplayMember = "Name";
+            StatusComboBox.SelectedItem = File.LookupFileStatus;
+        }
+
+        private bool ValidateForm()
+        {
+            string error = null;
+            if (OwnerComboBox.SelectedItem == null && ProjectComboBox.SelectedItem == null)
+                error = "One of Owner or Project must be set";
+            else if (OwnerComboBox.SelectedItem != null && ProjectComboBox.SelectedItem != null)
+                error = "One of Owner or Project must be empty";
+            else if (CollarComboBox.SelectedItem != File.Collar && File.Status != 'I')
+                error = "You cannot change the collar of an active file";
+            else if (CollarComboBox.SelectedItem != File.Collar && StatusComboBox.SelectedItem != File.LookupFileStatus)
+                error = "You cannot change the collar and the status at the same time";
+            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
+                error = "File must have a collar assignment (unless it has Argos Data)";
+            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
+                error = "If the parent file is inactive, the child must be inactive";
+            ValidationTextBox.Text = error;
+            ValidationTextBox.Visible = error != null;
+            return error == null;
         }
 
         private void FileDataChanged()
@@ -267,7 +293,7 @@ namespace AnimalMovement
             if (IsEditMode)
                 return;
             //I can't use the DataSource here, because it is an anoymous type.
-            var file = (CollarFile)ChildFilesDataGridView.SelectedRows[0].Cells[0].Value;
+            var file = (CollarFile)DerivedFilesDataGridView.SelectedRows[0].Cells[0].Value;
             var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, args) => FileDataChanged();
             form.Show(this);
@@ -312,6 +338,77 @@ namespace AnimalMovement
                 Close();
             }
         }
+
+#endregion
+
+
+        #region Argos Tab
+
+        private void SetUpArgosTab()
+        {
+        }
+
+        #endregion
+
+
+        #region GPS Fixes Tab
+
+        private void SetUpGpsFixesTab()
+        {
+            var data = from fix in DatabaseViews.AnimalFixesByFiles
+                       where fix.FileId == File.FileId
+                       select fix;
+            GpsFixesDataGridView.DataSource = data;
+        }
+
+        #endregion
+
+
+        #region Argos Fixes Tab
+
+        private void SetUpArgosFixesTab()
+        {
+            var data = from fix in DatabaseViews.AnimalFixesByFiles
+                       where fix.FileId == File.FileId
+                       select fix;
+            ArgosFixesDataGridView.DataSource = data;
+        }
+
+        #endregion
+
+
+        #region Derived Files
+
+        private void SetUpDerivedFilesTab()
+        {
+            var data = from file in Database.CollarFiles
+                       where file.ParentFileId == File.FileId
+                       select new
+                       {
+                           file,
+                           file.FileId,
+                           file.FileName,
+                           Format = file.LookupCollarFileFormat.Name,
+                           Status = file.LookupFileStatus.Name,
+                           file.Collar
+                       };
+            DerivedFilesDataGridView.DataSource = data;
+            DerivedFilesDataGridView.Columns[0].Visible = false;
+        }
+
+        #endregion
+
+
+        #region Processing Issues Tab
+
+        private void SetUpProcessingIssuesTab()
+        {
+            ProcessingIssuesDataGridView.DataSource =
+                Database.ArgosFileProcessingIssues.Where(i => i.CollarFile == File)
+                        .Select(i => new {i.Issue, ArgosId = i.PlatformId, i.Collar});
+        }
+
+        #endregion
 
     }
 }
