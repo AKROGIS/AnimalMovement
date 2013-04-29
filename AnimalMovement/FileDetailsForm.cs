@@ -61,22 +61,36 @@ namespace AnimalMovement
 
         private void SetUpCollarComboBox()
         {
-            //TODO - Correctly Limit the lists in the ComboBoxes
-            CollarComboBox.DataSource = Database.Collars.Where(c => c.Manager == CurrentUser);
-                //Add collars belonging to PI I assist
+            //Show only my collars and collars that belonging to PI that I can assist
+            CollarComboBox.DataSource = from c in Database.Collars
+                                        where c == File.Collar ||
+                                              c.Manager == CurrentUser ||
+                                              c.ProjectInvestigator.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                        select c;
             CollarComboBox.SelectedItem = File.Collar;
         }
 
         private void SetUpProjectComboBox()
         {
-            ProjectComboBox.DataSource = Database.Projects; //only projects I can edit
+            //Show only my projects and projects that I can edit and projects belonging to PIs I can assist.
+            ProjectComboBox.DataSource = from p in Database.Projects
+                                         where p == File.Project ||
+                                               p.ProjectInvestigator == CurrentUser ||
+                                               p.ProjectEditors.Any(u => u.Editor == CurrentUser)  ||
+                                               p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                         select p;
             ProjectComboBox.DisplayMember = "ProjectName";
             ProjectComboBox.SelectedItem = File.Project;
         }
 
         private void SetUpOwnerComboBox()
         {
-            OwnerComboBox.DataSource = Database.ProjectInvestigators; //Give a file away to anyone.
+            // Show me (if I'm a PI), and any PIs that I can assist
+            OwnerComboBox.DataSource = from pi in Database.ProjectInvestigators
+                                       where pi == File.ProjectInvestigator ||
+                                             pi.Login == CurrentUser ||
+                                             pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                       select pi;
             OwnerComboBox.DisplayMember = "Name";
             OwnerComboBox.SelectedItem = File.ProjectInvestigator;
         }
