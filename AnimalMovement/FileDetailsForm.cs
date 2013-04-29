@@ -63,6 +63,7 @@ namespace AnimalMovement
             //TabControl does not support setting TabPage visibility, so we will remove invisible pages
             var fileCouldHaveChildren = File.LookupCollarFileFormat.ArgosData == 'Y' || File.Format == 'H';
             var fileHasChildren = Database.CollarFiles.Any(f => f.ParentFileId == File.FileId);
+            var fileHasArgosFixes = Database.CollarFixes.Any(f => f.CollarFile == File && !f.Collar.HasGps);
 
             FileTabControl.TabPages.Clear();
             if (File.LookupCollarFileFormat.ArgosData == 'Y')
@@ -71,7 +72,7 @@ namespace AnimalMovement
             if (!fileHasChildren && File.Collar != null && File.Collar.HasGps)
                 FileTabControl.TabPages.AddRange(new[]{GpsFixesTabPage});
 
-            if (File.Collar != null && !File.Collar.HasGps)
+            if (fileHasArgosFixes)
                 FileTabControl.TabPages.AddRange(new[]{ArgosFixesTabPage});
 
             if (fileCouldHaveChildren)
@@ -346,6 +347,10 @@ namespace AnimalMovement
 
         private void SetUpArgosTab()
         {
+            var query = from argos in Database.ArgosFilePlatformDates
+                        where argos.CollarFile == File
+                        select new {ArgosId = argos.PlatformId, argos.FirstTransmission, argos.LastTransmission};
+            ArgosPlatformsDataGridView.DataSource = query;
         }
 
         #endregion
