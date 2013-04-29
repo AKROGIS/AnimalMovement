@@ -13,6 +13,7 @@ namespace AnimalMovement
         private int DeploymentId { get; set; }
         private ArgosDeployment ArgosDeployment { get; set; }
         private bool IsEditor { get; set; }
+        private bool IsEditMode { get; set; }
         private bool LockCollar { get; set; }
         private bool LockArgos { get; set; }
         internal event EventHandler DatabaseChanged;
@@ -70,12 +71,12 @@ namespace AnimalMovement
         private void EnableFormControls()
         {
             EditSaveButton.Enabled = IsEditor;
-            var inEditMode = EditSaveButton.Text == "Save";
-            EditSaveButton.Enabled = inEditMode;
-            CollarComboBox.Enabled = inEditMode && !LockCollar;
-            ArgosComboBox.Enabled = inEditMode && !LockArgos;
-            StartDateTimePicker.Enabled = inEditMode;
-            EndDateTimePicker.Enabled = inEditMode;
+            IsEditMode = EditSaveButton.Text == "Save";
+            EditSaveButton.Enabled = IsEditMode;
+            CollarComboBox.Enabled = IsEditMode && !LockCollar;
+            ArgosComboBox.Enabled = IsEditMode && !LockArgos;
+            StartDateTimePicker.Enabled = IsEditMode;
+            EndDateTimePicker.Enabled = IsEditMode;
             ValidateForm();
         }
 
@@ -85,7 +86,7 @@ namespace AnimalMovement
             if (error != null)
                 ValidationTextBox.Text = error;
             ValidationTextBox.Visible = error != null;
-            EditSaveButton.Enabled = error == null;
+            EditSaveButton.Enabled = (IsEditMode && error == null) || (!IsEditMode && IsEditor);
             FixItButton.Visible = error != null;
         }
 
@@ -206,8 +207,8 @@ namespace AnimalMovement
 
         private void FixItButton_Click(object sender, EventArgs e)
         {
-            //TODO - implement FIxIt code
-            MessageBox.Show("Not Implemented Yet.");
+            //TODO - implement FixIt code
+            MessageBox.Show("You must fix it manually", "Not Implemented");
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)

@@ -418,8 +418,8 @@ namespace AnimalMovement
                                     Parameter = p,
                                     Period = p.Gen3Period % 60 == 0 ? p.Gen3Period / 60 + " hrs" : p.Gen3Period + " min",
                                     File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
-                                    Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
-                                    End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("g")
+                                    Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
+                                    End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g")
                                 }).ToList();
                     break;
                 case "Gen4":
@@ -427,8 +427,8 @@ namespace AnimalMovement
                         Collar.CollarParameters.Select(p => new {
                             Parameter = p,
                             File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
-                            Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToString("g"),
-                            End = p.EndDate == null ? "Never" : p.EndDate.Value.ToString("g")
+                            Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
+                            End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g")
                         })
                               .ToList();
                     break;

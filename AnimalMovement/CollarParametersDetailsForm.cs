@@ -12,6 +12,7 @@ namespace AnimalMovement
         private string CurrentUser { get; set; }
         private CollarParameter CollarParameter { get; set; }
         private bool IsEditor { get; set; }
+        private bool IsEditMode { get; set; }
         private bool LockCollar { get; set; }
         private bool LockFile { get; set; }
         internal event EventHandler DatabaseChanged;
@@ -52,12 +53,13 @@ namespace AnimalMovement
             LoadFileComboBox();
             LoadCollarComboBox();
             LoadDatePickers();
-            Gen3TimeUnitComboBox.SelectedIndex = 0;
-            if (CollarParameter.Gen3Period != null)
-                if (CollarParameter.Gen3Period%60 == 0)
-                    Gen3PeriodTextBox.Text = (CollarParameter.Gen3Period/60).ToString();
-                else
-                    Gen3TimeUnitComboBox.SelectedIndex = 1;
+            Gen3TimeUnitComboBox.SelectedIndex = 1; // minutes
+            Gen3PeriodTextBox.Text = CollarParameter.Gen3Period.ToString();
+            if (CollarParameter.Gen3Period != null && CollarParameter.Gen3Period%60 == 0) // use hours
+            {
+                Gen3PeriodTextBox.Text = (CollarParameter.Gen3Period/60).ToString();
+                Gen3TimeUnitComboBox.SelectedIndex = 0;
+            }
         }
 
         private void LoadFileComboBox()
@@ -120,16 +122,16 @@ namespace AnimalMovement
         private void EnableFormControls()
         {
             EditSaveButton.Enabled = IsEditor;
-            var inEditMode = EditSaveButton.Text == "Save";
-            EditSaveButton.Enabled = inEditMode;
-            CollarComboBox.Enabled = inEditMode && !LockCollar;
-            FileComboBox.Enabled = inEditMode && !LockFile;
-            StartDateTimePicker.Enabled = inEditMode;
-            EndDateTimePicker.Enabled = inEditMode;
-            Gen3PeriodTextBox.Enabled = inEditMode;
-            ClearFileButton.Enabled = inEditMode;
-            BrowseButton.Enabled = inEditMode;
-            Gen3TimeUnitComboBox.Enabled = inEditMode;
+            IsEditMode = EditSaveButton.Text == "Save";
+            EditSaveButton.Enabled = IsEditMode;
+            CollarComboBox.Enabled = IsEditMode && !LockCollar;
+            FileComboBox.Enabled = IsEditMode && !LockFile;
+            StartDateTimePicker.Enabled = IsEditMode;
+            EndDateTimePicker.Enabled = IsEditMode;
+            Gen3PeriodTextBox.Enabled = IsEditMode;
+            ClearFileButton.Enabled = IsEditMode;
+            BrowseButton.Enabled = IsEditMode;
+            Gen3TimeUnitComboBox.Enabled = IsEditMode;
             ValidateForm();
         }
 
@@ -139,7 +141,7 @@ namespace AnimalMovement
             if (error != null)
                 ValidationTextBox.Text = error;
             ValidationTextBox.Visible = error != null;
-            EditSaveButton.Enabled = error == null || EditSaveButton.Text != "Save";
+            EditSaveButton.Enabled = (IsEditMode && error == null) || (!IsEditMode && IsEditor);
             FixItButton.Visible = error != null;
         }
 
