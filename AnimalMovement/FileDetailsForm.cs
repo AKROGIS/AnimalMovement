@@ -51,8 +51,7 @@ namespace AnimalMovement
             UploadDateTextBox.Text = File.UploadDate.ToString("g");
             FileNameTextBox.Text = File.FileName;
             SetUpCollarComboBox();
-            SetUpProjectComboBox();
-            SetUpOwnerComboBox();
+            SetUpProjectAndOwnerComboBoxes();
             SetUpStatusComboBox();
             SetParentChildFiles();
             EnableControls();
@@ -70,8 +69,10 @@ namespace AnimalMovement
             CollarComboBox.SelectedItem = File.Collar;
         }
 
-        private void SetUpProjectComboBox()
+        private void SetUpProjectAndOwnerComboBoxes()
         {
+            //I have to do these together because Setting the datasource triggers selectedindex changed, so the last one wins
+
             //Show only my projects and projects that I can edit and projects belonging to PIs I can assist.
             ProjectComboBox.DataSource = from p in Database.Projects
                                          where p == File.Project ||
@@ -80,11 +81,7 @@ namespace AnimalMovement
                                                p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
                                          select p;
             ProjectComboBox.DisplayMember = "ProjectName";
-            ProjectComboBox.SelectedItem = File.Project;
-        }
 
-        private void SetUpOwnerComboBox()
-        {
             // Show me (if I'm a PI), and any PIs that I can assist
             OwnerComboBox.DataSource = from pi in Database.ProjectInvestigators
                                        where pi == File.ProjectInvestigator ||
@@ -92,7 +89,17 @@ namespace AnimalMovement
                                              pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
                                        select pi;
             OwnerComboBox.DisplayMember = "Name";
-            OwnerComboBox.SelectedItem = File.ProjectInvestigator;
+
+            if (File.Project == null)
+            {
+                ProjectComboBox.SelectedItem = null;
+                OwnerComboBox.SelectedItem = File.ProjectInvestigator;
+            }
+            else
+            {
+                OwnerComboBox.SelectedItem = null;
+                ProjectComboBox.SelectedItem = File.Project;
+            }
         }
 
         private void SetUpStatusComboBox()
@@ -139,6 +146,7 @@ namespace AnimalMovement
         private void EnableControls()
         {
             IsEditMode = EditSaveButton.Text == "Save";
+            SourceFileButton.Enabled = !IsEditMode;
             FileNameTextBox.Enabled = IsEditMode;
             ProjectComboBox.Enabled = IsEditMode && File.ParentFile == null;
             OwnerComboBox.Enabled = IsEditMode && File.ParentFile == null;
@@ -255,6 +263,9 @@ namespace AnimalMovement
 
         private void ChildFilesDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+            //Do not open (and potentially edit) a child file if we are editing the parent
+            if (IsEditMode)
+                return;
             //I can't use the DataSource here, because it is an anoymous type.
             var file = (CollarFile)ChildFilesDataGridView.SelectedRows[0].Cells[0].Value;
             var form = new FileDetailsForm(file);
