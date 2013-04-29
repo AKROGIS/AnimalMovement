@@ -63,6 +63,7 @@
             this.CollarComboBox = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.SourceFileLabel = new System.Windows.Forms.Label();
+            this.ValidationTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.FixInfoDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ChildFilesDataGridView)).BeginInit();
             this.SuspendLayout();
@@ -226,7 +227,7 @@
             this.FixInfoDataGridView.ReadOnly = true;
             this.FixInfoDataGridView.RowHeadersVisible = false;
             this.FixInfoDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.FixInfoDataGridView.Size = new System.Drawing.Size(510, 155);
+            this.FixInfoDataGridView.Size = new System.Drawing.Size(510, 150);
             this.FixInfoDataGridView.TabIndex = 12;
             // 
             // FileIdColumn
@@ -306,7 +307,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(12, 335);
+            this.DoneCancelButton.Location = new System.Drawing.Point(12, 350);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 46;
@@ -318,7 +319,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(448, 335);
+            this.EditSaveButton.Location = new System.Drawing.Point(448, 350);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 47;
@@ -362,7 +363,7 @@
             this.ChildFilesDataGridView.ReadOnly = true;
             this.ChildFilesDataGridView.RowHeadersVisible = false;
             this.ChildFilesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.ChildFilesDataGridView.Size = new System.Drawing.Size(510, 155);
+            this.ChildFilesDataGridView.Size = new System.Drawing.Size(510, 150);
             this.ChildFilesDataGridView.TabIndex = 51;
             this.ChildFilesDataGridView.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ChildFilesDataGridView_CellContentDoubleClick);
             // 
@@ -385,6 +386,7 @@
             this.ProjectComboBox.Name = "ProjectComboBox";
             this.ProjectComboBox.Size = new System.Drawing.Size(188, 21);
             this.ProjectComboBox.TabIndex = 53;
+            this.ProjectComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
             // 
             // OwnerComboBox
             // 
@@ -396,6 +398,7 @@
             this.OwnerComboBox.Name = "OwnerComboBox";
             this.OwnerComboBox.Size = new System.Drawing.Size(188, 21);
             this.OwnerComboBox.TabIndex = 54;
+            this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
             // StatusComboBox
             // 
@@ -407,6 +410,7 @@
             this.StatusComboBox.Name = "StatusComboBox";
             this.StatusComboBox.Size = new System.Drawing.Size(188, 21);
             this.StatusComboBox.TabIndex = 55;
+            this.StatusComboBox.SelectedIndexChanged += new System.EventHandler(this.StatusComboBox_SelectedIndexChanged);
             // 
             // CollarComboBox
             // 
@@ -418,6 +422,7 @@
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(188, 21);
             this.CollarComboBox.TabIndex = 56;
+            this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // label5
             // 
@@ -439,11 +444,28 @@
             this.SourceFileLabel.TabIndex = 58;
             this.SourceFileLabel.Text = "Parent:";
             // 
+            // ValidationTextBox
+            // 
+            this.ValidationTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ValidationTextBox.BackColor = System.Drawing.SystemColors.Control;
+            this.ValidationTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ValidationTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ValidationTextBox.ForeColor = System.Drawing.Color.Red;
+            this.ValidationTextBox.Location = new System.Drawing.Point(12, 330);
+            this.ValidationTextBox.Name = "ValidationTextBox";
+            this.ValidationTextBox.ReadOnly = true;
+            this.ValidationTextBox.Size = new System.Drawing.Size(510, 14);
+            this.ValidationTextBox.TabIndex = 59;
+            this.ValidationTextBox.Tag = "";
+            this.ValidationTextBox.Text = "Validation Error";
+            this.ValidationTextBox.Visible = false;
+            // 
             // FileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(535, 370);
+            this.ClientSize = new System.Drawing.Size(535, 385);
+            this.Controls.Add(this.ValidationTextBox);
             this.Controls.Add(this.SourceFileLabel);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.CollarComboBox);
@@ -519,5 +541,6 @@
         private System.Windows.Forms.ComboBox CollarComboBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label SourceFileLabel;
+        private System.Windows.Forms.TextBox ValidationTextBox;
     }
 }

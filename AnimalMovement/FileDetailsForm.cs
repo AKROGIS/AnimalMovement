@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
@@ -13,6 +14,7 @@ namespace AnimalMovement
         private string CurrentUser { get; set; }
         private CollarFile File { get; set; }
         private bool IsFileEditor { get; set; }
+        private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
         internal FileDetailsForm(CollarFile file)
@@ -37,7 +39,8 @@ namespace AnimalMovement
 
             DatabaseViews = new AnimalMovementViews();
             var functions = new AnimalMovementFunctions();
-            IsFileEditor = functions.IsProjectEditor(File.ProjectId, CurrentUser) ?? false;
+            IsFileEditor = (functions.IsProjectEditor(File.ProjectId, CurrentUser) ?? false) ||
+                           (functions.IsInvestigatorEditor(File.Owner, CurrentUser) ?? false);
         }
 
         private void SetUpControls()
@@ -47,21 +50,42 @@ namespace AnimalMovement
             UserNameTextBox.Text = File.UserName;
             UploadDateTextBox.Text = File.UploadDate.ToString("g");
             FileNameTextBox.Text = File.FileName;
+            SetUpCollarComboBox();
+            SetUpProjectComboBox();
+            SetUpOwnerComboBox();
+            SetUpStatusComboBox();
+            SetParentChildFiles();
+            EnableControls();
+            DoneCancelButton.Focus();
+        }
+
+        private void SetUpCollarComboBox()
+        {
             //TODO - Correctly Limit the lists in the ComboBoxes
-            CollarComboBox.DataSource = Database.Collars.Where(c => c.Manager == CurrentUser); //Add collars belonging to PI I assist
+            CollarComboBox.DataSource = Database.Collars.Where(c => c.Manager == CurrentUser);
+                //Add collars belonging to PI I assist
             CollarComboBox.SelectedItem = File.Collar;
+        }
+
+        private void SetUpProjectComboBox()
+        {
             ProjectComboBox.DataSource = Database.Projects; //only projects I can edit
             ProjectComboBox.DisplayMember = "ProjectName";
             ProjectComboBox.SelectedItem = File.Project;
+        }
+
+        private void SetUpOwnerComboBox()
+        {
             OwnerComboBox.DataSource = Database.ProjectInvestigators; //Give a file away to anyone.
             OwnerComboBox.DisplayMember = "Name";
             OwnerComboBox.SelectedItem = File.ProjectInvestigator;
+        }
+
+        private void SetUpStatusComboBox()
+        {
             StatusComboBox.DataSource = Database.LookupFileStatus;
             StatusComboBox.DisplayMember = "Name";
             StatusComboBox.SelectedItem = File.LookupFileStatus;
-            EnableForm();
-            SetParentChildFiles();
-            DoneCancelButton.Focus();
         }
 
         private void SetParentChildFiles()
@@ -98,13 +122,104 @@ namespace AnimalMovement
             }
         }
 
-        private void UpdateDataSource()
+        private void EnableControls()
+        {
+            IsEditMode = EditSaveButton.Text == "Save";
+            FileNameTextBox.Enabled = IsEditMode;
+            ProjectComboBox.Enabled = IsEditMode && File.ParentFile == null;
+            OwnerComboBox.Enabled = IsEditMode && File.ParentFile == null;
+            CollarComboBox.Enabled = IsEditMode && File.ParentFile == null && File.LookupCollarFileFormat.ArgosData != 'Y';
+            StatusComboBox.Enabled = IsEditMode && (File.ParentFile == null || File.ParentFile.Status == 'A');
+            EditSaveButton.Enabled = (IsFileEditor && !IsEditMode) || (IsEditMode && ValidateForm());
+        }
+
+        private bool ValidateForm()
+        {
+            string error = null;
+            if (OwnerComboBox.SelectedItem == null && ProjectComboBox.SelectedItem == null)
+                error = "One of Owner or Project must be set";
+            else if (OwnerComboBox.SelectedItem != null && ProjectComboBox.SelectedItem != null)
+                error = "One of Owner or Project must be empty";
+            else if (CollarComboBox.SelectedItem != File.Collar && File.Status != 'I')
+                error = "You cannot change the collar of an active file";
+            else if (CollarComboBox.SelectedItem != File.Collar && StatusComboBox.SelectedItem != File.LookupFileStatus)
+                error = "You cannot change the collar and the status at the same time";
+            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
+                error = "File must have a collar assignment (unless it has Argos Data)";
+            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
+                error = "If the parent file is inactive, the child must be inactive";
+            ValidationTextBox.Text = error;
+            ValidationTextBox.Visible = error != null; 
+            return error == null;
+        }
+
+        private void UpdateFile()
         {
             File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
-            File.Project = (Project) ProjectComboBox.SelectedItem;
-            File.ProjectInvestigator = (ProjectInvestigator) OwnerComboBox.SelectedItem;
+            File.Project = (Project)ProjectComboBox.SelectedItem;
+            File.ProjectInvestigator = (ProjectInvestigator)OwnerComboBox.SelectedItem;
             File.Collar = (Collar)CollarComboBox.SelectedItem;
             File.LookupFileStatus = (LookupFileStatus)StatusComboBox.SelectedItem;
+        }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
+        private void FileDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpControls();
+        }
+
+
+        private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ProjectComboBox.SelectedItem != null)
+                OwnerComboBox.SelectedItem = null;
+            EnableControls();
+        }
+
+        private void OwnerComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (OwnerComboBox.SelectedItem != null)
+                ProjectComboBox.SelectedItem = null;
+            EnableControls();
+        }
+
+        private void CollarComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableControls();
+        }
+
+        private void StatusComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableControls();
         }
 
         private void ShowContentsButton_Click(object sender, EventArgs e)
@@ -115,32 +230,12 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void EnableForm()
-        {
-            EditSaveButton.Enabled = IsFileEditor && File.ParentFileId == null;
-            //TODO disable project if owner set
-            //TODO disable owner if project is set
-            //TODO disable collar if file is active.
-            //TODO disable active if collar has been changed. ??
-            StatusComboBox.Enabled = IsFileEditor && File.ParentFileId == null;
-        }
-
-        private void SetEditingControls()
-        {
-            bool editModeEnabled = EditSaveButton.Text == "Save";
-            FileNameTextBox.Enabled = editModeEnabled;
-            CollarComboBox.Enabled = editModeEnabled && File.Status == 'I';
-            StatusComboBox.Enabled = !editModeEnabled && IsFileEditor;
-        }
-
-
-
         private void SourceFileButton_Click(object sender, EventArgs e)
         {
             if (File.ParentFileId == null)
                 return;
             var form = new FileDetailsForm(File.ParentFile);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.DatabaseChanged += (o, args) => FileDataChanged();
             form.Show(this);
         }
 
@@ -149,7 +244,7 @@ namespace AnimalMovement
             //I can't use the DataSource here, because it is an anoymous type.
             var file = (CollarFile)ChildFilesDataGridView.SelectedRows[0].Cells[0].Value;
             var form = new FileDetailsForm(file);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.DatabaseChanged += (o, args) => FileDataChanged();
             form.Show(this);
         }
 
@@ -161,28 +256,21 @@ namespace AnimalMovement
                 // The user wants to edit, Enable form
                 EditSaveButton.Text = "Save";
                 DoneCancelButton.Text = "Cancel";
-                SetEditingControls();
+                EnableControls();
             }
             else
             {
                 //User is saving
-                try
+                UpdateFile();
+                if (SubmitChanges())
                 {
-                    UpdateDataSource();
-                    Database.SubmitChanges();
                     OnDatabaseChanged();
+                    EditSaveButton.Text = "Edit";
+                    DoneCancelButton.Text = "Done";
+                    EnableControls();
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Unable to save changes", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                EditSaveButton.Text = "Edit";
-                DoneCancelButton.Text = "Done";
-                SetEditingControls();
             }
         }
-
 
         private void DoneCancelButton_Click(object sender, EventArgs e)
         {
@@ -190,22 +278,14 @@ namespace AnimalMovement
             {
                 DoneCancelButton.Text = "Done";
                 EditSaveButton.Text = "Edit";
-                SetEditingControls();
                 //Reset state from database
                 LoadDataContext();
+                SetUpControls();
             }
             else
             {
                 Close();
             }
-        }
-
-
-        private void OnDatabaseChanged()
-        {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this, EventArgs.Empty);
         }
 
     }
