@@ -109,10 +109,10 @@ namespace AnimalMovement
 
         private void LoadDatePickers()
         {
-            StartDateTimePicker.Value = CollarParameter.StartDate == null ? DateTime.Now.Date : CollarParameter.StartDate.Value;
+            StartDateTimePicker.Value = CollarParameter.StartDate == null ? DateTime.Now.Date : CollarParameter.StartDate.Value.ToLocalTime();
             StartDateTimePicker.Checked = CollarParameter.StartDate != null;
             StartDateTimePicker.CustomFormat = CollarParameter.StartDate != null ? "MMM-d-yyyy" : " ";
-            EndDateTimePicker.Value = CollarParameter.EndDate == null ? DateTime.Now.Date : CollarParameter.EndDate.Value;
+            EndDateTimePicker.Value = CollarParameter.EndDate == null ? DateTime.Now.Date : CollarParameter.EndDate.Value.ToLocalTime();
             EndDateTimePicker.Checked = CollarParameter.EndDate != null;
             EndDateTimePicker.CustomFormat = CollarParameter.EndDate != null ? "MMM-d-yyyy" : " ";
         }
@@ -158,8 +158,8 @@ namespace AnimalMovement
             if (collar.CollarModel != "Gen3" && !hasFile)
                 return "You must provide a file for this collar";
 
-            var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value : DateTime.MinValue;
-            var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value : DateTime.MaxValue;
+            var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : DateTime.MinValue;
+            var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
                 return "The end date must be after the start date";
 
@@ -204,8 +204,8 @@ namespace AnimalMovement
                                 (((string) Gen3TimeUnitComboBox.SelectedItem) == "Hours" ? 60 : 1);
             CollarParameter.Gen3Period = period;
 
-            CollarParameter.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date : (DateTime?) null;
-            CollarParameter.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date : (DateTime?) null;
+            CollarParameter.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
+            CollarParameter.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
 
             return SubmitChanges();
         }

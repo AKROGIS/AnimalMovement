@@ -59,10 +59,10 @@ namespace AnimalMovement
                 collars.First(c =>
                               c.CollarManufacturer == ArgosDeployment.Collar.CollarManufacturer &&
                               c.CollarId == ArgosDeployment.Collar.CollarId);
-            StartDateTimePicker.Value = ArgosDeployment.StartDate == null ? DateTime.Now.Date : ArgosDeployment.StartDate.Value;
+            StartDateTimePicker.Value = ArgosDeployment.StartDate == null ? DateTime.Now.Date : ArgosDeployment.StartDate.Value.ToLocalTime();
             StartDateTimePicker.Checked = ArgosDeployment.StartDate != null;
             StartDateTimePicker.CustomFormat = ArgosDeployment.StartDate != null ? "MMM-d-yyyy" : " ";
-            EndDateTimePicker.Value = ArgosDeployment.EndDate == null ? DateTime.Now.Date : ArgosDeployment.EndDate.Value;
+            EndDateTimePicker.Value = ArgosDeployment.EndDate == null ? DateTime.Now.Date : ArgosDeployment.EndDate.Value.ToLocalTime();
             EndDateTimePicker.Checked = ArgosDeployment.EndDate != null;
             EndDateTimePicker.CustomFormat = ArgosDeployment.EndDate != null ? "MMM-d-yyyy" : " ";
         }
@@ -101,8 +101,8 @@ namespace AnimalMovement
             if (platform == null)
                 return "No Argos Id selected.";
 
-            var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value : DateTime.MinValue;
-            var end   =   EndDateTimePicker.Checked ?   EndDateTimePicker.Value : DateTime.MaxValue;
+            var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : DateTime.MinValue;
+            var end   =   EndDateTimePicker.Checked ?   EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
                 return "The end date must be after the start date";
 
@@ -140,8 +140,8 @@ namespace AnimalMovement
             var newPlatform = Database.ArgosPlatforms.FirstOrDefault(d => d.PlatformId == (string) ArgosComboBox.SelectedItem);
             if (newPlatform != null && ArgosDeployment.PlatformId != newPlatform.PlatformId)
                 ArgosDeployment.ArgosPlatform = newPlatform;
-            ArgosDeployment.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date : (DateTime?) null;
-            ArgosDeployment.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date : (DateTime?) null;
+            ArgosDeployment.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
+            ArgosDeployment.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
 
             return SubmitChanges();
         }

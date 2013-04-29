@@ -76,8 +76,8 @@ namespace AnimalMovement
 
         private string ValidateError()
         {
-            var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value : DateTime.MinValue;
-            var end   =   EndDateTimePicker.Checked ?   EndDateTimePicker.Value : DateTime.MaxValue;
+            var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MinValue;
+            var end   =   EndDateTimePicker.Checked ?   EndDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
                 return "The end date must be after the start date";
 
@@ -109,8 +109,8 @@ namespace AnimalMovement
                 {
                     Collar = Collar,
                     PlatformId = (string)ArgosComboBox.SelectedItem,
-                    StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date : (DateTime?) null,
-                    EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date : (DateTime?) null
+                    StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null,
+                    EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null
                 };
             Database.ArgosDeployments.InsertOnSubmit(deployment);
             if (SubmitChanges())
