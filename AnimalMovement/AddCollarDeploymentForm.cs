@@ -52,11 +52,28 @@ namespace AnimalMovement
 
         private void LoadDefaultFormContents()
         {
-            //TODO limit lists to appropriate collars/animals
-            CollarComboBox.DataSource = Database.Collars;
-            CollarComboBox.SelectedItem = Collar;
-            AnimalComboBox.DataSource = Database.Animals;
+            if (LockAnimal)
+                AnimalComboBox.DataSource = new[] { Animal };
+            else
+            {
+                AnimalComboBox.DataSource = from animal in Database.Animals
+                                            where animal.Project.ProjectInvestigator == CurrentUser ||
+                                                  animal.Project.ProjectEditors.Any(
+                                                      e => e.Editor == CurrentUser)
+                                            select animal;
+            }
+            if (LockCollar)
+                CollarComboBox.DataSource = new[] { Collar };
+            else
+            {
+                CollarComboBox.DataSource = from collar in Database.Collars
+                                            where collar.Manager == CurrentUser ||
+                                                  collar.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                      a => a.Assistant == CurrentUser)
+                                            select collar;
+            }
             AnimalComboBox.SelectedItem = Animal;
+            CollarComboBox.SelectedItem = Collar;
         }
 
         private void EnableFormControls()

@@ -20,7 +20,7 @@ namespace AnimalMovement
         {
             InitializeComponent();
             CollarDeployment = collarDeployment;
-            //FIXME - remove locks when CollarDeployments_Update SPROC accepts collars and animals
+            //TODO - remove locks when (if) CollarDeployments allows updates to collars or animals
             LockCollar = lockCollar || true;
             LockAnimal = lockAnimal || true;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
@@ -46,14 +46,30 @@ namespace AnimalMovement
 
         private void LoadDefaultFormContents()
         {
-            //TODO - filter list of animals and collars (by assistant as well)
-            AnimalComboBox.DataSource = Database.Animals;
+            if (LockAnimal)
+                AnimalComboBox.DataSource = new [] {CollarDeployment.Animal};
+            else
+            {
+                AnimalComboBox.DataSource = from animal in Database.Animals
+                                            where animal == CollarDeployment.Animal ||
+                                                  animal.Project.ProjectInvestigator == CurrentUser ||
+                                                  animal.Project.ProjectEditors.Any(
+                                                      e => e.Editor == CurrentUser)
+                                            select animal;
+            }
+            if (LockCollar)
+                CollarComboBox.DataSource = new [] {CollarDeployment.Collar};
+            else
+            {
+                CollarComboBox.DataSource = from collar in Database.Collars
+                                            where
+                                                collar == CollarDeployment.Collar ||
+                                                collar.Manager == CurrentUser ||
+                                                collar.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                    a => a.Assistant == CurrentUser)
+                                            select collar;
+            }
             AnimalComboBox.SelectedItem = CollarDeployment.Animal;
-            var collarQuery = from collar in Database.Collars
-                              where collar.Manager == CollarDeployment.Collar.Manager
-                              select collar;
-            var collars = collarQuery.ToList();
-            CollarComboBox.DataSource = collars;
             CollarComboBox.SelectedItem = CollarDeployment.Collar;
         }
 
