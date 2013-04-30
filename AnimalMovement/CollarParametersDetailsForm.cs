@@ -64,30 +64,36 @@ namespace AnimalMovement
 
         private void LoadFileComboBox()
         {
-            //TODO - We can use anyones parameter file, but should we limit the list to just ours?
-            //TODO - should we show the inactive files?
             IQueryable<FileItem> fileQuery;
             switch (CollarParameter.Collar.CollarModel)
             {
                 case "Gen3":
                     fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format == 'B' && file.Status == 'A'
+                                where file.Format == 'B' && file.Status == 'A' &&
+                                      (file.Owner == CurrentUser ||
+                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                           a => a.Assistant == CurrentUser))
                                 select new FileItem(file.FileId, file.FileName);
                     break;
                 case "Gen4":
                     //TODO limit to TPF files with this collar
                     fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format == 'A' && file.Status == 'A'
+                                where file.Format == 'A' && file.Status == 'A' &&
+                                      (file.Owner == CurrentUser ||
+                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                           a => a.Assistant == CurrentUser))
                                 select new FileItem(file.FileId, file.FileName);
                     break;
                 default:
                     fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format != 'A' && file.Format != 'B' && file.Status == 'A'
+                                where file.Format != 'A' && file.Format != 'B' && file.Status == 'A' &&
+                                      (file.Owner == CurrentUser ||
+                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                           a => a.Assistant == CurrentUser))
                                 select new FileItem(file.FileId, file.FileName);
                     break;
             }
-            var files = fileQuery.ToList();
-            FileComboBox.DataSource = files;
+            FileComboBox.DataSource = fileQuery;
             FileComboBox.DisplayMember = "Name";
             FileComboBox.ValueMember = "FileId";
             if (CollarParameter.FileId == null)
