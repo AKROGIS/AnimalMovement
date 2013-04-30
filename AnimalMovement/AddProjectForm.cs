@@ -25,6 +25,7 @@ namespace AnimalMovement
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
             Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
         }
 

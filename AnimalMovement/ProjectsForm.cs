@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -7,66 +8,113 @@ namespace AnimalMovement
 {
     internal partial class ProjectsForm : BaseForm
     {
+        private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
+        private bool IsEditor { get; set; }
+        internal event EventHandler DatabaseChanged;
+        private object myProjects;
+        private object allProjects;
 
         internal ProjectsForm()
         {
             InitializeComponent();
             RestoreWindow();
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
+            LoadDataContext();
+            SetUpForm();
         }
 
-        private void ReviewProjectsForm_Load(object sender, EventArgs e)
+        private void LoadDataContext()
         {
-            ReloadFromDatabase();
+            Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
+            IsEditor =
+                Database.ProjectInvestigators.Any(
+                    pi =>
+                    pi.Login == CurrentUser || pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
+            MakeLists();
+        }
+
+        private void MakeLists()
+        {
+            myProjects = (from p in Database.Projects
+                          where p.ProjectInvestigator == CurrentUser ||
+                                p.ProjectEditors.Any(u => u.Editor == CurrentUser)
+                          select new
+                              {
+                                  p.ProjectId,
+                                  p.ProjectName,
+                                  Lead = p.ProjectInvestigator1.Name,
+                                  p.UnitCode,
+                                  p.Description,
+                                  CanDelete =
+                                     (p.ProjectInvestigator == CurrentUser || 
+                                      p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser))
+                                     && !p.Animals.Any() && !p.CollarFiles.Any(),
+                                  Project = p
+                              }).ToList();
+            allProjects = (from p in Database.Projects
+                           select new
+                               {
+                                   p.ProjectId,
+                                   p.ProjectName,
+                                   Lead = p.ProjectInvestigator1.Name,
+                                   p.UnitCode,
+                                   p.Description,
+                                   CanDelete =
+                                     (p.ProjectInvestigator == CurrentUser ||
+                                      p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser))
+                                     && !p.Animals.Any() && !p.CollarFiles.Any(),
+                                   Project = p
+                               }).ToList();
+        }
+
+        private void SetUpForm()
+        {
+            SelectProjectFilter();
+            ProjectsGridView.DataSource = ShowHideButton.Text == "Show All Projects" ? myProjects : allProjects;
+            EnableControls();
+        }
+
+        private void EnableControls()
+        {
+            ProjectsGridView.Columns[6].Visible = false;
+            AddProjectButton.Enabled = IsEditor;
+        }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
         }
 
         private void ProjectDataChanged()
         {
-            ReloadFromDatabase();
-        }
-
-        private void ReloadFromDatabase()
-        {
-            var db = new AnimalMovementDataContext();
-            SelectProjectFilter();
-            if (ShowHideButton.Text == "Show All Projects")
-            {
-                //show only my projects
-                var myProjects = from p in db.Projects
-                                 where p.ProjectInvestigator == CurrentUser ||
-                                       p.ProjectEditors.Any(u => u.Editor == CurrentUser)
-                                 select new
-                                 {
-                                     Code = p.ProjectId,
-                                     Name = p.ProjectName,
-                                     Lead = p.ProjectInvestigator1.Name,
-                                     Unit = p.UnitCode,
-                                     p.Description,
-                                     CanDelete = p.ProjectInvestigator == CurrentUser && !p.Animals.Any() && !p.CollarFiles.Any(),
-                                     Project = p
-                                 };
-                ProjectsGridView.DataSource = myProjects;
-            }
-            else
-            {
-                // show all projects
-                var allProjects = from p in db.Projects
-                                  select new
-                                  {
-                                      Code = p.ProjectId,
-                                      Name = p.ProjectName,
-                                      Lead = p.ProjectInvestigator1.Name,
-                                      Unit = p.UnitCode,
-                                      p.Description,
-                                      CanDelete = p.ProjectInvestigator == CurrentUser && !p.Animals.Any() && !p.CollarFiles.Any(),
-                                      Project = p
-                                  };
-                ProjectsGridView.DataSource = allProjects;
-            }
-
-            ProjectsGridView.Columns[6].Visible = false;
-            AddProjectButton.Enabled = db.ProjectInvestigators.Any(pi => pi.Login == CurrentUser);
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpForm();
         }
 
         void SelectProjectFilter()
@@ -78,7 +126,7 @@ namespace AnimalMovement
         {
             ShowHideButton.Text = ShowHideButton.Text == "Show Only My Projects" ? "Show All Projects" : "Show Only My Projects";
             Settings.SetDefaultProjectFilter(ShowHideButton.Text == "Show All Projects");
-            ReloadFromDatabase();
+            SetUpForm();
         }
 
         private void AddProjectButton_Click(object sender, EventArgs e)
@@ -90,49 +138,40 @@ namespace AnimalMovement
 
         private void DeleteProjectButton_Click(object sender, EventArgs e)
         {
-            foreach (DataGridViewRow row in ProjectsGridView.SelectedRows.Cast<DataGridViewRow>().Where(row => (bool)row.Cells["columnCanDelete"].Value))
-            {
-                var projectId = (string)row.Cells["columnCode"].Value;
-                var projectName = (string)row.Cells["columnName"].Value;
-                try
-                {
-                    var database = new AnimalMovementDataContext();
-                    database.Project_Delete(projectId);
-                }
-                catch (Exception ex)
-                {
-                    string msg = "Unable to delete project '" + projectName + "'.  " +
-                                 "Projects can only be deleted by the project investigator " + 
-                                 "and they cannot contain any files or animals.  " +
-                                 "Please review the project properties.\n\n" +
-                                 "Error message:\n" + ex.Message;
-                    MessageBox.Show(msg, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            ReloadFromDatabase();
+            foreach (Project project in
+                ProjectsGridView.SelectedRows.Cast<DataGridViewRow>()
+                                .Where(row => (bool) row.Cells["CanDelete"].Value)
+                                .Select(row => row.Cells["Project"].Value))
+                Database.Projects.DeleteOnSubmit(project);
+            if (SubmitChanges())
+                ProjectDataChanged();
+
         }
 
         private void InfoProjectButton_Click(object sender, EventArgs e)
         {
             if (ProjectsGridView.CurrentRow == null)
                 return; //This buttton is only enabled when Current Row is not not null
-            var project = (Project)ProjectsGridView.CurrentRow.Cells[6].Value;
+            var project = (Project)ProjectsGridView.CurrentRow.Cells["Project"].Value;
             var form = new ProjectDetailsForm(project);
-            form.DatabaseChanged += (o, args) => { ReloadFromDatabase();
-                                              SelectedRow(project.ProjectId);};
+            form.DatabaseChanged += (o, args) =>
+                {
+                    ProjectDataChanged();
+                    SelectProjectRow(project.ProjectId);
+                };
             form.Show(this);
         }
 
-        private void SelectedRow(string projectId)
+        private void SelectProjectRow(string projectId)
         {
             foreach (DataGridViewRow row in ProjectsGridView.Rows)
-                if ((string)row.Cells["columnCode"].Value == projectId)
-                    ProjectsGridView.CurrentCell = row.Cells["columnCode"];
+                if ((string)row.Cells["ProjectId"].Value == projectId)
+                    ProjectsGridView.CurrentCell = row.Cells["ProjectId"];
         }
 
         private void ProjectsGridView_SelectionChanged(object sender, EventArgs e)
         {
-            DeleteProjectButton.Enabled = ProjectsGridView.SelectedRows.Cast<DataGridViewRow>().Any(row => (bool)row.Cells["columnCanDelete"].Value);
+            DeleteProjectButton.Enabled = ProjectsGridView.SelectedRows.Cast<DataGridViewRow>().Any(row => (bool)row.Cells["CanDelete"].Value);
             InfoProjectButton.Enabled = ProjectsGridView.SelectedRows.Count == 1;
         }
     }
