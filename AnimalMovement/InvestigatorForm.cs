@@ -39,6 +39,7 @@ namespace AnimalMovement
             Investigator = investigator;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
+            SetDefaultPropertiesBeforeFormLoad();
         }
 
         private void LoadDataContext()
@@ -58,14 +59,19 @@ namespace AnimalMovement
             SetupGeneral();
         }
 
+        private void SetDefaultPropertiesBeforeFormLoad()
+        {
+            ShowEmailFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowEmailFiles;
+            ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDownloadFiles;
+            ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDerivedFiles;
+        }
+
+
 
         #region Form Control
 
         protected override void OnLoad(EventArgs e)
         {
-            ShowEmailFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowEmailFiles;
-            ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDownloadFiles;
-            ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDerivedFiles;
             ProjectInvestigatorTabs.SelectedIndex = Properties.Settings.Default.InvestigatorFormActiveTab;
             if (ProjectInvestigatorTabs.SelectedIndex == 0)
                 //if new index is zero, index changed event will not fire, so fire it manually
@@ -504,7 +510,8 @@ namespace AnimalMovement
 
         private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            SetupCollarFilesTab();
+            if (Visible)
+                SetupCollarFilesTab();
         }
 
         #endregion
