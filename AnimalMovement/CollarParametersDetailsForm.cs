@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -147,8 +148,16 @@ namespace AnimalMovement
             if (error != null)
                 ValidationTextBox.Text = error;
             ValidationTextBox.Visible = error != null;
+            ValidationTextBox.ForeColor = Color.Red;
             EditSaveButton.Enabled = (IsEditMode && error == null) || (!IsEditMode && IsEditor);
             FixItButton.Visible = error != null;
+            if (error != null)
+                return;
+            var warning = ValidateWarning();
+            if (warning != null)
+                ValidationTextBox.Text = warning;
+            ValidationTextBox.Visible = warning != null;
+            ValidationTextBox.ForeColor = Color.DodgerBlue;
         }
 
         private string ValidateError()
@@ -161,7 +170,9 @@ namespace AnimalMovement
             //We must have a file or a period for Gen3
             var hasFile = FileComboBox.SelectedItem != null;
             if (collar.CollarModel == "Gen3" && !hasFile && String.IsNullOrEmpty(Gen3PeriodTextBox.Text))
-                return "You must provide a file or a time period for this collar";
+                return "You must provide a file or a time period";
+            if (collar.CollarModel == "Gen3" && hasFile && !String.IsNullOrEmpty(Gen3PeriodTextBox.Text))
+                return "You must provide a file OR a time period, not both";
             //We must have a file or all others
             if (collar.CollarModel != "Gen3" && !hasFile)
                 return "You must provide a file for this collar";
@@ -178,8 +189,6 @@ namespace AnimalMovement
                                                          param.EndDate ?? DateTime.MaxValue, start, end)))
                 return "This collar has another set of parameters during your date range.";
 
-            //TODO - for Gen4 TPF files, validate start date and collar match
-
             //Check Gen3 Period
             int period;
             if (CollarParameter.Collar.CollarModel == "Gen3" &&
@@ -195,9 +204,19 @@ namespace AnimalMovement
             return (start2 < end1 && start1 < end2);
         }
 
+        private string ValidateWarning()
+        {
+            var collar = (Collar)CollarComboBox.SelectedItem;
+            if (collar.CollarModel == "Gen3" && FileComboBox.SelectedItem != null)
+                return "Warning: Argos data for collars with a PPF file cannot be automatically processed";
+
+            //TODO - for Gen4 TPF files, validate start date and collar match
+
+            return null;
+        }
+
         private bool UpdateParameters()
         {
-            //TODO add warning about PPF files
             var newCollar = (Collar)CollarComboBox.SelectedItem;
             if (CollarParameter.Collar.CollarManufacturer != newCollar.CollarManufacturer || CollarParameter.Collar.CollarId != newCollar.CollarId)
                 CollarParameter.Collar = newCollar;
