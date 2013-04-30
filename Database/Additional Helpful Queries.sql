@@ -457,6 +457,22 @@
         AND (speed > 12000 or duration < 6)
    ORDER BY Speed, AnimalId, StartDate
 
+----------- Find Locations that do not occur close to the expected time.
+----------- in this case the moose locations were expected every 8 hours
+     SELECT *, DATEDIFF(MINUTE, CONVERT(DATE, FixDate), FixDate)
+       FROM Locations
+      WHERE ProjectId = 'GAAR_MOOSE'
+        AND DATEDIFF(MINUTE, CONVERT(DATE, FixDate), FixDate) NOT BETWEEN  -3 AND   3
+        AND DATEDIFF(MINUTE, CONVERT(DATE, FixDate), FixDate) NOT BETWEEN 477 AND 483
+        AND DATEDIFF(MINUTE, CONVERT(DATE, FixDate), FixDate) NOT BETWEEN 957 AND 963
+/*  
+----------- Hide all Locations that do not occur close to the expected time.
+     UPDATE Locations SET [Status] = 'H'
+      WHERE ProjectId = 'GAAR_MOOSE'
+        AND DATEDIFF(MINUTE, CONVERT(DATE, FixDate), FixDate) NOT BETWEEN  -3 AND   3
+        AND DATEDIFF(MINUTE, CONVERT(DATE, FixDate), FixDate) NOT BETWEEN 477 AND 483
+        AND DATEDIFF(MINUTE, CONVERT(DATE, FixDate), FixDate) NOT BETWEEN 957 AND 963
+*/
 
 
 
