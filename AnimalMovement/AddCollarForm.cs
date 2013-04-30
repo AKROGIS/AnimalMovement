@@ -54,7 +54,7 @@ namespace AnimalMovement
         private void SetUpControls()
         {
             SetUpManagerComboBox();
-                //  first get the default, then set the datasource, then set the selection to the default.
+            //  first get the default, then set the datasource, then set the selection to the default.
             //    this order is required because setting the datasource sets the selected index to 0 triggering the selectedindex_changed event
             //    the selectedindex_changed event saves the user's selection, which when setting the datasource, overwrites the user's previous
             //    default with the item at index 0, so initialization deletes the user's preference.

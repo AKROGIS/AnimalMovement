@@ -22,60 +22,60 @@ namespace AnimalMovement
             Project = project;
             Investigator = pi;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
-            SetupForm();
-        }
-
-        private void SetupForm()
-        {
             InitializeComponent();
             RestoreWindow();
             LoadDataContext();
-            EnableUpload();
-            FileRadioButton.Checked = true;
-            ProjectRadioButton.Checked = Project != null;
-            InvestigatorRadioButton.Checked = !ProjectRadioButton.Checked;
+            SetUpForm();
         }
 
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
+            //Project and Investigator are in a different DataContext, get them in this DataContext
+            if (Project != null)
+                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+            if (Investigator != null)
+                Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+            // legal to open the form without a project or PI, but cannot upload unless one is specified
+            if (Project != null && Investigator != null)
+                throw new InvalidOperationException("Upload Files Form cannot have both a valid Project AND Project Investigator.");
+
+            //Permission to upload a file is dependent on the project or PI that this fill will upload to.
+            //The picklist will only show the allowable.  IF there are no allowable the upload button will be disabled.
+        }
+
+        private void SetUpForm()
+        {
             LoadProjectList();
             LoadInvestigatorList();
+            FileRadioButton.Checked = true;
+            ProjectRadioButton.Checked = Project != null;
+            InvestigatorRadioButton.Checked = !ProjectRadioButton.Checked;
+            EnableUpload();
         }
 
         private void LoadProjectList()
         {
-            //The Project I was given does not have object equality with projects in this data context
-            var projects = (from p in Database.Projects
-                            where p.ProjectInvestigator == CurrentUser ||
-                                  p.ProjectEditors.Any(u => u.Editor == CurrentUser)
-                            select p).ToList();
-            var selectedProject =
-                projects.FirstOrDefault(
-                    p =>
-                    Project == null ? p.ProjectId == Settings.GetDefaultProject() : p.ProjectId == Project.ProjectId);
-
+            var projects = from p in Database.Projects
+                           where p.ProjectInvestigator == CurrentUser ||
+                                 p.ProjectEditors.Any(u => u.Editor == CurrentUser)
+                           select p;
             ProjectComboBox.DataSource = projects;
             ProjectComboBox.DisplayMember = "ProjectName";
-            ProjectComboBox.SelectedItem = selectedProject;
+            ProjectComboBox.SelectedItem = Project;
         }
 
         private void LoadInvestigatorList()
         {
-            //The Investigator I was given does not have object equality with investigators in this data context
-            var investigators = (from pi in Database.ProjectInvestigators
-                                 where pi.Login == CurrentUser ||
-                                       pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
-                                 select pi).ToList();
-            var selectedInvestigator =
-                investigators.FirstOrDefault(
-                    i => Investigator == null ? i.Login == CurrentUser : i.Login == Investigator.Login);
+            var investigators = from pi in Database.ProjectInvestigators
+                                where pi.Login == CurrentUser ||
+                                      pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                select pi;
             InvestigatorComboBox.DataSource = investigators;
             InvestigatorComboBox.DisplayMember = "Name";
-            InvestigatorComboBox.SelectedItem = selectedInvestigator;
+            InvestigatorComboBox.SelectedItem = Investigator;
         }
-
 
         private void EnableUpload()
         {
@@ -115,10 +115,10 @@ namespace AnimalMovement
             Cursor.Current = Cursors.WaitCursor;
             Application.DoEvents();
 
-            //FIXME - Revise Fileloader to use events we can subscribe to - this will require using instances instead of a static method
-            //FIXME - Revise Fileloader to have hooks that can allow it to be canceled.
-            //FIXME - Run FileLoader on a background thread
-            //FIXME - Display a progress bar updated by events from the FileLoader
+            //TODO - Revise Fileloader to use events we can subscribe to - this will require using instances instead of a static method
+            //TODO - Revise Fileloader to have hooks that can allow it to be canceled.
+            //TODO - Run FileLoader on a background thread
+            //TODO - Display a progress bar updated by events from the FileLoader
             FileLoader.LoadPath(path, HandleException,
                                 ProjectRadioButton.Checked ? (Project) ProjectComboBox.SelectedItem : null,
                                 InvestigatorRadioButton.Checked
@@ -126,12 +126,12 @@ namespace AnimalMovement
                                     : null,
                                 (Collar) CollarComboBox.SelectedItem,
                                 StatusActiveRadioButton.Checked ? 'A' : 'I', AllowDuplicatesCheckBox.Checked);
-            
-            //FIXME - OnDatabaseChanged() should be called in response to a FileLoader FinishedLoading event
+
+            //TODO - OnDatabaseChanged() should be called in response to a FileLoader FinishedLoading event
             //for now, we will assume that at least one file loaded and we need to update the caller
             OnDatabaseChanged();
 
-            //FIXME - This should not be done here, but in some FileLoader Done event
+            //TODO - This should not be done here, but in some FileLoader Done event
             Cursor.Current = Cursors.Default;
             UploadButton.Enabled = true;
             UploadButton.Text = "Close";
@@ -139,7 +139,7 @@ namespace AnimalMovement
 
         private static void HandleException(Exception ex, string path, Project project, ProjectInvestigator manager)
         {
-            //FIXME - disctinguish between loading and processing (loaded fine) errors
+            //TODO - distinguish between loading and processing (loaded fine) errors
             var msg = String.Format("Unable to load file: {0} for project: {1} or manager: {2} reason: {3}", path,
                 project == null ? "<null>" : project.ProjectId, manager == null ? "<null>" : manager.Login, ex.Message);
             MessageBox.Show(msg, "File Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -221,9 +221,6 @@ namespace AnimalMovement
 
         private void InvestigatorComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //Investigator = InvestigatorComboBox.SelectedItem as ProjectInvestigator;
-            //if (Investigator != null)
-            //    Settings.SetDefaultProject(Project.ProjectId);
             EnableUpload();
             RefreshCollarComboBox();
         }

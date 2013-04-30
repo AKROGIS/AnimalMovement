@@ -28,6 +28,7 @@ namespace AnimalMovement
             LockSelector = lockSelector;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
+            SetUpControls();
             EnableControls();
         }
 
@@ -47,10 +48,9 @@ namespace AnimalMovement
 
             //Only project investigators can add editors/assistants
             IsProjectInvestigator = Database.ProjectInvestigators.Any(pi => pi.Login == CurrentUser);
-            SetupControls();
         }
 
-        private void SetupControls()
+        private void SetUpControls()
         {
             if (Investigator != null)
             {
