@@ -169,7 +169,16 @@ namespace AnimalMovement
             FrequencyTextBox.Enabled = IsEditMode;
             DisposalDateTimePicker.Enabled = IsEditMode;
             NotesTextBox.Enabled = IsEditMode;
-            //TODO - disable save if frequency is not a double
+        }
+
+        private void ValidateFrequency(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            double frequency;
+            bool ok = (String.IsNullOrEmpty(FrequencyTextBox.Text) ||
+                       (Double.TryParse(FrequencyTextBox.Text, out frequency) && frequency > 0));
+            var msg = ok ? "" : "Frequency must be a null or a positive number";
+            CollarErrorProvider.SetError(FrequencyTextBox, msg);
+            e.Cancel = !ok;
         }
 
         private void UpdateDataSource()

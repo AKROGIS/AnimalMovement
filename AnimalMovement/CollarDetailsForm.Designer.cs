@@ -82,6 +82,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.CollarErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.CollarTabControl.SuspendLayout();
             this.GeneralTabPage.SuspendLayout();
             this.AnimalsTabPage.SuspendLayout();
@@ -94,6 +95,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.FilesDataGridView)).BeginInit();
             this.FixesTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FixConflictsDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CollarErrorProvider)).BeginInit();
             this.SuspendLayout();
             // 
             // HasGpsCheckBox
@@ -382,6 +384,7 @@
             this.FrequencyTextBox.Name = "FrequencyTextBox";
             this.FrequencyTextBox.Size = new System.Drawing.Size(73, 20);
             this.FrequencyTextBox.TabIndex = 8;
+            this.FrequencyTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateFrequency);
             // 
             // AnimalsTabPage
             // 
@@ -771,6 +774,10 @@
             this.label2.TabIndex = 35;
             this.label2.Text = "Collar Id:";
             // 
+            // CollarErrorProvider
+            // 
+            this.CollarErrorProvider.ContainerControl = this;
+            // 
             // CollarDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -799,6 +806,7 @@
             this.FixesTabPage.ResumeLayout(false);
             this.FixesTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FixConflictsDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CollarErrorProvider)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -859,5 +867,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DeployDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn RetrieveDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn DeploymentColumn;
+        private System.Windows.Forms.ErrorProvider CollarErrorProvider;
     }
 }
