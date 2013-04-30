@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 using DataModel;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace AnimalMovement
         //private string ProjectId { get; set; }
         private ProjectInvestigator ProjectInvestigator { get; set; }
         private Project Project { get; set; }
+        internal event EventHandler DatabaseChanged;
 
         internal ChangeInvestigatorForm(Project project)
         {
@@ -76,15 +78,11 @@ namespace AnimalMovement
 
         private void ChangeButton_Click(object sender, EventArgs e)
         {
-            try
+            Project.ProjectInvestigator1 = (ProjectInvestigator)LeadComboBox.SelectedItem;
+            if (SubmitChanges())
             {
-                Project.ProjectInvestigator1 = (ProjectInvestigator)LeadComboBox.SelectedItem;
-                Database.SubmitChanges();
-                DialogResult = DialogResult.OK; //Closes form
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Unable To Update Project", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                OnDatabaseChanged();
+                Close();
             }
         }
 
@@ -92,5 +90,35 @@ namespace AnimalMovement
         {
             Close();
         }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
+
     }
 }

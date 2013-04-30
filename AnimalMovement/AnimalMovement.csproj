@@ -331,6 +331,9 @@
     <Content Include="InvestigatorReports.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ProjectReports.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Images\add.gif" />
     <Content Include="Images\AnimalTrack.ico" />
     <Content Include="Images\AnimalTrack.png" />

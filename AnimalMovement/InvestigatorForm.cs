@@ -38,25 +38,9 @@ namespace AnimalMovement
             RestoreWindow();
             Investigator = investigator;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
-            LoadDataContext();
             SetDefaultPropertiesBeforeFormLoad();
-        }
-
-        private void LoadDataContext()
-        {
-            Database = new AnimalMovementDataContext();
-            //Database.Log = Console.Out;
-            //Database.Log = Console.Out;
-            //Animal is in a different DataContext, get one in this DataContext
-            if (Investigator != null)
-                Investigator = Database.ProjectInvestigators.First(pi => pi.Login == Investigator.Login);
-            if (Investigator == null)
-                throw new InvalidOperationException("Investigator Form not provided a valid Collar Investigator.");
-
-            var functions = new AnimalMovementFunctions();
-            IsInvestigator = Investigator == Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
-            IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
-            SetupGeneral();
+            LoadDataContext();
+            SetUpGeneral();
         }
 
         private void SetDefaultPropertiesBeforeFormLoad()
@@ -66,6 +50,20 @@ namespace AnimalMovement
             ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.InvestigatorFormShowDerivedFiles;
         }
 
+        private void LoadDataContext()
+        {
+            Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
+            //Investigator is in a different DataContext, get one in this DataContext
+            if (Investigator != null)
+                Investigator = Database.ProjectInvestigators.First(pi => pi.Login == Investigator.Login);
+            if (Investigator == null)
+                throw new InvalidOperationException("Investigator Form not provided a valid investigator.");
+
+            var functions = new AnimalMovementFunctions();
+            IsInvestigator = Investigator == Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
+            IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
+        }
 
 
         #region Form Control
@@ -92,25 +90,25 @@ namespace AnimalMovement
             switch (ProjectInvestigatorTabs.SelectedIndex)
             {
                 case 0:
-                    SetupProjectTab();
+                    SetUpProjectTab();
                     break;
                 case 1:
-                    SetupCollarsTab();
+                    SetUpCollarsTab();
                     break;
                 case 2:
-                    SetupArgosTab();
+                    SetUpArgosTab();
                     break;
                 case 3:
-                    SetupCollarFilesTab();
+                    SetUpCollarFilesTab();
                     break;
                 case 4:
-                    SetupParameterFilesTab();
+                    SetUpParameterFilesTab();
                     break;
                 case 5:
-                    SetupAssistantsTab();
+                    SetUpAssistantsTab();
                     break;
                 case 6:
-                    SetupReportsTab();
+                    SetUpReportsTab();
                     break;
             }
         }
@@ -148,7 +146,7 @@ namespace AnimalMovement
 
         #region General
 
-        private void SetupGeneral()
+        private void SetUpGeneral()
         {
             LoginTextBox.Text = Investigator.Login;
             NameTextBox.Text = Investigator.Name;
@@ -190,7 +188,6 @@ namespace AnimalMovement
             }
         }
 
-
         private void DoneCancelButton_Click(object sender, EventArgs e)
         {
             if (DoneCancelButton.Text == "Cancel")
@@ -200,7 +197,7 @@ namespace AnimalMovement
                 EnableGeneralControls();
                 //Reset state from database
                 LoadDataContext();
-                SetupGeneral();
+                SetUpGeneral();
             }
             else
             {
@@ -230,7 +227,7 @@ namespace AnimalMovement
         }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
-        private void SetupProjectTab()
+        private void SetUpProjectTab()
         {
             var query = from project in Database.Projects
                         where project.ProjectInvestigator1 == Investigator
@@ -252,14 +249,14 @@ namespace AnimalMovement
             DeleteProjectsButton.Enabled = !IsEditMode && IsEditor &&
                                           ProjectsListBox.SelectedItems.Cast<ProjectListItem>()
                                                         .Any(item => item.CanDelete);
-            InfoProjectButton.Enabled = !IsEditMode;
+            InfoProjectButton.Enabled = !IsEditMode && ProjectsListBox.SelectedItems.Count == 1;
         }
 
         private void ProjectDataChanged()
         {
             OnDatabaseChanged();
             LoadDataContext();
-            SetupProjectTab();
+            SetUpProjectTab();
         }
 
         private void AddProjectButton_Click(object sender, EventArgs e)
@@ -306,7 +303,7 @@ namespace AnimalMovement
         }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
-        private void SetupCollarsTab()
+        private void SetUpCollarsTab()
         {
             var query = from collar in Database.Collars
                         where collar.ProjectInvestigator == Investigator
@@ -363,7 +360,7 @@ namespace AnimalMovement
         {
             OnDatabaseChanged();
             LoadDataContext();
-            SetupCollarsTab();
+            SetUpCollarsTab();
         }
 
         private void AddCollarButton_Click(object sender, EventArgs e)
@@ -399,7 +396,7 @@ namespace AnimalMovement
 
         #region Argos Programs
 
-        private void SetupArgosTab()
+        private void SetUpArgosTab()
         {
             //TODO - provide implementation
             EnableArgosControls();
@@ -425,7 +422,7 @@ namespace AnimalMovement
         }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
-        private void SetupCollarFilesTab()
+        private void SetUpCollarFilesTab()
         {
             var query = from file in Database.CollarFiles
                         where file.ProjectInvestigator == Investigator &&
@@ -477,7 +474,7 @@ namespace AnimalMovement
         {
             OnDatabaseChanged();
             LoadDataContext();
-            SetupCollarFilesTab();
+            SetUpCollarFilesTab();
         }
 
         private void AddCollarFileButton_Click(object sender, EventArgs e)
@@ -511,7 +508,7 @@ namespace AnimalMovement
         private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (Visible)
-                SetupCollarFilesTab();
+                SetUpCollarFilesTab();
         }
 
         #endregion
@@ -529,7 +526,7 @@ namespace AnimalMovement
         }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
-        private void SetupParameterFilesTab()
+        private void SetUpParameterFilesTab()
         {
             var query = from file in Database.CollarParameterFiles
                         where file.ProjectInvestigator == Investigator
@@ -565,7 +562,7 @@ namespace AnimalMovement
         {
             OnDatabaseChanged();
             LoadDataContext();
-            SetupParameterFilesTab();
+            SetUpParameterFilesTab();
         }
 
         private void AddParameterFileButton_Click(object sender, EventArgs e)
@@ -601,7 +598,7 @@ namespace AnimalMovement
 
         #region Assistants
 
-        private void SetupAssistantsTab()
+        private void SetUpAssistantsTab()
         {
             var assistants = Investigator.ProjectInvestigatorAssistants;
             AssistantsListBox.DataSource = assistants;
@@ -623,7 +620,7 @@ namespace AnimalMovement
         {
             OnDatabaseChanged();
             LoadDataContext();
-            SetupAssistantsTab();
+            SetUpAssistantsTab();
         }
 
         private void AddAssistantButton_Click(object sender, EventArgs e)
@@ -653,7 +650,7 @@ namespace AnimalMovement
 
         private XDocument _queryDocument;
 
-        private void SetupReportsTab()
+        private void SetUpReportsTab()
         {
             var xmlFilePath = Properties.Settings.Default.InvestigatorReportsXml;
             string error = null;

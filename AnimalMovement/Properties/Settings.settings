@@ -173,5 +173,8 @@
     <Setting Name="AnimalDetailsFormActiveTab" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="ProjectReportsXml" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ProjectReports.xml</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using DataModel;
 using System.Linq;
 
@@ -20,32 +24,13 @@ namespace AnimalMovement
 {
     internal partial class ProjectDetailsForm : BaseForm
     {
-
         private AnimalMovementDataContext Database { get; set; }
-        //private AnimalMovementFunctions DatabaseFunctions { get; set; }
         private string CurrentUser { get; set; }
-        //private string ProjectId { get; set; }
         private Project Project { get; set; }
-        private bool IsProjectInvestigator { get; set; }
+        private bool IsInvestigator { get; set; }
         private bool IsEditor { get; set; }
+        private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
-
-        // ReSharper disable UnusedAutoPropertyAccessor.Local
-        // public accessors are used by the control when these classes are accessed through the Datasource
-        class AnimalListItem
-        {
-            public string Name { get; set; }
-            public bool CanDelete { get; set; }
-            public Animal Animal { get; set; }
-        }
-
-        class FileListItem
-        {
-            public string Name { get; set; }
-            public bool CanDelete { get; set; }
-            public CollarFile File { get; set; }
-        }
-        // ReSharper restore UnusedAutoPropertyAccessor.Local
 
         internal ProjectDetailsForm(Project project)
         {
@@ -53,17 +38,41 @@ namespace AnimalMovement
             RestoreWindow();
             Project = project;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
+            SetDefaultPropertiesBeforeFormLoad();
             LoadDataContext();
-            SetupForm();
+            SetUpGeneral();
         }
 
-        protected override void OnLoad(EventArgs e)
+        private void SetDefaultPropertiesBeforeFormLoad()
         {
             ShowEmailFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowEmailFiles;
             ShowDownloadFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowDownloadFiles;
             ShowDerivedFilesCheckBox.Checked = Properties.Settings.Default.ProjectDetailsFormShowDerivedFiles;
+        }
+
+        private void LoadDataContext()
+        {
+            Database = new AnimalMovementDataContext();
+            //Database.Log = Console.Out;
+            //Project is in a different DataContext, get one in this DataContext
+            if (Project != null)
+                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+            if (Project == null)
+                throw new InvalidOperationException("Project Details Form not provided a valid project.");
+
+            var functions = new AnimalMovementFunctions();
+            IsInvestigator = Database.Projects.Any(p => p == Project && p.ProjectInvestigator == CurrentUser);
+            IsEditor = functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
+        }
+
+        
+        #region Form Control
+
+        protected override void OnLoad(EventArgs e)
+        {
             ProjectTabs.SelectedIndex = Properties.Settings.Default.ProjectDetailsFormActiveTab;
             if (ProjectTabs.SelectedIndex == 0)
+                //if new index is zero, index changed event will not fire, so fire it manually
                 ProjectTabs_SelectedIndexChanged(null, null);
         }
 
@@ -76,58 +85,174 @@ namespace AnimalMovement
             Properties.Settings.Default.ProjectDetailsFormShowDerivedFiles = ShowDerivedFilesCheckBox.Checked;
         }
 
-        private void LoadDataContext()
+        private void ProjectTabs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Database = new AnimalMovementDataContext();
-            //Database.Log = Console.Out;
-            //Project is in a different DataContext, get one in this DataContext
-            if (Project != null)
-                Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
-            if (Project == null)
-                throw new InvalidOperationException("Collar Details Form not provided a valid Collar.");
-
-            var functions = new AnimalMovementFunctions();
-            IsEditor = functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
-            IsProjectInvestigator = Database.Projects.Any(p => p.ProjectId == Project.ProjectId && p.ProjectInvestigator == CurrentUser);
+            switch (ProjectTabs.SelectedIndex)
+            {
+                case 0:
+                    SetUpAnimalTab();
+                    break;
+                case 1:
+                    SetUpFileTab();
+                    break;
+                case 2:
+                    SetUpEditorsTab();
+                    break;
+                case 3:
+                    SetUpReportsTab();
+                    break;
+            }
         }
 
-        private void SetupForm()
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+
+        #region General Tab (Header)
+
+        private void SetUpGeneral()
         {
             ProjectCodeTextBox.Text = Project.ProjectId;
             DescriptionTextBox.Text = Project.Description;
             UnitTextBox.Text = Project.UnitCode;
             ProjectNameTextBox.Text = Project.ProjectName;
             InvestigatorTextBox.Text = Project.ProjectInvestigator;
-            //Whenever we load the datasource, we should reenable the form (we may not have the permissions we did)
-            EnableForm();
+            EnableGeneralControls();
         }
 
-        private void SetEditorList()
+        private void EnableGeneralControls()
         {
-            //Using the EntitySet seems to mostly work, but it does not get refreshed when we submit changes
-            //var editors = Project.ProjectEditors;
-            //This query does not always create something DataSource can accept (IList<>)
-            //var editors = from editor in Project.ProjectEditors select editor;
-            //This query goes directly to the database, and seems to always work.
-            var editors = from editor in Database.ProjectEditors
-                          where editor.Project == Project
-                          select editor;
-            EditorsListBox.DataSource = editors;
-            EditorsListBox.DisplayMember = "Editor";
+            EditSaveButton.Enabled = IsEditor;
+            IsEditMode = EditSaveButton.Text == "Save";
+            ProjectNameTextBox.Enabled = IsEditMode;
+            DescriptionTextBox.Enabled = IsEditMode;
+            UnitTextBox.Enabled = IsEditMode;
+            EditInvestigatorButton.Enabled = !IsEditMode && IsInvestigator;
+            InvestigatorDetailsButton.Enabled = !IsEditMode;
         }
 
-        private void SetAnimalList()
+        private void GeneralDataChanged()
         {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpGeneral();
+        }
 
+        private void EditInvestigatorButton_Click(object sender, EventArgs e)
+        {
+            var form = new ChangeInvestigatorForm(Project);
+            form.DatabaseChanged += (o, args) => GeneralDataChanged();
+            form.Show(this);
+        }
+
+        private void InvestigatorDetailsButton_Click(object sender, EventArgs e)
+        {
+            var form = new InvestigatorForm(Project.ProjectInvestigator1);
+            form.DatabaseChanged += (o, args) => GeneralDataChanged();
+            form.Show(this);
+        }
+
+        private void EditSaveButton_Click(object sender, EventArgs e)
+        {
+            //This button is not enabled unless editing is permitted 
+            if (EditSaveButton.Text == "Edit")
+            {
+                // The user wants to edit, Enable form
+                EditSaveButton.Text = "Save";
+                DoneCancelButton.Text = "Cancel";
+                EnableGeneralControls();
+            }
+            else
+            {
+                //User is saving
+                UpdateDataSource();
+                if (SubmitChanges())
+                {
+                    OnDatabaseChanged();
+                    EditSaveButton.Text = "Edit";
+                    DoneCancelButton.Text = "Done";
+                    EnableGeneralControls();
+                }
+            }
+        }
+
+        private void DoneCancelButton_Click(object sender, EventArgs e)
+        {
+            if (DoneCancelButton.Text == "Cancel")
+            {
+                DoneCancelButton.Text = "Done";
+                EditSaveButton.Text = "Edit";
+                EnableGeneralControls();
+                //Reset state from database
+                LoadDataContext();
+                SetUpGeneral();
+            }
+            else
+            {
+                Close();
+            }
+        }
+
+        private void UpdateDataSource()
+        {
+            Project.Description = DescriptionTextBox.Text;
+            Project.UnitCode = UnitTextBox.Text;
+            Project.ProjectName = ProjectNameTextBox.Text;
+        }
+
+        #endregion
+
+
+        #region Animal List
+
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        class AnimalListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public Animal Animal { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void SetUpAnimalTab()
+        {
             var query = (from animal in Database.Animals
                          where animal.Project == Project
                          //orderby animal.MortalityDate , animal.AnimalId
                          select new AnimalListItem
-                                    {
-                                        Animal = animal,
-                                        Name = GetName(animal),
-                                        CanDelete = CanDeleteAnimal(animal)
-                                    });
+                         {
+                             Animal = animal,
+                             Name = GetName(animal),
+                             CanDelete = CanDeleteAnimal(animal)
+                         });
             var sortedList = query.OrderBy(a => a.Animal.MortalityDate != null).ThenBy(a => a.Animal.AnimalId).ToList();
             AnimalsListBox.DataSource = sortedList;
             AnimalsListBox.DisplayMember = "Name";
@@ -143,7 +268,7 @@ namespace AnimalMovement
         private static string GetName(Animal animal)
         {
             var currentCollar = animal.CollarDeployments.FirstOrDefault(cd => cd.RetrievalDate == null);
-            var name   = currentCollar == null
+            var name = currentCollar == null
                        ? animal.AnimalId
                        : animal.AnimalId + " (" + currentCollar.Collar + ")";
             if (animal.MortalityDate != null)
@@ -151,19 +276,84 @@ namespace AnimalMovement
             return name;
         }
 
-        private void SetFileList()
+        private bool CanDeleteAnimal(Animal animal)
         {
-            var query =  from file in Database.CollarFiles
-                                      where file.Project == Project &&
-                               (ShowDerivedFilesCheckBox.Checked || file.ParentFileId == null) &&
-                               (ShowEmailFilesCheckBox.Checked || file.Format != 'E') &&
-                               (ShowDownloadFilesCheckBox.Checked || file.Format != 'F')
-                         select new FileListItem
-                                      {
-                                          File = file,
-                                          Name = file.FileName + (file.Status == 'I' ? " (Inactive)" : ""),
-                                          CanDelete = file.ParentFileId == null && !file.ArgosDownloads.Any()
-                                      };
+            //An animal can't have any locations without a deployment
+            return !Database.CollarDeployments.Any(d => d.Animal == animal);
+        }
+
+        private void EnableAnimalControls()
+        {
+            AddAnimalButton.Enabled = !IsEditMode && IsEditor;
+            DeleteAnimalsButton.Enabled = !IsEditMode && IsEditor &&
+                                          AnimalsListBox.SelectedItems.Cast<AnimalListItem>()
+                                                        .Any(item => item.CanDelete);
+            InfoAnimalsButton.Enabled = !IsEditMode && AnimalsListBox.SelectedItems.Count == 1;
+        }
+
+        private void AnimalDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpAnimalTab();
+        }
+
+        private void AddAnimalButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddAnimalForm(Project);
+            form.DatabaseChanged += (o, x) => AnimalDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteAnimalsButton_Click(object sender, EventArgs e)
+        {
+            foreach (AnimalListItem item in AnimalsListBox.SelectedItems.Cast<AnimalListItem>().Where(item => item.CanDelete))
+                Database.Animals.DeleteOnSubmit(item.Animal);
+            if (SubmitChanges())
+                AnimalDataChanged();
+        }
+
+        private void InfoAnimalButton_Click(object sender, EventArgs e)
+        {
+            var animal = ((AnimalListItem)AnimalsListBox.SelectedItem).Animal;
+            var form = new AnimalDetailsForm(animal);
+            form.DatabaseChanged += (o, args) => AnimalDataChanged();
+            form.Show(this);
+        }
+
+        private void AnimalsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableAnimalControls();
+        }
+
+        #endregion
+
+
+        #region File List
+
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        class FileListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public CollarFile File { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void SetUpFileTab()
+        {
+            var query = from file in Database.CollarFiles
+                        where file.Project == Project &&
+                 (ShowDerivedFilesCheckBox.Checked || file.ParentFileId == null) &&
+                 (ShowEmailFilesCheckBox.Checked || file.Format != 'E') &&
+                 (ShowDownloadFilesCheckBox.Checked || file.Format != 'F')
+                        select new FileListItem
+                        {
+                            File = file,
+                            Name = file.FileName + (file.Status == 'I' ? " (Inactive)" : ""),
+                            CanDelete = file.ParentFileId == null && !file.ArgosDownloads.Any()
+                        };
             var sortedList = query.OrderBy(f => f.File.Status)
                                   .ThenByDescending(f => f.File.ParentFileId ?? f.File.FileId)
                                   .ThenByDescending(f => f.File.FileId)
@@ -189,277 +379,171 @@ namespace AnimalMovement
             FilesTabPage.Text = sortedList.Count < 5 ? "Files" : String.Format("Files ({0})", sortedList.Count);
         }
 
-        private bool CanDeleteAnimal(Animal animal)
+        private void EnableFileControls()
         {
-            //An animal can't have any locations without a deployment
-            return !Database.CollarDeployments.Any(d => d.Animal == animal);
+            AddFilesButton.Enabled = !IsEditMode && IsEditor;
+            DeleteFilesButton.Enabled = !IsEditMode && IsEditor &&
+                                          FilesListBox.SelectedItems.Cast<FileListItem>()
+                                                        .Any(item => item.CanDelete);
+            InfoFilesButton.Enabled = !IsEditMode && FilesListBox.SelectedItems.Count == 1;
         }
 
-        private void UpdateDataSource()
+        private void FileDataChanged()
         {
-            Project.Description = DescriptionTextBox.Text;
-            Project.UnitCode = UnitTextBox.Text;
-            Project.ProjectName = ProjectNameTextBox.Text;
-        }
-
-        private void EnableForm()
-        {
-            EditInvestigatorButton.Enabled = IsProjectInvestigator;
-            EditSaveButton.Enabled = IsEditor || IsProjectInvestigator;
-            SetEditingControls();
-        }
-
-        private void SetEditingControls()
-        {
-            bool editModeEnabled = EditSaveButton.Text == "Save";
-            ProjectNameTextBox.Enabled = editModeEnabled;
-            DescriptionTextBox.Enabled = editModeEnabled;
-            UnitTextBox.Enabled = editModeEnabled;
-
-            EditInvestigatorButton.Enabled = !editModeEnabled && IsProjectInvestigator;
-            InvestigatorDetailsButton.Enabled = !editModeEnabled;
-
-            AddAnimalButton.Enabled = !editModeEnabled && IsEditor;
-            AddFilesButton.Enabled = !editModeEnabled && IsEditor;
-            AddEditorButton.Enabled = !editModeEnabled && IsProjectInvestigator;
-            //Set the Delete/Info buttons based on what is selected
-            EditorsListBox_SelectedIndexChanged(null, null);
-            AnimalsListBox_SelectedIndexChanged(null, null);
-            FilesListBox_SelectedIndexChanged(null, null);
-        }
-
-
-        #region form control events
-
-        private void EditInvestigatorButton_Click(object sender, EventArgs e)
-        {
-            var form = new ChangeInvestigatorForm(Project);
-            if (form.ShowDialog(this) == DialogResult.Cancel)
-                return;
             OnDatabaseChanged();
             LoadDataContext();
-        }
-
-        private void InvestigatorDetailsButton_Click(object sender, EventArgs e)
-        {
-            var form = new InvestigatorForm(Project.ProjectInvestigator1);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
-            form.Show(this);
-        }
-
-        private void AddEditorButton_Click(object sender, EventArgs e)
-        {
-            var form = new AddEditorForm(Project, null, true);
-            form.DatabaseChanged += (o, x) => { OnDatabaseChanged(); LoadDataContext(); };
-            form.Show(this);
-        }
-
-        private void DeleteEditorButton_Click(object sender, EventArgs e)
-        {
-            //If we have permission, We can always delete any/all project editors
-            foreach (ProjectEditor editor in EditorsListBox.SelectedItems)
-                Database.ProjectEditors.DeleteOnSubmit(editor);
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected editors\n" +
-                                "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            OnDatabaseChanged();
-            SetEditorList();
-            EditorsListBox_SelectedIndexChanged(null, null);
+            SetUpFileTab();
         }
 
         private void AddFilesButton_Click(object sender, EventArgs e)
         {
-            //The add happens in a new context, so we need to reload this context if changes were made
             var form = new UploadFilesForm(Project);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.DatabaseChanged += (o, x) => FileDataChanged();
             form.Show(this);
         }
 
         private void DeleteFilesButton_Click(object sender, EventArgs e)
         {
-            foreach (FileListItem item in FilesListBox.SelectedItems.Cast<FileListItem>().Where(item => item.CanDelete))
+            foreach (FileListItem item in AnimalsListBox.SelectedItems.Cast<FileListItem>().Where(item => item.CanDelete))
                 Database.CollarFiles.DeleteOnSubmit(item.File);
-            //Deleting an active file takes time to remove the locations; assume at least one file is active
-            Cursor.Current = Cursors.WaitCursor;
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected files\n" +
-                             "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            Cursor.Current = Cursors.Default;
-            OnDatabaseChanged();
-            SetFileList();
-            FilesListBox_SelectedIndexChanged(null, null);
+            if (SubmitChanges())
+                FileDataChanged();
         }
 
-        private void InfoFilesButton_Click(object sender, EventArgs e)
+        private void InfoFileButton_Click(object sender, EventArgs e)
         {
-            //If the user make changes in the info dialog, they happen in a different context, so we need to reload this context if changes were made
             var file = ((FileListItem)FilesListBox.SelectedItem).File;
             var form = new FileDetailsForm(file);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
+            form.DatabaseChanged += (o, args) => FileDataChanged();
             form.Show(this);
-        }
-
-        private void AddAnimalButton_Click(object sender, EventArgs e)
-        {
-            //The add happens in a new context, so we need to reload this context if changes were made
-            var form = new AddAnimalForm(Project);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
-            form.Show(this);
-        }
-
-        private void DeleteAnimalsButton_Click(object sender, EventArgs e)
-        {
-            foreach (AnimalListItem item in AnimalsListBox.SelectedItems.Cast<AnimalListItem>().Where(item => item.CanDelete))
-                Database.Animals.DeleteOnSubmit(item.Animal);
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                string msg = "Unable to delete one or more of the selected animals\n" +
-                             "Error message:\n" + ex.Message;
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            OnDatabaseChanged();
-            SetAnimalList();
-            AnimalsListBox_SelectedIndexChanged(null, null);
-        }
-
-        private void InfoAnimalsButton_Click(object sender, EventArgs e)
-        {
-            //If the user make changes in the info dialog, they happen in a different context, so we need to reload this context if changes were made
-            var animal = ((AnimalListItem)AnimalsListBox.SelectedItem).Animal;
-            var form = new AnimalDetailsForm(animal);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); };
-            form.Show(this);
-        }
-
-
-        private void EditSaveButton_Click(object sender, EventArgs e)
-        {
-            //This button is not enabled unless editing is permitted 
-            if (EditSaveButton.Text == "Edit")
-            {
-                // The user wants to edit, Enable form
-                EditSaveButton.Text = "Save";
-                DoneCancelButton.Text = "Cancel";
-                SetEditingControls();
-            }
-            else
-            {
-                //User is saving
-                UpdateDataSource();
-                try
-                {
-                    Database.SubmitChanges();
-                }
-                catch (Exception ex)
-                {
-                    string msg = "Unable to save all the changes.\n" +
-                                 "Error message:\n" + ex.Message;
-                    MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                OnDatabaseChanged();
-                EditSaveButton.Text = "Edit";
-                DoneCancelButton.Text = "Done";
-                SetEditingControls();
-            }
-        }
-
-        private void DoneCancelButton_Click(object sender, EventArgs e)
-        {
-            if (DoneCancelButton.Text == "Cancel")
-            {
-                DoneCancelButton.Text = "Done";
-                EditSaveButton.Text = "Edit";
-                SetEditingControls();
-                //Reset state from database
-                LoadDataContext();
-            }
-            else
-            {
-                Close();
-            }
-        }
-
-        private void EditorsListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            DeleteEditorButton.Enabled = false;
-            if (EditSaveButton.Text == "Save" || !IsProjectInvestigator)
-                return;
-            if (EditorsListBox.SelectedItems.Count > 0)
-                DeleteEditorButton.Enabled = true;
-        }
-
-        private void AnimalsListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            InfoAnimalsButton.Enabled = false;
-            DeleteAnimalsButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoAnimalsButton.Enabled = AnimalsListBox.SelectedItems.Count == 1;
-            if (IsEditor && AnimalsListBox.SelectedItems.Cast<AnimalListItem>().Any(item => item.CanDelete))
-                DeleteAnimalsButton.Enabled = true;
         }
 
         private void FilesListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            InfoFilesButton.Enabled = false;
-            DeleteFilesButton.Enabled = false;
-            if (EditSaveButton.Text == "Save")
-                return;
-            InfoFilesButton.Enabled = FilesListBox.SelectedItems.Count == 1;
-            if (IsEditor && FilesListBox.SelectedItems.Cast<FileListItem>().Any(item => item.CanDelete))
-                DeleteFilesButton.Enabled = true;
+            EnableFileControls();
         }
-
-
-        private void ProjectTabs_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            switch (ProjectTabs.SelectedIndex)
-            {
-                case 0:
-                    SetAnimalList();
-                    break;
-                case 1:
-                    SetFileList();
-                    break;
-                case 2:
-                    SetEditorList();
-                    break;
-            }
-        }
-
 
         private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            SetFileList();
+            if (Visible)
+                SetUpFileTab();
         }
 
         #endregion
 
-        private void OnDatabaseChanged()
-        {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this,EventArgs.Empty);
-        }
-    }
 
+        #region Editors List
+
+        private void SetUpEditorsTab()
+        {
+            var editors = Project.ProjectEditors;
+            EditorsListBox.DataSource = editors;
+            EditorsListBox.DisplayMember = "Editor";
+            EnableEditorControls();
+        }
+
+        private void EnableEditorControls()
+        {
+            AddEditorButton.Enabled = !IsEditMode && IsInvestigator;
+            DeleteEditorButton.Enabled = !IsEditMode && EditorsListBox.SelectedItems.Count > 0 &&
+                                            (IsInvestigator ||
+                                             (IsEditor && EditorsListBox.SelectedItems.Count == 1 &&
+                                              String.Equals(((ProjectEditor)EditorsListBox.SelectedItem).Editor.Normalize(),
+                                                            CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)));
+        }
+
+        private void EditorDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpEditorsTab();
+        }
+
+        private void AddEditorButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddEditorForm(Project);
+            form.DatabaseChanged += (o, x) => EditorDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteEditorButton_Click(object sender, EventArgs e)
+        {
+            foreach (var item in EditorsListBox.SelectedItems)
+                Database.ProjectEditors.DeleteOnSubmit((ProjectEditor)item);
+            if (SubmitChanges())
+                EditorDataChanged();
+        }
+
+        private void EditorsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableEditorControls();
+        }
+
+        #endregion
+
+
+        #region QC Reports
+
+        private XDocument _queryDocument;
+
+        private void SetUpReportsTab()
+        {
+            var xmlFilePath = Properties.Settings.Default.ProjectReportsXml;
+            string error = null;
+            try
+            {
+                _queryDocument = XDocument.Load(xmlFilePath);
+            }
+            catch (Exception ex)
+            {
+                error = String.Format("Unable to load '{0}': {1}", xmlFilePath, ex.Message);
+                _queryDocument = null;
+            }
+            if (error != null)
+            {
+                ReportDescriptionTextBox.Text = error;
+                MessageBox.Show(error, "Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ReportComboBox.DataSource = null;
+                return;
+            }
+            var names = new List<string>{"Pick a report"};
+            names.AddRange(_queryDocument.Descendants("name").Select(i => i.Value.Trim()));
+            ReportComboBox.DataSource = names;
+        }
+
+        private void ReportComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var report = _queryDocument.Descendants("report")
+                                       .FirstOrDefault(
+                                           r => ((string)r.Element("name")).Trim() == (string)ReportComboBox.SelectedItem);
+            ReportDescriptionTextBox.Text = report == null ? null : (string)report.Element("description");
+            FillDataGrid(report == null ? null : (string)report.Element("query"));
+        }
+
+        private void FillDataGrid(string sql)
+        {
+            if (String.IsNullOrEmpty(sql))
+            {
+                ReportDataGridView.DataSource = null;
+                return;
+            }
+            var command = new SqlCommand(sql, (SqlConnection)Database.Connection);
+            command.Parameters.Add(new SqlParameter("@Project", SqlDbType.NVarChar) { Value = Project.ProjectId });
+            var dataAdapter = new SqlDataAdapter(command);
+            var table = new DataTable();
+            try
+            {
+                dataAdapter.Fill(table);
+            }
+            catch (Exception ex)
+            {
+                table.Columns.Add("Error");
+                table.Rows.Add(ex.Message);
+            }
+            ReportDataGridView.DataSource = new BindingSource { DataSource = table };
+        }
+
+        #endregion
+
+    }
 }

@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<reports>
+  <!--If a query has the string '@Project' it will be replaced with the current project-->
+  <report>
+    <name>All Animals</name>
+    <description>
+      <![CDATA[List all animals.  To copy this data into Excel or another application, select the rows to copy (click the top left corner to select all rows), then press Ctrl-C, then paste into the other application.]]>
+    </description>
+    <query>
+      <![CDATA[
+      SELECT * FROM Animals WHERE ProjectId = @Project
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Time of Last Location</name>
+    <description>
+      <![CDATA[Last location for each living animal with a collar in a project]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT A.ProjectId, A.AnimalId, CONVERT(VARCHAR(10), MAX(FixDate), 101) AS [Date of Last Location]
+       FROM Locations AS L
+ INNER JOIN Animals AS A
+         ON L.ProjectId = A.ProjectId AND L.AnimalId = A.AnimalId
+ INNER JOIN CollarDeployments AS CD
+         ON CD.ProjectId = A.ProjectId AND CD.AnimalId = A.AnimalId
+      WHERE L.ProjectId = @Project
+        AND MortalityDate IS NULL
+        AND RetrievalDate IS NULL
+   GROUP BY A.ProjectId, A.AnimalId
+   ORDER BY MAX(FixDate) DESC
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Deployments</name>
+    <description>
+      <![CDATA[All of a project's current deployments]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT AnimalId, CollarId, DeploymentDate
+       FROM CollarDeployments
+      WHERE ProjectId = @Project and RetrievalDate IS NULL
+   ORDER BY DeploymentDate
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Living Animals without a collar</name>
+    <description>
+      <![CDATA[A Project's living animals without a collar]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT *
+       FROM Animals
+      WHERE ProjectId = @Project
+        AND MortalityDate IS NULL
+        AND AnimalId NOT IN ( 
+                      SELECT AnimalId
+                        FROM CollarDeployments
+                       WHERE ProjectId = @Project
+                         AND RetrievalDate IS NULL
+                     )
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Files with no fixes</name>
+    <description>
+      <![CDATA[Active files in a project with no fixes]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT CF.ProjectId, CF.[FileName], PF.[FileName] AS Parent, CF.Format, C.CollarModel, C.CollarId, D.PlatformId
+       FROM CollarFiles AS CF
+ INNER JOIN Collars as C
+         ON CF.CollarManufacturer = C.CollarManufacturer AND CF.CollarId = C.CollarId
+  LEFT JOIN CollarFiles AS PF
+         ON CF.ParentFileId = PF.FileId
+  LEFT JOIN CollarFixes AS X
+         ON CF.FileId = X.FileId
+  LEFT JOIN ArgosDeployments AS D
+         ON CF.ArgosDeploymentId = D.DeploymentId
+ INNER JOIN LookupCollarFileFormats AS F
+         ON CF.Format = F.Code
+      WHERE F.ArgosData = 'N'
+        AND CF.[Status] = 'A'
+        AND X.FixId IS NULL
+        AND CF.ProjectId = @Project
+   ORDER BY CF.ProjectId, CF.Format, CollarId, PF.[FileName], CF.[FileName]
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Animals with no fixes</name>
+    <description>
+      <![CDATA[If a animal has had multiple deployments, and one deployment has fixes, and the other does not, this will report a false positive for the listing the animal with the collar with no fixes]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT A.AnimalId, D.CollarId
+       FROM Animals AS A
+  LEFT JOIN CollarDeployments AS D
+         ON A.ProjectId = D.ProjectId AND A.AnimalId = D.AnimalId
+  LEFT JOIN CollarFixes as F
+         ON D.CollarId = F.CollarId
+      WHERE A.ProjectId = @Project
+        AND F.CollarId IS NULL
+   ORDER BY A.AnimalId
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>-----------------------</name>
+    <description>
+      <![CDATA[]]>
+    </description>
+    <query>
+      <![CDATA[
+      ]]>
+    </query>
+  </report>
+
+  <report>
+    <name>All fix conflicts in the last 30 days (SLOW!!!)</name>
+    <description>
+      <![CDATA[All conflicting fixes for all collars deployed (at any time) on a project (SLOW!!!)]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarManufacturer, C.CollarId, F.*
+       FROM (SELECT DISTINCT CollarManufacturer, CollarId, ProjectId FROM CollarDeployments) AS C
+CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer, C.CollarId, 30)) AS F
+      WHERE C.ProjectId = @Project
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>All fix conflicts (REALLY SLOW!!!)</name>
+    <description>
+      <![CDATA[All conflicting fixes for all collars deployed (at any time) on a project (SLOW!!!)]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarManufacturer, C.CollarId, F.*
+       FROM (SELECT DISTINCT CollarManufacturer, CollarId, ProjectId FROM CollarDeployments) AS C
+CROSS APPLY (SELECT * FROM ConflictingFixes (C.CollarManufacturer, C.CollarId,30000)) AS F
+      WHERE C.ProjectId = @Project
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Summary of fixes by animal (Slow!!!)</name>
+    <description>
+      <![CDATA[Summary of fixes for all animals in a project (Slow!!!)]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.AnimalId, F.*
+       FROM CollarDeployments AS C
+CROSS APPLY (SELECT * FROM AnimalLocationSummary (C.ProjectId, C.AnimalId)) AS F
+      WHERE C.ProjectId = @Project
+      ]]>
+    </query>
+  </report>
+</reports>
