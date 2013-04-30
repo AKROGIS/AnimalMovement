@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -8,107 +9,63 @@ namespace AnimalMovement
     internal partial class AddProjectForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
-        private bool IndependentContext { get; set; }
         private string CurrentUser { get; set; }
-        private bool IsProjectInvestigator { get; set; }
+        private ProjectInvestigator Investigator { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal AddProjectForm(string user)
-        {
-            IndependentContext = true;
-            CurrentUser = user;
-            SetupForm();
-        }
-
-        internal AddProjectForm(AnimalMovementDataContext database, string user)
-        {
-            IndependentContext = false;
-            Database = database;
-            CurrentUser = user;
-            SetupForm();
-        }
-
-        private void SetupForm()
+        internal AddProjectForm()
         {
             InitializeComponent();
             RestoreWindow();
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
-            EnableCreate();
+            SetUpForm();
         }
 
         private void LoadDataContext()
         {
-            if (IndependentContext)
-            {
-                Database = new AnimalMovementDataContext();
-            }
-            if (Database == null || CurrentUser == null)
-            {
-                MessageBox.Show("Insufficent information to initialize form.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
-            IsProjectInvestigator = Database.ProjectInvestigators.Any(pi => pi.Login == CurrentUser);
-            ProjectInvestigatorComboBox.DataSource = Database.ProjectInvestigators;
-            ProjectInvestigatorComboBox.DisplayMember = "Name";
-            ProjectInvestigatorComboBox.SelectedItem =
-                Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
+            Database = new AnimalMovementDataContext();
+            Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
         }
 
-        private void EnableCreate()
+        private void SetUpForm()
         {
-            CreateButton.Enabled = IsProjectInvestigator &&
+            var investigators = from pi in Database.ProjectInvestigators
+                                where pi.Login == CurrentUser ||
+                                      pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                select pi;
+            ProjectInvestigatorComboBox.DataSource = investigators;
+            ProjectInvestigatorComboBox.DisplayMember = "Name";
+            ProjectInvestigatorComboBox.SelectedItem = Investigator;
+            EnableControls();
+        }
+
+        private void EnableControls()
+        {
+            CreateButton.Enabled = ProjectInvestigatorComboBox.SelectedItem != null &&
                                    !string.IsNullOrEmpty(ProjectIdTextBox.Text) &&
                                    !string.IsNullOrEmpty(ProjectNameTextBox.Text);
         }
 
-        private void CreateButton_Click(object sender, EventArgs e)
+        private bool SubmitChanges()
         {
-            string projectId = ProjectIdTextBox.Text;
-            if (Database.Projects.Any(p => p.ProjectId == projectId))
+            Cursor.Current = Cursors.WaitCursor;
+            try
             {
-                MessageBox.Show("The project Id is not unique.  Try again", "Database Error", MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-                ProjectIdTextBox.Focus();
-                CreateButton.Enabled = false;
-                return;
+                Database.SubmitChanges();
             }
-            var project = new Project
+            catch (SqlException ex)
             {
-                ProjectId = projectId,
-                ProjectName = ProjectNameTextBox.Text.NullifyIfEmpty(),
-                ProjectInvestigator1 = (ProjectInvestigator)ProjectInvestigatorComboBox.SelectedItem,
-                UnitCode = UnitCodeTextBox.Text.NullifyIfEmpty(),
-                Description = DescriptionTextBox.Text.NullifyIfEmpty()
-            };
-            Database.Projects.InsertOnSubmit(project);
-            if (IndependentContext)
-            {
-                try
-                {
-                    Database.SubmitChanges();
-                }
-                catch (Exception ex)
-                {
-                    Database.Projects.DeleteOnSubmit(project);
-                    MessageBox.Show(ex.Message, "Unable to create new project", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    ProjectIdTextBox.Focus();
-                    CreateButton.Enabled = false;
-                    return;
-                }
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
-            OnDatabaseChanged();
-            DialogResult = DialogResult.OK;
-        }
-
-        private void CodeTextBox_TextChanged(object sender, EventArgs e)
-        {
-            EnableCreate();
-        }
-
-        private void NameTextBox_TextChanged(object sender, EventArgs e)
-        {
-            EnableCreate();
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
         }
 
         private void OnDatabaseChanged()
@@ -118,9 +75,54 @@ namespace AnimalMovement
                 handle(this, EventArgs.Empty);
         }
 
+        private Project GetValidProject()
+        {
+            if (Database.Projects.Any(p => p.ProjectId == ProjectIdTextBox.Text))
+            {
+                MessageBox.Show("The project Id is not unique.  Try again", "Database Error", MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+                ProjectIdTextBox.Focus();
+                CreateButton.Enabled = false;
+                return null;
+            }
+            return new Project
+            {
+                ProjectId = ProjectIdTextBox.Text,
+                ProjectName = ProjectNameTextBox.Text.NullifyIfEmpty(),
+                ProjectInvestigator1 = (ProjectInvestigator)ProjectInvestigatorComboBox.SelectedItem,
+                UnitCode = UnitCodeTextBox.Text.NullifyIfEmpty(),
+                Description = DescriptionTextBox.Text.NullifyIfEmpty()
+            };
+        }
+
+        private void CreateButton_Click(object sender, EventArgs e)
+        {
+            var project = GetValidProject();
+            if (project == null)
+                return;
+            Database.Projects.InsertOnSubmit(project);
+            if (SubmitChanges())
+            {
+                OnDatabaseChanged();
+                Close();
+            }
+            ProjectIdTextBox.Focus();
+            CreateButton.Enabled = false;
+        }
+
         private void cancelButton_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void CodeTextBox_TextChanged(object sender, EventArgs e)
+        {
+            EnableControls();
+        }
+
+        private void NameTextBox_TextChanged(object sender, EventArgs e)
+        {
+            EnableControls();
         }
     }
 }

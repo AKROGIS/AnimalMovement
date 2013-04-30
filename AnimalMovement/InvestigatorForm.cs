@@ -261,7 +261,7 @@ namespace AnimalMovement
 
         private void AddProjectButton_Click(object sender, EventArgs e)
         {
-            var form = new AddProjectForm(CurrentUser);
+            var form = new AddProjectForm();
             form.DatabaseChanged += (o, x) => ProjectDataChanged();
             form.Show(this);
         }

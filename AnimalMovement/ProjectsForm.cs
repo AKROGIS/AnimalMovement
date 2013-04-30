@@ -21,6 +21,11 @@ namespace AnimalMovement
             ReloadFromDatabase();
         }
 
+        private void ProjectDataChanged()
+        {
+            ReloadFromDatabase();
+        }
+
         private void ReloadFromDatabase()
         {
             var db = new AnimalMovementDataContext();
@@ -78,9 +83,9 @@ namespace AnimalMovement
 
         private void AddProjectButton_Click(object sender, EventArgs e)
         {
-            var form = new AddProjectForm(CurrentUser);
-            if (form.ShowDialog(this) != DialogResult.Cancel)
-                ReloadFromDatabase();
+            var form = new AddProjectForm();
+            form.DatabaseChanged += (o, x) => ProjectDataChanged();
+            form.Show(this);
         }
 
         private void DeleteProjectButton_Click(object sender, EventArgs e)
