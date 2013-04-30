@@ -45,6 +45,7 @@ namespace AnimalMovement
             if (Project != null && Investigator != null)
                 throw new InvalidOperationException("Add Editor Form cannot have both a valid Project AND Project Investigator.");
 
+            //Only project investigators can add editors/assistants
             IsProjectInvestigator = Database.ProjectInvestigators.Any(pi => pi.Login == CurrentUser);
             SetupControls();
         }

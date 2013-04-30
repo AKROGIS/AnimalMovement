@@ -57,20 +57,23 @@ namespace AnimalMovement
                     Project == null ? p.ProjectId == Settings.GetDefaultProject() : p.ProjectId == Project.ProjectId);
 
             ProjectComboBox.DataSource = projects;
-            ProjectComboBox.SelectedItem = selectedProject;
             ProjectComboBox.DisplayMember = "ProjectName";
+            ProjectComboBox.SelectedItem = selectedProject;
         }
 
         private void LoadInvestigatorList()
         {
             //The Investigator I was given does not have object equality with investigators in this data context
-            var investigators = Database.ProjectInvestigators.ToList();
+            var investigators = (from pi in Database.ProjectInvestigators
+                                 where pi.Login == CurrentUser ||
+                                       pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                                 select pi).ToList();
             var selectedInvestigator =
                 investigators.FirstOrDefault(
                     i => Investigator == null ? i.Login == CurrentUser : i.Login == Investigator.Login);
             InvestigatorComboBox.DataSource = investigators;
-            InvestigatorComboBox.SelectedItem = selectedInvestigator;
             InvestigatorComboBox.DisplayMember = "Name";
+            InvestigatorComboBox.SelectedItem = selectedInvestigator;
         }
 
 

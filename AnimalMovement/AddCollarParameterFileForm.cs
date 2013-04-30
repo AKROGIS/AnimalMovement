@@ -48,6 +48,7 @@ namespace AnimalMovement
             SetupFormatList();
             SetupCollarList();
             SetupStatusList();
+            //FIXME - determine if current user has permission
         }
 
         private void SetupOwnerList()
