@@ -208,9 +208,6 @@ namespace AnimalMovement
             var collar = (Collar)CollarComboBox.SelectedItem;
             if (collar.CollarModel == "Gen3" && FileComboBox.SelectedItem != null)
                 return "Warning: Argos data for collars with a PPF file cannot be automatically processed";
-
-            //TODO - for Gen4 TPF files, validate start date and collar match
-
             return null;
         }
 
