@@ -64,13 +64,10 @@
             this.SourceFileLabel = new System.Windows.Forms.Label();
             this.ValidationTextBox = new System.Windows.Forms.TextBox();
             this.FileTabControl = new System.Windows.Forms.TabControl();
-            this.GpsFixesTabPage = new System.Windows.Forms.TabPage();
-            this.DerivedFilesTabPage = new System.Windows.Forms.TabPage();
-            this.ProcessingIssuesTabPage = new System.Windows.Forms.TabPage();
             this.ArgosTabPage = new System.Windows.Forms.TabPage();
-            this.ArgosFixesTabPage = new System.Windows.Forms.TabPage();
-            this.ProcessingIssuesDataGridView = new System.Windows.Forms.DataGridView();
             this.ArgosPlatformsDataGridView = new System.Windows.Forms.DataGridView();
+            this.GpsFixesTabPage = new System.Windows.Forms.TabPage();
+            this.ArgosFixesTabPage = new System.Windows.Forms.TabPage();
             this.ArgosFixesDataGridView = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -80,17 +77,20 @@
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DerivedFilesTabPage = new System.Windows.Forms.TabPage();
+            this.ProcessingIssuesTabPage = new System.Windows.Forms.TabPage();
+            this.ProcessingIssuesDataGridView = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.GpsFixesDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DerivedFilesDataGridView)).BeginInit();
             this.FileTabControl.SuspendLayout();
+            this.ArgosTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ArgosPlatformsDataGridView)).BeginInit();
             this.GpsFixesTabPage.SuspendLayout();
+            this.ArgosFixesTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ArgosFixesDataGridView)).BeginInit();
             this.DerivedFilesTabPage.SuspendLayout();
             this.ProcessingIssuesTabPage.SuspendLayout();
-            this.ArgosTabPage.SuspendLayout();
-            this.ArgosFixesTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ArgosPlatformsDataGridView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ArgosFixesDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // label6
@@ -463,7 +463,8 @@
             // 
             // ValidationTextBox
             // 
-            this.ValidationTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ValidationTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ValidationTextBox.BackColor = System.Drawing.SystemColors.Control;
             this.ValidationTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.ValidationTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -495,42 +496,6 @@
             this.FileTabControl.Tag = "";
             this.FileTabControl.SelectedIndexChanged += new System.EventHandler(this.FileTabControl_SelectedIndexChanged);
             // 
-            // GpsFixesTabPage
-            // 
-            this.GpsFixesTabPage.Controls.Add(this.GpsFixesDataGridView);
-            this.GpsFixesTabPage.Location = new System.Drawing.Point(4, 22);
-            this.GpsFixesTabPage.Name = "GpsFixesTabPage";
-            this.GpsFixesTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.GpsFixesTabPage.Size = new System.Drawing.Size(502, 185);
-            this.GpsFixesTabPage.TabIndex = 0;
-            this.GpsFixesTabPage.Tag = "GpsFixes";
-            this.GpsFixesTabPage.Text = "GPS Fixes in File";
-            this.GpsFixesTabPage.UseVisualStyleBackColor = true;
-            // 
-            // DerivedFilesTabPage
-            // 
-            this.DerivedFilesTabPage.Controls.Add(this.DerivedFilesDataGridView);
-            this.DerivedFilesTabPage.Location = new System.Drawing.Point(4, 22);
-            this.DerivedFilesTabPage.Name = "DerivedFilesTabPage";
-            this.DerivedFilesTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.DerivedFilesTabPage.Size = new System.Drawing.Size(502, 185);
-            this.DerivedFilesTabPage.TabIndex = 1;
-            this.DerivedFilesTabPage.Tag = "DerivedFiles";
-            this.DerivedFilesTabPage.Text = "Derived Files";
-            this.DerivedFilesTabPage.UseVisualStyleBackColor = true;
-            // 
-            // ProcessingIssuesTabPage
-            // 
-            this.ProcessingIssuesTabPage.Controls.Add(this.ProcessingIssuesDataGridView);
-            this.ProcessingIssuesTabPage.Location = new System.Drawing.Point(4, 22);
-            this.ProcessingIssuesTabPage.Name = "ProcessingIssuesTabPage";
-            this.ProcessingIssuesTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.ProcessingIssuesTabPage.Size = new System.Drawing.Size(502, 185);
-            this.ProcessingIssuesTabPage.TabIndex = 2;
-            this.ProcessingIssuesTabPage.Tag = "ProcessingIssues";
-            this.ProcessingIssuesTabPage.Text = "Processing Issues";
-            this.ProcessingIssuesTabPage.UseVisualStyleBackColor = true;
-            // 
             // ArgosTabPage
             // 
             this.ArgosTabPage.Controls.Add(this.ArgosPlatformsDataGridView);
@@ -542,38 +507,6 @@
             this.ArgosTabPage.Tag = "Argos";
             this.ArgosTabPage.Text = "Collars in File";
             this.ArgosTabPage.UseVisualStyleBackColor = true;
-            // 
-            // ArgosFixesTabPage
-            // 
-            this.ArgosFixesTabPage.Controls.Add(this.ArgosFixesDataGridView);
-            this.ArgosFixesTabPage.Location = new System.Drawing.Point(4, 22);
-            this.ArgosFixesTabPage.Name = "ArgosFixesTabPage";
-            this.ArgosFixesTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.ArgosFixesTabPage.Size = new System.Drawing.Size(502, 185);
-            this.ArgosFixesTabPage.TabIndex = 4;
-            this.ArgosFixesTabPage.Tag = "ArgosFixes";
-            this.ArgosFixesTabPage.Text = "Argos Fixes in File";
-            this.ArgosFixesTabPage.UseVisualStyleBackColor = true;
-            // 
-            // ProcessingIssuesDataGridView
-            // 
-            this.ProcessingIssuesDataGridView.AllowUserToAddRows = false;
-            this.ProcessingIssuesDataGridView.AllowUserToDeleteRows = false;
-            this.ProcessingIssuesDataGridView.AllowUserToOrderColumns = true;
-            this.ProcessingIssuesDataGridView.AllowUserToResizeRows = false;
-            this.ProcessingIssuesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ProcessingIssuesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            this.ProcessingIssuesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ProcessingIssuesDataGridView.Location = new System.Drawing.Point(3, 3);
-            this.ProcessingIssuesDataGridView.MultiSelect = false;
-            this.ProcessingIssuesDataGridView.Name = "ProcessingIssuesDataGridView";
-            this.ProcessingIssuesDataGridView.ReadOnly = true;
-            this.ProcessingIssuesDataGridView.RowHeadersVisible = false;
-            this.ProcessingIssuesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(497, 179);
-            this.ProcessingIssuesDataGridView.TabIndex = 52;
             // 
             // ArgosPlatformsDataGridView
             // 
@@ -594,6 +527,30 @@
             this.ArgosPlatformsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ArgosPlatformsDataGridView.Size = new System.Drawing.Size(497, 179);
             this.ArgosPlatformsDataGridView.TabIndex = 52;
+            // 
+            // GpsFixesTabPage
+            // 
+            this.GpsFixesTabPage.Controls.Add(this.GpsFixesDataGridView);
+            this.GpsFixesTabPage.Location = new System.Drawing.Point(4, 22);
+            this.GpsFixesTabPage.Name = "GpsFixesTabPage";
+            this.GpsFixesTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.GpsFixesTabPage.Size = new System.Drawing.Size(502, 185);
+            this.GpsFixesTabPage.TabIndex = 0;
+            this.GpsFixesTabPage.Tag = "GpsFixes";
+            this.GpsFixesTabPage.Text = "GPS Fixes in File";
+            this.GpsFixesTabPage.UseVisualStyleBackColor = true;
+            // 
+            // ArgosFixesTabPage
+            // 
+            this.ArgosFixesTabPage.Controls.Add(this.ArgosFixesDataGridView);
+            this.ArgosFixesTabPage.Location = new System.Drawing.Point(4, 22);
+            this.ArgosFixesTabPage.Name = "ArgosFixesTabPage";
+            this.ArgosFixesTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.ArgosFixesTabPage.Size = new System.Drawing.Size(502, 185);
+            this.ArgosFixesTabPage.TabIndex = 4;
+            this.ArgosFixesTabPage.Tag = "ArgosFixes";
+            this.ArgosFixesTabPage.Text = "Argos Fixes in File";
+            this.ArgosFixesTabPage.UseVisualStyleBackColor = true;
             // 
             // ArgosFixesDataGridView
             // 
@@ -696,6 +653,50 @@
             this.dataGridViewTextBoxColumn8.ReadOnly = true;
             this.dataGridViewTextBoxColumn8.Width = 110;
             // 
+            // DerivedFilesTabPage
+            // 
+            this.DerivedFilesTabPage.Controls.Add(this.DerivedFilesDataGridView);
+            this.DerivedFilesTabPage.Location = new System.Drawing.Point(4, 22);
+            this.DerivedFilesTabPage.Name = "DerivedFilesTabPage";
+            this.DerivedFilesTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.DerivedFilesTabPage.Size = new System.Drawing.Size(502, 185);
+            this.DerivedFilesTabPage.TabIndex = 1;
+            this.DerivedFilesTabPage.Tag = "DerivedFiles";
+            this.DerivedFilesTabPage.Text = "Derived Files";
+            this.DerivedFilesTabPage.UseVisualStyleBackColor = true;
+            // 
+            // ProcessingIssuesTabPage
+            // 
+            this.ProcessingIssuesTabPage.Controls.Add(this.ProcessingIssuesDataGridView);
+            this.ProcessingIssuesTabPage.Location = new System.Drawing.Point(4, 22);
+            this.ProcessingIssuesTabPage.Name = "ProcessingIssuesTabPage";
+            this.ProcessingIssuesTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.ProcessingIssuesTabPage.Size = new System.Drawing.Size(502, 185);
+            this.ProcessingIssuesTabPage.TabIndex = 2;
+            this.ProcessingIssuesTabPage.Tag = "ProcessingIssues";
+            this.ProcessingIssuesTabPage.Text = "Processing Issues";
+            this.ProcessingIssuesTabPage.UseVisualStyleBackColor = true;
+            // 
+            // ProcessingIssuesDataGridView
+            // 
+            this.ProcessingIssuesDataGridView.AllowUserToAddRows = false;
+            this.ProcessingIssuesDataGridView.AllowUserToDeleteRows = false;
+            this.ProcessingIssuesDataGridView.AllowUserToOrderColumns = true;
+            this.ProcessingIssuesDataGridView.AllowUserToResizeRows = false;
+            this.ProcessingIssuesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ProcessingIssuesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.ProcessingIssuesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ProcessingIssuesDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.ProcessingIssuesDataGridView.MultiSelect = false;
+            this.ProcessingIssuesDataGridView.Name = "ProcessingIssuesDataGridView";
+            this.ProcessingIssuesDataGridView.ReadOnly = true;
+            this.ProcessingIssuesDataGridView.RowHeadersVisible = false;
+            this.ProcessingIssuesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(497, 179);
+            this.ProcessingIssuesDataGridView.TabIndex = 52;
+            // 
             // FileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -734,14 +735,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.GpsFixesDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.DerivedFilesDataGridView)).EndInit();
             this.FileTabControl.ResumeLayout(false);
+            this.ArgosTabPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.ArgosPlatformsDataGridView)).EndInit();
             this.GpsFixesTabPage.ResumeLayout(false);
+            this.ArgosFixesTabPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.ArgosFixesDataGridView)).EndInit();
             this.DerivedFilesTabPage.ResumeLayout(false);
             this.ProcessingIssuesTabPage.ResumeLayout(false);
-            this.ArgosTabPage.ResumeLayout(false);
-            this.ArgosFixesTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ArgosPlatformsDataGridView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ArgosFixesDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

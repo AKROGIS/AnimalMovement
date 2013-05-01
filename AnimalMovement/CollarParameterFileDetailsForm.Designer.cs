@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollarParameterFileDetailsForm));
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
             this.CollarsDataGridView = new System.Windows.Forms.DataGridView();
@@ -53,16 +52,25 @@
             this.FileNameTextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.OwnerComboBox = new System.Windows.Forms.ComboBox();
-            this.label10 = new System.Windows.Forms.Label();
             this.StatusComboBox = new System.Windows.Forms.ComboBox();
+            this.FileTabControl = new System.Windows.Forms.TabControl();
+            this.ParametersTabPage = new System.Windows.Forms.TabPage();
+            this.TpfDetailsTabPage = new System.Windows.Forms.TabPage();
+            this.DerivedFilesDataGridView = new System.Windows.Forms.DataGridView();
+            this.ValidationTextBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).BeginInit();
+            this.FileTabControl.SuspendLayout();
+            this.ParametersTabPage.SuspendLayout();
+            this.TpfDetailsTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DerivedFilesDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // DoneCancelButton
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(16, 271);
+            this.DoneCancelButton.Location = new System.Drawing.Point(16, 344);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 70;
@@ -74,7 +82,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(405, 271);
+            this.EditSaveButton.Location = new System.Drawing.Point(394, 344);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 71;
@@ -100,13 +108,13 @@
             this.CollarParameterFileColumn,
             this.StartDateColumn,
             this.EndDateColumn});
-            this.CollarsDataGridView.Location = new System.Drawing.Point(17, 157);
+            this.CollarsDataGridView.Location = new System.Drawing.Point(3, 3);
             this.CollarsDataGridView.MultiSelect = false;
             this.CollarsDataGridView.Name = "CollarsDataGridView";
             this.CollarsDataGridView.ReadOnly = true;
             this.CollarsDataGridView.RowHeadersVisible = false;
             this.CollarsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.CollarsDataGridView.Size = new System.Drawing.Size(463, 105);
+            this.CollarsDataGridView.Size = new System.Drawing.Size(439, 149);
             this.CollarsDataGridView.TabIndex = 60;
             // 
             // CollarColumn
@@ -177,9 +185,9 @@
             // ShowContentsButton
             // 
             this.ShowContentsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.ShowContentsButton.Location = new System.Drawing.Point(364, 88);
+            this.ShowContentsButton.Location = new System.Drawing.Point(307, 116);
             this.ShowContentsButton.Name = "ShowContentsButton";
-            this.ShowContentsButton.Size = new System.Drawing.Size(116, 23);
+            this.ShowContentsButton.Size = new System.Drawing.Size(162, 23);
             this.ShowContentsButton.TabIndex = 59;
             this.ShowContentsButton.Text = "Show Contents";
             this.ShowContentsButton.UseVisualStyleBackColor = true;
@@ -189,7 +197,7 @@
             // 
             this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(241, 67);
+            this.label9.Location = new System.Drawing.Point(230, 93);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(71, 13);
             this.label9.TabIndex = 69;
@@ -199,7 +207,7 @@
             // 
             this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(242, 41);
+            this.label8.Location = new System.Drawing.Point(231, 67);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(70, 13);
             this.label8.TabIndex = 68;
@@ -209,7 +217,7 @@
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(274, 15);
+            this.label3.Location = new System.Drawing.Point(263, 15);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(38, 13);
             this.label3.TabIndex = 66;
@@ -219,7 +227,7 @@
             // 
             this.FileIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.FileIdTextBox.Enabled = false;
-            this.FileIdTextBox.Location = new System.Drawing.Point(318, 12);
+            this.FileIdTextBox.Location = new System.Drawing.Point(307, 12);
             this.FileIdTextBox.Name = "FileIdTextBox";
             this.FileIdTextBox.Size = new System.Drawing.Size(162, 20);
             this.FileIdTextBox.TabIndex = 49;
@@ -228,7 +236,7 @@
             // 
             this.UserNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UserNameTextBox.Enabled = false;
-            this.UserNameTextBox.Location = new System.Drawing.Point(318, 64);
+            this.UserNameTextBox.Location = new System.Drawing.Point(307, 90);
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(162, 20);
             this.UserNameTextBox.TabIndex = 56;
@@ -237,17 +245,16 @@
             // 
             this.UploadDateTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UploadDateTextBox.Enabled = false;
-            this.UploadDateTextBox.Location = new System.Drawing.Point(318, 38);
+            this.UploadDateTextBox.Location = new System.Drawing.Point(307, 64);
             this.UploadDateTextBox.Name = "UploadDateTextBox";
             this.UploadDateTextBox.Size = new System.Drawing.Size(162, 20);
             this.UploadDateTextBox.TabIndex = 54;
             // 
             // FormatTextBox
             // 
-            this.FormatTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.FormatTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.FormatTextBox.Enabled = false;
-            this.FormatTextBox.Location = new System.Drawing.Point(62, 64);
+            this.FormatTextBox.Location = new System.Drawing.Point(307, 38);
             this.FormatTextBox.Name = "FormatTextBox";
             this.FormatTextBox.Size = new System.Drawing.Size(162, 20);
             this.FormatTextBox.TabIndex = 53;
@@ -263,8 +270,9 @@
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 67);
+            this.label2.Location = new System.Drawing.Point(259, 41);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(42, 13);
             this.label2.TabIndex = 62;
@@ -287,13 +295,13 @@
             this.FileNameTextBox.Location = new System.Drawing.Point(62, 12);
             this.FileNameTextBox.MaxLength = 255;
             this.FileNameTextBox.Name = "FileNameTextBox";
-            this.FileNameTextBox.Size = new System.Drawing.Size(162, 20);
+            this.FileNameTextBox.Size = new System.Drawing.Size(151, 20);
             this.FileNameTextBox.TabIndex = 51;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(14, 93);
+            this.label4.Location = new System.Drawing.Point(14, 67);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(40, 13);
             this.label4.TabIndex = 73;
@@ -308,17 +316,8 @@
             this.OwnerComboBox.FormattingEnabled = true;
             this.OwnerComboBox.Location = new System.Drawing.Point(62, 37);
             this.OwnerComboBox.Name = "OwnerComboBox";
-            this.OwnerComboBox.Size = new System.Drawing.Size(162, 21);
+            this.OwnerComboBox.Size = new System.Drawing.Size(151, 21);
             this.OwnerComboBox.TabIndex = 74;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(59, 115);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(415, 39);
-            this.label10.TabIndex = 75;
-            this.label10.Text = resources.GetString("label10.Text");
             // 
             // StatusComboBox
             // 
@@ -327,23 +326,108 @@
             this.StatusComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.StatusComboBox.Enabled = false;
             this.StatusComboBox.FormattingEnabled = true;
-            this.StatusComboBox.Location = new System.Drawing.Point(62, 90);
+            this.StatusComboBox.Location = new System.Drawing.Point(62, 64);
             this.StatusComboBox.Name = "StatusComboBox";
-            this.StatusComboBox.Size = new System.Drawing.Size(162, 21);
+            this.StatusComboBox.Size = new System.Drawing.Size(151, 21);
             this.StatusComboBox.TabIndex = 77;
+            // 
+            // FileTabControl
+            // 
+            this.FileTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.FileTabControl.Controls.Add(this.ParametersTabPage);
+            this.FileTabControl.Controls.Add(this.TpfDetailsTabPage);
+            this.FileTabControl.Location = new System.Drawing.Point(16, 137);
+            this.FileTabControl.Name = "FileTabControl";
+            this.FileTabControl.SelectedIndex = 0;
+            this.FileTabControl.Size = new System.Drawing.Size(453, 181);
+            this.FileTabControl.TabIndex = 79;
+            this.FileTabControl.Tag = "";
+            // 
+            // ParametersTabPage
+            // 
+            this.ParametersTabPage.Controls.Add(this.CollarsDataGridView);
+            this.ParametersTabPage.Location = new System.Drawing.Point(4, 22);
+            this.ParametersTabPage.Name = "ParametersTabPage";
+            this.ParametersTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.ParametersTabPage.Size = new System.Drawing.Size(445, 155);
+            this.ParametersTabPage.TabIndex = 3;
+            this.ParametersTabPage.Tag = "Argos";
+            this.ParametersTabPage.Text = "Collars using file";
+            this.ParametersTabPage.UseVisualStyleBackColor = true;
+            // 
+            // TpfDetailsTabPage
+            // 
+            this.TpfDetailsTabPage.Controls.Add(this.DerivedFilesDataGridView);
+            this.TpfDetailsTabPage.Location = new System.Drawing.Point(4, 22);
+            this.TpfDetailsTabPage.Name = "TpfDetailsTabPage";
+            this.TpfDetailsTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.TpfDetailsTabPage.Size = new System.Drawing.Size(502, 217);
+            this.TpfDetailsTabPage.TabIndex = 1;
+            this.TpfDetailsTabPage.Tag = "DerivedFiles";
+            this.TpfDetailsTabPage.Text = "TPF Details";
+            this.TpfDetailsTabPage.UseVisualStyleBackColor = true;
+            // 
+            // DerivedFilesDataGridView
+            // 
+            this.DerivedFilesDataGridView.AllowUserToAddRows = false;
+            this.DerivedFilesDataGridView.AllowUserToDeleteRows = false;
+            this.DerivedFilesDataGridView.AllowUserToOrderColumns = true;
+            this.DerivedFilesDataGridView.AllowUserToResizeRows = false;
+            this.DerivedFilesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.DerivedFilesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.DerivedFilesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.DerivedFilesDataGridView.Location = new System.Drawing.Point(2, 3);
+            this.DerivedFilesDataGridView.MultiSelect = false;
+            this.DerivedFilesDataGridView.Name = "DerivedFilesDataGridView";
+            this.DerivedFilesDataGridView.ReadOnly = true;
+            this.DerivedFilesDataGridView.RowHeadersVisible = false;
+            this.DerivedFilesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.DerivedFilesDataGridView.Size = new System.Drawing.Size(497, 211);
+            this.DerivedFilesDataGridView.TabIndex = 51;
+            // 
+            // ValidationTextBox
+            // 
+            this.ValidationTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ValidationTextBox.BackColor = System.Drawing.SystemColors.Control;
+            this.ValidationTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ValidationTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ValidationTextBox.ForeColor = System.Drawing.Color.Red;
+            this.ValidationTextBox.Location = new System.Drawing.Point(16, 324);
+            this.ValidationTextBox.Name = "ValidationTextBox";
+            this.ValidationTextBox.ReadOnly = true;
+            this.ValidationTextBox.Size = new System.Drawing.Size(453, 14);
+            this.ValidationTextBox.TabIndex = 78;
+            this.ValidationTextBox.Tag = "";
+            this.ValidationTextBox.Text = "Validation Error";
+            this.ValidationTextBox.Visible = false;
+            // 
+            // label5
+            // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(249, 121);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(52, 13);
+            this.label5.TabIndex = 80;
+            this.label5.Text = "Contents:";
             // 
             // CollarParameterFileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(492, 302);
+            this.ClientSize = new System.Drawing.Size(481, 375);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.ValidationTextBox);
             this.Controls.Add(this.StatusComboBox);
-            this.Controls.Add(this.label10);
             this.Controls.Add(this.OwnerComboBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
-            this.Controls.Add(this.CollarsDataGridView);
             this.Controls.Add(this.ShowContentsButton);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
@@ -356,9 +440,15 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.FileNameTextBox);
+            this.Controls.Add(this.FileTabControl);
+            this.MinimumSize = new System.Drawing.Size(490, 360);
             this.Name = "CollarParameterFileDetailsForm";
             this.Text = "Collar Parameter File Details";
             ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).EndInit();
+            this.FileTabControl.ResumeLayout(false);
+            this.ParametersTabPage.ResumeLayout(false);
+            this.TpfDetailsTabPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.DerivedFilesDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -390,8 +480,13 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn EndDateColumn;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox OwnerComboBox;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.ComboBox StatusComboBox;
+        private System.Windows.Forms.TabControl FileTabControl;
+        private System.Windows.Forms.TabPage ParametersTabPage;
+        private System.Windows.Forms.TabPage TpfDetailsTabPage;
+        private System.Windows.Forms.DataGridView DerivedFilesDataGridView;
+        private System.Windows.Forms.TextBox ValidationTextBox;
+        private System.Windows.Forms.Label label5;
 
     }
 }

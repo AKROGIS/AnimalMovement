@@ -138,9 +138,4 @@
   <metadata name="EndDateColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="label10.Text" xml:space="preserve">
-    <value>Inactive files are archived in the database, but are not used to process collar data files.
-When you activate a file, it will NOT review previously uploaded collar data to see if
-they should be reprocessed.</value>
-  </data>
 </root>
