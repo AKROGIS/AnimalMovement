@@ -12,13 +12,15 @@ namespace AnimalMovement
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
         private Collar Collar { get; set; }
+        private CollarFile File { get; set; }
         private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        public AddCollarParametersForm(Collar collar)
+        public AddCollarParametersForm(Collar collar = null, CollarFile file = null)
         {
             InitializeComponent();
             Collar = collar;
+            File = file;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
             LoadDefaultFormContents();  //Called before events are triggered
@@ -28,63 +30,103 @@ namespace AnimalMovement
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            //Collar is in a different DataContext, get one in this DataContext
+            //Collar and File are in a different DataContext, get them in this DataContext
             if (Collar != null)
                 Collar =
                     Database.Collars.FirstOrDefault(
                         c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
-            if (Collar == null)
-                throw new InvalidOperationException("Add Collar Parameters Form not provided a valid Collar.");
+            if (File != null)
+                File = Database.CollarFiles.FirstOrDefault(f => f.FileId == File.FileId);
+            //Both Collar and File can be null or non-null.  if either is non-null, then it is locked.
 
+            IsEditor = CanEditCollar(Collar);
+        }
+
+        private bool CanEditCollar(Collar collar)
+        {
+            if (collar == null)
+                return Database.ProjectInvestigators.Any(
+                        pi =>
+                        pi.Login == CurrentUser || pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
             var functions = new AnimalMovementFunctions();
-            IsEditor = functions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false;
+            return functions.IsInvestigatorEditor(collar.Manager, CurrentUser) ?? false;
         }
 
         private void LoadDefaultFormContents()
         {
-            CollarTextBox.Text = Collar.ToString();
-            Gen3Label.Visible = Collar.CollarModel == "Gen3";
-            Gen3PeriodTextBox.Visible = Collar.CollarModel == "Gen3";
-            Gen3TimeUnitComboBox.Visible = Collar.CollarModel == "Gen3";
-            ClearFileButton.Visible = Collar.CollarModel == "Gen3";
-            Gen3TimeUnitComboBox.SelectedIndex = 0;
-            FileComboBox.Size = new System.Drawing.Size(Collar.CollarModel == "Gen3" ? 119 : 172, FileComboBox.Size.Height);
+            LoadCollarComboBox();
             LoadFileComboBox();
-            if (Collar.CollarModel == "Gen3")
-                FileComboBox.SelectedItem = null;
+            Gen3Label.Visible = Collar == null || Collar.CollarModel == "Gen3";
+            Gen3PeriodTextBox.Visible = Collar == null || Collar.CollarModel == "Gen3";
+            Gen3TimeUnitComboBox.Visible = Collar == null || Collar.CollarModel == "Gen3";
+            ClearFileButton.Visible = Collar == null || Collar.CollarModel == "Gen3";
+            Gen3TimeUnitComboBox.SelectedIndex = 0;
+            FileComboBox.Size = new Size((Collar == null || Collar.CollarModel == "Gen3") ? 119 : 172, FileComboBox.Size.Height);
+        }
+
+        private void LoadCollarComboBox()
+        {
+            if (Collar != null)
+                CollarComboBox.DataSource = new[] {Collar};
+            else
+                CollarComboBox.DataSource = from collar in Database.Collars
+                                            where collar.Manager == CurrentUser ||
+                                                  collar.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                      a => a.Assistant == CurrentUser)
+                                            select collar;
+            CollarComboBox.Enabled = Collar == null;
+            CollarComboBox.SelectedItem = Collar;
         }
 
         private void LoadFileComboBox()
         {
-            IQueryable<FileItem> fileQuery;
-            switch (Collar.CollarModel)
+            if (File != null)
+                FileComboBox.DataSource = new[] { File };
+            else
             {
-                case "Gen3":
-                    fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format == 'B' && file.Status == 'A' &&
-                                      (file.Owner == CurrentUser ||
-                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
-                                           a => a.Assistant == CurrentUser))
-                                select new FileItem(file.FileId, file.FileName);
-                    break;
-                case "Gen4":
-                    fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format == 'A' && file.Status == 'A' &&
-                                      (file.Owner == CurrentUser ||
-                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
-                                           a => a.Assistant == CurrentUser))
-                                select new FileItem(file.FileId, file.FileName);
-                    break;
-                default:
-                    fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format != 'A' && file.Format != 'B' && file.Status == 'A' &&
-                                      (file.Owner == CurrentUser ||
-                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
-                                           a => a.Assistant == CurrentUser))
-                                select new FileItem(file.FileId, file.FileName);
-                    break;
+                if (Collar == null)
+                    FileComboBox.DataSource = from file in Database.CollarFiles
+                                              where file.Status == 'A' &&
+                                                    (file.Owner == CurrentUser ||
+                                                     file.ProjectInvestigator
+                                                         .ProjectInvestigatorAssistants.Any(
+                                                             a => a.Assistant == CurrentUser))
+                                              select file;
+                else
+                {
+                    switch (Collar.CollarModel)
+                    {
+                        case "Gen3":
+                            FileComboBox.DataSource = from file in Database.CollarParameterFiles
+                                                      where file.Format == 'B' && file.Status == 'A' &&
+                                                            (file.Owner == CurrentUser ||
+                                                             file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                                 a => a.Assistant == CurrentUser))
+                                                      select new FileItem(file.FileId, file.FileName);
+                            break;
+                        case "Gen4":
+                            FileComboBox.DataSource = from file in Database.CollarParameterFiles
+                                                      where file.Format == 'A' && file.Status == 'A' &&
+                                                            (file.Owner == CurrentUser ||
+                                                             file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                                 a => a.Assistant == CurrentUser))
+                                                      select new FileItem(file.FileId, file.FileName);
+                            break;
+                        default:
+                            FileComboBox.DataSource = from file in Database.CollarParameterFiles
+                                                      where
+                                                          file.Format != 'A' && file.Format != 'B' && file.Status == 'A' &&
+                                                          (file.Owner == CurrentUser ||
+                                                           file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                               a => a.Assistant == CurrentUser))
+                                                      select new FileItem(file.FileId, file.FileName);
+                            break;
+                    }
+                }
             }
-            FileComboBox.DataSource = fileQuery;
+            FileComboBox.Enabled = File == null;
+            ClearFileButton.Enabled = File == null;
+            BrowseButton.Enabled = File == null;
             FileComboBox.DisplayMember = "Name";
             FileComboBox.ValueMember = "FileId";
         }
@@ -93,11 +135,14 @@ namespace AnimalMovement
         {
             if (!IsEditor)
             {
-                CreateButton.Enabled = false;
+                CollarComboBox.Enabled = false;
                 FileComboBox.Enabled = false;
+                ClearFileButton.Enabled = false;
+                BrowseButton.Enabled = false;
                 StartDateTimePicker.Enabled = false;
                 EndDateTimePicker.Enabled = false;
-                ValidationTextBox.Text = "You do not have permission to edit this collar.";
+                CreateButton.Enabled = false;
+                ValidationTextBox.Text = "You do not have permission to create this deployment.";
                 return;
             }
             ValidateForm();
@@ -123,6 +168,9 @@ namespace AnimalMovement
 
         private string ValidateError()
         {
+            //We must have a collar
+            if (Collar == null)
+                return "You must select a collar";
             //We must have a file or a period for Gen3
             var hasFile = FileComboBox.SelectedItem != null;
             if (Collar.CollarModel == "Gen3" && !hasFile && String.IsNullOrEmpty(Gen3PeriodTextBox.Text))
@@ -218,6 +266,13 @@ namespace AnimalMovement
         }
 
         #region Form Control Events
+
+        private void CollarComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadFileComboBox();
+            IsEditor = CanEditCollar((Collar)CollarComboBox.SelectedItem);
+            EnableFormControls();
+        }
 
         private void AddCollarParametersForm_Load(object sender, EventArgs e)
         {

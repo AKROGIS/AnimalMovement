@@ -38,13 +38,13 @@
             this.EndDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.cancelButton = new System.Windows.Forms.Button();
             this.CreateButton = new System.Windows.Forms.Button();
-            this.CollarTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.Gen3PeriodTextBox = new System.Windows.Forms.TextBox();
             this.Gen3Label = new System.Windows.Forms.Label();
             this.Gen3TimeUnitComboBox = new System.Windows.Forms.ComboBox();
             this.BrowseButton = new System.Windows.Forms.Button();
             this.ClearFileButton = new System.Windows.Forms.Button();
+            this.CollarComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // FixItButton
@@ -167,15 +167,6 @@
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
             // 
-            // CollarTextBox
-            // 
-            this.CollarTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CollarTextBox.Enabled = false;
-            this.CollarTextBox.Location = new System.Drawing.Point(118, 12);
-            this.CollarTextBox.Name = "CollarTextBox";
-            this.CollarTextBox.Size = new System.Drawing.Size(200, 20);
-            this.CollarTextBox.TabIndex = 14;
-            // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -243,6 +234,17 @@
             this.ClearFileButton.UseVisualStyleBackColor = true;
             this.ClearFileButton.Click += new System.EventHandler(this.ClearFileButton_Click);
             // 
+            // CollarComboBox
+            // 
+            this.CollarComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.CollarComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.CollarComboBox.FormattingEnabled = true;
+            this.CollarComboBox.Location = new System.Drawing.Point(118, 12);
+            this.CollarComboBox.Name = "CollarComboBox";
+            this.CollarComboBox.Size = new System.Drawing.Size(199, 21);
+            this.CollarComboBox.TabIndex = 30;
+            this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
+            // 
             // AddCollarParametersForm
             // 
             this.AcceptButton = this.CreateButton;
@@ -250,6 +252,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(330, 227);
+            this.Controls.Add(this.CollarComboBox);
             this.Controls.Add(this.ClearFileButton);
             this.Controls.Add(this.BrowseButton);
             this.Controls.Add(this.Gen3TimeUnitComboBox);
@@ -265,7 +268,6 @@
             this.Controls.Add(this.EndDateTimePicker);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.CreateButton);
-            this.Controls.Add(this.CollarTextBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "AddCollarParametersForm";
@@ -288,12 +290,12 @@
         private System.Windows.Forms.DateTimePicker EndDateTimePicker;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button CreateButton;
-        private System.Windows.Forms.TextBox CollarTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox Gen3PeriodTextBox;
         private System.Windows.Forms.Label Gen3Label;
         private System.Windows.Forms.ComboBox Gen3TimeUnitComboBox;
         private System.Windows.Forms.Button BrowseButton;
         private System.Windows.Forms.Button ClearFileButton;
+        private System.Windows.Forms.ComboBox CollarComboBox;
     }
 }
