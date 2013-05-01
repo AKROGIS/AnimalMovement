@@ -102,7 +102,7 @@ namespace AnimalMovement
                                                             (file.Owner == CurrentUser ||
                                                              file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
                                                                  a => a.Assistant == CurrentUser))
-                                                      select new FileItem(file.FileId, file.FileName);
+                                                      select file;
                             break;
                         case "Gen4":
                             FileComboBox.DataSource = from file in Database.CollarParameterFiles
@@ -110,7 +110,7 @@ namespace AnimalMovement
                                                             (file.Owner == CurrentUser ||
                                                              file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
                                                                  a => a.Assistant == CurrentUser))
-                                                      select new FileItem(file.FileId, file.FileName);
+                                                      select file;
                             break;
                         default:
                             FileComboBox.DataSource = from file in Database.CollarParameterFiles
@@ -119,7 +119,7 @@ namespace AnimalMovement
                                                           (file.Owner == CurrentUser ||
                                                            file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
                                                                a => a.Assistant == CurrentUser))
-                                                      select new FileItem(file.FileId, file.FileName);
+                                                      select file;
                             break;
                     }
                 }
@@ -128,7 +128,6 @@ namespace AnimalMovement
             ClearFileButton.Enabled = File == null;
             BrowseButton.Enabled = File == null;
             FileComboBox.DisplayMember = "Name";
-            FileComboBox.ValueMember = "FileId";
         }
 
         private void EnableFormControls()
@@ -224,7 +223,7 @@ namespace AnimalMovement
             {
                 Collar = Collar,
                 Gen3Period = period,
-                FileId = FileComboBox.SelectedItem == null ? (int?)null : (int)FileComboBox.SelectedValue,
+                CollarParameterFile = (CollarParameterFile)FileComboBox.SelectedItem,
                 StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null,
                 EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null
             };
@@ -331,23 +330,6 @@ namespace AnimalMovement
         }
 
         #endregion
-
-        private struct FileItem
-        {
-            public FileItem(int fileId, string name)
-                : this()
-            {
-                FileId = fileId;
-                Name = name;
-            }
-            // ReSharper disable MemberCanBePrivate.Local
-            // ReSharper disable UnusedAutoPropertyAccessor.Local
-            // Members are accessed by reflection in ThreadExceptionDialog FileComboBox
-            public int FileId { get; private set; }
-            public string Name { get; private set; }
-            // ReSharper restore MemberCanBePrivate.Local
-            // ReSharper restore UnusedAutoPropertyAccessor.Local
-        }
 
     }
 }
