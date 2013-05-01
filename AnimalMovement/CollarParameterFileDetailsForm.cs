@@ -6,9 +6,6 @@ using System.Windows.Forms;
 using DataModel;
 using Telonics;
 
-//TODO - Provide an interface to see which collars in the TPF file are not in the db, and an option to add them.
-//TODO - load tabs on demand, do not reload tabs unless data context has changed.
-
 namespace AnimalMovement
 {
     internal partial class CollarParameterFileDetailsForm : BaseForm
@@ -272,6 +269,8 @@ namespace AnimalMovement
 
 
         #region Telonics Parameter File Tab
+
+        //TODO - Provide an interface to see which collars in the TPF file are not in the db, and an option to add them.
 
         private void HideTpfDetailsTab()
         {
