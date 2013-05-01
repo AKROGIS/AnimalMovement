@@ -8,6 +8,7 @@ using Telonics;
 //TODO - When loading multiple files, do not cancel remainder of files if you skip a file
 //TODO - Reload project Investigator form after add parameter file adds a collar
 //TODO - Reload project Investigator form after add parameter file loads multiple files, but one has a problem
+//TODO - add warning about PPF file types not being used and they are binary
 
 namespace AnimalMovement
 {

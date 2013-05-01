@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
@@ -6,8 +7,7 @@ using DataModel;
 using Telonics;
 
 //TODO - Provide an interface to see which collars in the TPF file are not in the db, and an option to add them.
-//TODO - Enable Add/Edit/Delete for parameter assignments and date ranges
-//TODO - add warning about PPF file types not being used and they are binary
+//TODO - load tabs on demand, do not reload tabs unless data context has changed.
 
 namespace AnimalMovement
 {
@@ -16,6 +16,7 @@ namespace AnimalMovement
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
         private CollarParameterFile File { get; set; }
+        private bool IsEditMode { get; set; }
         private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
 
@@ -26,7 +27,7 @@ namespace AnimalMovement
             File = file;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
-            SetUpControls();
+            SetUpGeneral();
         }
 
         private void LoadDataContext()
@@ -41,10 +42,66 @@ namespace AnimalMovement
 
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsInvestigatorEditor(File.Owner, CurrentUser) ?? false;
+            ParametersDataGridView.DataSource = null;
         }
 
-        private void SetUpControls()
+        #region Form Control
+
+        protected override void OnLoad(EventArgs e)
         {
+            base.OnLoad(e);
+            FileTabControl_SelectedIndexChanged(null, null);
+        }
+
+        private void FileTabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (FileTabControl.SelectedIndex)
+            {
+                default:
+                    SetUpParametersTab();
+                    break;
+                case 1:
+                    SetUpTpfDetailsTab();
+                    break;
+            }
+        }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+
+        #region General
+
+        private void SetUpGeneral()
+        {
+            HideTpfDetailsTab();
             FileNameTextBox.Text = File.FileName;
             FileIdTextBox.Text = File.FileId.ToString(CultureInfo.CurrentCulture);
             FormatTextBox.Text = File.LookupCollarParameterFileFormat.Name;
@@ -59,38 +116,17 @@ namespace AnimalMovement
             StatusComboBox.DataSource = Database.LookupFileStatus;
             StatusComboBox.DisplayMember = "Name";
             StatusComboBox.SelectedItem = File.LookupFileStatus;
-            CollarsDataGridView.DataSource =
-                Database.CollarParameters.Where(cp => cp.CollarParameterFile == File)
-                        .Select(cp => new {cp.Collar, cp.StartDate, cp.EndDate});
-            ShowTpfData();
-            EnableForm();
+            EnableGeneralControls();
             DoneCancelButton.Focus();
         }
 
-        private void ShowTpfData()
+        private void EnableGeneralControls()
         {
-            if (File.Format != 'A')
-            {
-                FileTabControl.TabPages.Remove(TpfDetailsTabPage);
-                return;
-            }
-            TpfDataGridView.DataSource =
-                new TpfFile(File.Contents.ToArray()).GetCollars()
-                                                    .Select(t => new
-                                                        {
-                                                            t.Owner,
-                                                            CTN = t.Ctn,
-                                                            t.ArgosId,
-                                                            t.Frequency,
-                                                            StartDate = t.TimeStamp
-                                                        }).ToList();
-        }
-
-        private void UpdateDataSource()
-        {
-            File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
-            File.ProjectInvestigator = (ProjectInvestigator)OwnerComboBox.SelectedItem;
-            File.LookupFileStatus = (LookupFileStatus)StatusComboBox.SelectedItem;
+            EditSaveButton.Enabled = IsEditor;
+            IsEditMode = EditSaveButton.Text == "Save";
+            FileNameTextBox.Enabled = IsEditMode;
+            OwnerComboBox.Enabled = IsEditMode;
+            StatusComboBox.Enabled = IsEditMode;
         }
 
         private void ShowContentsButton_Click(object sender, EventArgs e)
@@ -101,11 +137,6 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void EnableForm()
-        {
-            EditSaveButton.Enabled = IsEditor;
-        }
-
         private void EditSaveButton_Click(object sender, EventArgs e)
         {
             //This button is not enabled unless editing is permitted 
@@ -114,28 +145,21 @@ namespace AnimalMovement
                 // The user wants to edit, Enable form
                 EditSaveButton.Text = "Save";
                 DoneCancelButton.Text = "Cancel";
-                SetEditingControls();
+                EnableGeneralControls();
             }
             else
             {
                 //User is saving
-                try
+                UpdateFile();
+                if (SubmitChanges())
                 {
-                    UpdateDataSource();
-                    Database.SubmitChanges();
                     OnDatabaseChanged();
+                    EditSaveButton.Text = "Edit";
+                    DoneCancelButton.Text = "Done";
+                    EnableGeneralControls();
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Unable to save changes", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                EditSaveButton.Text = "Edit";
-                DoneCancelButton.Text = "Done";
-                SetEditingControls();
             }
         }
-
 
         private void DoneCancelButton_Click(object sender, EventArgs e)
         {
@@ -143,9 +167,10 @@ namespace AnimalMovement
             {
                 DoneCancelButton.Text = "Done";
                 EditSaveButton.Text = "Edit";
-                SetEditingControls();
+                EnableGeneralControls();
                 //Reset state from database
                 LoadDataContext();
+                SetUpGeneral();
             }
             else
             {
@@ -153,21 +178,118 @@ namespace AnimalMovement
             }
         }
 
-
-        private void SetEditingControls()
+        private void UpdateFile()
         {
-            bool editModeEnabled = EditSaveButton.Text == "Save";
-            FileNameTextBox.Enabled = editModeEnabled;
-            OwnerComboBox.Enabled = editModeEnabled;
-            StatusComboBox.Enabled = editModeEnabled;
+            File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
+            File.ProjectInvestigator = (ProjectInvestigator)OwnerComboBox.SelectedItem;
+            File.LookupFileStatus = (LookupFileStatus)StatusComboBox.SelectedItem;
         }
 
+        #endregion
 
-        private void OnDatabaseChanged()
+
+        #region Collar Parameters Tab
+
+        private void SetUpParametersTab()
         {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this, EventArgs.Empty);
+            if (ParametersDataGridView.DataSource == null)
+                ParametersDataGridView.DataSource =
+                    Database.CollarParameters.Where(cp => cp.CollarParameterFile == File)
+                            .Select(cp => new
+                                {
+                                    cp.Collar,
+                                    cp.StartDate,
+                                    cp.EndDate,
+                                    cp,
+                                    CanDelete = Database.CollarFiles.Any(f => f.CollarParameter == cp)
+                                }).ToList();
+            ParametersDataGridView.Columns[3].Visible = false;
+            ParametersDataGridView.Columns[4].Visible = false;
+            EnableCollarFilesControls();
         }
+
+        private void EnableCollarFilesControls()
+        {
+            AddParameterButton.Enabled = !IsEditMode && IsEditor;
+            DeleteParameterButton.Enabled = !IsEditMode && IsEditor &&
+                                            ParametersDataGridView.SelectedRows.Cast<DataGridViewRow>()
+                                                                  .Any(row => (bool) row.Cells["CanDelete"].Value);
+            EditParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count == 1;
+            InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1;
+        }
+
+        private void ParametersDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpParametersTab();
+        }
+
+        private void AddParameterButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddCollarParametersForm(null, File);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteParameterButton_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in ParametersDataGridView.SelectedRows)
+                if ((bool)row.Cells["CanDelete"].Value)
+                    Database.CollarParameters.DeleteOnSubmit((CollarParameter) row.Cells[3].Value);
+            if (SubmitChanges())
+                ParametersDataChanged();
+        }
+
+        private void EditParameterButton_Click(object sender, EventArgs e)
+        {
+            var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[3].Value;
+            var form = new CollarParametersDetailsForm(parameter, false, true);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void InfoParameterButton_Click(object sender, EventArgs e)
+        {
+            var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[3].Value;
+            var form = new CollarDetailsForm(parameter.Collar);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void CollarsDataGridView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            InfoParameterButton_Click(sender, e);
+        }
+
+        #endregion
+
+
+        #region Telonics Parameter File Tab
+
+        private void HideTpfDetailsTab()
+        {
+            if (File.Format != 'A' && FileTabControl.TabPages.Contains(TpfDetailsTabPage))
+                FileTabControl.TabPages.Remove(TpfDetailsTabPage);
+        }
+
+        private void SetUpTpfDetailsTab()
+        {
+            if (TpfDataGridView.DataSource != null)
+                return;
+            TpfDataGridView.DataSource =
+                new TpfFile(File.Contents.ToArray()).GetCollars()
+                                                    .Select(t => new
+                                                    {
+                                                        t.Owner,
+                                                        CTN = t.Ctn,
+                                                        t.ArgosId,
+                                                        t.Frequency,
+                                                        StartDate = t.TimeStamp
+                                                    }).ToList();
+        }
+
+        #endregion
+
     }
 }
