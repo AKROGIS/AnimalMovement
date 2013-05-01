@@ -45,7 +45,7 @@
             // FixItButton
             // 
             this.FixItButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.FixItButton.Location = new System.Drawing.Point(226, 124);
+            this.FixItButton.Location = new System.Drawing.Point(12, 159);
             this.FixItButton.Name = "FixItButton";
             this.FixItButton.Size = new System.Drawing.Size(75, 23);
             this.FixItButton.TabIndex = 24;
@@ -65,7 +65,7 @@
             this.ValidationTextBox.Multiline = true;
             this.ValidationTextBox.Name = "ValidationTextBox";
             this.ValidationTextBox.ReadOnly = true;
-            this.ValidationTextBox.Size = new System.Drawing.Size(208, 35);
+            this.ValidationTextBox.Size = new System.Drawing.Size(289, 35);
             this.ValidationTextBox.TabIndex = 23;
             this.ValidationTextBox.Tag = "";
             this.ValidationTextBox.Text = "Validation Error";

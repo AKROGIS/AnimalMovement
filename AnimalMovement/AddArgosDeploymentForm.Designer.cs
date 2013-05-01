@@ -163,7 +163,7 @@
             this.ValidationTextBox.Multiline = true;
             this.ValidationTextBox.Name = "ValidationTextBox";
             this.ValidationTextBox.ReadOnly = true;
-            this.ValidationTextBox.Size = new System.Drawing.Size(209, 35);
+            this.ValidationTextBox.Size = new System.Drawing.Size(290, 35);
             this.ValidationTextBox.TabIndex = 11;
             this.ValidationTextBox.Tag = "";
             this.ValidationTextBox.Text = "Validation Error";
@@ -171,7 +171,7 @@
             // 
             // FixItButton
             // 
-            this.FixItButton.Location = new System.Drawing.Point(227, 121);
+            this.FixItButton.Location = new System.Drawing.Point(12, 158);
             this.FixItButton.Name = "FixItButton";
             this.FixItButton.Size = new System.Drawing.Size(75, 23);
             this.FixItButton.TabIndex = 12;
