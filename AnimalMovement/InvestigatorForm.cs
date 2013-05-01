@@ -567,7 +567,7 @@ namespace AnimalMovement
 
         private void AddParameterFileButton_Click(object sender, EventArgs e)
         {
-            var form = new AddCollarParameterFileForm(CurrentUser);
+            var form = new AddCollarParameterFileForm(null);
             form.DatabaseChanged += (o, x) => ParameterFileDataChanged();
             form.Show(this);
         }

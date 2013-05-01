@@ -15,13 +15,15 @@ namespace AnimalMovement
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
+        private Collar Collar { get; set; }
         internal event EventHandler DatabaseChanged;
         private Byte[] _fileContents;
         private Byte[] _fileHash;
 
-        internal AddCollarParameterFileForm(string user)
+        internal AddCollarParameterFileForm(Collar collar)
         {
-            CurrentUser = user;
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
+            Collar = collar;
             SetupForm();
         }
 

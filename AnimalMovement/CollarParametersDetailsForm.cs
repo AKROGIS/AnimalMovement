@@ -290,9 +290,7 @@ namespace AnimalMovement
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
-            //TODO - Specify that we only want PPF or TPF files
-            //The add happens in a new context, so we need to reload this context if changes were made
-            var form = new AddCollarParameterFileForm(CurrentUser);
+            var form = new AddCollarParameterFileForm(CollarComboBox.SelectedItem as Collar);
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); LoadDefaultFormContents(); };
             form.Show(this);
         }
