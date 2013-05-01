@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
+using Telonics;
 
 //TODO - Provide an interface to see which collars in the TPF file are not in the db, and an option to add them.
 //TODO - Enable Add/Edit/Delete for parameter assignments and date ranges
@@ -49,15 +50,40 @@ namespace AnimalMovement
             FormatTextBox.Text = File.LookupCollarParameterFileFormat.Name;
             UserNameTextBox.Text = File.UploadUser;
             UploadDateTextBox.Text = File.UploadDate.ToString(CultureInfo.CurrentCulture);
-            OwnerComboBox.DataSource = Database.ProjectInvestigators;
+            OwnerComboBox.DataSource =
+                Database.ProjectInvestigators.Where(
+                    pi =>
+                    pi.Login == CurrentUser || pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
             OwnerComboBox.DisplayMember = "Name";
             OwnerComboBox.SelectedItem = File.ProjectInvestigator;
             StatusComboBox.DataSource = Database.LookupFileStatus;
             StatusComboBox.DisplayMember = "Name";
             StatusComboBox.SelectedItem = File.LookupFileStatus;
-            CollarsDataGridView.DataSource = Database.CollarParameters.Where(cp => cp.CollarParameterFile == File);
+            CollarsDataGridView.DataSource =
+                Database.CollarParameters.Where(cp => cp.CollarParameterFile == File)
+                        .Select(cp => new {cp.Collar, cp.StartDate, cp.EndDate});
+            ShowTpfData();
             EnableForm();
             DoneCancelButton.Focus();
+        }
+
+        private void ShowTpfData()
+        {
+            if (File.Format != 'A')
+            {
+                FileTabControl.TabPages.Remove(TpfDetailsTabPage);
+                return;
+            }
+            TpfDataGridView.DataSource =
+                new TpfFile(File.Contents.ToArray()).GetCollars()
+                                                    .Select(t => new
+                                                        {
+                                                            t.Owner,
+                                                            CTN = t.Ctn,
+                                                            t.ArgosId,
+                                                            t.Frequency,
+                                                            StartDate = t.TimeStamp
+                                                        }).ToList();
         }
 
         private void UpdateDataSource()

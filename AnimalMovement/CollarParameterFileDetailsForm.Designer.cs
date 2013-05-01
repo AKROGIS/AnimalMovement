@@ -56,14 +56,14 @@
             this.FileTabControl = new System.Windows.Forms.TabControl();
             this.ParametersTabPage = new System.Windows.Forms.TabPage();
             this.TpfDetailsTabPage = new System.Windows.Forms.TabPage();
-            this.DerivedFilesDataGridView = new System.Windows.Forms.DataGridView();
+            this.TpfDataGridView = new System.Windows.Forms.DataGridView();
             this.ValidationTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).BeginInit();
             this.FileTabControl.SuspendLayout();
             this.ParametersTabPage.SuspendLayout();
             this.TpfDetailsTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.DerivedFilesDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // DoneCancelButton
@@ -359,35 +359,35 @@
             // 
             // TpfDetailsTabPage
             // 
-            this.TpfDetailsTabPage.Controls.Add(this.DerivedFilesDataGridView);
+            this.TpfDetailsTabPage.Controls.Add(this.TpfDataGridView);
             this.TpfDetailsTabPage.Location = new System.Drawing.Point(4, 22);
             this.TpfDetailsTabPage.Name = "TpfDetailsTabPage";
             this.TpfDetailsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.TpfDetailsTabPage.Size = new System.Drawing.Size(502, 217);
+            this.TpfDetailsTabPage.Size = new System.Drawing.Size(445, 155);
             this.TpfDetailsTabPage.TabIndex = 1;
             this.TpfDetailsTabPage.Tag = "DerivedFiles";
             this.TpfDetailsTabPage.Text = "TPF Details";
             this.TpfDetailsTabPage.UseVisualStyleBackColor = true;
             // 
-            // DerivedFilesDataGridView
+            // TpfDataGridView
             // 
-            this.DerivedFilesDataGridView.AllowUserToAddRows = false;
-            this.DerivedFilesDataGridView.AllowUserToDeleteRows = false;
-            this.DerivedFilesDataGridView.AllowUserToOrderColumns = true;
-            this.DerivedFilesDataGridView.AllowUserToResizeRows = false;
-            this.DerivedFilesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.TpfDataGridView.AllowUserToAddRows = false;
+            this.TpfDataGridView.AllowUserToDeleteRows = false;
+            this.TpfDataGridView.AllowUserToOrderColumns = true;
+            this.TpfDataGridView.AllowUserToResizeRows = false;
+            this.TpfDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.DerivedFilesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            this.DerivedFilesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DerivedFilesDataGridView.Location = new System.Drawing.Point(2, 3);
-            this.DerivedFilesDataGridView.MultiSelect = false;
-            this.DerivedFilesDataGridView.Name = "DerivedFilesDataGridView";
-            this.DerivedFilesDataGridView.ReadOnly = true;
-            this.DerivedFilesDataGridView.RowHeadersVisible = false;
-            this.DerivedFilesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.DerivedFilesDataGridView.Size = new System.Drawing.Size(497, 211);
-            this.DerivedFilesDataGridView.TabIndex = 51;
+            this.TpfDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.TpfDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.TpfDataGridView.Location = new System.Drawing.Point(2, 3);
+            this.TpfDataGridView.MultiSelect = false;
+            this.TpfDataGridView.Name = "TpfDataGridView";
+            this.TpfDataGridView.ReadOnly = true;
+            this.TpfDataGridView.RowHeadersVisible = false;
+            this.TpfDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.TpfDataGridView.Size = new System.Drawing.Size(440, 149);
+            this.TpfDataGridView.TabIndex = 51;
             // 
             // ValidationTextBox
             // 
@@ -448,7 +448,7 @@
             this.FileTabControl.ResumeLayout(false);
             this.ParametersTabPage.ResumeLayout(false);
             this.TpfDetailsTabPage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.DerivedFilesDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -484,7 +484,7 @@
         private System.Windows.Forms.TabControl FileTabControl;
         private System.Windows.Forms.TabPage ParametersTabPage;
         private System.Windows.Forms.TabPage TpfDetailsTabPage;
-        private System.Windows.Forms.DataGridView DerivedFilesDataGridView;
+        private System.Windows.Forms.DataGridView TpfDataGridView;
         private System.Windows.Forms.TextBox ValidationTextBox;
         private System.Windows.Forms.Label label5;
 
