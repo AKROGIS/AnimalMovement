@@ -30,7 +30,7 @@
         {
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
-            this.CollarsDataGridView = new System.Windows.Forms.DataGridView();
+            this.ParametersDataGridView = new System.Windows.Forms.DataGridView();
             this.CollarColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CollarIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CollarManufacturerColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -59,7 +59,11 @@
             this.TpfDataGridView = new System.Windows.Forms.DataGridView();
             this.ValidationTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).BeginInit();
+            this.AddParameterButton = new System.Windows.Forms.Button();
+            this.DeleteParameterButton = new System.Windows.Forms.Button();
+            this.InfoParameterButton = new System.Windows.Forms.Button();
+            this.EditParameterButton = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).BeginInit();
             this.FileTabControl.SuspendLayout();
             this.ParametersTabPage.SuspendLayout();
             this.TpfDetailsTabPage.SuspendLayout();
@@ -90,17 +94,17 @@
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
             // 
-            // CollarsDataGridView
+            // ParametersDataGridView
             // 
-            this.CollarsDataGridView.AllowUserToAddRows = false;
-            this.CollarsDataGridView.AllowUserToDeleteRows = false;
-            this.CollarsDataGridView.AllowUserToOrderColumns = true;
-            this.CollarsDataGridView.AllowUserToResizeRows = false;
-            this.CollarsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.ParametersDataGridView.AllowUserToAddRows = false;
+            this.ParametersDataGridView.AllowUserToDeleteRows = false;
+            this.ParametersDataGridView.AllowUserToOrderColumns = true;
+            this.ParametersDataGridView.AllowUserToResizeRows = false;
+            this.ParametersDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.CollarsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.CollarsDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ParametersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ParametersDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.CollarColumn,
             this.CollarIdColumn,
             this.CollarManufacturerColumn,
@@ -108,14 +112,15 @@
             this.CollarParameterFileColumn,
             this.StartDateColumn,
             this.EndDateColumn});
-            this.CollarsDataGridView.Location = new System.Drawing.Point(3, 3);
-            this.CollarsDataGridView.MultiSelect = false;
-            this.CollarsDataGridView.Name = "CollarsDataGridView";
-            this.CollarsDataGridView.ReadOnly = true;
-            this.CollarsDataGridView.RowHeadersVisible = false;
-            this.CollarsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.CollarsDataGridView.Size = new System.Drawing.Size(439, 149);
-            this.CollarsDataGridView.TabIndex = 60;
+            this.ParametersDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.ParametersDataGridView.MultiSelect = false;
+            this.ParametersDataGridView.Name = "ParametersDataGridView";
+            this.ParametersDataGridView.ReadOnly = true;
+            this.ParametersDataGridView.RowHeadersVisible = false;
+            this.ParametersDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.ParametersDataGridView.Size = new System.Drawing.Size(439, 119);
+            this.ParametersDataGridView.TabIndex = 60;
+            this.ParametersDataGridView.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.CollarsDataGridView_CellMouseDoubleClick);
             // 
             // CollarColumn
             // 
@@ -347,7 +352,11 @@
             // 
             // ParametersTabPage
             // 
-            this.ParametersTabPage.Controls.Add(this.CollarsDataGridView);
+            this.ParametersTabPage.Controls.Add(this.EditParameterButton);
+            this.ParametersTabPage.Controls.Add(this.AddParameterButton);
+            this.ParametersTabPage.Controls.Add(this.DeleteParameterButton);
+            this.ParametersTabPage.Controls.Add(this.InfoParameterButton);
+            this.ParametersTabPage.Controls.Add(this.ParametersDataGridView);
             this.ParametersTabPage.Location = new System.Drawing.Point(4, 22);
             this.ParametersTabPage.Name = "ParametersTabPage";
             this.ParametersTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -416,6 +425,55 @@
             this.label5.TabIndex = 80;
             this.label5.Text = "Contents:";
             // 
+            // AddParameterButton
+            // 
+            this.AddParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddParameterButton.Enabled = false;
+            this.AddParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddParameterButton.Location = new System.Drawing.Point(3, 128);
+            this.AddParameterButton.Name = "AddParameterButton";
+            this.AddParameterButton.Size = new System.Drawing.Size(24, 24);
+            this.AddParameterButton.TabIndex = 61;
+            this.AddParameterButton.UseVisualStyleBackColor = true;
+            this.AddParameterButton.Click += new System.EventHandler(this.AddParameterButton_Click);
+            // 
+            // DeleteParameterButton
+            // 
+            this.DeleteParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteParameterButton.Enabled = false;
+            this.DeleteParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeleteParameterButton.Location = new System.Drawing.Point(30, 128);
+            this.DeleteParameterButton.Name = "DeleteParameterButton";
+            this.DeleteParameterButton.Size = new System.Drawing.Size(24, 24);
+            this.DeleteParameterButton.TabIndex = 62;
+            this.DeleteParameterButton.UseVisualStyleBackColor = true;
+            this.DeleteParameterButton.Click += new System.EventHandler(this.DeleteParameterButton_Click);
+            // 
+            // InfoParameterButton
+            // 
+            this.InfoParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoParameterButton.FlatAppearance.BorderSize = 0;
+            this.InfoParameterButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoParameterButton.Location = new System.Drawing.Point(82, 128);
+            this.InfoParameterButton.Name = "InfoParameterButton";
+            this.InfoParameterButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoParameterButton.TabIndex = 63;
+            this.InfoParameterButton.UseVisualStyleBackColor = true;
+            this.InfoParameterButton.Click += new System.EventHandler(this.InfoParameterButton_Click);
+            // 
+            // EditParameterButton
+            // 
+            this.EditParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditParameterButton.FlatAppearance.BorderSize = 0;
+            this.EditParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditParameterButton.Location = new System.Drawing.Point(57, 128);
+            this.EditParameterButton.Name = "EditParameterButton";
+            this.EditParameterButton.Size = new System.Drawing.Size(24, 24);
+            this.EditParameterButton.TabIndex = 64;
+            this.EditParameterButton.UseVisualStyleBackColor = true;
+            this.EditParameterButton.Click += new System.EventHandler(this.EditParameterButton_Click);
+            // 
             // CollarParameterFileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -444,7 +502,7 @@
             this.MinimumSize = new System.Drawing.Size(490, 360);
             this.Name = "CollarParameterFileDetailsForm";
             this.Text = "Collar Parameter File Details";
-            ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).EndInit();
             this.FileTabControl.ResumeLayout(false);
             this.ParametersTabPage.ResumeLayout(false);
             this.TpfDetailsTabPage.ResumeLayout(false);
@@ -458,7 +516,7 @@
 
         private System.Windows.Forms.Button DoneCancelButton;
         private System.Windows.Forms.Button EditSaveButton;
-        private System.Windows.Forms.DataGridView CollarsDataGridView;
+        private System.Windows.Forms.DataGridView ParametersDataGridView;
         private System.Windows.Forms.Button ShowContentsButton;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label8;
@@ -487,6 +545,10 @@
         private System.Windows.Forms.DataGridView TpfDataGridView;
         private System.Windows.Forms.TextBox ValidationTextBox;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button AddParameterButton;
+        private System.Windows.Forms.Button DeleteParameterButton;
+        private System.Windows.Forms.Button InfoParameterButton;
+        private System.Windows.Forms.Button EditParameterButton;
 
     }
 }
