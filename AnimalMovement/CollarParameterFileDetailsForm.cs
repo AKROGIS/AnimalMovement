@@ -201,7 +201,7 @@ namespace AnimalMovement
                                     cp.StartDate,
                                     cp.EndDate,
                                     cp,
-                                    CanDelete = Database.CollarFiles.Any(f => f.CollarParameter == cp)
+                                    CanDelete = !Database.CollarFiles.Any(f => f.CollarParameter == cp)
                                 }).ToList();
             ParametersDataGridView.Columns[3].Visible = false;
             ParametersDataGridView.Columns[4].Visible = false;
@@ -257,9 +257,15 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void CollarsDataGridView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void ParametersDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            InfoParameterButton_Click(sender, e);
+            if (e.RowIndex > -1)
+                InfoParameterButton_Click(sender, e);
+        }
+
+        private void ParametersDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableCollarFilesControls();
         }
 
         #endregion

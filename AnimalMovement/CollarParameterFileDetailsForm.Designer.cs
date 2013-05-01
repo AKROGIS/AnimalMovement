@@ -96,16 +96,17 @@
             this.ParametersDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.ParametersDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.ParametersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ParametersDataGridView.Location = new System.Drawing.Point(3, 3);
-            this.ParametersDataGridView.MultiSelect = false;
             this.ParametersDataGridView.Name = "ParametersDataGridView";
             this.ParametersDataGridView.ReadOnly = true;
             this.ParametersDataGridView.RowHeadersVisible = false;
             this.ParametersDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ParametersDataGridView.Size = new System.Drawing.Size(439, 119);
             this.ParametersDataGridView.TabIndex = 60;
-            this.ParametersDataGridView.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.CollarsDataGridView_CellMouseDoubleClick);
+            this.ParametersDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellDoubleClick);
+            this.ParametersDataGridView.SelectionChanged += new System.EventHandler(this.ParametersDataGridView_SelectionChanged);
             // 
             // ShowContentsButton
             // 
