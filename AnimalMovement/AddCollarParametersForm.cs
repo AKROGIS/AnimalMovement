@@ -12,11 +12,11 @@ namespace AnimalMovement
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
         private Collar Collar { get; set; }
-        private CollarFile File { get; set; }
+        private CollarParameterFile File { get; set; }
         private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        public AddCollarParametersForm(Collar collar = null, CollarFile file = null)
+        public AddCollarParametersForm(Collar collar = null, CollarParameterFile file = null)
         {
             InitializeComponent();
             Collar = collar;
@@ -36,7 +36,7 @@ namespace AnimalMovement
                     Database.Collars.FirstOrDefault(
                         c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
             if (File != null)
-                File = Database.CollarFiles.FirstOrDefault(f => f.FileId == File.FileId);
+                File = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == File.FileId);
             //Both Collar and File can be null or non-null.  if either is non-null, then it is locked.
 
             IsEditor = CanEditCollar(Collar);
@@ -85,7 +85,7 @@ namespace AnimalMovement
             else
             {
                 if (Collar == null)
-                    FileComboBox.DataSource = from file in Database.CollarFiles
+                    FileComboBox.DataSource = from file in Database.CollarParameterFiles
                                               where file.Status == 'A' &&
                                                     (file.Owner == CurrentUser ||
                                                      file.ProjectInvestigator
