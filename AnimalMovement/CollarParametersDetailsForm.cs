@@ -18,7 +18,8 @@ namespace AnimalMovement
         private bool LockFile { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        public CollarParametersDetailsForm(CollarParameter collarParameter, bool lockCollar = false, bool lockFile = false)
+        public CollarParametersDetailsForm(CollarParameter collarParameter, bool lockCollar = false,
+                                           bool lockFile = false)
         {
             InitializeComponent();
             CollarParameter = collarParameter;
@@ -26,7 +27,7 @@ namespace AnimalMovement
             LockFile = lockFile;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
-            LoadDefaultFormContents();  //Called before events are triggered
+            LoadDefaultFormContents(); //Called before events are triggered
         }
 
         private void LoadDataContext()
@@ -46,11 +47,13 @@ namespace AnimalMovement
 
         private void LoadDefaultFormContents()
         {
-            Gen3Label.Visible = CollarParameter.Collar.CollarModel == "Gen3";
-            Gen3PeriodTextBox.Visible = CollarParameter.Collar.CollarModel == "Gen3";
-            Gen3TimeUnitComboBox.Visible = CollarParameter.Collar.CollarModel == "Gen3";
-            ClearFileButton.Visible = CollarParameter.Collar.CollarModel == "Gen3";
-            FileComboBox.Size = new Size(CollarParameter.Collar.CollarModel == "Gen3" ? 119 : 172, FileComboBox.Size.Height);
+            var showGen3 = CollarParameter.Collar.CollarModel == "Gen3" &&
+                           (!LockFile || CollarParameter.CollarParameterFile == null);
+            Gen3Label.Visible = showGen3;
+            Gen3PeriodTextBox.Visible = showGen3;
+            Gen3TimeUnitComboBox.Visible = showGen3;
+            ClearFileButton.Visible = showGen3;
+            FileComboBox.Size = new Size(showGen3 ? 119 : 172, FileComboBox.Size.Height);
             LoadFileComboBox();
             LoadCollarComboBox();
             LoadDatePickers();
@@ -65,62 +68,69 @@ namespace AnimalMovement
 
         private void LoadFileComboBox()
         {
-            IQueryable<FileItem> fileQuery;
-            switch (CollarParameter.Collar.CollarModel)
-            {
-                case "Gen3":
-                    fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format == 'B' && file.Status == 'A' &&
-                                      (file.Owner == CurrentUser ||
-                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
-                                           a => a.Assistant == CurrentUser))
-                                select new FileItem(file.FileId, file.FileName);
-                    break;
-                case "Gen4":
-                    fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format == 'A' && file.Status == 'A' &&
-                                      (file.Owner == CurrentUser ||
-                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
-                                           a => a.Assistant == CurrentUser))
-                                select new FileItem(file.FileId, file.FileName);
-                    break;
-                default:
-                    fileQuery = from file in Database.CollarParameterFiles
-                                where file.Format != 'A' && file.Format != 'B' && file.Status == 'A' &&
-                                      (file.Owner == CurrentUser ||
-                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
-                                           a => a.Assistant == CurrentUser))
-                                select new FileItem(file.FileId, file.FileName);
-                    break;
-            }
-            FileComboBox.DataSource = fileQuery;
-            FileComboBox.DisplayMember = "Name";
-            FileComboBox.ValueMember = "FileId";
-            if (CollarParameter.FileId == null)
-                FileComboBox.SelectedItem = null;
+            if (LockFile)
+                FileComboBox.DataSource = new[] {CollarParameter.CollarParameterFile};
             else
-                FileComboBox.SelectedValue = CollarParameter.FileId;
+                switch (CollarParameter.Collar.CollarModel)
+                {
+                    case "Gen3":
+                        FileComboBox.DataSource = from file in Database.CollarParameterFiles
+                                                  where file.Format == 'B' && file.Status == 'A' &&
+                                                        (file.Owner == CurrentUser ||
+                                                         file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                             a => a.Assistant == CurrentUser))
+                                                  select file;
+                        break;
+                    case "Gen4":
+                        FileComboBox.DataSource = from file in Database.CollarParameterFiles
+                                                  where file.Format == 'A' && file.Status == 'A' &&
+                                                        (file.Owner == CurrentUser ||
+                                                         file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                             a => a.Assistant == CurrentUser))
+                                                  select file;
+                        break;
+                    default:
+                        FileComboBox.DataSource = from file in Database.CollarParameterFiles
+                                                  where
+                                                      file.Format != 'A' && file.Format != 'B' && file.Status == 'A' &&
+                                                      (file.Owner == CurrentUser ||
+                                                       file.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                           a => a.Assistant == CurrentUser))
+                                                  select file;
+                        break;
+                }
+            FileComboBox.SelectedItem = CollarParameter.CollarParameterFile;
         }
 
         private void LoadCollarComboBox()
         {
-            var collarQuery = from collar in Database.Collars
-                              where collar.Manager == CollarParameter.Collar.Manager
-                              select collar;
-            var collars = collarQuery.ToList();
-            CollarComboBox.DataSource = collars;
-            CollarComboBox.SelectedItem =
-                collars.First(c =>
-                              c.CollarManufacturer == CollarParameter.Collar.CollarManufacturer &&
-                              c.CollarId == CollarParameter.Collar.CollarId);
+            if (LockCollar)
+                CollarComboBox.DataSource = new[] {CollarParameter.Collar};
+            else
+                CollarComboBox.DataSource = from collar in Database.Collars
+                                            where (collar.Manager == CurrentUser ||
+                                                   collar.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                       a => a.Assistant == CurrentUser)) &&
+                                                  (CollarParameter.CollarParameterFile == null ||
+                                                   (collar.CollarModel == "Gen4" &&
+                                                    CollarParameter.CollarParameterFile.Format == 'A') ||
+                                                   (collar.CollarModel == "Gen3" &&
+                                                    CollarParameter.CollarParameterFile.Format == 'B') ||
+                                                   (collar.CollarModel != "Gen3" && collar.CollarModel != "Gen4"))
+                                            select collar;
+            CollarComboBox.SelectedItem = CollarParameter.Collar;
         }
 
         private void LoadDatePickers()
         {
-            StartDateTimePicker.Value = CollarParameter.StartDate == null ? DateTime.Now.Date : CollarParameter.StartDate.Value.ToLocalTime();
+            StartDateTimePicker.Value = CollarParameter.StartDate == null
+                                            ? DateTime.Now.Date
+                                            : CollarParameter.StartDate.Value.ToLocalTime();
             StartDateTimePicker.Checked = CollarParameter.StartDate != null;
             StartDateTimePicker.CustomFormat = CollarParameter.StartDate != null ? "MMM-d-yyyy" : " ";
-            EndDateTimePicker.Value = CollarParameter.EndDate == null ? DateTime.Now.Date : CollarParameter.EndDate.Value.ToLocalTime();
+            EndDateTimePicker.Value = CollarParameter.EndDate == null
+                                          ? DateTime.Now.Date
+                                          : CollarParameter.EndDate.Value.ToLocalTime();
             EndDateTimePicker.Checked = CollarParameter.EndDate != null;
             EndDateTimePicker.CustomFormat = CollarParameter.EndDate != null ? "MMM-d-yyyy" : " ";
         }
@@ -135,8 +145,8 @@ namespace AnimalMovement
             StartDateTimePicker.Enabled = IsEditMode;
             EndDateTimePicker.Enabled = IsEditMode;
             Gen3PeriodTextBox.Enabled = IsEditMode;
-            ClearFileButton.Enabled = IsEditMode;
-            BrowseButton.Enabled = IsEditMode;
+            ClearFileButton.Enabled = IsEditMode && !LockFile;
+            BrowseButton.Enabled = IsEditMode && !LockFile;
             Gen3TimeUnitComboBox.Enabled = IsEditMode;
             ValidateForm();
         }
@@ -205,7 +215,7 @@ namespace AnimalMovement
 
         private string ValidateWarning()
         {
-            var collar = (Collar)CollarComboBox.SelectedItem;
+            var collar = (Collar) CollarComboBox.SelectedItem;
             if (collar.CollarModel == "Gen3" && FileComboBox.SelectedItem != null)
                 return "Warning: Argos data for collars with a PPF file cannot be automatically processed";
             return null;
@@ -213,12 +223,16 @@ namespace AnimalMovement
 
         private bool UpdateParameters()
         {
-            var newCollar = (Collar)CollarComboBox.SelectedItem;
-            if (CollarParameter.Collar.CollarManufacturer != newCollar.CollarManufacturer || CollarParameter.Collar.CollarId != newCollar.CollarId)
+            //TODO remove change detection.  The objects are in the same DataContext, so they will be identical,
+            //plus submit changes will call the update SPROC, with all parameters
+            var newCollar = (Collar) CollarComboBox.SelectedItem;
+            if (CollarParameter.Collar.CollarManufacturer != newCollar.CollarManufacturer ||
+                CollarParameter.Collar.CollarId != newCollar.CollarId)
                 CollarParameter.Collar = newCollar;
 
-            var newFile = FileComboBox.SelectedItem == null ? null : Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == (int)FileComboBox.SelectedValue);
-            if ((newFile == null && CollarParameter.FileId != null) || (newFile != null && CollarParameter.FileId != newFile.FileId))
+            var newFile = (CollarParameterFile) FileComboBox.SelectedItem;
+            if ((newFile == null && CollarParameter.FileId != null) ||
+                (newFile != null && CollarParameter.FileId != newFile.FileId))
                 CollarParameter.CollarParameterFile = newFile;
 
             int? period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text)
@@ -227,8 +241,12 @@ namespace AnimalMovement
                                 (((string) Gen3TimeUnitComboBox.SelectedItem) == "Hours" ? 60 : 1);
             CollarParameter.Gen3Period = period;
 
-            CollarParameter.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
-            CollarParameter.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
+            CollarParameter.StartDate = StartDateTimePicker.Checked
+                                            ? StartDateTimePicker.Value.ToUniversalTime()
+                                            : (DateTime?) null;
+            CollarParameter.EndDate = EndDateTimePicker.Checked
+                                          ? EndDateTimePicker.Value.ToUniversalTime()
+                                          : (DateTime?) null;
 
             return SubmitChanges();
         }
@@ -287,7 +305,12 @@ namespace AnimalMovement
         private void BrowseButton_Click(object sender, EventArgs e)
         {
             var form = new AddCollarParameterFileForm(CollarComboBox.SelectedItem as Collar);
-            form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); LoadDefaultFormContents(); };
+            form.DatabaseChanged += (o, args) =>
+                {
+                    OnDatabaseChanged();
+                    LoadDataContext();
+                    LoadDefaultFormContents();
+                };
             form.Show(this);
         }
 
@@ -352,23 +375,6 @@ namespace AnimalMovement
         }
 
         #endregion
-
-        private struct FileItem
-        {
-            public FileItem(int fileId, string name)
-                : this()
-            {
-                FileId = fileId;
-                Name = name;
-            }
-            // ReSharper disable MemberCanBePrivate.Local
-            // ReSharper disable UnusedAutoPropertyAccessor.Local
-            // Members are accessed by reflection in ThreadExceptionDialog FileComboBox
-            public int FileId { get; private set; }
-            public string Name { get; private set; }
-            // ReSharper restore MemberCanBePrivate.Local
-            // ReSharper restore UnusedAutoPropertyAccessor.Local
-        }
 
     }
 }

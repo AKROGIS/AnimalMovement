@@ -56,26 +56,33 @@ namespace AnimalMovement
         {
             LoadCollarComboBox();
             LoadFileComboBox();
-            Gen3Label.Visible = Collar == null || Collar.CollarModel == "Gen3";
-            Gen3PeriodTextBox.Visible = Collar == null || Collar.CollarModel == "Gen3";
-            Gen3TimeUnitComboBox.Visible = Collar == null || Collar.CollarModel == "Gen3";
-            ClearFileButton.Visible = Collar == null || Collar.CollarModel == "Gen3";
+            Gen3PeriodTextBox.Text = File == null ? "24" : "";
+            var showGen3 = (Collar == null && File == null) || (Collar != null && Collar.CollarModel == "Gen3") ||
+                           (File != null && File.Format == 'B');
+            Gen3Label.Visible = showGen3;
+            Gen3PeriodTextBox.Visible = showGen3;
+            Gen3TimeUnitComboBox.Visible = showGen3;
+            ClearFileButton.Visible = showGen3 && File == null;
             Gen3TimeUnitComboBox.SelectedIndex = 0;
-            FileComboBox.Size = new Size((Collar == null || Collar.CollarModel == "Gen3") ? 119 : 172, FileComboBox.Size.Height);
+            FileComboBox.Size = new Size(showGen3 && File == null ? 119 : 172, FileComboBox.Size.Height);
         }
 
         private void LoadCollarComboBox()
         {
+            CollarComboBox.Enabled = false;
             if (Collar != null)
                 CollarComboBox.DataSource = new[] {Collar};
             else
                 CollarComboBox.DataSource = from collar in Database.Collars
-                                            where collar.Manager == CurrentUser ||
-                                                  collar.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
-                                                      a => a.Assistant == CurrentUser)
+                                            where (collar.Manager == CurrentUser ||
+                                                   collar.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
+                                                       a => a.Assistant == CurrentUser)) &&
+                                                  (File == null || (collar.CollarModel == "Gen4" && File.Format == 'A') ||
+                                                   (collar.CollarModel == "Gen3" && File.Format == 'B') ||
+                                                   (collar.CollarModel != "Gen3" && collar.CollarModel != "Gen4"))
                                             select collar;
-            CollarComboBox.Enabled = Collar == null;
             CollarComboBox.SelectedItem = Collar;
+            CollarComboBox.Enabled = Collar == null;
         }
 
         private void LoadFileComboBox()
@@ -127,7 +134,6 @@ namespace AnimalMovement
             FileComboBox.Enabled = File == null;
             ClearFileButton.Enabled = File == null;
             BrowseButton.Enabled = File == null;
-            FileComboBox.DisplayMember = "Name";
         }
 
         private void EnableFormControls()
@@ -268,6 +274,9 @@ namespace AnimalMovement
 
         private void CollarComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (!CollarComboBox.Enabled)  //must be a call during setup
+                return;
+            Collar = (Collar) CollarComboBox.SelectedItem;
             LoadFileComboBox();
             IsEditor = CanEditCollar((Collar)CollarComboBox.SelectedItem);
             EnableFormControls();
@@ -280,7 +289,11 @@ namespace AnimalMovement
 
         private void FileComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ValidateForm();
+            if (!FileComboBox.Enabled)  //must be a call during setup
+                return;
+            File = (CollarParameterFile)FileComboBox.SelectedItem;
+            LoadCollarComboBox();
+            EnableFormControls();
         }
 
         private void ClearFileButton_Click(object sender, EventArgs e)
