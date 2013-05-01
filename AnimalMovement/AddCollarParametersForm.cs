@@ -68,7 +68,6 @@ namespace AnimalMovement
                                 select new FileItem(file.FileId, file.FileName);
                     break;
                 case "Gen4":
-                    //TODO limit to TPF files with this collar
                     fileQuery = from file in Database.CollarParameterFiles
                                 where file.Format == 'A' && file.Status == 'A' &&
                                       (file.Owner == CurrentUser ||

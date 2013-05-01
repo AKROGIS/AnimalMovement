@@ -50,7 +50,7 @@ namespace AnimalMovement
             Gen3PeriodTextBox.Visible = CollarParameter.Collar.CollarModel == "Gen3";
             Gen3TimeUnitComboBox.Visible = CollarParameter.Collar.CollarModel == "Gen3";
             ClearFileButton.Visible = CollarParameter.Collar.CollarModel == "Gen3";
-            FileComboBox.Size = new System.Drawing.Size(CollarParameter.Collar.CollarModel == "Gen3" ? 119 : 172, FileComboBox.Size.Height);
+            FileComboBox.Size = new Size(CollarParameter.Collar.CollarModel == "Gen3" ? 119 : 172, FileComboBox.Size.Height);
             LoadFileComboBox();
             LoadCollarComboBox();
             LoadDatePickers();
@@ -77,7 +77,6 @@ namespace AnimalMovement
                                 select new FileItem(file.FileId, file.FileName);
                     break;
                 case "Gen4":
-                    //TODO limit to TPF files with this collar
                     fileQuery = from file in Database.CollarParameterFiles
                                 where file.Format == 'A' && file.Status == 'A' &&
                                       (file.Owner == CurrentUser ||
