@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
@@ -294,6 +295,15 @@ namespace AnimalMovement
                                                         DeployOffset = GetDeploymentOffset(t.Ctn, t.ArgosId, t.TimeStamp),
                                                         ParamOffset = GetParameterOffset(t.Ctn, t.TimeStamp)
                                                     }).ToList();
+            foreach (DataGridViewRow row in TpfDataGridView.Rows)
+            {
+                if (row.Cells[5].Value == null && row.Cells[6].Value != null)
+                    row.DefaultCellStyle.ForeColor = Color.Red;
+                if (row.Cells[5].Value != null && row.Cells[6].Value == null)
+                    row.DefaultCellStyle.ForeColor = Color.Fuchsia;
+                if (row.Cells[5].Value == null && row.Cells[6].Value == null)
+                    row.DefaultCellStyle.ForeColor = Color.IndianRed;
+            }
         }
 
         private int? GetParameterOffset(string ctn, DateTime start)

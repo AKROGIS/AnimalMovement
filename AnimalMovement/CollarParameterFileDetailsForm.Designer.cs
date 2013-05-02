@@ -53,12 +53,12 @@
             this.DeleteParameterButton = new System.Windows.Forms.Button();
             this.InfoParameterButton = new System.Windows.Forms.Button();
             this.TpfDetailsTabPage = new System.Windows.Forms.TabPage();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.IgnoreSuffixCheckBox = new System.Windows.Forms.CheckBox();
             this.TpfDataGridView = new System.Windows.Forms.DataGridView();
             this.ValidationTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.IgnoreSuffixCheckBox = new System.Windows.Forms.CheckBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).BeginInit();
             this.FileTabControl.SuspendLayout();
             this.ParametersTabPage.SuspendLayout();
@@ -285,7 +285,7 @@
             this.ParametersTabPage.Location = new System.Drawing.Point(4, 22);
             this.ParametersTabPage.Name = "ParametersTabPage";
             this.ParametersTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.ParametersTabPage.Size = new System.Drawing.Size(445, 155);
+            this.ParametersTabPage.Size = new System.Drawing.Size(445, 235);
             this.ParametersTabPage.TabIndex = 3;
             this.ParametersTabPage.Tag = "Argos";
             this.ParametersTabPage.Text = "Collars using file";
@@ -355,6 +355,39 @@
             this.TpfDetailsTabPage.Text = "TPF Details";
             this.TpfDetailsTabPage.UseVisualStyleBackColor = true;
             // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button2.Location = new System.Drawing.Point(136, 204);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(124, 23);
+            this.button2.TabIndex = 54;
+            this.button2.Text = "Add Collar Parameter";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button1.Location = new System.Drawing.Point(6, 204);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(124, 23);
+            this.button1.TabIndex = 53;
+            this.button1.Text = "Add Argos Deployment";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // IgnoreSuffixCheckBox
+            // 
+            this.IgnoreSuffixCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.IgnoreSuffixCheckBox.AutoSize = true;
+            this.IgnoreSuffixCheckBox.Checked = true;
+            this.IgnoreSuffixCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.IgnoreSuffixCheckBox.Location = new System.Drawing.Point(324, 208);
+            this.IgnoreSuffixCheckBox.Name = "IgnoreSuffixCheckBox";
+            this.IgnoreSuffixCheckBox.Size = new System.Drawing.Size(115, 17);
+            this.IgnoreSuffixCheckBox.TabIndex = 52;
+            this.IgnoreSuffixCheckBox.Text = "Ignore Alpha Suffix";
+            this.IgnoreSuffixCheckBox.UseVisualStyleBackColor = true;
+            // 
             // TpfDataGridView
             // 
             this.TpfDataGridView.AllowUserToAddRows = false;
@@ -401,36 +434,6 @@
             this.label5.Size = new System.Drawing.Size(52, 13);
             this.label5.TabIndex = 80;
             this.label5.Text = "Contents:";
-            // 
-            // IgnoreSuffixCheckBox
-            // 
-            this.IgnoreSuffixCheckBox.AutoSize = true;
-            this.IgnoreSuffixCheckBox.Checked = true;
-            this.IgnoreSuffixCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.IgnoreSuffixCheckBox.Location = new System.Drawing.Point(324, 208);
-            this.IgnoreSuffixCheckBox.Name = "IgnoreSuffixCheckBox";
-            this.IgnoreSuffixCheckBox.Size = new System.Drawing.Size(115, 17);
-            this.IgnoreSuffixCheckBox.TabIndex = 52;
-            this.IgnoreSuffixCheckBox.Text = "Ignore Alpha Suffix";
-            this.IgnoreSuffixCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(6, 204);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(124, 23);
-            this.button1.TabIndex = 53;
-            this.button1.Text = "Add Argos Deployment";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(136, 204);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(124, 23);
-            this.button2.TabIndex = 54;
-            this.button2.Text = "Add Collar Parameter";
-            this.button2.UseVisualStyleBackColor = true;
             // 
             // CollarParameterFileDetailsForm
             // 
