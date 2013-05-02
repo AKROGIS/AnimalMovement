@@ -65,6 +65,7 @@
             this.DeleteArgosButton = new System.Windows.Forms.Button();
             this.InfoArgosButton = new System.Windows.Forms.Button();
             this.ParametersTabPage = new System.Windows.Forms.TabPage();
+            this.EditParameterButton = new System.Windows.Forms.Button();
             this.ParametersDataGridView = new System.Windows.Forms.DataGridView();
             this.AddParameterButton = new System.Windows.Forms.Button();
             this.DeleteParameterButton = new System.Windows.Forms.Button();
@@ -410,6 +411,7 @@
             this.DeploymentDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.DeploymentDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.DeploymentDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.DeploymentDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.AnimalColumn,
@@ -423,6 +425,7 @@
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DeploymentDataGridView.Size = new System.Drawing.Size(437, 293);
             this.DeploymentDataGridView.TabIndex = 11;
+            this.DeploymentDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DeploymentDataGridView_CellDoubleClick);
             this.DeploymentDataGridView.SelectionChanged += new System.EventHandler(this.DeploymentDataGridView_SelectionChanged);
             this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.InfoAnimalButton_Click);
             // 
@@ -491,13 +494,14 @@
             this.ArgosDataGridView.Location = new System.Drawing.Point(6, 6);
             this.ArgosDataGridView.Name = "ArgosDataGridView";
             this.ArgosDataGridView.ReadOnly = true;
+            this.ArgosDataGridView.RowHeadersVisible = false;
             this.ArgosDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ArgosDataGridView.ShowCellErrors = false;
             this.ArgosDataGridView.ShowEditingIcon = false;
             this.ArgosDataGridView.ShowRowErrors = false;
             this.ArgosDataGridView.Size = new System.Drawing.Size(439, 294);
             this.ArgosDataGridView.TabIndex = 29;
-            this.ArgosDataGridView.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ArgosDataGridView_CellContentDoubleClick);
+            this.ArgosDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ArgosDataGridView_CellDoubleClick);
             this.ArgosDataGridView.SelectionChanged += new System.EventHandler(this.ArgosDataGridView_SelectionChanged);
             // 
             // AddArgosButton
@@ -539,6 +543,7 @@
             // 
             // ParametersTabPage
             // 
+            this.ParametersTabPage.Controls.Add(this.EditParameterButton);
             this.ParametersTabPage.Controls.Add(this.ParametersDataGridView);
             this.ParametersTabPage.Controls.Add(this.AddParameterButton);
             this.ParametersTabPage.Controls.Add(this.DeleteParameterButton);
@@ -551,6 +556,18 @@
             this.ParametersTabPage.Text = "Parameters";
             this.ParametersTabPage.UseVisualStyleBackColor = true;
             // 
+            // EditParameterButton
+            // 
+            this.EditParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditParameterButton.FlatAppearance.BorderSize = 0;
+            this.EditParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditParameterButton.Location = new System.Drawing.Point(60, 306);
+            this.EditParameterButton.Name = "EditParameterButton";
+            this.EditParameterButton.Size = new System.Drawing.Size(24, 24);
+            this.EditParameterButton.TabIndex = 65;
+            this.EditParameterButton.UseVisualStyleBackColor = true;
+            this.EditParameterButton.Click += new System.EventHandler(this.EditParameterButton_Click);
+            // 
             // ParametersDataGridView
             // 
             this.ParametersDataGridView.AllowUserToAddRows = false;
@@ -559,19 +576,20 @@
             this.ParametersDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ParametersDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.ParametersDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.ParametersDataGridView.CausesValidation = false;
             this.ParametersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ParametersDataGridView.Location = new System.Drawing.Point(6, 6);
             this.ParametersDataGridView.Name = "ParametersDataGridView";
             this.ParametersDataGridView.ReadOnly = true;
+            this.ParametersDataGridView.RowHeadersVisible = false;
             this.ParametersDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ParametersDataGridView.ShowCellErrors = false;
             this.ParametersDataGridView.ShowEditingIcon = false;
             this.ParametersDataGridView.ShowRowErrors = false;
             this.ParametersDataGridView.Size = new System.Drawing.Size(439, 294);
             this.ParametersDataGridView.TabIndex = 33;
-            this.ParametersDataGridView.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellContentDoubleClick);
+            this.ParametersDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellDoubleClick);
             this.ParametersDataGridView.SelectionChanged += new System.EventHandler(this.ParametersDataGridView_SelectionChanged);
             // 
             // AddParameterButton
@@ -604,7 +622,7 @@
             this.InfoParameterButton.FlatAppearance.BorderSize = 0;
             this.InfoParameterButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoParameterButton.Location = new System.Drawing.Point(58, 306);
+            this.InfoParameterButton.Location = new System.Drawing.Point(84, 306);
             this.InfoParameterButton.Name = "InfoParameterButton";
             this.InfoParameterButton.Size = new System.Drawing.Size(24, 24);
             this.InfoParameterButton.TabIndex = 32;
@@ -655,7 +673,7 @@
             this.FilesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.FilesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.FilesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.FilesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.FilesDataGridView.Location = new System.Drawing.Point(6, 6);
             this.FilesDataGridView.Name = "FilesDataGridView";
@@ -664,6 +682,7 @@
             this.FilesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.FilesDataGridView.Size = new System.Drawing.Size(437, 293);
             this.FilesDataGridView.TabIndex = 0;
+            this.FilesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.FilesDataGridView_CellDoubleClick);
             this.FilesDataGridView.SelectionChanged += new System.EventHandler(this.FilesDataGridView_SelectionChanged);
             this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);
             // 
@@ -868,5 +887,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn RetrieveDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn DeploymentColumn;
         private System.Windows.Forms.ErrorProvider CollarErrorProvider;
+        private System.Windows.Forms.Button EditParameterButton;
     }
 }

@@ -330,6 +330,12 @@ namespace AnimalMovement
             form.Show(this);
         }
 
+        private void DeploymentDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                InfoAnimalButton_Click(sender, e);
+        }
+
         private void DeploymentDataGridView_SelectionChanged(object sender, EventArgs e)
         {
             EnableAnimalControls();
@@ -399,9 +405,10 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void ArgosDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void ArgosDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            InfoArgosButton_Click(sender, e);
+            if (e.RowIndex > -1)
+                InfoArgosButton_Click(sender, e);
         }
 
         private void ArgosDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -454,7 +461,10 @@ namespace AnimalMovement
         {
             AddParameterButton.Enabled = !IsEditMode && IsEditor;
             DeleteParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count > 0;
-            InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1;
+            InfoParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count == 0;
+            InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1 && //has a file
+                                          ((CollarParameter) ParametersDataGridView.SelectedRows[0].Cells[0].Value)
+                                              .CollarParameterFile != null;
         }
 
         private void ParametersDataChanged()
@@ -485,19 +495,28 @@ namespace AnimalMovement
                 ParametersDataChanged();
         }
 
-        private void InfoParameterButton_Click(object sender, EventArgs e)
+        private void EditParameterButton_Click(object sender, EventArgs e)
         {
-            if (ParametersDataGridView.SelectedRows.Count < 1 || ParametersDataGridView.Columns.Count < 1)
-                return;
             var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
             var form = new CollarParametersDetailsForm(parameter, true);
             form.DatabaseChanged += (o, x) => ParametersDataChanged();
             form.Show(this);
         }
 
-        private void ParametersDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void InfoParameterButton_Click(object sender, EventArgs e)
         {
-            InfoParameterButton_Click(sender, e);
+            if (ParametersDataGridView.SelectedRows.Count < 1 || ParametersDataGridView.Columns.Count < 1)
+                return;
+            var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new CollarParameterFileDetailsForm(parameter.CollarParameterFile);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void ParametersDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                InfoParameterButton_Click(sender, e);
         }
 
         private void ParametersDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -568,6 +587,12 @@ namespace AnimalMovement
             var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, x) => FileDataChanged();
             form.Show(this);
+        }
+
+        private void FilesDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                FileInfoButton_Click(sender, e);
         }
 
         private void FilesDataGridView_SelectionChanged(object sender, EventArgs e)
