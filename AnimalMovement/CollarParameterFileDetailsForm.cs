@@ -199,7 +199,7 @@ namespace AnimalMovement
                                     cp.EndDate,
                                     cp,
                                     CanDelete = !Database.CollarFiles.Any(f => f.CollarParameter == cp)
-                                }).ToList();
+                                });
             ParametersDataGridView.Columns[3].Visible = false;
             ParametersDataGridView.Columns[4].Visible = false;
             EnableCollarFilesControls();
@@ -290,8 +290,40 @@ namespace AnimalMovement
                                                         CTN = t.Ctn,
                                                         t.ArgosId,
                                                         t.Frequency,
-                                                        StartDate = t.TimeStamp
+                                                        StartDate = t.TimeStamp,
+                                                        DeployOffset = GetDeploymentOffset(t.Ctn, t.ArgosId, t.TimeStamp),
+                                                        ParamOffset = GetParameterOffset(t.Ctn, t.TimeStamp)
                                                     }).ToList();
+        }
+
+        private int? GetParameterOffset(string ctn, DateTime start)
+        {
+            bool ignoreSuffix = IgnoreSuffixCheckBox.Checked;
+            var altCtn = (ctn.Length > 6 && ignoreSuffix) ? ctn.Substring(0, 6) : ctn;
+            var parameters = File.CollarParameters.Where(p => p.CollarManufacturer == "Telonics" && (p.CollarId == ctn || p.CollarId == altCtn));
+            int? diff = null;
+            foreach (var param in parameters)
+            {
+                var d = (int)(start - (param.StartDate ?? DateTime.MinValue)).TotalHours;
+                if (diff == null || d < diff)
+                    diff = d;
+            }
+            return diff;
+        }
+
+        private int? GetDeploymentOffset(string ctn, string argos, DateTime start)
+        {
+            bool ignoreSuffix = IgnoreSuffixCheckBox.Checked;
+            var altCtn = (ctn.Length > 6 && ignoreSuffix) ? ctn.Substring(0, 6) : ctn;
+            var deployments = Database.ArgosDeployments.Where(d => d.PlatformId == argos && d.CollarManufacturer == "Telonics" && (d.CollarId == ctn || d.CollarId == altCtn));
+            int? diff = null;
+            foreach (var deployment in deployments)
+            {
+                var d = (int)(start - (deployment.StartDate ?? DateTime.MinValue)).TotalHours;
+                if (diff == null || d < diff)
+                    diff = d;
+            }
+            return diff;
         }
 
         #endregion

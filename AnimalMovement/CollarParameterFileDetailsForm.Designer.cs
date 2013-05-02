@@ -48,14 +48,17 @@
             this.StatusComboBox = new System.Windows.Forms.ComboBox();
             this.FileTabControl = new System.Windows.Forms.TabControl();
             this.ParametersTabPage = new System.Windows.Forms.TabPage();
+            this.EditParameterButton = new System.Windows.Forms.Button();
+            this.AddParameterButton = new System.Windows.Forms.Button();
+            this.DeleteParameterButton = new System.Windows.Forms.Button();
+            this.InfoParameterButton = new System.Windows.Forms.Button();
             this.TpfDetailsTabPage = new System.Windows.Forms.TabPage();
             this.TpfDataGridView = new System.Windows.Forms.DataGridView();
             this.ValidationTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.AddParameterButton = new System.Windows.Forms.Button();
-            this.DeleteParameterButton = new System.Windows.Forms.Button();
-            this.InfoParameterButton = new System.Windows.Forms.Button();
-            this.EditParameterButton = new System.Windows.Forms.Button();
+            this.IgnoreSuffixCheckBox = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).BeginInit();
             this.FileTabControl.SuspendLayout();
             this.ParametersTabPage.SuspendLayout();
@@ -67,7 +70,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(16, 344);
+            this.DoneCancelButton.Location = new System.Drawing.Point(16, 424);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 70;
@@ -79,7 +82,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(394, 344);
+            this.EditSaveButton.Location = new System.Drawing.Point(394, 424);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 71;
@@ -267,7 +270,7 @@
             this.FileTabControl.Location = new System.Drawing.Point(16, 137);
             this.FileTabControl.Name = "FileTabControl";
             this.FileTabControl.SelectedIndex = 0;
-            this.FileTabControl.Size = new System.Drawing.Size(453, 181);
+            this.FileTabControl.Size = new System.Drawing.Size(453, 261);
             this.FileTabControl.TabIndex = 79;
             this.FileTabControl.Tag = "";
             this.FileTabControl.SelectedIndexChanged += new System.EventHandler(this.FileTabControl_SelectedIndexChanged);
@@ -288,64 +291,17 @@
             this.ParametersTabPage.Text = "Collars using file";
             this.ParametersTabPage.UseVisualStyleBackColor = true;
             // 
-            // TpfDetailsTabPage
+            // EditParameterButton
             // 
-            this.TpfDetailsTabPage.Controls.Add(this.TpfDataGridView);
-            this.TpfDetailsTabPage.Location = new System.Drawing.Point(4, 22);
-            this.TpfDetailsTabPage.Name = "TpfDetailsTabPage";
-            this.TpfDetailsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.TpfDetailsTabPage.Size = new System.Drawing.Size(445, 155);
-            this.TpfDetailsTabPage.TabIndex = 1;
-            this.TpfDetailsTabPage.Tag = "DerivedFiles";
-            this.TpfDetailsTabPage.Text = "TPF Details";
-            this.TpfDetailsTabPage.UseVisualStyleBackColor = true;
-            // 
-            // TpfDataGridView
-            // 
-            this.TpfDataGridView.AllowUserToAddRows = false;
-            this.TpfDataGridView.AllowUserToDeleteRows = false;
-            this.TpfDataGridView.AllowUserToOrderColumns = true;
-            this.TpfDataGridView.AllowUserToResizeRows = false;
-            this.TpfDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.TpfDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.TpfDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.TpfDataGridView.Location = new System.Drawing.Point(2, 3);
-            this.TpfDataGridView.MultiSelect = false;
-            this.TpfDataGridView.Name = "TpfDataGridView";
-            this.TpfDataGridView.ReadOnly = true;
-            this.TpfDataGridView.RowHeadersVisible = false;
-            this.TpfDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.TpfDataGridView.Size = new System.Drawing.Size(440, 149);
-            this.TpfDataGridView.TabIndex = 51;
-            // 
-            // ValidationTextBox
-            // 
-            this.ValidationTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ValidationTextBox.BackColor = System.Drawing.SystemColors.Control;
-            this.ValidationTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ValidationTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ValidationTextBox.ForeColor = System.Drawing.Color.Red;
-            this.ValidationTextBox.Location = new System.Drawing.Point(16, 324);
-            this.ValidationTextBox.Name = "ValidationTextBox";
-            this.ValidationTextBox.ReadOnly = true;
-            this.ValidationTextBox.Size = new System.Drawing.Size(453, 14);
-            this.ValidationTextBox.TabIndex = 78;
-            this.ValidationTextBox.Tag = "";
-            this.ValidationTextBox.Text = "Validation Error";
-            this.ValidationTextBox.Visible = false;
-            // 
-            // label5
-            // 
-            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(249, 121);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(52, 13);
-            this.label5.TabIndex = 80;
-            this.label5.Text = "Contents:";
+            this.EditParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditParameterButton.FlatAppearance.BorderSize = 0;
+            this.EditParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditParameterButton.Location = new System.Drawing.Point(57, 128);
+            this.EditParameterButton.Name = "EditParameterButton";
+            this.EditParameterButton.Size = new System.Drawing.Size(24, 24);
+            this.EditParameterButton.TabIndex = 64;
+            this.EditParameterButton.UseVisualStyleBackColor = true;
+            this.EditParameterButton.Click += new System.EventHandler(this.EditParameterButton_Click);
             // 
             // AddParameterButton
             // 
@@ -377,30 +333,110 @@
             this.InfoParameterButton.FlatAppearance.BorderSize = 0;
             this.InfoParameterButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoParameterButton.Location = new System.Drawing.Point(82, 128);
+            this.InfoParameterButton.Location = new System.Drawing.Point(81, 128);
             this.InfoParameterButton.Name = "InfoParameterButton";
             this.InfoParameterButton.Size = new System.Drawing.Size(24, 24);
             this.InfoParameterButton.TabIndex = 63;
             this.InfoParameterButton.UseVisualStyleBackColor = true;
             this.InfoParameterButton.Click += new System.EventHandler(this.InfoParameterButton_Click);
             // 
-            // EditParameterButton
+            // TpfDetailsTabPage
             // 
-            this.EditParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.EditParameterButton.FlatAppearance.BorderSize = 0;
-            this.EditParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
-            this.EditParameterButton.Location = new System.Drawing.Point(57, 128);
-            this.EditParameterButton.Name = "EditParameterButton";
-            this.EditParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.EditParameterButton.TabIndex = 64;
-            this.EditParameterButton.UseVisualStyleBackColor = true;
-            this.EditParameterButton.Click += new System.EventHandler(this.EditParameterButton_Click);
+            this.TpfDetailsTabPage.Controls.Add(this.button2);
+            this.TpfDetailsTabPage.Controls.Add(this.button1);
+            this.TpfDetailsTabPage.Controls.Add(this.IgnoreSuffixCheckBox);
+            this.TpfDetailsTabPage.Controls.Add(this.TpfDataGridView);
+            this.TpfDetailsTabPage.Location = new System.Drawing.Point(4, 22);
+            this.TpfDetailsTabPage.Name = "TpfDetailsTabPage";
+            this.TpfDetailsTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.TpfDetailsTabPage.Size = new System.Drawing.Size(445, 235);
+            this.TpfDetailsTabPage.TabIndex = 1;
+            this.TpfDetailsTabPage.Tag = "DerivedFiles";
+            this.TpfDetailsTabPage.Text = "TPF Details";
+            this.TpfDetailsTabPage.UseVisualStyleBackColor = true;
+            // 
+            // TpfDataGridView
+            // 
+            this.TpfDataGridView.AllowUserToAddRows = false;
+            this.TpfDataGridView.AllowUserToDeleteRows = false;
+            this.TpfDataGridView.AllowUserToOrderColumns = true;
+            this.TpfDataGridView.AllowUserToResizeRows = false;
+            this.TpfDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TpfDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.TpfDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.TpfDataGridView.Location = new System.Drawing.Point(2, 3);
+            this.TpfDataGridView.MultiSelect = false;
+            this.TpfDataGridView.Name = "TpfDataGridView";
+            this.TpfDataGridView.ReadOnly = true;
+            this.TpfDataGridView.RowHeadersVisible = false;
+            this.TpfDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.TpfDataGridView.Size = new System.Drawing.Size(440, 195);
+            this.TpfDataGridView.TabIndex = 51;
+            // 
+            // ValidationTextBox
+            // 
+            this.ValidationTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ValidationTextBox.BackColor = System.Drawing.SystemColors.Control;
+            this.ValidationTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ValidationTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ValidationTextBox.ForeColor = System.Drawing.Color.Red;
+            this.ValidationTextBox.Location = new System.Drawing.Point(16, 404);
+            this.ValidationTextBox.Name = "ValidationTextBox";
+            this.ValidationTextBox.ReadOnly = true;
+            this.ValidationTextBox.Size = new System.Drawing.Size(453, 14);
+            this.ValidationTextBox.TabIndex = 78;
+            this.ValidationTextBox.Tag = "";
+            this.ValidationTextBox.Text = "Validation Error";
+            this.ValidationTextBox.Visible = false;
+            // 
+            // label5
+            // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(249, 121);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(52, 13);
+            this.label5.TabIndex = 80;
+            this.label5.Text = "Contents:";
+            // 
+            // IgnoreSuffixCheckBox
+            // 
+            this.IgnoreSuffixCheckBox.AutoSize = true;
+            this.IgnoreSuffixCheckBox.Checked = true;
+            this.IgnoreSuffixCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.IgnoreSuffixCheckBox.Location = new System.Drawing.Point(324, 208);
+            this.IgnoreSuffixCheckBox.Name = "IgnoreSuffixCheckBox";
+            this.IgnoreSuffixCheckBox.Size = new System.Drawing.Size(115, 17);
+            this.IgnoreSuffixCheckBox.TabIndex = 52;
+            this.IgnoreSuffixCheckBox.Text = "Ignore Alpha Suffix";
+            this.IgnoreSuffixCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(6, 204);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(124, 23);
+            this.button1.TabIndex = 53;
+            this.button1.Text = "Add Argos Deployment";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(136, 204);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(124, 23);
+            this.button2.TabIndex = 54;
+            this.button2.Text = "Add Collar Parameter";
+            this.button2.UseVisualStyleBackColor = true;
             // 
             // CollarParameterFileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(481, 375);
+            this.ClientSize = new System.Drawing.Size(481, 455);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.ValidationTextBox);
             this.Controls.Add(this.StatusComboBox);
@@ -428,6 +464,7 @@
             this.FileTabControl.ResumeLayout(false);
             this.ParametersTabPage.ResumeLayout(false);
             this.TpfDetailsTabPage.ResumeLayout(false);
+            this.TpfDetailsTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -464,6 +501,9 @@
         private System.Windows.Forms.Button DeleteParameterButton;
         private System.Windows.Forms.Button InfoParameterButton;
         private System.Windows.Forms.Button EditParameterButton;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckBox IgnoreSuffixCheckBox;
 
     }
 }
