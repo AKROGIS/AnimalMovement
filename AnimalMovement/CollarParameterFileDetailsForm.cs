@@ -351,12 +351,13 @@ namespace AnimalMovement
             var collar = collars[index];
             if (collar == null)
             {
+                var ctn = (string)TpfDataGridView.Rows[index].Cells[1].Value;
+                ctn = IgnoreSuffixCheckBox.Checked && ctn.Length > 6 ? ctn.Substring(0, 6) : ctn;
                 var form = new AddCollarForm(File.ProjectInvestigator);
-                form.DatabaseChanged += (o, x) => CollarAdded();
+                form.DatabaseChanged += (o, x) => CollarAdded(ctn);
                 form.SetDefaultFrequency((double)TpfDataGridView.SelectedRows[0].Cells[3].Value);
                 form.SetDefaultModel("Telonics","Gen4");
-                var ctn = (string)TpfDataGridView.Rows[index].Cells[1].Value;
-                form.SetDefaultId(IgnoreSuffixCheckBox.Checked && ctn.Length > 6 ? ctn.Substring(0, 6) : ctn);
+                form.SetDefaultId(ctn);
                 form.Show(this);
             }
             else
@@ -368,11 +369,43 @@ namespace AnimalMovement
             }
         }
 
-        private object CollarAdded()
+        private void CollarAdded(string id)
         {
-            throw new NotImplementedException();
-            //Look for the new collar, if we can find it then create parameter
-            //if we have the collar, and the argosid exists, create new deployment
+            var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == id);
+            if (collar == null)
+                return;
+            //Add Parameter
+            var start = (DateTime) TpfDataGridView.SelectedRows[0].Cells[4].Value;
+            //Since this is a new collar, I don't need to worry about any parameter conflicts.
+            var param = new CollarParameter
+                {
+                    Collar = collar,
+                    CollarParameterFile = File,
+                    StartDate = start
+                };
+            Database.CollarParameters.InsertOnSubmit(param);
+
+            //Add ArgosDeployment
+            var argosId = (string) TpfDataGridView.SelectedRows[0].Cells[2].Value;
+            var platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);
+            if (platform == null)
+            {
+                //TODO - Launch the new ArgosID to create an Argos platform
+                var form = new AddArgosPlatformForm(File.ProjectInvestigator);
+                form.DatabaseChanged += (o, x) => { platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);};
+                form.SetDefaultPlatform(argosId);
+                form.Show(this);
+            }
+            if (platform != null)
+            {
+                var deploy = new ArgosDeployment
+                    {
+                        ArgosPlatform = platform,
+                        Collar = collar,
+                        StartDate = start
+                    };
+                Database.ArgosDeployments.InsertOnSubmit(deploy);
+            }
             if (SubmitChanges())
                 TpfDataChanged();
         }
