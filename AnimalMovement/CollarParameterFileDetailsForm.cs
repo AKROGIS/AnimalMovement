@@ -271,8 +271,6 @@ namespace AnimalMovement
 
         #region Telonics Parameter File Tab
 
-        //TODO - Provide an interface to see which collars in the TPF file are not in the db, and an option to add them.
-
         private void HideTpfDetailsTab()
         {
             if (File.Format != 'A' && FileTabControl.TabPages.Contains(TpfDetailsTabPage))
@@ -292,48 +290,264 @@ namespace AnimalMovement
                                                         t.ArgosId,
                                                         t.Frequency,
                                                         StartDate = t.TimeStamp,
-                                                        DeployOffset = GetDeploymentOffset(t.Ctn, t.ArgosId, t.TimeStamp),
-                                                        ParamOffset = GetParameterOffset(t.Ctn, t.TimeStamp)
                                                     }).ToList();
+            EnableTpfDetailsControls();
+        }
+
+        private void IgnoreSuffixCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (collars == null)
+                return;
+            collars = null;
+            TpfDataGridView.DataSource = null;
+            SetUpTpfDetailsTab();
+            EnableTpfDetailsControls();
+        }
+
+        private void TpfDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableTpfDetailsControls();
+        }
+
+        private void EnableTpfDetailsControls()
+        {
+            CheckButton.Visible = collars == null;
+            AddFixCollarButton.Visible = collars != null;
+            AddArgosButton.Visible = collars != null;
+            AddFixParameterButton.Visible = collars != null;
+            if (collars == null || TpfDataGridView.SelectedRows.Count != 1)
+                return;
+            var index = TpfDataGridView.SelectedRows[0].Index;
+            var collar = collars[index];
+            if (collar == null)
+            {
+                var ctn = (string) TpfDataGridView.Rows[index].Cells[1].Value;
+                AddFixCollarButton.Text = "Add " +
+                                       (IgnoreSuffixCheckBox.Checked && ctn.Length > 6 ? ctn.Substring(0, 6) : ctn);
+                AddFixCollarButton.Enabled = true;
+                AddArgosButton.Enabled = false;
+                AddFixParameterButton.Enabled = false;
+                return;
+            }
+            var argosColor = TpfDataGridView.Rows[index].Cells[2].Style.ForeColor;
+            var frequencyColor = TpfDataGridView.Rows[index].Cells[3].Style.ForeColor;
+            var paramColor = TpfDataGridView.Rows[index].Cells[4].Style.ForeColor;
+            AddArgosButton.Enabled = argosColor == Color.Red;
+            AddFixCollarButton.Enabled = frequencyColor == Color.Red;
+            AddFixCollarButton.Text = frequencyColor == Color.Red ? "Fix Frequency" : AddFixCollarButton.Text;
+            AddFixParameterButton.Enabled = paramColor == Color.Red || paramColor == Color.Fuchsia;
+            AddFixParameterButton.Text = paramColor == Color.Fuchsia ? "Fix Parameter" : "Add Parameter";
+        }
+
+        private void CheckButton_Click(object sender, EventArgs e)
+        {
+            CheckTpfData();
+            EnableTpfDetailsControls();
+        }
+
+        private void AddCollarButton_Click(object sender, EventArgs e)
+        {
+            var index = TpfDataGridView.SelectedRows[0].Index;
+            var collar = collars[index];
+            if (collar == null)
+            {
+                //Call AddCollarForm, fix form to set defaults, mfgr, id, freq
+                //Look for the new collar, if we can find it then create parameter
+                //if we have the collar, and the argosid exists, create new deployment
+            }
+            else
+            {
+                //Fix the frequency
+                collar.Frequency = (double)TpfDataGridView.SelectedRows[0].Cells[3].Value;
+                SubmitChanges();
+            }
+        }
+
+        private void AddArgosButton_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void AddFixParameterButton_Click(object sender, EventArgs e)
+        {
+            var index = TpfDataGridView.SelectedRows[0].Index;
+            var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[4].Value;
+            var collar = collars[index];
+            DateTime? endDate = null;
+            if (AddFixParameterButton.Text == "Fix Parameter")
+            {
+                // If we are here, there is one (possibly though unlikely more) parameter(s) with this collar/file but not this start date.
+                // If there is only one parameter on this collar (this one), then no problems, just fix the date.  Otherwise, check/fix the other one(s) first. 
+                if (collar.CollarParameters.Count > 1)
+                {
+                    if (collar.CollarParameters.Count(p => p.CollarParameterFile == File) > 1)
+                    {
+                        MessageBox.Show(
+                            "This file is assigned to this collar more than once.  This ambiguity prevents automatic correction.",
+                            "Oh No!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    endDate = collar.CollarParameters.First(p => p.CollarParameterFile == File).EndDate;
+                    if (!FixOtherParameters(collar, start, ref endDate))
+                        return;
+                }
+                var param = collar.CollarParameters.First(p => p.CollarParameterFile == File);
+                param.StartDate = start;
+                param.EndDate = endDate;
+            }
+            else // Add
+            {
+                // If we are here, then this file is not on this collar, but the collar may have other files.
+                // If there are no other parameters, then no problems, otherwise, try to fix the other one(s) first
+                if (collar.CollarParameters.Count > 0)
+                    if (!FixOtherParameters(collar, start, ref endDate))
+                        return;
+                var param = new CollarParameter
+                {
+                    Collar = collar,
+                    CollarParameterFile = File,
+                    StartDate = start,
+                    EndDate = endDate
+                };
+                Database.CollarParameters.InsertOnSubmit(param);
+            }
+            if (SubmitChanges())
+                TpfDataChanged();
+        }
+
+        private void TpfDataChanged()
+        {
+            OnDatabaseChanged();
+            ParametersDataGridView.DataSource = null; //cause the sister grid to refresh when it becomes active
+            CheckTpfData(); //Redraw the datagridview
+            EnableTpfDetailsControls();
+        }
+
+        private bool FixOtherParameters(Collar collar, DateTime start, ref DateTime? end)
+        {
+            //I'm willing to move a existing null end date (there can only be one) back to my start date.
+            //Any existing non-null enddate must have been explicitly set by the user, so they should be dealt with explicitly
+            //If this situation exists, and I correct it, I am guaranteed to be fine (the new one will exist in the space created), so I can exit
+            var parameter = collar.CollarParameters.SingleOrDefault(p => p.CollarParameterFile != File && (p.StartDate < start && p.EndDate == null));
+            if (parameter != null)
+            {
+                parameter.EndDate = start;
+                if (!SubmitChanges())
+                    return false;
+            }
+
+            //If my enddate is null (when fixing existng, or adding new), I should set my end to the earliest start time of the others that are larger than my start but smaller than my end (infinity, so all).
+            //This could only happen on a fix if there was an existing integrity violation.
+            //I don't try to fix a non-null end date, because that was explicitly set by the user, and should explicitly changed.
+            if (end == null)
+                end = collar.CollarParameters.Where(p => p.CollarParameterFile != File && start < p.StartDate)
+                            .Select(p => p.StartDate).Min(); //If there is no min gets an empty enumerable, it will return null, which in this case is no change.
+
+            //There is no situation where I would need to change an existing null start date.
+
+            //now check if the new parameter is in conflict with any existing parameters
+            DateTime? endDate = end;
+            var competition = collar.CollarParameters.Where(p => p.CollarParameterFile != File).ToList();
+            bool conflict = competition.Any(p => DatesOverlap(p.StartDate, p.EndDate, start, endDate));
+            if (conflict)
+            {
+                MessageBox.Show(
+                    "The other parameter assignment(s) for this collar will require manual adjustment before this file can be used on this collar",
+                    "Oh No!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
+        private static bool DatesOverlap(DateTime? start1, DateTime? end1, DateTime? start2, DateTime? end2)
+        {
+            //touching is not considered overlapping.
+            return ((start2 ?? DateTime.MinValue) < (end1 ?? DateTime.MaxValue) && (start1 ?? DateTime.MinValue) < (end2 ?? DateTime.MaxValue));
+        }
+
+        //Array of collars that match a CTN, Index of the enclosing array is the row number of the datagridview
+        private Collar[] collars;
+
+        private void CheckTpfData()
+        {
+            if (collars == null)
+                collars = GetCollars();
             foreach (DataGridViewRow row in TpfDataGridView.Rows)
             {
-                if (row.Cells[5].Value == null && row.Cells[6].Value != null)
+                var collar = collars[row.Index];
+                var argosId = (string)row.Cells[2].Value;
+                var frequency = (double)row.Cells[3].Value;
+                var paramaterStart = (DateTime)row.Cells[4].Value;
+                //reset
+                //row.DefaultCellStyle.ApplyStyle(TpfDataGridView.DefaultCellStyle);
+                //row.Cells[2].Style.ApplyStyle(TpfDataGridView.DefaultCellStyle);
+                //row.Cells[3].Style.ApplyStyle(TpfDataGridView.DefaultCellStyle);
+                //row.Cells[4].Style.ApplyStyle(TpfDataGridView.DefaultCellStyle);
+                row.DefaultCellStyle.ForeColor = Color.Empty;
+                row.Cells[2].Style.ForeColor = Color.Empty;
+                row.Cells[3].Style.ForeColor = Color.Empty;
+                row.Cells[4].Style.ForeColor = Color.Empty;
+
+                if (collar == null) //No collar highlight all
+                {
                     row.DefaultCellStyle.ForeColor = Color.Red;
-                if (row.Cells[5].Value != null && row.Cells[6].Value == null)
-                    row.DefaultCellStyle.ForeColor = Color.Fuchsia;
-                if (row.Cells[5].Value == null && row.Cells[6].Value == null)
-                    row.DefaultCellStyle.ForeColor = Color.IndianRed;
+                    continue;
+                }
+                if (MissingArgosDeployment(collar, argosId))
+                    row.Cells[2].Style.ForeColor = Color.Red;
+                if (FrequencyMismatch(collar, frequency))
+                    row.Cells[3].Style.ForeColor = Color.Red;
+                if (FileNotOnCollar(collar))
+                    row.Cells[4].Style.ForeColor = Color.Red;
+                else
+                {
+                    //File is on collar (possibly more than once)
+                    if (!ParameterExistsWithDate(collar, paramaterStart))
+                        //There is no parameter on this collar with this date (figure out which one to fix later)
+                        row.Cells[4].Style.ForeColor = Color.Fuchsia;
+                }
             }
         }
 
-        private int? GetParameterOffset(string ctn, DateTime start)
+        private Collar[] GetCollars()
         {
-            bool ignoreSuffix = IgnoreSuffixCheckBox.Checked;
-            var altCtn = (ctn.Length > 6 && ignoreSuffix) ? ctn.Substring(0, 6) : ctn;
-            var parameters = File.CollarParameters.Where(p => p.CollarManufacturer == "Telonics" && (p.CollarId == ctn || p.CollarId == altCtn));
-            int? diff = null;
-            foreach (var param in parameters)
+            var collarIds = TpfDataGridView.Rows.Cast<DataGridViewRow>().Select(r => (string) r.Cells[1].Value).ToArray();
+            if (IgnoreSuffixCheckBox.Checked)
+                collarIds = collarIds.Select(c => c.Length > 6 ? c.Substring(0, 6) : c).ToArray();
+
+            var unsortedCollars =
+                Database.Collars.Where(
+                    c =>
+                    c.CollarManufacturer == "Telonics" && collarIds.Contains(c.CollarId)).ToList();
+
+            var sortedCollars = new Collar[TpfDataGridView.Rows.Count];
+            for (int i = 0; i < TpfDataGridView.Rows.Count; i++)
             {
-                var d = (int)(start - (param.StartDate ?? DateTime.MinValue)).TotalHours;
-                if (diff == null || d < diff)
-                    diff = d;
+                sortedCollars[i] = unsortedCollars.SingleOrDefault(c => c.CollarId == collarIds[i]);
             }
-            return diff;
+            return sortedCollars;
         }
 
-        private int? GetDeploymentOffset(string ctn, string argos, DateTime start)
+        private bool MissingArgosDeployment(Collar collar, string argosId)
         {
-            bool ignoreSuffix = IgnoreSuffixCheckBox.Checked;
-            var altCtn = (ctn.Length > 6 && ignoreSuffix) ? ctn.Substring(0, 6) : ctn;
-            var deployments = Database.ArgosDeployments.Where(d => d.PlatformId == argos && d.CollarManufacturer == "Telonics" && (d.CollarId == ctn || d.CollarId == altCtn));
-            int? diff = null;
-            foreach (var deployment in deployments)
-            {
-                var d = (int)(start - (deployment.StartDate ?? DateTime.MinValue)).TotalHours;
-                if (diff == null || d < diff)
-                    diff = d;
-            }
-            return diff;
+            return collar.ArgosDeployments.All(a => a.PlatformId != argosId);
+        }
+
+        private bool FrequencyMismatch(Collar collar, double frequency)
+        {
+            return collar.Frequency != frequency;
+        }
+
+        private bool FileNotOnCollar(Collar collar)
+        {
+            //true if this file is not assigned to this collar
+            return collar.CollarParameters.All(p => p.CollarParameterFile != File);
+        }
+
+        private bool ParameterExistsWithDate(Collar collar, DateTime paramaterStart)
+        {
+            //possible, though not probable, or even logical, for collar to have more than one parameter set (different date ranges) with File
+            //If any of the parameters match, assume we are goodone of them matches
+            return collar.CollarParameters.Any(p => p.CollarParameterFile == File && p.StartDate == paramaterStart);
         }
 
         #endregion

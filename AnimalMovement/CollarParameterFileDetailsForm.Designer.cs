@@ -53,8 +53,10 @@
             this.DeleteParameterButton = new System.Windows.Forms.Button();
             this.InfoParameterButton = new System.Windows.Forms.Button();
             this.TpfDetailsTabPage = new System.Windows.Forms.TabPage();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.CheckButton = new System.Windows.Forms.Button();
+            this.AddArgosButton = new System.Windows.Forms.Button();
+            this.AddFixParameterButton = new System.Windows.Forms.Button();
+            this.AddFixCollarButton = new System.Windows.Forms.Button();
             this.IgnoreSuffixCheckBox = new System.Windows.Forms.CheckBox();
             this.TpfDataGridView = new System.Windows.Forms.DataGridView();
             this.ValidationTextBox = new System.Windows.Forms.TextBox();
@@ -106,7 +108,7 @@
             this.ParametersDataGridView.ReadOnly = true;
             this.ParametersDataGridView.RowHeadersVisible = false;
             this.ParametersDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.ParametersDataGridView.Size = new System.Drawing.Size(439, 119);
+            this.ParametersDataGridView.Size = new System.Drawing.Size(439, 199);
             this.ParametersDataGridView.TabIndex = 60;
             this.ParametersDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellDoubleClick);
             this.ParametersDataGridView.SelectionChanged += new System.EventHandler(this.ParametersDataGridView_SelectionChanged);
@@ -296,7 +298,7 @@
             this.EditParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.EditParameterButton.FlatAppearance.BorderSize = 0;
             this.EditParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
-            this.EditParameterButton.Location = new System.Drawing.Point(57, 128);
+            this.EditParameterButton.Location = new System.Drawing.Point(57, 208);
             this.EditParameterButton.Name = "EditParameterButton";
             this.EditParameterButton.Size = new System.Drawing.Size(24, 24);
             this.EditParameterButton.TabIndex = 64;
@@ -308,7 +310,7 @@
             this.AddParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddParameterButton.Enabled = false;
             this.AddParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddParameterButton.Location = new System.Drawing.Point(3, 128);
+            this.AddParameterButton.Location = new System.Drawing.Point(3, 208);
             this.AddParameterButton.Name = "AddParameterButton";
             this.AddParameterButton.Size = new System.Drawing.Size(24, 24);
             this.AddParameterButton.TabIndex = 61;
@@ -320,7 +322,7 @@
             this.DeleteParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteParameterButton.Enabled = false;
             this.DeleteParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteParameterButton.Location = new System.Drawing.Point(30, 128);
+            this.DeleteParameterButton.Location = new System.Drawing.Point(30, 208);
             this.DeleteParameterButton.Name = "DeleteParameterButton";
             this.DeleteParameterButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteParameterButton.TabIndex = 62;
@@ -333,7 +335,7 @@
             this.InfoParameterButton.FlatAppearance.BorderSize = 0;
             this.InfoParameterButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoParameterButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoParameterButton.Location = new System.Drawing.Point(81, 128);
+            this.InfoParameterButton.Location = new System.Drawing.Point(81, 208);
             this.InfoParameterButton.Name = "InfoParameterButton";
             this.InfoParameterButton.Size = new System.Drawing.Size(24, 24);
             this.InfoParameterButton.TabIndex = 63;
@@ -342,8 +344,10 @@
             // 
             // TpfDetailsTabPage
             // 
-            this.TpfDetailsTabPage.Controls.Add(this.button2);
-            this.TpfDetailsTabPage.Controls.Add(this.button1);
+            this.TpfDetailsTabPage.Controls.Add(this.CheckButton);
+            this.TpfDetailsTabPage.Controls.Add(this.AddArgosButton);
+            this.TpfDetailsTabPage.Controls.Add(this.AddFixParameterButton);
+            this.TpfDetailsTabPage.Controls.Add(this.AddFixCollarButton);
             this.TpfDetailsTabPage.Controls.Add(this.IgnoreSuffixCheckBox);
             this.TpfDetailsTabPage.Controls.Add(this.TpfDataGridView);
             this.TpfDetailsTabPage.Location = new System.Drawing.Point(4, 22);
@@ -355,25 +359,49 @@
             this.TpfDetailsTabPage.Text = "TPF Details";
             this.TpfDetailsTabPage.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // CheckButton
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button2.Location = new System.Drawing.Point(136, 204);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(124, 23);
-            this.button2.TabIndex = 54;
-            this.button2.Text = "Add Collar Parameter";
-            this.button2.UseVisualStyleBackColor = true;
+            this.CheckButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.CheckButton.Location = new System.Drawing.Point(249, 204);
+            this.CheckButton.Name = "CheckButton";
+            this.CheckButton.Size = new System.Drawing.Size(69, 23);
+            this.CheckButton.TabIndex = 56;
+            this.CheckButton.Text = "Check";
+            this.CheckButton.UseVisualStyleBackColor = true;
+            this.CheckButton.Click += new System.EventHandler(this.CheckButton_Click);
             // 
-            // button1
+            // AddArgosButton
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.Location = new System.Drawing.Point(6, 204);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(124, 23);
-            this.button1.TabIndex = 53;
-            this.button1.Text = "Add Argos Deployment";
-            this.button1.UseVisualStyleBackColor = true;
+            this.AddArgosButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddArgosButton.Location = new System.Drawing.Point(97, 204);
+            this.AddArgosButton.Name = "AddArgosButton";
+            this.AddArgosButton.Size = new System.Drawing.Size(85, 23);
+            this.AddArgosButton.TabIndex = 55;
+            this.AddArgosButton.Text = "Add Argos";
+            this.AddArgosButton.UseVisualStyleBackColor = true;
+            this.AddArgosButton.Click += new System.EventHandler(this.AddArgosButton_Click);
+            // 
+            // AddFixParameterButton
+            // 
+            this.AddFixParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddFixParameterButton.Location = new System.Drawing.Point(188, 204);
+            this.AddFixParameterButton.Name = "AddFixParameterButton";
+            this.AddFixParameterButton.Size = new System.Drawing.Size(88, 23);
+            this.AddFixParameterButton.TabIndex = 54;
+            this.AddFixParameterButton.Text = "Add Parameter";
+            this.AddFixParameterButton.UseVisualStyleBackColor = true;
+            this.AddFixParameterButton.Click += new System.EventHandler(this.AddFixParameterButton_Click);
+            // 
+            // AddFixCollarButton
+            // 
+            this.AddFixCollarButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddFixCollarButton.Location = new System.Drawing.Point(2, 204);
+            this.AddFixCollarButton.Name = "AddFixCollarButton";
+            this.AddFixCollarButton.Size = new System.Drawing.Size(89, 23);
+            this.AddFixCollarButton.TabIndex = 53;
+            this.AddFixCollarButton.Text = "Add Collar";
+            this.AddFixCollarButton.UseVisualStyleBackColor = true;
+            this.AddFixCollarButton.Click += new System.EventHandler(this.AddCollarButton_Click);
             // 
             // IgnoreSuffixCheckBox
             // 
@@ -387,6 +415,7 @@
             this.IgnoreSuffixCheckBox.TabIndex = 52;
             this.IgnoreSuffixCheckBox.Text = "Ignore Alpha Suffix";
             this.IgnoreSuffixCheckBox.UseVisualStyleBackColor = true;
+            this.IgnoreSuffixCheckBox.CheckedChanged += new System.EventHandler(this.IgnoreSuffixCheckBox_CheckedChanged);
             // 
             // TpfDataGridView
             // 
@@ -407,6 +436,7 @@
             this.TpfDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.TpfDataGridView.Size = new System.Drawing.Size(440, 195);
             this.TpfDataGridView.TabIndex = 51;
+            this.TpfDataGridView.SelectionChanged += new System.EventHandler(this.TpfDataGridView_SelectionChanged);
             // 
             // ValidationTextBox
             // 
@@ -504,9 +534,11 @@
         private System.Windows.Forms.Button DeleteParameterButton;
         private System.Windows.Forms.Button InfoParameterButton;
         private System.Windows.Forms.Button EditParameterButton;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button AddFixParameterButton;
+        private System.Windows.Forms.Button AddFixCollarButton;
         private System.Windows.Forms.CheckBox IgnoreSuffixCheckBox;
+        private System.Windows.Forms.Button AddArgosButton;
+        private System.Windows.Forms.Button CheckButton;
 
     }
 }
