@@ -176,5 +176,11 @@
     <Setting Name="ProjectReportsXml" Type="System.String" Scope="User">
       <Value Profile="(Default)">ProjectReports.xml</Value>
     </Setting>
+    <Setting Name="AddArgosPlatformFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">300, 250</Value>
+    </Setting>
+    <Setting Name="AddArgosPlatformFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

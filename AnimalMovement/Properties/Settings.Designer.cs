@@ -718,5 +718,29 @@ namespace AnimalMovement.Properties {
                 this["ProjectReportsXml"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300, 250")]
+        public global::System.Drawing.Size AddArgosPlatformFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["AddArgosPlatformFormSize"]));
+            }
+            set {
+                this["AddArgosPlatformFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point AddArgosPlatformFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["AddArgosPlatformFormLocation"]));
+            }
+            set {
+                this["AddArgosPlatformFormLocation"] = value;
+            }
+        }
     }
 }

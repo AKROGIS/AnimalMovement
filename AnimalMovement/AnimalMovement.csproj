@@ -72,6 +72,12 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddArgosPlatformForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddArgosPlatformForm.Designer.cs">
+      <DependentUpon>AddArgosPlatformForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AddCollarDeploymentForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -219,6 +225,9 @@
     <Compile Include="UploadFilesForm.Designer.cs">
       <DependentUpon>UploadFilesForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AddArgosPlatformForm.resx">
+      <DependentUpon>AddArgosPlatformForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="AddCollarDeploymentForm.resx">
       <DependentUpon>AddCollarDeploymentForm.cs</DependentUpon>
     </EmbeddedResource>

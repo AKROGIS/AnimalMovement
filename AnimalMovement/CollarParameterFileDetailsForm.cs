@@ -347,6 +347,7 @@ namespace AnimalMovement
 
         private void AddCollarButton_Click(object sender, EventArgs e)
         {
+            //TODO support multi-select
             var index = TpfDataGridView.SelectedRows[0].Index;
             var collar = collars[index];
             if (collar == null)
@@ -391,7 +392,7 @@ namespace AnimalMovement
             if (platform == null)
             {
                 //TODO - Launch the new ArgosID to create an Argos platform
-                var form = new AddArgosPlatformForm(File.ProjectInvestigator);
+                var form = new AddArgosPlatformForm();
                 form.DatabaseChanged += (o, x) => { platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);};
                 form.SetDefaultPlatform(argosId);
                 form.Show(this);

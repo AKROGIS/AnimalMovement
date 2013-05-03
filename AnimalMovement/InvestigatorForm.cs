@@ -407,6 +407,22 @@ namespace AnimalMovement
 
         }
 
+        private void ArgosDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpArgosTab();
+        }
+
+
+        private void AddPlatformButton_Click(object sender, EventArgs e)
+        {
+            var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "14559");
+            var form = new AddArgosPlatformForm(prog);
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
         #endregion
 
 

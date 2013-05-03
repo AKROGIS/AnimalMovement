@@ -688,6 +688,7 @@
             this.AddPlatformButton.Size = new System.Drawing.Size(24, 24);
             this.AddPlatformButton.TabIndex = 6;
             this.AddPlatformButton.UseVisualStyleBackColor = true;
+            this.AddPlatformButton.Click += new System.EventHandler(this.AddPlatformButton_Click);
             // 
             // CollarFilesTab
             // 

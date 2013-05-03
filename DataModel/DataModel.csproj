@@ -70,6 +70,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AnimalMovementViews.dbml</DependentUpon>
     </Compile>
+    <Compile Include="ArgosProgram.cs" />
     <Compile Include="Collar.cs" />
     <Compile Include="AnimalMovementFunctions.designer.cs">
       <AutoGen>True</AutoGen>
