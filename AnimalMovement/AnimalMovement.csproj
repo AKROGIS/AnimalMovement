@@ -78,6 +78,12 @@
     <Compile Include="AddArgosPlatformForm.Designer.cs">
       <DependentUpon>AddArgosPlatformForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddArgosProgramForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddArgosProgramForm.Designer.cs">
+      <DependentUpon>AddArgosProgramForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AddCollarDeploymentForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -125,6 +131,18 @@
     </Compile>
     <Compile Include="AddProjectForm.Designer.cs">
       <DependentUpon>AddProjectForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ArgosPlatformDetailsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ArgosPlatformDetailsForm.Designer.cs">
+      <DependentUpon>ArgosPlatformDetailsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ArgosProgramDetailsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ArgosProgramDetailsForm.Designer.cs">
+      <DependentUpon>ArgosProgramDetailsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="CollarDeploymentDetailsForm.cs">
       <SubType>Form</SubType>
@@ -228,6 +246,9 @@
     <EmbeddedResource Include="AddArgosPlatformForm.resx">
       <DependentUpon>AddArgosPlatformForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="AddArgosProgramForm.resx">
+      <DependentUpon>AddArgosProgramForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="AddCollarDeploymentForm.resx">
       <DependentUpon>AddCollarDeploymentForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -254,6 +275,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AddProjectForm.resx">
       <DependentUpon>AddProjectForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ArgosPlatformDetailsForm.resx">
+      <DependentUpon>ArgosPlatformDetailsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ArgosProgramDetailsForm.resx">
+      <DependentUpon>ArgosProgramDetailsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CollarDeploymentDetailsForm.resx">
       <DependentUpon>CollarDeploymentDetailsForm.cs</DependentUpon>

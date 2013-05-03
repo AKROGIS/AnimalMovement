@@ -742,5 +742,77 @@ namespace AnimalMovement.Properties {
                 this["AddArgosPlatformFormLocation"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500, 500")]
+        public global::System.Drawing.Size AddArgosProgramFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["AddArgosProgramFormSize"]));
+            }
+            set {
+                this["AddArgosProgramFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point AddArgosProgramFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["AddArgosProgramFormLocation"]));
+            }
+            set {
+                this["AddArgosProgramFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300, 250")]
+        public global::System.Drawing.Size ArgosPlatformDetailsFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["ArgosPlatformDetailsFormSize"]));
+            }
+            set {
+                this["ArgosPlatformDetailsFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point ArgosPlatformDetailsFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["ArgosPlatformDetailsFormLocation"]));
+            }
+            set {
+                this["ArgosPlatformDetailsFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500, 500")]
+        public global::System.Drawing.Size ArgosProgramDetailsFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["ArgosProgramDetailsFormSize"]));
+            }
+            set {
+                this["ArgosProgramDetailsFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point ArgosProgramDetailsFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["ArgosProgramDetailsFormLocation"]));
+            }
+            set {
+                this["ArgosProgramDetailsFormLocation"] = value;
+            }
+        }
     }
 }
