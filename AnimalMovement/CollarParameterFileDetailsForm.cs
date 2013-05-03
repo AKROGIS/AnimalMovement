@@ -351,16 +351,30 @@ namespace AnimalMovement
             var collar = collars[index];
             if (collar == null)
             {
-                //Call AddCollarForm, fix form to set defaults, mfgr, id, freq
-                //Look for the new collar, if we can find it then create parameter
-                //if we have the collar, and the argosid exists, create new deployment
+                var form = new AddCollarForm(File.ProjectInvestigator);
+                form.DatabaseChanged += (o, x) => CollarAdded();
+                form.SetDefaultFrequency((double)TpfDataGridView.SelectedRows[0].Cells[3].Value);
+                form.SetDefaultModel("Telonics","Gen4");
+                var ctn = (string)TpfDataGridView.Rows[index].Cells[1].Value;
+                form.SetDefaultId(IgnoreSuffixCheckBox.Checked && ctn.Length > 6 ? ctn.Substring(0, 6) : ctn);
+                form.Show(this);
             }
             else
             {
                 //Fix the frequency
                 collar.Frequency = (double)TpfDataGridView.SelectedRows[0].Cells[3].Value;
-                SubmitChanges();
+                if (SubmitChanges())
+                    TpfDataChanged();
             }
+        }
+
+        private object CollarAdded()
+        {
+            throw new NotImplementedException();
+            //Look for the new collar, if we can find it then create parameter
+            //if we have the collar, and the argosid exists, create new deployment
+            if (SubmitChanges())
+                TpfDataChanged();
         }
 
         private void AddArgosButton_Click(object sender, EventArgs e)
@@ -478,10 +492,6 @@ namespace AnimalMovement
                 var frequency = (double)row.Cells[3].Value;
                 var paramaterStart = (DateTime)row.Cells[4].Value;
                 //reset
-                //row.DefaultCellStyle.ApplyStyle(TpfDataGridView.DefaultCellStyle);
-                //row.Cells[2].Style.ApplyStyle(TpfDataGridView.DefaultCellStyle);
-                //row.Cells[3].Style.ApplyStyle(TpfDataGridView.DefaultCellStyle);
-                //row.Cells[4].Style.ApplyStyle(TpfDataGridView.DefaultCellStyle);
                 row.DefaultCellStyle.ForeColor = Color.Empty;
                 row.Cells[2].Style.ForeColor = Color.Empty;
                 row.Cells[3].Style.ForeColor = Color.Empty;

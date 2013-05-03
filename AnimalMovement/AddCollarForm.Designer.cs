@@ -85,6 +85,8 @@
             this.HasGpsCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.HasGpsCheckBox.AutoSize = true;
             this.HasGpsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.HasGpsCheckBox.Checked = true;
+            this.HasGpsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.HasGpsCheckBox.Location = new System.Drawing.Point(287, 147);
             this.HasGpsCheckBox.Name = "HasGpsCheckBox";
             this.HasGpsCheckBox.Size = new System.Drawing.Size(67, 17);
