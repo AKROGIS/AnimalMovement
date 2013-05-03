@@ -385,34 +385,122 @@ namespace AnimalMovement
                     StartDate = start
                 };
             Database.CollarParameters.InsertOnSubmit(param);
+            if (SubmitChanges())
+                TpfDataChanged();
 
             //Add ArgosDeployment
             var argosId = (string) TpfDataGridView.SelectedRows[0].Cells[2].Value;
             var platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);
             if (platform == null)
             {
-                //TODO - Launch the new ArgosID to create an Argos platform
                 var form = new AddArgosPlatformForm();
-                form.DatabaseChanged += (o, x) => { platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);};
+                form.DatabaseChanged += (o, x) => ArgosAdded(argosId, collar, start);
                 form.SetDefaultPlatform(argosId);
                 form.Show(this);
             }
-            if (platform != null)
-            {
-                var deploy = new ArgosDeployment
-                    {
-                        ArgosPlatform = platform,
-                        Collar = collar,
-                        StartDate = start
-                    };
-                Database.ArgosDeployments.InsertOnSubmit(deploy);
-            }
+        }
+
+        private void ArgosAdded(string argosId, Collar collar, DateTime start)
+        {
+            var platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);
+            if (platform == null)
+                return;
+            var deploy = new ArgosDeployment
+                {
+                    ArgosPlatform = platform,
+                    Collar = collar,
+                    StartDate = start
+                };
+            Database.ArgosDeployments.InsertOnSubmit(deploy);
             if (SubmitChanges())
                 TpfDataChanged();
         }
 
         private void AddArgosButton_Click(object sender, EventArgs e)
         {
+            var index = TpfDataGridView.SelectedRows[0].Index;
+            var collar = collars[index];
+            var argosId = (string)TpfDataGridView.SelectedRows[0].Cells[2].Value;
+            var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[4].Value;
+            if (Database.ArgosPlatforms.Any(a => a.PlatformId == argosId))
+                AddArgosDeployment(argosId, collar, start);
+            else
+            {
+                //First add the Argosplatform
+                var form = new AddArgosPlatformForm();
+                form.SetDefaultPlatform(argosId);
+                form.DatabaseChanged += (o, x) => AddArgosDeployment(argosId, collar, start);
+                form.Show(this);
+            }
+        }
+
+        private void AddArgosDeployment(string argosId, Collar collar, DateTime start)
+        {
+            var platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);
+            if (platform == null)
+                return;
+            DateTime? endDate = null;
+            if (platform.ArgosDeployments.Count > 0 || collar.ArgosDeployments.Count > 0)
+                if (!FixOtherDeployments(collar, platform, start, ref endDate))
+                    return;
+            var deploy = new ArgosDeployment
+            {
+                ArgosPlatform = platform,
+                Collar = collar,
+                StartDate = start,
+                EndDate = endDate
+            };
+            Database.ArgosDeployments.InsertOnSubmit(deploy);
+            if (SubmitChanges())
+                TpfDataChanged();
+        }
+
+        private bool FixOtherDeployments(Collar collar, ArgosPlatform platform, DateTime start, ref DateTime? endDate)
+        {
+            //I'm willing to move a existing null end dates (there can only be one for the platform and one for the collar) back to my start date.
+            //Any existing non-null enddate must have been explicitly set by the user, so they should be dealt with explicitly
+            //If this situation exists, and I correct it, I am guaranteed to be fine (the new one will exist in the space created)
+            var deployment1 =
+                collar.ArgosDeployments.SingleOrDefault(d =>
+                                                        d.ArgosPlatform != platform &&
+                                                        d.StartDate < start && d.EndDate == null);
+            var deployment2 =
+                platform.ArgosDeployments.SingleOrDefault(d =>
+                                                          d.Collar != collar &&
+                                                          d.StartDate < start && d.EndDate == null);
+            if (deployment1 != null)
+                deployment1.EndDate = start;
+            if (deployment2 != null)
+                deployment2.EndDate = start;
+            if (deployment1 != null || deployment2 != null)
+                if (!SubmitChanges())
+                    return false;
+
+            //If my enddate is null, I should set my end to the earliest start time of the others that are larger than my start but smaller than my end (infinity, so all).
+            //I don't try to fix a non-null end date, because that was explicitly set by the user, and be should explicitly changed.
+            if (endDate == null)
+                endDate =
+                    Database.ArgosDeployments.Where(d =>
+                                                    ((d.Collar == collar && d.ArgosPlatform != platform) ||
+                                                     (d.Collar != collar && d.ArgosPlatform == platform)) &&
+                                                    start < d.StartDate)
+                            .Select(d => d.StartDate).Min(); //If min gets an empty enumerable, it will return null, which in this case is no change.
+
+            //Since my startdate is non-null, there is no situation where I would need to change an existing null start date.
+
+            //now check if the new deployment is in conflict with any existing deployments
+            DateTime? end = endDate;
+            var competition = Database.ArgosDeployments.Where(d => (d.Collar == collar && d.ArgosPlatform != platform) ||
+                                                                (d.Collar != collar && d.ArgosPlatform == platform));
+            bool conflict = competition.Any(d => DatesOverlap(d.StartDate, d.EndDate, start, end));
+            if (conflict)
+            {
+                MessageBox.Show(
+                    "The other deployment(s) for this collar or platform will require manual adjustment before this platform can be used on this collar",
+                    "Oh No!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
         }
 
         private void AddFixParameterButton_Click(object sender, EventArgs e)

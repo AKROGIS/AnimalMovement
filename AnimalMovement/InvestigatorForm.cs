@@ -414,7 +414,6 @@ namespace AnimalMovement
             SetUpArgosTab();
         }
 
-
         private void AddPlatformButton_Click(object sender, EventArgs e)
         {
             var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "14559");
