@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -219,6 +220,27 @@ namespace AnimalMovement
         private void cancelButton_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        internal void SetDefaultManufacturer(string manufacturer)
+        {
+            SelectDefaultManufacturer(manufacturer);
+        }
+
+        internal void SetDefaultModel(string manufacturer, string model)
+        {
+            SelectDefaultManufacturer(manufacturer);
+            SelectDefaultModel(manufacturer, model);
+        }
+
+        internal void SetDefaultId(string id)
+        {
+            CollarIdTextBox.Text = id;
+        }
+
+        internal void SetDefaultFrequency(double frequency)
+        {
+            FrequencyTextBox.Text = frequency.ToString(CultureInfo.InvariantCulture);
         }
 
     }
