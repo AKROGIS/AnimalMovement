@@ -51,6 +51,7 @@
             this.DoneCancelButton.TabIndex = 29;
             this.DoneCancelButton.Text = "Done";
             this.DoneCancelButton.UseVisualStyleBackColor = true;
+            this.DoneCancelButton.Click += new System.EventHandler(this.DoneCancelButton_Click);
             // 
             // EditSaveButton
             // 
@@ -61,6 +62,7 @@
             this.EditSaveButton.TabIndex = 28;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
+            this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
             // 
             // label4
             // 
@@ -156,6 +158,7 @@
             this.DisposalDateTimePicker.Size = new System.Drawing.Size(153, 20);
             this.DisposalDateTimePicker.TabIndex = 19;
             this.DisposalDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
+            this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
             // 
             // ArgosPlatformDetailsForm
             // 
