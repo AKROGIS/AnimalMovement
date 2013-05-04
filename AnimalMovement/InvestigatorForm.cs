@@ -414,6 +414,32 @@ namespace AnimalMovement
             SetUpArgosTab();
         }
 
+        private void DeleteProgramButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void DeletePlatformButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void AddArgosDeployment_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void DeleteArgosDeployment_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void InfoArgosDeployment_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
         private void AddPlatformButton_Click(object sender, EventArgs e)
         {
             //var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "2433");

@@ -544,6 +544,7 @@
             this.DeleteArgosDeployment.TabIndex = 20;
             this.DeleteArgosDeployment.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.DeleteArgosDeployment.UseVisualStyleBackColor = true;
+            this.DeleteArgosDeployment.Click += new System.EventHandler(this.DeleteArgosDeployment_Click);
             // 
             // InfoArgosDeployment
             // 
@@ -558,6 +559,7 @@
             this.InfoArgosDeployment.TabIndex = 21;
             this.InfoArgosDeployment.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.InfoArgosDeployment.UseVisualStyleBackColor = true;
+            this.InfoArgosDeployment.Click += new System.EventHandler(this.InfoArgosDeployment_Click);
             // 
             // AddArgosDeployment
             // 
@@ -569,6 +571,7 @@
             this.AddArgosDeployment.Size = new System.Drawing.Size(24, 24);
             this.AddArgosDeployment.TabIndex = 19;
             this.AddArgosDeployment.UseVisualStyleBackColor = true;
+            this.AddArgosDeployment.Click += new System.EventHandler(this.AddArgosDeployment_Click);
             // 
             // DownloadProgram
             // 
@@ -619,6 +622,7 @@
             this.DeleteProgramButton.TabIndex = 12;
             this.DeleteProgramButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.DeleteProgramButton.UseVisualStyleBackColor = true;
+            this.DeleteProgramButton.Click += new System.EventHandler(this.DeleteProgramButton_Click);
             // 
             // InfoProgramButton
             // 
@@ -665,6 +669,7 @@
             this.DeletePlatformButton.TabIndex = 7;
             this.DeletePlatformButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.DeletePlatformButton.UseVisualStyleBackColor = true;
+            this.DeletePlatformButton.Click += new System.EventHandler(this.DeletePlatformButton_Click);
             // 
             // InfoPlatformButton
             // 
