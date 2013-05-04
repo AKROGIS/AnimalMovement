@@ -59,6 +59,7 @@
             this.cancelButton.TabIndex = 29;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
             // CreateButton
             // 
@@ -69,6 +70,7 @@
             this.CreateButton.TabIndex = 28;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
+            this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
             // 
             // label4
             // 
@@ -101,6 +103,7 @@
             this.ActiveCheckBox.Size = new System.Drawing.Size(56, 17);
             this.ActiveCheckBox.TabIndex = 25;
             this.ActiveCheckBox.Text = "Active";
+            this.ActiveCheckBox.ThreeState = true;
             this.ActiveCheckBox.UseVisualStyleBackColor = true;
             // 
             // OwnerComboBox
@@ -113,6 +116,7 @@
             this.OwnerComboBox.Name = "OwnerComboBox";
             this.OwnerComboBox.Size = new System.Drawing.Size(203, 21);
             this.OwnerComboBox.TabIndex = 24;
+            this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -131,6 +135,7 @@
             this.ProgramIdTextBox.Name = "ProgramIdTextBox";
             this.ProgramIdTextBox.Size = new System.Drawing.Size(203, 20);
             this.ProgramIdTextBox.TabIndex = 22;
+            this.ProgramIdTextBox.TextChanged += new System.EventHandler(this.ProgramIdTextBox_TextChanged);
             // 
             // label1
             // 
@@ -163,6 +168,7 @@
             this.EndDateTimePicker.Size = new System.Drawing.Size(203, 20);
             this.EndDateTimePicker.TabIndex = 19;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
+            this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
             // ProgramNameTextBox
             // 
@@ -190,6 +196,7 @@
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(203, 20);
             this.UserNameTextBox.TabIndex = 33;
+            this.UserNameTextBox.TextChanged += new System.EventHandler(this.UserNameTextBox_TextChanged);
             // 
             // label6
             // 
@@ -208,6 +215,7 @@
             this.PasswordTextBox.Name = "PasswordTextBox";
             this.PasswordTextBox.Size = new System.Drawing.Size(203, 20);
             this.PasswordTextBox.TabIndex = 35;
+            this.PasswordTextBox.TextChanged += new System.EventHandler(this.PasswordTextBox_TextChanged);
             // 
             // label7
             // 
@@ -240,6 +248,7 @@
             this.StartDateTimePicker.Size = new System.Drawing.Size(203, 20);
             this.StartDateTimePicker.TabIndex = 36;
             this.StartDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
+            this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
             // 
             // AddArgosProgramForm
             // 

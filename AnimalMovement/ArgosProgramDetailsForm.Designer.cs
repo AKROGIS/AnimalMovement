@@ -30,7 +30,6 @@
         {
             this.label8 = new System.Windows.Forms.Label();
             this.StartDateTimePicker = new System.Windows.Forms.DateTimePicker();
-            this.PasswordTextBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.UserNameTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -47,6 +46,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.EndDateTimePicker = new System.Windows.Forms.DateTimePicker();
+            this.PasswordMaskedTextBox = new System.Windows.Forms.MaskedTextBox();
             this.SuspendLayout();
             // 
             // label8
@@ -71,15 +71,7 @@
             this.StartDateTimePicker.Size = new System.Drawing.Size(203, 20);
             this.StartDateTimePicker.TabIndex = 55;
             this.StartDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
-            // 
-            // PasswordTextBox
-            // 
-            this.PasswordTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.PasswordTextBox.Location = new System.Drawing.Point(119, 117);
-            this.PasswordTextBox.Name = "PasswordTextBox";
-            this.PasswordTextBox.Size = new System.Drawing.Size(203, 20);
-            this.PasswordTextBox.TabIndex = 54;
+            this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
             // 
             // label7
             // 
@@ -98,6 +90,7 @@
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(203, 20);
             this.UserNameTextBox.TabIndex = 52;
+            this.UserNameTextBox.TextChanged += new System.EventHandler(this.UserNameTextBox_TextChanged);
             // 
             // label6
             // 
@@ -136,6 +129,7 @@
             this.DoneCancelButton.TabIndex = 48;
             this.DoneCancelButton.Text = "Done";
             this.DoneCancelButton.UseVisualStyleBackColor = true;
+            this.DoneCancelButton.Click += new System.EventHandler(this.DoneCancelButton_Click);
             // 
             // EditSaveButton
             // 
@@ -146,6 +140,7 @@
             this.EditSaveButton.TabIndex = 47;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
+            this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
             // 
             // label4
             // 
@@ -178,6 +173,7 @@
             this.ActiveCheckBox.Size = new System.Drawing.Size(56, 17);
             this.ActiveCheckBox.TabIndex = 44;
             this.ActiveCheckBox.Text = "Active";
+            this.ActiveCheckBox.ThreeState = true;
             this.ActiveCheckBox.UseVisualStyleBackColor = true;
             // 
             // OwnerComboBox
@@ -190,6 +186,7 @@
             this.OwnerComboBox.Name = "OwnerComboBox";
             this.OwnerComboBox.Size = new System.Drawing.Size(203, 21);
             this.OwnerComboBox.TabIndex = 43;
+            this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -241,6 +238,15 @@
             this.EndDateTimePicker.Size = new System.Drawing.Size(203, 20);
             this.EndDateTimePicker.TabIndex = 38;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
+            this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
+            // 
+            // PasswordMaskedTextBox
+            // 
+            this.PasswordMaskedTextBox.Location = new System.Drawing.Point(119, 117);
+            this.PasswordMaskedTextBox.Name = "PasswordMaskedTextBox";
+            this.PasswordMaskedTextBox.Size = new System.Drawing.Size(203, 20);
+            this.PasswordMaskedTextBox.TabIndex = 57;
+            this.PasswordMaskedTextBox.MaskInputRejected += new System.Windows.Forms.MaskInputRejectedEventHandler(this.PasswordMaskedTextBox_MaskInputRejected);
             // 
             // ArgosProgramDetailsForm
             // 
@@ -249,9 +255,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.DoneCancelButton;
             this.ClientSize = new System.Drawing.Size(334, 316);
+            this.Controls.Add(this.PasswordMaskedTextBox);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.StartDateTimePicker);
-            this.Controls.Add(this.PasswordTextBox);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.UserNameTextBox);
             this.Controls.Add(this.label6);
@@ -283,7 +289,6 @@
 
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.DateTimePicker StartDateTimePicker;
-        private System.Windows.Forms.TextBox PasswordTextBox;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox UserNameTextBox;
         private System.Windows.Forms.Label label6;
@@ -300,5 +305,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker EndDateTimePicker;
+        private System.Windows.Forms.MaskedTextBox PasswordMaskedTextBox;
     }
 }
