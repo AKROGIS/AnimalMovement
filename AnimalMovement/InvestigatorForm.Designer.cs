@@ -632,6 +632,7 @@
             this.InfoProgramButton.TabIndex = 13;
             this.InfoProgramButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.InfoProgramButton.UseVisualStyleBackColor = true;
+            this.InfoProgramButton.Click += new System.EventHandler(this.InfoProgramButton_Click);
             // 
             // AddProgramButton
             // 
@@ -642,6 +643,7 @@
             this.AddProgramButton.Size = new System.Drawing.Size(24, 24);
             this.AddProgramButton.TabIndex = 11;
             this.AddProgramButton.UseVisualStyleBackColor = true;
+            this.AddProgramButton.Click += new System.EventHandler(this.AddProgramButton_Click);
             // 
             // label5
             // 
@@ -677,6 +679,7 @@
             this.InfoPlatformButton.TabIndex = 8;
             this.InfoPlatformButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.InfoPlatformButton.UseVisualStyleBackColor = true;
+            this.InfoPlatformButton.Click += new System.EventHandler(this.InfoPlatformButton_Click);
             // 
             // AddPlatformButton
             // 

@@ -69,12 +69,19 @@ namespace AnimalMovement
         private void EnableControls()
         {
             ArgosIdTextBox.Enabled = false;
-            EditSaveButton.Enabled = IsEditor;
+            EnableEditSaveButton();
             IsEditMode = EditSaveButton.Text == "Save";
             ArgosProgramComboBox.Enabled = IsEditMode;
             DisposalDateTimePicker.Enabled = IsEditMode;
             ActiveCheckBox.Enabled = IsEditMode;
             NotesTextBox.Enabled = IsEditMode;
+        }
+
+        private void EnableEditSaveButton()
+        {
+            EditSaveButton.Enabled = IsEditor && (!IsEditMode ||
+                                                  (ArgosProgramComboBox.SelectedItem != null &&
+                                                   !string.IsNullOrEmpty(ArgosIdTextBox.Text)));
         }
 
         protected override void OnLoad(EventArgs e)
@@ -133,7 +140,7 @@ namespace AnimalMovement
                                         ? (DateTime?) DisposalDateTimePicker.Value.ToUniversalTime()
                                         : null;
             Platform.Active = ActiveCheckBox.Checked;
-            Platform.Notes = NotesTextBox.Text;
+            Platform.Notes = NotesTextBox.Text.NullifyIfEmpty();
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)

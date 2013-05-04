@@ -416,11 +416,37 @@ namespace AnimalMovement
 
         private void AddPlatformButton_Click(object sender, EventArgs e)
         {
-            var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "14559");
-            var form = new AddArgosPlatformForm(prog);
+            //var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "2433");
+            //var form = new AddArgosPlatformForm(prog);
+            var form = new AddArgosPlatformForm();
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }
+
+        private void InfoPlatformButton_Click(object sender, EventArgs e)
+        {
+            var prog = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == "62051");
+            var form = new ArgosPlatformDetailsForm(prog);
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
+        private void AddProgramButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddArgosProgramForm(Investigator);
+            //var form = new AddArgosProgramForm();
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
+        private void InfoProgramButton_Click(object sender, EventArgs e)
+        {
+            var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "1234");
+            var form = new ArgosProgramDetailsForm(prog);
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
 
         #endregion
 
