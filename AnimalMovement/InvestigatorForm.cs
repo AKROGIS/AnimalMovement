@@ -398,12 +398,32 @@ namespace AnimalMovement
 
         private void SetUpArgosTab()
         {
+            LoadProgramList();
+            //The other lists will be selected when a program is selected
             EnableArgosControls();
         }
 
         private void EnableArgosControls()
         {
+            AddProgramButton.Enabled = IsEditor;
+            DeleteProgramButton.Enabled = true;
+            InfoProgramButton.Enabled = ProgramsListBox.SelectedItems.Count == 1;
 
+            AddPlatformButton.Enabled = IsEditor && ProgramsListBox.SelectedItems.Count == 1;
+            DeletePlatformButton.Enabled = true;
+            InfoPlatformButton.Enabled = PlatformsListBox.SelectedItems.Count == 1;
+            
+            AddArgosDeploymentButton.Enabled = IsEditor && PlatformsListBox.SelectedItems.Count == 1;
+            DeleteArgosDeploymentButton.Enabled =
+                ArgosDeploymentsGridView.SelectedRows.Cast<DataGridViewRow>()
+                                        .Any(r => (bool) r.Cells["CanDelete"].Value);
+            InfoArgosDeploymentButton.Enabled = ArgosDeploymentsGridView.SelectedRows.Count == 1;
+
+            DownloadPlatformButton.Enabled = false;
+            DownloadProgramButton.Enabled = false;
+            ChangePlatformStatusButton.Enabled = false;
+            ChangeProgramStatusButton.Enabled = false;
+            AddMissingPlatformsButton.Enabled = false;
         }
 
         private void ArgosDataChanged()
@@ -415,17 +435,53 @@ namespace AnimalMovement
 
         #region Argos Programs
 
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        class ProgramListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public ArgosProgram Program { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void LoadProgramList()
+        {
+            var query = from program in Investigator.ArgosPrograms
+                        select new ProgramListItem
+                        {
+                            Program = program,
+                            Name = program.ToString(),
+                            CanDelete = !program.ArgosPlatforms.Any()
+                        };
+            var sortedList = query.OrderBy(p => p.Program.Active.HasValue ? (p.Program.Active.Value ? 0 : 2) : 1).ThenBy(p => p.Name).ToList();
+            ProgramsListBox.DataSource = sortedList;
+            ProgramsListBox.DisplayMember = "Name";
+            ProgramsListBoxLabel.Text = sortedList.Count < 5 ? "Programs" : String.Format("Programs ({0})", sortedList.Count);
+            ProgramsListBox.ClearItemColors();
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (!sortedList[i].Program.Active.HasValue)
+                    CollarsListBox.SetItemColor(i, Color.DarkGray);
+                if (sortedList[i].Program.Active.HasValue && !sortedList[i].Program.Active.Value)
+                    CollarsListBox.SetItemColor(i, Color.LightGray);
+            }
+        }
+
         private void AddProgramButton_Click(object sender, EventArgs e)
         {
             var form = new AddArgosProgramForm(Investigator);
-            //var form = new AddArgosProgramForm();
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }
 
         private void DeleteProgramButton_Click(object sender, EventArgs e)
         {
-
+            foreach (ProgramListItem item in ProgramsListBox.SelectedItems)
+                if (item.CanDelete)
+                    Database.ArgosPrograms.DeleteOnSubmit(item.Program);
+            if (SubmitChanges())
+                ArgosDataChanged();
         }
 
         private void InfoProgramButton_Click(object sender, EventArgs e)
@@ -436,30 +492,74 @@ namespace AnimalMovement
             form.Show(this);
         }
 
+        private void ProgramsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadPlatformsListBox(((ProgramListItem)ProgramsListBox.SelectedItem).Program);
+        }
+
         #endregion
 
         #region Argos Platforms
 
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        // public accessors are used by the control when these classes are accessed through the Datasource
+        class PlatformListItem
+        {
+            public string Name { get; set; }
+            public bool CanDelete { get; set; }
+            public ArgosPlatform Platform { get; set; }
+        }
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+        private void LoadPlatformsListBox(ArgosProgram program)
+        {
+            var query = from platform in program.ArgosPlatforms
+                        select new PlatformListItem
+                        {
+                            Platform = platform,
+                            Name = platform.PlatformId,
+                            CanDelete = !platform.ArgosDeployments.Any()
+                        };
+            var sortedList = query.OrderBy(p => p.Platform.Active ? 0 : 1).ThenBy(p => p.Name).ToList();
+            PlatformsListBox.DataSource = sortedList;
+            PlatformsListBox.DisplayMember = "Name";
+            PlatformsListBoxLabel.Text = sortedList.Count < 5 ? "Programs" : String.Format("Programs ({0})", sortedList.Count);
+            PlatformsListBox.ClearItemColors();
+            for (int i = 0; i < sortedList.Count; i++)
+            {
+                if (!sortedList[i].Platform.Active)
+                    CollarsListBox.SetItemColor(i, Color.DarkGray);
+            }
+        }
+
         private void AddPlatformButton_Click(object sender, EventArgs e)
         {
-            //var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "2433");
-            //var form = new AddArgosPlatformForm(prog);
-            var form = new AddArgosPlatformForm();
+            var program = (ArgosProgram)ProgramsListBox.SelectedItem;
+            var form = new AddArgosPlatformForm(program);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }
 
         private void DeletePlatformButton_Click(object sender, EventArgs e)
         {
-
+            foreach (PlatformListItem item in PlatformsListBox.SelectedItems)
+                if (item.CanDelete)
+                    Database.ArgosPlatforms.DeleteOnSubmit(item.Platform);
+            if (SubmitChanges())
+                ArgosDataChanged();
         }
 
         private void InfoPlatformButton_Click(object sender, EventArgs e)
         {
-            var prog = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == "62051");
-            var form = new ArgosPlatformDetailsForm(prog);
+            var platform = (ArgosPlatform)PlatformsListBox.SelectedItem;
+            var form = new ArgosPlatformDetailsForm(platform);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
+        }
+
+        private void PlatformsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            LoadArgosDataGridView(((PlatformListItem)PlatformsListBox.SelectedItem).Platform);
         }
 
         #endregion
@@ -467,15 +567,31 @@ namespace AnimalMovement
 
         #region Argos Deployments
 
-        private void AddArgosDeployment_Click(object sender, EventArgs e)
+        private void LoadArgosDataGridView(ArgosPlatform platform)
+        {
+            ArgosDeploymentsGridView.DataSource =
+                platform.ArgosDeployments.Select(d => new
+                    {
+                        ArgosDeployment = d,
+                        d.Collar,
+                        ArgosId = d.PlatformId,
+                        Start = d.StartDate == null ? "Long ago" : d.StartDate.Value.ToString("g"),
+                        End = d.EndDate == null ? "Never" : d.EndDate.Value.ToString("g"),
+                        CanDelete = true
+                    });
+            ArgosDeploymentsGridView.Columns[0].Visible = false;
+            ArgosDeploymentsGridView.Columns[5].Visible = false;
+        }
+
+        private void AddArgosDeploymentButton_Click(object sender, EventArgs e)
         {
             var platform = (ArgosPlatform) PlatformsListBox.SelectedItem;
-            var form = new AddArgosDeploymentForm(null);//, platform);
+            var form = new AddArgosDeploymentForm(null, platform);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }
 
-        private void DeleteArgosDeployment_Click(object sender, EventArgs e)
+        private void DeleteArgosDeploymentButton_Click(object sender, EventArgs e)
         {
             foreach (DataGridViewRow row in ArgosDeploymentsGridView.SelectedRows)
             {
@@ -487,7 +603,7 @@ namespace AnimalMovement
                 ArgosDataChanged();
         }
 
-        private void InfoArgosDeployment_Click(object sender, EventArgs e)
+        private void InfoArgosDeploymentButton_Click(object sender, EventArgs e)
         {
             var deploymentId = (int)ArgosDeploymentsGridView.SelectedRows[0].Cells[0].Value;
             var form = new ArgosDeploymentDetailsForm(deploymentId, true);
@@ -498,7 +614,7 @@ namespace AnimalMovement
         private void ArgosDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1)
-                InfoArgosDeployment_Click(sender, e);
+                InfoArgosDeploymentButton_Click(sender, e);
         }
 
         private void ArgosDataGridView_SelectionChanged(object sender, EventArgs e)

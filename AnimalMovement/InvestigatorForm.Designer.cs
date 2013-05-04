@@ -58,20 +58,20 @@
             this.PlatformsListBox = new AnimalMovement.ColoredListBox();
             this.ProgramsListBox = new AnimalMovement.ColoredListBox();
             this.ArgosDeploymentsGridView = new System.Windows.Forms.DataGridView();
-            this.ChangePlatformStatus = new System.Windows.Forms.Button();
-            this.ChangeProgramStatus = new System.Windows.Forms.Button();
+            this.ChangePlatformStatusButton = new System.Windows.Forms.Button();
+            this.ChangeProgramStatusButton = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
-            this.DeleteArgosDeployment = new System.Windows.Forms.Button();
-            this.InfoArgosDeployment = new System.Windows.Forms.Button();
-            this.AddArgosDeployment = new System.Windows.Forms.Button();
-            this.DownloadProgram = new System.Windows.Forms.Button();
-            this.DownloadPlatform = new System.Windows.Forms.Button();
-            this.AddMissingPlatforms = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
+            this.DeleteArgosDeploymentButton = new System.Windows.Forms.Button();
+            this.InfoArgosDeploymentButton = new System.Windows.Forms.Button();
+            this.AddArgosDeploymentButton = new System.Windows.Forms.Button();
+            this.DownloadProgramButton = new System.Windows.Forms.Button();
+            this.DownloadPlatformButton = new System.Windows.Forms.Button();
+            this.AddMissingPlatformsButton = new System.Windows.Forms.Button();
+            this.ProgramsListBoxLabel = new System.Windows.Forms.Label();
             this.DeleteProgramButton = new System.Windows.Forms.Button();
             this.InfoProgramButton = new System.Windows.Forms.Button();
             this.AddProgramButton = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
+            this.PlatformsListBoxLabel = new System.Windows.Forms.Label();
             this.DeletePlatformButton = new System.Windows.Forms.Button();
             this.InfoPlatformButton = new System.Windows.Forms.Button();
             this.AddPlatformButton = new System.Windows.Forms.Button();
@@ -430,20 +430,20 @@
             this.ArgosTab.Controls.Add(this.PlatformsListBox);
             this.ArgosTab.Controls.Add(this.ProgramsListBox);
             this.ArgosTab.Controls.Add(this.ArgosDeploymentsGridView);
-            this.ArgosTab.Controls.Add(this.ChangePlatformStatus);
-            this.ArgosTab.Controls.Add(this.ChangeProgramStatus);
+            this.ArgosTab.Controls.Add(this.ChangePlatformStatusButton);
+            this.ArgosTab.Controls.Add(this.ChangeProgramStatusButton);
             this.ArgosTab.Controls.Add(this.label7);
-            this.ArgosTab.Controls.Add(this.DeleteArgosDeployment);
-            this.ArgosTab.Controls.Add(this.InfoArgosDeployment);
-            this.ArgosTab.Controls.Add(this.AddArgosDeployment);
-            this.ArgosTab.Controls.Add(this.DownloadProgram);
-            this.ArgosTab.Controls.Add(this.DownloadPlatform);
-            this.ArgosTab.Controls.Add(this.AddMissingPlatforms);
-            this.ArgosTab.Controls.Add(this.label6);
+            this.ArgosTab.Controls.Add(this.DeleteArgosDeploymentButton);
+            this.ArgosTab.Controls.Add(this.InfoArgosDeploymentButton);
+            this.ArgosTab.Controls.Add(this.AddArgosDeploymentButton);
+            this.ArgosTab.Controls.Add(this.DownloadProgramButton);
+            this.ArgosTab.Controls.Add(this.DownloadPlatformButton);
+            this.ArgosTab.Controls.Add(this.AddMissingPlatformsButton);
+            this.ArgosTab.Controls.Add(this.ProgramsListBoxLabel);
             this.ArgosTab.Controls.Add(this.DeleteProgramButton);
             this.ArgosTab.Controls.Add(this.InfoProgramButton);
             this.ArgosTab.Controls.Add(this.AddProgramButton);
-            this.ArgosTab.Controls.Add(this.label5);
+            this.ArgosTab.Controls.Add(this.PlatformsListBoxLabel);
             this.ArgosTab.Controls.Add(this.DeletePlatformButton);
             this.ArgosTab.Controls.Add(this.InfoPlatformButton);
             this.ArgosTab.Controls.Add(this.AddPlatformButton);
@@ -477,6 +477,7 @@
             this.PlatformsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.PlatformsListBox.Size = new System.Drawing.Size(183, 154);
             this.PlatformsListBox.TabIndex = 27;
+            this.PlatformsListBox.SelectedIndexChanged += new System.EventHandler(this.PlatformsListBox_SelectedIndexChanged);
             // 
             // ProgramsListBox
             // 
@@ -490,6 +491,7 @@
             this.ProgramsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.ProgramsListBox.Size = new System.Drawing.Size(341, 73);
             this.ProgramsListBox.TabIndex = 26;
+            this.ProgramsListBox.SelectedIndexChanged += new System.EventHandler(this.ProgramsListBox_SelectedIndexChanged);
             // 
             // ArgosDeploymentsGridView
             // 
@@ -507,24 +509,24 @@
             this.ArgosDeploymentsGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ArgosDataGridView_CellDoubleClick);
             this.ArgosDeploymentsGridView.SelectionChanged += new System.EventHandler(this.ArgosDataGridView_SelectionChanged);
             // 
-            // ChangePlatformStatus
+            // ChangePlatformStatusButton
             // 
-            this.ChangePlatformStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.ChangePlatformStatus.Location = new System.Drawing.Point(88, 319);
-            this.ChangePlatformStatus.Name = "ChangePlatformStatus";
-            this.ChangePlatformStatus.Size = new System.Drawing.Size(98, 23);
-            this.ChangePlatformStatus.TabIndex = 24;
-            this.ChangePlatformStatus.Text = "DL On/Off";
-            this.ChangePlatformStatus.UseVisualStyleBackColor = true;
+            this.ChangePlatformStatusButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ChangePlatformStatusButton.Location = new System.Drawing.Point(88, 319);
+            this.ChangePlatformStatusButton.Name = "ChangePlatformStatusButton";
+            this.ChangePlatformStatusButton.Size = new System.Drawing.Size(98, 23);
+            this.ChangePlatformStatusButton.TabIndex = 24;
+            this.ChangePlatformStatusButton.Text = "DL On/Off";
+            this.ChangePlatformStatusButton.UseVisualStyleBackColor = true;
             // 
-            // ChangeProgramStatus
+            // ChangeProgramStatusButton
             // 
-            this.ChangeProgramStatus.Location = new System.Drawing.Point(88, 98);
-            this.ChangeProgramStatus.Name = "ChangeProgramStatus";
-            this.ChangeProgramStatus.Size = new System.Drawing.Size(115, 23);
-            this.ChangeProgramStatus.TabIndex = 23;
-            this.ChangeProgramStatus.Text = "DL On/Off/Varies";
-            this.ChangeProgramStatus.UseVisualStyleBackColor = true;
+            this.ChangeProgramStatusButton.Location = new System.Drawing.Point(88, 98);
+            this.ChangeProgramStatusButton.Name = "ChangeProgramStatusButton";
+            this.ChangeProgramStatusButton.Size = new System.Drawing.Size(115, 23);
+            this.ChangeProgramStatusButton.TabIndex = 23;
+            this.ChangeProgramStatusButton.Text = "DL On/Off/Varies";
+            this.ChangeProgramStatusButton.UseVisualStyleBackColor = true;
             // 
             // label7
             // 
@@ -535,84 +537,84 @@
             this.label7.TabIndex = 22;
             this.label7.Text = "Collar Deployments";
             // 
-            // DeleteArgosDeployment
+            // DeleteArgosDeploymentButton
             // 
-            this.DeleteArgosDeployment.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.DeleteArgosDeployment.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DeleteArgosDeployment.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteArgosDeployment.Location = new System.Drawing.Point(244, 321);
-            this.DeleteArgosDeployment.Name = "DeleteArgosDeployment";
-            this.DeleteArgosDeployment.Size = new System.Drawing.Size(24, 24);
-            this.DeleteArgosDeployment.TabIndex = 20;
-            this.DeleteArgosDeployment.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.DeleteArgosDeployment.UseVisualStyleBackColor = true;
-            this.DeleteArgosDeployment.Click += new System.EventHandler(this.DeleteArgosDeployment_Click);
+            this.DeleteArgosDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteArgosDeploymentButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DeleteArgosDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeleteArgosDeploymentButton.Location = new System.Drawing.Point(244, 321);
+            this.DeleteArgosDeploymentButton.Name = "DeleteArgosDeploymentButton";
+            this.DeleteArgosDeploymentButton.Size = new System.Drawing.Size(24, 24);
+            this.DeleteArgosDeploymentButton.TabIndex = 20;
+            this.DeleteArgosDeploymentButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.DeleteArgosDeploymentButton.UseVisualStyleBackColor = true;
+            this.DeleteArgosDeploymentButton.Click += new System.EventHandler(this.DeleteArgosDeploymentButton_Click);
             // 
-            // InfoArgosDeployment
+            // InfoArgosDeploymentButton
             // 
-            this.InfoArgosDeployment.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.InfoArgosDeployment.FlatAppearance.BorderSize = 0;
-            this.InfoArgosDeployment.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.InfoArgosDeployment.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.InfoArgosDeployment.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoArgosDeployment.Location = new System.Drawing.Point(269, 321);
-            this.InfoArgosDeployment.Name = "InfoArgosDeployment";
-            this.InfoArgosDeployment.Size = new System.Drawing.Size(24, 24);
-            this.InfoArgosDeployment.TabIndex = 21;
-            this.InfoArgosDeployment.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.InfoArgosDeployment.UseVisualStyleBackColor = true;
-            this.InfoArgosDeployment.Click += new System.EventHandler(this.InfoArgosDeployment_Click);
+            this.InfoArgosDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoArgosDeploymentButton.FlatAppearance.BorderSize = 0;
+            this.InfoArgosDeploymentButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoArgosDeploymentButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.InfoArgosDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoArgosDeploymentButton.Location = new System.Drawing.Point(269, 321);
+            this.InfoArgosDeploymentButton.Name = "InfoArgosDeploymentButton";
+            this.InfoArgosDeploymentButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoArgosDeploymentButton.TabIndex = 21;
+            this.InfoArgosDeploymentButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.InfoArgosDeploymentButton.UseVisualStyleBackColor = true;
+            this.InfoArgosDeploymentButton.Click += new System.EventHandler(this.InfoArgosDeploymentButton_Click);
             // 
-            // AddArgosDeployment
+            // AddArgosDeploymentButton
             // 
-            this.AddArgosDeployment.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.AddArgosDeployment.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AddArgosDeployment.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddArgosDeployment.Location = new System.Drawing.Point(214, 321);
-            this.AddArgosDeployment.Name = "AddArgosDeployment";
-            this.AddArgosDeployment.Size = new System.Drawing.Size(24, 24);
-            this.AddArgosDeployment.TabIndex = 19;
-            this.AddArgosDeployment.UseVisualStyleBackColor = true;
-            this.AddArgosDeployment.Click += new System.EventHandler(this.AddArgosDeployment_Click);
+            this.AddArgosDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddArgosDeploymentButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.AddArgosDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddArgosDeploymentButton.Location = new System.Drawing.Point(214, 321);
+            this.AddArgosDeploymentButton.Name = "AddArgosDeploymentButton";
+            this.AddArgosDeploymentButton.Size = new System.Drawing.Size(24, 24);
+            this.AddArgosDeploymentButton.TabIndex = 19;
+            this.AddArgosDeploymentButton.UseVisualStyleBackColor = true;
+            this.AddArgosDeploymentButton.Click += new System.EventHandler(this.AddArgosDeploymentButton_Click);
             // 
-            // DownloadProgram
+            // DownloadProgramButton
             // 
-            this.DownloadProgram.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.DownloadProgram.Location = new System.Drawing.Point(350, 77);
-            this.DownloadProgram.Name = "DownloadProgram";
-            this.DownloadProgram.Size = new System.Drawing.Size(137, 23);
-            this.DownloadProgram.TabIndex = 17;
-            this.DownloadProgram.Text = "Download Program Now";
-            this.DownloadProgram.UseVisualStyleBackColor = true;
+            this.DownloadProgramButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.DownloadProgramButton.Location = new System.Drawing.Point(350, 77);
+            this.DownloadProgramButton.Name = "DownloadProgramButton";
+            this.DownloadProgramButton.Size = new System.Drawing.Size(137, 23);
+            this.DownloadProgramButton.TabIndex = 17;
+            this.DownloadProgramButton.Text = "Download Program Now";
+            this.DownloadProgramButton.UseVisualStyleBackColor = true;
             // 
-            // DownloadPlatform
+            // DownloadPlatformButton
             // 
-            this.DownloadPlatform.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.DownloadPlatform.Location = new System.Drawing.Point(350, 48);
-            this.DownloadPlatform.Name = "DownloadPlatform";
-            this.DownloadPlatform.Size = new System.Drawing.Size(137, 23);
-            this.DownloadPlatform.TabIndex = 16;
-            this.DownloadPlatform.Text = "Download Platform Now";
-            this.DownloadPlatform.UseVisualStyleBackColor = true;
+            this.DownloadPlatformButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.DownloadPlatformButton.Location = new System.Drawing.Point(350, 48);
+            this.DownloadPlatformButton.Name = "DownloadPlatformButton";
+            this.DownloadPlatformButton.Size = new System.Drawing.Size(137, 23);
+            this.DownloadPlatformButton.TabIndex = 16;
+            this.DownloadPlatformButton.Text = "Download Platform Now";
+            this.DownloadPlatformButton.UseVisualStyleBackColor = true;
             // 
-            // AddMissingPlatforms
+            // AddMissingPlatformsButton
             // 
-            this.AddMissingPlatforms.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.AddMissingPlatforms.Location = new System.Drawing.Point(350, 19);
-            this.AddMissingPlatforms.Name = "AddMissingPlatforms";
-            this.AddMissingPlatforms.Size = new System.Drawing.Size(137, 23);
-            this.AddMissingPlatforms.TabIndex = 15;
-            this.AddMissingPlatforms.Text = "Add Missing Platforms";
-            this.AddMissingPlatforms.UseVisualStyleBackColor = true;
+            this.AddMissingPlatformsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.AddMissingPlatformsButton.Location = new System.Drawing.Point(350, 19);
+            this.AddMissingPlatformsButton.Name = "AddMissingPlatformsButton";
+            this.AddMissingPlatformsButton.Size = new System.Drawing.Size(137, 23);
+            this.AddMissingPlatformsButton.TabIndex = 15;
+            this.AddMissingPlatformsButton.Text = "Add Missing Platforms";
+            this.AddMissingPlatformsButton.UseVisualStyleBackColor = true;
             // 
-            // label6
+            // ProgramsListBoxLabel
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 3);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(51, 13);
-            this.label6.TabIndex = 14;
-            this.label6.Text = "Programs";
+            this.ProgramsListBoxLabel.AutoSize = true;
+            this.ProgramsListBoxLabel.Location = new System.Drawing.Point(6, 3);
+            this.ProgramsListBoxLabel.Name = "ProgramsListBoxLabel";
+            this.ProgramsListBoxLabel.Size = new System.Drawing.Size(51, 13);
+            this.ProgramsListBoxLabel.TabIndex = 14;
+            this.ProgramsListBoxLabel.Text = "Programs";
             // 
             // DeleteProgramButton
             // 
@@ -651,14 +653,14 @@
             this.AddProgramButton.UseVisualStyleBackColor = true;
             this.AddProgramButton.Click += new System.EventHandler(this.AddProgramButton_Click);
             // 
-            // label5
+            // PlatformsListBoxLabel
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 143);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(124, 13);
-            this.label5.TabIndex = 9;
-            this.label5.Text = "Platforms (aka Argos Ids)";
+            this.PlatformsListBoxLabel.AutoSize = true;
+            this.PlatformsListBoxLabel.Location = new System.Drawing.Point(7, 143);
+            this.PlatformsListBoxLabel.Name = "PlatformsListBoxLabel";
+            this.PlatformsListBoxLabel.Size = new System.Drawing.Size(124, 13);
+            this.PlatformsListBoxLabel.TabIndex = 9;
+            this.PlatformsListBoxLabel.Text = "Platforms (aka Argos Ids)";
             // 
             // DeletePlatformButton
             // 
@@ -1019,20 +1021,20 @@
         private System.Windows.Forms.CheckBox ShowEmailFilesCheckBox;
         private System.Windows.Forms.TabPage ArgosTab;
         private System.Windows.Forms.DataGridView ArgosDeploymentsGridView;
-        private System.Windows.Forms.Button ChangePlatformStatus;
-        private System.Windows.Forms.Button ChangeProgramStatus;
+        private System.Windows.Forms.Button ChangePlatformStatusButton;
+        private System.Windows.Forms.Button ChangeProgramStatusButton;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button DeleteArgosDeployment;
-        private System.Windows.Forms.Button InfoArgosDeployment;
-        private System.Windows.Forms.Button AddArgosDeployment;
-        private System.Windows.Forms.Button DownloadProgram;
-        private System.Windows.Forms.Button DownloadPlatform;
-        private System.Windows.Forms.Button AddMissingPlatforms;
-        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button DeleteArgosDeploymentButton;
+        private System.Windows.Forms.Button InfoArgosDeploymentButton;
+        private System.Windows.Forms.Button AddArgosDeploymentButton;
+        private System.Windows.Forms.Button DownloadProgramButton;
+        private System.Windows.Forms.Button DownloadPlatformButton;
+        private System.Windows.Forms.Button AddMissingPlatformsButton;
+        private System.Windows.Forms.Label ProgramsListBoxLabel;
         private System.Windows.Forms.Button DeleteProgramButton;
         private System.Windows.Forms.Button InfoProgramButton;
         private System.Windows.Forms.Button AddProgramButton;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label PlatformsListBoxLabel;
         private System.Windows.Forms.Button DeletePlatformButton;
         private System.Windows.Forms.Button InfoPlatformButton;
         private System.Windows.Forms.Button AddPlatformButton;
