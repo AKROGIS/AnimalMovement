@@ -398,7 +398,6 @@ namespace AnimalMovement
 
         private void SetUpArgosTab()
         {
-            //TODO - provide implementation
             EnableArgosControls();
         }
 
@@ -414,48 +413,7 @@ namespace AnimalMovement
             SetUpArgosTab();
         }
 
-        private void DeleteProgramButton_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void DeletePlatformButton_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void AddArgosDeployment_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void DeleteArgosDeployment_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void InfoArgosDeployment_Click(object sender, EventArgs e)
-        {
-
-        }
-
-
-        private void AddPlatformButton_Click(object sender, EventArgs e)
-        {
-            //var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "2433");
-            //var form = new AddArgosPlatformForm(prog);
-            var form = new AddArgosPlatformForm();
-            form.DatabaseChanged += (o, x) => ArgosDataChanged();
-            form.Show(this);
-        }
-
-        private void InfoPlatformButton_Click(object sender, EventArgs e)
-        {
-            var prog = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == "62051");
-            var form = new ArgosPlatformDetailsForm(prog);
-            form.DatabaseChanged += (o, x) => ArgosDataChanged();
-            form.Show(this);
-        }
+        #region Argos Programs
 
         private void AddProgramButton_Click(object sender, EventArgs e)
         {
@@ -463,6 +421,11 @@ namespace AnimalMovement
             //var form = new AddArgosProgramForm();
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
+        }
+
+        private void DeleteProgramButton_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void InfoProgramButton_Click(object sender, EventArgs e)
@@ -473,6 +436,77 @@ namespace AnimalMovement
             form.Show(this);
         }
 
+        #endregion
+
+        #region Argos Platforms
+
+        private void AddPlatformButton_Click(object sender, EventArgs e)
+        {
+            //var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "2433");
+            //var form = new AddArgosPlatformForm(prog);
+            var form = new AddArgosPlatformForm();
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
+        private void DeletePlatformButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void InfoPlatformButton_Click(object sender, EventArgs e)
+        {
+            var prog = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == "62051");
+            var form = new ArgosPlatformDetailsForm(prog);
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
+        #endregion
+
+
+        #region Argos Deployments
+
+        private void AddArgosDeployment_Click(object sender, EventArgs e)
+        {
+            var platform = (ArgosPlatform) PlatformsListBox.SelectedItem;
+            var form = new AddArgosDeploymentForm(null);//, platform);
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteArgosDeployment_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in ArgosDeploymentsGridView.SelectedRows)
+            {
+                var argosDeployment = (ArgosDeployment) row.Cells[0].Value;
+                if ((bool)row.Cells["CanDelete"].Value)
+                    Database.ArgosDeployments.DeleteOnSubmit(argosDeployment);
+            }
+            if (SubmitChanges())
+                ArgosDataChanged();
+        }
+
+        private void InfoArgosDeployment_Click(object sender, EventArgs e)
+        {
+            var deploymentId = (int)ArgosDeploymentsGridView.SelectedRows[0].Cells[0].Value;
+            var form = new ArgosDeploymentDetailsForm(deploymentId, true);
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
+        private void ArgosDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                InfoArgosDeployment_Click(sender, e);
+        }
+
+        private void ArgosDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableArgosControls();
+        }
+
+        #endregion
 
         #endregion
 

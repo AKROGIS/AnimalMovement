@@ -504,6 +504,8 @@
             this.ArgosDeploymentsGridView.ReadOnly = true;
             this.ArgosDeploymentsGridView.Size = new System.Drawing.Size(273, 156);
             this.ArgosDeploymentsGridView.TabIndex = 25;
+            this.ArgosDeploymentsGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ArgosDataGridView_CellDoubleClick);
+            this.ArgosDeploymentsGridView.SelectionChanged += new System.EventHandler(this.ArgosDataGridView_SelectionChanged);
             // 
             // ChangePlatformStatus
             // 
