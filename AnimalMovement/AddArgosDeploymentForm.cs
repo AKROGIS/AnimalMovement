@@ -13,41 +13,83 @@ namespace AnimalMovement
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
         private Collar Collar { get; set; }
+        private ArgosPlatform Platform { get; set; }
         private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        public AddArgosDeploymentForm(Collar collar)
+        public AddArgosDeploymentForm(Collar collar = null, ArgosPlatform platform = null)
         {
             InitializeComponent();
             Collar = collar;
+            Platform = platform;
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
-            LoadDefaultFormContents();  //Called before events are triggered
+            SetUpControls();  //Called before events are triggered
         }
 
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
             //Database.Log = Console.Out;
-            //Collar is in a different DataContext, get one in this DataContext
+            //Collar and Platform are in a different DataContext, get them in this DataContext
             if (Collar != null)
                 Collar =
                     Database.Collars.FirstOrDefault(
                         c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
-            if (Collar == null)
-                throw new InvalidOperationException("Add Argos Deployment Form not provided a valid Collar.");
-
-            var functions = new AnimalMovementFunctions();
-            IsEditor = functions.IsInvestigatorEditor(Collar.Manager, CurrentUser) ?? false;
+            if (Platform != null)
+                Platform =
+                    Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == Platform.PlatformId);
         }
 
-        private void LoadDefaultFormContents()
+        private void SetUpControls()
         {
-            CollarTextBox.Text = Collar.ToString();
-            var argosQuery = from platform in Database.ArgosPlatforms
-                             where platform.ArgosProgram.Manager == Collar.Manager
-                             select platform.PlatformId;
-            ArgosComboBox.DataSource = argosQuery.ToList();
+            LoadCollarComboBox();
+            LoadPlatformComboBox();
+            //defer datepickers until after load
+            EnableFormControls();
+        }
+
+        private void LoadCollarComboBox()
+        {
+            //If given a Collar, set that and lock it.
+            //else, set list to all collars I can edit, and select null per the constructor request
+            if (Collar != null)
+                CollarComboBox.Items.Add(Collar);
+            else
+            {
+                CollarComboBox.DataSource =
+                    Database.ProjectInvestigators.Where(pi => pi.Login == CurrentUser ||
+                     pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
+            }
+            CollarComboBox.Enabled = Collar == null;
+            CollarComboBox.SelectedItem = Collar;
+        }
+
+        private void LoadPlatformComboBox()
+        {
+            //If given a Collar, set that and lock it.
+            //else, set list to all collars I can edit, and select null per the constructor request
+            if (Platform != null)
+                ArgosComboBox.Items.Add(Platform);
+            else
+            {
+                ArgosComboBox.DataSource =
+                    Database.ArgosPlatforms.Where(p => p.ArgosProgram.Manager == CurrentUser ||
+                     p.ArgosProgram.ProjectInvestigator.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
+            }
+            ArgosComboBox.Enabled = Platform == null;
+            ArgosComboBox.SelectedItem = Platform;
+            ArgosComboBox.DisplayMember = "PlatformId";
+        }
+
+        private void SetUpDatePickers()
+        {
+            StartDateTimePicker.Value = DateTime.Now.Date + TimeSpan.FromHours(12);
+            StartDateTimePicker.Checked = false;
+            StartDateTimePicker.CustomFormat = " ";
+            EndDateTimePicker.Value = DateTime.Now.Date + TimeSpan.FromHours(12);
+            EndDateTimePicker.Checked = false;
+            EndDateTimePicker.CustomFormat = " ";
         }
 
         private void EnableFormControls()
@@ -64,6 +106,49 @@ namespace AnimalMovement
             ValidateForm();
         }
 
+        private void ValidateEditor()
+        {
+            //If Collar is provided, it will be locked, so you must be the pi or an assistant
+            if (Collar != null && Collar.Manager != CurrentUser &&
+                Collar.ProjectInvestigator.ProjectInvestigatorAssistants.All(a => a.Assistant != CurrentUser))
+            {
+                MessageBox.Show(
+                    "You do not have permission to edit this collar.", "No Permission",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                IsEditor = false;
+                return;
+            }
+            //If Collar is not provided, make sure there is a collar to pick from (we can edit everything in the list)
+            if (Collar == null && CollarComboBox.Items.Count < 1)
+            {
+                MessageBox.Show(
+                    "You can't create a deployment unless you are a PI or an assitant to a PI with collars.", "No Permission",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                IsEditor = false;
+                return;
+            }
+            //If Platform is provided, it will be locked, so you must be the pi or an assistant
+            if (Platform != null && Platform.ArgosProgram.Manager != CurrentUser &&
+                Platform.ArgosProgram.ProjectInvestigator.ProjectInvestigatorAssistants.All(a => a.Assistant != CurrentUser))
+            {
+                MessageBox.Show(
+                    "You do not have permission to edit this Argos Platform.", "No Permission",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                IsEditor = false;
+                return;
+            }
+            //If Platform is not provided, make sure there is a platform to pick from (we can edit everything in the list)
+            if (Platform == null && ArgosComboBox.Items.Count < 1)
+            {
+                MessageBox.Show(
+                    "You can't create a deployment unless you are a PI or an assitant to a PI with Argos platforms.", "No Permission",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                IsEditor = false;
+                return;
+            }
+            IsEditor = true;
+        }
+
         private void ValidateForm()
         {
             var error = ValidateError();
@@ -76,6 +161,12 @@ namespace AnimalMovement
 
         private string ValidateError()
         {
+            if (CollarComboBox.SelectedItem == null)
+                return "You must select a collar";
+
+            if (ArgosComboBox.SelectedItem == null)
+                return "You must select an Argos Id";
+
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MinValue;
             var end   =   EndDateTimePicker.Checked ?   EndDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
@@ -107,8 +198,8 @@ namespace AnimalMovement
         {
             var deployment = new ArgosDeployment
                 {
-                    Collar = Collar,
-                    PlatformId = (string)ArgosComboBox.SelectedItem,
+                    Collar = (Collar)CollarComboBox.SelectedItem,
+                    ArgosPlatform = (ArgosPlatform)ArgosComboBox.SelectedItem,
                     StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null,
                     EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null
                 };
@@ -150,6 +241,13 @@ namespace AnimalMovement
         }
 
         #region Form Control Events
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            ValidateEditor();
+            SetUpDatePickers();
+        }
 
         private void AddArgosDeploymentForm_Load(object sender, EventArgs e)
         {

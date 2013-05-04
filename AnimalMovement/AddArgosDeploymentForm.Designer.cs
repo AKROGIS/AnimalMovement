@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this.CollarTextBox = new System.Windows.Forms.TextBox();
             this.CreateButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.EndDateTimePicker = new System.Windows.Forms.DateTimePicker();
@@ -40,6 +39,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.ValidationTextBox = new System.Windows.Forms.TextBox();
             this.FixItButton = new System.Windows.Forms.Button();
+            this.CollarComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // label1
@@ -52,15 +52,6 @@
             this.label1.Size = new System.Drawing.Size(36, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Collar:";
-            // 
-            // CollarTextBox
-            // 
-            this.CollarTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CollarTextBox.Enabled = false;
-            this.CollarTextBox.Location = new System.Drawing.Point(102, 12);
-            this.CollarTextBox.Name = "CollarTextBox";
-            this.CollarTextBox.Size = new System.Drawing.Size(200, 20);
-            this.CollarTextBox.TabIndex = 1;
             // 
             // CreateButton
             // 
@@ -180,6 +171,16 @@
             this.FixItButton.Visible = false;
             this.FixItButton.Click += new System.EventHandler(this.FixItButton_Click);
             // 
+            // CollarComboBox
+            // 
+            this.CollarComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.CollarComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.CollarComboBox.FormattingEnabled = true;
+            this.CollarComboBox.Location = new System.Drawing.Point(102, 12);
+            this.CollarComboBox.Name = "CollarComboBox";
+            this.CollarComboBox.Size = new System.Drawing.Size(200, 21);
+            this.CollarComboBox.TabIndex = 13;
+            // 
             // AddArgosDeploymentForm
             // 
             this.AcceptButton = this.CreateButton;
@@ -187,6 +188,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(314, 193);
+            this.Controls.Add(this.CollarComboBox);
             this.Controls.Add(this.FixItButton);
             this.Controls.Add(this.ValidationTextBox);
             this.Controls.Add(this.label4);
@@ -197,7 +199,6 @@
             this.Controls.Add(this.EndDateTimePicker);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.CreateButton);
-            this.Controls.Add(this.CollarTextBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "AddArgosDeploymentForm";
@@ -211,7 +212,6 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox CollarTextBox;
         private System.Windows.Forms.Button CreateButton;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.DateTimePicker EndDateTimePicker;
@@ -222,5 +222,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox ValidationTextBox;
         private System.Windows.Forms.Button FixItButton;
+        private System.Windows.Forms.ComboBox CollarComboBox;
     }
 }
