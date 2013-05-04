@@ -457,6 +457,7 @@
             // 
             // EmailCheckBox
             // 
+            this.EmailCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.EmailCheckBox.AutoSize = true;
             this.EmailCheckBox.Location = new System.Drawing.Point(350, 106);
             this.EmailCheckBox.Name = "EmailCheckBox";
@@ -500,10 +501,13 @@
             this.ArgosDeploymentsGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.ArgosDeploymentsGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.ArgosDeploymentsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ArgosDeploymentsGridView.Location = new System.Drawing.Point(214, 159);
             this.ArgosDeploymentsGridView.Name = "ArgosDeploymentsGridView";
             this.ArgosDeploymentsGridView.ReadOnly = true;
+            this.ArgosDeploymentsGridView.RowHeadersVisible = false;
+            this.ArgosDeploymentsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ArgosDeploymentsGridView.Size = new System.Drawing.Size(273, 156);
             this.ArgosDeploymentsGridView.TabIndex = 25;
             this.ArgosDeploymentsGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ArgosDataGridView_CellDoubleClick);
@@ -658,9 +662,9 @@
             this.PlatformsListBoxLabel.AutoSize = true;
             this.PlatformsListBoxLabel.Location = new System.Drawing.Point(7, 143);
             this.PlatformsListBoxLabel.Name = "PlatformsListBoxLabel";
-            this.PlatformsListBoxLabel.Size = new System.Drawing.Size(124, 13);
+            this.PlatformsListBoxLabel.Size = new System.Drawing.Size(51, 13);
             this.PlatformsListBoxLabel.TabIndex = 9;
-            this.PlatformsListBoxLabel.Text = "Platforms (aka Argos Ids)";
+            this.PlatformsListBoxLabel.Text = "Argos Ids";
             // 
             // DeletePlatformButton
             // 

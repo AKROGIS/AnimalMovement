@@ -406,11 +406,11 @@ namespace AnimalMovement
         private void EnableArgosControls()
         {
             AddProgramButton.Enabled = IsEditor;
-            DeleteProgramButton.Enabled = true;
+            DeleteProgramButton.Enabled = ProgramsListBox.SelectedItems.Cast<ProgramListItem>().Any(i => i.CanDelete);
             InfoProgramButton.Enabled = ProgramsListBox.SelectedItems.Count == 1;
 
             AddPlatformButton.Enabled = IsEditor && ProgramsListBox.SelectedItems.Count == 1;
-            DeletePlatformButton.Enabled = true;
+            DeletePlatformButton.Enabled = PlatformsListBox.SelectedItems.Cast<PlatformListItem>().Any(i => i.CanDelete);
             InfoPlatformButton.Enabled = PlatformsListBox.SelectedItems.Count == 1;
             
             AddArgosDeploymentButton.Enabled = IsEditor && PlatformsListBox.SelectedItems.Count == 1;
@@ -486,8 +486,8 @@ namespace AnimalMovement
 
         private void InfoProgramButton_Click(object sender, EventArgs e)
         {
-            var prog = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == "1234");
-            var form = new ArgosProgramDetailsForm(prog);
+            var program = ((ProgramListItem)ProgramsListBox.SelectedItem).Program;
+            var form = new ArgosProgramDetailsForm(program);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }
@@ -495,6 +495,7 @@ namespace AnimalMovement
         private void ProgramsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             LoadPlatformsListBox(((ProgramListItem)ProgramsListBox.SelectedItem).Program);
+            EnableArgosControls();
         }
 
         #endregion
@@ -523,7 +524,7 @@ namespace AnimalMovement
             var sortedList = query.OrderBy(p => p.Platform.Active ? 0 : 1).ThenBy(p => p.Name).ToList();
             PlatformsListBox.DataSource = sortedList;
             PlatformsListBox.DisplayMember = "Name";
-            PlatformsListBoxLabel.Text = sortedList.Count < 5 ? "Programs" : String.Format("Programs ({0})", sortedList.Count);
+            PlatformsListBoxLabel.Text = sortedList.Count < 5 ? "Argos Ids" : String.Format("Argos Ids ({0})", sortedList.Count);
             PlatformsListBox.ClearItemColors();
             for (int i = 0; i < sortedList.Count; i++)
             {
@@ -534,7 +535,7 @@ namespace AnimalMovement
 
         private void AddPlatformButton_Click(object sender, EventArgs e)
         {
-            var program = (ArgosProgram)ProgramsListBox.SelectedItem;
+            var program = ((ProgramListItem)ProgramsListBox.SelectedItem).Program;
             var form = new AddArgosPlatformForm(program);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
@@ -551,7 +552,7 @@ namespace AnimalMovement
 
         private void InfoPlatformButton_Click(object sender, EventArgs e)
         {
-            var platform = (ArgosPlatform)PlatformsListBox.SelectedItem;
+            var platform = ((PlatformListItem)PlatformsListBox.SelectedItem).Platform;
             var form = new ArgosPlatformDetailsForm(platform);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
@@ -560,6 +561,7 @@ namespace AnimalMovement
         private void PlatformsListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             LoadArgosDataGridView(((PlatformListItem)PlatformsListBox.SelectedItem).Platform);
+            EnableArgosControls();
         }
 
         #endregion
@@ -578,14 +580,14 @@ namespace AnimalMovement
                         Start = d.StartDate == null ? "Long ago" : d.StartDate.Value.ToString("g"),
                         End = d.EndDate == null ? "Never" : d.EndDate.Value.ToString("g"),
                         CanDelete = true
-                    });
+                    }).ToList();
             ArgosDeploymentsGridView.Columns[0].Visible = false;
             ArgosDeploymentsGridView.Columns[5].Visible = false;
         }
 
         private void AddArgosDeploymentButton_Click(object sender, EventArgs e)
         {
-            var platform = (ArgosPlatform) PlatformsListBox.SelectedItem;
+            var platform = ((PlatformListItem) PlatformsListBox.SelectedItem).Platform;
             var form = new AddArgosDeploymentForm(null, platform);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
@@ -605,8 +607,8 @@ namespace AnimalMovement
 
         private void InfoArgosDeploymentButton_Click(object sender, EventArgs e)
         {
-            var deploymentId = (int)ArgosDeploymentsGridView.SelectedRows[0].Cells[0].Value;
-            var form = new ArgosDeploymentDetailsForm(deploymentId, true);
+            var deploymentId = ((ArgosDeployment)ArgosDeploymentsGridView.SelectedRows[0].Cells[0].Value).DeploymentId;
+            var form = new ArgosDeploymentDetailsForm(deploymentId, false, true);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }
