@@ -659,12 +659,12 @@ namespace AnimalMovement
             return sortedCollars;
         }
 
-        private bool MissingArgosDeployment(Collar collar, string argosId)
+        private static bool MissingArgosDeployment(Collar collar, string argosId)
         {
             return collar.ArgosDeployments.All(a => a.PlatformId != argosId);
         }
 
-        private bool FrequencyMismatch(Collar collar, double frequency)
+        private static bool FrequencyMismatch(Collar collar, double frequency)
         {
             return collar.Frequency != frequency;
         }

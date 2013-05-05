@@ -473,7 +473,7 @@ namespace AnimalMovement
             }
         }
 
-        private string GetProgramName(ArgosProgram program)
+        private static string GetProgramName(ArgosProgram program)
         {
             var active = program.Active.HasValue
                              ? (program.Active.Value ? "Active download" : "Inactive download")
@@ -551,7 +551,7 @@ namespace AnimalMovement
             }
         }
 
-        private string GetPlatformName(ArgosPlatform platform)
+        private static string GetPlatformName(ArgosPlatform platform)
         {
             var active = platform.ArgosProgram.Active.HasValue
                              ? ""

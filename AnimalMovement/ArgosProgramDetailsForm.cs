@@ -110,7 +110,7 @@ namespace AnimalMovement
             ConfigureDateTimePicker(EndDateTimePicker, Program.EndDate);
         }
 
-        private void ConfigureDateTimePicker(DateTimePicker dateTimePicker, DateTime? dateTime)
+        private static void ConfigureDateTimePicker(DateTimePicker dateTimePicker, DateTime? dateTime)
         {
             if (dateTime.HasValue)
             {
