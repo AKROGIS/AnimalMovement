@@ -1,11 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-//TODO - When adding collar parameters, if an existing one has an earlier start date, and a null end date, then first set the end date to the new start date.
-//TODO - When a new collar is added to the database, we need to create Argos deployments, and update old Argos deployments
-//TODO - When a new TPF file for an existing Collar is added, the old parameters should be ended.
-//TODO - When Updating the Disposal Date of a collar consider adding an end date to the collar parameter (this is not a database requirement)
-
 //FIXME - DATABASE - Hide the ArgosPlatforms.Password from all but the Manager, and the Download API
 //FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
@@ -18,26 +13,26 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Add more unit testing.
 
 //TODO - Document the optimal "getting started" process, and make sure the code supports it
-//TODO - Build UI to add/edit/delete Argos Projects and Platforms
+//TODO - bulk upload (data grid view copy/paste) of multiple animals/collars/deploymnents (optional - sa can do this for PI using SSMS)
+//TODO - Add ability to add Argos Platforms when creating an Argos Program (now we have to go to the details tab after creation)
+//TODO - Add ability to create an Argos deployment when creating a collar (now we have to go to the details tab after creation)
 //TODO - Add Icon or collar coding to Collar List to signify (VHF only, PTT only, Storeonboard GPS, GPS+Argos)
-//TODO - Provide some global QAQC tools - I.e. show files with overlapping fix dates
-//TODO - Provide some global QAQC tools - I.e. show Argos collars that might be missing data since downloading began.
-//TODO - Provide some global QAQC tools - I.e. Identify collars with data gaps (analyze download dates, transmissions in email files).
 //TODO - build tool to visualize deployments (i.e. show a graphical time line of animals & collars)
 //TODO - Create a simple location layer, create a table of animal data, and join in ArcMap
 //TODO - Replace the wait cursors with a message box and progress bar
 //TODO - Add a warning (consent to monitoring) message at start up.
 //TODO - How do I add this warning to a layer file??
 //TODO - Replication to remote locations.
-//TODO - 	a) Application/input  will all happen on the central server, which will push all data out to remote locations for fast readonly access.
 //TODO - help documents/tutorials
-//TODO - bulk upload (data grid view copy/paste) of multiple animals/collars/deploymnents (optional - sa can do this for PI using SSMS)
 //TODO - Add MS Access readonly interface
 //TODO - Add R statistics interface and adehabitat example
 //TODO - Build a tool to hide locations outside a reasonable (user provided) range
-//TODO - provide datasheet views of animals, deployments, and maybe files and fixes
 //TODO - Pass the TPF filename to the Gen4 processor, since the filename (currently temp) is written to the output file
 //TODO - Add an ArcGIS tool for creating a mortality date
+//TODO - New QC Report - Show files with overlapping fix dates
+//TODO - New QC Report - Show Argos collars that might be missing data since downloading began.
+//TODO - New QC Report - Identify collars with data gaps (analyze download dates, transmissions in email files).
+//TODO - New QC Report - Data sheet view of all animals, collar, deployments, files, fixes, etc.
 
 //To NOT do or fix:
 //  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date
