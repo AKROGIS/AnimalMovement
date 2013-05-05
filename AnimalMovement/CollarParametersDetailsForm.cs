@@ -223,31 +223,18 @@ namespace AnimalMovement
 
         private bool UpdateParameters()
         {
-            //TODO remove change detection.  The objects are in the same DataContext, so they will be identical,
-            //plus submit changes will call the update SPROC, with all parameters
-            var newCollar = (Collar) CollarComboBox.SelectedItem;
-            if (CollarParameter.Collar.CollarManufacturer != newCollar.CollarManufacturer ||
-                CollarParameter.Collar.CollarId != newCollar.CollarId)
-                CollarParameter.Collar = newCollar;
-
-            var newFile = (CollarParameterFile) FileComboBox.SelectedItem;
-            if ((newFile == null && CollarParameter.FileId != null) ||
-                (newFile != null && CollarParameter.FileId != newFile.FileId))
-                CollarParameter.CollarParameterFile = newFile;
-
-            int? period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text)
-                              ? (int?) null
-                              : Int32.Parse(Gen3PeriodTextBox.Text)*
-                                (((string) Gen3TimeUnitComboBox.SelectedItem) == "Hours" ? 60 : 1);
-            CollarParameter.Gen3Period = period;
-
+            CollarParameter.Collar = (Collar)CollarComboBox.SelectedItem;
+            CollarParameter.CollarParameterFile = (CollarParameterFile)FileComboBox.SelectedItem;
+            CollarParameter.Gen3Period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text)
+                                             ? (int?) null
+                                             : Int32.Parse(Gen3PeriodTextBox.Text)*
+                                               (((string) Gen3TimeUnitComboBox.SelectedItem) == "Hours" ? 60 : 1);
             CollarParameter.StartDate = StartDateTimePicker.Checked
                                             ? StartDateTimePicker.Value.ToUniversalTime()
                                             : (DateTime?) null;
             CollarParameter.EndDate = EndDateTimePicker.Checked
                                           ? EndDateTimePicker.Value.ToUniversalTime()
                                           : (DateTime?) null;
-
             return SubmitChanges();
         }
 
