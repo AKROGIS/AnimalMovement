@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using DataModel;
-using System.Linq;
 
 /*
  * I wanted the changes to the projects and collars list to occur in the main datacontext,
@@ -120,7 +120,7 @@ namespace AnimalMovement
             {
                 Database.SubmitChanges();
             }
-            catch (SqlException ex)
+            catch (Exception ex)  //SqlException && Linq.DuplicateKeyException
             {
                 string msg = "Unable to submit changes to the database.\n" +
                              "Error message:\n" + ex.Message;
@@ -394,13 +394,17 @@ namespace AnimalMovement
         #endregion
 
 
-        #region Argos Programs
+        #region Argos Tab
 
         private void SetUpArgosTab()
         {
             LoadProgramList();
             //The other lists will be populated when a program is selected
             EnableArgosControls();
+            if (IsInvestigator)
+                EmailCheckBox.Checked = Settings.GetWantsEmail();
+            else
+                EmailCheckBox.CheckState = CheckState.Indeterminate;
         }
 
         private void EnableArgosControls()
@@ -418,10 +422,7 @@ namespace AnimalMovement
                 ArgosDeploymentsGridView.SelectedRows.Cast<DataGridViewRow>()
                                         .Any(r => (bool) r.Cells["CanDelete"].Value);
             InfoArgosDeploymentButton.Enabled = ArgosDeploymentsGridView.SelectedRows.Count == 1;
-
-            DownloadPlatformButton.Enabled = false;
-            DownloadProgramButton.Enabled = false;
-            AddMissingPlatformsButton.Enabled = false;
+            EmailCheckBox.Enabled = IsInvestigator;
         }
 
         private void ArgosDataChanged()
@@ -430,6 +431,12 @@ namespace AnimalMovement
             LoadDataContext();
             SetUpArgosTab();
         }
+
+        private void EmailCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.SetWantsEmail(EmailCheckBox.Checked);
+        }
+
 
         #region Argos Programs
 
@@ -505,7 +512,9 @@ namespace AnimalMovement
             EnableArgosControls();
         }
 
+
         #endregion
+
 
         #region Argos Platforms
 

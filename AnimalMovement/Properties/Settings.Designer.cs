@@ -793,7 +793,7 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("350, 350")]
+        [global::System.Configuration.DefaultSettingValueAttribute("420, 510")]
         public global::System.Drawing.Size ArgosProgramDetailsFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["ArgosProgramDetailsFormSize"]));

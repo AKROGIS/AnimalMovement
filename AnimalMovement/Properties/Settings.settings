@@ -195,7 +195,7 @@
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
     <Setting Name="ArgosProgramDetailsFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">350, 350</Value>
+      <Value Profile="(Default)">420, 510</Value>
     </Setting>
     <Setting Name="ArgosProgramDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>

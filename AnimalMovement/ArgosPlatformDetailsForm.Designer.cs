@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
@@ -39,6 +40,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.DisposalDateTimePicker = new System.Windows.Forms.DateTimePicker();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // DoneCancelButton
@@ -88,13 +90,14 @@
             // 
             this.ActiveCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ActiveCheckBox.AutoSize = true;
+            this.ActiveCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.ActiveCheckBox.Checked = true;
             this.ActiveCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ActiveCheckBox.Location = new System.Drawing.Point(216, 91);
+            this.ActiveCheckBox.Location = new System.Drawing.Point(138, 91);
             this.ActiveCheckBox.Name = "ActiveCheckBox";
-            this.ActiveCheckBox.Size = new System.Drawing.Size(56, 17);
+            this.ActiveCheckBox.Size = new System.Drawing.Size(134, 17);
             this.ActiveCheckBox.TabIndex = 25;
-            this.ActiveCheckBox.Text = "Active";
+            this.ActiveCheckBox.Text = "Download this Platform";
             this.ActiveCheckBox.UseVisualStyleBackColor = true;
             // 
             // ArgosProgramComboBox
@@ -160,6 +163,10 @@
             this.DisposalDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
             // 
+            // toolTip1
+            // 
+            this.toolTip1.ToolTipTitle = "Download state of the program  governs unless it is not set.";
+            // 
             // ArgosPlatformDetailsForm
             // 
             this.AcceptButton = this.DoneCancelButton;
@@ -202,5 +209,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker DisposalDateTimePicker;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

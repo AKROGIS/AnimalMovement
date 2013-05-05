@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
+using Telonics;
 
 namespace AnimalMovement
 {
@@ -55,6 +56,7 @@ namespace AnimalMovement
             else
                 ActiveCheckBox.CheckState = CheckState.Indeterminate;
             NotesTextBox.Text = Program.Notes;
+            SetUpPlatformsDataGridView();
             EnableControls();
         }
 
@@ -88,6 +90,7 @@ namespace AnimalMovement
             EndDateTimePicker.Enabled = IsEditMode;
             ActiveCheckBox.Enabled = IsEditMode;
             NotesTextBox.Enabled = IsEditMode;
+            EnablePlatformControls();
         }
 
         private void EnableEditSaveButton()
@@ -233,5 +236,121 @@ namespace AnimalMovement
         }
 
         #endregion
+
+        #region Platforms
+
+        private void SetUpPlatformsDataGridView()
+        {
+            PlatformsGridView.DataSource = Program.ArgosPlatforms;
+            if (PlatformsGridView.Columns["ProgramId"] != null)
+                PlatformsGridView.Columns["ProgramId"].Visible = false;
+            if (PlatformsGridView.Columns["ArgosProgram"] != null)
+                PlatformsGridView.Columns["ArgosProgram"].Visible = false;
+        }
+
+        private void EnablePlatformControls()
+        {
+            AddPlatformButton.Enabled = IsEditor && !IsEditMode;
+            DeletePlatformButton.Enabled = IsEditor && !IsEditMode &&
+                                           PlatformsGridView.SelectedRows.Cast<DataGridViewRow>()
+                                                            .Any(row =>
+                                                                 !((ArgosPlatform) row.DataBoundItem).ArgosDeployments
+                                                                                                     .Any());
+            InfoPlatformButton.Enabled = !IsEditMode && PlatformsGridView.SelectedRows.Count == 1;
+            AddMissingPlatformsButton.Enabled = IsEditor && !IsEditMode;
+        }
+
+        private void PlatformDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpForm();
+        }
+
+        private void AddPlatformButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddArgosPlatformForm(Program);
+            form.DatabaseChanged += (o, x) => PlatformDataChanged();
+            form.Show(this);
+        }
+
+        private void DeletePlatformButton_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in PlatformsGridView.SelectedRows)
+            {
+                var platform = (ArgosPlatform)row.DataBoundItem;
+                if (!platform.ArgosDeployments.Any())
+                    Database.ArgosPlatforms.DeleteOnSubmit(platform);
+            }
+            if (SubmitChanges())
+                PlatformDataChanged();
+        }
+
+        private void InfoPlatformButton_Click(object sender, EventArgs e)
+        {
+            var platform = (ArgosPlatform)PlatformsGridView.SelectedRows[0].DataBoundItem;
+            var form = new ArgosPlatformDetailsForm(platform);
+            form.DatabaseChanged += (o, x) => PlatformDataChanged();
+            form.Show(this);
+        }
+
+        private void PlatformsGridView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnablePlatformControls();
+        }
+
+        private void PlatformsGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                InfoPlatformButton_Click(sender, e);
+        }
+
+        private void AddMissingPlatformsButton_Click(object sender, EventArgs e)
+        {
+            AddMissingPlatformsButton.Enabled = false;
+            AddMissingPlatformsButton.Text = "Working...";
+            Cursor.Current = Cursors.WaitCursor;
+            Application.DoEvents();
+            try
+            {
+                string error;
+                var programPlatforms = ArgosWebSite.GetPlatformList(Program.UserName, Program.Password, out error);
+                var AddedNewPlatform = false;
+                if (error != null)
+                {
+                    MessageBox.Show("Argos Web Server returned an error" + Environment.NewLine + error, "Server Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                foreach (var item in programPlatforms)
+                {
+                    if (item.Item1 == Program.ProgramId)
+                    {
+                        if (Program.ArgosPlatforms.All(p => p.PlatformId != item.Item2))
+                        {
+                            var platform = new ArgosPlatform
+                            {
+                                ArgosProgram = Program,
+                                PlatformId = item.Item2,
+                                Active = true
+                            };
+                            Database.ArgosPlatforms.InsertOnSubmit(platform);
+                            AddedNewPlatform = true;
+                        }
+                    }
+                }
+                if (AddedNewPlatform && SubmitChanges())
+                    PlatformDataChanged();
+            }
+            finally
+            {
+                AddMissingPlatformsButton.Enabled = true;
+                AddMissingPlatformsButton.Text = "Add Missing Platforms";
+                Cursor.Current = Cursors.Default;
+            }
+        }
+
+        #endregion
+
     }
 }

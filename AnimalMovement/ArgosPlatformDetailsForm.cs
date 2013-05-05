@@ -73,7 +73,7 @@ namespace AnimalMovement
             IsEditMode = EditSaveButton.Text == "Save";
             ArgosProgramComboBox.Enabled = IsEditMode;
             DisposalDateTimePicker.Enabled = IsEditMode;
-            ActiveCheckBox.Enabled = IsEditMode;
+            ActiveCheckBox.Enabled = IsEditMode && Platform.ArgosProgram.Active == null;
             NotesTextBox.Enabled = IsEditMode;
         }
 

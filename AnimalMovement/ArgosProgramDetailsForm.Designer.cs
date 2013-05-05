@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label8 = new System.Windows.Forms.Label();
             this.StartDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.label7 = new System.Windows.Forms.Label();
@@ -47,6 +48,13 @@
             this.label3 = new System.Windows.Forms.Label();
             this.EndDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.PasswordMaskedTextBox = new System.Windows.Forms.MaskedTextBox();
+            this.AddMissingPlatformsButton = new System.Windows.Forms.Button();
+            this.PlatformsGridView = new System.Windows.Forms.DataGridView();
+            this.DeletePlatformButton = new System.Windows.Forms.Button();
+            this.InfoPlatformButton = new System.Windows.Forms.Button();
+            this.AddPlatformButton = new System.Windows.Forms.Button();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            ((System.ComponentModel.ISupportInitialize)(this.PlatformsGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // label8
@@ -68,7 +76,7 @@
             this.StartDateTimePicker.Location = new System.Drawing.Point(119, 143);
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.ShowCheckBox = true;
-            this.StartDateTimePicker.Size = new System.Drawing.Size(203, 20);
+            this.StartDateTimePicker.Size = new System.Drawing.Size(273, 20);
             this.StartDateTimePicker.TabIndex = 55;
             this.StartDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
@@ -88,7 +96,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.UserNameTextBox.Location = new System.Drawing.Point(119, 91);
             this.UserNameTextBox.Name = "UserNameTextBox";
-            this.UserNameTextBox.Size = new System.Drawing.Size(203, 20);
+            this.UserNameTextBox.Size = new System.Drawing.Size(273, 20);
             this.UserNameTextBox.TabIndex = 52;
             this.UserNameTextBox.TextChanged += new System.EventHandler(this.UserNameTextBox_TextChanged);
             // 
@@ -107,7 +115,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ProgramNameTextBox.Location = new System.Drawing.Point(119, 65);
             this.ProgramNameTextBox.Name = "ProgramNameTextBox";
-            this.ProgramNameTextBox.Size = new System.Drawing.Size(203, 20);
+            this.ProgramNameTextBox.Size = new System.Drawing.Size(273, 20);
             this.ProgramNameTextBox.TabIndex = 50;
             // 
             // label5
@@ -123,7 +131,7 @@
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(12, 281);
+            this.DoneCancelButton.Location = new System.Drawing.Point(12, 441);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 48;
@@ -134,7 +142,7 @@
             // EditSaveButton
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.EditSaveButton.Location = new System.Drawing.Point(247, 281);
+            this.EditSaveButton.Location = new System.Drawing.Point(317, 441);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 47;
@@ -153,27 +161,28 @@
             // 
             // NotesTextBox
             // 
-            this.NotesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.NotesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.NotesTextBox.Location = new System.Drawing.Point(12, 215);
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
-            this.NotesTextBox.Size = new System.Drawing.Size(310, 60);
+            this.NotesTextBox.Size = new System.Drawing.Size(380, 53);
             this.NotesTextBox.TabIndex = 45;
             // 
             // ActiveCheckBox
             // 
             this.ActiveCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ActiveCheckBox.AutoSize = true;
+            this.ActiveCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.ActiveCheckBox.Checked = true;
             this.ActiveCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ActiveCheckBox.Location = new System.Drawing.Point(266, 195);
+            this.ActiveCheckBox.Location = new System.Drawing.Point(258, 195);
             this.ActiveCheckBox.Name = "ActiveCheckBox";
-            this.ActiveCheckBox.Size = new System.Drawing.Size(56, 17);
+            this.ActiveCheckBox.Size = new System.Drawing.Size(134, 17);
             this.ActiveCheckBox.TabIndex = 44;
-            this.ActiveCheckBox.Text = "Active";
+            this.ActiveCheckBox.Text = "Download this program";
             this.ActiveCheckBox.ThreeState = true;
+            this.toolTip1.SetToolTip(this.ActiveCheckBox, "Yes, No, or defer to the individual platforms");
             this.ActiveCheckBox.UseVisualStyleBackColor = true;
             // 
             // OwnerComboBox
@@ -184,7 +193,7 @@
             this.OwnerComboBox.FormattingEnabled = true;
             this.OwnerComboBox.Location = new System.Drawing.Point(119, 12);
             this.OwnerComboBox.Name = "OwnerComboBox";
-            this.OwnerComboBox.Size = new System.Drawing.Size(203, 21);
+            this.OwnerComboBox.Size = new System.Drawing.Size(273, 21);
             this.OwnerComboBox.TabIndex = 43;
             this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
@@ -204,7 +213,7 @@
             this.ProgramIdTextBox.Enabled = false;
             this.ProgramIdTextBox.Location = new System.Drawing.Point(119, 39);
             this.ProgramIdTextBox.Name = "ProgramIdTextBox";
-            this.ProgramIdTextBox.Size = new System.Drawing.Size(203, 20);
+            this.ProgramIdTextBox.Size = new System.Drawing.Size(273, 20);
             this.ProgramIdTextBox.TabIndex = 41;
             // 
             // label1
@@ -235,18 +244,90 @@
             this.EndDateTimePicker.Location = new System.Drawing.Point(119, 169);
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.ShowCheckBox = true;
-            this.EndDateTimePicker.Size = new System.Drawing.Size(203, 20);
+            this.EndDateTimePicker.Size = new System.Drawing.Size(273, 20);
             this.EndDateTimePicker.TabIndex = 38;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
             // PasswordMaskedTextBox
             // 
+            this.PasswordMaskedTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.PasswordMaskedTextBox.Location = new System.Drawing.Point(119, 117);
             this.PasswordMaskedTextBox.Name = "PasswordMaskedTextBox";
-            this.PasswordMaskedTextBox.Size = new System.Drawing.Size(203, 20);
+            this.PasswordMaskedTextBox.Size = new System.Drawing.Size(273, 20);
             this.PasswordMaskedTextBox.TabIndex = 57;
             this.PasswordMaskedTextBox.MaskInputRejected += new System.Windows.Forms.MaskInputRejectedEventHandler(this.PasswordMaskedTextBox_MaskInputRejected);
+            // 
+            // AddMissingPlatformsButton
+            // 
+            this.AddMissingPlatformsButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.AddMissingPlatformsButton.Location = new System.Drawing.Point(141, 441);
+            this.AddMissingPlatformsButton.Name = "AddMissingPlatformsButton";
+            this.AddMissingPlatformsButton.Size = new System.Drawing.Size(123, 23);
+            this.AddMissingPlatformsButton.TabIndex = 58;
+            this.AddMissingPlatformsButton.Text = "Add Missing Platforms";
+            this.AddMissingPlatformsButton.UseVisualStyleBackColor = true;
+            this.AddMissingPlatformsButton.Click += new System.EventHandler(this.AddMissingPlatformsButton_Click);
+            // 
+            // PlatformsGridView
+            // 
+            this.PlatformsGridView.AllowUserToAddRows = false;
+            this.PlatformsGridView.AllowUserToDeleteRows = false;
+            this.PlatformsGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.PlatformsGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.PlatformsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.PlatformsGridView.Location = new System.Drawing.Point(12, 274);
+            this.PlatformsGridView.Name = "PlatformsGridView";
+            this.PlatformsGridView.ReadOnly = true;
+            this.PlatformsGridView.RowHeadersVisible = false;
+            this.PlatformsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.PlatformsGridView.Size = new System.Drawing.Size(380, 131);
+            this.PlatformsGridView.TabIndex = 59;
+            this.PlatformsGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.PlatformsGridView_CellDoubleClick);
+            this.PlatformsGridView.SelectionChanged += new System.EventHandler(this.PlatformsGridView_SelectedIndexChanged);
+            // 
+            // DeletePlatformButton
+            // 
+            this.DeletePlatformButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeletePlatformButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DeletePlatformButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeletePlatformButton.Location = new System.Drawing.Point(45, 411);
+            this.DeletePlatformButton.Name = "DeletePlatformButton";
+            this.DeletePlatformButton.Size = new System.Drawing.Size(24, 24);
+            this.DeletePlatformButton.TabIndex = 61;
+            this.DeletePlatformButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.DeletePlatformButton.UseVisualStyleBackColor = true;
+            this.DeletePlatformButton.Click += new System.EventHandler(this.DeletePlatformButton_Click);
+            // 
+            // InfoPlatformButton
+            // 
+            this.InfoPlatformButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoPlatformButton.FlatAppearance.BorderSize = 0;
+            this.InfoPlatformButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoPlatformButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.InfoPlatformButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoPlatformButton.Location = new System.Drawing.Point(70, 411);
+            this.InfoPlatformButton.Name = "InfoPlatformButton";
+            this.InfoPlatformButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoPlatformButton.TabIndex = 62;
+            this.InfoPlatformButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.InfoPlatformButton.UseVisualStyleBackColor = true;
+            this.InfoPlatformButton.Click += new System.EventHandler(this.InfoPlatformButton_Click);
+            // 
+            // AddPlatformButton
+            // 
+            this.AddPlatformButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddPlatformButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.AddPlatformButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddPlatformButton.Location = new System.Drawing.Point(15, 411);
+            this.AddPlatformButton.Name = "AddPlatformButton";
+            this.AddPlatformButton.Size = new System.Drawing.Size(24, 24);
+            this.AddPlatformButton.TabIndex = 60;
+            this.AddPlatformButton.UseVisualStyleBackColor = true;
+            this.AddPlatformButton.Click += new System.EventHandler(this.AddPlatformButton_Click);
             // 
             // ArgosProgramDetailsForm
             // 
@@ -254,7 +335,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.DoneCancelButton;
-            this.ClientSize = new System.Drawing.Size(334, 316);
+            this.ClientSize = new System.Drawing.Size(404, 476);
+            this.Controls.Add(this.DeletePlatformButton);
+            this.Controls.Add(this.InfoPlatformButton);
+            this.Controls.Add(this.AddPlatformButton);
+            this.Controls.Add(this.PlatformsGridView);
+            this.Controls.Add(this.AddMissingPlatformsButton);
             this.Controls.Add(this.PasswordMaskedTextBox);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.StartDateTimePicker);
@@ -277,9 +363,10 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(300, 335);
+            this.MinimumSize = new System.Drawing.Size(325, 510);
             this.Name = "ArgosProgramDetailsForm";
             this.Text = "Argos Program Details";
+            ((System.ComponentModel.ISupportInitialize)(this.PlatformsGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -306,5 +393,11 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker EndDateTimePicker;
         private System.Windows.Forms.MaskedTextBox PasswordMaskedTextBox;
+        private System.Windows.Forms.Button AddMissingPlatformsButton;
+        private System.Windows.Forms.DataGridView PlatformsGridView;
+        private System.Windows.Forms.Button DeletePlatformButton;
+        private System.Windows.Forms.Button InfoPlatformButton;
+        private System.Windows.Forms.Button AddPlatformButton;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

@@ -115,6 +115,8 @@ namespace Telonics
                 return null;
             var request = String.Format(ArgosPlatformListSoapRequest, username, password);
             var response = GetArgosWebResult(request, out error);
+            if (error != null)
+                return new Tuple<string, string>[0];
             var xml = XDocument.Load(new StringReader(response.ToString()));
             var list = new List<Tuple<string, string>>();
             foreach (var program in xml.Descendants("program"))
@@ -171,9 +173,9 @@ namespace Telonics
                 string response = GetResponse(req);
                 if (String.IsNullOrEmpty(response))
                     error = "No response";
-                else if (response == "<errors><error code=\"4\">no data</error></errors>")
+                else if (response.Contains("<errors><error code=\"4\">no data</error></errors>"))
                     error = "No data or unknown id";
-                else if (response == "<errors><error code=\"3\">authentification error</error></errors>")
+                else if (response.Contains("<errors><error code=\"3\">authentification error</error></errors>"))
                     error = "Authentication Error: bad username or password";
                 else if (response.Contains("<errors>"))
                     error = "Unknown error: " + response;
