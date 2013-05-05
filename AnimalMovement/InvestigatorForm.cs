@@ -399,7 +399,7 @@ namespace AnimalMovement
         private void SetUpArgosTab()
         {
             LoadProgramList();
-            //The other lists will be selected when a program is selected
+            //The other lists will be populated when a program is selected
             EnableArgosControls();
         }
 
@@ -421,8 +421,6 @@ namespace AnimalMovement
 
             DownloadPlatformButton.Enabled = false;
             DownloadProgramButton.Enabled = false;
-            ChangePlatformStatusButton.Enabled = false;
-            ChangeProgramStatusButton.Enabled = false;
             AddMissingPlatformsButton.Enabled = false;
         }
 
@@ -451,7 +449,7 @@ namespace AnimalMovement
                         select new ProgramListItem
                         {
                             Program = program,
-                            Name = program.ToString(),
+                            Name = GetProgramName(program),
                             CanDelete = !program.ArgosPlatforms.Any()
                         };
             var sortedList = query.OrderBy(p => p.Program.Active.HasValue ? (p.Program.Active.Value ? 0 : 2) : 1).ThenBy(p => p.Name).ToList();
@@ -462,11 +460,20 @@ namespace AnimalMovement
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (!sortedList[i].Program.Active.HasValue)
-                    CollarsListBox.SetItemColor(i, Color.DarkGray);
+                    ProgramsListBox.SetItemColor(i, Color.DimGray);
                 if (sortedList[i].Program.Active.HasValue && !sortedList[i].Program.Active.Value)
-                    CollarsListBox.SetItemColor(i, Color.LightGray);
+                    ProgramsListBox.SetItemColor(i, Color.DarkGray);
             }
         }
+
+        private string GetProgramName(ArgosProgram program)
+        {
+            var active = program.Active.HasValue
+                             ? (program.Active.Value ? "Active download" : "Inactive download")
+                             : "Download status defered to platforms";
+            return program + " (" + active + ")";
+        }
+
 
         private void AddProgramButton_Click(object sender, EventArgs e)
         {
@@ -518,7 +525,7 @@ namespace AnimalMovement
                         select new PlatformListItem
                         {
                             Platform = platform,
-                            Name = platform.PlatformId,
+                            Name = GetPlatformName(platform),
                             CanDelete = !platform.ArgosDeployments.Any()
                         };
             var sortedList = query.OrderBy(p => p.Platform.Active ? 0 : 1).ThenBy(p => p.Name).ToList();
@@ -528,9 +535,19 @@ namespace AnimalMovement
             PlatformsListBox.ClearItemColors();
             for (int i = 0; i < sortedList.Count; i++)
             {
-                if (!sortedList[i].Platform.Active)
-                    CollarsListBox.SetItemColor(i, Color.DarkGray);
+                var programStatus = sortedList[i].Platform.ArgosProgram.Active;
+                var platformStatus = sortedList[i].Platform.Active;
+                if ((programStatus.HasValue && !programStatus.Value) || (!programStatus.HasValue && !platformStatus))
+                    PlatformsListBox.SetItemColor(i, Color.DarkGray);
             }
+        }
+
+        private string GetPlatformName(ArgosPlatform platform)
+        {
+            var active = platform.ArgosProgram.Active.HasValue
+                             ? ""
+                             : (platform.Active ? " (Active)" : " (Inactive)");
+            return platform.PlatformId + active;
         }
 
         private void AddPlatformButton_Click(object sender, EventArgs e)

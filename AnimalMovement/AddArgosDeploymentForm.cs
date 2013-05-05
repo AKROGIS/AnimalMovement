@@ -45,8 +45,8 @@ namespace AnimalMovement
         {
             LoadCollarComboBox();
             LoadPlatformComboBox();
-            //defer datepickers until after load
-            EnableFormControls();
+            //Defer setup of DateTimePickers until onload (setting them in the form ctor doesn't work well)
+            //Defer Enabling controls until after load so error message boxes have better context
         }
 
         private void LoadCollarComboBox()
@@ -58,10 +58,9 @@ namespace AnimalMovement
             else
             {
                 CollarComboBox.DataSource =
-                    Database.ProjectInvestigators.Where(pi => pi.Login == CurrentUser ||
-                     pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
+                    Database.Collars.Where(c => c.Manager == CurrentUser ||
+                     c.ProjectInvestigator.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
             }
-            CollarComboBox.Enabled = Collar == null;
             CollarComboBox.SelectedItem = Collar;
         }
 
@@ -77,7 +76,6 @@ namespace AnimalMovement
                     Database.ArgosPlatforms.Where(p => p.ArgosProgram.Manager == CurrentUser ||
                      p.ArgosProgram.ProjectInvestigator.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
             }
-            ArgosComboBox.Enabled = Platform == null;
             ArgosComboBox.SelectedItem = Platform;
             ArgosComboBox.DisplayMember = "PlatformId";
         }
@@ -94,15 +92,21 @@ namespace AnimalMovement
 
         private void EnableFormControls()
         {
+            ValidateEditor();
             if (!IsEditor)
             {
                 CreateButton.Enabled = false;
+                CollarComboBox.Enabled = false;
                 ArgosComboBox.Enabled = false;
                 StartDateTimePicker.Enabled = false;
                 EndDateTimePicker.Enabled = false;
                 ValidationTextBox.Text = "You do not have permission to edit this collar.";
                 return;
             }
+            CollarComboBox.Enabled = Collar == null;
+            ArgosComboBox.Enabled = Platform == null;
+            StartDateTimePicker.Enabled = true;
+            EndDateTimePicker.Enabled = true;
             ValidateForm();
         }
 
@@ -161,10 +165,12 @@ namespace AnimalMovement
 
         private string ValidateError()
         {
-            if (CollarComboBox.SelectedItem == null)
+            var collar = CollarComboBox.SelectedItem as Collar;
+            if (collar == null)
                 return "You must select a collar";
 
-            if (ArgosComboBox.SelectedItem == null)
+            var platform = ArgosComboBox.SelectedItem as ArgosPlatform;
+            if (platform == null)
                 return "You must select an Argos Id";
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MinValue;
@@ -173,17 +179,15 @@ namespace AnimalMovement
                 return "The end date must be after the start date";
 
             //A collar cannot have multiple Argos Platforms at the same time
-            if (Collar.ArgosDeployments.Any(deployment =>
+            if (collar.ArgosDeployments.Any(deployment =>
                                             DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
                                                          deployment.EndDate ?? DateTime.MaxValue, start, end)))
                 return "This collar has another Argos Id during your date range.";
             
-            //An Argos Platform cannot be on two collars at the same time.
-            //I must create a list, because it cannot translate the second lambda to SQL
-            var deployments = Database.ArgosDeployments.Where(d => d.PlatformId == (string)ArgosComboBox.SelectedItem).ToList();
-            if (deployments.Any(deployment =>
-                                DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
-                                             deployment.EndDate ?? DateTime.MaxValue, start, end)))
+            //A platform cannot be on two collars at the same time.
+            if (platform.ArgosDeployments.Any(deployment =>
+                                              DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
+                                                           deployment.EndDate ?? DateTime.MaxValue, start, end)))
                 return "Another collar is using this Argos Id during your date range.";
             return null;
         }
@@ -245,13 +249,18 @@ namespace AnimalMovement
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            ValidateEditor();
             SetUpDatePickers();
         }
 
-        private void AddArgosDeploymentForm_Load(object sender, EventArgs e)
+        protected override void OnShown(EventArgs e)
         {
+            base.OnShown(e);
             EnableFormControls();
+        }
+
+        private void CollarComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ValidateForm();
         }
 
         private void ArgosComboBox_SelectedIndexChanged(object sender, EventArgs e)

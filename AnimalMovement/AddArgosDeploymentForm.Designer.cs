@@ -46,7 +46,6 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Enabled = false;
             this.label1.Location = new System.Drawing.Point(60, 15);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(36, 13);
@@ -180,6 +179,7 @@
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(200, 21);
             this.CollarComboBox.TabIndex = 13;
+            this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // AddArgosDeploymentForm
             // 
@@ -203,7 +203,6 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "AddArgosDeploymentForm";
             this.Text = "Add Argos on Collar Deployment";
-            this.Load += new System.EventHandler(this.AddArgosDeploymentForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

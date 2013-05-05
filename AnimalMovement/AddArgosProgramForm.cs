@@ -180,6 +180,7 @@ namespace AnimalMovement
             {
                 ProgramId = programId,
                 ProjectInvestigator = (ProjectInvestigator)OwnerComboBox.SelectedItem,
+                ProgramName = ProgramNameTextBox.Text.NullifyIfEmpty(),
                 UserName = UserNameTextBox.Text,
                 Password = PasswordTextBox.Text,
                 StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : (DateTime?)null,

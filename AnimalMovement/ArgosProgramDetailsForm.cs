@@ -50,9 +50,10 @@ namespace AnimalMovement
             PasswordMaskedTextBox.Text = Program.Password;
             PasswordMaskedTextBox.UseSystemPasswordChar = !IsEditor;
             //defer DateTimePickers until loaded, otherwise the default values get messed up
-            ActiveCheckBox.CheckState = CheckState.Indeterminate;
             if (Program.Active.HasValue)
                 ActiveCheckBox.Checked = Program.Active.Value;
+            else
+                ActiveCheckBox.CheckState = CheckState.Indeterminate;
             NotesTextBox.Text = Program.Notes;
             EnableControls();
         }
@@ -71,6 +72,7 @@ namespace AnimalMovement
                                                                   a => a.Assistant == CurrentUser));
             }
             OwnerComboBox.SelectedItem = Program.ProjectInvestigator;
+            OwnerComboBox.DisplayMember = "Name";
         }
 
         private void EnableControls()

@@ -58,8 +58,6 @@
             this.PlatformsListBox = new AnimalMovement.ColoredListBox();
             this.ProgramsListBox = new AnimalMovement.ColoredListBox();
             this.ArgosDeploymentsGridView = new System.Windows.Forms.DataGridView();
-            this.ChangePlatformStatusButton = new System.Windows.Forms.Button();
-            this.ChangeProgramStatusButton = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.DeleteArgosDeploymentButton = new System.Windows.Forms.Button();
             this.InfoArgosDeploymentButton = new System.Windows.Forms.Button();
@@ -430,8 +428,6 @@
             this.ArgosTab.Controls.Add(this.PlatformsListBox);
             this.ArgosTab.Controls.Add(this.ProgramsListBox);
             this.ArgosTab.Controls.Add(this.ArgosDeploymentsGridView);
-            this.ArgosTab.Controls.Add(this.ChangePlatformStatusButton);
-            this.ArgosTab.Controls.Add(this.ChangeProgramStatusButton);
             this.ArgosTab.Controls.Add(this.label7);
             this.ArgosTab.Controls.Add(this.DeleteArgosDeploymentButton);
             this.ArgosTab.Controls.Add(this.InfoArgosDeploymentButton);
@@ -479,6 +475,7 @@
             this.PlatformsListBox.Size = new System.Drawing.Size(183, 154);
             this.PlatformsListBox.TabIndex = 27;
             this.PlatformsListBox.SelectedIndexChanged += new System.EventHandler(this.PlatformsListBox_SelectedIndexChanged);
+            this.PlatformsListBox.DoubleClick += new System.EventHandler(this.InfoPlatformButton_Click);
             // 
             // ProgramsListBox
             // 
@@ -493,6 +490,7 @@
             this.ProgramsListBox.Size = new System.Drawing.Size(341, 73);
             this.ProgramsListBox.TabIndex = 26;
             this.ProgramsListBox.SelectedIndexChanged += new System.EventHandler(this.ProgramsListBox_SelectedIndexChanged);
+            this.ProgramsListBox.DoubleClick += new System.EventHandler(this.InfoProgramButton_Click);
             // 
             // ArgosDeploymentsGridView
             // 
@@ -512,25 +510,6 @@
             this.ArgosDeploymentsGridView.TabIndex = 25;
             this.ArgosDeploymentsGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ArgosDataGridView_CellDoubleClick);
             this.ArgosDeploymentsGridView.SelectionChanged += new System.EventHandler(this.ArgosDataGridView_SelectionChanged);
-            // 
-            // ChangePlatformStatusButton
-            // 
-            this.ChangePlatformStatusButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.ChangePlatformStatusButton.Location = new System.Drawing.Point(88, 319);
-            this.ChangePlatformStatusButton.Name = "ChangePlatformStatusButton";
-            this.ChangePlatformStatusButton.Size = new System.Drawing.Size(98, 23);
-            this.ChangePlatformStatusButton.TabIndex = 24;
-            this.ChangePlatformStatusButton.Text = "DL On/Off";
-            this.ChangePlatformStatusButton.UseVisualStyleBackColor = true;
-            // 
-            // ChangeProgramStatusButton
-            // 
-            this.ChangeProgramStatusButton.Location = new System.Drawing.Point(88, 98);
-            this.ChangeProgramStatusButton.Name = "ChangeProgramStatusButton";
-            this.ChangeProgramStatusButton.Size = new System.Drawing.Size(115, 23);
-            this.ChangeProgramStatusButton.TabIndex = 23;
-            this.ChangeProgramStatusButton.Text = "DL On/Off/Varies";
-            this.ChangeProgramStatusButton.UseVisualStyleBackColor = true;
             // 
             // label7
             // 
@@ -1025,8 +1004,6 @@
         private System.Windows.Forms.CheckBox ShowEmailFilesCheckBox;
         private System.Windows.Forms.TabPage ArgosTab;
         private System.Windows.Forms.DataGridView ArgosDeploymentsGridView;
-        private System.Windows.Forms.Button ChangePlatformStatusButton;
-        private System.Windows.Forms.Button ChangeProgramStatusButton;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button DeleteArgosDeploymentButton;
         private System.Windows.Forms.Button InfoArgosDeploymentButton;
