@@ -5,65 +5,80 @@ using System.Windows.Forms;
 using DataModel;
 using Telonics;
 
-//TODO - When loading multiple files, do not cancel remainder of files if you skip a file
-//TODO - Reload project Investigator form after add parameter file adds a collar
-//TODO - Reload project Investigator form after add parameter file loads multiple files, but one has a problem
-//TODO - add warning about PPF file types not being used and they are binary
-
 namespace AnimalMovement
 {
     internal partial class AddCollarParameterFileForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
-        private Collar Collar { get; set; }
+        private ProjectInvestigator Investigator { get; set; }
+        private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
         private Byte[] _fileContents;
         private Byte[] _fileHash;
 
-        internal AddCollarParameterFileForm(Collar collar)
-        {
-            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
-            Collar = collar;
-            SetupForm();
-        }
-
-        private void SetupForm()
+        internal AddCollarParameterFileForm(ProjectInvestigator investigator = null)
         {
             InitializeComponent();
             RestoreWindow();
+            CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
+            Investigator = investigator;
             LoadDataContext();
-            EnableUpload();
+            SetUpForm();
+        }
+
+        private void SetUpForm()
+        {
+            SetupOwnerList();
+            SetupFormatList();
+            SetupStatusList();
+            EnableForm();
         }
 
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
-
-            if (Database == null || CurrentUser == null)
-            {
-                MessageBox.Show("Insufficent information to initialize form.", "Form Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
             //Database.Log = Console.Out;
-            SetupOwnerList();
-            SetupFormatList();
-            SetupCollarList();
-            SetupStatusList();
-            //FIXME - determine if current user has permission
+            //Investigator is in a different DataContext, get one in this DataContext
+            if (Investigator != null)
+                Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            if (Investigator != null)
+            {
+                var functions = new AnimalMovementFunctions();
+                IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
+                if (!IsEditor)
+                    MessageBox.Show("You do not have permission to add a file for this investigator", "Permission Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                IsEditor = OwnerComboBox.Items.Count > 0;
+                if (!IsEditor)
+                    MessageBox.Show("You do not have permission to add a file", "Permission Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void SetupOwnerList()
         {
-            //currentPi = Settings.GetDefaultParameterFileFormat();
-            var query = Database.ProjectInvestigators;
-            var owners = query.ToList();
-            OwnerComboBox.DataSource = owners;
+            //If given a Investigator, set that and lock it.
+            //else, set list to all investigator I can edit, and select null per the constructor request
+            if (Investigator != null)
+                OwnerComboBox.Items.Add(Investigator);
+            else
+            {
+                OwnerComboBox.DataSource =
+                    Database.ProjectInvestigators.Where(pi => pi.Login == CurrentUser ||
+                     pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
+            }
+            OwnerComboBox.Enabled = Investigator == null;
+            OwnerComboBox.SelectedItem = Investigator;
             OwnerComboBox.DisplayMember = "Name";
-            var owner = query.FirstOrDefault(o => o.Login == CurrentUser);
-            if (owner != null)
-                OwnerComboBox.SelectedItem = owner;
         }
 
         private void SetupFormatList()
@@ -92,31 +107,14 @@ namespace AnimalMovement
                 StatusComboBox.SelectedItem = status;
         }
 
-        private void SetupCollarList()
-        {
-            if (OwnerComboBox.SelectedItem == null)
-            {
-                CollarComboBox.DataSource = null;
-                return;
-            }
-            var owner = (ProjectInvestigator) OwnerComboBox.SelectedItem;
-            //A collar is only required with a ppf file, which means a telonics gen 3 collar.
-            //The AlternaitveID (i.e. Argos ID) is used as the identifier since the ppf files are usually named with the argos id.
-            var query = Database.ArgosDeployments.Where(d => d.Collar.ProjectInvestigator == owner && d.Collar.CollarModel == "Gen3");
-            var deployments = query.ToList();
-            CollarComboBox.DataSource = deployments;
-            CollarComboBox.DisplayMember = "PlatformId";
-        }
- 
-        private void EnableUpload()
+        private void EnableForm()
         {
             UploadButton.Enabled = OwnerComboBox.SelectedItem != null
                                    && !string.IsNullOrEmpty(FileNameTextBox.Text) 
-                                   && FormatComboBox.SelectedItem != null
-                                   && (((LookupCollarParameterFileFormat)FormatComboBox.SelectedItem).Code != 'B'
-                                       || CollarComboBox.SelectedItem != null);
+                                   && FormatComboBox.SelectedItem != null;
+            CreateCollarsCheckBox.Enabled = CreateParametersCheckBox.Enabled && CreateParametersCheckBox.Checked;
+            IgnoreSuffixCheckBox.Enabled = CreateParametersCheckBox.Enabled && CreateParametersCheckBox.Checked;
         }
-
 
         private void UploadButton_Click(object sender, EventArgs e)
         {
@@ -142,7 +140,7 @@ namespace AnimalMovement
                     }
                     break;
                 case 'B':
-                    if (UploadPpfFile(FileNameTextBox.Text))
+                    if (UploadPpfFiles(FileNameTextBox.Text))
                     {
                         OnDatabaseChanged();
                         Cursor.Current = Cursors.Default;
@@ -160,9 +158,11 @@ namespace AnimalMovement
             }
         }
 
+
         private bool UploadTpfFiles(string files)
         {
-            return files.Split(';').All(UploadTpfFile);
+            //return true if any file is successfully uploaded
+            return files.Split(';').Aggregate(false, (current, file) => current || UploadTpfFile(file));
         }
 
         private bool UploadTpfFile(string file)
@@ -172,66 +172,24 @@ namespace AnimalMovement
             CollarParameterFile paramFile = UploadParameterFile(owner, format, file);
             if (paramFile == null)
                 return false;
-            var tpfFile = new TpfFile(file);
-            foreach (TpfCollar tpfCollar in tpfFile.GetCollars())
-            {
-                TpfCollar collar1 = tpfCollar;
-                var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == collar1.Ctn);
-                if (collar == null)
-                {
-                    string msg = String.Format(
-                        "The file: {3}\n describes a collar (CTN: {0}, Argos: {1}, Frequency: {2})\n" +
-                        " which is not in the database.  Do you want to add this collar to the database?", collar1.Ctn, collar1.ArgosId,
-                        collar1.Frequency, file);
-                    DialogResult answer = MessageBox.Show(msg, "Add Collar?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (answer == DialogResult.Yes)
-                    {
-                        collar = AddTpfCollar(collar1, owner);
-                        if (collar == null)
-                            continue;
-                    }
-                    else
-                        continue;
-                }
-                if (collar.ArgosDeployments.All(d => d.PlatformId != collar1.ArgosId) || collar.Frequency != collar1.Frequency)
-                {
-                    string msg = String.Format(
-                        "The database record for collar (CTN: {0})\n" +
-                        "does not match the information in the TPF file.({1}\n" +
-                        "Database Argos ID: {2}\n" + "TPF file Argos ID: {3}\n" +
-                        "Database Frequency: {4}\n" + "TPF file Frequency: {5}\n" +
-                        "This collar is being skipped.", collar1.Ctn, file,
-                        String.Join(", ", collar.ArgosDeployments.Select(d => d.PlatformId)),
-                        collar1.ArgosId, collar.Frequency, collar1.Frequency);
-                    MessageBox.Show(msg, "Consistancy Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    continue;
-                }
-                if (!AddCollarParameters(collar, paramFile, collar1.TimeStamp))
-                {
-                    string msg = String.Format(
-                        "The collar: {0} could not be associated with the file: {1}\n" +
-                        "You will need to edit the collar parameters to fix this.", collar1.Ctn, file);
-                    MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
+            if (CreateParametersCheckBox.Checked)
+                CreateParameters(file, owner, paramFile);
             return true;
+        }
+
+        private bool UploadPpfFiles(string files)
+        {
+            //return true if any file is successfully uploaded
+            return files.Split(';').Aggregate(false, (current, file) => current || UploadPpfFile(file));
         }
 
         private bool UploadPpfFile(string file)
         {
             var owner = (ProjectInvestigator)OwnerComboBox.SelectedItem;
-            var collar = ((ArgosDeployment)CollarComboBox.SelectedItem).Collar;
             var format = (LookupCollarParameterFileFormat)FormatComboBox.SelectedItem;
             CollarParameterFile paramFile = UploadParameterFile(owner, format, file);
             if (paramFile == null)
                 return false;
-            if (!AddCollarParameters(collar, paramFile, null))
-            {
-                string msg =
-                    "The parameter file was added to the database, but could not be associated with the collar.\n";
-                msg = msg + "You will need to edit the parameter file details to fix this.";
-                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
             return true;
         }
 
@@ -267,8 +225,57 @@ namespace AnimalMovement
         }
 
 
+        private void CreateParameters(string file, ProjectInvestigator owner, CollarParameterFile paramFile)
+        {
+            var tpfFile = new TpfFile(file);
+            foreach (TpfCollar tpfCollar in tpfFile.GetCollars())
+            {
+                TpfCollar collar1 = tpfCollar;
+                var collar =
+                    Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == collar1.Ctn);
+                if (collar == null)
+                {
+                    string msg = String.Format(
+                        "The file: {3}\n describes a collar (CTN: {0}, Argos: {1}, Frequency: {2})\n" +
+                        " which is not in the database.  Do you want to add this collar to the database?", collar1.Ctn,
+                        collar1.ArgosId,
+                        collar1.Frequency, file);
+                    DialogResult answer = MessageBox.Show(msg, "Add Collar?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (answer == DialogResult.Yes)
+                    {
+                        collar = AddTpfCollar(collar1, owner);
+                        if (collar == null)
+                            continue;
+                    }
+                    else
+                        continue;
+                }
+                if (collar.ArgosDeployments.All(d => d.PlatformId != collar1.ArgosId) || collar.Frequency != collar1.Frequency)
+                {
+                    string msg = String.Format(
+                        "The database record for collar (CTN: {0})\n" +
+                        "does not match the information in the TPF file.({1}\n" +
+                        "Database Argos ID: {2}\n" + "TPF file Argos ID: {3}\n" +
+                        "Database Frequency: {4}\n" + "TPF file Frequency: {5}\n" +
+                        "This collar is being skipped.", collar1.Ctn, file,
+                        String.Join(", ", collar.ArgosDeployments.Select(d => d.PlatformId)),
+                        collar1.ArgosId, collar.Frequency, collar1.Frequency);
+                    MessageBox.Show(msg, "Consistancy Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    continue;
+                }
+                if (!AddCollarParameters(collar, paramFile, collar1.TimeStamp))
+                {
+                    string msg = String.Format(
+                        "The collar: {0} could not be associated with the file: {1}\n" +
+                        "You will need to edit the collar parameters to fix this.", collar1.Ctn, file);
+                    MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
         private Collar AddTpfCollar(TpfCollar tpfCollar, ProjectInvestigator owner)
         {
+            //TODO - When loading multiple files, do not cancel remainder of files if you skip a file
             //FIXME - launch add collar form with defaults
             DisposeOfPreviousVersionOfCollar(tpfCollar);
             var collar = new Collar
@@ -399,60 +406,62 @@ namespace AnimalMovement
 
         private void FileNameTextBox_TextChanged(object sender, EventArgs e)
         {
-            EnableUpload();
+            EnableForm();
         }
 
         private void OwnerComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            SetupCollarList();
-            EnableUpload();
+            EnableForm();
         }
 
         private void FormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (FormatComboBox.SelectedItem != null)
+            var format = FormatComboBox.SelectedItem as LookupCollarParameterFileFormat;
+            if (format == null)
+                return;
+            switch (format.Code)
             {
-                var format = (LookupCollarParameterFileFormat)FormatComboBox.SelectedItem;
-                switch (format.Code)
-                {
                     // Keep this current with changes to LookupCollarParameterFileFormats table
-                    case 'A':
-                        Settings.SetDefaultParameterFileFormat(format.Code);
-                        SetupForTpfFile();
-                        EnableUpload();
-                        break;
-                    case 'B':
-                        Settings.SetDefaultParameterFileFormat(format.Code);
-                        SetupForPpfFile();
-                        EnableUpload();
-                        break;
-                    default:
-                        MessageBox.Show("Un expected parameter file format encountered", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        break;
-                }
+                case 'A':
+                    Settings.SetDefaultParameterFileFormat(format.Code);
+                    SetupForTpfFile();
+                    EnableForm();
+                    break;
+                case 'B':
+                    Settings.SetDefaultParameterFileFormat(format.Code);
+                    SetupForPpfFile();
+                    EnableForm();
+                    break;
+                default:
+                    MessageBox.Show("Un expected parameter file format encountered", "Program Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
             }
         }
 
         private void SetupForTpfFile()
         {
             FileNameTextBox.Text = String.Empty;
-            CollarComboBox.Visible = false;
-            CollarLabel.Visible = false;
             openFileDialog.DefaultExt = "tpf";
             openFileDialog.Filter = "TPF Files|*.tpf|All Files|*.*";
             openFileDialog.FilterIndex = 1;
             openFileDialog.Multiselect = true;
+            CreateParametersCheckBox.Enabled = true;
         }
 
         private void SetupForPpfFile()
         {
             FileNameTextBox.Text = String.Empty;
-            CollarComboBox.Visible = true;
-            CollarLabel.Visible = true;
             openFileDialog.DefaultExt = "*.ppf";
             openFileDialog.Filter = "PPF Files|*.ppf|All Files|*.*";
             openFileDialog.FilterIndex = 1;
-            openFileDialog.Multiselect = false;
+            openFileDialog.Multiselect = true;
+            CreateParametersCheckBox.Enabled = false;
+        }
+
+        private void CreateParametersCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            EnableForm();
         }
 
         private void OnDatabaseChanged()

@@ -303,7 +303,7 @@ namespace AnimalMovement
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
-            var form = new AddCollarParameterFileForm(Collar);
+            var form = new AddCollarParameterFileForm();
             form.DatabaseChanged += (o, args) => { OnDatabaseChanged(); LoadDataContext(); LoadDefaultFormContents(); };
             form.Show(this);
         }

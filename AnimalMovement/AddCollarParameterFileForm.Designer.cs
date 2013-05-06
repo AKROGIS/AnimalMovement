@@ -38,17 +38,18 @@
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.OwnerComboBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.CollarLabel = new System.Windows.Forms.Label();
-            this.CollarComboBox = new System.Windows.Forms.ComboBox();
             this.StatusComboBox = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.CreateParametersCheckBox = new System.Windows.Forms.CheckBox();
+            this.CreateCollarsCheckBox = new System.Windows.Forms.CheckBox();
+            this.IgnoreSuffixCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(205, 145);
+            this.cancelButton.Location = new System.Drawing.Point(116, 201);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 30;
@@ -59,7 +60,7 @@
             // UploadButton
             // 
             this.UploadButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.UploadButton.Location = new System.Drawing.Point(286, 145);
+            this.UploadButton.Location = new System.Drawing.Point(197, 201);
             this.UploadButton.Name = "UploadButton";
             this.UploadButton.Size = new System.Drawing.Size(75, 23);
             this.UploadButton.TabIndex = 31;
@@ -75,7 +76,7 @@
             this.FormatComboBox.FormattingEnabled = true;
             this.FormatComboBox.Location = new System.Drawing.Point(51, 39);
             this.FormatComboBox.Name = "FormatComboBox";
-            this.FormatComboBox.Size = new System.Drawing.Size(310, 21);
+            this.FormatComboBox.Size = new System.Drawing.Size(221, 21);
             this.FormatComboBox.TabIndex = 28;
             this.FormatComboBox.SelectedIndexChanged += new System.EventHandler(this.FormatComboBox_SelectedIndexChanged);
             // 
@@ -91,7 +92,7 @@
             // BrowseButton
             // 
             this.BrowseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.BrowseButton.Location = new System.Drawing.Point(337, 64);
+            this.BrowseButton.Location = new System.Drawing.Point(248, 64);
             this.BrowseButton.Name = "BrowseButton";
             this.BrowseButton.Size = new System.Drawing.Size(24, 23);
             this.BrowseButton.TabIndex = 26;
@@ -114,7 +115,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.FileNameTextBox.Location = new System.Drawing.Point(50, 66);
             this.FileNameTextBox.Name = "FileNameTextBox";
-            this.FileNameTextBox.Size = new System.Drawing.Size(281, 20);
+            this.FileNameTextBox.Size = new System.Drawing.Size(192, 20);
             this.FileNameTextBox.TabIndex = 25;
             this.FileNameTextBox.TextChanged += new System.EventHandler(this.FileNameTextBox_TextChanged);
             // 
@@ -130,7 +131,7 @@
             this.OwnerComboBox.FormattingEnabled = true;
             this.OwnerComboBox.Location = new System.Drawing.Point(51, 12);
             this.OwnerComboBox.Name = "OwnerComboBox";
-            this.OwnerComboBox.Size = new System.Drawing.Size(310, 21);
+            this.OwnerComboBox.Size = new System.Drawing.Size(221, 21);
             this.OwnerComboBox.TabIndex = 32;
             this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
@@ -143,28 +144,6 @@
             this.label3.TabIndex = 33;
             this.label3.Text = "Owner:";
             // 
-            // CollarLabel
-            // 
-            this.CollarLabel.AutoSize = true;
-            this.CollarLabel.Location = new System.Drawing.Point(9, 121);
-            this.CollarLabel.Name = "CollarLabel";
-            this.CollarLabel.Size = new System.Drawing.Size(36, 13);
-            this.CollarLabel.TabIndex = 35;
-            this.CollarLabel.Text = "Collar:";
-            this.CollarLabel.Visible = false;
-            // 
-            // CollarComboBox
-            // 
-            this.CollarComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.CollarComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.CollarComboBox.FormattingEnabled = true;
-            this.CollarComboBox.Location = new System.Drawing.Point(51, 118);
-            this.CollarComboBox.Name = "CollarComboBox";
-            this.CollarComboBox.Size = new System.Drawing.Size(310, 21);
-            this.CollarComboBox.TabIndex = 36;
-            this.CollarComboBox.Visible = false;
-            // 
             // StatusComboBox
             // 
             this.StatusComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -173,7 +152,7 @@
             this.StatusComboBox.FormattingEnabled = true;
             this.StatusComboBox.Location = new System.Drawing.Point(51, 91);
             this.StatusComboBox.Name = "StatusComboBox";
-            this.StatusComboBox.Size = new System.Drawing.Size(310, 21);
+            this.StatusComboBox.Size = new System.Drawing.Size(221, 21);
             this.StatusComboBox.TabIndex = 38;
             // 
             // label4
@@ -185,15 +164,54 @@
             this.label4.TabIndex = 37;
             this.label4.Text = "Status:";
             // 
+            // CreateParametersCheckBox
+            // 
+            this.CreateParametersCheckBox.AutoSize = true;
+            this.CreateParametersCheckBox.Checked = true;
+            this.CreateParametersCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.CreateParametersCheckBox.Location = new System.Drawing.Point(50, 118);
+            this.CreateParametersCheckBox.Name = "CreateParametersCheckBox";
+            this.CreateParametersCheckBox.Size = new System.Drawing.Size(179, 17);
+            this.CreateParametersCheckBox.TabIndex = 40;
+            this.CreateParametersCheckBox.Text = "Match TPF parameters to collars";
+            this.CreateParametersCheckBox.UseVisualStyleBackColor = true;
+            this.CreateParametersCheckBox.CheckedChanged += new System.EventHandler(this.CreateParametersCheckBox_CheckedChanged);
+            // 
+            // CreateCollarsCheckBox
+            // 
+            this.CreateCollarsCheckBox.AutoSize = true;
+            this.CreateCollarsCheckBox.Checked = true;
+            this.CreateCollarsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.CreateCollarsCheckBox.Location = new System.Drawing.Point(72, 141);
+            this.CreateCollarsCheckBox.Name = "CreateCollarsCheckBox";
+            this.CreateCollarsCheckBox.Size = new System.Drawing.Size(135, 17);
+            this.CreateCollarsCheckBox.TabIndex = 41;
+            this.CreateCollarsCheckBox.Text = "Create collars if missing";
+            this.CreateCollarsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // IgnoreSuffixCheckBox
+            // 
+            this.IgnoreSuffixCheckBox.AutoSize = true;
+            this.IgnoreSuffixCheckBox.Checked = true;
+            this.IgnoreSuffixCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.IgnoreSuffixCheckBox.Location = new System.Drawing.Point(72, 164);
+            this.IgnoreSuffixCheckBox.Name = "IgnoreSuffixCheckBox";
+            this.IgnoreSuffixCheckBox.Size = new System.Drawing.Size(176, 17);
+            this.IgnoreSuffixCheckBox.TabIndex = 42;
+            this.IgnoreSuffixCheckBox.Text = "Ignore suffix on CTN for CollarId";
+            this.IgnoreSuffixCheckBox.UseVisualStyleBackColor = true;
+            // 
             // AddCollarParameterFileForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(373, 180);
+            this.CancelButton = this.cancelButton;
+            this.ClientSize = new System.Drawing.Size(284, 236);
+            this.Controls.Add(this.IgnoreSuffixCheckBox);
+            this.Controls.Add(this.CreateCollarsCheckBox);
+            this.Controls.Add(this.CreateParametersCheckBox);
             this.Controls.Add(this.StatusComboBox);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.CollarComboBox);
-            this.Controls.Add(this.CollarLabel);
             this.Controls.Add(this.OwnerComboBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.cancelButton);
@@ -203,7 +221,10 @@
             this.Controls.Add(this.BrowseButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.FileNameTextBox);
-            this.MinimumSize = new System.Drawing.Size(232, 192);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(281, 260);
             this.Name = "AddCollarParameterFileForm";
             this.Text = "Upload Collar Parameters";
             this.ResumeLayout(false);
@@ -223,10 +244,11 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.ComboBox OwnerComboBox;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label CollarLabel;
-        private System.Windows.Forms.ComboBox CollarComboBox;
         private System.Windows.Forms.ComboBox StatusComboBox;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.CheckBox CreateParametersCheckBox;
+        private System.Windows.Forms.CheckBox CreateCollarsCheckBox;
+        private System.Windows.Forms.CheckBox IgnoreSuffixCheckBox;
 
     }
 }
