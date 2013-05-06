@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Windows.Forms;
@@ -27,14 +28,6 @@ namespace AnimalMovement
             SetUpForm();
         }
 
-        private void SetUpForm()
-        {
-            SetupOwnerList();
-            SetupFormatList();
-            SetupStatusList();
-            EnableForm();
-        }
-
         private void LoadDataContext()
         {
             Database = new AnimalMovementDataContext();
@@ -42,26 +35,16 @@ namespace AnimalMovement
             //Investigator is in a different DataContext, get one in this DataContext
             if (Investigator != null)
                 Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
-
         }
 
-        protected override void OnShown(EventArgs e)
+        #region SetUp Form
+
+        private void SetUpForm()
         {
-            if (Investigator != null)
-            {
-                var functions = new AnimalMovementFunctions();
-                IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
-                if (!IsEditor)
-                    MessageBox.Show("You do not have permission to add a file for this investigator", "Permission Error",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else
-            {
-                IsEditor = OwnerComboBox.Items.Count > 0;
-                if (!IsEditor)
-                    MessageBox.Show("You do not have permission to add a file", "Permission Error",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            SetupOwnerList();
+            SetupFormatList();
+            SetupStatusList();
+            EnableForm();
         }
 
         private void SetupOwnerList()
@@ -107,6 +90,28 @@ namespace AnimalMovement
                 StatusComboBox.SelectedItem = status;
         }
 
+        private void SetupForTpfFile()
+        {
+            FileNameTextBox.Text = String.Empty;
+            openFileDialog.DefaultExt = "tpf";
+            openFileDialog.Filter = "TPF Files|*.tpf|All Files|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.Multiselect = true;
+            CreateParametersCheckBox.Enabled = true;
+        }
+
+        private void SetupForPpfFile()
+        {
+            FileNameTextBox.Text = String.Empty;
+            openFileDialog.DefaultExt = "*.ppf";
+            openFileDialog.Filter = "PPF Files|*.ppf|All Files|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.Multiselect = true;
+            CreateParametersCheckBox.Enabled = false;
+        }
+
+        #endregion
+
         private void EnableForm()
         {
             UploadButton.Enabled = OwnerComboBox.SelectedItem != null
@@ -114,6 +119,56 @@ namespace AnimalMovement
                                    && FormatComboBox.SelectedItem != null;
             CreateCollarsCheckBox.Enabled = CreateParametersCheckBox.Enabled && CreateParametersCheckBox.Checked;
             IgnoreSuffixCheckBox.Enabled = CreateParametersCheckBox.Enabled && CreateParametersCheckBox.Checked;
+        }
+
+        private bool SubmitChanges()
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                Database.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                string msg = "Unable to submit changes to the database.\n" +
+                             "Error message:\n" + ex.Message;
+                MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+            return true;
+        }
+
+        private void OnDatabaseChanged()
+        {
+            EventHandler handle = DatabaseChanged;
+            if (handle != null)
+                handle(this, EventArgs.Empty);
+        }
+
+
+        #region Form Control Events
+
+        protected override void OnShown(EventArgs e)
+        {
+            if (Investigator != null)
+            {
+                var functions = new AnimalMovementFunctions();
+                IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
+                if (!IsEditor)
+                    MessageBox.Show("You do not have permission to add a file for this investigator", "Permission Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                IsEditor = OwnerComboBox.Items.Count > 0;
+                if (!IsEditor)
+                    MessageBox.Show("You do not have permission to add a file", "Permission Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void UploadButton_Click(object sender, EventArgs e)
@@ -158,6 +213,63 @@ namespace AnimalMovement
             }
         }
 
+        private void cancelButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void BrowseButton_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                FileNameTextBox.Text = string.Join(";", openFileDialog.FileNames);
+            }
+        }
+
+        private void FileNameTextBox_TextChanged(object sender, EventArgs e)
+        {
+            EnableForm();
+        }
+
+        private void CreateParametersCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            EnableForm();
+        }
+
+        private void OwnerComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableForm();
+        }
+
+        private void FormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var format = FormatComboBox.SelectedItem as LookupCollarParameterFileFormat;
+            if (format == null)
+                return;
+            switch (format.Code)
+            {
+                // Keep this current with changes to LookupCollarParameterFileFormats table
+                case 'A':
+                    Settings.SetDefaultParameterFileFormat(format.Code);
+                    SetupForTpfFile();
+                    EnableForm();
+                    break;
+                case 'B':
+                    Settings.SetDefaultParameterFileFormat(format.Code);
+                    SetupForPpfFile();
+                    EnableForm();
+                    break;
+                default:
+                    MessageBox.Show("Un expected parameter file format encountered", "Program Error",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+            }
+        }
+
+        #endregion
+
+
+        #region Upload Files
 
         private bool UploadTpfFiles(string files)
         {
@@ -224,141 +336,6 @@ namespace AnimalMovement
             return file;
         }
 
-
-        private void CreateParameters(string file, ProjectInvestigator owner, CollarParameterFile paramFile)
-        {
-            var tpfFile = new TpfFile(file);
-            foreach (TpfCollar tpfCollar in tpfFile.GetCollars())
-            {
-                TpfCollar collar1 = tpfCollar;
-                var collar =
-                    Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == collar1.Ctn);
-                if (collar == null)
-                {
-                    string msg = String.Format(
-                        "The file: {3}\n describes a collar (CTN: {0}, Argos: {1}, Frequency: {2})\n" +
-                        " which is not in the database.  Do you want to add this collar to the database?", collar1.Ctn,
-                        collar1.ArgosId,
-                        collar1.Frequency, file);
-                    DialogResult answer = MessageBox.Show(msg, "Add Collar?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (answer == DialogResult.Yes)
-                    {
-                        collar = AddTpfCollar(collar1, owner);
-                        if (collar == null)
-                            continue;
-                    }
-                    else
-                        continue;
-                }
-                if (collar.ArgosDeployments.All(d => d.PlatformId != collar1.ArgosId) || collar.Frequency != collar1.Frequency)
-                {
-                    string msg = String.Format(
-                        "The database record for collar (CTN: {0})\n" +
-                        "does not match the information in the TPF file.({1}\n" +
-                        "Database Argos ID: {2}\n" + "TPF file Argos ID: {3}\n" +
-                        "Database Frequency: {4}\n" + "TPF file Frequency: {5}\n" +
-                        "This collar is being skipped.", collar1.Ctn, file,
-                        String.Join(", ", collar.ArgosDeployments.Select(d => d.PlatformId)),
-                        collar1.ArgosId, collar.Frequency, collar1.Frequency);
-                    MessageBox.Show(msg, "Consistancy Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    continue;
-                }
-                if (!AddCollarParameters(collar, paramFile, collar1.TimeStamp))
-                {
-                    string msg = String.Format(
-                        "The collar: {0} could not be associated with the file: {1}\n" +
-                        "You will need to edit the collar parameters to fix this.", collar1.Ctn, file);
-                    MessageBox.Show(msg, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private Collar AddTpfCollar(TpfCollar tpfCollar, ProjectInvestigator owner)
-        {
-            //TODO - When loading multiple files, do not cancel remainder of files if you skip a file
-            //FIXME - launch add collar form with defaults
-            DisposeOfPreviousVersionOfCollar(tpfCollar);
-            var collar = new Collar
-            {
-                CollarManufacturer = "Telonics",
-                CollarId = tpfCollar.Ctn,
-                CollarModel = "Gen4",
-                //ArgosId = tpfCollar.ArgosId,
-                HasGps = true, //guess
-                //DisposalDate = ???,
-                //Owner = ???,
-                //Notes = ???,
-                SerialNumber = tpfCollar.Ctn.Substring(0,6),
-                Frequency = tpfCollar.Frequency,
-                Manager = owner.Login
-            };
-            Database.Collars.InsertOnSubmit(collar);
-
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                Database.Collars.DeleteOnSubmit(collar);
-                MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-            return collar;
-        }
-
-        private void DisposeOfPreviousVersionOfCollar(TpfCollar tpfCollar)
-        {
-            var conflictingCollar = Database.Collars.FirstOrDefault(c => c.ArgosDeployments.Any(d => d.PlatformId == tpfCollar.ArgosId) && c.DisposalDate == null);
-            if (conflictingCollar == null)
-                return;
-
-            string msg = String.Format(
-                "The Argos Id ({0}) for the new collar (Telonics/{1})\n" +
-                "is being used by an existing collar ({2})\n" +
-                "You cannot have two active collars with the same Argos Id.\n" +
-                "Adding the new collar will fail unless the existing collar is deactivated.\n\n"+
-                "Do you want to deactivate the existing collar?", tpfCollar.ArgosId, tpfCollar.Ctn, conflictingCollar);
-            DialogResult answer = MessageBox.Show(msg, "Deactivate Existing Collar?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (answer == DialogResult.Yes)
-            {
-                conflictingCollar.DisposalDate = tpfCollar.TimeStamp;
-                try
-                {
-                    Database.SubmitChanges();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-
-        private bool AddCollarParameters(Collar collar, CollarParameterFile paramFile, DateTime? timeStamp)
-        {
-            var collarParameters = new CollarParameter
-            {
-                Collar = collar,
-                CollarParameterFile = paramFile,
-                StartDate = timeStamp
-            };
-            Database.CollarParameters.InsertOnSubmit(collarParameters);
-
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                Database.CollarParameters.DeleteOnSubmit(collarParameters);
-                MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            return true;
-        }
-
-
         private void LoadAndHashFile(string path)
         {
             try
@@ -391,85 +368,197 @@ namespace AnimalMovement
             return result != DialogResult.Yes;
         }
 
-        private void cancelButton_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
+        #endregion
 
-        private void BrowseButton_Click(object sender, EventArgs e)
+
+        #region Create Parameters
+
+        private void CreateParameters(string file, ProjectInvestigator owner, CollarParameterFile paramFile)
         {
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            var tpfFile = new TpfFile(file);
+            foreach (TpfCollar tpfCollar in tpfFile.GetCollars())
             {
-                FileNameTextBox.Text = string.Join(";", openFileDialog.FileNames);
+                if (IgnoreSuffixCheckBox.Checked && tpfCollar.Ctn.Length > 6)
+                    tpfCollar.Ctn = tpfCollar.Ctn.Substring(0, 6);
+                //Does this collar exist?
+                var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" &&
+                                                                  c.CollarId == tpfCollar.Ctn);
+                if (collar == null && !CreateCollarsCheckBox.Checked)
+                    continue;
+                if (collar == null)
+                {
+                    collar = CreateTpfCollar(owner, tpfCollar.Ctn, tpfCollar.Frequency);
+                    if (collar == null)
+                        continue;
+                }
+                //Does this Argos platform exist?
+                var fileHasArgos = !String.IsNullOrEmpty(tpfCollar.ArgosId) &&
+                                   !tpfCollar.ArgosId.Trim().Normalize().Equals("?", StringComparison.OrdinalIgnoreCase);
+                if (fileHasArgos)
+                {
+                    var platform = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == tpfCollar.ArgosId);
+                    if (platform == null && CreateCollarsCheckBox.Checked)
+                        platform = CreatePlatform(tpfCollar.ArgosId);
+                    if (platform != null)
+                        //If not paired, then try to parit the collar and platform.  If it fails, or the the dates are wrong, they can correct that later
+                        if (!Database.ArgosDeployments.Any(d => d.Collar == collar && d.ArgosPlatform == platform))
+                            CreateDeployment(collar, platform, tpfCollar.TimeStamp);
+                }
+                CreateParameter(collar, paramFile, tpfCollar.TimeStamp);
+                SubmitChanges(); //We do this now, because we do not want one big tranaction. - a failure here should not impact other parameters or the file upload.
             }
         }
 
-        private void FileNameTextBox_TextChanged(object sender, EventArgs e)
+        private Collar CreateTpfCollar(ProjectInvestigator owner, string collarId, double frequency)
         {
-            EnableForm();
+            var collarAdded = false;
+            var form = new AddCollarForm(owner);
+            form.DatabaseChanged += (o, x) => collarAdded = true;
+            form.SetDefaultFrequency(frequency);
+            form.SetDefaultModel("Telonics", "Gen4");
+            form.SetDefaultId(collarId);
+            form.ShowDialog(this); //Blocks until form closed
+            if (!collarAdded)
+                return null;
+            return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" &&
+                                                                  c.CollarId == collarId);
         }
 
-        private void OwnerComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private ArgosPlatform CreatePlatform(string argosId)
         {
-            EnableForm();
+            var platformAdded = false;
+            var form = new AddArgosPlatformForm();
+            form.DatabaseChanged += (o, x) => platformAdded = true;
+            form.SetDefaultPlatform(argosId);
+            form.ShowDialog(this);
+            if (!platformAdded)
+                return null;
+            return Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == argosId);
         }
 
-        private void FormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void CreateDeployment(Collar collar, ArgosPlatform platform, DateTime startDateTime)
         {
-            var format = FormatComboBox.SelectedItem as LookupCollarParameterFileFormat;
-            if (format == null)
-                return;
-            switch (format.Code)
+            DateTime? endDateTime = null;
+            if (platform.ArgosDeployments.Count > 0 || collar.ArgosDeployments.Count > 0)
+                if (!FixOtherDeployments(collar, platform, startDateTime, ref endDateTime))
+                    return;
+            var deploy = new ArgosDeployment
             {
-                    // Keep this current with changes to LookupCollarParameterFileFormats table
-                case 'A':
-                    Settings.SetDefaultParameterFileFormat(format.Code);
-                    SetupForTpfFile();
-                    EnableForm();
-                    break;
-                case 'B':
-                    Settings.SetDefaultParameterFileFormat(format.Code);
-                    SetupForPpfFile();
-                    EnableForm();
-                    break;
-                default:
-                    MessageBox.Show("Un expected parameter file format encountered", "Program Error",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    break;
+                ArgosPlatform = platform,
+                Collar = collar,
+                StartDate = startDateTime,
+                EndDate = endDateTime
+            };
+            Database.ArgosDeployments.InsertOnSubmit(deploy);
+        }
+
+        private void CreateParameter(Collar collar, CollarParameterFile file, DateTime startDateTime)
+        {
+            DateTime? endDateTime = null;
+            if (collar.CollarParameters.Count > 0)
+                if (!FixOtherParameters(collar, file, startDateTime, ref endDateTime))
+                    return;
+            var param = new CollarParameter
+            {
+                Collar = collar,
+                CollarParameterFile = file,
+                StartDate = startDateTime,
+                EndDate = endDateTime
+            };
+            Database.CollarParameters.InsertOnSubmit(param);
+        }
+
+        private bool FixOtherDeployments(Collar collar, ArgosPlatform platform, DateTime start, ref DateTime? endDate)
+        {
+            //I'm willing to move a existing null end dates (there can only be one for the platform and one for the collar) back to my start date.
+            //Any existing non-null enddate must have been explicitly set by the user, so they should be dealt with explicitly
+            //If this situation exists, and I correct it, I am guaranteed to be fine (the new one will exist in the space created)
+            var deployment1 =
+                collar.ArgosDeployments.SingleOrDefault(d =>
+                                                        d.ArgosPlatform != platform &&
+                                                        d.StartDate < start && d.EndDate == null);
+            var deployment2 =
+                platform.ArgosDeployments.SingleOrDefault(d =>
+                                                          d.Collar != collar &&
+                                                          d.StartDate < start && d.EndDate == null);
+            if (deployment1 != null)
+                deployment1.EndDate = start;
+            if (deployment2 != null)
+                deployment2.EndDate = start;
+            if (deployment1 != null || deployment2 != null)
+                if (!SubmitChanges())
+                    return false;
+
+            //If my enddate is null, I should set my end to the earliest start time of the others that are larger than my start but smaller than my end (infinity, so all).
+            //I don't try to fix a non-null end date, because that was explicitly set by the user, and be should explicitly changed.
+            if (endDate == null)
+                endDate =
+                    Database.ArgosDeployments.Where(d =>
+                                                    ((d.Collar == collar && d.ArgosPlatform != platform) ||
+                                                     (d.Collar != collar && d.ArgosPlatform == platform)) &&
+                                                    start < d.StartDate)
+                            .Select(d => d.StartDate).Min(); //If min gets an empty enumerable, it will return null, which in this case is no change.
+
+            //Since my startdate is non-null, there is no situation where I would need to change an existing null start date.
+
+            //now check if the new deployment is in conflict with any existing deployments
+            DateTime? end = endDate;
+            var competition = Database.ArgosDeployments.Where(d => (d.Collar == collar && d.ArgosPlatform != platform) ||
+                                                                (d.Collar != collar && d.ArgosPlatform == platform));
+            bool conflict = competition.Any(d => DatesOverlap(d.StartDate, d.EndDate, start, end));
+            if (conflict)
+            {
+                MessageBox.Show(
+                    "The other deployment(s) for this collar or platform will require manual adjustment before this platform can be used on this collar",
+                    "Oh No!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
+            return true;
         }
 
-        private void SetupForTpfFile()
+        private bool FixOtherParameters(Collar collar, CollarParameterFile file, DateTime start, ref DateTime? end)
         {
-            FileNameTextBox.Text = String.Empty;
-            openFileDialog.DefaultExt = "tpf";
-            openFileDialog.Filter = "TPF Files|*.tpf|All Files|*.*";
-            openFileDialog.FilterIndex = 1;
-            openFileDialog.Multiselect = true;
-            CreateParametersCheckBox.Enabled = true;
+            //I'm willing to move a existing null end date (there can only be one) back to my start date.
+            //Any existing non-null enddate must have been explicitly set by the user, so they should be dealt with explicitly
+            //If this situation exists, and I correct it, I am guaranteed to be fine (the new one will exist in the space created), so I can exit
+            var parameter = collar.CollarParameters.SingleOrDefault(p => p.CollarParameterFile != file && (p.StartDate < start && p.EndDate == null));
+            if (parameter != null)
+            {
+                parameter.EndDate = start;
+                if (!SubmitChanges())
+                    return false;
+            }
+
+            //If my enddate is null (when fixing existng, or adding new), I should set my end to the earliest start time of the others that are larger than my start but smaller than my end (infinity, so all).
+            //This could only happen on a fix if there was an existing integrity violation.
+            //I don't try to fix a non-null end date, because that was explicitly set by the user, and should explicitly changed.
+            if (end == null)
+                end = collar.CollarParameters.Where(p => p.CollarParameterFile != file && start < p.StartDate)
+                            .Select(p => p.StartDate).Min(); //If there is no min gets an empty enumerable, it will return null, which in this case is no change.
+
+            //There is no situation where I would need to change an existing null start date.
+
+            //now check if the new parameter is in conflict with any existing parameters
+            DateTime? endDate = end;
+            var competition = collar.CollarParameters.Where(p => p.CollarParameterFile != file).ToList();
+            bool conflict = competition.Any(p => DatesOverlap(p.StartDate, p.EndDate, start, endDate));
+            if (conflict)
+            {
+                MessageBox.Show(
+                    "The other parameter assignment(s) for this collar will require manual adjustment before this file can be used on this collar",
+                    "Oh No!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
         }
 
-        private void SetupForPpfFile()
+        private static bool DatesOverlap(DateTime? start1, DateTime? end1, DateTime? start2, DateTime? end2)
         {
-            FileNameTextBox.Text = String.Empty;
-            openFileDialog.DefaultExt = "*.ppf";
-            openFileDialog.Filter = "PPF Files|*.ppf|All Files|*.*";
-            openFileDialog.FilterIndex = 1;
-            openFileDialog.Multiselect = true;
-            CreateParametersCheckBox.Enabled = false;
+            //touching is not considered overlapping.
+            return ((start2 ?? DateTime.MinValue) < (end1 ?? DateTime.MaxValue) && (start1 ?? DateTime.MinValue) < (end2 ?? DateTime.MaxValue));
         }
 
-        private void CreateParametersCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            EnableForm();
-        }
-
-        private void OnDatabaseChanged()
-        {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this,EventArgs.Empty);
-        }
+        #endregion
 
     }
 }
