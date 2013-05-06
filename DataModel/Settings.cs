@@ -19,8 +19,14 @@ namespace DataModel
         private const string WantsEmailKey = "wants_email";
         private const string SystemEmailKey = "sa_email";
         private const string SystemEmailPasswordKey = "sa_email_password";
+        private const string SystemDbaContact = "dba_contact";
 
         #region getters
+
+        public static string GetSystemDbaContact()
+        {
+            return GetSystemDefault(SystemDbaContact);
+        }
 
         public static string GetSystemEmail()
         {

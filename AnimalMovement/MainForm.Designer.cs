@@ -33,6 +33,7 @@
             this.ProjectsButton = new System.Windows.Forms.Button();
             this.GenerateMapButton = new System.Windows.Forms.Button();
             this.MyProfileButton = new System.Windows.Forms.Button();
+            this.QuickStartWizardButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // UploadButton
@@ -52,7 +53,7 @@
             // 
             this.QuitButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.QuitButton.Location = new System.Drawing.Point(12, 133);
+            this.QuitButton.Location = new System.Drawing.Point(12, 177);
             this.QuitButton.Name = "QuitButton";
             this.QuitButton.Size = new System.Drawing.Size(205, 23);
             this.QuitButton.TabIndex = 5;
@@ -98,11 +99,25 @@
             this.MyProfileButton.UseVisualStyleBackColor = true;
             this.MyProfileButton.Click += new System.EventHandler(this.MyProfileButton_Click);
             // 
+            // QuickStartWizardButton
+            // 
+            this.QuickStartWizardButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.QuickStartWizardButton.Enabled = false;
+            this.QuickStartWizardButton.Location = new System.Drawing.Point(12, 128);
+            this.QuickStartWizardButton.Name = "QuickStartWizardButton";
+            this.QuickStartWizardButton.Size = new System.Drawing.Size(205, 23);
+            this.QuickStartWizardButton.TabIndex = 6;
+            this.QuickStartWizardButton.Text = "Quick Start Wizard";
+            this.QuickStartWizardButton.UseVisualStyleBackColor = true;
+            this.QuickStartWizardButton.Click += new System.EventHandler(this.button1_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(231, 168);
+            this.ClientSize = new System.Drawing.Size(231, 212);
+            this.Controls.Add(this.QuickStartWizardButton);
             this.Controls.Add(this.MyProfileButton);
             this.Controls.Add(this.GenerateMapButton);
             this.Controls.Add(this.ProjectsButton);
@@ -123,5 +138,6 @@
         private System.Windows.Forms.Button ProjectsButton;
         private System.Windows.Forms.Button GenerateMapButton;
         private System.Windows.Forms.Button MyProfileButton;
+        private System.Windows.Forms.Button QuickStartWizardButton;
     }
 }

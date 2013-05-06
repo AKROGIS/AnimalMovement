@@ -49,6 +49,7 @@ namespace AnimalMovement
             ProjectsButton.Enabled = true;
             UploadButton.Enabled = true;
             GenerateMapButton.Enabled = true;
+            QuickStartWizardButton.Enabled = true;
         }
 
         private void MyProfileButton_Click(object sender, EventArgs e)
@@ -78,6 +79,12 @@ namespace AnimalMovement
         private void QuitButton_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var form = new QuickStartWizard();
+            form.Show(this);
         }
 
 
