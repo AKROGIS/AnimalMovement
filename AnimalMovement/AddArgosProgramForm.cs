@@ -64,6 +64,7 @@ namespace AnimalMovement
                                    !string.IsNullOrEmpty(ProgramIdTextBox.Text) &&
                                    !string.IsNullOrEmpty(UserNameTextBox.Text) &&
                                    !string.IsNullOrEmpty(PasswordTextBox.Text);
+            //TODO - Add button to test program/username/password combination - Make this a condition of a create if the program is active.
         }
 
         private bool SubmitChanges()
