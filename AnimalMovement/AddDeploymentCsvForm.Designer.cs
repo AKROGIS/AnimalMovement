@@ -31,12 +31,12 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.label1 = new System.Windows.Forms.Label();
             this.QuitButton = new System.Windows.Forms.Button();
-            this.NextButton = new System.Windows.Forms.Button();
+            this.ProcessButton = new System.Windows.Forms.Button();
             this.InvestigatorComboBox = new System.Windows.Forms.ComboBox();
             this.BrowseButton = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.FileNameTextBox = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.ProgressTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // openFileDialog1
@@ -62,16 +62,18 @@
             this.QuitButton.TabIndex = 6;
             this.QuitButton.Text = "Cancel";
             this.QuitButton.UseVisualStyleBackColor = true;
+            this.QuitButton.Click += new System.EventHandler(this.QuitButton_Click);
             // 
-            // NextButton
+            // ProcessButton
             // 
-            this.NextButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.NextButton.Location = new System.Drawing.Point(174, 131);
-            this.NextButton.Name = "NextButton";
-            this.NextButton.Size = new System.Drawing.Size(75, 23);
-            this.NextButton.TabIndex = 5;
-            this.NextButton.Text = "Process";
-            this.NextButton.UseVisualStyleBackColor = true;
+            this.ProcessButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.ProcessButton.Location = new System.Drawing.Point(174, 131);
+            this.ProcessButton.Name = "ProcessButton";
+            this.ProcessButton.Size = new System.Drawing.Size(75, 23);
+            this.ProcessButton.TabIndex = 5;
+            this.ProcessButton.Text = "Process";
+            this.ProcessButton.UseVisualStyleBackColor = true;
+            this.ProcessButton.Click += new System.EventHandler(this.ProcessButton_Click);
             // 
             // InvestigatorComboBox
             // 
@@ -83,6 +85,7 @@
             this.InvestigatorComboBox.Name = "InvestigatorComboBox";
             this.InvestigatorComboBox.Size = new System.Drawing.Size(128, 21);
             this.InvestigatorComboBox.TabIndex = 4;
+            this.InvestigatorComboBox.SelectedIndexChanged += new System.EventHandler(this.InvestigatorComboBox_SelectedIndexChanged);
             // 
             // BrowseButton
             // 
@@ -93,11 +96,12 @@
             this.BrowseButton.TabIndex = 29;
             this.BrowseButton.Text = "...";
             this.BrowseButton.UseVisualStyleBackColor = true;
+            this.BrowseButton.Click += new System.EventHandler(this.BrowseButton_Click);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 44);
+            this.label2.Location = new System.Drawing.Point(18, 44);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(26, 13);
             this.label2.TabIndex = 30;
@@ -111,30 +115,32 @@
             this.FileNameTextBox.Name = "FileNameTextBox";
             this.FileNameTextBox.Size = new System.Drawing.Size(167, 20);
             this.FileNameTextBox.TabIndex = 28;
+            this.FileNameTextBox.TextChanged += new System.EventHandler(this.FileNameTextBox_TextChanged);
             // 
-            // textBox1
+            // ProgressTextBox
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.ProgressTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(11, 68);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(236, 57);
-            this.textBox1.TabIndex = 31;
+            this.ProgressTextBox.Location = new System.Drawing.Point(11, 68);
+            this.ProgressTextBox.Multiline = true;
+            this.ProgressTextBox.Name = "ProgressTextBox";
+            this.ProgressTextBox.Size = new System.Drawing.Size(236, 57);
+            this.ProgressTextBox.TabIndex = 31;
             // 
             // AddDeploymentCsvForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.QuitButton;
             this.ClientSize = new System.Drawing.Size(259, 166);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.ProgressTextBox);
             this.Controls.Add(this.BrowseButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.FileNameTextBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.QuitButton);
-            this.Controls.Add(this.NextButton);
+            this.Controls.Add(this.ProcessButton);
             this.Controls.Add(this.InvestigatorComboBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(275, 200);
@@ -150,11 +156,11 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button QuitButton;
-        private System.Windows.Forms.Button NextButton;
+        private System.Windows.Forms.Button ProcessButton;
         private System.Windows.Forms.ComboBox InvestigatorComboBox;
         private System.Windows.Forms.Button BrowseButton;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox FileNameTextBox;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox ProgressTextBox;
     }
 }

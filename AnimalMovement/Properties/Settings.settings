@@ -200,5 +200,17 @@
     <Setting Name="ArgosProgramDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
+    <Setting Name="AddDeploymentCsvFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AddDeploymentCsvFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">275, 200</Value>
+    </Setting>
+    <Setting Name="QuickStartWizardLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="QuickStartWizardSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">300, 250</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -814,5 +814,53 @@ namespace AnimalMovement.Properties {
                 this["ArgosProgramDetailsFormLocation"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point AddDeploymentCsvFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["AddDeploymentCsvFormLocation"]));
+            }
+            set {
+                this["AddDeploymentCsvFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("275, 200")]
+        public global::System.Drawing.Size AddDeploymentCsvFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["AddDeploymentCsvFormSize"]));
+            }
+            set {
+                this["AddDeploymentCsvFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point QuickStartWizardLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["QuickStartWizardLocation"]));
+            }
+            set {
+                this["QuickStartWizardLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300, 250")]
+        public global::System.Drawing.Size QuickStartWizardSize {
+            get {
+                return ((global::System.Drawing.Size)(this["QuickStartWizardSize"]));
+            }
+            set {
+                this["QuickStartWizardSize"] = value;
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@ using DataModel;
 
 namespace AnimalMovement
 {
-    public partial class QuickStartWizard : Form
+    internal partial class QuickStartWizard : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
@@ -43,7 +43,8 @@ namespace AnimalMovement
                         break;
                     }
                     CloseInvestigatorPage();
-                    SetUpArgosProgramPage();
+                    SetUpDeploymentsPage();
+                    //SetUpArgosProgramPage();
                     break;
                 case 2:  //Load Argos Platforms
                     SetUpArgosPlatformPage();
@@ -208,8 +209,22 @@ namespace AnimalMovement
         {
             InstructionsRichTextBox.Text = "Load a deployments table as CSV file (exported from excel spreadsheet)" +
                 "See the help for the format of this spreadsheet.";
+            NextButton.Click -= NextButton_Click;
+            NextButton.Click += AddDeployments_Click;
         }
 
+        private void AddDeployments_Click(object sender, EventArgs e)
+        {
+            var form = new AddDeploymentCsvForm(Investigator);
+            NextButton.Enabled = false;
+            form.DatabaseChanged += (o, a) =>
+            {
+                NextButton.Click -= AddDeployments_Click;
+                NextButton.Click += NextButton_Click;
+            };
+            form.ShowDialog();
+            NextButton.Enabled = true;
+        }
 
         private void SetUpLoadFilesPage()
         {
