@@ -177,39 +177,36 @@ namespace AnimalMovement
             UploadButton.Enabled = false;
             Cursor.Current = Cursors.WaitCursor;
             Application.DoEvents();
-
-            var format = (LookupCollarParameterFileFormat)FormatComboBox.SelectedItem;
-            switch (format.Code)
+            try
             {
-                // Keep this current with changes to LookupCollarParameterFileFormats table
-                case 'A':
-                    if (UploadTpfFiles(FileNameTextBox.Text))
-                    {
-                        OnDatabaseChanged();
-                        Cursor.Current = Cursors.Default;
-                        DialogResult = DialogResult.OK;
-                    }
-                    else
-                    {
-                        UploadButton.Text = "Upload";
-                    }
-                    break;
-                case 'B':
-                    if (UploadPpfFiles(FileNameTextBox.Text))
-                    {
-                        OnDatabaseChanged();
-                        Cursor.Current = Cursors.Default;
-                        DialogResult = DialogResult.OK;
-                    }
-                    else
-                    {
-                        UploadButton.Text = "Upload";
-                    }
-                    break;
-                default:
-                    MessageBox.Show("Unexpected parameter file format encountered", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    UploadButton.Text = "Upload";
-                    break;
+                var format = (LookupCollarParameterFileFormat)FormatComboBox.SelectedItem;
+                switch (format.Code)
+                {
+                    // Keep this current with changes to LookupCollarParameterFileFormats table
+                    case 'A':
+                        if (UploadTpfFiles(FileNameTextBox.Text))
+                        {
+                            OnDatabaseChanged();
+                            Close();
+                        }
+                        break;
+                    case 'B':
+                        if (UploadPpfFiles(FileNameTextBox.Text))
+                        {
+                            OnDatabaseChanged();
+                            Close();
+                        }
+                        break;
+                    default:
+                        MessageBox.Show("Unexpected parameter file format encountered", "Program Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                }
+            }
+            finally
+            {
+                UploadButton.Text = "Upload";
+                UploadButton.Enabled = false;
+                Cursor.Current = Cursors.WaitCursor;
             }
         }
 
@@ -277,15 +274,17 @@ namespace AnimalMovement
             return files.Split(';').Aggregate(false, (current, file) => current || UploadTpfFile(file));
         }
 
-        private bool UploadTpfFile(string file)
+        private bool UploadTpfFile(string filePath)
         {
             var owner = (ProjectInvestigator)OwnerComboBox.SelectedItem;
             var format = (LookupCollarParameterFileFormat)FormatComboBox.SelectedItem;
-            CollarParameterFile paramFile = UploadParameterFile(owner, format, file);
+            CollarParameterFile paramFile = UploadParameterFile(owner, format, filePath);
             if (paramFile == null)
                 return false;
+            //paramfile has been successfully committed to the database.
+            // CreateParameters is optional, so it should be a separate tranaction (and are not concerned with success or failure)
             if (CreateParametersCheckBox.Checked)
-                CreateParameters(file, owner, paramFile);
+                CreateParameters(owner, paramFile);
             return true;
         }
 
@@ -307,7 +306,7 @@ namespace AnimalMovement
 
         private CollarParameterFile UploadParameterFile(ProjectInvestigator owner, LookupCollarParameterFileFormat format, string filename)
         {
-            LoadAndHashFile(FileNameTextBox.Text);
+            LoadAndHashFile(filename);
             if (_fileContents == null)
                 return null;
             if (AbortBecauseDuplicate())
@@ -322,18 +321,9 @@ namespace AnimalMovement
                 Contents = _fileContents
             };
             Database.CollarParameterFiles.InsertOnSubmit(file);
-
-            try
-            {
-                Database.SubmitChanges();
-            }
-            catch (Exception ex)
-            {
-                Database.CollarParameterFiles.DeleteOnSubmit(file);
-                MessageBox.Show(ex.Message, "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
-            return file;
+            if (SubmitChanges())
+                return file;
+            return null;
         }
 
         private void LoadAndHashFile(string path)
@@ -373,9 +363,9 @@ namespace AnimalMovement
 
         #region Create Parameters
 
-        private void CreateParameters(string file, ProjectInvestigator owner, CollarParameterFile paramFile)
+        private void CreateParameters(ProjectInvestigator owner, CollarParameterFile paramFile)
         {
-            var tpfFile = new TpfFile(file);
+            var tpfFile = new TpfFile(_fileContents);
             foreach (TpfCollar tpfCollar in tpfFile.GetCollars())
             {
                 if (IgnoreSuffixCheckBox.Checked && tpfCollar.Ctn.Length > 6)
@@ -405,7 +395,6 @@ namespace AnimalMovement
                             CreateDeployment(collar, platform, tpfCollar.TimeStamp);
                 }
                 CreateParameter(collar, paramFile, tpfCollar.TimeStamp);
-                SubmitChanges(); //We do this now, because we do not want one big tranaction. - a failure here should not impact other parameters or the file upload.
             }
         }
 
@@ -450,6 +439,9 @@ namespace AnimalMovement
                 EndDate = endDateTime
             };
             Database.ArgosDeployments.InsertOnSubmit(deploy);
+            //Creating a deployment is optional, so we submit now, so a failure will not stop other transactions.
+            if (!SubmitChanges())
+                Database.ArgosDeployments.DeleteOnSubmit(deploy);
         }
 
         private void CreateParameter(Collar collar, CollarParameterFile file, DateTime startDateTime)
@@ -466,6 +458,9 @@ namespace AnimalMovement
                 EndDate = endDateTime
             };
             Database.CollarParameters.InsertOnSubmit(param);
+            //Creating a parameter is optional, so we submit now, so a failure will not stop other transactions.
+            if (!SubmitChanges())
+                Database.CollarParameters.DeleteOnSubmit(param);
         }
 
         private bool FixOtherDeployments(Collar collar, ArgosPlatform platform, DateTime start, ref DateTime? endDate)
