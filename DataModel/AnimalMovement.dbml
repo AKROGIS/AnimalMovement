@@ -217,11 +217,11 @@
       <Argument Parameter="sha1Hash" Member="Sha1Hash" />
     </InsertFunction>
     <UpdateFunction FunctionId="FunctionId14">
+      <Argument Parameter="fileId" Member="FileId" Version="Original" />
       <Argument Parameter="owner" Member="Owner" />
       <Argument Parameter="fileName" Member="FileName" />
       <Argument Parameter="format" Member="Format" />
       <Argument Parameter="status" Member="Status" />
-      <Argument Parameter="fileId" Member="FileId" Version="Original" />
     </UpdateFunction>
     <DeleteFunction FunctionId="FunctionId15">
       <Argument Parameter="fileId" Member="FileId" Version="Original" />
@@ -633,14 +633,6 @@
     <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
   </Function>
-  <Function Id="FunctionId14" Name="dbo.CollarParameterFile_Update" Method="CollarParameterFile_Update">
-    <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
-    <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
-    <Parameter Name="Status" Parameter="status" Type="System.Char" DbType="Char(1)" />
-    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
-    <Return Type="System.Int32" />
-  </Function>
   <Function Id="FunctionId12" Name="dbo.CollarDeployment_Delete" Method="CollarDeployment_Delete">
     <Parameter Name="DeploymentId" Parameter="deploymentId" Type="System.Int32" DbType="Int" />
     <Return Type="System.Int32" />
@@ -857,6 +849,14 @@
   <Function Id="FunctionId35" Name="dbo.ProjectInvestigatorAssistant_Delete" Method="ProjectInvestigatorAssistant_Delete">
     <Parameter Name="ProjectInvestigator" Parameter="projectInvestigator" Type="System.String" DbType="NVarChar(128)" />
     <Parameter Name="Assistant" Parameter="assistant" Type="System.String" DbType="NVarChar(128)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId14" Name="dbo.CollarParameterFile_Update" Method="CollarParameterFile_Update">
+    <Parameter Name="FileId" Parameter="fileId" Type="System.Int32" DbType="Int" />
+    <Parameter Name="Owner" Parameter="owner" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="FileName" Parameter="fileName" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="Format" Parameter="format" Type="System.Char" DbType="Char(1)" />
+    <Parameter Name="Status" Parameter="status" Type="System.Char" DbType="Char(1)" />
     <Return Type="System.Int32" />
   </Function>
 </Database>

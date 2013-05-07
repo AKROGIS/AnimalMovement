@@ -376,7 +376,7 @@ namespace DataModel
 		private void UpdateCollarParameterFile(CollarParameterFile obj)
 		{
 			CollarParameterFile original = ((CollarParameterFile)(CollarParameterFiles.GetOriginalEntityState(obj)));
-			this.CollarParameterFile_Update(obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), ((System.Nullable<char>)(obj.Status)), ((System.Nullable<int>)(original.FileId)));
+			this.CollarParameterFile_Update(((System.Nullable<int>)(original.FileId)), obj.Owner, obj.FileName, ((System.Nullable<char>)(obj.Format)), ((System.Nullable<char>)(obj.Status)));
 		}
 		
 		private void DeleteCollarParameterFile(CollarParameterFile obj)
@@ -609,13 +609,6 @@ namespace DataModel
 			return ((int)(result.ReturnValue));
 		}
 		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameterFile_Update")]
-		public int CollarParameterFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), owner, fileName, format, status, fileId);
-			return ((int)(result.ReturnValue));
-		}
-		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarDeployment_Delete")]
 		public int CollarDeployment_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentId", DbType="Int")] System.Nullable<int> deploymentId)
 		{
@@ -807,6 +800,13 @@ namespace DataModel
 		public int ProjectInvestigatorAssistant_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectInvestigator", DbType="NVarChar(128)")] string projectInvestigator, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Assistant", DbType="NVarChar(128)")] string assistant)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), projectInvestigator, assistant);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarParameterFile_Update")]
+		public int CollarParameterFile_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Owner", DbType="NVarChar(255)")] string owner, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileName", DbType="NVarChar(255)")] string fileName, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Format", DbType="Char(1)")] System.Nullable<char> format, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Status", DbType="Char(1)")] System.Nullable<char> status)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, owner, fileName, format, status);
 			return ((int)(result.ReturnValue));
 		}
 	}
