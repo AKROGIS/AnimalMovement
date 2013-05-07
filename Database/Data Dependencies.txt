@@ -432,8 +432,78 @@ CollarParameters
 ================
 
 
+
 CollarParameterFiles
 ====================
+Description
+-----------
+  This table contains Collar Parameter Files used to process Collar Files. Each record
+  contains information about the Collar Parameter File, as well as the contents of the
+  Collar Parameter File.  Currently this is only used by Telonics Gen3 and Gen4 collars
+  to process Collar Files with Argos data.
+  
+Relationships
+-------------
+  Collar Parameter Files are owned by a Project Investigator.  A Collar Parameter File is
+  linked to a Collar with a Collar Parameter.  A Collar Parameter File can be linked to
+  multiple collars.
+  
+Attributes
+----------
+  FileId - non-null surrogate primary key (integer starting at 1 and incrementing by 1).
+           Users cannot add or update this column.
+  Owner - non-null foreign key to ProjectInvestigators  Cascade on delete and update.
+          File is subject to changes and deletes in ProjectInvestigators
+  Format - non-null foreign key to LookupCollarParameterFileFormats. Update - Cascade,
+           Delete - No Action (i.e. deny delete of format if in use).  Format
+		   is specified by the user, and the database does not try to verify the contents
+		   with the format. Behavior is unspecified if the contents and the format do not
+		   match.  Since the database doesn't manage the format, the user can change the
+		   format, but only if the file is not linked to a collar.
+  Status - non-null foreign key to LookupFileStatus. Update - Cascade, Delete - No Action
+           (i.e. update to match changes in status code, and deny delete of format if in
+		   use) - Currently two status A- Active and I - Inactive.  Inactive Collar
+		   Parameter Files cannot be linked to a collar (and they appear different in the
+		   UI).  A file cannot be made Inactive if it is linked to a collar.
+  FileName - non-null text name the file.  For information only.
+  Contents - non-null binary contents of the file.  Not changeable.
+  Sha1Hash - non-null computed (and cached) hash value of the file contents, for avoiding
+             duplicates.  Users cannot add or update this column.
+  UploadDate - non-null date time when the file was added to the database. Users cannot
+               add or update this column.
+  UploadUser - non-null database login name of the user who added this file to the
+               database. Users cannot add or update this column.
+  
+Select
+------
+  Any database user can view any attribute of any Collar Parameter Files.
+Create
+------
+  Only a database user who is a Project Investigator, or an Assistant to a Project
+  Investigator can create Collar Parameter Files for that PI.  The database will never
+  create these objects automatically.  Creating different Collar Parameter Files with
+  identical contents (and Sha1Hash) is allowed, but potentially confusing for users.
+Update
+------
+  Only the database user who is the owning Project Investigator, or an Assistant to the
+  owning Project Investigator can update a Collar Parameter Files.  The following
+  restrictions apply to changing attributes:
+  - FileId, Contents, Sha1Hash, UploadDate, UploadUser: managed by the database, the user
+    cannot change these attributes.  The database will not change them after creation.
+  - Format, Status: cannot be changed if the file is linked to a collar.  Note, this will
+    effectively block cascading updates from LookupCollarParameterFileFormats and 
+	LookupFileStatus which is OK, since those tables shouldn't change anyway.
+  - Owner: The database user making the update must be the receiving PI or an Assistant
+    to the receiving PI. 
+  - FileName: no restrictions
+Delete
+------
+  Only the database user who is the owning Project Investigator, or an Assistant to the
+  owning Project Investigator can delete a Collar Parameter Files. The database will never
+  delete these objects automatically.  Collar Parameter Files deletes will cascade to the
+  all related Collar Parameters (link between Collars and Collar Parameter Files).  A
+  Collar Parameter cannot be deleted if it was used to created a CollarFile.  Therefore a
+  Collar Parameter File cannot be deleted if it was used to create a CollarFile.
 
 
 

@@ -1964,6 +1964,64 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 7, 2013
+-- Description:	Validate and enforce business rules
+--              when updating collar parameter files
+-- =============================================
+Create TRIGGER [dbo].[AfterCollarParameterFileUpdate] 
+    ON  [dbo].[CollarFiles] 
+    AFTER UPDATE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+    -- triggers always execute in the context of a transaction
+    -- so the following code is all or nothing.
+
+
+    -- Business Rule: FileId, Contents, Username, UploadDate, and Sha1Hash cannot be updated.
+    --                Sha1Hash is managed by the DB engine since it is a computed column
+    IF    UPDATE(FileId) OR UPDATE(Contents) OR  UPDATE(UserName) OR UPDATE(UploadDate)
+    BEGIN
+        RAISERROR('Integrity Violation. Attempted to modify an immutable column in CollarFiles', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: Format cannot be changed if CollarParameterFile is used in a CollarParameter
+    IF EXISTS (    SELECT 1
+                     FROM inserted AS i
+               INNER JOIN CollarParameters AS P
+                       ON P.FileId = i.FileId
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. Format cannot be changed when the file is linked to a Collar', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: Status cannot be changed if CollarParameterFile is used in a CollarParameter
+    IF EXISTS (    SELECT 1
+                     FROM inserted AS i
+               INNER JOIN CollarParameters AS P
+                       ON P.FileId = i.FileId
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. Status cannot be changed when the file is linked to a Collar', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[ArgosPrograms](
@@ -6728,54 +6786,76 @@ GO
 --              if those are wrong, delete and re-upload the file.
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarParameterFile_Update] 
-	@Owner NVARCHAR(255) = NULL, 
-	@FileName NVARCHAR(255) = NULL,
-	@Format CHAR = NULL, 
-	@Status CHAR = NULL,
-	@FileId INT = NULL
+    @FileId INT,
+    @Owner NVARCHAR(255) = NULL, 
+    @FileName NVARCHAR(255) = NULL,
+    @Format CHAR = NULL, 
+    @Status CHAR = NULL
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
     
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
 
-	IF @Owner IS NULL
-		SET @Owner = @Caller
-		
-	-- Validate permission for this operation
+    -- Validate permission for this operation
 
-	-- The caller must be an editor in the database - handled by execute permissions
+    -- The caller must be an editor in the database - handled by execute permissions
 
-	-- Verify that the file exists (this is done now to avoid the following check issuing a confusing error)
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] WHERE [FileId] = @FileId)
-	BEGIN
-		RAISERROR('The file you want to update was not found.', 18, 0)
-		RETURN (1)
-	END
+    -- Verify that the file exists (this is done now to avoid the following check issuing a confusing error)
+    DECLARE @OldOwner sysname
+    SELECT @OldOwner = [OWNER] FROM [dbo].[CollarParameterFiles] WHERE [FileId] = @FileId
+    IF @OldOwner IS NULL
+    BEGIN
+        RAISERROR('The file you want to update was not found.', 18, 0)
+        RETURN 1
+    END
 
-	-- The caller must be the owner or the Uploader of the collar parameter file
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] WHERE [FileId] = @FileId AND ([Owner] = @Caller OR [UploadUser] = @Caller))
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner or the Uploader of the collar parameter file (Id = '+str(@FileId)+') to delete it.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
+    -- The caller must be the old owner, or an assistant for the old owner
+    IF @OldOwner != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @OldOwner)
+    BEGIN
+        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner ('+@OldOwner+') or an assistant to the owner to update this file.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
 
-	IF @Format IS NULL
-	BEGIN
-		SELECT @Format = [Format] FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
-	END
+    -- The caller must be the new owner, or an assistant for the new owner
+    IF @Owner IS NULL
+        SELECT @Owner = [Owner] FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
 
-	IF @Status IS NULL
-	BEGIN
-		SELECT @Status = [Status] FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
-	END
+    IF @Owner != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Owner)
+    BEGIN
+        DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the new owner ('+@Owner+') or an assistant to the new owner to change the owner.';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+    --Fix Defaults
+    -- I use NULL to indicate don't change value only on non-null fields.
+    -- The defaults for nullable field should match the insert SP.
+    -- If the client does not want to change a nullable field they must provide the original value.
+    IF @FileName IS NULL
+        SELECT @FileName = [FileName] FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
+
+    IF @Format IS NULL
+        SELECT @Format = [Format] FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
+
+    IF @Status IS NULL
+        SELECT @Status = [Status] FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
 
 
-	-- All other verification is handled by primary/foreign key and column constraints.
-	UPDATE dbo.CollarParameterFiles SET [Owner] = @Owner, [FileName] = @FileName, [Format] = @Format, [Status] = @Status
-		 WHERE [FileId] = @FileId
+    -- All other verification is handled by primary/foreign key and column constraints.
+    UPDATE dbo.CollarParameterFiles SET [Owner] = @Owner,
+                                        [FileName] = @FileName,
+                                        [Format] = @Format,
+                                        [Status] = @Status
+                                  WHERE [FileId] = @FileId
 
 END
 GO
@@ -6789,35 +6869,47 @@ GO
 -- Description:	Adds a new collar parameter file to the database.
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarParameterFile_Insert] 
-	@Owner NVARCHAR(255) = NULL, 
-	@FileName NVARCHAR(255) = NULL,
-	@Format CHAR = NULL, 
-	@Contents VARBINARY(max) = NULL,
-	@Status CHAR = 'A',
-	@FileId INT OUTPUT,
+    @Owner NVARCHAR(255), 
+    @FileName NVARCHAR(255),
+    @Format CHAR, 
+    @Contents VARBINARY(max),
+    @Status CHAR = 'A',
+    @FileId INT OUTPUT,
     @UploadDate DATETIME2(7) OUTPUT,
     @UploadUser NVARCHAR(128) OUTPUT,
     @Sha1Hash VARBINARY(8000) OUTPUT
 AS
 BEGIN
-	SET NOCOUNT ON;
-    
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+    SET NOCOUNT ON;
 
-	IF @Owner IS NULL
-		SET @Owner = @Caller
-		
-	-- Validate permission for this operation
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
 
-	-- The caller must be an editor in the database - handled by execute permissions
+    IF @Owner IS NULL
+        SET @Owner = @Caller
 
-	-- All other verification is handled by primary/foreign key and column constraints.
-	INSERT INTO dbo.CollarParameterFiles ([Owner], [FileName], [Format], [Contents], [Status])
-		 VALUES (@Owner, @FileName, @Format, @Contents, @Status)
+    -- Validate permission for this operation
 
-	SET @FileId = SCOPE_IDENTITY();
-	SELECT @UploadDate = [UploadDate], @UploadUser = [UploadUser], @Sha1Hash = [Sha1Hash] FROM dbo.CollarParameterFiles WHERE FileId = @FileId
+    -- The caller must be an editor in the database - handled by execute permissions
+
+    -- The caller must be the owner, or an assistant for the owner
+    IF @Owner != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Owner)
+    BEGIN
+        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner ('+@Owner+') or an assistant to the owner to insert this file.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    -- All other verification is handled by primary/foreign key and column constraints.
+    INSERT INTO dbo.CollarParameterFiles ([Owner], [FileName], [Format], [Contents], [Status])
+         VALUES (@Owner, @FileName, @Format, @Contents, @Status)
+
+    -- Get the output values.  This is key for Linq to Sql to get the full state of the new object
+    SET @FileId = SCOPE_IDENTITY();
+    SELECT @UploadDate = [UploadDate], @UploadUser = [UploadUser], @Sha1Hash = [Sha1Hash] FROM dbo.CollarParameterFiles WHERE FileId = @FileId
 
 END
 GO
@@ -6831,36 +6923,41 @@ GO
 -- Description:	Deletes a CollarParameterFile from the database
 -- =============================================
 CREATE PROCEDURE [dbo].[CollarParameterFile_Delete] 
-	@FileId int = -1
+    @FileId int
 AS
 BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+    SET NOCOUNT ON;
+    
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
 
-	-- Validate permission for this operation
+    -- Validate permission for this operation
 
-	-- The caller must be an editor in the database - handled by execute permissions
+    -- The caller must be an editor in the database - handled by execute permissions
 
-	-- Verify that the file exists (this is done now to avoid the following check issuing a confusing error)
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] WHERE [FileId] = @FileId)
-	BEGIN
-		RAISERROR('The file you want to delete was not found.', 18, 0)
-		RETURN (1)
-	END
+    -- Verify that the file exists (this is done now to avoid the following check issuing a confusing error)
+    IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] WHERE [FileId] = @FileId)
+    BEGIN
+        RETURN -- exit quietly, there is nothing to do.
+    END
 
 
-	-- The caller must be the owner or the Uploader of the collar parameter file
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarParameterFiles] WHERE [FileId] = @FileId AND ([Owner] = @Caller OR [UploadUser] = @Caller))
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner or the Uploader of the collar parameter file (Id = '+str(@FileId)+') to delete it.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
+    -- The caller must be the owner or an assistant to the owner of the collar parameter file
+    IF NOT EXISTS (   SELECT 1 FROM [dbo].[CollarParameterFiles] AS P
+                   LEFT JOIN [dbo].[ProjectInvestigatorAssistants] AS A
+                          ON A.ProjectInvestigator = P.[Owner]
+                       WHERE [FileId] = @FileId
+                         AND ([Owner] = @Caller OR A.[Assistant] = @Caller)
+                  )
+    BEGIN
+        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the owner or an assistant to the owner to delete this file.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
 
-	-- All other verification is handled by primary/foreign key and column constraints.
-	DELETE FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
+    -- All other verification is handled by declarative constraints and triggers.
+    
+    DELETE FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
 END
 GO
 SET ANSI_NULLS ON
@@ -7503,16 +7600,20 @@ ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_Collars]
 GO
 ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus] FOREIGN KEY([Status])
 REFERENCES [dbo].[LookupFileStatus] ([Code])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus]
 GO
 ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupParameterFileFormats] FOREIGN KEY([Format])
 REFERENCES [dbo].[LookupCollarParameterFileFormats] ([Code])
+ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupParameterFileFormats]
 GO
 ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_ProjectInvestigators] FOREIGN KEY([Owner])
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
+ON UPDATE CASCADE
+ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_ProjectInvestigators]
 GO
