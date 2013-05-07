@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.OleDb;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -115,6 +119,59 @@ namespace AnimalMovement
                 handle(this, EventArgs.Empty);
         }
 
+        #region Read Excel File
+
+        private DataTable GetDataTableFromExcel(string path, string sheetName = "Sheet1")
+        {
+            var dataTable = new DataTable();
+            var ext = Path.GetExtension(path);
+            var extProps = new Dictionary<string, string> { { ".xls", "Excel 8.0" }, { ".xlsx", "Excel 12.0 Xml" }, { ".xlsm", "Excel 12.0 Macro" }, { ".xlsb", "Excel 12.0" } };
+            if (ext == null || !extProps.ContainsKey(ext))
+            {
+                MessageBox.Show("Unrecognized file type");
+                return null;
+            }
+            var constr = "Provider=Microsoft.ACE.OLEDB.12.0" +
+                         ";Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}" +
+                         ";DBQ=" + path +
+                         ";Extended Properties='" + extProps[ext] + ";IMEX=1;HDR=Yes;'";
+            using (var connection = new OleDbConnection(constr))
+            {
+                connection.Open();
+                var command = new OleDbDataAdapter(" SELECT * FROM [" + sheetName + "$]", connection);
+                command.Fill(dataTable);
+            }
+            return dataTable;
+        }
+
+        #endregion
+
+
+        #region Read CSV File
+
+        public static DataTable ConvertTabFiles(string path, char delimeter = ',')
+        {
+            var dataTable = new DataTable();
+            bool gotHeader = false;
+            foreach (var line in File.ReadLines(path))
+            {
+                if (!gotHeader)
+                {
+                    foreach (string column in line.Split(delimeter))
+                        dataTable.Columns.Add(column);
+                    gotHeader = true;
+                    continue;
+                }
+                // ReSharper disable CoVariantArrayConversion
+                dataTable.Rows.Add(line.Split(delimeter));
+                // ReSharper restore CoVariantArrayConversion
+            }
+            return dataTable;
+        }
+
+        #endregion
+
+
         #region Form Control Events
 
         protected override void OnShown(EventArgs e)
@@ -131,13 +188,24 @@ namespace AnimalMovement
 
         private void ProcessButton_Click(object sender, EventArgs e)
         {
-            //do The work
+            DataTable dataTable = null;
+            try
+            {
+                dataTable = ConvertTabFiles(FileNameTextBox.Text);
+            }
+            catch (Exception ex1)
+            {
+                MessageBox.Show("Unable to parse the CSV file." + Environment.NewLine + ex1.Message);
+            }
+            if (dataTable == null)
+                return;
+            ExcelDataGridView.DataSource = dataTable;
         }
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
-            if (openFileDialog1.ShowDialog() != DialogResult.Cancel)
-                FileNameTextBox.Text = openFileDialog1.FileName;
+            if (OpenFileDialog.ShowDialog() != DialogResult.Cancel)
+                FileNameTextBox.Text = OpenFileDialog.FileName;
         }
 
         private void InvestigatorComboBox_SelectedIndexChanged(object sender, EventArgs e)
