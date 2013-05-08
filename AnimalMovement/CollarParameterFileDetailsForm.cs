@@ -205,14 +205,14 @@ namespace AnimalMovement
                     Database.CollarParameters.Where(cp => cp.CollarParameterFile == File)
                             .Select(cp => new
                                 {
+                                    cp,
                                     cp.Collar,
                                     cp.StartDate,
                                     cp.EndDate,
-                                    cp,
-                                    CanDelete = !Database.CollarFiles.Any(f => f.CollarParameter == cp)
+                                    Data = cp.CollarFiles.Any()
                                 });
-            ParametersDataGridView.Columns[3].Visible = false;
-            ParametersDataGridView.Columns[4].Visible = false;
+            ParametersDataGridView.Columns[0].Visible = false;
+            ParametersDataGridView.Columns[4].HeaderText = "Has Derived Data";
             EnableCollarFilesControls();
         }
 
@@ -220,8 +220,7 @@ namespace AnimalMovement
         {
             AddParameterButton.Enabled = !IsEditMode && IsEditor;
             DeleteParameterButton.Enabled = !IsEditMode && IsEditor &&
-                                            ParametersDataGridView.SelectedRows.Cast<DataGridViewRow>()
-                                                                  .Any(row => (bool) row.Cells["CanDelete"].Value);
+                                            ParametersDataGridView.SelectedRows.Count > 0;
             EditParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count == 1;
             InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1;
         }
@@ -242,16 +241,35 @@ namespace AnimalMovement
 
         private void DeleteParameterButton_Click(object sender, EventArgs e)
         {
-            foreach (DataGridViewRow row in ParametersDataGridView.SelectedRows)
-                if ((bool)row.Cells["CanDelete"].Value)
-                    Database.CollarParameters.DeleteOnSubmit((CollarParameter) row.Cells[3].Value);
+            var parameters =
+                ParametersDataGridView.SelectedRows.Cast<DataGridViewRow>()
+                                      .Select(row => (CollarParameter) row.Cells[0].Value)
+                                      .ToList();
+            bool abort = false;
+            if (parameters.Any(p => p.CollarFiles.Any()))
+            {
+                var message = String.Format("Deleting {0} will delete derived collar files and fixes.",
+                                            parameters.Count == 1 ? "this parameter" : "these parameters")
+                              + Environment.NewLine + "Are you sure you want to continue?";
+                abort =
+                    MessageBox.Show(message, "Deleting derived data", MessageBoxButtons.YesNo, MessageBoxIcon.Question) !=
+                    DialogResult.Yes;
+            }
+            if (abort)
+                return;
+            foreach (var parameter in parameters)
+            {
+                foreach (var collarFile in parameter.CollarFiles)
+                    Database.CollarFiles.DeleteOnSubmit(collarFile);
+                Database.CollarParameters.DeleteOnSubmit(parameter);
+            }
             if (SubmitChanges())
                 ParametersDataChanged();
         }
 
         private void EditParameterButton_Click(object sender, EventArgs e)
         {
-            var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[3].Value;
+            var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
             var form = new CollarParametersDetailsForm(parameter, false, true);
             form.DatabaseChanged += (o, x) => ParametersDataChanged();
             form.Show(this);
@@ -259,7 +277,7 @@ namespace AnimalMovement
 
         private void InfoParameterButton_Click(object sender, EventArgs e)
         {
-            var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[3].Value;
+            var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
             var form = new CollarDetailsForm(parameter.Collar);
             form.DatabaseChanged += (o, x) => ParametersDataChanged();
             form.Show(this);

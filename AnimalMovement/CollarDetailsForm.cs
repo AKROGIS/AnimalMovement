@@ -439,7 +439,8 @@ namespace AnimalMovement
                                                         : p.Gen3Period + " min"),
                                     File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
                                     Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
-                                    End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g")
+                                    End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g"),
+                                    Data = p.CollarFiles.Any()
                                 }).ToList();
                     break;
                 case "Gen4":
@@ -448,12 +449,14 @@ namespace AnimalMovement
                             Parameter = p,
                             File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
                             Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
-                            End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g")
+                            End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g"),
+                            Data = p.CollarFiles.Any()
                         })
                               .ToList();
                     break;
             }
             ParametersDataGridView.Columns[0].Visible = false;
+            ParametersDataGridView.Columns[4].HeaderText = "Has Derived Data";
             EnableParametersControls();
         }
 
@@ -483,13 +486,27 @@ namespace AnimalMovement
 
         private void DeleteParameterButton_Click(object sender, EventArgs e)
         {
-            if (ParametersDataGridView.SelectedRows.Count < 1 || ParametersDataGridView.Columns.Count < 1)
-                return;
-            foreach (DataGridViewRow row in ParametersDataGridView.SelectedRows)
+            var parameters =
+                ParametersDataGridView.SelectedRows.Cast<DataGridViewRow>()
+                                      .Select(row => (CollarParameter) row.Cells[0].Value)
+                                      .ToList();
+            bool abort = false;
+            if (parameters.Any(p => p.CollarFiles.Any()))
             {
-                var parameterId = (int) row.Cells[0].Value;
-                var collarParameter = Collar.CollarParameters.First(p => p.ParameterId == parameterId);
-                Database.CollarParameters.DeleteOnSubmit(collarParameter);
+                var message = String.Format("Deleting {0} will delete derived collar files and fixes.",
+                                            parameters.Count == 1 ? "this parameter" : "these parameters")
+                              + Environment.NewLine + "Are you sure you want to continue?";
+                abort =
+                    MessageBox.Show(message, "Deleting derived data", MessageBoxButtons.YesNo, MessageBoxIcon.Question) !=
+                    DialogResult.Yes;
+            }
+            if (abort)
+                return;
+            foreach (var parameter in parameters)
+            {
+                foreach (var collarFile in parameter.CollarFiles)
+                    Database.CollarFiles.DeleteOnSubmit(collarFile);
+                Database.CollarParameters.DeleteOnSubmit(parameter);
             }
             if (SubmitChanges())
                 ParametersDataChanged();
