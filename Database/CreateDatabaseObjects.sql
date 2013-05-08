@@ -7709,11 +7709,11 @@ GRANT EXECUTE ON [dbo].[Animal_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Animal_Update] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosDeployment_Delete] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosDeployment_Delete] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosDeployment_Insert] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosDeployment_Insert] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosDeployment_Update] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosDeployment_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosDownloads_Insert] TO [ArgosProcessor] AS [dbo]
 GO
@@ -7739,13 +7739,15 @@ GRANT EXECUTE ON [dbo].[ArgosFileProcessingIssues_Insert] TO [ArgosProcessor] AS
 GO
 GRANT EXECUTE ON [dbo].[ArgosFileProcessingIssues_Insert] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosPlatform_Delete] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosPlatform_Delete] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosPlatform_Update] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosPlatform_Insert] TO [Investigator] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosProgram_Delete] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosPlatform_Update] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosProgram_Update] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosProgram_Delete] TO [Editor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosProgram_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Collar_Delete] TO [Editor] AS [dbo]
 GO
@@ -7783,9 +7785,9 @@ GRANT EXECUTE ON [dbo].[CollarParameterFile_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Location_UpdateStatus] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[Project_Delete] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[Project_Delete] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[Project_Insert] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[Project_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Project_Update] TO [Editor] AS [dbo]
 GO
