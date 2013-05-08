@@ -6226,12 +6226,9 @@ BEGIN
     END
  
     -- Check that this is not somebodies child
-    IF EXISTS (SELECT 1 FROM dbo.CollarFiles WHERE ParentFileId IS NOT NULL and FileId = @FileId)
-    BEGIN
-        DECLARE @message3 nvarchar(200) = 'This file was derived from another file.  It cannot be deleted directly';
-        RAISERROR(@message3, 18, 0)
-        RETURN (1)
-    END
+    -- this was previously denied, but it is required to allow the user to delete collar parameters and argos deployments
+    -- In general, client apps should deny deleting client files directly.  The scheduled ArgosProcessor will recreate
+    -- them unless an Argos Deployment or Collar Parameter is also deleted.
     
     -- Delete this file
     DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
