@@ -428,8 +428,96 @@ Collars
 
 **Updating DisposalDate needs to update any null EndDate in a related ArgosDeployment.**
 
+
+
+
 CollarParameters
 ================
+Description
+-----------
+  This table contains information on how to process a Collar Files. Each record
+  contains a Collar, and either a link to a Collar Parameter File, or a timespan.
+  This table is currently only useful for Telonics collars with Argos data. Other
+  arrangements that require more than a parameter file (of any format) to process
+  a Collar File will require modifications to this table.  A Collar can have only
+  one Collar Parameter at a time.  The Start and End dates are used to specify the
+  period during which a parameter is valid for a file.
+  
+Relationships
+-------------
+  A Collar can have one or more Collar Parameter (at different times).  A Collar
+  Parameter File can provide Collar Parameters for multiple Collars concurrently.
+  Therefore, a Collar Parameter must have a Collar (foreign key), and optionally a
+  Collar Parameter File (nullable foreign Key).
+  Collar Files that are created by a using the Collar Parameter maintain a link to the
+  Collar Parameter (foreign key), which will deny deletes of the Collar Parameter.  How         FIX
+  a Collar File was derived is important to keeping it up to date, so we need to maintain
+  the Collar Parameters used to create it.
+  
+Attributes
+----------
+  ParameterId - non-null surrogate primary key (integer starting at 1 and incrementing
+                by 1).  Users cannot add or update this column.
+  CollarManufacturer/CollarId - non-null foreign key to Collars  Cascade on delete and
+          update. Parameter is subject to changes and deletes in Collars.                 ***COLLAR Disposal Date***
+  FileId - nullable foreign key to CollarParameterFiles. Cascade on delete and No Action
+           on update (FileId is a surrogate PK, it will never change).  A Collar Parameter
+		   cannot use an Inactive Collar Parameter File. One and only one of FileId and
+		   Gen3Period must be non-null.
+  Gen3Period - nullable positive integer timespan in minutes between GPS fixes on an
+               Telonics Gen3 collar. One and only one of FileId and Gen3Period must be
+			   non-null. 
+  StateDate - nullable date/time in UTC indicating when this Collar Parameter begins to
+              apply to the collar.  A value of null indicates the infinite past.
+  EndDate - nullable date/time in UTC indicating when this Collar Parameter stops
+              applying to the collar.  A value of null indicates the infinite future.
+  
+Select
+------
+  Any database user can view any attribute of any Collar Parameter.
+Create
+------
+  Only a database user who is a Project Investigator, or an Assistant to a Project
+  Investigator can create Collar Parameter for a collar that the PI owns.  The database
+  will never create these objects automatically.  Creating different Collar Parameters for
+  the same Collar with overlapping (touching is not overlapping) dates is not allowed.
+  One and only one of FileId and Gen3Period must be non-null.  The database user creating
+  a Collar Parameter with a Collar Parameter File must be the owner or an assistant to
+  the owner of the Collar Parameter File.
+  When a Collar Parameter is created, the FileProcessingIssues should be scanned, and         or Flag the appropriate files for reprocessing
+  any file issues that can be resolved with the new Collar Parameter should be resolved
+  by reprocessing the file.
+Update
+------
+  Only the database user who owns the Collar or Collar Parameter File, or is an Assistant
+  to the Collar or Collar Parameter File owner can update a Collar Parameter for the
+  Collar or Collar Parameter File.  The following restrictions apply to changing
+  attributes:
+  - ParameterId: managed by the database, the user cannot change this attribute.  The
+    database will not change it after creation.
+  - CollarManufacturer/CollarId: If these values changes, then all of the files generated       CHECK
+    with this Collar Parameter will need to be deleted.  The file processing issues should
+	be scanned to see if there are issues that are resolved with the new Collar Parameter.
+  - Gen3Period, FileId: If these values changes, then all of the files generated with this
+    Collar Parameter will need to be regenerated. 
+  - Start,Date: cannot overlap with another Collar Parameter for the same collar.  The
+    dates (typically only a null end date) will be changed to accomodate a new Collar
+	Parameter on a Collar.  When this happens, any files that were created with this
+	Collar Parameter must be evaluated to ensure that the generated fixes are all
+	inside the new date range, and if the date range increased, then new fixes may need
+	to be generated. 
+Delete
+------
+  Only the database user who owns the Collar, or is an Assistant to the Collar owner can
+  delete a Collar Parameter. The database will never delete these objects automatically.
+  
+  ** Collar Parameter deletes cannot be done if the Collar Parameter was used to create a       RESOLVE
+  Collar File.  This requires the user to first delete all processed results.  This is
+  tedious.
+  
+  ** When a Collar Parameter is deleted is will cascade to all Collar Files generated with
+  this Collar Parameter.  The Collar File delete must trigger an update to the File
+  Processing Issues (the parent file is no longer fully processed).
 
 
 
