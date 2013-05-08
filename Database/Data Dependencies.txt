@@ -510,14 +510,41 @@ Delete
 ------
   Only the database user who owns the Collar, or is an Assistant to the Collar owner can
   delete a Collar Parameter. The database will never delete these objects automatically.
-  
-  ** Collar Parameter deletes cannot be done if the Collar Parameter was used to create a       RESOLVE
-  Collar File.  This requires the user to first delete all processed results.  This is
-  tedious.
-  
-  ** When a Collar Parameter is deleted is will cascade to all Collar Files generated with
-  this Collar Parameter.  The Collar File delete must trigger an update to the File
-  Processing Issues (the parent file is no longer fully processed).
+  Collar Parameter deletes cannot be done if the Collar Parameter was used to create a
+  Collar File - see the Special Note on Referential Integrity below.  Therefore, if the
+  client wants to delete a CollarParameter, they must first delete related CollarFiles.
+  Deleting a CollarFile is sufficient to list the parents file in need of reprocessing
+  (it will be argos platform dates not in a results file, and no processing issue to
+  explain it), after a scheduled attempt to process, the file will have a processing
+  issue to blaming the missing collar parameter.
+
+Special Note on Referential Integrity
+-------------------------------------
+If a CollarParameter is deleted, all CollarFiles which reference it need to be deleted.
+I would prefer to do this as an 'DELETE ON CASCADE' in a foreign key relationship in the
+CollarFiles table, however CollarFiles has an INSTEAD OF trigger (for reasons similar to
+those discussed here, and because of it's ParentFileId self-referential foreign key
+relationship). Per MSDN, http://msdn.microsoft.com/en-us/library/ms186973(v=sql.105).aspx,
+"A table that has an INSTEAD OF trigger cannot also have a REFERENCES clause that
+specifies a cascading action", so CollarFiles cannot have a DELETE ON CASCADE contraint.
+
+In addition, per MSDN, http://msdn.microsoft.com/en-us/library/ms189261(v=sql.105).aspx,
+"If constraints exist on the trigger table, they are checked after the INSTEAD OF trigger
+execution but prior to the AFTER trigger execution. If the constraints are violated, the
+INSTEAD OF trigger actions are rolled back and the AFTER trigger is not executed."
+Therefore if CollarFiles has a DELETE NO ACTION constraint it will block the delete of
+CollarParameters.  I would need to use another INSTEAD OF trigger to delete the
+CollarFiles before deleting the COllarParameters. However, this would mean I cannot use
+DELETE ON CASCADE in the CollarParameter's relationship to CollarParameterFiles, etc.
+
+Three solutions
+1) Implement INSTEAD OF triggers (or avoid cascades) all the way down.
+2) Require the client to delete referential problems before deleting the CollarParameters
+3) Remove the foreign key constraint, and use AFTER update, inssert, delete triggers
+   to maintain referential integrity.
+I like the explicite relationships, and cascading triggers (they are simple to understand,
+easy to maintain, and guarantee the semantics). Therefore, I do not like INSTEAD OF
+triggers.  I am left with option #2.
 
 
 
