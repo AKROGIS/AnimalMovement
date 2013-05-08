@@ -858,7 +858,7 @@ namespace DataModel
 		
 		private int _DeploymentId;
 		
-		private int _ParameterId;
+		private System.Nullable<int> _ParameterId;
 		
 		private string _PlatformId;
 		
@@ -900,8 +900,8 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ParameterId", DbType="Int NOT NULL")]
-		public int ParameterId
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ParameterId", DbType="Int")]
+		public System.Nullable<int> ParameterId
 		{
 			get
 			{

@@ -187,6 +187,18 @@ namespace FileLibrary
                 LogIssueForFile(file.FileId, msg, platformId);
             }
             foreach (var parameterSet in parameterSets)
+            {
+                if (parameterSet.ParameterId == null ||
+                    (parameterSet.CollarModel == "Gen3" && parameterSet.Gen3Period == null) ||
+                    (parameterSet.CollarModel == "Gen4" && parameterSet.Format == null))
+                {
+                    var start = parameterSet.StartDate ?? first;
+                    var end = parameterSet.EndDate ?? last;
+                    var msg = String.Format("No Telonics Parameters for Collar {0}/{3} from {1:g} to {2:g}",
+                                            parameterSet.CollarManufacturer, start, end, parameterSet.CollarId);
+                    LogIssueForFile(file.FileId, msg, platformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
+                    continue;
+                }
                 try
                 {
                     ProcessParameterSet(file, argos, first, last, transmissions, parameterSet);
@@ -200,6 +212,7 @@ namespace FileLibrary
                     LogIssueForFile(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer,
                                     parameterSet.CollarId);
                 }
+            }
             LogGeneralMessage("  Finished processing transmissions");
         }
 

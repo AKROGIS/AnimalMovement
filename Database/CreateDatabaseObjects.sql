@@ -1879,6 +1879,12 @@ GO
 -- Caller should order the results by startdate, then check the following:
 --   if @StartDate < firstrecord.startDate(and not null) then Missing parameters
 --   if @EndDate > lastrecord.EndDate(and not null) more missing parameters
+
+-- Update May 8, 2013
+--   Removed valid parameter check.  The processor will now be able to check
+--   if there is a valid Argos-collar deployment, but no collar-parameter
+--   assignment, and therefore write a better error message.
+--   The client must now check for invalid parameters.
 -- =============================================
 CREATE FUNCTION [dbo].[GetTelonicsParametersForArgosDates] 
 (
@@ -1900,7 +1906,7 @@ AS
        FROM ArgosDeployments AS A
  INNER JOIN Collars AS C
          ON A.CollarManufacturer = C.CollarManufacturer AND A.CollarId = C.CollarId
- INNER JOIN CollarParameters AS P
+  LEFT JOIN CollarParameters AS P
          ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
   LEFT JOIN CollarParameterFiles AS F
          ON P.FileId = F.FileId
@@ -1909,8 +1915,6 @@ AS
         AND (P.StartDate IS NULL OR P.StartDate < @EndDate)
         AND (A.EndDate IS NULL OR @StartDate < A.EndDate)
         AND (P.EndDate IS NULL OR @StartDate < P.EndDate)
-        AND (   (CollarModel = 'Gen3' AND P.Gen3Period IS NOT NULL)
-             OR (CollarModel = 'Gen4' AND P.FileId IS NOT NULL))
 GO
 SET ANSI_NULLS ON
 GO
