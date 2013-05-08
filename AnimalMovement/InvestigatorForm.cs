@@ -779,9 +779,9 @@ namespace AnimalMovement
                         {
                             File = file,
                             Name = file.FileName,
-                            CanDelete = true
+                            CanDelete = !file.CollarParameters.Any(p => p.CollarFiles.Any())
                         };
-            var sortedList = query.OrderBy(f => f.Name).ToList();
+            var sortedList = query.OrderBy(f => f.File.Status).ThenBy(f => f.Name).ToList();
             ParameterFilesListBox.DataSource = sortedList;
             ParameterFilesListBox.DisplayMember = "Name";
             ParameterFilesListBox.ClearItemColors();

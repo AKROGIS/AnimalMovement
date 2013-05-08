@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.DoneCancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
             this.ParametersDataGridView = new System.Windows.Forms.DataGridView();
@@ -61,11 +62,13 @@
             this.TpfDataGridView = new System.Windows.Forms.DataGridView();
             this.ValidationTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.ErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).BeginInit();
             this.FileTabControl.SuspendLayout();
             this.ParametersTabPage.SuspendLayout();
             this.TpfDetailsTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ErrorProvider)).BeginInit();
             this.SuspendLayout();
             // 
             // DoneCancelButton
@@ -228,6 +231,7 @@
             this.FileNameTextBox.Name = "FileNameTextBox";
             this.FileNameTextBox.Size = new System.Drawing.Size(151, 20);
             this.FileNameTextBox.TabIndex = 51;
+            this.FileNameTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.FileNameTextBox_Validating);
             // 
             // label4
             // 
@@ -465,6 +469,10 @@
             this.label5.TabIndex = 80;
             this.label5.Text = "Contents:";
             // 
+            // ErrorProvider
+            // 
+            this.ErrorProvider.ContainerControl = this;
+            // 
             // CollarParameterFileDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -499,6 +507,7 @@
             this.TpfDetailsTabPage.ResumeLayout(false);
             this.TpfDetailsTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ErrorProvider)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -539,6 +548,7 @@
         private System.Windows.Forms.CheckBox IgnoreSuffixCheckBox;
         private System.Windows.Forms.Button AddArgosButton;
         private System.Windows.Forms.Button CheckButton;
+        private System.Windows.Forms.ErrorProvider ErrorProvider;
 
     }
 }

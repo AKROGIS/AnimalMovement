@@ -16,6 +16,7 @@ namespace AnimalMovement
         private CollarParameterFile File { get; set; }
         private bool IsEditMode { get; set; }
         private bool IsEditor { get; set; }
+        private bool HasParameters { get; set; }
         internal event EventHandler DatabaseChanged;
 
         internal CollarParameterFileDetailsForm(CollarParameterFile file)
@@ -40,6 +41,7 @@ namespace AnimalMovement
 
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsInvestigatorEditor(File.Owner, CurrentUser) ?? false;
+            HasParameters = File.CollarParameters.Any();
             ParametersDataGridView.DataSource = null;
         }
 
@@ -124,7 +126,15 @@ namespace AnimalMovement
             IsEditMode = EditSaveButton.Text == "Save";
             FileNameTextBox.Enabled = IsEditMode;
             OwnerComboBox.Enabled = IsEditMode;
-            StatusComboBox.Enabled = IsEditMode;
+            StatusComboBox.Enabled = IsEditMode && !HasParameters;
+        }
+
+        private void FileNameTextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            bool ok = !String.IsNullOrEmpty(FileNameTextBox.Text);
+            var msg = ok ? "" : "File Name cannot be empty";
+            ErrorProvider.SetError(FileNameTextBox, msg);
+            e.Cancel = !ok;
         }
 
         private void ShowContentsButton_Click(object sender, EventArgs e)
@@ -178,7 +188,7 @@ namespace AnimalMovement
 
         private void UpdateFile()
         {
-            File.FileName = FileNameTextBox.Text.NullifyIfEmpty();
+            File.FileName = FileNameTextBox.Text;
             File.ProjectInvestigator = (ProjectInvestigator)OwnerComboBox.SelectedItem;
             File.LookupFileStatus = (LookupFileStatus)StatusComboBox.SelectedItem;
         }
