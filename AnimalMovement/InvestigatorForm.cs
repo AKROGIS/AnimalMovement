@@ -63,6 +63,7 @@ namespace AnimalMovement
             var functions = new AnimalMovementFunctions();
             IsInvestigator = Investigator == Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
             IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
+            CollarsListBox.DataSource = null;
         }
 
 
@@ -305,15 +306,15 @@ namespace AnimalMovement
 
         private void SetUpCollarsTab()
         {
-            var query = from collar in Database.Collars
-                        where collar.ProjectInvestigator == Investigator
-                        //orderby collar.CollarManufacturer , collar.CollarId
+            if (CollarsListBox.DataSource != null)
+                return;
+            var query = from collar in Investigator.Collars
                         select new CollarListItem
-                        {
-                            Collar = collar,
-                            Name = BuildCollarText(collar),
-                            CanDelete = CanDeleteCollar(collar)
-                        };
+                            {
+                                Collar = collar,
+                                Name = BuildCollarText(collar),
+                                CanDelete = CanDeleteCollar(collar)
+                            };
             var sortedList = query.OrderBy(c => c.Collar.DisposalDate != null).ThenBy(c => c.Collar.CollarManufacturer).ThenBy(c => c.Collar.CollarId).ToList();
             CollarsListBox.DataSource = sortedList;
             CollarsListBox.DisplayMember = "Name";
@@ -338,8 +339,9 @@ namespace AnimalMovement
 
         private bool CanDeleteCollar(Collar collar)
         {
-            return !Database.CollarDeployments.Any(cd => cd.Collar == collar) &&
-                   !Database.CollarFixes.Any(cd => cd.Collar == collar);
+            return !collar.CollarDeployments.Any() &&
+                   !collar.CollarFixes.Any() &&
+                   !collar.CollarParameters.Any(p => p.CollarFiles.Any());
         }
 
         private string BuildCollarText(Collar collar)
