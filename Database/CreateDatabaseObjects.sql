@@ -4433,173 +4433,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:		Regan Sarwas
--- Create date: March 21, 2013
--- Description:	Update an Argos Deployment
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosDeployment_Update] 
-    @DeploymentId int, 
-    @PlatformId NVARCHAR(255) = NULL,
-    @CollarManufacturer NVARCHAR(255) = NULL, 
-    @CollarId NVARCHAR(255) = NULL, 
-    @StartDate DATETIME2(7) = NULL,
-    @EndDate DATETIME2(7) = NULL 
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
-    
-    -- Check that this is a valid deployment
-    IF NOT EXISTS (SELECT 1 FROM [dbo].[ArgosDeployments] WHERE [DeploymentId] = @DeploymentId)
-    BEGIN
-        DECLARE @message1 nvarchar(100) = 'ArgosDeployment ' + CONVERT(nvarchar(10),@DeploymentId) + ' does not exist.';
-        RAISERROR(@message1, 18, 0)
-        RETURN 1
-    END
-    
-    -- You must be the Manager to the Platform or the Collar to update the deployment
-    IF NOT EXISTS (SELECT 1 FROM dbo.ArgosDeployments AS D
-                            JOIN ArgosPlatforms AS P ON D.PlatformId = P.PlatformId
-                            JOIN ArgosPrograms AS P2 ON P2.ProgramId = P.ProgramId
-                           WHERE Manager = @Caller)
-       AND
-       NOT EXISTS (SELECT 1 FROM dbo.ArgosDeployments AS D
-                            JOIN Collars AS C ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-                           WHERE Manager = @Caller)
-                             
-    BEGIN
-        DECLARE @message2 nvarchar(100) = 'You must be the manager of the deployment''s collar or Argos platform.';
-        RAISERROR(@message2, 18, 0)
-        RETURN 1
-    END
-
-    --Fix Defaults
-    -- I use NULL to indicate don't change value only on non-null fields.
-    -- The defaults for nullable field should match the insert SP.
-    -- If the client does not want to change a nullable field they must provide the original value.
-    IF @PlatformId IS NULL
-        SELECT @PlatformId = [PlatformId] FROM [dbo].[ArgosDeployments] WHERE [DeploymentId] = @DeploymentId;
-    IF @CollarManufacturer IS NULL
-        SELECT @CollarManufacturer = [CollarManufacturer] FROM [dbo].[ArgosDeployments] WHERE [DeploymentId] = @DeploymentId;
-    IF @CollarId IS NULL
-        SELECT @CollarId = [CollarId] FROM [dbo].[ArgosDeployments] WHERE [DeploymentId] = @DeploymentId;
-
-    --All other verification is handled by table constraints and triggers.
-    UPDATE [dbo].[ArgosDeployments] SET [PlatformId] = @PlatformId,
-                                        [CollarManufacturer] = @CollarManufacturer,
-                                        [CollarId] = @CollarId,
-                                        [StartDate] = @StartDate,
-                                        [EndDate] = @EndDate
-                                  WHERE [DeploymentId] = @DeploymentId;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 21, 2013
--- Description:	Adds a new Argos Deployment
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosDeployment_Insert] 
-    @PlatformId NVARCHAR(255),
-    @CollarManufacturer NVARCHAR(255), 
-    @CollarId NVARCHAR(255), 
-    @StartDate DATETIME2(7) = NULL,
-    @EndDate DATETIME2(7) = NULL,
-    @DeploymentId INT OUTPUT 
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-    -- Validate permission for this operation
-    -- Caller must be an investigator, managed by permissions on SP
-
-	-- Caller must be the Manager of the Collar
-    IF NOT EXISTS (SELECT 1 FROM Collars
-                           WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-                             AND Manager = @Caller)      
-    BEGIN
-        DECLARE @message1 nvarchar(100) = 'You are not the manager of Collar ' + @CollarManufacturer + '/' + @CollarId;
-        RAISERROR(@message1, 18, 0)
-        RETURN 1
-    END
-	
-	-- Caller must be the Manager of the Platform's Program
-    IF NOT EXISTS (SELECT 1 FROM ArgosPlatforms AS P
-                            JOIN ArgosPrograms AS P2 ON P2.ProgramId = P.ProgramId
-                           WHERE PlatformId = @PlatformId
-                             AND Manager = @Caller)
-    BEGIN
-        DECLARE @message2 nvarchar(100) = 'You are not the manager of Argos Platform ' + @PlatformId;
-        RAISERROR(@message2, 18, 0)
-        RETURN 1
-    END
-
-    
-    --All other verification is handled by primary/foreign key and column constraints.
-    INSERT INTO [dbo].[ArgosDeployments] ([PlatformId], [CollarManufacturer], [CollarId],
-                                          [StartDate], [EndDate])
-                                  VALUES (@PlatformId, @CollarManufacturer, @CollarId,
-                                          @StartDate, @EndDate)
-    SET @DeploymentId = SCOPE_IDENTITY()
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 21, 2013
--- Description:	Deletes an Argos Deployment
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosDeployment_Delete] 
-    @DeploymentId int 
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
-    
-    -- Check that this is a valid deployment
-    IF NOT EXISTS (SELECT 1 FROM [dbo].[ArgosDeployments] WHERE [DeploymentId] = @DeploymentId)
-    BEGIN
-        -- since it doesn't exist we are successfully done.
-        RETURN 0
-    END
-    
-    -- You must be the Manager to the Platform or the Collar to delete the deployment
-    IF NOT EXISTS (SELECT 1 FROM dbo.ArgosDeployments AS D
-                            JOIN ArgosPlatforms AS P ON D.PlatformId = P.PlatformId
-                            JOIN ArgosPrograms AS P2 ON P2.ProgramId = P.ProgramId
-                           WHERE Manager = @Caller)
-       AND
-       NOT EXISTS (SELECT 1 FROM dbo.ArgosDeployments AS D
-                            JOIN Collars AS C ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-                           WHERE Manager = @Caller)
-                             
-    BEGIN
-        DECLARE @message2 nvarchar(100) = 'You must be the manager of the deployment''s collar or Argos platform.';
-        RAISERROR(@message2, 18, 0)
-        RETURN 1
-    END
-
-    DELETE FROM dbo.ArgosDeployments WHERE [DeploymentId] = @DeploymentId
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
 -- Create date: April 11, 2012
 -- Description:	Updates a project investigator
 -- =============================================
@@ -5826,6 +5659,241 @@ BEGIN
 
 
     DELETE FROM dbo.ArgosPlatforms WHERE [PlatformId] = @PlatformId
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 21, 2013
+-- Description: Update an Argos Deployment
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosDeployment_Update] 
+    @DeploymentId       INT, 
+    @PlatformId         NVARCHAR(255) = NULL,
+    @CollarManufacturer NVARCHAR(255) = NULL, 
+    @CollarId           NVARCHAR(255) = NULL, 
+    @StartDate          DATETIME2(7),
+    @EndDate            DATETIME2(7) 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    DECLARE @OldCollarOwner sysname
+    DECLARE @OldPlatformOwner sysname
+    DECLARE @NewCollarOwner sysname
+    DECLARE @NewPlatformOwner sysname
+    
+    -- Check that this is a valid deployment
+    --   this is done now to get the old owner and avoid a confusing permission error	
+        SELECT @OldCollarOwner = C.Manager, @OldPlatformOwner = P.Manager
+          FROM [dbo].[ArgosDeployments] AS D
+          JOIN [dbo].[Collars] AS C ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+          JOIN [dbo].[ArgosPlatforms] AS A ON A.PlatformId = D.PlatformId
+          JOIN [dbo].[ArgosPrograms] AS P ON P.ProgramId = A.ProgramId
+         WHERE [DeploymentId] = @DeploymentId
+    IF @OldCollarOwner IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'ArgosDeployment ' + CONVERT(nvarchar(10),@DeploymentId) + ' does not exist.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+	-- Caller must be the Manager or Assistant of the old Collar
+    IF (@OldCollarOwner != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @OldCollarOwner))
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You ('+@Caller+') are not the manager (or assistant) of the old Collar'
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+	
+	-- Caller must be the Manager or Assistant of the old Platform's Program
+    IF @OldPlatformOwner != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @OldPlatformOwner)
+    BEGIN
+        DECLARE @message3 nvarchar(100) = 'You ('+@Caller+') are not the manager (or assistant) of old Argos Platform'
+        RAISERROR(@message3, 18, 0)
+        RETURN 3
+    END
+
+    --Fix Defaults
+    -- I use NULL to indicate don't change value only on non-null fields.
+    -- The defaults for nullable field should match the insert SP.
+    -- If the client does not want to change a nullable field they must provide the original value.
+    IF @PlatformId IS NULL
+        SELECT @PlatformId = [PlatformId] FROM [dbo].[ArgosDeployments] WHERE [DeploymentId] = @DeploymentId;
+    IF @CollarManufacturer IS NULL
+        SELECT @CollarManufacturer = [CollarManufacturer] FROM [dbo].[ArgosDeployments] WHERE [DeploymentId] = @DeploymentId;
+    IF @CollarId IS NULL
+        SELECT @CollarId = [CollarId] FROM [dbo].[ArgosDeployments] WHERE [DeploymentId] = @DeploymentId;
+
+
+	-- Caller must be the Manager or Assistant of the new Collar
+    SELECT @NewCollarOwner = Manager FROM [dbo].[Collars] WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF (@NewCollarOwner != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @NewCollarOwner))
+    BEGIN
+        DECLARE @message4 nvarchar(100) = 'You ('+@Caller+') are not the manager (or assistant) of the new Collar ' + @CollarManufacturer + '/' + @CollarId;
+        RAISERROR(@message4, 18, 0)
+        RETURN 4
+    END
+	
+	-- Caller must be the Manager or Assistant of the new Platform's Program
+    SELECT @NewPlatformOwner = Manager FROM [dbo].[ArgosPlatforms] AS A
+                                       JOIN [dbo].[ArgosPrograms] AS P ON P.ProgramId = A.ProgramId
+                                      WHERE A.PlatformId = @NewPlatformOwner
+    IF @NewPlatformOwner != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @NewPlatformOwner)
+    BEGIN
+        DECLARE @message5 nvarchar(100) = 'You ('+@Caller+') are not the manager (or assistant) of new Argos Platform ' + @PlatformId;
+        RAISERROR(@message5, 18, 0)
+        RETURN 5
+    END
+
+
+    UPDATE [dbo].[ArgosDeployments] SET [PlatformId] = @PlatformId,
+                                        [CollarManufacturer] = @CollarManufacturer,
+                                        [CollarId] = @CollarId,
+                                        [StartDate] = @StartDate,
+                                        [EndDate] = @EndDate
+                                  WHERE [DeploymentId] = @DeploymentId;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 21, 2013
+-- Description:	Adds a new Argos Deployment
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosDeployment_Insert] 
+    @PlatformId NVARCHAR(255),
+    @CollarManufacturer NVARCHAR(255), 
+    @CollarId NVARCHAR(255), 
+    @StartDate DATETIME2(7) = NULL,
+    @EndDate DATETIME2(7) = NULL,
+    @DeploymentId INT OUTPUT 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    DECLARE @NewCollarOwner sysname
+    DECLARE @NewPlatformOwner sysname
+
+    -- Validate permission for this operation
+    
+    -- Caller must be an editor, managed by permissions on SP
+
+	-- Caller must be the Manager or Assistant of the Collar
+    SELECT @NewCollarOwner = Manager FROM [dbo].[Collars] WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF (@NewCollarOwner != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @NewCollarOwner))
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the manager (or assistant) of the Collar ' + @CollarManufacturer + '/' + @CollarId;
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+	
+	-- Caller must be the Manager or Assistant of the Platform's Program
+    SELECT @NewPlatformOwner = Manager FROM [dbo].[ArgosPlatforms] AS A
+                                       JOIN [dbo].[ArgosPrograms] AS P ON P.ProgramId = A.ProgramId
+                                      WHERE A.PlatformId = @NewPlatformOwner
+    IF @NewPlatformOwner != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @NewPlatformOwner)
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You ('+@Caller+') are not the manager (or assistant) of Argos Platform ' + @PlatformId;
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+
+    INSERT INTO [dbo].[ArgosDeployments] ([PlatformId], [CollarManufacturer], [CollarId], [StartDate], [EndDate])
+                                  VALUES (@PlatformId,  @CollarManufacturer,  @CollarId,  @StartDate,  @EndDate)
+    SET @DeploymentId = SCOPE_IDENTITY()
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 21, 2013
+-- Description: Deletes an Argos Deployment
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosDeployment_Delete] 
+    @DeploymentId int 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    DECLARE @OldCollarOwner sysname
+    DECLARE @OldPlatformOwner sysname
+    
+    -- Check that this is a valid deployment
+    --   this is done now to get the old owner and avoid a confusing permission error	
+        SELECT @OldCollarOwner = C.Manager, @OldPlatformOwner = P.Manager
+          FROM [dbo].[ArgosDeployments] AS D
+          JOIN [dbo].[Collars] AS C ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+          JOIN [dbo].[ArgosPlatforms] AS A ON A.PlatformId = D.PlatformId
+          JOIN [dbo].[ArgosPrograms] AS P ON P.ProgramId = A.ProgramId
+         WHERE [DeploymentId] = @DeploymentId
+    IF @OldCollarOwner IS NULL
+        RETURN -- quietly, there is nothing to delete, so we have finished our task.
+
+
+	-- Caller must be the Manager or Assistant of the Collar
+    IF (@OldCollarOwner != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @OldCollarOwner))
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the manager (or assistant) of the Collar'
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+	
+	-- Caller must be the Manager or Assistant of the Platform's Program
+    IF @OldPlatformOwner != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @OldPlatformOwner)
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You ('+@Caller+') are not the manager (or assistant) of Argos Platform'
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+
+    DELETE FROM dbo.ArgosDeployments WHERE [DeploymentId] = @DeploymentId
+
 END
 GO
 SET ANSI_NULLS ON
