@@ -6181,71 +6181,97 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- ===============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: March 2, 2012
--- Description:	Updates the editable fields of a CollarFile
---              except Status.  Also see CollarFile_UpdateStatus
+-- Description: Updates the editable fields of a CollarFile
 -- ===============================================
 CREATE PROCEDURE [dbo].[CollarFile_Update] 
-	@FileId INT, 
-	@FileName NVARCHAR(255) = NULL,
-	@Status CHAR(1),
-	@CollarManufacturer NVARCHAR(255),
-	@CollarId NVARCHAR(255),
-	@ProjectId NVARCHAR(255),
-	@Owner NVARCHAR(255)
+    @FileId INT, 
+    @FileName NVARCHAR(255) = NULL,
+    @Status CHAR(1),
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId NVARCHAR(255),
+    @ProjectId NVARCHAR(255),
+    @Owner NVARCHAR(255)
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-	
-	-- Validate permission for this operation
-	-- Verify we are updating a valid collar
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-    -- if @CurrentOwner is non-null the caller must be the existing owner, the new owner doesn't matter.
-    -- if @CurrentProjectId is non-null the caller must be the existing project PI or editor on the project
-	DECLARE @CurrentOwner NVARCHAR(255) = NULL
-	DECLARE @CurrentProjectId NVARCHAR(255) = NULL
-	SELECT @CurrentOwner = [Owner], @CurrentProjectId = [ProjectId] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-    IF         @CurrentOwner <> @Caller  -- Not the owner, when defined
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @FileName           = NULLIF(@FileName,'')
+    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
+    SET @CollarId           = NULLIF(@CollarId,'')
+    SET @ProjectId          = NULLIF(@ProjectId,'')
+    SET @Owner              = NULLIF(@Owner,'')
+
+    -- Validate permission for this operation
+    -- Verify we are updating a valid collar
+    DECLARE @CurrentOwner NVARCHAR(255) = NULL
+    DECLARE @CurrentProjectId NVARCHAR(255) = NULL
+    SELECT @CurrentOwner = [Owner], @CurrentProjectId = [ProjectId] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+    IF @CurrentOwner IS NULL AND @CurrentProjectId IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    -- caller must be old owner or their assistant 
+    IF @CurrentOwner IS NOT NULL
+       AND @caller != @CurrentOwner
+       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @CurrentOwner) -- Not the file Owner's Assistant
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You ('+@Caller+') are not the owner (' + @CurrentOwner + ') (or their assistant) of the file.';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+    -- caller must be new owner or their assistant 
+    IF @Owner IS NOT NULL
+       AND @caller != @Owner
+       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Owner) -- Not the file Owner's Assistant
+    BEGIN
+        DECLARE @message3 nvarchar(100) = 'You ('+@Caller+') are not the new owner (' + @Owner + ') (or their assistant) of the file.';
+        RAISERROR(@message3, 18, 0)
+        RETURN 3
+    END
+
+    -- caller must be old project PI or a project editor 
+    IF @CurrentProjectId IS NOT NULL
        AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @CurrentProjectId AND ProjectInvestigator = @Caller)  -- Not the project's PI
        AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @CurrentProjectId AND Editor = @Caller)  -- Not an editor on the project
     BEGIN
-        DECLARE @message2 nvarchar(200)
-        IF @CurrentProjectId IS NOT NULL
-            SET @message2 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@CurrentProjectId+').';
-        ELSE
-            SET @message2 = 'You ('+@Caller+') are not the owner (' + @CurrentOwner + ') of the file.';
-        RAISERROR(@message2, 18, 0)
-        RETURN (1)
+        DECLARE @message4 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@CurrentProjectId+').';
+        RAISERROR(@message4, 18, 0)
+        RETURN 4
     END
 
-    --Fix Defaults
-    -- Blanks strings are not allowed
-    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
-    SET @CollarId = NULLIF(@CollarId,'')
-    SET @ProjectId = NULLIF(@ProjectId,'')
-    SET @Owner = NULLIF(@Owner,'')
+    -- caller must be new project PI or a project editor 
+    IF @ProjectId IS NOT NULL
+       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)  -- Not the project's PI
+       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not an editor on the project
+    BEGIN
+        DECLARE @message5 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
+        RAISERROR(@message5, 18, 0)
+        RETURN 5
+    END
 
     -- I use NULL to indicate don't change value only on non-null fields.
     -- The defaults for nullable field should match the insert SP.
     -- If the client does not want to change a nullable field they must provide the original value.
     IF @FileName IS NULL
-		SELECT @FileName = [FileName] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-    
+        SELECT @FileName = [FileName] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+
     -- Do the update
-	UPDATE [dbo].[CollarFiles]
-	   SET [FileName] = @FileName, [Status] = @Status, [CollarManufacturer] = @CollarManufacturer,
-	       [CollarId] = @CollarId, [ProjectId] = @ProjectId, [Owner] = @Owner
-	 WHERE [FileId] = @FileId
+    UPDATE [dbo].[CollarFiles]
+       SET [FileName] = @FileName, [Status] = @Status, [CollarManufacturer] = @CollarManufacturer,
+           [CollarId] = @CollarId, [ProjectId] = @ProjectId, [Owner] = @Owner
+     WHERE [FileId] = @FileId
 
 END
 GO
@@ -6279,15 +6305,22 @@ BEGIN
     SET NOCOUNT ON;
     
     -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @FileName           = NULLIF(@FileName,'')
+    SET @ProjectId          = NULLIF(@ProjectId,'')
+    SET @Owner              = NULLIF(@Owner,'')
+    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
+    SET @CollarId           = NULLIF(@CollarId,'')
 
     -- Fix the defaults
     IF @Owner IS NULL AND @ProjectId IS NULL
         SET @Owner = @Caller
-    
+
     -- Validate permission for this operation
     -- The caller must be in the ArgosProcessor role
-    -- OR if @Owner is non-null the caller must be a PI.
+    -- OR if @Owner is non-null the caller must be the owner or the owner's assistant (owner may not be a PI, but that will be caught with ref integrity).
     -- OR if @ProjectID is non-null the caller must be the project PI or editor on the project
     IF     NOT EXISTS (SELECT 1 
                          FROM sys.database_role_members AS RM 
@@ -6296,8 +6329,10 @@ BEGIN
                          JOIN sys.database_principals AS R 
                            ON RM.role_principal_id = R.principal_id 
                         WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-      AND (NOT EXISTS (SELECT 1 FROM dbo.ProjectInvestigators WHERE [Login] = @Caller) OR
-           NOT EXISTS (SELECT 1 FROM dbo.ProjectInvestigators WHERE [Login] = @Owner))  -- Not a Project Investigator
+       AND @Caller != @Owner  -- Not the file's owner
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Owner) -- Not the file Owner's Assistant
        AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)  -- Not the project's PI
        AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not an editor on the project
     BEGIN
@@ -6309,7 +6344,7 @@ BEGIN
         RAISERROR(@message1, 18, 0)
         RETURN (1)
     END
-    
+
     -- Get the format of the file, and determine if this format has Argos data (to determine processing required)
     SET @Format = [dbo].[FileFormat](@Contents)
     IF NOT EXISTS (SELECT 1 FROM dbo.LookupCollarFileFormats WHERE Code = @Format)
@@ -6318,12 +6353,12 @@ BEGIN
         RAISERROR(@message2, 18, 0)
         RETURN (1)
     END
-    
+
     -- Do the update, the rest of the integrity checks are done in the trigger
     INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [Owner], [CollarManufacturer], [CollarId], [Format], [Status], [Contents], [ParentFileId], [ArgosDeploymentId], [CollarParameterId])
                          VALUES (@FileName,  @ProjectId,  @Owner,  @CollarManufacturer,  @CollarId,  @Format,  @Status,  @Contents,  @ParentFileId,  @ArgosDeploymentId,  @CollarParameterId)
-	SET @FileId = SCOPE_IDENTITY();
-	SELECT @UploadDate = [UploadDate], @UserName = [UserName], @Sha1Hash = [Sha1Hash] FROM dbo.CollarFiles WHERE FileId = @FileId
+    SET @FileId = SCOPE_IDENTITY();
+    SELECT @UploadDate = [UploadDate], @UserName = [UserName], @Sha1Hash = [Sha1Hash] FROM dbo.CollarFiles WHERE FileId = @FileId
 END
 GO
 SET ANSI_NULLS ON
@@ -6331,10 +6366,10 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: March 2, 2012
 --     revised: March 25, 2013
--- Description:	Deletes a CollarFile
+-- Description: Deletes a CollarFile
 --              related records are deleted by FK Cascades, or the INSTEAD OF trigger
 --              Ensures that Child files are never delete (the trigger handles it)
 -- =============================================
@@ -6343,9 +6378,9 @@ CREATE PROCEDURE [dbo].[CollarFile_Delete]
 AS
 BEGIN
     SET NOCOUNT ON;
-        
+
     -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
 
     -- First check that this is a valid file, if not exit quietly (we are done)
     IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId)
@@ -6354,14 +6389,15 @@ BEGIN
     END
 
     -- Validate permission for this operation
-    -- To delete a file you must be an editor of the project, or the Owner of the file
-    -- Do not check the uploader. i.e. Do not allow someone who lost their privileges to remove a file.
-        
+    -- To delete a file you must be an editor of the project, or the Owner (or assistant) of the file
+    -- Do not check the uploader. i.e. Do not allow someone who may have lost their privileges to remove a file.
+
     -- Get the projectId and Owner
     DECLARE @ProjectId NVARCHAR(255) = NULL
     DECLARE @Owner NVARCHAR(255) = NULL
     SELECT @ProjectID = [ProjectId], @Owner = [Owner] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
     IF @Owner <> @Caller  -- Not the owner
+       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectInvestigatorAssistants WHERE Assistant = @Caller AND ProjectInvestigator = @Caller) -- Not the Owner's assistant
        AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not the Project PI
        AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller) -- Not a Project Editor
     BEGIN
@@ -6369,7 +6405,7 @@ BEGIN
         IF @ProjectId IS NOT NULL
             SET @message1 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
         ELSE
-            SET @message1 = 'You ('+@Caller+') are not the owner (' + @Owner + ') of this file.';
+            SET @message1 = 'You ('+@Caller+') are not the owner (' + @Owner + ')of this file or their assistant.';
         RAISERROR(@message1, 18, 0)
         RETURN (1)
     END
@@ -6378,10 +6414,10 @@ BEGIN
     -- this was previously denied, but it is required to allow the user to delete collar parameters and argos deployments
     -- In general, client apps should deny deleting client files directly.  The scheduled ArgosProcessor will recreate
     -- them unless an Argos Deployment or Collar Parameter is also deleted.
-    
+
     -- Delete this file
     DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-    
+
 END
 GO
 SET ANSI_NULLS ON
