@@ -6816,40 +6816,47 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: March 28, 2012
--- Description:	Adds a new project to the database.
+-- Description: Adds a new project to the database.
 -- =============================================
 CREATE PROCEDURE [dbo].[Project_Insert] 
-	@ProjectId NVARCHAR(255)= NULL,
-	@ProjectName NVARCHAR(255) = NULL, 
-	@ProjectInvestigator sysname = NULL, 
-	@UnitCode NVARCHAR(255) = NULL, 
-	@Description NVARCHAR(4000) = NULL 
+    @ProjectId           NVARCHAR(255),
+    @ProjectName         NVARCHAR(255), 
+    @ProjectInvestigator SYSNAME, 
+    @UnitCode            NVARCHAR(255) = NULL, 
+    @Description         NVARCHAR(4000) = NULL 
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-		
-	--default PI is the calling user
-	IF nullif(@ProjectInvestigator,'') IS NULL
-	BEGIN
-		SET @ProjectInvestigator = @Caller;
-	END
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
 
-	-- If the caller is not a PI then error and return
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a project';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
+    --Fix Text Inputs
+    SET @ProjectId           = NULLIF(@ProjectId,'')
+    SET @ProjectName         = NULLIF(@ProjectName,'')
+    SET @UnitCode            = NULLIF(@UnitCode,'')
+    SET @ProjectInvestigator = NULLIF(@ProjectInvestigator,'')
+    SET @Description         = NULLIF(@Description,'')
 
-	INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
-		 VALUES (nullif(@ProjectId,''), nullif(@ProjectName,''), nullif(@ProjectInvestigator,''),
-		         nullif(@UnitCode,''), nullif(@Description,''))
+    --default PI is the calling user
+    SET @ProjectInvestigator = ISNULL(@ProjectInvestigator, @Caller) 
+
+    -- If the caller is not a PI or assistant then error and return
+    IF @ProjectInvestigator != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator)
+    BEGIN
+        DECLARE @message1 NVARCHAR(100) = 'You ('+@Caller+') must be a project investigator (or assitant) to create a project';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
+         VALUES              (@ProjectId,  @ProjectName,  @ProjectInvestigator,  @UnitCode,  @Description)
 
 END
 GO
@@ -7231,36 +7238,51 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: March 2, 2012
--- Description:	Deletes a project
+-- Description: Deletes a project
 -- =============================================
 CREATE PROCEDURE [dbo].[Project_Delete] 
-	@ProjectId NVARCHAR(255) = NULL 
+    @ProjectId NVARCHAR(255) = NULL 
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-	
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Project (' + @ProjectId + ') is not an existing project.';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-	-- You must be the ProjectInvestigator to delete the project
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId AND [ProjectInvestigator] = @Caller)
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'You are not the owner of the ' + @ProjectId + ' project.';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
 
-	DELETE FROM dbo.ProjectEditors WHERE [ProjectId] = @ProjectId
-	DELETE FROM dbo.Projects WHERE [ProjectId] = @ProjectId
+    -- Get the Project Investigator to check permissions
+    DECLARE @ProjectInvestigator sysname
+    SELECT @ProjectInvestigator = ProjectInvestigator FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId
+    IF @ProjectInvestigator IS NULL
+        RETURN 0 --There is no project to delete, we must be done.
+    
+    -- You must be the ProjectInvestigator or assistant to delete the project
+    IF (@ProjectInvestigator != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator))
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the owner (or assitant) of the ' + @ProjectId + ' project.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    -- wrap the two operations in a transaction
+    BEGIN TRY
+        BEGIN TRANSACTION
+            DELETE FROM dbo.ProjectEditors WHERE [ProjectId] = @ProjectId
+            DELETE FROM dbo.Projects WHERE [ProjectId] = @ProjectId
+        COMMIT TRANSACTION
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        EXEC [dbo].[Utility_RethrowError]
+        RETURN 1
+    END CATCH
+    
 END
 GO
 SET ANSI_NULLS ON
@@ -7479,69 +7501,90 @@ GO
  * PIs can only modify projects for which they are the PI or an editor. - Done.
  * Editors can only modify projects for which they are an editor. - Done.
  * No one is allowed to modify the Project Id. - Done. (to change the ID you must deleted and recreate)
- * Only the PI is allowed to change the PI column. - Undone.  FIXME FIXME FIXME FIXME FIXME FIXME FIXME
+ * Only the PI (or assitant) is allowed to change the PI column. - Done
  */
 
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: March 28, 2012
--- Description:	Updates a project name
+-- Description: Updates a project name
 -- =============================================
 CREATE PROCEDURE [dbo].[Project_Update] 
-	@ProjectId			 NVARCHAR(255)  = NULL,
-	@ProjectName		 NVARCHAR(255)  = NULL, 
-	@UnitCode			 NVARCHAR(255)  = NULL, 
-	@ProjectInvestigator NVARCHAR(255)  = NULL, 
-	@Description		 NVARCHAR(4000) = NULL 
+    @ProjectId           NVARCHAR(255),
+    @ProjectName         NVARCHAR(255)  = NULL, 
+    @UnitCode            NVARCHAR(255), 
+    @ProjectInvestigator NVARCHAR(255) = NULL, 
+    @Description         NVARCHAR(4000) 
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-	-- Verify this is an existing project
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Project (' + @ProjectId + ') is not an existing project.';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-	-- You must be the ProjectInvestigator or and Editor on the project to update it
-	--IF NOT EXISTS (SELECT 1 FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId AND [ProjectInvestigator] = ORIGINAL_LOGIN())
-	IF [dbo].[IsProjectEditor](@ProjectId, ORIGINAL_LOGIN()) = 0
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'You are not the owner or an editor of the ' + @ProjectId + ' project.';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
-	
-	-- If a parameter is not provided, use the existing value.
-	-- (to put null in a field the user will need to pass an empty string)
-	IF @ProjectName IS NULL
-	BEGIN
-		SELECT @ProjectName = [ProjectName] FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId;
-	END
-	
-	IF @UnitCode IS NULL
-	BEGIN
-		SELECT @UnitCode = [UnitCode] FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId;
-	END
-	
-	IF @ProjectInvestigator IS NULL
-	BEGIN
-		SELECT @ProjectInvestigator = [ProjectInvestigator] FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId;
-	END
-	
-	IF @Description IS NULL
-	BEGIN
-		SELECT @Description = [Description] FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId;
-	END
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+        
+    -- Check that this is a valid deployment
+    --   this is done now to get the old PI and avoid a confusing permission error	
+    DECLARE @OldProjectInvestigator sysname
+    SELECT @OldProjectInvestigator = ProjectInvestigator FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId
+    IF @OldProjectInvestigator IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'Project (' + @ProjectId + ') is not an existing project.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
 
-	-- Do the update, replacing empty strings with NULLs
-	UPDATE dbo.Projects SET [ProjectName]		  = nullif(@ProjectName,''),
-							[UnitCode]			  = nullif(@UnitCode,''),
-							[ProjectInvestigator] = nullif(@ProjectInvestigator,''),
-							[Description]		  = nullif(@Description,'')
-					  WHERE [ProjectId]			  = @ProjectId
+    --Fix Defaults
+    -- I use NULL to indicate don't change value only on non-null fields.
+    -- The defaults for nullable field should match the insert SP.
+    -- If the client does not want to change a nullable field they must provide the original value.
+    SET @ProjectName = NULLIF(@ProjectName,'')
+    SET @UnitCode    = NULLIF(@UnitCode,'')
+    SET @ProjectInvestigator = NULLIF(@ProjectInvestigator,'')
+    SET @Description = NULLIF(@Description,'')
+    IF @ProjectName IS NULL
+        SELECT @ProjectName = [ProjectName] FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId;
+    IF @ProjectInvestigator IS NULL
+        SELECT @ProjectInvestigator = [ProjectInvestigator] FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId;
+
+    
+    -- You must be the ProjectInvestigator or and Editor on the project to update it
+    IF [dbo].[IsProjectEditor](@ProjectId, @Caller) = 0
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You are not the owner or an editor of the ' + @ProjectId + ' project.';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+    -- To change the PI, you must be the old PI or an assistant to the old PI
+    --  and an assistant to the new PI or the new PI 
+    IF @ProjectInvestigator != @OldProjectInvestigator
+    BEGIN
+        IF (@OldProjectInvestigator != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @OldProjectInvestigator))
+        BEGIN
+            DECLARE @message3 nvarchar(100) = 'You are not the owner or assistant of the ' + @ProjectId + ' project.';
+            RAISERROR(@message3, 18, 0)
+            RETURN 3
+        END
+        IF (@ProjectInvestigator != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator))
+        BEGIN
+            DECLARE @message4 nvarchar(100) = 'You are not the new owner (or assistant) of the ' + @ProjectId + ' project.';
+            RAISERROR(@message4, 18, 0)
+            RETURN 4
+        END
+    END
+
+
+    UPDATE dbo.Projects SET [ProjectName]         = @ProjectName,
+                            [UnitCode]            = @UnitCode,
+                            [ProjectInvestigator] = @ProjectInvestigator,
+                            [Description]         = @Description
+                      WHERE [ProjectId]           = @ProjectId
 
 END
 GO
