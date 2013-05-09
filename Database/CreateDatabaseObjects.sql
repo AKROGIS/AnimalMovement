@@ -4431,68 +4431,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 11, 2012
--- Description:	Updates a project investigator
--- =============================================
-CREATE PROCEDURE [dbo].[ProjectInvestigator_Update] 
-	@Login sysname       = NULL,
-	@Name  NVARCHAR(255) = NULL, 
-	@Email NVARCHAR(255) = NULL, 
-	@Phone NVARCHAR(255) = NULL 
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	IF @Login IS NULL
-		SET @Login = ORIGINAL_LOGIN();
-
-	-- Verify this is an existing project investigator
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'There is no project investigator with a login of ' + @Login + '.';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	
-	-- You must be the ProjectInvestigator to update the ProjectInvestigator
-	IF @Login <> ORIGINAL_LOGIN()
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'You can only update your own record.';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
-	
-	-- If a parameter is not provided, use the existing value.
-	-- (to put null in a field the user will need to pass an empty string)
-	IF @Name IS NULL
-	BEGIN
-		SELECT @Name = [Name] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	IF @Email IS NULL
-	BEGIN
-		SELECT @Email = [Email] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	IF @Phone IS NULL
-	BEGIN
-		SELECT @Phone = [Phone] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
-	END
-	
-	-- Do the update, replacing empty strings with NULLs
-	UPDATE [dbo].[ProjectInvestigators] SET [Name]	= nullif(@Name,''),
-											[Email] = nullif(@Email,''),
-											[Phone] = nullif(@Phone,'')
-									  WHERE [Login] = @Login
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
 	@Login sysname, 
 	@Name  NVARCHAR(255), 
@@ -6017,6 +5955,72 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: April 11, 2012
+-- Description: Updates a project investigator
+-- =============================================
+CREATE PROCEDURE [dbo].[ProjectInvestigator_Update] 
+    @Login SYSNAME       = NULL,
+    @Name  NVARCHAR(255) = NULL, 
+    @Email NVARCHAR(255) = NULL, 
+    @Phone NVARCHAR(255) = NULL 
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    -- Fix Text Inputs
+    SET @Login = NULLIF(@Login,'')
+    SET @Name  = NULLIF(@Name,'')
+    SET @Email = NULLIF(@Email,'')
+    SET @Phone = NULLIF(@Phone,'')
+
+    -- Fix Defaults
+    -- I use NULL to indicate don't change value only on non-null fields.
+    -- The defaults for nullable field should match the insert SP.
+    -- If the client does not want to change a nullable field they must provide the original value.
+    SET @Login = ISNULL(@Login,@Caller)
+    IF @Name IS NULL
+        SELECT @Name = [Name] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+    IF @Email IS NULL
+        SELECT @Email = [Email] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+    IF @Phone IS NULL
+        SELECT @Phone = [Phone] FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Login;
+
+    -- Verify this is an existing project investigator
+    IF @Name IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'There is no project investigator with a login of ' + @Login + '.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    -- You must be the ProjectInvestigator or assistant to update the ProjectInvestigator
+    IF (@Login != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @Login))
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You can only update your own data (or someone you assist).';
+        RAISERROR(@message2, 18, 0)
+        RETURN 1
+    END
+
+
+    UPDATE [dbo].[ProjectInvestigators] SET [Name]  = @Name,
+                                            [Email] = @Email,
+                                            [Phone] = @Phone
+                                      WHERE [Login] = @Login
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarFileHeaders](
@@ -6767,48 +6771,45 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: March 20, 2012
--- Description:	Updates the settings table
+-- Description: Updates the settings table
 -- =============================================
 CREATE PROCEDURE [dbo].[Settings_Update] 
-	@Key   nvarchar(30)  = Null,
-	@Value nvarchar(500) = Null
+    @Key   nvarchar(30),
+    @Value nvarchar(500)
 AS
 BEGIN
-	SET NOCOUNT ON;
+    SET NOCOUNT ON;
 
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-	
-	IF @Key = 'project' AND NOT EXISTS (SELECT 1 FROM [dbo].[Projects] WHERE ProjectId = @Value)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Project (' + @Value + ') is not an existing project';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	IF @Key in ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format', 'parameter_file_format', 'wants_email', 'othervalidkeys...') --Add valid keys to this list
-	   OR @Key IN (select 'collar_model_' + CollarManufacturer from LookupCollarManufacturers)
-	BEGIN
-		BEGIN TRY
-			BEGIN TRAN
-				DELETE dbo.Settings WHERE [Username] = @Caller AND [Key] = @Key 
-				INSERT dbo.Settings ([Username], [Key], [Value]) VALUES (@Caller, @Key, @Value) 
-			COMMIT TRANSACTION
-		END TRY
-		BEGIN CATCH
-			IF XACT_STATE() <> 0
-				ROLLBACK TRANSACTION;
-			EXEC [dbo].[Utility_RethrowError]
-			RETURN 1
-		END CATCH
-	END
-	ELSE
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'Invalid key (' + @Key + ') for settings';
-		RAISERROR(@message2, 18, 0)
-		RETURN 1
-	END
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @Key   = NULLIF(@Key,'')
+    SET @Value = NULLIF(@Value,'')
+    
+    IF @Key = 'project' AND NOT EXISTS (SELECT 1 FROM [dbo].[Projects] WHERE ProjectId = @Value)
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'Project (' + @Value + ') is not an existing project';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    IF     @Key NOT IN ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format', 'parameter_file_format', 'wants_email', 'othervalidkeys...') --Add valid keys to this list
+       AND @Key NOT IN (select 'collar_model_' + CollarManufacturer from LookupCollarManufacturers)
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'Invalid key (' + @Key + ') for settings';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+
+    IF EXISTS (SELECT 1 FROM [dbo].[Settings] WHERE [Username] = @Caller AND [Key] = @Key)
+        UPDATE [dbo].[Settings] SET [Value] = @Value WHERE [Username] = @Caller AND [Key] = @Key
+    ELSE
+        INSERT [dbo].[Settings] ([Username], [Key], [Value]) VALUES (@Caller, @Key, @Value) 
+
 END
 GO
 SET ANSI_NULLS ON
