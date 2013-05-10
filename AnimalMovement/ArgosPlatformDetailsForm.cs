@@ -238,7 +238,12 @@ namespace AnimalMovement
 
         private void SetUpCollarsTab()
         {
-            CollarsDataGridView.DataSource = Platform.ArgosDeployments;
+            CollarsDataGridView.DataSource = Platform.ArgosDeployments.Select(d => new
+            {
+                d.Collar,
+                d.StartDate,
+                d.EndDate
+            }).ToList();
         }
 
         #endregion
@@ -254,12 +259,12 @@ namespace AnimalMovement
 
             ParametersDataGridView.DataSource = views.AllTpfFileDatas.Where(t => t.Platform == Platform.PlatformId).Select(t => new
                                                     {
+                                                        t.FileId,
+                                                        t.FileName,
+                                                        t.Status,
                                                         t.CTN,
                                                         t.Frequency,
                                                         StartDate = t.TimeStamp,
-                                                        t.FileName,
-                                                        t.FileId,
-                                                        t.Status,
                                                     }).ToList();
         }
 
@@ -293,7 +298,14 @@ namespace AnimalMovement
 
         private void SetUpIssuesTab()
         {
-            ProcessingIssuesDataGridView.DataSource = Platform.ArgosFileProcessingIssues;
+            //TODO - creating anonymous (or nested type) is empty unless ToList() is used,  lists do not support sorting.
+            //ProcessingIssuesDataGridView.DataSource = Platform.ArgosFileProcessingIssues; //works but too many fields in wrong order
+            ProcessingIssuesDataGridView.DataSource = Platform.ArgosFileProcessingIssues.Select(i => new
+                {
+                    i.CollarFile,
+                    i.Collar,
+                    i.Issue
+                }).ToList();
         }
 
         #endregion
