@@ -50,7 +50,7 @@ namespace AnimalMovement
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            ArgosTabControl.SelectedIndex = Properties.Settings.Default.ArgosDetailsFormActiveTab;
+            ArgosTabControl.SelectedIndex = Properties.Settings.Default.ArgosPlatformDetailsFormActiveTab;
             if (ArgosTabControl.SelectedIndex == 0)
                 ArgosTabControl_SelectedIndexChanged(ArgosTabControl, null);
         }
@@ -58,7 +58,7 @@ namespace AnimalMovement
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            Properties.Settings.Default.ArgosDetailsFormActiveTab = ArgosTabControl.SelectedIndex;
+            Properties.Settings.Default.ArgosPlatformDetailsFormActiveTab = ArgosTabControl.SelectedIndex;
         }
 
         private void ArgosTabControl_SelectedIndexChanged(object sender, EventArgs e)
@@ -344,7 +344,13 @@ namespace AnimalMovement
                     d.Days,
                     d.CollarFile,
                     d.ErrorMessage
-                }).ToList();
+                }).OrderByDescending(x => x.TimeStamp).ToList();
+            EnableDownloadsControls();
+        }
+
+        private void EnableDownloadsControls()
+        {
+            ProgramDownloadsButton.Enabled = !IsEditMode;
         }
 
         private void DownloadsChanged()
@@ -366,7 +372,7 @@ namespace AnimalMovement
 
         private void DownloadsDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && !IsEditMode)
                 DownloadsDetails();
         }
 
@@ -374,8 +380,8 @@ namespace AnimalMovement
         {
             var form = new ArgosProgramDetailsForm(Platform.ArgosProgram);
             form.DatabaseChanged += (o, x) => DownloadsChanged();
-            //TODO - create the download tab on the Argos form, and select it.
             form.Show();
+            form.ArgosProgramTabControl.SelectedIndex = 2;
         }
 
         #endregion
@@ -422,7 +428,7 @@ namespace AnimalMovement
 
         private void ProcessingIssuesDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && !IsEditMode)
                 if (e.ColumnIndex == 1)
                     IssueCollarDetails();
                 else
@@ -465,7 +471,7 @@ namespace AnimalMovement
 
         private void TransmissionsDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && !IsEditMode)
                 TransmissionDetails();
         }
 
@@ -509,7 +515,7 @@ namespace AnimalMovement
 
         private void DerivedDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && !IsEditMode)
                 DerivedDataDetails();
         }
 

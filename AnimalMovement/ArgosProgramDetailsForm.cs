@@ -40,24 +40,70 @@ namespace AnimalMovement
             IsEditor = functions.IsInvestigatorEditor(Program.Manager, CurrentUser) ?? false;
         }
 
+
         #region Form Controls
 
         private void SetUpForm()
         {
             ProgramIdTextBox.Text = Program.ProgramId;
+            ProgramIdTextBox.Enabled = false;
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            ArgosProgramTabControl.SelectedIndex = Properties.Settings.Default.ArgosProgramDetailsFormActiveTab;
+            if (ArgosProgramTabControl.SelectedIndex == 0)
+                ArgosTabControl_SelectedIndexChanged(ArgosProgramTabControl, null);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Properties.Settings.Default.ArgosProgramDetailsFormActiveTab = ArgosProgramTabControl.SelectedIndex;
+        }
+
+        private void ArgosTabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (((TabControl)sender).SelectedIndex)
+            {
+                default:
+                    SetUpGeneralTab();
+                    break;
+                case 1:
+                    SetUpPlatformsTab();
+                    break;
+                case 2:
+                    SetUpDownloadsTab();
+                    break;
+            }
+        }
+
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        #endregion
+
+
+        #region General Tab
+
+        private void SetUpGeneralTab()
+        {
             SetUpOwnerComboBox();
             ProgramNameTextBox.Text = Program.ProgramName;
             UserNameTextBox.Text = Program.UserName;
             PasswordMaskedTextBox.Text = Program.Password;
             PasswordMaskedTextBox.UseSystemPasswordChar = !IsEditor;
-            //defer DateTimePickers until loaded, otherwise the default values get messed up
+            ConfigureDateTimePicker(StartDateTimePicker, Program.StartDate);
+            ConfigureDateTimePicker(EndDateTimePicker, Program.EndDate);
             if (Program.Active.HasValue)
                 ActiveCheckBox.Checked = Program.Active.Value;
             else
                 ActiveCheckBox.CheckState = CheckState.Indeterminate;
             NotesTextBox.Text = Program.Notes;
-            SetUpPlatformsDataGridView();
-            EnableControls();
+            EnableGeneralControls();
         }
 
         private void SetUpOwnerComboBox()
@@ -77,9 +123,8 @@ namespace AnimalMovement
             OwnerComboBox.DisplayMember = "Name";
         }
 
-        private void EnableControls()
+        private void EnableGeneralControls()
         {
-            ProgramIdTextBox.Enabled = false;
             EnableEditSaveButton();
             IsEditMode = EditSaveButton.Text == "Save";
             OwnerComboBox.Enabled = IsEditMode;
@@ -100,14 +145,6 @@ namespace AnimalMovement
                                                    !string.IsNullOrEmpty(ProgramIdTextBox.Text) &&
                                                    !string.IsNullOrEmpty(UserNameTextBox.Text) &&
                                                    !string.IsNullOrEmpty(PasswordMaskedTextBox.Text)));
-        }
-
-
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-            ConfigureDateTimePicker(StartDateTimePicker, Program.StartDate);
-            ConfigureDateTimePicker(EndDateTimePicker, Program.EndDate);
         }
 
         private static void ConfigureDateTimePicker(DateTimePicker dateTimePicker, DateTime? dateTime)
@@ -172,7 +209,7 @@ namespace AnimalMovement
 
         private void OwnerComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnableControls();
+            EnableGeneralControls();
         }
 
         private void StartDateTimePicker_ValueChanged(object sender, EventArgs e)
@@ -187,12 +224,12 @@ namespace AnimalMovement
 
         private void PasswordMaskedTextBox_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
         {
-            EnableControls();
+            EnableGeneralControls();
         }
 
         private void UserNameTextBox_TextChanged(object sender, EventArgs e)
         {
-            EnableControls();
+            EnableGeneralControls();
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
@@ -202,8 +239,8 @@ namespace AnimalMovement
             {
                 // The user wants to edit, Enable form
                 EditSaveButton.Text = "Save";
-                DoneCancelButton.Text = "Cancel";
-                EnableControls();
+                cancelButton.Visible = true;
+                EnableGeneralControls();
             }
             else
             {
@@ -213,31 +250,32 @@ namespace AnimalMovement
                 {
                     OnDatabaseChanged();
                     EditSaveButton.Text = "Edit";
-                    DoneCancelButton.Text = "Done";
-                    EnableControls();
+                    cancelButton.Visible = false;
+                    EnableGeneralControls();
                 }
             }
         }
 
-        private void DoneCancelButton_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
-            if (DoneCancelButton.Text == "Cancel")
-            {
-                DoneCancelButton.Text = "Done";
-                EditSaveButton.Text = "Edit";
-                //Reset state from database
-                LoadDataContext();
-                SetUpForm();
-            }
-            else
-            {
-                Close();
-            }
+            cancelButton.Visible = false;
+            EditSaveButton.Text = "Edit";
+            //Reset state from database
+            LoadDataContext();
+            SetUpGeneralTab();
         }
+
 
         #endregion
 
-        #region Platforms
+
+        #region Platforms Tab
+
+        private void SetUpPlatformsTab()
+        {
+            SetUpPlatformsDataGridView();
+            EnablePlatformControls();
+        }
 
         private void SetUpPlatformsDataGridView()
         {
@@ -301,7 +339,7 @@ namespace AnimalMovement
 
         private void PlatformsGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && !IsEditMode)
                 InfoPlatformButton_Click(sender, e);
         }
 
@@ -348,6 +386,45 @@ namespace AnimalMovement
                 AddMissingPlatformsButton.Text = "Add Missing Platforms";
                 Cursor.Current = Cursors.Default;
             }
+        }
+
+        #endregion
+
+
+        #region Downloads Tab
+
+        private void SetUpDownloadsTab()
+        {
+            DownloadsDataGridView.DataSource = Program.ArgosDownloads.Select(d => new
+            {
+                d.TimeStamp,
+                d.Days,
+                d.CollarFile,
+                d.ErrorMessage
+            }).OrderByDescending(x => x.TimeStamp).ToList();
+        }
+
+        private void DownloadsChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpDownloadsTab();
+        }
+
+        private void DownloadsDetails()
+        {
+            var file = (CollarFile)DownloadsDataGridView.SelectedRows[0].Cells[2].Value;
+            if (file == null)
+                return;
+            var form = new FileDetailsForm(file);
+            form.DatabaseChanged += (o, x) => DownloadsChanged();
+            form.Show(this);
+        }
+
+        private void DownloadsDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1 && !IsEditMode)
+                DownloadsDetails();
         }
 
         #endregion

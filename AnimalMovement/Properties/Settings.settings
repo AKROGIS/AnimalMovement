@@ -212,7 +212,10 @@
     <Setting Name="QuickStartWizardSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">300, 250</Value>
     </Setting>
-    <Setting Name="ArgosDetailsFormActiveTab" Type="System.Int32" Scope="User">
+    <Setting Name="ArgosPlatformDetailsFormActiveTab" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="ArgosProgramDetailsFormActiveTab" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>

@@ -866,12 +866,24 @@ namespace AnimalMovement.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int ArgosDetailsFormActiveTab {
+        public int ArgosPlatformDetailsFormActiveTab {
             get {
-                return ((int)(this["ArgosDetailsFormActiveTab"]));
+                return ((int)(this["ArgosPlatformDetailsFormActiveTab"]));
             }
             set {
-                this["ArgosDetailsFormActiveTab"] = value;
+                this["ArgosPlatformDetailsFormActiveTab"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ArgosProgramDetailsFormActiveTab {
+            get {
+                return ((int)(this["ArgosProgramDetailsFormActiveTab"]));
+            }
+            set {
+                this["ArgosProgramDetailsFormActiveTab"] = value;
             }
         }
     }
