@@ -356,7 +356,7 @@ namespace AnimalMovement
 
         private void DownloadsDetails()
         {
-            var file = (CollarFile)DownloadsDataGridView.SelectedRows[0].Cells[0].Value;
+            var file = (CollarFile)DownloadsDataGridView.SelectedRows[0].Cells[2].Value;
             if (file == null)
                 return;
             var form = new FileDetailsForm(file);
@@ -413,6 +413,8 @@ namespace AnimalMovement
         private void IssueCollarDetails()
         {
             var collar = (Collar)ProcessingIssuesDataGridView.SelectedRows[0].Cells[1].Value;
+            if (collar == null)
+                return;
             var form = new CollarDetailsForm(collar);
             form.DatabaseChanged += (o, x) => IssueDataChanged();
             form.Show(this);
@@ -480,7 +482,9 @@ namespace AnimalMovement
                     f.LookupCollarFileFormat.Name,
                     f.Status,
                     f.Collar,
-                    Parent = f.ParentFile
+                    Parent = f.ParentFile,
+                    f.ArgosDeploymentId,
+                    f.ArgosDeployment.PlatformId
                 }).ToList();
             DerivedDataGridView.Columns[0].HeaderText = "Derived File";
             DerivedDataGridView.Columns[1].HeaderText = "Format";

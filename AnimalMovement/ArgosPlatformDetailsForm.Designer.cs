@@ -56,12 +56,12 @@
             this.DownloadsDataGridView = new System.Windows.Forms.DataGridView();
             this.ProgramDownloadsButton = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
-            this.ProcessingIssuesTabPage = new System.Windows.Forms.TabPage();
-            this.label8 = new System.Windows.Forms.Label();
-            this.ProcessingIssuesDataGridView = new System.Windows.Forms.DataGridView();
             this.TransmissionsTabPage = new System.Windows.Forms.TabPage();
             this.label7 = new System.Windows.Forms.Label();
             this.TransmissionsDataGridView = new System.Windows.Forms.DataGridView();
+            this.ProcessingIssuesTabPage = new System.Windows.Forms.TabPage();
+            this.label8 = new System.Windows.Forms.Label();
+            this.ProcessingIssuesDataGridView = new System.Windows.Forms.DataGridView();
             this.DerivedDataTabPage = new System.Windows.Forms.TabPage();
             this.label6 = new System.Windows.Forms.Label();
             this.DerivedDataGridView = new System.Windows.Forms.DataGridView();
@@ -74,10 +74,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).BeginInit();
             this.DownloadsTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DownloadsDataGridView)).BeginInit();
-            this.ProcessingIssuesTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).BeginInit();
             this.TransmissionsTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TransmissionsDataGridView)).BeginInit();
+            this.ProcessingIssuesTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).BeginInit();
             this.DerivedDataTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DerivedDataGridView)).BeginInit();
             this.SuspendLayout();
@@ -390,6 +390,7 @@
             this.DownloadsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DownloadsDataGridView.Size = new System.Drawing.Size(496, 197);
             this.DownloadsDataGridView.TabIndex = 2;
+            this.DownloadsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DownloadsDataGridView_CellContentDoubleClick);
             // 
             // ProgramDownloadsButton
             // 
@@ -411,6 +412,43 @@
             this.label5.TabIndex = 0;
             this.label5.Text = "Automatic downloads from the Argos website for just this Argos platform (max of 1" +
     "0 days available)";
+            // 
+            // TransmissionsTabPage
+            // 
+            this.TransmissionsTabPage.Controls.Add(this.label7);
+            this.TransmissionsTabPage.Controls.Add(this.TransmissionsDataGridView);
+            this.TransmissionsTabPage.Location = new System.Drawing.Point(4, 22);
+            this.TransmissionsTabPage.Name = "TransmissionsTabPage";
+            this.TransmissionsTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.TransmissionsTabPage.Size = new System.Drawing.Size(502, 261);
+            this.TransmissionsTabPage.TabIndex = 4;
+            this.TransmissionsTabPage.Text = "Transmissions";
+            this.TransmissionsTabPage.UseVisualStyleBackColor = true;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 12);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(254, 13);
+            this.label7.TabIndex = 6;
+            this.label7.Text = "Collar files containing raw data for this Argos platform";
+            // 
+            // TransmissionsDataGridView
+            // 
+            this.TransmissionsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TransmissionsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.TransmissionsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.TransmissionsDataGridView.Location = new System.Drawing.Point(3, 28);
+            this.TransmissionsDataGridView.Name = "TransmissionsDataGridView";
+            this.TransmissionsDataGridView.ReadOnly = true;
+            this.TransmissionsDataGridView.RowHeadersVisible = false;
+            this.TransmissionsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.TransmissionsDataGridView.Size = new System.Drawing.Size(496, 230);
+            this.TransmissionsDataGridView.TabIndex = 4;
+            this.TransmissionsDataGridView.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransmissionsDataGridView_CellContentDoubleClick);
             // 
             // ProcessingIssuesTabPage
             // 
@@ -449,43 +487,6 @@
             this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(496, 230);
             this.ProcessingIssuesDataGridView.TabIndex = 3;
             this.ProcessingIssuesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProcessingIssuesDataGridView_CellContentDoubleClick);
-            // 
-            // TransmissionsTabPage
-            // 
-            this.TransmissionsTabPage.Controls.Add(this.label7);
-            this.TransmissionsTabPage.Controls.Add(this.TransmissionsDataGridView);
-            this.TransmissionsTabPage.Location = new System.Drawing.Point(4, 22);
-            this.TransmissionsTabPage.Name = "TransmissionsTabPage";
-            this.TransmissionsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.TransmissionsTabPage.Size = new System.Drawing.Size(502, 261);
-            this.TransmissionsTabPage.TabIndex = 4;
-            this.TransmissionsTabPage.Text = "Transmissions";
-            this.TransmissionsTabPage.UseVisualStyleBackColor = true;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(6, 12);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(254, 13);
-            this.label7.TabIndex = 6;
-            this.label7.Text = "Collar files containing raw data for this Argos platform";
-            // 
-            // TransmissionsDataGridView
-            // 
-            this.TransmissionsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.TransmissionsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.TransmissionsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.TransmissionsDataGridView.Location = new System.Drawing.Point(3, 28);
-            this.TransmissionsDataGridView.Name = "TransmissionsDataGridView";
-            this.TransmissionsDataGridView.ReadOnly = true;
-            this.TransmissionsDataGridView.RowHeadersVisible = false;
-            this.TransmissionsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.TransmissionsDataGridView.Size = new System.Drawing.Size(496, 230);
-            this.TransmissionsDataGridView.TabIndex = 4;
-            this.TransmissionsDataGridView.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransmissionsDataGridView_CellContentDoubleClick);
             // 
             // DerivedDataTabPage
             // 
@@ -562,12 +563,12 @@
             this.DownloadsTabPage.ResumeLayout(false);
             this.DownloadsTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DownloadsDataGridView)).EndInit();
-            this.ProcessingIssuesTabPage.ResumeLayout(false);
-            this.ProcessingIssuesTabPage.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).EndInit();
             this.TransmissionsTabPage.ResumeLayout(false);
             this.TransmissionsTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TransmissionsDataGridView)).EndInit();
+            this.ProcessingIssuesTabPage.ResumeLayout(false);
+            this.ProcessingIssuesTabPage.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).EndInit();
             this.DerivedDataTabPage.ResumeLayout(false);
             this.DerivedDataTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DerivedDataGridView)).EndInit();
