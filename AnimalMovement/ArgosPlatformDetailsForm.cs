@@ -78,10 +78,10 @@ namespace AnimalMovement
                     SetUpDownloadsTab();
                     break;
                 case 4:
-                    SetUpIssuesTab();
+                    SetUpTransmissionsTab();
                     break;
                 case 5:
-                    SetUpTransmissionsTab();
+                    SetUpIssuesTab();
                     break;
                 case 6:
                     SetUpDerivedDataTab();
@@ -200,7 +200,7 @@ namespace AnimalMovement
             {
                 // The user wants to edit, Enable form
                 EditSaveButton.Text = "Save";
-                CancelButton.Visible = true;
+                cancelButton.Visible = true;
                 EnableGeneralControls();
             }
             else
@@ -211,7 +211,7 @@ namespace AnimalMovement
                 {
                     OnDatabaseChanged();
                     EditSaveButton.Text = "Edit";
-                    CancelButton.Visible = false;
+                    cancelButton.Visible = false;
                     EnableGeneralControls();
                 }
             }
@@ -219,7 +219,7 @@ namespace AnimalMovement
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            CancelButton.Visible = false;
+            cancelButton.Visible = false;
             EditSaveButton.Text = "Edit";
             //Reset state from database
             LoadDataContext();
@@ -338,18 +338,42 @@ namespace AnimalMovement
 
         private void SetUpDownloadsTab()
         {
-            DownloadsDataGridView.DataSource = Database.ArgosDownloads.Where(d => d.PlatformId == Platform.PlatformId);
+            DownloadsDataGridView.DataSource = Platform.ArgosDownloads.Select(d => new
+                {
+                    d.TimeStamp,
+                    d.Days,
+                    d.CollarFile,
+                    d.ErrorMessage
+                }).ToList();
+        }
+
+        private void DownloadsChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpDownloadsTab();
+        }
+
+        private void DownloadsDetails()
+        {
+            var file = (CollarFile)DownloadsDataGridView.SelectedRows[0].Cells[0].Value;
+            if (file == null)
+                return;
+            var form = new FileDetailsForm(file);
+            form.DatabaseChanged += (o, x) => DownloadsChanged();
+            form.Show(this);
+        }
+
+        private void DownloadsDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                DownloadsDetails();
         }
 
         private void ProgramDownloadsButton_Click(object sender, EventArgs e)
         {
             var form = new ArgosProgramDetailsForm(Platform.ArgosProgram);
-            form.DatabaseChanged += (o, x) =>
-                {
-                    OnDatabaseChanged();
-                    LoadDataContext();
-                    SetUpDownloadsTab();
-                };
+            form.DatabaseChanged += (o, x) => DownloadsChanged();
             //TODO - create the download tab on the Argos form, and select it.
             form.Show();
         }
@@ -371,6 +395,39 @@ namespace AnimalMovement
                 }).ToList();
         }
 
+        private void IssueDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpIssuesTab();
+        }
+
+        private void IssueFileDetails()
+        {
+            var file = (CollarFile)ProcessingIssuesDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new FileDetailsForm(file);
+            form.DatabaseChanged += (o, x) => IssueDataChanged();
+            form.Show(this);
+        }
+
+        private void IssueCollarDetails()
+        {
+            var collar = (Collar)ProcessingIssuesDataGridView.SelectedRows[0].Cells[1].Value;
+            var form = new CollarDetailsForm(collar);
+            form.DatabaseChanged += (o, x) => IssueDataChanged();
+            form.Show(this);
+        }
+
+        private void ProcessingIssuesDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                if (e.ColumnIndex == 1)
+                    IssueCollarDetails();
+                else
+                    IssueFileDetails();
+        }
+
+
         #endregion
 
 
@@ -378,8 +435,36 @@ namespace AnimalMovement
 
         private void SetUpTransmissionsTab()
         {
-            TransmissionsDataGridView.DataSource =
-                Database.ArgosFilePlatformDates.Where(d => d.PlatformId == Platform.PlatformId);
+            TransmissionsDataGridView.DataSource = Platform.ArgosFilePlatformDates.Select(t => new
+                {
+                    t.CollarFile,
+                    t.FirstTransmission,
+                    t.LastTransmission
+                }).ToList();
+            TransmissionsDataGridView.Columns[0].HeaderText = "Collar File";
+            TransmissionsDataGridView.Columns[1].HeaderText = "First Transmission";
+            TransmissionsDataGridView.Columns[2].HeaderText = "Last Transmission";
+        }
+
+        private void TransmissionDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpTransmissionsTab();
+        }
+
+        private void TransmissionDetails()
+        {
+            var file = (CollarFile)TransmissionsDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new FileDetailsForm(file);
+            form.DatabaseChanged += (o, x) => TransmissionDataChanged();
+            form.Show(this);
+        }
+
+        private void TransmissionsDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                TransmissionDetails();
         }
 
         #endregion
@@ -389,7 +474,39 @@ namespace AnimalMovement
 
         private void SetUpDerivedDataTab()
         {
-            DerivedDataGridView.DataSource = Database.CollarFiles.Where(f => f.ArgosDeployment.ArgosPlatform == Platform);
+            DerivedDataGridView.DataSource = Platform.ArgosDeployments.SelectMany(d => d.CollarFiles).Select(f => new
+                {
+                    f,
+                    f.LookupCollarFileFormat.Name,
+                    f.Status,
+                    f.Collar,
+                    Parent = f.ParentFile
+                }).ToList();
+            DerivedDataGridView.Columns[0].HeaderText = "Derived File";
+            DerivedDataGridView.Columns[1].HeaderText = "Format";
+            DerivedDataGridView.Columns[2].HeaderText = "Status";
+            DerivedDataGridView.Columns[4].HeaderText = "Source File";
+        }
+
+        private void DerivedDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpDerivedDataTab();
+        }
+
+        private void DerivedDataDetails()
+        {
+            var file = (CollarFile)DerivedDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new FileDetailsForm(file);
+            form.DatabaseChanged += (o, x) => DerivedDataChanged();
+            form.Show(this);
+        }
+
+        private void DerivedDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                DerivedDataDetails();
         }
 
         #endregion

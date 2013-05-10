@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.CancelButton = new System.Windows.Forms.Button();
+            this.cancelButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.NotesTextBox = new System.Windows.Forms.TextBox();
@@ -50,16 +50,20 @@
             this.InfoCollarButton = new System.Windows.Forms.Button();
             this.CollarsDataGridView = new System.Windows.Forms.DataGridView();
             this.ParametersTabPage = new System.Windows.Forms.TabPage();
+            this.label9 = new System.Windows.Forms.Label();
             this.ParametersDataGridView = new System.Windows.Forms.DataGridView();
             this.DownloadsTabPage = new System.Windows.Forms.TabPage();
             this.DownloadsDataGridView = new System.Windows.Forms.DataGridView();
             this.ProgramDownloadsButton = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.ProcessingIssuesTabPage = new System.Windows.Forms.TabPage();
+            this.label8 = new System.Windows.Forms.Label();
             this.ProcessingIssuesDataGridView = new System.Windows.Forms.DataGridView();
             this.TransmissionsTabPage = new System.Windows.Forms.TabPage();
+            this.label7 = new System.Windows.Forms.Label();
             this.TransmissionsDataGridView = new System.Windows.Forms.DataGridView();
             this.DerivedDataTabPage = new System.Windows.Forms.TabPage();
+            this.label6 = new System.Windows.Forms.Label();
             this.DerivedDataGridView = new System.Windows.Forms.DataGridView();
             this.CloseButton = new System.Windows.Forms.Button();
             this.ArgosTabControl.SuspendLayout();
@@ -78,18 +82,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.DerivedDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
-            // CancelButton
+            // cancelButton
             // 
-            this.CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.CancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.CancelButton.Location = new System.Drawing.Point(6, 232);
-            this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(75, 23);
-            this.CancelButton.TabIndex = 29;
-            this.CancelButton.Text = "Cancel";
-            this.CancelButton.UseVisualStyleBackColor = true;
-            this.CancelButton.Visible = false;
-            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.cancelButton.Location = new System.Drawing.Point(6, 232);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(75, 23);
+            this.cancelButton.TabIndex = 29;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Visible = false;
+            this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
             // 
             // EditSaveButton
             // 
@@ -212,8 +216,8 @@
             this.ArgosTabControl.Controls.Add(this.CollarsTabPage);
             this.ArgosTabControl.Controls.Add(this.ParametersTabPage);
             this.ArgosTabControl.Controls.Add(this.DownloadsTabPage);
-            this.ArgosTabControl.Controls.Add(this.ProcessingIssuesTabPage);
             this.ArgosTabControl.Controls.Add(this.TransmissionsTabPage);
+            this.ArgosTabControl.Controls.Add(this.ProcessingIssuesTabPage);
             this.ArgosTabControl.Controls.Add(this.DerivedDataTabPage);
             this.ArgosTabControl.Location = new System.Drawing.Point(12, 38);
             this.ArgosTabControl.Name = "ArgosTabControl";
@@ -225,7 +229,7 @@
             // DetailsTabPage
             // 
             this.DetailsTabPage.Controls.Add(this.NotesTextBox);
-            this.DetailsTabPage.Controls.Add(this.CancelButton);
+            this.DetailsTabPage.Controls.Add(this.cancelButton);
             this.DetailsTabPage.Controls.Add(this.DisposalDateTimePicker);
             this.DetailsTabPage.Controls.Add(this.EditSaveButton);
             this.DetailsTabPage.Controls.Add(this.label3);
@@ -325,6 +329,7 @@
             // 
             // ParametersTabPage
             // 
+            this.ParametersTabPage.Controls.Add(this.label9);
             this.ParametersTabPage.Controls.Add(this.ParametersDataGridView);
             this.ParametersTabPage.Location = new System.Drawing.Point(4, 22);
             this.ParametersTabPage.Name = "ParametersTabPage";
@@ -334,6 +339,15 @@
             this.ParametersTabPage.Text = "Parameter Files";
             this.ParametersTabPage.UseVisualStyleBackColor = true;
             // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 12);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(308, 13);
+            this.label9.TabIndex = 6;
+            this.label9.Text = "Telonics Gen4 Parameter Files which include this Argos platform";
+            // 
             // ParametersDataGridView
             // 
             this.ParametersDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -341,12 +355,12 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ParametersDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.ParametersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ParametersDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.ParametersDataGridView.Location = new System.Drawing.Point(3, 28);
             this.ParametersDataGridView.Name = "ParametersDataGridView";
             this.ParametersDataGridView.ReadOnly = true;
             this.ParametersDataGridView.RowHeadersVisible = false;
             this.ParametersDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.ParametersDataGridView.Size = new System.Drawing.Size(496, 255);
+            this.ParametersDataGridView.Size = new System.Drawing.Size(496, 230);
             this.ParametersDataGridView.TabIndex = 4;
             // 
             // DownloadsTabPage
@@ -369,35 +383,38 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DownloadsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.DownloadsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DownloadsDataGridView.Location = new System.Drawing.Point(3, 37);
+            this.DownloadsDataGridView.Location = new System.Drawing.Point(3, 28);
             this.DownloadsDataGridView.Name = "DownloadsDataGridView";
             this.DownloadsDataGridView.ReadOnly = true;
             this.DownloadsDataGridView.RowHeadersVisible = false;
             this.DownloadsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.DownloadsDataGridView.Size = new System.Drawing.Size(496, 221);
+            this.DownloadsDataGridView.Size = new System.Drawing.Size(496, 197);
             this.DownloadsDataGridView.TabIndex = 2;
             // 
             // ProgramDownloadsButton
             // 
-            this.ProgramDownloadsButton.Location = new System.Drawing.Point(255, 8);
+            this.ProgramDownloadsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ProgramDownloadsButton.Location = new System.Drawing.Point(6, 231);
             this.ProgramDownloadsButton.Name = "ProgramDownloadsButton";
-            this.ProgramDownloadsButton.Size = new System.Drawing.Size(75, 23);
+            this.ProgramDownloadsButton.Size = new System.Drawing.Size(243, 23);
             this.ProgramDownloadsButton.TabIndex = 1;
-            this.ProgramDownloadsButton.Text = "Show Me";
+            this.ProgramDownloadsButton.Text = "Show Downloads for the Entire Argos Program";
             this.ProgramDownloadsButton.UseVisualStyleBackColor = true;
             this.ProgramDownloadsButton.Click += new System.EventHandler(this.ProgramDownloadsButton_Click);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 13);
+            this.label5.Location = new System.Drawing.Point(6, 12);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(243, 13);
+            this.label5.Size = new System.Drawing.Size(466, 13);
             this.label5.TabIndex = 0;
-            this.label5.Text = "Also see the downloads for the platform\'s program.";
+            this.label5.Text = "Automatic downloads from the Argos website for just this Argos platform (max of 1" +
+    "0 days available)";
             // 
             // ProcessingIssuesTabPage
             // 
+            this.ProcessingIssuesTabPage.Controls.Add(this.label8);
             this.ProcessingIssuesTabPage.Controls.Add(this.ProcessingIssuesDataGridView);
             this.ProcessingIssuesTabPage.Location = new System.Drawing.Point(4, 22);
             this.ProcessingIssuesTabPage.Name = "ProcessingIssuesTabPage";
@@ -407,6 +424,16 @@
             this.ProcessingIssuesTabPage.Text = "Processing Issues";
             this.ProcessingIssuesTabPage.UseVisualStyleBackColor = true;
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(6, 12);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(443, 13);
+            this.label8.TabIndex = 6;
+            this.label8.Text = "Results (or problems) encountered when trying to process the raw data for this Ar" +
+    "gos platform";
+            // 
             // ProcessingIssuesDataGridView
             // 
             this.ProcessingIssuesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -414,16 +441,18 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ProcessingIssuesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.ProcessingIssuesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ProcessingIssuesDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.ProcessingIssuesDataGridView.Location = new System.Drawing.Point(3, 28);
             this.ProcessingIssuesDataGridView.Name = "ProcessingIssuesDataGridView";
             this.ProcessingIssuesDataGridView.ReadOnly = true;
             this.ProcessingIssuesDataGridView.RowHeadersVisible = false;
             this.ProcessingIssuesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(496, 255);
+            this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(496, 230);
             this.ProcessingIssuesDataGridView.TabIndex = 3;
+            this.ProcessingIssuesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProcessingIssuesDataGridView_CellContentDoubleClick);
             // 
             // TransmissionsTabPage
             // 
+            this.TransmissionsTabPage.Controls.Add(this.label7);
             this.TransmissionsTabPage.Controls.Add(this.TransmissionsDataGridView);
             this.TransmissionsTabPage.Location = new System.Drawing.Point(4, 22);
             this.TransmissionsTabPage.Name = "TransmissionsTabPage";
@@ -433,6 +462,15 @@
             this.TransmissionsTabPage.Text = "Transmissions";
             this.TransmissionsTabPage.UseVisualStyleBackColor = true;
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 12);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(254, 13);
+            this.label7.TabIndex = 6;
+            this.label7.Text = "Collar files containing raw data for this Argos platform";
+            // 
             // TransmissionsDataGridView
             // 
             this.TransmissionsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -440,16 +478,18 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.TransmissionsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.TransmissionsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.TransmissionsDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.TransmissionsDataGridView.Location = new System.Drawing.Point(3, 28);
             this.TransmissionsDataGridView.Name = "TransmissionsDataGridView";
             this.TransmissionsDataGridView.ReadOnly = true;
             this.TransmissionsDataGridView.RowHeadersVisible = false;
             this.TransmissionsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.TransmissionsDataGridView.Size = new System.Drawing.Size(496, 255);
+            this.TransmissionsDataGridView.Size = new System.Drawing.Size(496, 230);
             this.TransmissionsDataGridView.TabIndex = 4;
+            this.TransmissionsDataGridView.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransmissionsDataGridView_CellContentDoubleClick);
             // 
             // DerivedDataTabPage
             // 
+            this.DerivedDataTabPage.Controls.Add(this.label6);
             this.DerivedDataTabPage.Controls.Add(this.DerivedDataGridView);
             this.DerivedDataTabPage.Location = new System.Drawing.Point(4, 22);
             this.DerivedDataTabPage.Name = "DerivedDataTabPage";
@@ -459,6 +499,15 @@
             this.DerivedDataTabPage.Text = "Derived Data";
             this.DerivedDataTabPage.UseVisualStyleBackColor = true;
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 12);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(275, 13);
+            this.label6.TabIndex = 5;
+            this.label6.Text = "Derived collar data files dependent on this Argos platform";
+            // 
             // DerivedDataGridView
             // 
             this.DerivedDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -466,13 +515,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DerivedDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.DerivedDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DerivedDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.DerivedDataGridView.Location = new System.Drawing.Point(3, 28);
             this.DerivedDataGridView.Name = "DerivedDataGridView";
             this.DerivedDataGridView.ReadOnly = true;
             this.DerivedDataGridView.RowHeadersVisible = false;
             this.DerivedDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.DerivedDataGridView.Size = new System.Drawing.Size(496, 255);
+            this.DerivedDataGridView.Size = new System.Drawing.Size(496, 230);
             this.DerivedDataGridView.TabIndex = 4;
+            this.DerivedDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DerivedDataGridView_CellContentDoubleClick);
             // 
             // CloseButton
             // 
@@ -507,15 +557,19 @@
             this.CollarsTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).EndInit();
             this.ParametersTabPage.ResumeLayout(false);
+            this.ParametersTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).EndInit();
             this.DownloadsTabPage.ResumeLayout(false);
             this.DownloadsTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DownloadsDataGridView)).EndInit();
             this.ProcessingIssuesTabPage.ResumeLayout(false);
+            this.ProcessingIssuesTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).EndInit();
             this.TransmissionsTabPage.ResumeLayout(false);
+            this.TransmissionsTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TransmissionsDataGridView)).EndInit();
             this.DerivedDataTabPage.ResumeLayout(false);
+            this.DerivedDataTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DerivedDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -524,7 +578,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button EditSaveButton;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox NotesTextBox;
@@ -557,5 +611,9 @@
         private System.Windows.Forms.Button AddCollarButton;
         private System.Windows.Forms.Button DeleteCollarButton;
         private System.Windows.Forms.Button InfoCollarButton;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
     }
 }
