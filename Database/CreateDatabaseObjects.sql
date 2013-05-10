@@ -1321,126 +1321,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 2, 2012
--- Description:	Updates a Collar
--- =============================================
-CREATE PROCEDURE [dbo].[Collar_Update] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL, 
-	@CollarModel NVARCHAR(255) = NULL, 
-	@Manager sysname = NULL, 
-	@Owner NVARCHAR(255) = NULL, 
-	@SerialNumber NVARCHAR(255) = NULL, 
-	@Frequency FLOAT = NULL, 
-	@HasGps BIT = 0, 
-	@Notes NVARCHAR(max) = NULL,
-	@DisposalDate DATETIME2(7) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Verify this is an existing collar
-	-- Otherwise, the update will silently succeed, which could be confusing.
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId)
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-		
-	-- Validate permission for this operation
-	-- The caller must be the Manager of the collar
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manager of this collar ('+@CollarManufacturer+'/'+@CollarId+') to update it.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- If a parameter is not provided, use the existing value.
-	-- (to put null in a field the user will need to pass an empty string)
-	IF @CollarModel IS NULL
-	BEGIN
-		SELECT @CollarModel = [CollarModel] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Manager IS NULL
-	BEGIN
-		SELECT @Manager = [Manager] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Owner IS NULL
-	BEGIN
-		SELECT @Owner = [Owner] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @SerialNumber IS NULL
-	BEGIN
-		SELECT @SerialNumber = [SerialNumber] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	IF @Notes IS NULL
-	BEGIN
-		SELECT @Notes = [Notes] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-	END
-	
-	-- Do the update, replacing empty strings with NULLs
-	-- All other verification is handled by primary/foreign key and column constraints.
-
-	UPDATE dbo.Collars SET [CollarModel] = nullif(@CollarModel,''),
-						   [Manager] = nullif(@Manager,''),
-						   [Owner] = nullif(@Owner,''),
-						   [SerialNumber] = nullif(@SerialNumber,''),
-						   [Frequency] = @Frequency,
-						   [HasGps] = @HasGps,
-						   [Notes] = nullif(@Notes,''),
-						   [DisposalDate] = @DisposalDate
-					 WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 2, 2012
--- Description:	Delete a collar
--- =============================================
-CREATE PROCEDURE [dbo].[Collar_Delete] 
-	@CollarManufacturer NVARCHAR(255)= NULL,
-	@CollarId NVARCHAR(255) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the Manager of the collar
-	IF NOT EXISTS (SELECT 1 FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND [Manager] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manger of this collar ('+@CollarManufacturer+'/'+@CollarId+') to delete it.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- deleting a non-existing collar will silently succeed.
-	-- All other verification is handled by primary/foreign key and column constraints.
-	DELETE FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[ArgosFileProcessingIssues](
@@ -3435,58 +3315,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 2, 2012
--- Description:	Adds a new Collar.
---    Modified: 2013-03-01 - Added Manager to parameter list (allows creating a collar for another PI)
--- =============================================
-CREATE PROCEDURE [dbo].[Collar_Insert] 
-	@CollarManufacturer NVARCHAR(255),
-	@CollarId NVARCHAR(255), 
-	@CollarModel NVARCHAR(255), 
-	@Manager NVARCHAR(255) = NULL, -- null defaults to caller
-	@Owner NVARCHAR(255) = NULL,  
-	@SerialNumber NVARCHAR(255) = NULL, 
-	@Frequency FLOAT = NULL, 
-	@HasGps BIT = 0, 
-	@Notes NVARCHAR(max) = NULL,
-	@DisposalDate DATETIME2(7) = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- If the caller is not a PI then error and return
-	-- This is enforced by the defaults and referential integrity,
-	-- but this makes the returned error message much easier to interpret.
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Caller)
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be a principal investigator to create a collar';
-		RAISERROR(@message1, 18, 0)
-		RETURN
-	END
-	
-	--Fix Defaults
-    SET @Manager = ISNULL(@Manager,@Caller)
-    SET @Owner = NULLIF(@Owner,'')
-    SET @SerialNumber = NULLIF(@SerialNumber,'')
-    SET @Notes = NULLIF(@Notes,'')
-	
-	--All other verification is handled by primary/foreign key and column constraints.
-	INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Manager], [Owner],  
-							 [SerialNumber], [Frequency], [HasGps], [Notes])
-					 VALUES (@CollarManufacturer, @CollarId, @CollarModel, @Manager, @Owner,
-							 @SerialNumber, @Frequency, @HasGps, @Notes)
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE TABLE [dbo].[LookupQueryLayerServers](
 	[Location] [nvarchar](128) NOT NULL,
 	[Connection] [nvarchar](255) NOT NULL,
@@ -3502,91 +3330,104 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: April 3, 2012
--- Description:	Add/Remove Locations when Deployment is updated
+-- Description: Add/Remove Locations when Deployment is updated
 -- =============================================
 CREATE TRIGGER [dbo].[AfterCollarDeploymentUpdate] 
    ON  [dbo].[CollarDeployments] 
    AFTER UPDATE
 AS 
 BEGIN
-	SET NOCOUNT ON;
-	
-	--Retrevial date is the only thing that can change.
-	IF (UPDATE (ProjectId) OR UPDATE (AnimalId) OR UPDATE (CollarManufacturer) OR UPDATE(CollarId))
-	BEGIN
-		RAISERROR('Updating the Animal or Collar is not allowed.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-	
-	-- triggers always execute in the context of a transaction
-	-- so the following code is all or nothing.
+    SET NOCOUNT ON;
 
-	-- Verify the retrieval occurs after the deployment
-	IF EXISTS (SELECT 1
-				 FROM inserted AS I
-				WHERE I.RetrievalDate <= I.DeploymentDate
-			  )
-	BEGIN
-		RAISERROR('The retrevial must occur after the deployment.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
+    -- triggers always execute in the context of a transaction
+    -- so the following code is all or nothing.
 
-	-- Verify new deployment start occurs before collar disposal
-	IF EXISTS (SELECT 1
-				 FROM inserted AS I
-		   INNER JOIN Collars AS C
-				   ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
-				WHERE C.DisposalDate < I.DeploymentDate
-			  )
-	BEGIN
-		RAISERROR('Deployment start date violation.  The collar was disposed before the deployment begins.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
+    -- dates are the only thing that can change (at this point)
 
-	-- Verify that the animal is not wearing another collar during the proposed date range
-	-- We are checking each inserted deployment against all existing deployments, and all other new deployments	 
-	IF EXISTS (SELECT 1
-				 FROM inserted AS I1
-			LEFT JOIN inserted AS I2
-				   ON I1.ProjectId = I2.ProjectId AND I1.AnimalId = I2.AnimalId AND I1.DeploymentId <> I2.DeploymentId
-		   INNER JOIN dbo.CollarDeployments AS D
-				   ON D.ProjectId = I1.ProjectId AND D.AnimalId = I1.AnimalId AND D.DeploymentId <> I1.DeploymentId
-	   			WHERE dbo.DoDateRangesOverlap(D.DeploymentDate, D.RetrievalDate, I1.DeploymentDate, I1.RetrievalDate) = 1
-				   OR (I2.DeploymentDate IS NOT NULL AND
-					   dbo.DoDateRangesOverlap(I1.DeploymentDate, I1.RetrievalDate, I2.DeploymentDate, I2.RetrievalDate) = 1)
-			  )
-	BEGIN
-		RAISERROR('Insert would result in an animal with overlapping deployment dates violation.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-	
-	-- Verify that the collar is not on another animal during the proposed date range
-	-- We are checking each inserted deployment against all existing deployments, and all other new deployments 
-	IF EXISTS (SELECT 1
-				 FROM inserted AS I1
-			LEFT JOIN inserted AS I2
-				   ON I1.CollarManufacturer = I2.CollarManufacturer AND I1.CollarId = I2.CollarId AND I1.DeploymentId <> I2.DeploymentId
-		   INNER JOIN dbo.CollarDeployments AS D
-				   ON D.CollarManufacturer = I1.CollarManufacturer AND D.CollarId = I1.CollarId AND D.DeploymentId <> I1.DeploymentId
-	   			WHERE dbo.DoDateRangesOverlap(D.DeploymentDate, D.RetrievalDate, I1.DeploymentDate, I1.RetrievalDate) = 1
-				   OR (I2.DeploymentDate IS NOT NULL AND
-					   dbo.DoDateRangesOverlap(I1.DeploymentDate, I1.RetrievalDate, I2.DeploymentDate, I2.RetrievalDate) = 1)
-			  )
-	BEGIN
-		RAISERROR('Insert would result in a collar with overlapping deployment dates violation.', 18, 0)
-		ROLLBACK TRANSACTION;
-		RETURN
-	END
-		
+    -- I compare inserted with deleted because the Update SPROC includes all columns
+    IF (UPDATE(ProjectId) OR UPDATE(AnimalId))
+       AND EXISTS (SELECT 1 FROM inserted AS I JOIN deleted AS D ON D.DeploymentId = I.DeploymentId
+                    WHERE I.ProjectId != D.ProjectId OR I.AnimalId != D.AnimalId)
+    BEGIN
+        RAISERROR('Updating the Animal is currently not allowed - Delete and recreate.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+    IF (UPDATE(CollarManufacturer) OR UPDATE(CollarId))
+       AND EXISTS (SELECT 1 FROM inserted AS I JOIN deleted AS D ON D.DeploymentId = I.DeploymentId
+                    WHERE I.CollarManufacturer != D.CollarManufacturer OR I.CollarId != D.CollarId)
+    BEGIN
+        RAISERROR('Updating the Collar is currently not allowed - Delete and recreate.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
 
-  		-- When new retrevial date < old retrieval date we may lose some Locations
-		-- Delete records from locations fix date is greater than the new retrieval date
+
+    -- Verify the retrieval occurs after the deployment
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+                WHERE I.RetrievalDate <= I.DeploymentDate
+              )
+    BEGIN
+        RAISERROR('The retrevial must occur after the deployment.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- Verify new deployment start occurs before collar disposal
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+           INNER JOIN Collars AS C
+                   ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
+                WHERE C.DisposalDate < I.DeploymentDate
+              )
+    BEGIN
+        RAISERROR('Deployment start date violation.  The collar was disposed before the deployment begins.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- Verify that the animal is not wearing another collar during the proposed date range
+    -- We are checking each inserted deployment against all existing deployments, and all other new deployments	 
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I1
+            LEFT JOIN inserted AS I2
+                   ON I1.ProjectId = I2.ProjectId AND I1.AnimalId = I2.AnimalId AND I1.DeploymentId <> I2.DeploymentId
+           INNER JOIN dbo.CollarDeployments AS D
+                   ON D.ProjectId = I1.ProjectId AND D.AnimalId = I1.AnimalId AND D.DeploymentId <> I1.DeploymentId
+                WHERE dbo.DoDateRangesOverlap(D.DeploymentDate, D.RetrievalDate, I1.DeploymentDate, I1.RetrievalDate) = 1
+                   OR (I2.DeploymentDate IS NOT NULL AND
+                       dbo.DoDateRangesOverlap(I1.DeploymentDate, I1.RetrievalDate, I2.DeploymentDate, I2.RetrievalDate) = 1)
+              )
+    BEGIN
+        RAISERROR('Insert would result in an animal with overlapping deployment dates violation.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- Verify that the collar is not on another animal during the proposed date range
+    -- We are checking each inserted deployment against all existing deployments, and all other new deployments 
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I1
+            LEFT JOIN inserted AS I2
+                   ON I1.CollarManufacturer = I2.CollarManufacturer AND I1.CollarId = I2.CollarId AND I1.DeploymentId <> I2.DeploymentId
+           INNER JOIN dbo.CollarDeployments AS D
+                   ON D.CollarManufacturer = I1.CollarManufacturer AND D.CollarId = I1.CollarId AND D.DeploymentId <> I1.DeploymentId
+                WHERE dbo.DoDateRangesOverlap(D.DeploymentDate, D.RetrievalDate, I1.DeploymentDate, I1.RetrievalDate) = 1
+                   OR (I2.DeploymentDate IS NOT NULL AND
+                       dbo.DoDateRangesOverlap(I1.DeploymentDate, I1.RetrievalDate, I2.DeploymentDate, I2.RetrievalDate) = 1)
+              )
+    BEGIN
+        RAISERROR('Insert would result in a collar with overlapping deployment dates violation.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+        -- When new retrevial date < old retrieval date we may lose some Locations
+        -- Delete records from locations fix date is greater than the new retrieval date
 /*
 Example:  Time --->
 
@@ -3594,26 +3435,26 @@ Example:  Time --->
       *              *               *
       L1             L2              L3
   *-----D1-----* *------D2-----*
-                             
+
 L1 is part of D1 but not D2,
 L2 and L3 are part of original D2, but not D1
 L3 is not part of either deploymnet after changing retrieval date on D2
 */
-		DELETE L FROM dbo.Locations as L
-				   -- Join to the deployment that created this location
-		   INNER JOIN deleted as D
-				   ON L.ProjectId = D.ProjectId
-				  AND L.AnimalId = D.AnimalId
-				  AND D.DeploymentDate < L.FixDate
-				  AND (L.FixDate < D.RetrievalDate OR D.RetrievalDate IS NULL)
-				   -- Match the old (deleted) deployment dates to the new (inserted) deployment dates
-		   INNER JOIN inserted as I
-				   ON I.DeploymentId = D.DeploymentId
-				   -- Delete the Locations outside the new (inserted) deployment dates:
-				WHERE L.FixDate < I.DeploymentDate OR I.RetrievalDate < L.FixDate 
-								
-		-- When new retrevial is null, or is greater than the old retrevial date we may gain some Locations
-		-- Add locations for fixes that are now deployed, but were not before
+        DELETE L FROM dbo.Locations as L
+                   -- Join to the deployment that created this location
+           INNER JOIN deleted as D
+                   ON L.ProjectId = D.ProjectId
+                  AND L.AnimalId = D.AnimalId
+                  AND D.DeploymentDate < L.FixDate
+                  AND (L.FixDate < D.RetrievalDate OR D.RetrievalDate IS NULL)
+                   -- Match the old (deleted) deployment dates to the new (inserted) deployment dates
+           INNER JOIN inserted as I
+                   ON I.DeploymentId = D.DeploymentId
+                   -- Delete the Locations outside the new (inserted) deployment dates:
+                WHERE L.FixDate < I.DeploymentDate OR I.RetrievalDate < L.FixDate 
+
+        -- When new retrevial is null, or is greater than the old retrevial date we may gain some Locations
+        -- Add locations for fixes that are now deployed, but were not before
 /*
 Example:  Time --->
 
@@ -3621,40 +3462,33 @@ Example:  Time --->
       *              *               *
       F1             F2              F3
   *-----D1-----* *------D2-----------------*  or --->
-                             
+
 Add Location for F3, but not F1 or F2
 */
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
-			   FROM dbo.CollarFixes AS F
-				 -- Join to the fixes that are covered by the new deployment dates
-		 INNER JOIN inserted AS I
-				 ON F.CollarManufacturer = I.CollarManufacturer
-				AND F.CollarId = I.CollarId
-	     INNER JOIN deleted as D
-				 -- To get the old retrieval date, we need to link inserted and deleted deployments by PK
-			     ON I.DeploymentId = D.DeploymentId
+        INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+             SELECT I.ProjectId, I.AnimalId, F.FixDate, geography::Point(F.Lat, F.Lon, 4326), F.FixId
+               FROM dbo.CollarFixes AS F
+                 -- Join to the fixes that are covered by the new deployment dates
+         INNER JOIN inserted AS I
+                 ON F.CollarManufacturer = I.CollarManufacturer
+                AND F.CollarId = I.CollarId
+         INNER JOIN deleted as D
+                 -- To get the old retrieval date, we need to link inserted and deleted deployments by PK
+                 ON I.DeploymentId = D.DeploymentId
          INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = I.ProjectId
- 	            AND A.AnimalId = I.AnimalId
+                 ON A.ProjectId = I.ProjectId
+                AND A.AnimalId = I.AnimalId
          INNER JOIN dbo.Collars AS C
- 	             ON C.CollarManufacturer = I.CollarManufacturer
- 	            AND C.CollarId = I.CollarId
-			  WHERE F.HiddenBy IS NULL
-			     -- fix wasn't in old deployment dates, note: NULL < F.FixDate is always false (good) 
-			    AND (F.FixDate < D.DeploymentDate OR D.RetrievalDate < F.FixDate)
-				 -- fix is in new deployment dates
-				AND I.DeploymentDate < F.FixDate
-				AND (I.RetrievalDate IS NULL OR F.FixDate <= I.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR F.FixDate <= A.MortalityDate)
-				AND (C.DisposalDate IS NULL OR F.FixDate <= C.DisposalDate)
-
-		/*
-		These stored procedures would be clean, but they would require a cursor,
-		stored procedures cannot be used in a set based solution.
-		EXEC [dbo].[AddLocationForDeployment] @CollarManufacturer, @CollarId, @ProjectId, @AnimalId, @StartDate, @EndDate
-		EXEC [dbo].[DeleteLocationForAnimalAndDateRange] @ProjectId, @AnimalId, @StartDate, @EndDate
-		*/
+                 ON C.CollarManufacturer = I.CollarManufacturer
+                AND C.CollarId = I.CollarId
+              WHERE F.HiddenBy IS NULL
+                 -- fix wasn't in old deployment dates, note: NULL < F.FixDate is always false (good) 
+                AND (F.FixDate < D.DeploymentDate OR D.RetrievalDate < F.FixDate)
+                 -- fix is in new deployment dates
+                AND I.DeploymentDate < F.FixDate
+                AND (I.RetrievalDate IS NULL OR F.FixDate <= I.RetrievalDate)
+                AND (A.MortalityDate IS NULL OR F.FixDate <= A.MortalityDate)
+                AND (C.DisposalDate IS NULL OR F.FixDate <= C.DisposalDate)
 
 END
 GO
@@ -5194,6 +5028,197 @@ BEGIN
 
     -- All other verification is handled by primary/foreign key and column constraints.
     DELETE FROM dbo.CollarParameters WHERE [ParameterId] = @ParameterId;
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: April 2, 2012
+-- Description: Updates a Collar
+-- =============================================
+CREATE PROCEDURE [dbo].[Collar_Update] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255), 
+    @CollarModel        NVARCHAR(255) = NULL, 
+    @Manager            SYSNAME       = NULL, 
+    @Owner              NVARCHAR(255), 
+    @SerialNumber       NVARCHAR(255), 
+    @Frequency          FLOAT, 
+    @HasGps             BIT           = NULL, 
+    @Notes              NVARCHAR(MAX),
+    @DisposalDate       DATETIME2(7)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    -- Fix Text Inputs
+    SET @CollarModel        = NULLIF(@CollarModel,'')
+    SET @Manager            = NULLIF(@Manager,'')
+    SET @Owner              = NULLIF(@Owner,'')
+    SET @SerialNumber       = NULLIF(@SerialNumber,'')
+    SET @Notes              = NULLIF(@Notes,'')
+
+    -- Verify this is an existing collar by getting the original owner (needed for permissions check)
+    DECLARE @OldManager SYSNAME
+    SELECT @OldManager = Manager FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF @OldManager IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    --Fix Defaults
+    -- I use NULL to indicate "don't change value" only on non-null fields.
+    -- The defaults for nullable field should match the insert SP.
+    -- If the client does not want to change a nullable field they must provide the original value.
+    IF @CollarModel IS NULL
+        SELECT @CollarModel = [CollarModel] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+    IF @Manager IS NULL
+        SELECT @Manager = [Manager] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+    IF @HasGps IS NULL
+        SELECT @HasGps = [HasGps] FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+
+
+    -- Validate permission for this operation
+    -- The caller must be the old manager or assistant of the collar
+    IF @OldManager != @Caller
+       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @OldManager)
+    BEGIN
+        DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the old manager (or assistant) of this collar.';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+    -- The caller must be the manager or assistant of the collar
+    IF @Manager != @Caller
+       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message3 nvarchar(200) = 'You ('+@Caller+') must be the new manager (or assistant) of this collar.';
+        RAISERROR(@message3, 18, 0)
+        RETURN 3
+    END
+
+
+    UPDATE dbo.Collars SET [CollarModel]  = @CollarModel,
+                           [Manager]      = @Manager,
+                           [Owner]        = @Owner,
+                           [SerialNumber] = @SerialNumber,
+                           [Frequency]    = @Frequency,
+                           [HasGps]       = @HasGps,
+                           [Notes]        = @Notes,
+                           [DisposalDate] = @DisposalDate
+                     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: April 2, 2012
+-- Description: Adds a new Collar.
+--    Modified: 2013-03-01 - Added Manager to parameter list (allows creating a collar for another PI)
+-- =============================================
+CREATE PROCEDURE [dbo].[Collar_Insert] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255), 
+    @CollarModel        NVARCHAR(255), 
+    @Manager            NVARCHAR(255) = NULL, -- null defaults to caller
+    @Owner              NVARCHAR(255) = NULL,  
+    @SerialNumber       NVARCHAR(255) = NULL, 
+    @Frequency          FLOAT = NULL, 
+    @HasGps             BIT = 0, 
+    @Notes              NVARCHAR(max) = NULL,
+    @DisposalDate       DATETIME2(7) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
+    SET @CollarId           = NULLIF(@CollarId,'')
+    SET @CollarModel        = NULLIF(@CollarModel,'')
+    SET @Manager            = NULLIF(@Manager,'')
+    SET @Owner              = NULLIF(@Owner,'')
+    SET @SerialNumber       = NULLIF(@SerialNumber,'')
+    SET @Notes              = NULLIF(@Notes,'')
+
+    --default PI is the calling user
+    SET @Manager = ISNULL(@Manager, @Caller) 
+
+    -- Validate permission for this operation
+    -- If the caller is not the owner or assistant then error and return
+    IF @Manager != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') must be the manager (or assistant) of the a collar'
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    INSERT INTO dbo.Collars ([CollarManufacturer], [CollarId], [CollarModel], [Manager], [Owner],  
+                             [SerialNumber], [Frequency], [HasGps], [Notes])
+                     VALUES (@CollarManufacturer, @CollarId, @CollarModel, @Manager, @Owner,
+                             @SerialNumber, @Frequency, @HasGps, @Notes)
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: April 2, 2012
+-- Description: Delete a collar
+-- =============================================
+CREATE PROCEDURE [dbo].[Collar_Delete] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    DECLARE @Manager SYSNAME
+    SELECT @Manager = Manager FROM Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF @Manager IS NULL
+        RETURN -- Collar was not found, so it must have been deleted already
+
+    -- Validate permission for this operation
+
+    -- The caller must be the Manager or assistant of the collar
+    IF @Manager != @Caller
+        AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manager (or assistant) of this collar ('+@CollarManufacturer+'/'+@CollarId+') to delete it.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    DELETE FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
 
 END
 GO
@@ -7125,8 +7150,12 @@ GO
 -- Create date: April 2, 2012
 -- Description: Adds a new Collar Deployment.
 -- =============================================
-CREATE PROCEDURE [dbo].[CollarDeployment_UpdateDates] 
+CREATE PROCEDURE [dbo].[CollarDeployment_Update] 
     @DeploymentId       INT,
+    @ProjectId          NVARCHAR(255) = NULL,
+    @AnimalId           NVARCHAR(255) = NULL, 
+    @CollarManufacturer NVARCHAR(255) = NULL,
+    @CollarId           NVARCHAR(255) = NULL, 
     @DeploymentDate     DATETIME2 = NULL, 
     @RetrievalDate      DATETIME2
 AS
@@ -7136,27 +7165,84 @@ BEGIN
     -- Get the name of the caller
     DECLARE @Caller sysname = ORIGINAL_LOGIN();
 
-    --Fix Defaults
-    -- I use NULL to indicate don't change value only on non-null fields.
-    -- The defaults for nullable field should match the insert SP.
-    -- If the client does not want to change a nullable field they must provide the original value.
-    IF @DeploymentDate IS NULL
-        SELECT @DeploymentDate = [DeploymentDate] FROM [dbo].[CollarDeployments] WHERE [DeploymentId] = @DeploymentId;
-
-    -- Validate deployment and get variables for permission checking
-    DECLARE @ProjectId NVARCHAR(255);
-    SELECT  @ProjectId = ProjectId FROM dbo.CollarDeployments WHERE DeploymentId = @DeploymentId
-    IF @ProjectId IS NULL
+    -- Validate Deployment before we go any further
+    DECLARE @OldProjectId          NVARCHAR(255)
+    DECLARE @OldCollarManufacturer NVARCHAR(255)
+    DECLARE @OldCollarId           NVARCHAR(255) 
+    SELECT @OldProjectId = ProjectId, @OldCollarManufacturer = CollarManufacturer, @OldCollarId = CollarId
+      FROM [dbo].[CollarDeployments] WHERE [DeploymentId] = @DeploymentId
+    IF @OldProjectId IS NULL
     BEGIN
         RAISERROR('The deployment you want to change was not found.', 18, 0)
         RETURN 1
     END
+    
+    --Fix Text Inputs
+    SET @ProjectId          = NULLIF(@ProjectId,'')
+    SET @AnimalId           = NULLIF(@AnimalId,'')
+    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
+    SET @CollarId           = NULLIF(@CollarId,'')
+
+    --Fix Defaults
+    -- I use NULL to indicate don't change value only on non-null fields.
+    -- The defaults for nullable field should match the insert SP.
+    -- If the client does not want to change a nullable field they must provide the original value.
+    IF @ProjectId IS NULL
+        SELECT @ProjectId = [ProjectId] FROM [dbo].[CollarDeployments] WHERE [DeploymentId] = @DeploymentId;
+    IF @AnimalId IS NULL
+        SELECT @AnimalId = [AnimalId] FROM [dbo].[CollarDeployments] WHERE [DeploymentId] = @DeploymentId;
+    IF @CollarManufacturer IS NULL
+        SELECT @CollarManufacturer = [CollarManufacturer] FROM [dbo].[CollarDeployments] WHERE [DeploymentId] = @DeploymentId;
+    IF @CollarId IS NULL
+        SELECT @CollarId = [CollarId] FROM [dbo].[CollarDeployments] WHERE [DeploymentId] = @DeploymentId;
+    IF @DeploymentDate IS NULL
+        SELECT @DeploymentDate = [DeploymentDate] FROM [dbo].[CollarDeployments] WHERE [DeploymentId] = @DeploymentId;
+
+
+    -- Get variables for permission checking against OLD deployment
+    DECLARE @OldProjectPI NVARCHAR(255);
+    SELECT  @OldProjectPI = ProjectInvestigator FROM dbo.Projects WHERE ProjectId = @OldProjectId
+    DECLARE @OldCollarPI NVARCHAR(255);
+    SELECT  @OldCollarPI = Manager FROM dbo.Collars AS C JOIN dbo.CollarDeployments AS D
+                                  ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+                               WHERE DeploymentId = @DeploymentId
+    DECLARE @IsOldProjectEditor BIT = dbo.IsProjectEditor(@OldProjectId, @Caller)
+    DECLARE @IsOldInvestigatorEditor BIT = dbo.IsInvestigatorEditor(@OldCollarPI, @Caller)
+
+    -- The caller must be the Project PI or editor on the project
+    -- or the collar owner or an assistant to the collar owner
+    IF @IsOldProjectEditor = 0 AND @IsOldInvestigatorEditor = 0 
+    BEGIN
+        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the PI or editor on the old project OR owner (or assitant) of the old collar.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    -- If the collar does not belong to the project PI, then
+    --   The caller must also be the Owner (or assistant) of the collar
+    IF @OldProjectPI != @OldCollarPI AND @IsOldInvestigatorEditor = 0
+    BEGIN
+            DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must also be the manager (or assistant) of the old collar.';
+            RAISERROR(@message2, 18, 0)
+            RETURN 2
+    END
+
+    -- If the project does not belong to the collar owner, then
+    --   The caller must also be an editor on the project
+    IF @OldProjectPI != @OldCollarPI AND @IsOldProjectEditor = 0
+    BEGIN
+            DECLARE @message3 nvarchar(200) = 'You ('+@Caller+') must also be the PI or editor of the old project.';
+            RAISERROR(@message3, 18, 0)
+            RETURN 3
+    END
+
+
+    -- Get variables for permission checking against NEW deployment
     DECLARE @ProjectPI NVARCHAR(255);
     SELECT  @ProjectPI = ProjectInvestigator FROM dbo.Projects WHERE ProjectId = @ProjectId
     DECLARE @CollarPI NVARCHAR(255);
-    SELECT  @CollarPI = Manager FROM dbo.Collars AS C JOIN dbo.CollarDeployments AS D
-                                  ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-                               WHERE DeploymentId = @DeploymentId
+    SELECT  @CollarPI = Manager FROM dbo.Collars
+                               WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
     DECLARE @IsProjectEditor BIT = dbo.IsProjectEditor(@ProjectId, @Caller)
     DECLARE @IsInvestigatorEditor BIT = dbo.IsInvestigatorEditor(@CollarPI, @Caller)
 
@@ -7164,27 +7250,27 @@ BEGIN
     -- or the collar owner or an assistant to the collar owner
     IF @IsProjectEditor = 0 AND @IsInvestigatorEditor = 0 
     BEGIN
-        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the PI or editor on the project OR owner (or assitant) of the collar.';
-        RAISERROR(@message1, 18, 0)
-        RETURN 1
+        DECLARE @message4 nvarchar(200) = 'You ('+@Caller+') must be the PI or editor on the new project OR owner (or assitant) of the new collar.';
+        RAISERROR(@message4, 18, 0)
+        RETURN 4
     END
 
     -- If the collar does not belong to the project PI, then
     --   The caller must also be the Owner (or assistant) of the collar
     IF @ProjectPI != @CollarPI AND @IsInvestigatorEditor = 0
     BEGIN
-            DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must also be the manager (or assistant) of the collar.';
-            RAISERROR(@message2, 18, 0)
-            RETURN 2
+            DECLARE @message5 nvarchar(200) = 'You ('+@Caller+') must also be the manager (or assistant) of the new collar.';
+            RAISERROR(@message5, 18, 0)
+            RETURN 5
     END
 
     -- If the project does not belong to the collar owner, then
     --   The caller must also be an editor on the project
     IF @ProjectPI != @CollarPI AND @IsProjectEditor = 0
     BEGIN
-            DECLARE @message3 nvarchar(200) = 'You ('+@Caller+') must also be the PI or editor of the project.';
-            RAISERROR(@message3, 18, 0)
-            RETURN 3
+            DECLARE @message6 nvarchar(200) = 'You ('+@Caller+') must also be the PI or editor of the new project.';
+            RAISERROR(@message6, 18, 0)
+            RETURN 6
     END
 
 
@@ -8036,7 +8122,7 @@ GRANT EXECUTE ON [dbo].[CollarDeployment_Delete] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[CollarDeployment_Insert] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[CollarDeployment_UpdateDates] TO [Editor] AS [dbo]
+GRANT EXECUTE ON [dbo].[CollarDeployment_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[CollarFile_Delete] TO [Editor] AS [dbo]
 GO
