@@ -13,7 +13,6 @@ namespace AnimalMovement
         private string CurrentUser { get; set; }
         private CollarParameter CollarParameter { get; set; }
         private bool IsEditor { get; set; }
-        private bool IsEditMode { get; set; }
         private bool LockCollar { get; set; }
         private bool LockFile { get; set; }
         internal event EventHandler DatabaseChanged;
@@ -137,17 +136,16 @@ namespace AnimalMovement
 
         private void EnableFormControls()
         {
-            EditSaveButton.Enabled = IsEditor;
-            IsEditMode = EditSaveButton.Text == "Save";
-            EditSaveButton.Enabled = IsEditMode;
-            CollarComboBox.Enabled = IsEditMode && !LockCollar;
-            FileComboBox.Enabled = IsEditMode && !LockFile;
-            StartDateTimePicker.Enabled = IsEditMode;
-            EndDateTimePicker.Enabled = IsEditMode;
-            Gen3PeriodTextBox.Enabled = IsEditMode;
-            ClearFileButton.Enabled = IsEditMode && !LockFile;
-            BrowseButton.Enabled = IsEditMode && !LockFile;
-            Gen3TimeUnitComboBox.Enabled = IsEditMode;
+            SaveButton.Enabled = IsEditor;
+            SaveButton.Enabled = IsEditor;
+            CollarComboBox.Enabled = IsEditor && !LockCollar;
+            FileComboBox.Enabled = IsEditor && !LockFile;
+            StartDateTimePicker.Enabled = IsEditor;
+            EndDateTimePicker.Enabled = IsEditor;
+            Gen3PeriodTextBox.Enabled = IsEditor;
+            ClearFileButton.Enabled = IsEditor && !LockFile;
+            BrowseButton.Enabled = IsEditor && !LockFile;
+            Gen3TimeUnitComboBox.Enabled = IsEditor;
             ValidateForm();
         }
 
@@ -158,8 +156,8 @@ namespace AnimalMovement
                 ValidationTextBox.Text = error;
             ValidationTextBox.Visible = error != null;
             ValidationTextBox.ForeColor = Color.Red;
-            EditSaveButton.Enabled = (IsEditMode && error == null) || (!IsEditMode && IsEditor);
             FixItButton.Visible = error != null;
+            SaveButton.Enabled = IsEditor && error == null && ParameterChanged();
             if (error != null)
                 return;
             var warning = ValidateWarning();
@@ -167,6 +165,18 @@ namespace AnimalMovement
                 ValidationTextBox.Text = warning;
             ValidationTextBox.Visible = warning != null;
             ValidationTextBox.ForeColor = Color.DodgerBlue;
+        }
+
+        private bool ParameterChanged()
+        {
+            return CollarComboBox.SelectedItem as Collar != CollarParameter.Collar ||
+                   FileComboBox.SelectedItem as CollarParameterFile != CollarParameter.CollarParameterFile ||
+                   (CollarParameter.StartDate == null && StartDateTimePicker.Checked) ||
+                   (CollarParameter.StartDate != null &&
+                    StartDateTimePicker.Value != CollarParameter.StartDate.Value.ToLocalTime()) ||
+                   (CollarParameter.EndDate == null && EndDateTimePicker.Checked) ||
+                   (CollarParameter.EndDate != null &&
+                    EndDateTimePicker.Value != CollarParameter.EndDate.Value.ToLocalTime());
         }
 
         private string ValidateError()
@@ -324,41 +334,15 @@ namespace AnimalMovement
             MessageBox.Show("You must fix it manually", "Not Implemented");
         }
 
-        private void EditSaveButton_Click(object sender, EventArgs e)
+        private void SaveButton_Click(object sender, EventArgs e)
         {
-            //This button is not enabled unless editing is permitted 
-            if (EditSaveButton.Text == "Edit")
-            {
-                // The user wants to edit, Enable form
-                EditSaveButton.Text = "Save";
-                DoneCancelButton.Text = "Cancel";
-                EnableFormControls();
-            }
-            else
-            {
-                if (UpdateParameters())
-                {
-                    EditSaveButton.Text = "Edit";
-                    DoneCancelButton.Text = "Done";
-                    EnableFormControls();
-                }
-            }
+            if (UpdateParameters())
+                Close();
         }
 
-        private void DoneCancelButton_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
-            if (DoneCancelButton.Text == "Cancel")
-            {
-                DoneCancelButton.Text = "Done";
-                EditSaveButton.Text = "Edit";
-                EnableFormControls();
-                //Reset state from database
-                LoadDefaultFormContents();
-            }
-            else
-            {
-                Close();
-            }
+            Close();
         }
 
         #endregion

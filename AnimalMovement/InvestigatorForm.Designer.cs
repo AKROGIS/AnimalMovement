@@ -54,13 +54,14 @@
             this.ProjectsTab = new System.Windows.Forms.TabPage();
             this.CollarsTab = new System.Windows.Forms.TabPage();
             this.ArgosTab = new System.Windows.Forms.TabPage();
+            this.InfoArgosCollarButton = new System.Windows.Forms.Button();
             this.EmailCheckBox = new System.Windows.Forms.CheckBox();
             this.PlatformsListBox = new AnimalMovement.ColoredListBox();
             this.ProgramsListBox = new AnimalMovement.ColoredListBox();
             this.ArgosDeploymentsGridView = new System.Windows.Forms.DataGridView();
             this.label7 = new System.Windows.Forms.Label();
             this.DeleteArgosDeploymentButton = new System.Windows.Forms.Button();
-            this.InfoArgosDeploymentButton = new System.Windows.Forms.Button();
+            this.EditArgosDeploymentButton = new System.Windows.Forms.Button();
             this.AddArgosDeploymentButton = new System.Windows.Forms.Button();
             this.ProgramsListBoxLabel = new System.Windows.Forms.Label();
             this.DeleteProgramButton = new System.Windows.Forms.Button();
@@ -421,13 +422,14 @@
             // 
             // ArgosTab
             // 
+            this.ArgosTab.Controls.Add(this.InfoArgosCollarButton);
             this.ArgosTab.Controls.Add(this.EmailCheckBox);
             this.ArgosTab.Controls.Add(this.PlatformsListBox);
             this.ArgosTab.Controls.Add(this.ProgramsListBox);
             this.ArgosTab.Controls.Add(this.ArgosDeploymentsGridView);
             this.ArgosTab.Controls.Add(this.label7);
             this.ArgosTab.Controls.Add(this.DeleteArgosDeploymentButton);
-            this.ArgosTab.Controls.Add(this.InfoArgosDeploymentButton);
+            this.ArgosTab.Controls.Add(this.EditArgosDeploymentButton);
             this.ArgosTab.Controls.Add(this.AddArgosDeploymentButton);
             this.ArgosTab.Controls.Add(this.ProgramsListBoxLabel);
             this.ArgosTab.Controls.Add(this.DeleteProgramButton);
@@ -444,6 +446,21 @@
             this.ArgosTab.TabIndex = 5;
             this.ArgosTab.Text = "Argos";
             this.ArgosTab.UseVisualStyleBackColor = true;
+            // 
+            // InfoArgosCollarButton
+            // 
+            this.InfoArgosCollarButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoArgosCollarButton.FlatAppearance.BorderSize = 0;
+            this.InfoArgosCollarButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoArgosCollarButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.InfoArgosCollarButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoArgosCollarButton.Location = new System.Drawing.Point(238, 247);
+            this.InfoArgosCollarButton.Name = "InfoArgosCollarButton";
+            this.InfoArgosCollarButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoArgosCollarButton.TabIndex = 29;
+            this.InfoArgosCollarButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.InfoArgosCollarButton.UseVisualStyleBackColor = true;
+            this.InfoArgosCollarButton.Click += new System.EventHandler(this.InfoArgosCollarButton_Click);
             // 
             // EmailCheckBox
             // 
@@ -527,20 +544,19 @@
             this.DeleteArgosDeploymentButton.UseVisualStyleBackColor = true;
             this.DeleteArgosDeploymentButton.Click += new System.EventHandler(this.DeleteArgosDeploymentButton_Click);
             // 
-            // InfoArgosDeploymentButton
+            // EditArgosDeploymentButton
             // 
-            this.InfoArgosDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.InfoArgosDeploymentButton.FlatAppearance.BorderSize = 0;
-            this.InfoArgosDeploymentButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.InfoArgosDeploymentButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.InfoArgosDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoArgosDeploymentButton.Location = new System.Drawing.Point(208, 247);
-            this.InfoArgosDeploymentButton.Name = "InfoArgosDeploymentButton";
-            this.InfoArgosDeploymentButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoArgosDeploymentButton.TabIndex = 21;
-            this.InfoArgosDeploymentButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.InfoArgosDeploymentButton.UseVisualStyleBackColor = true;
-            this.InfoArgosDeploymentButton.Click += new System.EventHandler(this.InfoArgosDeploymentButton_Click);
+            this.EditArgosDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditArgosDeploymentButton.FlatAppearance.BorderSize = 0;
+            this.EditArgosDeploymentButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.EditArgosDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditArgosDeploymentButton.Location = new System.Drawing.Point(213, 247);
+            this.EditArgosDeploymentButton.Name = "EditArgosDeploymentButton";
+            this.EditArgosDeploymentButton.Size = new System.Drawing.Size(24, 24);
+            this.EditArgosDeploymentButton.TabIndex = 21;
+            this.EditArgosDeploymentButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.EditArgosDeploymentButton.UseVisualStyleBackColor = true;
+            this.EditArgosDeploymentButton.Click += new System.EventHandler(this.EditArgosDeploymentButton_Click);
             // 
             // AddArgosDeploymentButton
             // 
@@ -771,7 +787,7 @@
             this.ParameterFilesTab.Location = new System.Drawing.Point(4, 22);
             this.ParameterFilesTab.Name = "ParameterFilesTab";
             this.ParameterFilesTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ParameterFilesTab.Size = new System.Drawing.Size(493, 348);
+            this.ParameterFilesTab.Size = new System.Drawing.Size(455, 276);
             this.ParameterFilesTab.TabIndex = 3;
             this.ParameterFilesTab.Text = "Parameter Files";
             this.ParameterFilesTab.UseVisualStyleBackColor = true;
@@ -784,7 +800,7 @@
             this.AssistantsTab.Location = new System.Drawing.Point(4, 22);
             this.AssistantsTab.Name = "AssistantsTab";
             this.AssistantsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.AssistantsTab.Size = new System.Drawing.Size(493, 348);
+            this.AssistantsTab.Size = new System.Drawing.Size(455, 276);
             this.AssistantsTab.TabIndex = 6;
             this.AssistantsTab.Text = "Assistants";
             this.AssistantsTab.UseVisualStyleBackColor = true;
@@ -836,7 +852,7 @@
             this.ReportsTab.Location = new System.Drawing.Point(4, 22);
             this.ReportsTab.Name = "ReportsTab";
             this.ReportsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ReportsTab.Size = new System.Drawing.Size(493, 348);
+            this.ReportsTab.Size = new System.Drawing.Size(455, 276);
             this.ReportsTab.TabIndex = 4;
             this.ReportsTab.Text = "QC Reports";
             this.ReportsTab.UseVisualStyleBackColor = true;
@@ -970,7 +986,7 @@
         private System.Windows.Forms.DataGridView ArgosDeploymentsGridView;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button DeleteArgosDeploymentButton;
-        private System.Windows.Forms.Button InfoArgosDeploymentButton;
+        private System.Windows.Forms.Button EditArgosDeploymentButton;
         private System.Windows.Forms.Button AddArgosDeploymentButton;
         private System.Windows.Forms.Label ProgramsListBoxLabel;
         private System.Windows.Forms.Button DeleteProgramButton;
@@ -991,5 +1007,6 @@
         private System.Windows.Forms.ComboBox ReportComboBox;
         private System.Windows.Forms.DataGridView ReportDataGridView;
         private System.Windows.Forms.TextBox ReportDescriptionTextBox;
+        private System.Windows.Forms.Button InfoArgosCollarButton;
     }
 }

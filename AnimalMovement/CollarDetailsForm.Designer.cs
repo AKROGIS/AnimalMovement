@@ -60,6 +60,7 @@
             this.RetrieveDateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DeploymentColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ArgosTabPage = new System.Windows.Forms.TabPage();
+            this.EditArgosButton = new System.Windows.Forms.Button();
             this.ArgosDataGridView = new System.Windows.Forms.DataGridView();
             this.AddArgosButton = new System.Windows.Forms.Button();
             this.DeleteArgosButton = new System.Windows.Forms.Button();
@@ -84,7 +85,6 @@
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.CollarErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
-            this.EditArgosButton = new System.Windows.Forms.Button();
             this.CollarTabControl.SuspendLayout();
             this.GeneralTabPage.SuspendLayout();
             this.AnimalsTabPage.SuspendLayout();
@@ -481,6 +481,18 @@
             this.ArgosTabPage.Text = "Argos";
             this.ArgosTabPage.UseVisualStyleBackColor = true;
             // 
+            // EditArgosButton
+            // 
+            this.EditArgosButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditArgosButton.FlatAppearance.BorderSize = 0;
+            this.EditArgosButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditArgosButton.Location = new System.Drawing.Point(60, 306);
+            this.EditArgosButton.Name = "EditArgosButton";
+            this.EditArgosButton.Size = new System.Drawing.Size(24, 24);
+            this.EditArgosButton.TabIndex = 30;
+            this.EditArgosButton.UseVisualStyleBackColor = true;
+            this.EditArgosButton.Click += new System.EventHandler(this.EditArgosButton_Click);
+            // 
             // ArgosDataGridView
             // 
             this.ArgosDataGridView.AllowUserToAddRows = false;
@@ -590,7 +602,7 @@
             this.ParametersDataGridView.ShowEditingIcon = false;
             this.ParametersDataGridView.ShowRowErrors = false;
             this.ParametersDataGridView.Size = new System.Drawing.Size(439, 294);
-            this.ParametersDataGridView.TabIndex = 33;
+            this.ParametersDataGridView.TabIndex = 29;
             this.ParametersDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellDoubleClick);
             this.ParametersDataGridView.SelectionChanged += new System.EventHandler(this.ParametersDataGridView_SelectionChanged);
             // 
@@ -798,18 +810,6 @@
             // CollarErrorProvider
             // 
             this.CollarErrorProvider.ContainerControl = this;
-            // 
-            // EditArgosButton
-            // 
-            this.EditArgosButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.EditArgosButton.FlatAppearance.BorderSize = 0;
-            this.EditArgosButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
-            this.EditArgosButton.Location = new System.Drawing.Point(60, 306);
-            this.EditArgosButton.Name = "EditArgosButton";
-            this.EditArgosButton.Size = new System.Drawing.Size(24, 24);
-            this.EditArgosButton.TabIndex = 30;
-            this.EditArgosButton.UseVisualStyleBackColor = true;
-            this.EditArgosButton.Click += new System.EventHandler(this.EditArgosButton_Click);
             // 
             // CollarDetailsForm
             // 

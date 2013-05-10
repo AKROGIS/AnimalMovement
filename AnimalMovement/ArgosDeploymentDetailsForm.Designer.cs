@@ -36,8 +36,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.StartDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.EndDateTimePicker = new System.Windows.Forms.DateTimePicker();
-            this.DoneCancelButton = new System.Windows.Forms.Button();
-            this.EditSaveButton = new System.Windows.Forms.Button();
+            this.cancelButton = new System.Windows.Forms.Button();
+            this.SaveButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.CollarComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
@@ -139,28 +139,28 @@
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
-            // DoneCancelButton
+            // cancelButton
             // 
-            this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(145, 159);
-            this.DoneCancelButton.Name = "DoneCancelButton";
-            this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.DoneCancelButton.TabIndex = 16;
-            this.DoneCancelButton.Text = "Done";
-            this.DoneCancelButton.UseVisualStyleBackColor = true;
-            this.DoneCancelButton.Click += new System.EventHandler(this.DoneCancelButton_Click);
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.cancelButton.Location = new System.Drawing.Point(145, 159);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(75, 23);
+            this.cancelButton.TabIndex = 16;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
             // 
-            // EditSaveButton
+            // SaveButton
             // 
-            this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.EditSaveButton.Location = new System.Drawing.Point(226, 159);
-            this.EditSaveButton.Name = "EditSaveButton";
-            this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
-            this.EditSaveButton.TabIndex = 15;
-            this.EditSaveButton.Text = "Edit";
-            this.EditSaveButton.UseVisualStyleBackColor = true;
-            this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
+            this.SaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveButton.Location = new System.Drawing.Point(226, 159);
+            this.SaveButton.Name = "SaveButton";
+            this.SaveButton.Size = new System.Drawing.Size(75, 23);
+            this.SaveButton.TabIndex = 15;
+            this.SaveButton.Text = "Save";
+            this.SaveButton.UseVisualStyleBackColor = true;
+            this.SaveButton.Click += new System.EventHandler(this.SaveButton_Click);
             // 
             // label1
             // 
@@ -185,10 +185,10 @@
             // 
             // ArgosDeploymentDetailsForm
             // 
-            this.AcceptButton = this.DoneCancelButton;
+            this.AcceptButton = this.cancelButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.DoneCancelButton;
+            this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(313, 198);
             this.Controls.Add(this.CollarComboBox);
             this.Controls.Add(this.FixItButton);
@@ -199,8 +199,8 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.StartDateTimePicker);
             this.Controls.Add(this.EndDateTimePicker);
-            this.Controls.Add(this.DoneCancelButton);
-            this.Controls.Add(this.EditSaveButton);
+            this.Controls.Add(this.cancelButton);
+            this.Controls.Add(this.SaveButton);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "ArgosDeploymentDetailsForm";
@@ -221,8 +221,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DateTimePicker StartDateTimePicker;
         private System.Windows.Forms.DateTimePicker EndDateTimePicker;
-        private System.Windows.Forms.Button DoneCancelButton;
-        private System.Windows.Forms.Button EditSaveButton;
+        private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.Button SaveButton;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox CollarComboBox;
     }

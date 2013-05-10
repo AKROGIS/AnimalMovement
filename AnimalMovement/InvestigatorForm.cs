@@ -423,7 +423,9 @@ namespace AnimalMovement
             DeleteArgosDeploymentButton.Enabled =
                 ArgosDeploymentsGridView.SelectedRows.Cast<DataGridViewRow>()
                                         .Any(r => (bool) r.Cells["CanDelete"].Value);
-            InfoArgosDeploymentButton.Enabled = ArgosDeploymentsGridView.SelectedRows.Count == 1;
+            EditArgosDeploymentButton.Enabled = ArgosDeploymentsGridView.SelectedRows.Count == 1;
+            InfoArgosCollarButton.Enabled = ArgosDeploymentsGridView.SelectedRows.Count == 1;
+
             EmailCheckBox.Enabled = IsInvestigator;
         }
 
@@ -633,7 +635,7 @@ namespace AnimalMovement
                 ArgosDataChanged();
         }
 
-        private void InfoArgosDeploymentButton_Click(object sender, EventArgs e)
+        private void EditArgosDeploymentButton_Click(object sender, EventArgs e)
         {
             var deploymentId = ((ArgosDeployment)ArgosDeploymentsGridView.SelectedRows[0].Cells[0].Value).DeploymentId;
             var form = new ArgosDeploymentDetailsForm(deploymentId, false, true);
@@ -641,10 +643,18 @@ namespace AnimalMovement
             form.Show(this);
         }
 
+        private void InfoArgosCollarButton_Click(object sender, EventArgs e)
+        {
+            var deployment = ((ArgosDeployment)ArgosDeploymentsGridView.SelectedRows[0].Cells[0].Value);
+            var form = new CollarDetailsForm(deployment.Collar);
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
         private void ArgosDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1 && InfoArgosDeploymentButton.Enabled)
-                InfoArgosDeploymentButton_Click(sender, e);
+            if (e.RowIndex > -1 && InfoArgosCollarButton.Enabled)
+                InfoArgosCollarButton_Click(sender, e);
         }
 
         private void ArgosDataGridView_SelectionChanged(object sender, EventArgs e)

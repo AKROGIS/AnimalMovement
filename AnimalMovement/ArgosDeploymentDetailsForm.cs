@@ -13,7 +13,6 @@ namespace AnimalMovement
         private int DeploymentId { get; set; }
         private ArgosDeployment ArgosDeployment { get; set; }
         private bool IsEditor { get; set; }
-        private bool IsEditMode { get; set; }
         private bool LockCollar { get; set; }
         private bool LockArgos { get; set; }
         internal event EventHandler DatabaseChanged;
@@ -47,10 +46,12 @@ namespace AnimalMovement
         private void LoadDefaultFormContents()
         {
             var argosQuery = from platform in Database.ArgosPlatforms
-                             where platform.ArgosProgram.Manager == ArgosDeployment.Collar.Manager
-                             select platform.PlatformId;
+                             where platform.ArgosProgram.Manager == CurrentUser || 
+                             platform.ArgosProgram.ProjectInvestigator.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
+                             select platform;
             ArgosComboBox.DataSource = argosQuery.ToList();
-            ArgosComboBox.SelectedItem = ArgosDeployment.PlatformId;
+            ArgosComboBox.SelectedItem = ArgosDeployment.ArgosPlatform;
+            ArgosComboBox.DisplayMember = "PlatformId";
             var collarQuery = from collar in Database.Collars
                              where collar.Manager == ArgosDeployment.Collar.Manager
                              select collar;
@@ -70,14 +71,24 @@ namespace AnimalMovement
 
         private void EnableFormControls()
         {
-            EditSaveButton.Enabled = IsEditor;
-            IsEditMode = EditSaveButton.Text == "Save";
-            EditSaveButton.Enabled = IsEditMode;
-            CollarComboBox.Enabled = IsEditMode && !LockCollar;
-            ArgosComboBox.Enabled = IsEditMode && !LockArgos;
-            StartDateTimePicker.Enabled = IsEditMode;
-            EndDateTimePicker.Enabled = IsEditMode;
+            SaveButton.Enabled = IsEditor;
+            CollarComboBox.Enabled = IsEditor && !LockCollar;
+            ArgosComboBox.Enabled = IsEditor && !LockArgos;
+            StartDateTimePicker.Enabled = IsEditor;
+            EndDateTimePicker.Enabled = IsEditor;
             ValidateForm();
+        }
+
+        private bool DeploymentChanged()
+        {
+            return CollarComboBox.SelectedItem as Collar != ArgosDeployment.Collar ||
+                   ArgosComboBox.SelectedItem as ArgosPlatform != ArgosDeployment.ArgosPlatform ||
+                   (ArgosDeployment.StartDate == null && StartDateTimePicker.Checked) ||
+                   (ArgosDeployment.StartDate != null &&
+                    StartDateTimePicker.Value != ArgosDeployment.StartDate.Value.ToLocalTime()) ||
+                   (ArgosDeployment.EndDate == null && EndDateTimePicker.Checked) ||
+                   (ArgosDeployment.EndDate != null &&
+                    EndDateTimePicker.Value != ArgosDeployment.EndDate.Value.ToLocalTime());
         }
 
         private void ValidateForm()
@@ -86,8 +97,8 @@ namespace AnimalMovement
             if (error != null)
                 ValidationTextBox.Text = error;
             ValidationTextBox.Visible = error != null;
-            EditSaveButton.Enabled = (IsEditMode && error == null) || (!IsEditMode && IsEditor);
             FixItButton.Visible = error != null;
+            SaveButton.Enabled = IsEditor && error == null && DeploymentChanged();
         }
 
         private string ValidateError()
@@ -98,7 +109,7 @@ namespace AnimalMovement
                 return "No collar selected.";
 
             //We must have a platform
-            var platform = ArgosComboBox.SelectedItem as string;
+            var platform = ArgosComboBox.SelectedItem as ArgosPlatform;
             if (platform == null)
                 return "No Argos Id selected.";
 
@@ -116,12 +127,10 @@ namespace AnimalMovement
             
             //An Argos Platform cannot be on two collars at the same time.
             //I must create a list, because LinqToSql cannot translate the second lambda to SQL
-            var deployments =
-                Database.ArgosDeployments.Where(
-                    d => d.PlatformId == platform && d.DeploymentId != ArgosDeployment.DeploymentId).ToList();
-            if (deployments.Any(deployment =>
-                                DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
-                                             deployment.EndDate ?? DateTime.MaxValue, start, end)))
+            if (platform.ArgosDeployments.Any(deployment =>
+                                              deployment.DeploymentId != ArgosDeployment.DeploymentId &&
+                                              DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
+                                                           deployment.EndDate ?? DateTime.MaxValue, start, end)))
                 return "Another collar is using this Argos Id during your date range.";
             return null;
         }
@@ -134,13 +143,8 @@ namespace AnimalMovement
 
         private bool UpdateDeployment()
         {
-            //LinqToSql denys direct changes to FK, we must assign an entity.  I only do this if the keys have changed.
-            var newCollar = (Collar)CollarComboBox.SelectedItem;
-            if (ArgosDeployment.CollarManufacturer != newCollar.CollarManufacturer || ArgosDeployment.CollarId != newCollar.CollarId)
-                ArgosDeployment.Collar = newCollar;
-            var newPlatform = Database.ArgosPlatforms.FirstOrDefault(d => d.PlatformId == (string) ArgosComboBox.SelectedItem);
-            if (newPlatform != null && ArgosDeployment.PlatformId != newPlatform.PlatformId)
-                ArgosDeployment.ArgosPlatform = newPlatform;
+            ArgosDeployment.Collar = (Collar) CollarComboBox.SelectedItem;
+            ArgosDeployment.ArgosPlatform = (ArgosPlatform)ArgosComboBox.SelectedItem;
             ArgosDeployment.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
             ArgosDeployment.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
 
@@ -211,41 +215,15 @@ namespace AnimalMovement
             MessageBox.Show("You must fix it manually", "Not Implemented");
         }
 
-        private void EditSaveButton_Click(object sender, EventArgs e)
+        private void SaveButton_Click(object sender, EventArgs e)
         {
-            //This button is not enabled unless editing is permitted 
-            if (EditSaveButton.Text == "Edit")
-            {
-                // The user wants to edit, Enable form
-                EditSaveButton.Text = "Save";
-                DoneCancelButton.Text = "Cancel";
-                EnableFormControls();
-            }
-            else
-            {
-                if (UpdateDeployment())
-                {
-                    EditSaveButton.Text = "Edit";
-                    DoneCancelButton.Text = "Done";
-                    EnableFormControls();
-                }
-            }
+            if (UpdateDeployment())
+                Close();
         }
 
-        private void DoneCancelButton_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
-            if (DoneCancelButton.Text == "Cancel")
-            {
-                DoneCancelButton.Text = "Done";
-                EditSaveButton.Text = "Edit";
-                EnableFormControls();
-                //Reset state from database
-                LoadDefaultFormContents();
-            }
-            else
-            {
-                Close();
-            }
+            Close();
         }
 
         #endregion

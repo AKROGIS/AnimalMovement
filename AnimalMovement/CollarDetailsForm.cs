@@ -446,6 +446,7 @@ namespace AnimalMovement
                                     End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g"),
                                     Data = p.CollarFiles.Any()
                                 }).ToList();
+                    ParametersDataGridView.Columns[5].HeaderText = "Has Derived Data";
                     break;
                 case "Gen4":
                     ParametersDataGridView.DataSource =
@@ -457,10 +458,10 @@ namespace AnimalMovement
                             Data = p.CollarFiles.Any()
                         })
                               .ToList();
+                    ParametersDataGridView.Columns[4].HeaderText = "Has Derived Data";
                     break;
             }
             ParametersDataGridView.Columns[0].Visible = false;
-            ParametersDataGridView.Columns[4].HeaderText = "Has Derived Data";
             EnableParametersControls();
         }
 
