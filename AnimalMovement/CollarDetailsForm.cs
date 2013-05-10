@@ -332,7 +332,7 @@ namespace AnimalMovement
 
         private void DeploymentDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && InfoAnimalButton.Enabled)
                 InfoAnimalButton_Click(sender, e);
         }
 
@@ -411,7 +411,7 @@ namespace AnimalMovement
 
         private void ArgosDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && InfoArgosButton.Enabled)
                 InfoArgosButton_Click(sender, e);
         }
 
@@ -468,7 +468,7 @@ namespace AnimalMovement
         {
             AddParameterButton.Enabled = !IsEditMode && IsEditor;
             DeleteParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count > 0;
-            InfoParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count == 0;
+            EditParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count == 1;
             InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1 && //has a file
                                           ((CollarParameter) ParametersDataGridView.SelectedRows[0].Cells[0].Value)
                                               .CollarParameterFile != null;
@@ -526,9 +526,9 @@ namespace AnimalMovement
 
         private void InfoParameterButton_Click(object sender, EventArgs e)
         {
-            if (ParametersDataGridView.SelectedRows.Count < 1 || ParametersDataGridView.Columns.Count < 1)
-                return;
             var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
+            if (parameter.CollarParameterFile == null)
+                return;
             var form = new CollarParameterFileDetailsForm(parameter.CollarParameterFile);
             form.DatabaseChanged += (o, x) => ParametersDataChanged();
             form.Show(this);
@@ -536,7 +536,7 @@ namespace AnimalMovement
 
         private void ParametersDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && InfoParameterButton.Enabled)
                 InfoParameterButton_Click(sender, e);
         }
 
@@ -612,7 +612,7 @@ namespace AnimalMovement
 
         private void FilesDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && FileInfoButton.Enabled)
                 FileInfoButton_Click(sender, e);
         }
 

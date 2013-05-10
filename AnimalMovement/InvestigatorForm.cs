@@ -643,7 +643,7 @@ namespace AnimalMovement
 
         private void ArgosDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && InfoArgosDeploymentButton.Enabled)
                 InfoArgosDeploymentButton_Click(sender, e);
         }
 

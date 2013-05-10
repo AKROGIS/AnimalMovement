@@ -437,7 +437,7 @@
             this.DownloadsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DownloadsDataGridView.Size = new System.Drawing.Size(346, 230);
             this.DownloadsDataGridView.TabIndex = 60;
-            this.DownloadsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DownloadsDataGridView_CellContentDoubleClick);
+            this.DownloadsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DownloadsDataGridView_CellDoubleClick);
             // 
             // CloseButton
             // 

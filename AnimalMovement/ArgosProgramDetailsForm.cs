@@ -339,7 +339,7 @@ namespace AnimalMovement
 
         private void PlatformsGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1 && !IsEditMode)
+            if (e.RowIndex > -1 && InfoPlatformButton.Enabled)
                 InfoPlatformButton_Click(sender, e);
         }
 
@@ -421,7 +421,7 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void DownloadsDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void DownloadsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
                 DownloadsDetails();

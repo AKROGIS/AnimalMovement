@@ -361,6 +361,7 @@
             this.ParametersDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ParametersDataGridView.Size = new System.Drawing.Size(496, 230);
             this.ParametersDataGridView.TabIndex = 4;
+            this.ParametersDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellDoubleClick);
             // 
             // DownloadsTabPage
             // 
@@ -389,7 +390,7 @@
             this.DownloadsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DownloadsDataGridView.Size = new System.Drawing.Size(496, 197);
             this.DownloadsDataGridView.TabIndex = 2;
-            this.DownloadsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DownloadsDataGridView_CellContentDoubleClick);
+            this.DownloadsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DownloadsDataGridView_CellDoubleClick);
             // 
             // ProgramDownloadsButton
             // 
@@ -447,7 +448,7 @@
             this.TransmissionsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.TransmissionsDataGridView.Size = new System.Drawing.Size(496, 230);
             this.TransmissionsDataGridView.TabIndex = 4;
-            this.TransmissionsDataGridView.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransmissionsDataGridView_CellContentDoubleClick);
+            this.TransmissionsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransmissionsDataGridView_CellDoubleClick);
             // 
             // ProcessingIssuesTabPage
             // 
@@ -485,7 +486,7 @@
             this.ProcessingIssuesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(496, 230);
             this.ProcessingIssuesDataGridView.TabIndex = 3;
-            this.ProcessingIssuesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProcessingIssuesDataGridView_CellContentDoubleClick);
+            this.ProcessingIssuesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProcessingIssuesDataGridView_CellDoubleClick);
             // 
             // DerivedDataTabPage
             // 
@@ -522,11 +523,12 @@
             this.DerivedDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DerivedDataGridView.Size = new System.Drawing.Size(496, 230);
             this.DerivedDataGridView.TabIndex = 4;
-            this.DerivedDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DerivedDataGridView_CellContentDoubleClick);
+            this.DerivedDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DerivedDataGridView_CellDoubleClick);
             // 
             // CloseButton
             // 
             this.CloseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.CloseButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.CloseButton.Location = new System.Drawing.Point(447, 331);
             this.CloseButton.Name = "CloseButton";
             this.CloseButton.Size = new System.Drawing.Size(75, 23);

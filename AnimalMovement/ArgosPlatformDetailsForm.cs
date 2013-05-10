@@ -300,7 +300,7 @@ namespace AnimalMovement
 
         private void CollarDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex > -1)
+            if (e.RowIndex > -1 && InfoCollarButton.Enabled)
                 InfoCollarButton_Click(sender, e);
         }
 
@@ -329,6 +329,30 @@ namespace AnimalMovement
                                                         t.Frequency,
                                                         StartDate = t.TimeStamp,
                                                     }).ToList();
+        }
+
+        private void ParameterFileChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpParameterFilesTab();
+        }
+
+        private void ShowParameterFileDetails()
+        {
+            var fileId = (int)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
+            var file = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == fileId);
+            if (file == null)
+                return;
+            var form = new CollarParameterFileDetailsForm(file);
+            form.DatabaseChanged += (o, x) => ParameterFileChanged();
+            form.Show(this);
+        }
+
+        private void ParametersDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1 && !IsEditMode)
+                ShowParameterFileDetails();
         }
 
         #endregion
@@ -370,7 +394,7 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void DownloadsDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void DownloadsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
                 DownloadsDetails();
@@ -426,7 +450,7 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void ProcessingIssuesDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void ProcessingIssuesDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
                 if (e.ColumnIndex == 1)
@@ -469,11 +493,12 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void TransmissionsDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void TransmissionsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
                 TransmissionDetails();
         }
+
 
         #endregion
 
@@ -513,14 +538,13 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void DerivedDataGridView_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void DerivedDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
                 DerivedDataDetails();
         }
 
         #endregion
-
 
     }
 }
