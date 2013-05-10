@@ -44,34 +44,38 @@
             this.ArgosTabControl = new System.Windows.Forms.TabControl();
             this.DetailsTabPage = new System.Windows.Forms.TabPage();
             this.CollarsTabPage = new System.Windows.Forms.TabPage();
+            this.EditCollarButton = new System.Windows.Forms.Button();
+            this.AddCollarButton = new System.Windows.Forms.Button();
+            this.DeleteCollarButton = new System.Windows.Forms.Button();
+            this.InfoCollarButton = new System.Windows.Forms.Button();
+            this.CollarsDataGridView = new System.Windows.Forms.DataGridView();
             this.ParametersTabPage = new System.Windows.Forms.TabPage();
+            this.ParametersDataGridView = new System.Windows.Forms.DataGridView();
             this.DownloadsTabPage = new System.Windows.Forms.TabPage();
             this.DownloadsDataGridView = new System.Windows.Forms.DataGridView();
             this.ProgramDownloadsButton = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.ProcessingIssuesTabPage = new System.Windows.Forms.TabPage();
-            this.TransmissionsTabPage = new System.Windows.Forms.TabPage();
-            this.DerivedDataTabPage = new System.Windows.Forms.TabPage();
-            this.CloseButton = new System.Windows.Forms.Button();
             this.ProcessingIssuesDataGridView = new System.Windows.Forms.DataGridView();
+            this.TransmissionsTabPage = new System.Windows.Forms.TabPage();
             this.TransmissionsDataGridView = new System.Windows.Forms.DataGridView();
+            this.DerivedDataTabPage = new System.Windows.Forms.TabPage();
             this.DerivedDataGridView = new System.Windows.Forms.DataGridView();
-            this.CollarsDataGridView = new System.Windows.Forms.DataGridView();
-            this.ParametersDataGridView = new System.Windows.Forms.DataGridView();
+            this.CloseButton = new System.Windows.Forms.Button();
             this.ArgosTabControl.SuspendLayout();
             this.DetailsTabPage.SuspendLayout();
             this.CollarsTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).BeginInit();
             this.ParametersTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).BeginInit();
             this.DownloadsTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DownloadsDataGridView)).BeginInit();
             this.ProcessingIssuesTabPage.SuspendLayout();
-            this.TransmissionsTabPage.SuspendLayout();
-            this.DerivedDataTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).BeginInit();
+            this.TransmissionsTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TransmissionsDataGridView)).BeginInit();
+            this.DerivedDataTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DerivedDataGridView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // CancelButton
@@ -239,6 +243,10 @@
             // 
             // CollarsTabPage
             // 
+            this.CollarsTabPage.Controls.Add(this.EditCollarButton);
+            this.CollarsTabPage.Controls.Add(this.AddCollarButton);
+            this.CollarsTabPage.Controls.Add(this.DeleteCollarButton);
+            this.CollarsTabPage.Controls.Add(this.InfoCollarButton);
             this.CollarsTabPage.Controls.Add(this.CollarsDataGridView);
             this.CollarsTabPage.Location = new System.Drawing.Point(4, 22);
             this.CollarsTabPage.Name = "CollarsTabPage";
@@ -247,6 +255,73 @@
             this.CollarsTabPage.TabIndex = 1;
             this.CollarsTabPage.Text = "Collars";
             this.CollarsTabPage.UseVisualStyleBackColor = true;
+            // 
+            // EditCollarButton
+            // 
+            this.EditCollarButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditCollarButton.FlatAppearance.BorderSize = 0;
+            this.EditCollarButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditCollarButton.Location = new System.Drawing.Point(57, 234);
+            this.EditCollarButton.Name = "EditCollarButton";
+            this.EditCollarButton.Size = new System.Drawing.Size(24, 24);
+            this.EditCollarButton.TabIndex = 34;
+            this.EditCollarButton.UseVisualStyleBackColor = true;
+            this.EditCollarButton.Click += new System.EventHandler(this.EditCollarButton_Click);
+            // 
+            // AddCollarButton
+            // 
+            this.AddCollarButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddCollarButton.Enabled = false;
+            this.AddCollarButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddCollarButton.Location = new System.Drawing.Point(3, 234);
+            this.AddCollarButton.Name = "AddCollarButton";
+            this.AddCollarButton.Size = new System.Drawing.Size(24, 24);
+            this.AddCollarButton.TabIndex = 31;
+            this.AddCollarButton.UseVisualStyleBackColor = true;
+            this.AddCollarButton.Click += new System.EventHandler(this.AddCollarButton_Click);
+            // 
+            // DeleteCollarButton
+            // 
+            this.DeleteCollarButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteCollarButton.Enabled = false;
+            this.DeleteCollarButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeleteCollarButton.Location = new System.Drawing.Point(30, 234);
+            this.DeleteCollarButton.Name = "DeleteCollarButton";
+            this.DeleteCollarButton.Size = new System.Drawing.Size(24, 24);
+            this.DeleteCollarButton.TabIndex = 32;
+            this.DeleteCollarButton.UseVisualStyleBackColor = true;
+            this.DeleteCollarButton.Click += new System.EventHandler(this.DeleteCollarButton_Click);
+            // 
+            // InfoCollarButton
+            // 
+            this.InfoCollarButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.InfoCollarButton.FlatAppearance.BorderSize = 0;
+            this.InfoCollarButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.InfoCollarButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
+            this.InfoCollarButton.Location = new System.Drawing.Point(81, 234);
+            this.InfoCollarButton.Name = "InfoCollarButton";
+            this.InfoCollarButton.Size = new System.Drawing.Size(24, 24);
+            this.InfoCollarButton.TabIndex = 33;
+            this.InfoCollarButton.UseVisualStyleBackColor = true;
+            this.InfoCollarButton.Click += new System.EventHandler(this.InfoCollarButton_Click);
+            // 
+            // CollarsDataGridView
+            // 
+            this.CollarsDataGridView.AllowUserToOrderColumns = true;
+            this.CollarsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.CollarsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.CollarsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.CollarsDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.CollarsDataGridView.Name = "CollarsDataGridView";
+            this.CollarsDataGridView.ReadOnly = true;
+            this.CollarsDataGridView.RowHeadersVisible = false;
+            this.CollarsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.CollarsDataGridView.Size = new System.Drawing.Size(496, 225);
+            this.CollarsDataGridView.TabIndex = 4;
+            this.CollarsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.CollarDataGridView_CellDoubleClick);
+            this.CollarsDataGridView.SelectionChanged += new System.EventHandler(this.CollarDataGridView_SelectionChanged);
             // 
             // ParametersTabPage
             // 
@@ -258,6 +333,21 @@
             this.ParametersTabPage.TabIndex = 2;
             this.ParametersTabPage.Text = "Parameter Files";
             this.ParametersTabPage.UseVisualStyleBackColor = true;
+            // 
+            // ParametersDataGridView
+            // 
+            this.ParametersDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ParametersDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.ParametersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ParametersDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.ParametersDataGridView.Name = "ParametersDataGridView";
+            this.ParametersDataGridView.ReadOnly = true;
+            this.ParametersDataGridView.RowHeadersVisible = false;
+            this.ParametersDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.ParametersDataGridView.Size = new System.Drawing.Size(496, 255);
+            this.ParametersDataGridView.TabIndex = 4;
             // 
             // DownloadsTabPage
             // 
@@ -282,6 +372,8 @@
             this.DownloadsDataGridView.Location = new System.Drawing.Point(3, 37);
             this.DownloadsDataGridView.Name = "DownloadsDataGridView";
             this.DownloadsDataGridView.ReadOnly = true;
+            this.DownloadsDataGridView.RowHeadersVisible = false;
+            this.DownloadsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DownloadsDataGridView.Size = new System.Drawing.Size(496, 221);
             this.DownloadsDataGridView.TabIndex = 2;
             // 
@@ -315,6 +407,21 @@
             this.ProcessingIssuesTabPage.Text = "Processing Issues";
             this.ProcessingIssuesTabPage.UseVisualStyleBackColor = true;
             // 
+            // ProcessingIssuesDataGridView
+            // 
+            this.ProcessingIssuesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ProcessingIssuesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.ProcessingIssuesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ProcessingIssuesDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.ProcessingIssuesDataGridView.Name = "ProcessingIssuesDataGridView";
+            this.ProcessingIssuesDataGridView.ReadOnly = true;
+            this.ProcessingIssuesDataGridView.RowHeadersVisible = false;
+            this.ProcessingIssuesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(496, 255);
+            this.ProcessingIssuesDataGridView.TabIndex = 3;
+            // 
             // TransmissionsTabPage
             // 
             this.TransmissionsTabPage.Controls.Add(this.TransmissionsDataGridView);
@@ -325,6 +432,21 @@
             this.TransmissionsTabPage.TabIndex = 4;
             this.TransmissionsTabPage.Text = "Transmissions";
             this.TransmissionsTabPage.UseVisualStyleBackColor = true;
+            // 
+            // TransmissionsDataGridView
+            // 
+            this.TransmissionsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TransmissionsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.TransmissionsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.TransmissionsDataGridView.Location = new System.Drawing.Point(3, 3);
+            this.TransmissionsDataGridView.Name = "TransmissionsDataGridView";
+            this.TransmissionsDataGridView.ReadOnly = true;
+            this.TransmissionsDataGridView.RowHeadersVisible = false;
+            this.TransmissionsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.TransmissionsDataGridView.Size = new System.Drawing.Size(496, 255);
+            this.TransmissionsDataGridView.TabIndex = 4;
             // 
             // DerivedDataTabPage
             // 
@@ -337,43 +459,6 @@
             this.DerivedDataTabPage.Text = "Derived Data";
             this.DerivedDataTabPage.UseVisualStyleBackColor = true;
             // 
-            // CloseButton
-            // 
-            this.CloseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.CloseButton.Location = new System.Drawing.Point(447, 331);
-            this.CloseButton.Name = "CloseButton";
-            this.CloseButton.Size = new System.Drawing.Size(75, 23);
-            this.CloseButton.TabIndex = 30;
-            this.CloseButton.Text = "Close";
-            this.CloseButton.UseVisualStyleBackColor = true;
-            this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
-            // 
-            // ProcessingIssuesDataGridView
-            // 
-            this.ProcessingIssuesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ProcessingIssuesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.ProcessingIssuesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ProcessingIssuesDataGridView.Location = new System.Drawing.Point(3, 3);
-            this.ProcessingIssuesDataGridView.Name = "ProcessingIssuesDataGridView";
-            this.ProcessingIssuesDataGridView.ReadOnly = true;
-            this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(496, 255);
-            this.ProcessingIssuesDataGridView.TabIndex = 3;
-            // 
-            // TransmissionsDataGridView
-            // 
-            this.TransmissionsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.TransmissionsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.TransmissionsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.TransmissionsDataGridView.Location = new System.Drawing.Point(3, 3);
-            this.TransmissionsDataGridView.Name = "TransmissionsDataGridView";
-            this.TransmissionsDataGridView.ReadOnly = true;
-            this.TransmissionsDataGridView.Size = new System.Drawing.Size(496, 255);
-            this.TransmissionsDataGridView.TabIndex = 4;
-            // 
             // DerivedDataGridView
             // 
             this.DerivedDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -384,34 +469,21 @@
             this.DerivedDataGridView.Location = new System.Drawing.Point(3, 3);
             this.DerivedDataGridView.Name = "DerivedDataGridView";
             this.DerivedDataGridView.ReadOnly = true;
+            this.DerivedDataGridView.RowHeadersVisible = false;
+            this.DerivedDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DerivedDataGridView.Size = new System.Drawing.Size(496, 255);
             this.DerivedDataGridView.TabIndex = 4;
             // 
-            // CollarsDataGridView
+            // CloseButton
             // 
-            this.CollarsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.CollarsDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.CollarsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.CollarsDataGridView.Location = new System.Drawing.Point(3, 3);
-            this.CollarsDataGridView.Name = "CollarsDataGridView";
-            this.CollarsDataGridView.ReadOnly = true;
-            this.CollarsDataGridView.Size = new System.Drawing.Size(496, 255);
-            this.CollarsDataGridView.TabIndex = 4;
-            // 
-            // ParametersDataGridView
-            // 
-            this.ParametersDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.ParametersDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.ParametersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ParametersDataGridView.Location = new System.Drawing.Point(3, 3);
-            this.ParametersDataGridView.Name = "ParametersDataGridView";
-            this.ParametersDataGridView.ReadOnly = true;
-            this.ParametersDataGridView.Size = new System.Drawing.Size(496, 255);
-            this.ParametersDataGridView.TabIndex = 4;
+            this.CloseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.CloseButton.Location = new System.Drawing.Point(447, 331);
+            this.CloseButton.Name = "CloseButton";
+            this.CloseButton.Size = new System.Drawing.Size(75, 23);
+            this.CloseButton.TabIndex = 30;
+            this.CloseButton.Text = "Close";
+            this.CloseButton.UseVisualStyleBackColor = true;
+            this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
             // 
             // ArgosPlatformDetailsForm
             // 
@@ -433,18 +505,18 @@
             this.DetailsTabPage.ResumeLayout(false);
             this.DetailsTabPage.PerformLayout();
             this.CollarsTabPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).EndInit();
             this.ParametersTabPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).EndInit();
             this.DownloadsTabPage.ResumeLayout(false);
             this.DownloadsTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DownloadsDataGridView)).EndInit();
             this.ProcessingIssuesTabPage.ResumeLayout(false);
-            this.TransmissionsTabPage.ResumeLayout(false);
-            this.DerivedDataTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).EndInit();
+            this.TransmissionsTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.TransmissionsDataGridView)).EndInit();
+            this.DerivedDataTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.DerivedDataGridView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.CollarsDataGridView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -481,5 +553,9 @@
         private System.Windows.Forms.DataGridView ParametersDataGridView;
         private System.Windows.Forms.DataGridView TransmissionsDataGridView;
         private System.Windows.Forms.DataGridView DerivedDataGridView;
+        private System.Windows.Forms.Button EditCollarButton;
+        private System.Windows.Forms.Button AddCollarButton;
+        private System.Windows.Forms.Button DeleteCollarButton;
+        private System.Windows.Forms.Button InfoCollarButton;
     }
 }

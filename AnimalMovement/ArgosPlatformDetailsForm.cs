@@ -240,10 +240,73 @@ namespace AnimalMovement
         {
             CollarsDataGridView.DataSource = Platform.ArgosDeployments.Select(d => new
             {
+                d,
                 d.Collar,
-                d.StartDate,
-                d.EndDate
+                Start = d.StartDate == null ? "Long ago" : d.StartDate.Value.ToString("g"),
+                End = d.EndDate == null ? "Never" : d.EndDate.Value.ToString("g")
             }).ToList();
+            CollarsDataGridView.Columns[0].Visible = false;
+            EnableCollarControls();
+        }
+
+        private void EnableCollarControls()
+        {
+            AddCollarButton.Enabled = !IsEditMode && IsEditor;
+            DeleteCollarButton.Enabled = !IsEditMode && IsEditor && CollarsDataGridView.SelectedRows.Count > 0;
+            EditCollarButton.Enabled = !IsEditMode && CollarsDataGridView.SelectedRows.Count == 1;
+            InfoCollarButton.Enabled = !IsEditMode && CollarsDataGridView.SelectedRows.Count == 1;
+        }
+
+        private void CollarDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpCollarsTab();
+        }
+
+        private void AddCollarButton_Click(object sender, EventArgs e)
+        {
+            var form = new AddArgosDeploymentForm(null,Platform);
+            form.DatabaseChanged += (o, x) => CollarDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteCollarButton_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in CollarsDataGridView.SelectedRows)
+            {
+                var deployment = (CollarDeployment)row.Cells[0].Value;
+                Database.CollarDeployments.DeleteOnSubmit(deployment);
+            }
+            if (SubmitChanges())
+                CollarDataChanged();
+        }
+
+        private void EditCollarButton_Click(object sender, EventArgs e)
+        {
+            var deployment = (ArgosDeployment)CollarsDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new ArgosDeploymentDetailsForm(deployment.DeploymentId, true);
+            form.DatabaseChanged += (o, x) => CollarDataChanged();
+            form.Show(this);
+        }
+
+        private void InfoCollarButton_Click(object sender, EventArgs e)
+        {
+            var deployment = (ArgosDeployment)CollarsDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new CollarDetailsForm(deployment.Collar);
+            form.DatabaseChanged += (o, x) => CollarDataChanged();
+            form.Show(this);
+        }
+
+        private void CollarDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1)
+                InfoCollarButton_Click(sender, e);
+        }
+
+        private void CollarDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableCollarControls();
         }
 
         #endregion
