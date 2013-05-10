@@ -33,12 +33,10 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
-            this.InvestigatorTextBox = new System.Windows.Forms.TextBox();
             this.UnitTextBox = new System.Windows.Forms.TextBox();
             this.DescriptionTextBox = new System.Windows.Forms.TextBox();
             this.ProjectNameTextBox = new System.Windows.Forms.TextBox();
             this.ProjectCodeTextBox = new System.Windows.Forms.TextBox();
-            this.EditInvestigatorButton = new System.Windows.Forms.Button();
             this.InvestigatorDetailsButton = new System.Windows.Forms.Button();
             this.EditSaveButton = new System.Windows.Forms.Button();
             this.DoneCancelButton = new System.Windows.Forms.Button();
@@ -65,6 +63,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.ReportComboBox = new System.Windows.Forms.ComboBox();
             this.ReportDataGridView = new System.Windows.Forms.DataGridView();
+            this.InvestigatorComboBox = new System.Windows.Forms.ComboBox();
             this.ProjectTabs.SuspendLayout();
             this.AnimalsTabPage.SuspendLayout();
             this.FilesTabPage.SuspendLayout();
@@ -120,17 +119,6 @@
             this.label8.TabIndex = 10;
             this.label8.Text = "Unit:";
             // 
-            // InvestigatorTextBox
-            // 
-            this.InvestigatorTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.InvestigatorTextBox.Enabled = false;
-            this.InvestigatorTextBox.Location = new System.Drawing.Point(86, 38);
-            this.InvestigatorTextBox.MaxLength = 128;
-            this.InvestigatorTextBox.Name = "InvestigatorTextBox";
-            this.InvestigatorTextBox.Size = new System.Drawing.Size(169, 20);
-            this.InvestigatorTextBox.TabIndex = 3;
-            // 
             // UnitTextBox
             // 
             this.UnitTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -173,20 +161,6 @@
             this.ProjectCodeTextBox.Name = "ProjectCodeTextBox";
             this.ProjectCodeTextBox.Size = new System.Drawing.Size(101, 20);
             this.ProjectCodeTextBox.TabIndex = 2;
-            // 
-            // EditInvestigatorButton
-            // 
-            this.EditInvestigatorButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.EditInvestigatorButton.Enabled = false;
-            this.EditInvestigatorButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.EditInvestigatorButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
-            this.EditInvestigatorButton.Location = new System.Drawing.Point(261, 36);
-            this.EditInvestigatorButton.Name = "EditInvestigatorButton";
-            this.EditInvestigatorButton.Size = new System.Drawing.Size(24, 24);
-            this.EditInvestigatorButton.TabIndex = 4;
-            this.EditInvestigatorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.EditInvestigatorButton.UseVisualStyleBackColor = true;
-            this.EditInvestigatorButton.Click += new System.EventHandler(this.EditInvestigatorButton_Click);
             // 
             // InvestigatorDetailsButton
             // 
@@ -534,12 +508,24 @@
             this.ReportDataGridView.Size = new System.Drawing.Size(422, 123);
             this.ReportDataGridView.TabIndex = 4;
             // 
+            // InvestigatorComboBox
+            // 
+            this.InvestigatorComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.InvestigatorComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.InvestigatorComboBox.FormattingEnabled = true;
+            this.InvestigatorComboBox.Location = new System.Drawing.Point(86, 38);
+            this.InvestigatorComboBox.Name = "InvestigatorComboBox";
+            this.InvestigatorComboBox.Size = new System.Drawing.Size(194, 21);
+            this.InvestigatorComboBox.TabIndex = 23;
+            // 
             // ProjectDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.DoneCancelButton;
             this.ClientSize = new System.Drawing.Size(476, 421);
+            this.Controls.Add(this.InvestigatorComboBox);
             this.Controls.Add(this.ProjectTabs);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
@@ -547,8 +533,6 @@
             this.Controls.Add(this.ProjectNameTextBox);
             this.Controls.Add(this.DescriptionTextBox);
             this.Controls.Add(this.UnitTextBox);
-            this.Controls.Add(this.EditInvestigatorButton);
-            this.Controls.Add(this.InvestigatorTextBox);
             this.Controls.Add(this.InvestigatorDetailsButton);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
@@ -589,8 +573,6 @@
         private System.Windows.Forms.Button DeleteAnimalsButton;
         private System.Windows.Forms.Button AddAnimalButton;
         private System.Windows.Forms.Button InvestigatorDetailsButton;
-        private System.Windows.Forms.TextBox InvestigatorTextBox;
-        private System.Windows.Forms.Button EditInvestigatorButton;
         private System.Windows.Forms.TextBox UnitTextBox;
         private System.Windows.Forms.TextBox DescriptionTextBox;
         private System.Windows.Forms.Button InfoAnimalsButton;
@@ -611,5 +593,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox ReportComboBox;
         private System.Windows.Forms.DataGridView ReportDataGridView;
+        private System.Windows.Forms.ComboBox InvestigatorComboBox;
     }
 }

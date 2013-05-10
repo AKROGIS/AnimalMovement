@@ -61,7 +61,7 @@ namespace AnimalMovement
                 throw new InvalidOperationException("Project Details Form not provided a valid project.");
 
             var functions = new AnimalMovementFunctions();
-            IsInvestigator = Database.Projects.Any(p => p == Project && p.ProjectInvestigator == CurrentUser);
+            IsInvestigator = Project.ProjectInvestigator.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase);
             IsEditor = functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
         }
 
@@ -143,8 +143,22 @@ namespace AnimalMovement
             DescriptionTextBox.Text = Project.Description;
             UnitTextBox.Text = Project.UnitCode;
             ProjectNameTextBox.Text = Project.ProjectName;
-            InvestigatorTextBox.Text = Project.ProjectInvestigator;
+            SetUpInvestigatorComboBox();
             EnableGeneralControls();
+        }
+
+        private void SetUpInvestigatorComboBox()
+        {
+
+            InvestigatorComboBox.DataSource =
+                Database.ProjectInvestigators.Where(
+                    pi => pi.Login == CurrentUser ||
+                          pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
+            if (!InvestigatorComboBox.Items.Contains(Project.ProjectInvestigator1))
+                //user does not have permission to edit the owning PI
+                InvestigatorComboBox.DataSource = new[] { Project.ProjectInvestigator1 };
+            InvestigatorComboBox.DisplayMember = "Name";
+            InvestigatorComboBox.SelectedItem = Project.ProjectInvestigator1;
         }
 
         private void EnableGeneralControls()
@@ -154,7 +168,7 @@ namespace AnimalMovement
             ProjectNameTextBox.Enabled = IsEditMode;
             DescriptionTextBox.Enabled = IsEditMode;
             UnitTextBox.Enabled = IsEditMode;
-            EditInvestigatorButton.Enabled = !IsEditMode && IsInvestigator;
+            InvestigatorComboBox.Enabled = IsEditMode && InvestigatorComboBox.Items.Count > 1;
             InvestigatorDetailsButton.Enabled = !IsEditMode;
         }
 
@@ -163,13 +177,6 @@ namespace AnimalMovement
             OnDatabaseChanged();
             LoadDataContext();
             SetUpGeneral();
-        }
-
-        private void EditInvestigatorButton_Click(object sender, EventArgs e)
-        {
-            var form = new ChangeInvestigatorForm(Project);
-            form.DatabaseChanged += (o, args) => GeneralDataChanged();
-            form.Show(this);
         }
 
         private void InvestigatorDetailsButton_Click(object sender, EventArgs e)
@@ -225,6 +232,7 @@ namespace AnimalMovement
             Project.Description = DescriptionTextBox.Text;
             Project.UnitCode = UnitTextBox.Text;
             Project.ProjectName = ProjectNameTextBox.Text;
+            Project.ProjectInvestigator1 = (ProjectInvestigator) InvestigatorComboBox.SelectedItem;
         }
 
         #endregion

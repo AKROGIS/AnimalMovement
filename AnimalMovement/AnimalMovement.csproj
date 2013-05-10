@@ -171,12 +171,6 @@
     <Compile Include="BaseForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ChangeInvestigatorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ChangeInvestigatorForm.Designer.cs">
-      <DependentUpon>ChangeInvestigatorForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="CollarDetailsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -305,9 +299,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ArgosDeploymentDetailsForm.resx">
       <DependentUpon>ArgosDeploymentDetailsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ChangeInvestigatorForm.resx">
-      <DependentUpon>ChangeInvestigatorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CollarDetailsForm.resx">
       <DependentUpon>CollarDetailsForm.cs</DependentUpon>
