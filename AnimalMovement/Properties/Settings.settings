@@ -189,7 +189,7 @@
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
     <Setting Name="ArgosPlatformDetailsFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">300, 250</Value>
+      <Value Profile="(Default)">400, 350</Value>
     </Setting>
     <Setting Name="ArgosPlatformDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
@@ -211,6 +211,9 @@
     </Setting>
     <Setting Name="QuickStartWizardSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">300, 250</Value>
+    </Setting>
+    <Setting Name="ArgosDetailsFormActiveTab" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

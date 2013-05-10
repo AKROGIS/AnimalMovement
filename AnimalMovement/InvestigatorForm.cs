@@ -337,7 +337,7 @@ namespace AnimalMovement
             InfoCollarButton.Enabled = !IsEditMode;
         }
 
-        private bool CanDeleteCollar(Collar collar)
+        private static bool CanDeleteCollar(Collar collar)
         {
             return !collar.CollarDeployments.Any() &&
                    !collar.CollarFixes.Any() &&

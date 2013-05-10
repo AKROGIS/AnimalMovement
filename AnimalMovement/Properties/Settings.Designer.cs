@@ -769,7 +769,7 @@ namespace AnimalMovement.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("300, 250")]
+        [global::System.Configuration.DefaultSettingValueAttribute("400, 350")]
         public global::System.Drawing.Size ArgosPlatformDetailsFormSize {
             get {
                 return ((global::System.Drawing.Size)(this["ArgosPlatformDetailsFormSize"]));
@@ -860,6 +860,18 @@ namespace AnimalMovement.Properties {
             }
             set {
                 this["QuickStartWizardSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ArgosDetailsFormActiveTab {
+            get {
+                return ((int)(this["ArgosDetailsFormActiveTab"]));
+            }
+            set {
+                this["ArgosDetailsFormActiveTab"] = value;
             }
         }
     }

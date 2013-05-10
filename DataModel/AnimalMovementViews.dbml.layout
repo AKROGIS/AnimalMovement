@@ -26,5 +26,11 @@
         <elementListCompartment Id="96caac4f-2a02-42f5-a6ea-7713fc54980a" absoluteBounds="3.7649999999999997, 4.585, 1.9700000000000002, 0.44169108072916669" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
+    <classShape Id="6c918acd-86ff-413b-b51d-8a98c08179f1" absoluteBounds="6.125, 4.375, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/AnimalMovementViews/AllTpfFileData" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5993f309-fa03-42fa-896d-c43899752fed" absoluteBounds="6.14, 4.835, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>

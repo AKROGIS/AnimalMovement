@@ -44,11 +44,68 @@ namespace AnimalMovement
         private void SetUpForm()
         {
             ArgosIdTextBox.Text = Platform.PlatformId;
+            ArgosIdTextBox.Enabled = false;
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            ArgosTabControl.SelectedIndex = Properties.Settings.Default.ArgosDetailsFormActiveTab;
+            if (ArgosTabControl.SelectedIndex == 0)
+                ArgosTabControl_SelectedIndexChanged(ArgosTabControl, null);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Properties.Settings.Default.ArgosDetailsFormActiveTab = ArgosTabControl.SelectedIndex;
+        }
+
+        private void ArgosTabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (((TabControl)sender).SelectedIndex)
+            {
+                default:
+                    SetUpGeneralTab();
+                    break;
+                case 1:
+                    SetUpCollarsTab();
+                    break;
+                case 2:
+                    SetUpParameterFilesTab();
+                    break;
+                case 3:
+                    SetUpDownloadsTab();
+                    break;
+                case 4:
+                    SetUpIssuesTab();
+                    break;
+                case 5:
+                    SetUpTransmissionsTab();
+                    break;
+                case 6:
+                    SetUpDerivedDataTab();
+                    break;
+            }
+        }
+
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        #endregion
+
+
+        #region General Tab
+
+        private void SetUpGeneralTab()
+        {
             SetUpArgosProgramComboBox();
-            //defer DisposalDateTimePicker until loaded, otherwise the default value get messed up
+            ConfigureDispsoalDateTimePicker();
             ActiveCheckBox.Checked = Platform.Active;
             NotesTextBox.Text = Platform.Notes;
-            EnableControls();
+            EnableGeneralControls();
         }
 
         private void SetUpArgosProgramComboBox()
@@ -66,9 +123,8 @@ namespace AnimalMovement
             ArgosProgramComboBox.SelectedItem = Platform.ArgosProgram;
         }
 
-        private void EnableControls()
+        private void EnableGeneralControls()
         {
-            ArgosIdTextBox.Enabled = false;
             EnableEditSaveButton();
             IsEditMode = EditSaveButton.Text == "Save";
             ArgosProgramComboBox.Enabled = IsEditMode;
@@ -82,12 +138,6 @@ namespace AnimalMovement
             EditSaveButton.Enabled = IsEditor && (!IsEditMode ||
                                                   (ArgosProgramComboBox.SelectedItem != null &&
                                                    !string.IsNullOrEmpty(ArgosIdTextBox.Text)));
-        }
-
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-            ConfigureDispsoalDateTimePicker();
         }
 
         private void ConfigureDispsoalDateTimePicker()
@@ -150,8 +200,8 @@ namespace AnimalMovement
             {
                 // The user wants to edit, Enable form
                 EditSaveButton.Text = "Save";
-                DoneCancelButton.Text = "Cancel";
-                EnableControls();
+                CancelButton.Visible = true;
+                EnableGeneralControls();
             }
             else
             {
@@ -161,26 +211,19 @@ namespace AnimalMovement
                 {
                     OnDatabaseChanged();
                     EditSaveButton.Text = "Edit";
-                    DoneCancelButton.Text = "Done";
-                    EnableControls();
+                    CancelButton.Visible = false;
+                    EnableGeneralControls();
                 }
             }
         }
 
-        private void DoneCancelButton_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
-            if (DoneCancelButton.Text == "Cancel")
-            {
-                DoneCancelButton.Text = "Done";
-                EditSaveButton.Text = "Edit";
-                //Reset state from database
-                LoadDataContext();
-                SetUpForm();
-            }
-            else
-            {
-                Close();
-            }
+            CancelButton.Visible = false;
+            EditSaveButton.Text = "Edit";
+            //Reset state from database
+            LoadDataContext();
+            SetUpGeneralTab();
         }
 
         private void DisposalDateTimePicker_ValueChanged(object sender, EventArgs e)
@@ -189,6 +232,93 @@ namespace AnimalMovement
         }
 
         #endregion
+
+
+        #region Collars Tab
+
+        private void SetUpCollarsTab()
+        {
+            CollarsDataGridView.DataSource = Platform.ArgosDeployments;
+        }
+
+        #endregion
+
+
+        #region Parameter Files Tab
+
+        private void SetUpParameterFilesTab()
+        {
+            if (ParametersDataGridView.DataSource != null)
+                return;
+            var views = new AnimalMovementViews();
+
+            ParametersDataGridView.DataSource = views.AllTpfFileDatas.Where(t => t.Platform == Platform.PlatformId).Select(t => new
+                                                    {
+                                                        t.CTN,
+                                                        t.Frequency,
+                                                        StartDate = t.TimeStamp,
+                                                        t.FileName,
+                                                        t.FileId,
+                                                        t.Status,
+                                                    }).ToList();
+        }
+
+        #endregion
+
+
+        #region Downloads Tab
+
+        private void SetUpDownloadsTab()
+        {
+            DownloadsDataGridView.DataSource = Database.ArgosDownloads.Where(d => d.PlatformId == Platform.PlatformId);
+        }
+
+        private void ProgramDownloadsButton_Click(object sender, EventArgs e)
+        {
+            var form = new ArgosProgramDetailsForm(Platform.ArgosProgram);
+            form.DatabaseChanged += (o, x) =>
+                {
+                    OnDatabaseChanged();
+                    LoadDataContext();
+                    SetUpDownloadsTab();
+                };
+            //TODO - create the download tab on the Argos form, and select it.
+            form.Show();
+        }
+
+        #endregion
+
+
+        #region Issues Tab
+
+        private void SetUpIssuesTab()
+        {
+            ProcessingIssuesDataGridView.DataSource = Platform.ArgosFileProcessingIssues;
+        }
+
+        #endregion
+
+
+        #region Transmissions Tab
+
+        private void SetUpTransmissionsTab()
+        {
+            TransmissionsDataGridView.DataSource =
+                Database.ArgosFilePlatformDates.Where(d => d.PlatformId == Platform.PlatformId);
+        }
+
+        #endregion
+
+
+        #region Derived Data Tab
+
+        private void SetUpDerivedDataTab()
+        {
+            DerivedDataGridView.DataSource = Database.CollarFiles.Where(f => f.ArgosDeployment.ArgosPlatform == Platform);
+        }
+
+        #endregion
+
 
     }
 }
