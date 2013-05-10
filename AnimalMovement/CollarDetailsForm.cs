@@ -351,7 +351,7 @@ namespace AnimalMovement
             ArgosDataGridView.DataSource =
                 Collar.ArgosDeployments.Select(a => new
                 {
-                    Id = a.DeploymentId,
+                    a,
                     Argos_Id = a.PlatformId,
                     Start = a.StartDate == null ? "Long ago" : a.StartDate.Value.ToString("g"),
                     End = a.EndDate == null ? "Never" : a.EndDate.Value.ToString("g")
@@ -364,6 +364,7 @@ namespace AnimalMovement
         {
             AddArgosButton.Enabled = !IsEditMode && IsEditor;
             DeleteArgosButton.Enabled = !IsEditMode && IsEditor && ArgosDataGridView.SelectedRows.Count > 0;
+            EditArgosButton.Enabled = !IsEditMode && ArgosDataGridView.SelectedRows.Count == 1;
             InfoArgosButton.Enabled = !IsEditMode && ArgosDataGridView.SelectedRows.Count == 1;
         }
 
@@ -383,24 +384,27 @@ namespace AnimalMovement
 
         private void DeleteArgosButton_Click(object sender, EventArgs e)
         {
-            if (ArgosDataGridView.SelectedRows.Count < 1 || ArgosDataGridView.Columns.Count < 1)
-                return;
             foreach (DataGridViewRow row in ArgosDataGridView.SelectedRows)
             {
-                var deploymentId = (int)row.Cells[0].Value;
-                var argosDeployment = Collar.ArgosDeployments.First(d => d.DeploymentId == deploymentId);
-                Database.ArgosDeployments.DeleteOnSubmit(argosDeployment);
+                var deployment = (ArgosDeployment)row.Cells[0].Value;
+                Database.ArgosDeployments.DeleteOnSubmit(deployment);
             }
             if (SubmitChanges())
                 ArgosDataChanged();
         }
 
+        private void EditArgosButton_Click(object sender, EventArgs e)
+        {
+            var deployment = (ArgosDeployment)ArgosDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new ArgosDeploymentDetailsForm(deployment.DeploymentId, true);
+            form.DatabaseChanged += (o, x) => ArgosDataChanged();
+            form.Show(this);
+        }
+
         private void InfoArgosButton_Click(object sender, EventArgs e)
         {
-            if (ArgosDataGridView.SelectedRows.Count < 1 || ArgosDataGridView.Columns.Count < 1)
-                return;
-            var deploymentId = (int)ArgosDataGridView.SelectedRows[0].Cells[0].Value;
-            var form = new ArgosDeploymentDetailsForm(deploymentId, true);
+            var deployment = (ArgosDeployment)ArgosDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new ArgosPlatformDetailsForm(deployment.ArgosPlatform);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
         }

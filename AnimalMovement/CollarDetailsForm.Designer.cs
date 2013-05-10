@@ -84,6 +84,7 @@
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.CollarErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
+            this.EditArgosButton = new System.Windows.Forms.Button();
             this.CollarTabControl.SuspendLayout();
             this.GeneralTabPage.SuspendLayout();
             this.AnimalsTabPage.SuspendLayout();
@@ -467,6 +468,7 @@
             // 
             // ArgosTabPage
             // 
+            this.ArgosTabPage.Controls.Add(this.EditArgosButton);
             this.ArgosTabPage.Controls.Add(this.ArgosDataGridView);
             this.ArgosTabPage.Controls.Add(this.AddArgosButton);
             this.ArgosTabPage.Controls.Add(this.DeleteArgosButton);
@@ -534,7 +536,7 @@
             this.InfoArgosButton.FlatAppearance.BorderSize = 0;
             this.InfoArgosButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoArgosButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoArgosButton.Location = new System.Drawing.Point(58, 306);
+            this.InfoArgosButton.Location = new System.Drawing.Point(84, 306);
             this.InfoArgosButton.Name = "InfoArgosButton";
             this.InfoArgosButton.Size = new System.Drawing.Size(24, 24);
             this.InfoArgosButton.TabIndex = 28;
@@ -797,6 +799,18 @@
             // 
             this.CollarErrorProvider.ContainerControl = this;
             // 
+            // EditArgosButton
+            // 
+            this.EditArgosButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditArgosButton.FlatAppearance.BorderSize = 0;
+            this.EditArgosButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditArgosButton.Location = new System.Drawing.Point(60, 306);
+            this.EditArgosButton.Name = "EditArgosButton";
+            this.EditArgosButton.Size = new System.Drawing.Size(24, 24);
+            this.EditArgosButton.TabIndex = 30;
+            this.EditArgosButton.UseVisualStyleBackColor = true;
+            this.EditArgosButton.Click += new System.EventHandler(this.EditArgosButton_Click);
+            // 
             // CollarDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -888,5 +902,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DeploymentColumn;
         private System.Windows.Forms.ErrorProvider CollarErrorProvider;
         private System.Windows.Forms.Button EditParameterButton;
+        private System.Windows.Forms.Button EditArgosButton;
     }
 }
