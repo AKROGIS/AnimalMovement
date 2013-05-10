@@ -4201,6 +4201,10 @@ namespace DataModel
 		
 		private EntityRef<CollarFile> _CollarFile;
 		
+		private EntityRef<ArgosPlatform> _ArgosPlatform;
+		
+		private EntityRef<ArgosProgram> _ArgosProgram;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -4222,6 +4226,8 @@ namespace DataModel
 		public ArgosDownload()
 		{
 			this._CollarFile = default(EntityRef<CollarFile>);
+			this._ArgosPlatform = default(EntityRef<ArgosPlatform>);
+			this._ArgosProgram = default(EntityRef<ArgosProgram>);
 			OnCreated();
 		}
 		
@@ -4256,6 +4262,10 @@ namespace DataModel
 			{
 				if ((this._ProgramId != value))
 				{
+					if (this._ArgosProgram.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
 					this.OnProgramIdChanging(value);
 					this.SendPropertyChanging();
 					this._ProgramId = value;
@@ -4276,6 +4286,10 @@ namespace DataModel
 			{
 				if ((this._PlatformId != value))
 				{
+					if (this._ArgosPlatform.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
 					this.OnPlatformIdChanging(value);
 					this.SendPropertyChanging();
 					this._PlatformId = value;
@@ -4383,6 +4397,74 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosDownload", Storage="_ArgosPlatform", ThisKey="PlatformId", OtherKey="PlatformId", IsForeignKey=true)]
+		public ArgosPlatform ArgosPlatform
+		{
+			get
+			{
+				return this._ArgosPlatform.Entity;
+			}
+			set
+			{
+				ArgosPlatform previousValue = this._ArgosPlatform.Entity;
+				if (((previousValue != value) 
+							|| (this._ArgosPlatform.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ArgosPlatform.Entity = null;
+						previousValue.ArgosDownloads.Remove(this);
+					}
+					this._ArgosPlatform.Entity = value;
+					if ((value != null))
+					{
+						value.ArgosDownloads.Add(this);
+						this._PlatformId = value.PlatformId;
+					}
+					else
+					{
+						this._PlatformId = default(string);
+					}
+					this.SendPropertyChanged("ArgosPlatform");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosDownload", Storage="_ArgosProgram", ThisKey="ProgramId", OtherKey="ProgramId", IsForeignKey=true)]
+		public ArgosProgram ArgosProgram
+		{
+			get
+			{
+				return this._ArgosProgram.Entity;
+			}
+			set
+			{
+				ArgosProgram previousValue = this._ArgosProgram.Entity;
+				if (((previousValue != value) 
+							|| (this._ArgosProgram.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ArgosProgram.Entity = null;
+						previousValue.ArgosDownloads.Remove(this);
+					}
+					this._ArgosProgram.Entity = value;
+					if ((value != null))
+					{
+						value.ArgosDownloads.Add(this);
+						this._ProgramId = value.ProgramId;
+					}
+					else
+					{
+						this._ProgramId = default(string);
+					}
+					this.SendPropertyChanged("ArgosProgram");
+				}
+			}
+		}
+		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -4424,6 +4506,10 @@ namespace DataModel
 		
 		private EntitySet<ArgosDeployment> _ArgosDeployments;
 		
+		private EntitySet<ArgosFilePlatformDate> _ArgosFilePlatformDates;
+		
+		private EntitySet<ArgosDownload> _ArgosDownloads;
+		
 		private EntityRef<ArgosProgram> _ArgosProgram;
 		
     #region Extensibility Method Definitions
@@ -4446,6 +4532,8 @@ namespace DataModel
 		{
 			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
 			this._ArgosDeployments = new EntitySet<ArgosDeployment>(new Action<ArgosDeployment>(this.attach_ArgosDeployments), new Action<ArgosDeployment>(this.detach_ArgosDeployments));
+			this._ArgosFilePlatformDates = new EntitySet<ArgosFilePlatformDate>(new Action<ArgosFilePlatformDate>(this.attach_ArgosFilePlatformDates), new Action<ArgosFilePlatformDate>(this.detach_ArgosFilePlatformDates));
+			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
 			this._ArgosProgram = default(EntityRef<ArgosProgram>);
 			OnCreated();
 		}
@@ -4580,6 +4668,32 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosFilePlatformDate", Storage="_ArgosFilePlatformDates", ThisKey="PlatformId", OtherKey="PlatformId")]
+		public EntitySet<ArgosFilePlatformDate> ArgosFilePlatformDates
+		{
+			get
+			{
+				return this._ArgosFilePlatformDates;
+			}
+			set
+			{
+				this._ArgosFilePlatformDates.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosDownload", Storage="_ArgosDownloads", ThisKey="PlatformId", OtherKey="PlatformId")]
+		public EntitySet<ArgosDownload> ArgosDownloads
+		{
+			get
+			{
+				return this._ArgosDownloads;
+			}
+			set
+			{
+				this._ArgosDownloads.Assign(value);
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosPlatform", Storage="_ArgosProgram", ThisKey="ProgramId", OtherKey="ProgramId", IsForeignKey=true)]
 		public ArgosProgram ArgosProgram
 		{
@@ -4657,6 +4771,30 @@ namespace DataModel
 			this.SendPropertyChanging();
 			entity.ArgosPlatform = null;
 		}
+		
+		private void attach_ArgosFilePlatformDates(ArgosFilePlatformDate entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosPlatform = this;
+		}
+		
+		private void detach_ArgosFilePlatformDates(ArgosFilePlatformDate entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosPlatform = null;
+		}
+		
+		private void attach_ArgosDownloads(ArgosDownload entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosPlatform = this;
+		}
+		
+		private void detach_ArgosDownloads(ArgosDownload entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosPlatform = null;
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosPrograms")]
@@ -4684,6 +4822,8 @@ namespace DataModel
 		private System.Nullable<bool> _Active;
 		
 		private EntitySet<ArgosPlatform> _ArgosPlatforms;
+		
+		private EntitySet<ArgosDownload> _ArgosDownloads;
 		
 		private EntityRef<ProjectInvestigator> _ProjectInvestigator;
 		
@@ -4714,6 +4854,7 @@ namespace DataModel
 		public ArgosProgram()
 		{
 			this._ArgosPlatforms = new EntitySet<ArgosPlatform>(new Action<ArgosPlatform>(this.attach_ArgosPlatforms), new Action<ArgosPlatform>(this.detach_ArgosPlatforms));
+			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
 			OnCreated();
 		}
@@ -4915,6 +5056,19 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosDownload", Storage="_ArgosDownloads", ThisKey="ProgramId", OtherKey="ProgramId")]
+		public EntitySet<ArgosDownload> ArgosDownloads
+		{
+			get
+			{
+				return this._ArgosDownloads;
+			}
+			set
+			{
+				this._ArgosDownloads.Assign(value);
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ProjectInvestigator_ArgosProgram", Storage="_ProjectInvestigator", ThisKey="Manager", OtherKey="Login", IsForeignKey=true)]
 		public ProjectInvestigator ProjectInvestigator
 		{
@@ -4976,6 +5130,18 @@ namespace DataModel
 		}
 		
 		private void detach_ArgosPlatforms(ArgosPlatform entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosProgram = null;
+		}
+		
+		private void attach_ArgosDownloads(ArgosDownload entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosProgram = this;
+		}
+		
+		private void detach_ArgosDownloads(ArgosDownload entity)
 		{
 			this.SendPropertyChanging();
 			entity.ArgosProgram = null;
@@ -7417,6 +7583,8 @@ namespace DataModel
 		
 		private EntityRef<CollarFile> _CollarFile;
 		
+		private EntityRef<ArgosPlatform> _ArgosPlatform;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -7436,6 +7604,7 @@ namespace DataModel
 		public ArgosFilePlatformDate()
 		{
 			this._CollarFile = default(EntityRef<CollarFile>);
+			this._ArgosPlatform = default(EntityRef<ArgosPlatform>);
 			OnCreated();
 		}
 		
@@ -7474,6 +7643,10 @@ namespace DataModel
 			{
 				if ((this._PlatformId != value))
 				{
+					if (this._ArgosPlatform.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
 					this.OnPlatformIdChanging(value);
 					this.SendPropertyChanging();
 					this._PlatformId = value;
@@ -7573,6 +7746,40 @@ namespace DataModel
 						this._FileId = default(int);
 					}
 					this.SendPropertyChanged("CollarFile");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosFilePlatformDate", Storage="_ArgosPlatform", ThisKey="PlatformId", OtherKey="PlatformId", IsForeignKey=true)]
+		public ArgosPlatform ArgosPlatform
+		{
+			get
+			{
+				return this._ArgosPlatform.Entity;
+			}
+			set
+			{
+				ArgosPlatform previousValue = this._ArgosPlatform.Entity;
+				if (((previousValue != value) 
+							|| (this._ArgosPlatform.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ArgosPlatform.Entity = null;
+						previousValue.ArgosFilePlatformDates.Remove(this);
+					}
+					this._ArgosPlatform.Entity = value;
+					if ((value != null))
+					{
+						value.ArgosFilePlatformDates.Add(this);
+						this._PlatformId = value.PlatformId;
+					}
+					else
+					{
+						this._PlatformId = default(string);
+					}
+					this.SendPropertyChanged("ArgosPlatform");
 				}
 			}
 		}

@@ -269,6 +269,8 @@
       <Column Name="FileId" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="ErrorMessage" Type="System.String" DbType="VarChar(MAX)" CanBeNull="true" />
       <Association Name="CollarFile_ArgosDownload" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
+      <Association Name="ArgosPlatform_ArgosDownload" Member="ArgosPlatform" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosPlatform" IsForeignKey="true" />
+      <Association Name="ArgosProgram_ArgosDownload" Member="ArgosProgram" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosProgram" IsForeignKey="true" />
     </Type>
     <InsertFunction FunctionId="FunctionId17">
       <Argument Parameter="programId" Member="ProgramId" />
@@ -287,6 +289,8 @@
       <Column Name="DisposalDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Association Name="ArgosPlatform_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFileProcessingIssue" />
       <Association Name="ArgosPlatform_ArgosDeployment" Member="ArgosDeployments" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosDeployment" />
+      <Association Name="ArgosPlatform_ArgosFilePlatformDate" Member="ArgosFilePlatformDates" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFilePlatformDate" />
+      <Association Name="ArgosPlatform_ArgosDownload" Member="ArgosDownloads" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosDownload" />
       <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosProgram" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosProgram" IsForeignKey="true" />
     </Type>
     <InsertFunction FunctionId="FunctionId18">
@@ -320,6 +324,7 @@
       <Column Name="Notes" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
       <Column Name="Active" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
       <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosPlatforms" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosPlatform" />
+      <Association Name="ArgosProgram_ArgosDownload" Member="ArgosDownloads" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosDownload" />
       <Association Name="ProjectInvestigator_ArgosProgram" Member="ProjectInvestigator" ThisKey="Manager" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
     </Type>
     <UpdateFunction FunctionId="FunctionId21">
@@ -548,6 +553,7 @@
       <Column Name="FirstTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
       <Column Name="LastTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
       <Association Name="CollarFile_ArgosFilePlatformDate" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="ArgosPlatform_ArgosFilePlatformDate" Member="ArgosPlatform" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosPlatform" IsForeignKey="true" />
     </Type>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
