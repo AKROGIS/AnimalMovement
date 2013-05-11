@@ -85,6 +85,12 @@
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.CollarErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.label6 = new System.Windows.Forms.Label();
+            this.ProcessingIssuesDataGridView = new System.Windows.Forms.DataGridView();
+            this.label10 = new System.Windows.Forms.Label();
+            this.TpfDataGridView = new System.Windows.Forms.DataGridView();
+            this.label13 = new System.Windows.Forms.Label();
             this.CollarTabControl.SuspendLayout();
             this.GeneralTabPage.SuspendLayout();
             this.AnimalsTabPage.SuspendLayout();
@@ -98,6 +104,9 @@
             this.FixesTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FixConflictsDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CollarErrorProvider)).BeginInit();
+            this.tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // HasGpsCheckBox
@@ -289,6 +298,7 @@
             this.CollarTabControl.Controls.Add(this.ParametersTabPage);
             this.CollarTabControl.Controls.Add(this.FilesTabPage);
             this.CollarTabControl.Controls.Add(this.FixesTabPage);
+            this.CollarTabControl.Controls.Add(this.tabPage2);
             this.CollarTabControl.Location = new System.Drawing.Point(0, 33);
             this.CollarTabControl.Name = "CollarTabControl";
             this.CollarTabControl.SelectedIndex = 0;
@@ -557,6 +567,9 @@
             // 
             // ParametersTabPage
             // 
+            this.ParametersTabPage.Controls.Add(this.label13);
+            this.ParametersTabPage.Controls.Add(this.label10);
+            this.ParametersTabPage.Controls.Add(this.TpfDataGridView);
             this.ParametersTabPage.Controls.Add(this.EditParameterButton);
             this.ParametersTabPage.Controls.Add(this.ParametersDataGridView);
             this.ParametersTabPage.Controls.Add(this.AddParameterButton);
@@ -593,7 +606,7 @@
             this.ParametersDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.ParametersDataGridView.CausesValidation = false;
             this.ParametersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ParametersDataGridView.Location = new System.Drawing.Point(6, 6);
+            this.ParametersDataGridView.Location = new System.Drawing.Point(6, 152);
             this.ParametersDataGridView.Name = "ParametersDataGridView";
             this.ParametersDataGridView.ReadOnly = true;
             this.ParametersDataGridView.RowHeadersVisible = false;
@@ -601,7 +614,7 @@
             this.ParametersDataGridView.ShowCellErrors = false;
             this.ParametersDataGridView.ShowEditingIcon = false;
             this.ParametersDataGridView.ShowRowErrors = false;
-            this.ParametersDataGridView.Size = new System.Drawing.Size(439, 294);
+            this.ParametersDataGridView.Size = new System.Drawing.Size(439, 148);
             this.ParametersDataGridView.TabIndex = 29;
             this.ParametersDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellDoubleClick);
             this.ParametersDataGridView.SelectionChanged += new System.EventHandler(this.ParametersDataGridView_SelectionChanged);
@@ -811,6 +824,77 @@
             // 
             this.CollarErrorProvider.ContainerControl = this;
             // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.label6);
+            this.tabPage2.Controls.Add(this.ProcessingIssuesDataGridView);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(451, 336);
+            this.tabPage2.TabIndex = 7;
+            this.tabPage2.Text = "Processing Issues";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 12);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(443, 13);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "Results (or problems) encountered when trying to process the raw data for this Ar" +
+    "gos platform";
+            // 
+            // ProcessingIssuesDataGridView
+            // 
+            this.ProcessingIssuesDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.ProcessingIssuesDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.ProcessingIssuesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ProcessingIssuesDataGridView.Location = new System.Drawing.Point(3, 28);
+            this.ProcessingIssuesDataGridView.Name = "ProcessingIssuesDataGridView";
+            this.ProcessingIssuesDataGridView.ReadOnly = true;
+            this.ProcessingIssuesDataGridView.RowHeadersVisible = false;
+            this.ProcessingIssuesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(445, 305);
+            this.ProcessingIssuesDataGridView.TabIndex = 7;
+            this.ProcessingIssuesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProcessingIssuesDataGridView_CellDoubleClick);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(6, 12);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(266, 13);
+            this.label10.TabIndex = 67;
+            this.label10.Text = "Telonics Gen4 Parameter Files which include this collar";
+            // 
+            // TpfDataGridView
+            // 
+            this.TpfDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TpfDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.TpfDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.TpfDataGridView.Location = new System.Drawing.Point(6, 28);
+            this.TpfDataGridView.Name = "TpfDataGridView";
+            this.TpfDataGridView.ReadOnly = true;
+            this.TpfDataGridView.RowHeadersVisible = false;
+            this.TpfDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.TpfDataGridView.Size = new System.Drawing.Size(439, 99);
+            this.TpfDataGridView.TabIndex = 66;
+            this.TpfDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TpfDataGridView_CellDoubleClick);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(6, 136);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(354, 13);
+            this.label13.TabIndex = 68;
+            this.label13.Text = "Parameters assigned to this collar (for automatic processing of Argos data)";
+            // 
             // CollarDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -833,6 +917,7 @@
             this.ArgosTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ArgosDataGridView)).EndInit();
             this.ParametersTabPage.ResumeLayout(false);
+            this.ParametersTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).EndInit();
             this.FilesTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.FilesDataGridView)).EndInit();
@@ -840,6 +925,10 @@
             this.FixesTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FixConflictsDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.CollarErrorProvider)).EndInit();
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -903,5 +992,11 @@
         private System.Windows.Forms.ErrorProvider CollarErrorProvider;
         private System.Windows.Forms.Button EditParameterButton;
         private System.Windows.Forms.Button EditArgosButton;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.DataGridView ProcessingIssuesDataGridView;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.DataGridView TpfDataGridView;
+        private System.Windows.Forms.Label label13;
     }
 }

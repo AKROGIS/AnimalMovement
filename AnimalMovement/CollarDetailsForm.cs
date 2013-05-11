@@ -88,6 +88,9 @@ namespace AnimalMovement
                 case 5:
                     SetupFixesTab();
                     break;
+                case 6:
+                    SetupFixesTab();
+                    break;
             }
         }
 
@@ -427,6 +430,7 @@ namespace AnimalMovement
 
         private void SetupParametersTab()
         {
+            SetUpTpfTab();
             switch (Collar.CollarModel)
             {
                 case "Gen3":
@@ -545,6 +549,48 @@ namespace AnimalMovement
         {
             EnableParametersControls();
         }
+
+        #region Tpf Data Grid
+
+        private void SetUpTpfTab()
+        {
+            if (TpfDataGridView.DataSource != null)
+                return;
+            if (Collar.CollarManufacturer != "Telonics" || Collar.CollarModel != "Gen4")
+                return;
+            var views = new AnimalMovementViews();
+            TpfDataGridView.DataSource = views.AllTpfFileDatas.Where(t => t.Platform == Collar.CollarId ||
+                                                                          (t.Platform.Length > 5 && Collar.CollarId.Length > 5 &&
+                                                                           t.Platform.Substring(0, 6) == Collar.CollarId.Substring(0, 6)))
+                                              .Select(t => new
+                                                  {
+                                                      t.FileId,
+                                                      t.FileName,
+                                                      t.Status,
+                                                      t.CTN,
+                                                      t.Frequency,
+                                                      StartDate = t.TimeStamp,
+                                                  }).ToList();
+        }
+
+        private void ShowTpfFileDetails()
+        {
+            var fileId = (int)TpfDataGridView.SelectedRows[0].Cells[0].Value;
+            var file = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == fileId);
+            if (file == null)
+                return;
+            var form = new CollarParameterFileDetailsForm(file);
+            form.DatabaseChanged += (o, x) => ParametersDataChanged();
+            form.Show(this);
+        }
+
+        private void TpfDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1 && !IsEditMode)
+                ShowTpfFileDetails();
+        }
+
+        #endregion
 
         #endregion
 
@@ -700,6 +746,57 @@ namespace AnimalMovement
         private void FixConflictsDataGridView_SelectionChanged(object sender, EventArgs e)
         {
             EnableFixControls();
+        }
+
+        #endregion
+
+
+        #region Issues Tab
+
+        private void SetUpIssuesTab()
+        {
+            //TODO - creating anonymous (or nested type) is empty unless ToList() is used,  lists do not support sorting.
+            //ProcessingIssuesDataGridView.DataSource = Platform.ArgosFileProcessingIssues; //works but too many fields in wrong order
+            ProcessingIssuesDataGridView.DataSource = Collar.ArgosFileProcessingIssues.Select(i => new
+            {
+                i.CollarFile,
+                i.Collar,
+                i.Issue
+            }).ToList();
+        }
+
+        private void IssueDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetUpIssuesTab();
+        }
+
+        private void IssueFileDetails()
+        {
+            var file = (CollarFile)ProcessingIssuesDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new FileDetailsForm(file);
+            form.DatabaseChanged += (o, x) => IssueDataChanged();
+            form.Show(this);
+        }
+
+        private void IssueCollarDetails()
+        {
+            var collar = (Collar)ProcessingIssuesDataGridView.SelectedRows[0].Cells[1].Value;
+            if (collar == null)
+                return;
+            var form = new CollarDetailsForm(collar);
+            form.DatabaseChanged += (o, x) => IssueDataChanged();
+            form.Show(this);
+        }
+
+        private void ProcessingIssuesDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1 && !IsEditMode)
+                if (e.ColumnIndex == 1)
+                    IssueCollarDetails();
+                else
+                    IssueFileDetails();
         }
 
         #endregion

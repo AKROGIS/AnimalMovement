@@ -108,7 +108,7 @@
             this.LoginTextBox.Enabled = false;
             this.LoginTextBox.Location = new System.Drawing.Point(93, 12);
             this.LoginTextBox.Name = "LoginTextBox";
-            this.LoginTextBox.Size = new System.Drawing.Size(385, 20);
+            this.LoginTextBox.Size = new System.Drawing.Size(438, 20);
             this.LoginTextBox.TabIndex = 0;
             // 
             // label1
@@ -155,7 +155,7 @@
             this.PhoneTextBox.Location = new System.Drawing.Point(93, 90);
             this.PhoneTextBox.MaxLength = 100;
             this.PhoneTextBox.Name = "PhoneTextBox";
-            this.PhoneTextBox.Size = new System.Drawing.Size(385, 20);
+            this.PhoneTextBox.Size = new System.Drawing.Size(438, 20);
             this.PhoneTextBox.TabIndex = 3;
             // 
             // EmailTextBox
@@ -166,7 +166,7 @@
             this.EmailTextBox.Location = new System.Drawing.Point(93, 64);
             this.EmailTextBox.MaxLength = 200;
             this.EmailTextBox.Name = "EmailTextBox";
-            this.EmailTextBox.Size = new System.Drawing.Size(385, 20);
+            this.EmailTextBox.Size = new System.Drawing.Size(438, 20);
             this.EmailTextBox.TabIndex = 2;
             // 
             // NameTextBox
@@ -177,14 +177,14 @@
             this.NameTextBox.Location = new System.Drawing.Point(93, 38);
             this.NameTextBox.MaxLength = 100;
             this.NameTextBox.Name = "NameTextBox";
-            this.NameTextBox.Size = new System.Drawing.Size(385, 20);
+            this.NameTextBox.Size = new System.Drawing.Size(438, 20);
             this.NameTextBox.TabIndex = 1;
             // 
             // DoneCancelButton
             // 
             this.DoneCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DoneCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.DoneCancelButton.Location = new System.Drawing.Point(18, 424);
+            this.DoneCancelButton.Location = new System.Drawing.Point(18, 433);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
             this.DoneCancelButton.TabIndex = 5;
@@ -196,7 +196,7 @@
             // 
             this.EditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.EditSaveButton.BackColor = System.Drawing.SystemColors.Control;
-            this.EditSaveButton.Location = new System.Drawing.Point(403, 424);
+            this.EditSaveButton.Location = new System.Drawing.Point(456, 433);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
             this.EditSaveButton.TabIndex = 6;
@@ -211,7 +211,7 @@
             this.InfoCollarButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoCollarButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoCollarButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoCollarButton.Location = new System.Drawing.Point(58, 249);
+            this.InfoCollarButton.Location = new System.Drawing.Point(58, 258);
             this.InfoCollarButton.Name = "InfoCollarButton";
             this.InfoCollarButton.Size = new System.Drawing.Size(24, 24);
             this.InfoCollarButton.TabIndex = 4;
@@ -226,7 +226,7 @@
             this.InfoProjectButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoProjectButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoProjectButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoProjectButton.Location = new System.Drawing.Point(58, 249);
+            this.InfoProjectButton.Location = new System.Drawing.Point(58, 258);
             this.InfoProjectButton.Name = "InfoProjectButton";
             this.InfoProjectButton.Size = new System.Drawing.Size(24, 24);
             this.InfoProjectButton.TabIndex = 4;
@@ -239,7 +239,7 @@
             this.DeleteProjectsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteProjectsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteProjectsButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteProjectsButton.Location = new System.Drawing.Point(33, 249);
+            this.DeleteProjectsButton.Location = new System.Drawing.Point(33, 258);
             this.DeleteProjectsButton.Name = "DeleteProjectsButton";
             this.DeleteProjectsButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteProjectsButton.TabIndex = 3;
@@ -252,7 +252,7 @@
             this.AddProjectButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddProjectButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AddProjectButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddProjectButton.Location = new System.Drawing.Point(3, 249);
+            this.AddProjectButton.Location = new System.Drawing.Point(3, 258);
             this.AddProjectButton.Name = "AddProjectButton";
             this.AddProjectButton.Size = new System.Drawing.Size(24, 24);
             this.AddProjectButton.TabIndex = 2;
@@ -264,7 +264,7 @@
             this.DeleteCollarsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteCollarsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteCollarsButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteCollarsButton.Location = new System.Drawing.Point(33, 249);
+            this.DeleteCollarsButton.Location = new System.Drawing.Point(33, 258);
             this.DeleteCollarsButton.Name = "DeleteCollarsButton";
             this.DeleteCollarsButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteCollarsButton.TabIndex = 3;
@@ -277,7 +277,7 @@
             this.AddCollarButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddCollarButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AddCollarButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddCollarButton.Location = new System.Drawing.Point(3, 249);
+            this.AddCollarButton.Location = new System.Drawing.Point(3, 258);
             this.AddCollarButton.Name = "AddCollarButton";
             this.AddCollarButton.Size = new System.Drawing.Size(24, 24);
             this.AddCollarButton.TabIndex = 2;
@@ -295,7 +295,7 @@
             this.ProjectsListBox.Location = new System.Drawing.Point(3, 3);
             this.ProjectsListBox.Name = "ProjectsListBox";
             this.ProjectsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.ProjectsListBox.Size = new System.Drawing.Size(449, 240);
+            this.ProjectsListBox.Size = new System.Drawing.Size(502, 249);
             this.ProjectsListBox.TabIndex = 1;
             this.ProjectsListBox.SelectedIndexChanged += new System.EventHandler(this.ProjectsListBox_SelectedIndexChanged);
             this.ProjectsListBox.DoubleClick += new System.EventHandler(this.InfoProjectButton_Click);
@@ -311,7 +311,7 @@
             this.CollarsListBox.Location = new System.Drawing.Point(3, 3);
             this.CollarsListBox.Name = "CollarsListBox";
             this.CollarsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.CollarsListBox.Size = new System.Drawing.Size(449, 240);
+            this.CollarsListBox.Size = new System.Drawing.Size(502, 249);
             this.CollarsListBox.TabIndex = 1;
             this.CollarsListBox.SelectedIndexChanged += new System.EventHandler(this.CollarsListBox_SelectedIndexChanged);
             this.CollarsListBox.DoubleClick += new System.EventHandler(this.InfoCollarButton_Click);
@@ -327,7 +327,7 @@
             this.ParameterFilesListBox.Location = new System.Drawing.Point(3, 3);
             this.ParameterFilesListBox.Name = "ParameterFilesListBox";
             this.ParameterFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.ParameterFilesListBox.Size = new System.Drawing.Size(487, 312);
+            this.ParameterFilesListBox.Size = new System.Drawing.Size(502, 279);
             this.ParameterFilesListBox.TabIndex = 35;
             this.ParameterFilesListBox.SelectedIndexChanged += new System.EventHandler(this.ParameterFilesListBox_SelectedIndexChanged);
             this.ParameterFilesListBox.DoubleClick += new System.EventHandler(this.InfoParameterFileButton_Click);
@@ -339,7 +339,7 @@
             this.InfoParameterFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoParameterFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoParameterFileButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoParameterFileButton.Location = new System.Drawing.Point(58, 321);
+            this.InfoParameterFileButton.Location = new System.Drawing.Point(58, 330);
             this.InfoParameterFileButton.Name = "InfoParameterFileButton";
             this.InfoParameterFileButton.Size = new System.Drawing.Size(24, 24);
             this.InfoParameterFileButton.TabIndex = 38;
@@ -352,7 +352,7 @@
             this.DeleteParameterFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteParameterFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteParameterFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteParameterFilesButton.Location = new System.Drawing.Point(33, 321);
+            this.DeleteParameterFilesButton.Location = new System.Drawing.Point(33, 330);
             this.DeleteParameterFilesButton.Name = "DeleteParameterFilesButton";
             this.DeleteParameterFilesButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteParameterFilesButton.TabIndex = 37;
@@ -365,7 +365,7 @@
             this.AddParameterFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddParameterFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AddParameterFileButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddParameterFileButton.Location = new System.Drawing.Point(3, 321);
+            this.AddParameterFileButton.Location = new System.Drawing.Point(3, 330);
             this.AddParameterFileButton.Name = "AddParameterFileButton";
             this.AddParameterFileButton.Size = new System.Drawing.Size(24, 24);
             this.AddParameterFileButton.TabIndex = 36;
@@ -388,7 +388,7 @@
             this.ProjectInvestigatorTabs.Location = new System.Drawing.Point(18, 116);
             this.ProjectInvestigatorTabs.Name = "ProjectInvestigatorTabs";
             this.ProjectInvestigatorTabs.SelectedIndex = 0;
-            this.ProjectInvestigatorTabs.Size = new System.Drawing.Size(463, 302);
+            this.ProjectInvestigatorTabs.Size = new System.Drawing.Size(516, 311);
             this.ProjectInvestigatorTabs.TabIndex = 8;
             this.ProjectInvestigatorTabs.SelectedIndexChanged += new System.EventHandler(this.ProjectInvestigatorTabs_SelectedIndexChanged);
             // 
@@ -401,7 +401,7 @@
             this.ProjectsTab.Location = new System.Drawing.Point(4, 22);
             this.ProjectsTab.Name = "ProjectsTab";
             this.ProjectsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ProjectsTab.Size = new System.Drawing.Size(455, 276);
+            this.ProjectsTab.Size = new System.Drawing.Size(508, 285);
             this.ProjectsTab.TabIndex = 0;
             this.ProjectsTab.Text = "Projects";
             this.ProjectsTab.UseVisualStyleBackColor = true;
@@ -415,7 +415,7 @@
             this.CollarsTab.Location = new System.Drawing.Point(4, 22);
             this.CollarsTab.Name = "CollarsTab";
             this.CollarsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.CollarsTab.Size = new System.Drawing.Size(455, 276);
+            this.CollarsTab.Size = new System.Drawing.Size(508, 285);
             this.CollarsTab.TabIndex = 1;
             this.CollarsTab.Text = "Collars";
             this.CollarsTab.UseVisualStyleBackColor = true;
@@ -442,7 +442,7 @@
             this.ArgosTab.Location = new System.Drawing.Point(4, 22);
             this.ArgosTab.Name = "ArgosTab";
             this.ArgosTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ArgosTab.Size = new System.Drawing.Size(455, 276);
+            this.ArgosTab.Size = new System.Drawing.Size(508, 285);
             this.ArgosTab.TabIndex = 5;
             this.ArgosTab.Text = "Argos";
             this.ArgosTab.UseVisualStyleBackColor = true;
@@ -454,7 +454,7 @@
             this.InfoArgosCollarButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoArgosCollarButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoArgosCollarButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoArgosCollarButton.Location = new System.Drawing.Point(238, 247);
+            this.InfoArgosCollarButton.Location = new System.Drawing.Point(238, 256);
             this.InfoArgosCollarButton.Name = "InfoArgosCollarButton";
             this.InfoArgosCollarButton.Size = new System.Drawing.Size(24, 24);
             this.InfoArgosCollarButton.TabIndex = 29;
@@ -483,7 +483,7 @@
             this.PlatformsListBox.Location = new System.Drawing.Point(3, 143);
             this.PlatformsListBox.Name = "PlatformsListBox";
             this.PlatformsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.PlatformsListBox.Size = new System.Drawing.Size(144, 98);
+            this.PlatformsListBox.Size = new System.Drawing.Size(144, 107);
             this.PlatformsListBox.TabIndex = 27;
             this.PlatformsListBox.SelectedIndexChanged += new System.EventHandler(this.PlatformsListBox_SelectedIndexChanged);
             this.PlatformsListBox.DoubleClick += new System.EventHandler(this.InfoPlatformButton_Click);
@@ -498,7 +498,7 @@
             this.ProgramsListBox.Location = new System.Drawing.Point(3, 19);
             this.ProgramsListBox.Name = "ProgramsListBox";
             this.ProgramsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.ProgramsListBox.Size = new System.Drawing.Size(446, 73);
+            this.ProgramsListBox.Size = new System.Drawing.Size(499, 73);
             this.ProgramsListBox.TabIndex = 26;
             this.ProgramsListBox.SelectedIndexChanged += new System.EventHandler(this.ProgramsListBox_SelectedIndexChanged);
             this.ProgramsListBox.DoubleClick += new System.EventHandler(this.InfoProgramButton_Click);
@@ -517,7 +517,7 @@
             this.ArgosDeploymentsGridView.ReadOnly = true;
             this.ArgosDeploymentsGridView.RowHeadersVisible = false;
             this.ArgosDeploymentsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.ArgosDeploymentsGridView.Size = new System.Drawing.Size(296, 98);
+            this.ArgosDeploymentsGridView.Size = new System.Drawing.Size(349, 107);
             this.ArgosDeploymentsGridView.TabIndex = 25;
             this.ArgosDeploymentsGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ArgosDataGridView_CellDoubleClick);
             this.ArgosDeploymentsGridView.SelectionChanged += new System.EventHandler(this.ArgosDataGridView_SelectionChanged);
@@ -536,7 +536,7 @@
             this.DeleteArgosDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteArgosDeploymentButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteArgosDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteArgosDeploymentButton.Location = new System.Drawing.Point(183, 247);
+            this.DeleteArgosDeploymentButton.Location = new System.Drawing.Point(183, 256);
             this.DeleteArgosDeploymentButton.Name = "DeleteArgosDeploymentButton";
             this.DeleteArgosDeploymentButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteArgosDeploymentButton.TabIndex = 20;
@@ -550,7 +550,7 @@
             this.EditArgosDeploymentButton.FlatAppearance.BorderSize = 0;
             this.EditArgosDeploymentButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.EditArgosDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
-            this.EditArgosDeploymentButton.Location = new System.Drawing.Point(213, 247);
+            this.EditArgosDeploymentButton.Location = new System.Drawing.Point(213, 256);
             this.EditArgosDeploymentButton.Name = "EditArgosDeploymentButton";
             this.EditArgosDeploymentButton.Size = new System.Drawing.Size(24, 24);
             this.EditArgosDeploymentButton.TabIndex = 21;
@@ -563,7 +563,7 @@
             this.AddArgosDeploymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddArgosDeploymentButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AddArgosDeploymentButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddArgosDeploymentButton.Location = new System.Drawing.Point(153, 247);
+            this.AddArgosDeploymentButton.Location = new System.Drawing.Point(153, 256);
             this.AddArgosDeploymentButton.Name = "AddArgosDeploymentButton";
             this.AddArgosDeploymentButton.Size = new System.Drawing.Size(24, 24);
             this.AddArgosDeploymentButton.TabIndex = 19;
@@ -630,7 +630,7 @@
             this.DeletePlatformButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeletePlatformButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeletePlatformButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeletePlatformButton.Location = new System.Drawing.Point(33, 249);
+            this.DeletePlatformButton.Location = new System.Drawing.Point(33, 258);
             this.DeletePlatformButton.Name = "DeletePlatformButton";
             this.DeletePlatformButton.Size = new System.Drawing.Size(24, 24);
             this.DeletePlatformButton.TabIndex = 7;
@@ -645,7 +645,7 @@
             this.InfoPlatformButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoPlatformButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoPlatformButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoPlatformButton.Location = new System.Drawing.Point(58, 249);
+            this.InfoPlatformButton.Location = new System.Drawing.Point(58, 258);
             this.InfoPlatformButton.Name = "InfoPlatformButton";
             this.InfoPlatformButton.Size = new System.Drawing.Size(24, 24);
             this.InfoPlatformButton.TabIndex = 8;
@@ -658,7 +658,7 @@
             this.AddPlatformButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddPlatformButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AddPlatformButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddPlatformButton.Location = new System.Drawing.Point(3, 249);
+            this.AddPlatformButton.Location = new System.Drawing.Point(3, 258);
             this.AddPlatformButton.Name = "AddPlatformButton";
             this.AddPlatformButton.Size = new System.Drawing.Size(24, 24);
             this.AddPlatformButton.TabIndex = 6;
@@ -677,7 +677,7 @@
             this.CollarFilesTab.Location = new System.Drawing.Point(4, 22);
             this.CollarFilesTab.Name = "CollarFilesTab";
             this.CollarFilesTab.Padding = new System.Windows.Forms.Padding(3);
-            this.CollarFilesTab.Size = new System.Drawing.Size(455, 276);
+            this.CollarFilesTab.Size = new System.Drawing.Size(508, 285);
             this.CollarFilesTab.TabIndex = 2;
             this.CollarFilesTab.Text = "Collar Files";
             this.CollarFilesTab.UseVisualStyleBackColor = true;
@@ -693,7 +693,7 @@
             this.CollarFilesListBox.Location = new System.Drawing.Point(3, 3);
             this.CollarFilesListBox.Name = "CollarFilesListBox";
             this.CollarFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.CollarFilesListBox.Size = new System.Drawing.Size(449, 240);
+            this.CollarFilesListBox.Size = new System.Drawing.Size(502, 249);
             this.CollarFilesListBox.TabIndex = 39;
             this.CollarFilesListBox.SelectedIndexChanged += new System.EventHandler(this.CollarFilesListBox_SelectedIndexChanged);
             this.CollarFilesListBox.DoubleClick += new System.EventHandler(this.InfoCollarFileButton_Click);
@@ -705,7 +705,7 @@
             this.InfoCollarFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoCollarFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoCollarFileButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoCollarFileButton.Location = new System.Drawing.Point(58, 249);
+            this.InfoCollarFileButton.Location = new System.Drawing.Point(58, 258);
             this.InfoCollarFileButton.Name = "InfoCollarFileButton";
             this.InfoCollarFileButton.Size = new System.Drawing.Size(24, 24);
             this.InfoCollarFileButton.TabIndex = 42;
@@ -718,7 +718,7 @@
             this.AddCollarFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddCollarFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AddCollarFileButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddCollarFileButton.Location = new System.Drawing.Point(3, 249);
+            this.AddCollarFileButton.Location = new System.Drawing.Point(3, 258);
             this.AddCollarFileButton.Name = "AddCollarFileButton";
             this.AddCollarFileButton.Size = new System.Drawing.Size(24, 24);
             this.AddCollarFileButton.TabIndex = 40;
@@ -731,7 +731,7 @@
             this.DeleteCollarFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteCollarFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteCollarFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteCollarFilesButton.Location = new System.Drawing.Point(33, 249);
+            this.DeleteCollarFilesButton.Location = new System.Drawing.Point(33, 258);
             this.DeleteCollarFilesButton.Name = "DeleteCollarFilesButton";
             this.DeleteCollarFilesButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteCollarFilesButton.TabIndex = 41;
@@ -744,7 +744,7 @@
             this.ShowEmailFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowEmailFilesCheckBox.AutoSize = true;
             this.ShowEmailFilesCheckBox.ForeColor = System.Drawing.Color.MediumBlue;
-            this.ShowEmailFilesCheckBox.Location = new System.Drawing.Point(88, 253);
+            this.ShowEmailFilesCheckBox.Location = new System.Drawing.Point(88, 262);
             this.ShowEmailFilesCheckBox.Name = "ShowEmailFilesCheckBox";
             this.ShowEmailFilesCheckBox.Size = new System.Drawing.Size(86, 17);
             this.ShowEmailFilesCheckBox.TabIndex = 43;
@@ -757,7 +757,7 @@
             this.ShowDownloadFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowDownloadFilesCheckBox.AutoSize = true;
             this.ShowDownloadFilesCheckBox.ForeColor = System.Drawing.Color.DarkMagenta;
-            this.ShowDownloadFilesCheckBox.Location = new System.Drawing.Point(181, 253);
+            this.ShowDownloadFilesCheckBox.Location = new System.Drawing.Point(181, 262);
             this.ShowDownloadFilesCheckBox.Name = "ShowDownloadFilesCheckBox";
             this.ShowDownloadFilesCheckBox.Size = new System.Drawing.Size(109, 17);
             this.ShowDownloadFilesCheckBox.TabIndex = 44;
@@ -770,7 +770,7 @@
             this.ShowDerivedFilesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowDerivedFilesCheckBox.AutoSize = true;
             this.ShowDerivedFilesCheckBox.ForeColor = System.Drawing.Color.Brown;
-            this.ShowDerivedFilesCheckBox.Location = new System.Drawing.Point(297, 253);
+            this.ShowDerivedFilesCheckBox.Location = new System.Drawing.Point(297, 262);
             this.ShowDerivedFilesCheckBox.Name = "ShowDerivedFilesCheckBox";
             this.ShowDerivedFilesCheckBox.Size = new System.Drawing.Size(93, 17);
             this.ShowDerivedFilesCheckBox.TabIndex = 45;
@@ -787,7 +787,7 @@
             this.ParameterFilesTab.Location = new System.Drawing.Point(4, 22);
             this.ParameterFilesTab.Name = "ParameterFilesTab";
             this.ParameterFilesTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ParameterFilesTab.Size = new System.Drawing.Size(455, 276);
+            this.ParameterFilesTab.Size = new System.Drawing.Size(508, 285);
             this.ParameterFilesTab.TabIndex = 3;
             this.ParameterFilesTab.Text = "Parameter Files";
             this.ParameterFilesTab.UseVisualStyleBackColor = true;
@@ -800,7 +800,7 @@
             this.AssistantsTab.Location = new System.Drawing.Point(4, 22);
             this.AssistantsTab.Name = "AssistantsTab";
             this.AssistantsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.AssistantsTab.Size = new System.Drawing.Size(455, 276);
+            this.AssistantsTab.Size = new System.Drawing.Size(508, 285);
             this.AssistantsTab.TabIndex = 6;
             this.AssistantsTab.Text = "Assistants";
             this.AssistantsTab.UseVisualStyleBackColor = true;
@@ -815,7 +815,7 @@
             this.AssistantsListBox.Location = new System.Drawing.Point(3, 6);
             this.AssistantsListBox.Name = "AssistantsListBox";
             this.AssistantsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.AssistantsListBox.Size = new System.Drawing.Size(487, 309);
+            this.AssistantsListBox.Size = new System.Drawing.Size(502, 276);
             this.AssistantsListBox.TabIndex = 14;
             this.AssistantsListBox.SelectedIndexChanged += new System.EventHandler(this.AssistantsListBox_SelectedIndexChanged);
             // 
@@ -824,7 +824,7 @@
             this.AddAssistantButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddAssistantButton.Enabled = false;
             this.AddAssistantButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddAssistantButton.Location = new System.Drawing.Point(3, 321);
+            this.AddAssistantButton.Location = new System.Drawing.Point(3, 330);
             this.AddAssistantButton.Name = "AddAssistantButton";
             this.AddAssistantButton.Size = new System.Drawing.Size(24, 24);
             this.AddAssistantButton.TabIndex = 15;
@@ -836,7 +836,7 @@
             this.DeleteAssistantButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteAssistantButton.Enabled = false;
             this.DeleteAssistantButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteAssistantButton.Location = new System.Drawing.Point(30, 321);
+            this.DeleteAssistantButton.Location = new System.Drawing.Point(30, 330);
             this.DeleteAssistantButton.Name = "DeleteAssistantButton";
             this.DeleteAssistantButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteAssistantButton.TabIndex = 16;
@@ -852,7 +852,7 @@
             this.ReportsTab.Location = new System.Drawing.Point(4, 22);
             this.ReportsTab.Name = "ReportsTab";
             this.ReportsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.ReportsTab.Size = new System.Drawing.Size(455, 276);
+            this.ReportsTab.Size = new System.Drawing.Size(508, 285);
             this.ReportsTab.TabIndex = 4;
             this.ReportsTab.Text = "QC Reports";
             this.ReportsTab.UseVisualStyleBackColor = true;
@@ -866,7 +866,7 @@
             this.ReportDescriptionTextBox.Name = "ReportDescriptionTextBox";
             this.ReportDescriptionTextBox.ReadOnly = true;
             this.ReportDescriptionTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ReportDescriptionTextBox.Size = new System.Drawing.Size(480, 34);
+            this.ReportDescriptionTextBox.Size = new System.Drawing.Size(498, 34);
             this.ReportDescriptionTextBox.TabIndex = 3;
             // 
             // label8
@@ -886,7 +886,7 @@
             this.ReportComboBox.FormattingEnabled = true;
             this.ReportComboBox.Location = new System.Drawing.Point(58, 6);
             this.ReportComboBox.Name = "ReportComboBox";
-            this.ReportComboBox.Size = new System.Drawing.Size(429, 21);
+            this.ReportComboBox.Size = new System.Drawing.Size(447, 21);
             this.ReportComboBox.TabIndex = 1;
             this.ReportComboBox.SelectedIndexChanged += new System.EventHandler(this.ReportComboBox_SelectedIndexChanged);
             // 
@@ -903,7 +903,7 @@
             this.ReportDataGridView.Location = new System.Drawing.Point(7, 73);
             this.ReportDataGridView.Name = "ReportDataGridView";
             this.ReportDataGridView.ReadOnly = true;
-            this.ReportDataGridView.Size = new System.Drawing.Size(480, 269);
+            this.ReportDataGridView.Size = new System.Drawing.Size(498, 209);
             this.ReportDataGridView.TabIndex = 0;
             // 
             // InvestigatorForm
@@ -911,7 +911,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.DoneCancelButton;
-            this.ClientSize = new System.Drawing.Size(493, 459);
+            this.ClientSize = new System.Drawing.Size(546, 468);
             this.Controls.Add(this.ProjectInvestigatorTabs);
             this.Controls.Add(this.DoneCancelButton);
             this.Controls.Add(this.EditSaveButton);
