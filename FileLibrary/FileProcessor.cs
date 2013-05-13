@@ -168,21 +168,21 @@ namespace FileLibrary
                              .ToList();
             if (parameterSets.Count == 0)
             {
-                var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}",
+                var msg = String.Format("No Collar for ArgosId {0} from {1:g} to {2:g}",
                                         platformId, first, last);
                 LogIssueForFile(file.FileId, msg, platformId);
                 return;
             }
             if (parameterSets[0].StartDate != null && first < parameterSets[0].StartDate)
             {
-                var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}",
+                var msg = String.Format("No Collar for ArgosId {0} from {1:g} to {2:g}",
                                         platformId, first, parameterSets[0].StartDate);
                 LogIssueForFile(file.FileId, msg, platformId);
             }
             int lastIndex = parameterSets.Count - 1;
             if (parameterSets[lastIndex].EndDate != null && parameterSets[lastIndex].EndDate < last)
             {
-                var msg = String.Format("No Collar or TelonicsParameters for ArgosId {0} from {1:g} to {2:g}",
+                var msg = String.Format("No Collar for ArgosId {0} from {1:g} to {2:g}",
                                         platformId, parameterSets[lastIndex].EndDate, last);
                 LogIssueForFile(file.FileId, msg, platformId);
             }
