@@ -2394,26 +2394,24 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: March 21, 2013
 -- Description: Enforce the business rules for deleting ArgosDeployment
 -- =============================================
 CREATE TRIGGER [dbo].[AfterArgosDeploymentDelete] 
    ON  [dbo].[ArgosDeployments] 
    AFTER DELETE
-AS 
+AS
 BEGIN
     SET NOCOUNT ON;
-    
-    -- delete files based on this deployment
-    DELETE C
-      FROM CollarFiles AS C
-      JOIN deleted AS D
-        ON D.DeploymentId = C.ArgosDeploymentId
+
+    -- collars file referencing this deployment must be deleted before
+    -- deleting the deployment.  Because of issues with instead of triggers,
+    -- we are putting this requirement on the client.
 
     -- we do not need to update issues, because the now unprocessed transmissions 
     -- (without issues) will be reflected in the query ArgosFile_NeedsPartialProcessing
-    
+
     -- If this deployment is related to a non-gps collar then delete all fixes for this collar
     -- during the time of the deployment (A collar can only have one deployment at any time,
     -- so all the fixes for that collar must be associated with this deployment)

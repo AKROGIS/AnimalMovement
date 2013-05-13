@@ -450,16 +450,20 @@ Relationships
   Therefore, a Collar Parameter must have a Collar (foreign key), and optionally a
   Collar Parameter File (nullable foreign Key).
   Collar Files that are created by a using the Collar Parameter maintain a link to the
-  Collar Parameter (foreign key), which will deny deletes of the Collar Parameter.  How         FIX
+  Collar Parameter (foreign key), which will deny deletes of the Collar Parameter.  How
   a Collar File was derived is important to keeping it up to date, so we need to maintain
-  the Collar Parameters used to create it.
+  the Collar Parameters used to create it.  If we want to delete a CollarParameter, we
+  must first delete the derived files that depend on it.
   
 Attributes
 ----------
   ParameterId - non-null surrogate primary key (integer starting at 1 and incrementing
                 by 1).  Users cannot add or update this column.
   CollarManufacturer/CollarId - non-null foreign key to Collars  Cascade on delete and
-          update. Parameter is subject to changes and deletes in Collars.                 ***COLLAR Disposal Date***
+          update. Parameter is subject to changes and deletes in Collars.  A
+		  CollarParameter cannot begin after a Collars disposal date, but it may continue
+		  to be valid after the collar is disposed (i.e. the end date is after the collar
+		  disposal date.
   FileId - nullable foreign key to CollarParameterFiles. Cascade on delete and No Action
            on update (FileId is a surrogate PK, it will never change).  A Collar Parameter
 		   cannot use an Inactive Collar Parameter File. One and only one of FileId and
@@ -514,9 +518,9 @@ Delete
   Collar File - see the Special Note on Referential Integrity below.  Therefore, if the
   client wants to delete a CollarParameter, they must first delete related CollarFiles.
   Deleting a CollarFile is sufficient to list the parents file in need of reprocessing
-  (it will be argos platform dates not in a results file, and no processing issue to
-  explain it), after a scheduled attempt to process, the file will have a processing
-  issue to blaming the missing collar parameter.
+  (the parent CollarFile will be listed in ArgosPlatformDates but will not have a derived
+  CollarFile, and no ProcessingIssues to explain it), after a scheduled attempt to
+  process, the file will have a processing issue to blaming the missing CollarParameter.
 
 Special Note on Referential Integrity
 -------------------------------------
@@ -994,19 +998,19 @@ validate ArgosDeployments.  **How should this validation be done?**
 The ArgosDeployments table cannot be edited directly, only through stored procedures.
 Stored procedures manage the permission validation, and triggers manage the data
 validation, and updates to related tables.
+
 Delete
-  A delete can be done by the Manager of the Collar, *or* the Manager of the PlatformId
-  (obtained from the related ArgosProgram).  It seems reasonable that the user must be
-  the Manager of both, but since Collars and ArgosPrograms can be given away, it is
-  possible that the two items could belong to different PIs.  If permitted, the delete
-  should never fail (there are no FK dependencies on this table).  The delete may render
-  the results from prior processing of one or more CollarFiles invalid.  The delete action
-  must scan ArgosFilePlatformDates to find to find CollarFiles that have data that
-  overlaps the deleted ArgosDeployment, and delete the CollarFiles' subfiles with the same
-  Collar as the deleted ArgosDeployment.  **Until we have a solution for detecting
-  partially processed files, and for partially processing a file, we will reprocess all
-  overlapping CollarFiles** **The UI should warn the user if the deleted deployment will
-  leave some CollarFile data unprocessed.**
+------
+  Only the database user who owns the Collar *AND* owns the platform (actually the related
+  ArgosProgram) or is an Assistant to either or both owners can delete an ArgosDeployment.
+  The database will never delete these objects automatically. ArgosDeployment deletes
+  cannot be done if the ArgosDeployment was used to create a Collar File - see the Special
+  Note on Referential Integrity in the CollarParameter discussion.  Therefore, if the
+  client wants to delete a ArgosDeployment, they must first delete related CollarFiles.
+  Deleting a CollarFile is sufficient to list the parents file in need of reprocessing
+  (the parent CollarFile will be listed in ArgosPlatformDates but will not have a derived
+  CollarFile, and no ProcessingIssues to explain it), after a scheduled attempt to
+  process, the file will have a processing issue to blaming the missing ArgosDeployment.
 
 Update
   A update can be done by the Manager of the Collar, *or* the Manager of the PlatformId,

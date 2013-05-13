@@ -389,9 +389,24 @@ namespace AnimalMovement
 
         private void DeleteArgosButton_Click(object sender, EventArgs e)
         {
-            foreach (DataGridViewRow row in ArgosDataGridView.SelectedRows)
+            var deployments =
+                ArgosDataGridView.SelectedRows.Cast<DataGridViewRow>()
+                                 .Select(row => (ArgosDeployment) row.Cells[0].Value)
+                                 .ToList();
+            if (deployments.Any(p => p.CollarFiles.Any()))
             {
-                var deployment = (ArgosDeployment)row.Cells[0].Value;
+                var message = String.Format("Deleting {0} will delete derived collar files and fixes.",
+                                            deployments.Count == 1 ? "this deployment" : "these deployments")
+                              + Environment.NewLine + "Are you sure you want to continue?";
+                var response = MessageBox.Show(message, "Deleting derived data", MessageBoxButtons.YesNo,
+                                               MessageBoxIcon.Question);
+                if (response != DialogResult.Yes)
+                    return;
+            }
+            foreach (var deployment in deployments)
+            {
+                foreach (var collarFile in deployment.CollarFiles)
+                    Database.CollarFiles.DeleteOnSubmit(collarFile);
                 Database.ArgosDeployments.DeleteOnSubmit(deployment);
             }
             if (SubmitChanges())
