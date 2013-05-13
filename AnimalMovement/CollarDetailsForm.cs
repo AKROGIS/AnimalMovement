@@ -559,18 +559,20 @@ namespace AnimalMovement
             if (Collar.CollarManufacturer != "Telonics" || Collar.CollarModel != "Gen4")
                 return;
             var views = new AnimalMovementViews();
-            TpfDataGridView.DataSource = views.AllTpfFileDatas.Where(t => t.Platform == Collar.CollarId ||
-                                                                          (t.Platform.Length > 5 && Collar.CollarId.Length > 5 &&
-                                                                           t.Platform.Substring(0, 6) == Collar.CollarId.Substring(0, 6)))
-                                              .Select(t => new
-                                                  {
-                                                      t.FileId,
-                                                      t.FileName,
-                                                      t.Status,
-                                                      t.CTN,
-                                                      t.Frequency,
-                                                      StartDate = t.TimeStamp,
-                                                  }).ToList();
+            var TpfList = views.AllTpfFileDatas.ToList();
+            TpfDataGridView.DataSource = TpfList.Where(t => t.CTN == Collar.CollarId ||
+                                                            (t.CTN.Length >= 6 &&
+                                                             t.CTN.Substring(0, 6) == Collar.CollarId))
+                                                .Select(t => new
+                                                    {
+                                                        t.FileId,
+                                                        t.FileName,
+                                                        t.Status,
+                                                        t.CTN,
+                                                        t.Frequency,
+                                                        StartDate = t.TimeStamp,
+                                                    }).ToList();
+            TpfDataGridView.Columns[5].HeaderText = "Start Date (UTC)";
         }
 
         private void ShowTpfFileDetails()
