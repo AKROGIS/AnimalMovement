@@ -5889,7 +5889,8 @@ BEGIN
         RETURN 1
     END
 
-    IF     @Key NOT IN ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format', 'parameter_file_format', 'wants_email', 'othervalidkeys...') --Add valid keys to this list
+    IF     @Key NOT IN ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format',
+                        'parameter_file_format', 'wants_email', 'ignore_ctn_suffix', 'othervalidkeys...') --Add valid keys to this list
        AND @Key NOT IN (select 'collar_model_' + CollarManufacturer from LookupCollarManufacturers)
     BEGIN
         DECLARE @message2 nvarchar(100) = 'Invalid key (' + @Key + ') for settings';

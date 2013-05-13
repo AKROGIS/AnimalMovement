@@ -17,6 +17,8 @@ namespace DataModel
         private const string ModelKey = "collar_model";
         private const string ManufacturerKey = "collar_manufacturer";
         private const string WantsEmailKey = "wants_email";
+        private const string IgnoreCtnSuffixKey = "ignore_ctn_suffix";
+
         private const string SystemEmailKey = "sa_email";
         private const string SystemEmailPasswordKey = "sa_email_password";
         private const string SystemDbaContact = "dba_contact";
@@ -89,6 +91,13 @@ namespace DataModel
             return (setting == null || setting != false.ToString(CultureInfo.InvariantCulture));
         }
 
+        public static bool GetIgnoreCtnSuffix()
+        {
+            //default is to get email, unless explicitly and correctly denied
+            string setting = GetUsersDefault(IgnoreCtnSuffixKey);
+            return (setting == null || setting != false.ToString(CultureInfo.InvariantCulture));
+        }
+
         #endregion
 
         #region setters
@@ -131,6 +140,11 @@ namespace DataModel
         public static void SetWantsEmail(bool wantsEmail)
         {
             SetUsersDefault(WantsEmailKey, wantsEmail.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public static void SetIgnoreCtnSuffix(bool ignoreCtnSuffix)
+        {
+            SetUsersDefault(IgnoreCtnSuffixKey, ignoreCtnSuffix.ToString(CultureInfo.InvariantCulture));
         }
 
         #endregion

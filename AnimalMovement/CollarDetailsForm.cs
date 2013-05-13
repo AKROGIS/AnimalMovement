@@ -54,6 +54,7 @@ namespace AnimalMovement
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            IgnoreSuffixCheckBox.Checked = Settings.GetIgnoreCtnSuffix();
             CollarTabControl.SelectedIndex = Properties.Settings.Default.CollarDetailsFormActiveTab;
             if (CollarTabControl.SelectedIndex == 0)
                 //if new index is zero, index changed event will not fire, so fire it manually
@@ -64,6 +65,7 @@ namespace AnimalMovement
         {
             base.OnFormClosed(e);
             Properties.Settings.Default.CollarDetailsFormActiveTab = CollarTabControl.SelectedIndex;
+            Settings.SetIgnoreCtnSuffix(IgnoreSuffixCheckBox.Checked);
         }
 
         private void CollarTabControl_SelectedIndexChanged(object sender, EventArgs e)
@@ -486,6 +488,12 @@ namespace AnimalMovement
             SetupParametersTab();
         }
 
+        private void IgnoreSuffixCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            TpfDataGridView.DataSource = null;
+            SetUpTpfTab();
+        }
+
         private void AddParameterButton_Click(object sender, EventArgs e)
         {
             var form = new AddCollarParametersForm(Collar);
@@ -559,11 +567,12 @@ namespace AnimalMovement
             if (Collar.CollarManufacturer != "Telonics" || Collar.CollarModel != "Gen4")
                 return;
             var views = new AnimalMovementViews();
-            var TpfList = views.AllTpfFileDatas.ToList();
-            TpfDataGridView.DataSource = TpfList.Where(t => t.CTN == Collar.CollarId ||
-                                                            (t.CTN.Length >= 6 &&
-                                                             t.CTN.Substring(0, 6) == Collar.CollarId))
-                                                .Select(t => new
+            var ignoreSuffix = IgnoreSuffixCheckBox.Checked;
+            var tpfList = views.AllTpfFileDatas.ToList();
+            tpfList = ignoreSuffix
+                          ? tpfList.Where(t => t.CTN.Length >= 6 && t.CTN.Substring(0, 6) == Collar.CollarId).ToList()
+                          : tpfList.Where(t => t.CTN == Collar.CollarId).ToList();
+            TpfDataGridView.DataSource = tpfList.Select(t => new
                                                     {
                                                         t.FileId,
                                                         t.FileName,

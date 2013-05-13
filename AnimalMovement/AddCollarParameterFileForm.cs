@@ -39,6 +39,17 @@ namespace AnimalMovement
 
         #region SetUp Form
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            IgnoreSuffixCheckBox.Checked = Settings.GetIgnoreCtnSuffix();
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            Settings.SetIgnoreCtnSuffix(IgnoreSuffixCheckBox.Checked);
+        }
         private void SetUpForm()
         {
             SetupOwnerList();

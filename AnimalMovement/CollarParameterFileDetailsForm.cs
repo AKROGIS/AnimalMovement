@@ -50,7 +50,18 @@ namespace AnimalMovement
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            FileTabControl_SelectedIndexChanged(null, null);
+            IgnoreSuffixCheckBox.Checked = Settings.GetIgnoreCtnSuffix();
+            FileTabControl.SelectedIndex = Properties.Settings.Default.CollarParameterFileDetailsFormActiveTab;
+            if (FileTabControl.SelectedIndex == 0)
+                //if new index is zero, index changed event will not fire, so fire it manually
+                FileTabControl_SelectedIndexChanged(null, null);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Properties.Settings.Default.CollarParameterFileDetailsFormActiveTab = FileTabControl.SelectedIndex;
+            Settings.SetIgnoreCtnSuffix(IgnoreSuffixCheckBox.Checked);
         }
 
         private void FileTabControl_SelectedIndexChanged(object sender, EventArgs e)

@@ -327,7 +327,7 @@
             this.ParameterFilesListBox.Location = new System.Drawing.Point(3, 3);
             this.ParameterFilesListBox.Name = "ParameterFilesListBox";
             this.ParameterFilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.ParameterFilesListBox.Size = new System.Drawing.Size(502, 279);
+            this.ParameterFilesListBox.Size = new System.Drawing.Size(502, 249);
             this.ParameterFilesListBox.TabIndex = 35;
             this.ParameterFilesListBox.SelectedIndexChanged += new System.EventHandler(this.ParameterFilesListBox_SelectedIndexChanged);
             this.ParameterFilesListBox.DoubleClick += new System.EventHandler(this.InfoParameterFileButton_Click);
@@ -339,7 +339,7 @@
             this.InfoParameterFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoParameterFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoParameterFileButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoParameterFileButton.Location = new System.Drawing.Point(58, 330);
+            this.InfoParameterFileButton.Location = new System.Drawing.Point(58, 258);
             this.InfoParameterFileButton.Name = "InfoParameterFileButton";
             this.InfoParameterFileButton.Size = new System.Drawing.Size(24, 24);
             this.InfoParameterFileButton.TabIndex = 38;
@@ -352,7 +352,7 @@
             this.DeleteParameterFilesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteParameterFilesButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteParameterFilesButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteParameterFilesButton.Location = new System.Drawing.Point(33, 330);
+            this.DeleteParameterFilesButton.Location = new System.Drawing.Point(33, 258);
             this.DeleteParameterFilesButton.Name = "DeleteParameterFilesButton";
             this.DeleteParameterFilesButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteParameterFilesButton.TabIndex = 37;
@@ -365,7 +365,7 @@
             this.AddParameterFileButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddParameterFileButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AddParameterFileButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddParameterFileButton.Location = new System.Drawing.Point(3, 330);
+            this.AddParameterFileButton.Location = new System.Drawing.Point(3, 258);
             this.AddParameterFileButton.Name = "AddParameterFileButton";
             this.AddParameterFileButton.Size = new System.Drawing.Size(24, 24);
             this.AddParameterFileButton.TabIndex = 36;
@@ -815,7 +815,7 @@
             this.AssistantsListBox.Location = new System.Drawing.Point(3, 6);
             this.AssistantsListBox.Name = "AssistantsListBox";
             this.AssistantsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.AssistantsListBox.Size = new System.Drawing.Size(502, 276);
+            this.AssistantsListBox.Size = new System.Drawing.Size(502, 246);
             this.AssistantsListBox.TabIndex = 14;
             this.AssistantsListBox.SelectedIndexChanged += new System.EventHandler(this.AssistantsListBox_SelectedIndexChanged);
             // 
@@ -824,7 +824,7 @@
             this.AddAssistantButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddAssistantButton.Enabled = false;
             this.AddAssistantButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
-            this.AddAssistantButton.Location = new System.Drawing.Point(3, 330);
+            this.AddAssistantButton.Location = new System.Drawing.Point(3, 258);
             this.AddAssistantButton.Name = "AddAssistantButton";
             this.AddAssistantButton.Size = new System.Drawing.Size(24, 24);
             this.AddAssistantButton.TabIndex = 15;
@@ -836,7 +836,7 @@
             this.DeleteAssistantButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteAssistantButton.Enabled = false;
             this.DeleteAssistantButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
-            this.DeleteAssistantButton.Location = new System.Drawing.Point(30, 330);
+            this.DeleteAssistantButton.Location = new System.Drawing.Point(30, 258);
             this.DeleteAssistantButton.Name = "DeleteAssistantButton";
             this.DeleteAssistantButton.Size = new System.Drawing.Size(24, 24);
             this.DeleteAssistantButton.TabIndex = 16;

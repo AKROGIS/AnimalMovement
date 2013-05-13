@@ -329,6 +329,7 @@ namespace AnimalMovement
                                                         t.Frequency,
                                                         StartDate = t.TimeStamp,
                                                     }).ToList();
+            ParametersDataGridView.Columns[5].HeaderText = "Start Date (UTC)";
         }
 
         private void ParameterFileChanged()

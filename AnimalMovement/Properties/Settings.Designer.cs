@@ -886,5 +886,17 @@ namespace AnimalMovement.Properties {
                 this["ArgosProgramDetailsFormActiveTab"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int CollarParameterFileDetailsFormActiveTab {
+            get {
+                return ((int)(this["CollarParameterFileDetailsFormActiveTab"]));
+            }
+            set {
+                this["CollarParameterFileDetailsFormActiveTab"] = value;
+            }
+        }
     }
 }
