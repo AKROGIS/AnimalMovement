@@ -48,119 +48,32 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarParameters](
-	[ParameterId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[FileId] [int] NULL,
-	[Gen3Period] [int] NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
- CONSTRAINT [PK_CollarParameters] PRIMARY KEY CLUSTERED 
-(
-	[ParameterId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[Location_Added] 
-	@Project NVARCHAR(255), 
-	@Animal  NVARCHAR(255), 
-	@Time    DATETIME2
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Deletes the fixes for a CollarFile
+--              Useful when changing status.
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFixes_Delete] 
+	@FileId int = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
-	
-	DECLARE
-		@PrevTime DATETIME2,
-		@NextTime DATETIME2;
-		
-	-- Typically an inserted location (new or updated) does not have any ajoining movements (it's new)
-	-- however, if this location is part of a larger operation, then a prior location may connect a movement
-	-- to this point.  We can safely delete any connected movements, before begining the standard process.
-	EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time
-	
-	SET @PrevTime = [dbo].[StartOfOverlappingMovement](@Project, @Animal, @Time);
-	SET @NextTime = [dbo].[EndOfMovement](@Project, @Animal, @PrevTime);
-	
-	EXEC [dbo].[Movement_Delete] @Project, @Animal, @PrevTime, @NextTime;
-	 
-	IF @PrevTime IS NULL
-	BEGIN
-		SET @PrevTime = [dbo].[PreviousLocationTime](@Project, @Animal, @Time);
-		SET @NextTime = [dbo].[NextLocationTime](@Project, @Animal, @Time);
-	END
-	
-	EXEC [dbo].[Movement_Insert] @Project, @Animal, @PrevTime, @Time; 
-	EXEC [dbo].[Movement_Insert] @Project, @Animal, @Time, @NextTime; 
+
+	-- This is not executed directly, only by CollarFile_Delete & CollarFile_UpdateStatus 
+
+	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
 END
 GO
-SET ANSI_NULLS ON
+CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
+RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
 GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[Location_Deleted] 
-	@Project NVARCHAR(255), 
-	@Animal  NVARCHAR(255), 
-	@Time    DATETIME2
+CREATE PROCEDURE [dbo].[Summerize]
+	@fileId [int]
 AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	DECLARE
-		@PrevTime DATETIME2,
-		@NextTime DATETIME2;
-	
-	SET @PrevTime = [dbo].[StartOfPriorConnectedMovement](@Project, @Animal, @Time);
-	SET @NextTime = [dbo].[EndOfFollowingConnectedMovement](@Project, @Animal, @Time);
-	
-	EXEC [dbo].[Movement_Delete] @Project, @Animal, @PrevTime, @Time; 
-	EXEC [dbo].[Movement_Delete] @Project, @Animal, @Time, @NextTime; 
-	EXEC [dbo].[Movement_Insert] @Project, @Animal, @PrevTime, @NextTime; 
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Locations](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
-	[Location] [geography] NOT NULL,
-	[FixId] [int] NOT NULL,
-	[Status] [char](1) NULL,
- CONSTRAINT [PK_Locations] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC,
-	[FixDate] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE UNIQUE NONCLUSTERED INDEX [IX_Locations_FixId] ON [dbo].[Locations] 
-(
-	[FixId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE SPATIAL INDEX [SIndex_Locations_Location] ON [dbo].[Locations] 
-(
-	[Location]
-)USING  GEOGRAPHY_GRID 
-WITH (
-GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
-CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
 GO
 SET ANSI_NULLS ON
 GO
@@ -203,141 +116,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[LookupGender](
-	[Sex] [varchar](7) NOT NULL,
- CONSTRAINT [PK_LookupSex] PRIMARY KEY CLUSTERED 
-(
-	[Sex] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupSpecies](
-	[Species] [varchar](32) NOT NULL,
- CONSTRAINT [PK_LookupSpecies] PRIMARY KEY CLUSTERED 
-(
-	[Species] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Animals](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[Species] [varchar](32) NULL,
-	[Gender] [varchar](7) NOT NULL,
-	[MortalityDate] [datetime2](7) NULL,
-	[GroupName] [nvarchar](500) NULL,
-	[Description] [nvarchar](2000) NULL,
- CONSTRAINT [PK_Animals] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[DoDateRangesOverlap] 
-(
-	@StartDate1		DATETIME2 = NULL, 
-	@EndDate1		DATETIME2 = NULL,
-	@StartDate2		DATETIME2 = NULL, 
-	@EndDate2		DATETIME2 = NULL
-)
-RETURNS BIT
-AS
-BEGIN
-	-- A StartDate of NULL means the begining of time
-	-- A EndDate of NULL means the ending of time
-	
-	-- Touching i.e. EndDate = StartDate WAS considered overlapping
-	-- At that instant in time, a collar for example would be on two animals
-	-- simultaneously, which violates reality and creates some ambiguity.
-	-- In reality, it is highly unlikely that we will get a fix at this exact instant, and
-	-- even if we did, then that fix would be applied to both animals.  No real problem.
-	-- Since user's are likely to be confused if they get an overlap error when they
-	-- stop and start different deployment on the same date (time = 00:00) I have
-	-- relaxed this requirement:
-	--      EndDate = StartDate IS NOT overlapping
-	
-	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
-	
-	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-	END
-	
-	IF @StartDate1 IS NOT NULL and @EndDate1 IS NOT NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 <= @StartDate1 OR @EndDate1 <= @StartDate2  RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-	END	
-
-	IF @StartDate1 IS NOT NULL and @EndDate1 IS NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			RETURN 1
-		END	
-	END
-	-- @StartDate1 IS NULL and @EndDate1 IS NULL, so we are guaranteed to overlap 
-	RETURN 1
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[LookupCollarManufacturers](
 	[CollarManufacturer] [varchar](16) NOT NULL,
 	[Name] [nvarchar](200) NULL,
@@ -350,160 +128,6 @@ CREATE TABLE [dbo].[LookupCollarManufacturers](
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarModels](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarModel] [varchar](24) NOT NULL,
- CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC,
-	[CollarModel] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Collars](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[CollarModel] [varchar](24) NOT NULL,
-	[Manager] [sysname] NOT NULL,
-	[Owner] [nvarchar](100) NULL,
-	[SerialNumber] [varchar](100) NULL,
-	[Frequency] [float] NULL,
-	[HasGps] [bit] NOT NULL,
-	[Notes] [nvarchar](max) NULL,
-	[DisposalDate] [datetime2](7) NULL,
- CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDeployments](
-	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[DeploymentDate] [datetime2](7) NOT NULL,
-	[RetrievalDate] [datetime2](7) NULL,
- CONSTRAINT [PK_CollarDeployments] PRIMARY KEY CLUSTERED 
-(
-	[DeploymentId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Animals] ON [dbo].[CollarDeployments] 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Collars] ON [dbo].[CollarDeployments] 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarFixes](
-	[FixId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[HiddenBy] [int] NULL,
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
-	[Lat] [float] NOT NULL,
-	[Lon] [float] NOT NULL,
- CONSTRAINT [PK_CollarFixes] PRIMARY KEY CLUSTERED 
-(
-	[FixId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_Collar] ON [dbo].[CollarFixes] 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_FileId] ON [dbo].[CollarFixes] 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_FixDate] ON [dbo].[CollarFixes] 
-(
-	[FixDate] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_HiddenBy] ON [dbo].[CollarFixes] 
-(
-	[HiddenBy] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Deletes the fixes for a CollarFile
---              Useful when changing status.
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFixes_Delete] 
-	@FileId int = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- This is not executed directly, only by CollarFile_Delete & CollarFile_UpdateStatus 
-
-	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
-END
-GO
-CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
-RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
-GO
-CREATE PROCEDURE [dbo].[Summerize]
-	@fileId [int]
-AS
-EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
 GO
 SET ANSI_NULLS ON
 GO
@@ -803,6 +427,360 @@ BEGIN
     -- do not process the parent, only the children ('B')
     
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarFixes](
+	[FixId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[HiddenBy] [int] NULL,
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[FixDate] [datetime2](7) NOT NULL,
+	[Lat] [float] NOT NULL,
+	[Lon] [float] NOT NULL,
+ CONSTRAINT [PK_CollarFixes] PRIMARY KEY CLUSTERED 
+(
+	[FixId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_Collar] ON [dbo].[CollarFixes] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_FileId] ON [dbo].[CollarFixes] 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_FixDate] ON [dbo].[CollarFixes] 
+(
+	[FixDate] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_HiddenBy] ON [dbo].[CollarFixes] 
+(
+	[HiddenBy] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarModels](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarModel] [varchar](24) NOT NULL,
+ CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarModel] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Location_Added] 
+	@Project NVARCHAR(255), 
+	@Animal  NVARCHAR(255), 
+	@Time    DATETIME2
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	DECLARE
+		@PrevTime DATETIME2,
+		@NextTime DATETIME2;
+		
+	-- Typically an inserted location (new or updated) does not have any ajoining movements (it's new)
+	-- however, if this location is part of a larger operation, then a prior location may connect a movement
+	-- to this point.  We can safely delete any connected movements, before begining the standard process.
+	EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time
+	
+	SET @PrevTime = [dbo].[StartOfOverlappingMovement](@Project, @Animal, @Time);
+	SET @NextTime = [dbo].[EndOfMovement](@Project, @Animal, @PrevTime);
+	
+	EXEC [dbo].[Movement_Delete] @Project, @Animal, @PrevTime, @NextTime;
+	 
+	IF @PrevTime IS NULL
+	BEGIN
+		SET @PrevTime = [dbo].[PreviousLocationTime](@Project, @Animal, @Time);
+		SET @NextTime = [dbo].[NextLocationTime](@Project, @Animal, @Time);
+	END
+	
+	EXEC [dbo].[Movement_Insert] @Project, @Animal, @PrevTime, @Time; 
+	EXEC [dbo].[Movement_Insert] @Project, @Animal, @Time, @NextTime; 
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Location_Deleted] 
+	@Project NVARCHAR(255), 
+	@Animal  NVARCHAR(255), 
+	@Time    DATETIME2
+AS
+BEGIN
+	SET NOCOUNT ON;
+	
+	DECLARE
+		@PrevTime DATETIME2,
+		@NextTime DATETIME2;
+	
+	SET @PrevTime = [dbo].[StartOfPriorConnectedMovement](@Project, @Animal, @Time);
+	SET @NextTime = [dbo].[EndOfFollowingConnectedMovement](@Project, @Animal, @Time);
+	
+	EXEC [dbo].[Movement_Delete] @Project, @Animal, @PrevTime, @Time; 
+	EXEC [dbo].[Movement_Delete] @Project, @Animal, @Time, @NextTime; 
+	EXEC [dbo].[Movement_Insert] @Project, @Animal, @PrevTime, @NextTime; 
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Locations](
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[FixDate] [datetime2](7) NOT NULL,
+	[Location] [geography] NOT NULL,
+	[FixId] [int] NOT NULL,
+	[Status] [char](1) NULL,
+ CONSTRAINT [PK_Locations] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC,
+	[FixDate] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Locations_FixId] ON [dbo].[Locations] 
+(
+	[FixId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE SPATIAL INDEX [SIndex_Locations_Location] ON [dbo].[Locations] 
+(
+	[Location]
+)USING  GEOGRAPHY_GRID 
+WITH (
+GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
+CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[DoDateRangesOverlap] 
+(
+	@StartDate1		DATETIME2 = NULL, 
+	@EndDate1		DATETIME2 = NULL,
+	@StartDate2		DATETIME2 = NULL, 
+	@EndDate2		DATETIME2 = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	-- A StartDate of NULL means the begining of time
+	-- A EndDate of NULL means the ending of time
+	
+	-- Touching i.e. EndDate = StartDate WAS considered overlapping
+	-- At that instant in time, a collar for example would be on two animals
+	-- simultaneously, which violates reality and creates some ambiguity.
+	-- In reality, it is highly unlikely that we will get a fix at this exact instant, and
+	-- even if we did, then that fix would be applied to both animals.  No real problem.
+	-- Since user's are likely to be confused if they get an overlap error when they
+	-- stop and start different deployment on the same date (time = 00:00) I have
+	-- relaxed this requirement:
+	--      EndDate = StartDate IS NOT overlapping
+	
+	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
+	
+	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+	END
+	
+	IF @StartDate1 IS NOT NULL and @EndDate1 IS NOT NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 <= @StartDate1 OR @EndDate1 <= @StartDate2  RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+	END	
+
+	IF @StartDate1 IS NOT NULL and @EndDate1 IS NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			RETURN 1
+		END	
+	END
+	-- @StartDate1 IS NULL and @EndDate1 IS NULL, so we are guaranteed to overlap 
+	RETURN 1
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupGender](
+	[Sex] [varchar](7) NOT NULL,
+ CONSTRAINT [PK_LookupSex] PRIMARY KEY CLUSTERED 
+(
+	[Sex] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupSpecies](
+	[Species] [varchar](32) NOT NULL,
+ CONSTRAINT [PK_LookupSpecies] PRIMARY KEY CLUSTERED 
+(
+	[Species] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Animals](
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[Species] [varchar](32) NULL,
+	[Gender] [varchar](7) NOT NULL,
+	[MortalityDate] [datetime2](7) NULL,
+	[GroupName] [nvarchar](500) NULL,
+	[Description] [nvarchar](2000) NULL,
+ CONSTRAINT [PK_Animals] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDeployments](
+	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[DeploymentDate] [datetime2](7) NOT NULL,
+	[RetrievalDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_CollarDeployments] PRIMARY KEY CLUSTERED 
+(
+	[DeploymentId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Animals] ON [dbo].[CollarDeployments] 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Collars] ON [dbo].[CollarDeployments] 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Collars](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[CollarModel] [varchar](24) NOT NULL,
+	[Manager] [sysname] NOT NULL,
+	[Owner] [nvarchar](100) NULL,
+	[SerialNumber] [varchar](100) NULL,
+	[Frequency] [float] NULL,
+	[HasGps] [bit] NOT NULL,
+	[Notes] [nvarchar](max) NULL,
+	[DisposalDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -1618,6 +1596,28 @@ CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeploy
 (
 	[PlatformId] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarParameters](
+	[ParameterId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[FileId] [int] NULL,
+	[Gen3Period] [int] NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_CollarParameters] PRIMARY KEY CLUSTERED 
+(
+	[ParameterId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -3331,6 +3331,120 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:      Regan Sarwas
+-- Create date: May 13, 2013
+-- Description: Validates the business rules for a new CollarParameter
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarParameterInsert] 
+   ON  [dbo].[CollarParameters] 
+   AFTER INSERT
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate Business Rules
+    -- 1. Ensure StartDate is before the EndDate
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+                WHERE I.EndDate <= I.StartDate  -- false if either is NULL
+              )
+    BEGIN
+        RAISERROR('The end of the parameter must occur after the start of the parameter.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- 2. Ensure the Deployment begins before the DisposalDate of the Collar
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+           INNER JOIN Collars AS C
+                   ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
+                WHERE C.DisposalDate < I.StartDate
+                   OR (I.StartDate IS NULL AND C.DisposalDate IS NOT NULL)
+              )
+    BEGIN
+        RAISERROR('The parameter must begin before the collar is disposed.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- 3. Ensure a Collar does not have multiple Parameters at the same time
+    -- We are checking each inserted parameter against all existing parameters, and all other inserted parameters 
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I1
+            LEFT JOIN inserted AS I2
+                   ON I1.CollarManufacturer = I2.CollarManufacturer AND I1.CollarId = I2.CollarId AND I1.ParameterId <> I2.ParameterId
+           INNER JOIN dbo.CollarParameters AS P
+                   ON P.CollarManufacturer = I1.CollarManufacturer AND P.CollarId = I1.CollarId AND P.ParameterId <> I1.ParameterId
+                WHERE dbo.DoDateRangesOverlap(P.StartDate, P.EndDate, I1.StartDate, I1.EndDate) = 1
+                   OR (I2.ParameterId IS NOT NULL AND
+                       dbo.DoDateRangesOverlap(I1.StartDate, I1.EndDate, I2.StartDate, I2.EndDate) = 1)
+              )
+    BEGIN
+        RAISERROR('Collars cannot have overlapping parameter dates.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- 4. Ensure that one and only one of FileId and Gen3Period are non-null
+    IF EXISTS (SELECT 1
+                 FROM inserted
+                WHERE (Gen3Period IS NULL AND FileId IS NULL) OR
+                      (Gen3Period IS NOT NULL AND FileId IS NOT NULL)
+              )
+    BEGIN
+        RAISERROR('One and only one of Gen3 period and parameter file must be provided.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- 5. Inactive parameter files cannot be linked to a collar
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+           INNER JOIN CollarParameterFiles AS F
+                   ON F.FileId = I.FileId
+                WHERE F.[Status] <> 'A'
+              )
+    BEGIN
+        RAISERROR('Inactive parameter files cannot be linked to a collar.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Process (partialy?) all files that might benefit from this parameter
+    -- We do not do the processing in the trigger, as it may require an external process
+    -- which would block the transaction and hold a lock that would slow processing.
+    -- Instead, we will monitor for changes that will trigger the external processing.
+
+    -- If a processed file had no issues, then do not reprocess.
+    --    This parameter is irrelevant to the file - the file had everything it when it was processed.
+    -- If a processed file had issues
+    --    without mentioning the collar, then it was unable to link the platform to a collar, so
+    --      this new information will not due any good.
+    --    with the collar in this parameter, then it was probably a missing parameter.
+    --      this file should be re-processed for the matching platfrom(s).  This can be done by
+    --      removing the issue.  The (file,platform) will then be recognized in need of re-processing.
+    -- If a file is unprocessed for some reason, then it is not in our perview to decide that it should
+    --   be processed, so we will skip it, even if it has transmissions for this platform. (The file should get
+    --   processed at some point in the future by the user or a scheduled task at which point the new parameter
+    --   will be considered.)
+
+    -- May be part of a batch insert (unlikely, and only by SA as all others must use SP)
+    -- Triggers always execute in the context of a transaction, so the following code is all or nothing.
+
+        DELETE A 
+          FROM inserted AS I
+    INNER JOIN ArgosFileProcessingIssues AS A
+            ON A.CollarManufacturer = I.CollarManufacturer AND A.CollarId = I.CollarId
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
 -- Create date: April 3, 2012
 -- Description: Add/Remove Locations when Deployment is updated
 -- =============================================
@@ -3954,10 +4068,10 @@ GO
 CREATE TRIGGER [dbo].[AfterArgosDeploymentInsert] 
    ON  [dbo].[ArgosDeployments] 
    AFTER INSERT
-AS 
+AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     -- Validate Business Rules
     -- 1. Ensure StartDate is before the EndDate
     IF EXISTS (SELECT 1
@@ -4015,7 +4129,7 @@ BEGIN
         ROLLBACK TRANSACTION;
         RETURN
     END
-    
+
     -- 4. Ensure a Collar is not carrying multiple ArgosPlatforms at the same time
     -- We are checking each inserted deployment against all existing deployments, and all other new deployments 
     IF EXISTS (SELECT 1
@@ -4033,49 +4147,39 @@ BEGIN
         ROLLBACK TRANSACTION;
         RETURN
     END
-        
-    -- Partialy process all files that might benefit from this deployment
-    
-    -- If a processed file had no issues with this platform, then do not reprocess.
-    --    There are no transmissions in that file by this platform were covered with an existing deployment
-    -- If a processed file has issues for this platform, then reprocess the (file,platform).
-    --    There are unprocessed transmissions in that file for this platform hopefully this deployment will cover them
+
+
+    -- Process (partialy?) all files that might benefit from this deployment
+    -- We do not do the processing in the trigger, as it may require an external process
+    -- which would block the transaction and hold open a lock that would slow other operations.
+    -- Instead, we will monitor for changes that will trigger the external processing.
+
+    -- If a processed file had no issues, then do not reprocess.
+    --    This deployment is irrelevant to the file - the file had everything it when it was processed.
+    -- If a processed file had issues
+    --    without mentioning the argos platform, then it was unable to link the problem to a platform, so
+    --      this new information will not due any good.
+    --    with the platform in this deployment, then it was probably a missing deployment.
+    --      this file should be re-processed for the matching platform(s).  This can be done by
+    --      removing the issue.  The (file,platform) will then be recognized in need of re-processing.
     -- If a file is unprocessed for some reason, then it is not in our perview to decide that it should
     --   be processed, so we will skip it, even if it has transmissions for this platform. (The file should get
-    --   processed at some point in the future by the user or a scheduled task at which point the new deployment
+    --   processed at some point in the future by the user or a scheduled task at which point the new parameter
     --   will be considered.)
-    
+
     -- May be part of a batch insert (unlikely, and only by SA as all others must use SP)
     -- Triggers always execute in the context of a transaction, so the following code is all or nothing.
 
-    DECLARE @FileId int;
-    DECLARE @PlatformId varchar(8);
-    DECLARE insert_deployment_cursor CURSOR FOR 
-          -- select all files (by platform) with processing issues for this platform
-             SELECT A.FileId, A.PlatformId
-               FROM inserted AS I
-         INNER JOIN ArgosFilePlatformDates AS D
-                 ON D.PlatformId = I.PlatformId
-         INNER JOIN ArgosFileProcessingIssues AS A
-                 ON A.PlatformId = D.PlatformId AND A.FileId = D.FileId
-              WHERE dbo.DoDateRangesOverlap(D.FirstTransmission, D.LastTransmission, I.StartDate, I.EndDate) = 1
-        
-    OPEN insert_deployment_cursor;
+        DELETE A 
+          FROM inserted AS I
+    INNER JOIN ArgosFileProcessingIssues AS A
+            ON A.PlatformId = I.PlatformId
 
-    FETCH NEXT FROM insert_deployment_cursor INTO @FileId, @PlatformId;
 
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
-        FETCH NEXT FROM insert_deployment_cursor INTO @FileId, @PlatformId;
-    END
-    CLOSE insert_deployment_cursor;
-    DEALLOCATE insert_deployment_cursor;
-    
-    
     -- If this deployment is for a non-gps collar,
     -- then E & F files with transmission that overlapping the platform in this deployment
-    -- should have collarfixes inserted for this just this deployment
+    -- should have collarfixes inserted for this just deployed collar/platform
+    DECLARE @FileId INT;
     DECLARE @DeploymentId INT;
     DECLARE insert_deployment_cursor2 CURSOR FOR 
              SELECT A.FileId, I.DeploymentId
@@ -4089,7 +4193,7 @@ BEGIN
               WHERE C.HasGps = 0
                 AND (F.Format = 'E' OR F.Format = 'F')
                 AND dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, I.StartDate, I.EndDate) = 1
-        
+
     OPEN insert_deployment_cursor2;
 
     FETCH NEXT FROM insert_deployment_cursor2 INTO @FileId, @DeploymentId;
@@ -4101,7 +4205,7 @@ BEGIN
     END
     CLOSE insert_deployment_cursor2;
     DEALLOCATE insert_deployment_cursor2;
-     
+
 END
 GO
 SET ANSI_NULLS ON
