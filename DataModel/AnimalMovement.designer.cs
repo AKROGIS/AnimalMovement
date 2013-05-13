@@ -51,8 +51,6 @@ namespace DataModel
     partial void InsertLookupCollarModel(LookupCollarModel instance);
     partial void UpdateLookupCollarModel(LookupCollarModel instance);
     partial void DeleteLookupCollarModel(LookupCollarModel instance);
-    partial void UpdateArgosFileProcessingIssue(ArgosFileProcessingIssue instance);
-    partial void DeleteArgosFileProcessingIssue(ArgosFileProcessingIssue instance);
     partial void InsertLookupFileStatus(LookupFileStatus instance);
     partial void UpdateLookupFileStatus(LookupFileStatus instance);
     partial void DeleteLookupFileStatus(LookupFileStatus instance);
@@ -67,6 +65,8 @@ namespace DataModel
     partial void InsertArgosFilePlatformDate(ArgosFilePlatformDate instance);
     partial void UpdateArgosFilePlatformDate(ArgosFilePlatformDate instance);
     partial void DeleteArgosFilePlatformDate(ArgosFilePlatformDate instance);
+    partial void UpdateArgosFileProcessingIssue(ArgosFileProcessingIssue instance);
+    partial void DeleteArgosFileProcessingIssue(ArgosFileProcessingIssue instance);
     #endregion
 		
 		public AnimalMovementDataContext() : 
@@ -195,14 +195,6 @@ namespace DataModel
 			}
 		}
 		
-		public System.Data.Linq.Table<ArgosFileProcessingIssue> ArgosFileProcessingIssues
-		{
-			get
-			{
-				return this.GetTable<ArgosFileProcessingIssue>();
-			}
-		}
-		
 		public System.Data.Linq.Table<LookupFileStatus> LookupFileStatus
 		{
 			get
@@ -288,6 +280,14 @@ namespace DataModel
 			get
 			{
 				return this.GetTable<ArgosFilePlatformDate>();
+			}
+		}
+		
+		public System.Data.Linq.Table<ArgosFileProcessingIssue> ArgosFileProcessingIssues
+		{
+			get
+			{
+				return this.GetTable<ArgosFileProcessingIssue>();
 			}
 		}
 		
@@ -383,11 +383,6 @@ namespace DataModel
 		{
 			CollarParameterFile original = ((CollarParameterFile)(CollarParameterFiles.GetOriginalEntityState(obj)));
 			this.CollarParameterFile_Delete(((System.Nullable<int>)(original.FileId)));
-		}
-		
-		private void InsertArgosFileProcessingIssue(ArgosFileProcessingIssue obj)
-		{
-			this.ArgosFileProcessingIssues_Insert(((System.Nullable<int>)(obj.FileId)), obj.Issue, obj.PlatformId, obj.CollarManufacturer, obj.CollarId);
 		}
 		
 		private void InsertArgosDownload(ArgosDownload obj)
@@ -511,6 +506,11 @@ namespace DataModel
 			this.ProjectInvestigatorAssistant_Delete(original.ProjectInvestigator, original.Assistant);
 		}
 		
+		private void InsertArgosFileProcessingIssue(ArgosFileProcessingIssue obj)
+		{
+			this.ArgosFileProcessingIssues_Insert(((System.Nullable<int>)(obj.FileId)), obj.Issue, obj.PlatformId, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<System.DateTime>)(obj.FirstTransmission)), ((System.Nullable<System.DateTime>)(obj.LastTransmission)));
+		}
+		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Delete")]
 		public int Animal_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId)
 		{
@@ -613,13 +613,6 @@ namespace DataModel
 		public int CollarDeployment_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentId", DbType="Int")] System.Nullable<int> deploymentId)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), deploymentId);
-			return ((int)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosFileProcessingIssues_Insert")]
-		public int ArgosFileProcessingIssues_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Issue", DbType="NVarChar(MAX)")] string issue, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformId", DbType="NVarChar(255)")] string platformId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, issue, platformId, collarManufacturer, collarId);
 			return ((int)(result.ReturnValue));
 		}
 		
@@ -800,6 +793,13 @@ namespace DataModel
 		public int CollarDeployment_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentId", DbType="Int")] System.Nullable<int> deploymentId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DeploymentDate", DbType="DateTime2")] System.Nullable<System.DateTime> deploymentDate, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RetrievalDate", DbType="DateTime2")] System.Nullable<System.DateTime> retrievalDate)
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), deploymentId, projectId, animalId, collarManufacturer, collarId, deploymentDate, retrievalDate);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.ArgosFileProcessingIssues_Insert")]
+		public int ArgosFileProcessingIssues_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="FileId", DbType="Int")] System.Nullable<int> fileId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Issue", DbType="NVarChar(MAX)")] string issue, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="PlatformId", DbType="NVarChar(255)")] string platformId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="FirstTransmission", DbType="DateTime2")] System.Nullable<System.DateTime> firstTransmission, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="LastTransmission", DbType="DateTime2")] System.Nullable<System.DateTime> lastTransmission)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, issue, platformId, collarManufacturer, collarId, firstTransmission, lastTransmission);
 			return ((int)(result.ReturnValue));
 		}
 	}
@@ -3704,317 +3704,6 @@ namespace DataModel
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosFileProcessingIssues")]
-	public partial class ArgosFileProcessingIssue : INotifyPropertyChanging, INotifyPropertyChanged
-	{
-		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _IssueId;
-		
-		private int _FileId;
-		
-		private string _Issue;
-		
-		private string _PlatformId;
-		
-		private string _CollarManufacturer;
-		
-		private string _CollarId;
-		
-		private EntityRef<ArgosPlatform> _ArgosPlatform;
-		
-		private EntityRef<CollarFile> _CollarFile;
-		
-		private EntityRef<Collar> _Collar;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIssueIdChanging(int value);
-    partial void OnIssueIdChanged();
-    partial void OnFileIdChanging(int value);
-    partial void OnFileIdChanged();
-    partial void OnIssueChanging(string value);
-    partial void OnIssueChanged();
-    partial void OnPlatformIdChanging(string value);
-    partial void OnPlatformIdChanged();
-    partial void OnCollarManufacturerChanging(string value);
-    partial void OnCollarManufacturerChanged();
-    partial void OnCollarIdChanging(string value);
-    partial void OnCollarIdChanged();
-    #endregion
-		
-		public ArgosFileProcessingIssue()
-		{
-			this._ArgosPlatform = default(EntityRef<ArgosPlatform>);
-			this._CollarFile = default(EntityRef<CollarFile>);
-			this._Collar = default(EntityRef<Collar>);
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IssueId", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int IssueId
-		{
-			get
-			{
-				return this._IssueId;
-			}
-			set
-			{
-				if ((this._IssueId != value))
-				{
-					this.OnIssueIdChanging(value);
-					this.SendPropertyChanging();
-					this._IssueId = value;
-					this.SendPropertyChanged("IssueId");
-					this.OnIssueIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL")]
-		public int FileId
-		{
-			get
-			{
-				return this._FileId;
-			}
-			set
-			{
-				if ((this._FileId != value))
-				{
-					if (this._CollarFile.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnFileIdChanging(value);
-					this.SendPropertyChanging();
-					this._FileId = value;
-					this.SendPropertyChanged("FileId");
-					this.OnFileIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Issue", DbType="NVarChar(MAX) NOT NULL", CanBeNull=false)]
-		public string Issue
-		{
-			get
-			{
-				return this._Issue;
-			}
-			set
-			{
-				if ((this._Issue != value))
-				{
-					this.OnIssueChanging(value);
-					this.SendPropertyChanging();
-					this._Issue = value;
-					this.SendPropertyChanged("Issue");
-					this.OnIssueChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PlatformId", DbType="VarChar(8)")]
-		public string PlatformId
-		{
-			get
-			{
-				return this._PlatformId;
-			}
-			set
-			{
-				if ((this._PlatformId != value))
-				{
-					if (this._ArgosPlatform.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnPlatformIdChanging(value);
-					this.SendPropertyChanging();
-					this._PlatformId = value;
-					this.SendPropertyChanged("PlatformId");
-					this.OnPlatformIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16)")]
-		public string CollarManufacturer
-		{
-			get
-			{
-				return this._CollarManufacturer;
-			}
-			set
-			{
-				if ((this._CollarManufacturer != value))
-				{
-					if (this._Collar.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCollarManufacturerChanging(value);
-					this.SendPropertyChanging();
-					this._CollarManufacturer = value;
-					this.SendPropertyChanged("CollarManufacturer");
-					this.OnCollarManufacturerChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16)")]
-		public string CollarId
-		{
-			get
-			{
-				return this._CollarId;
-			}
-			set
-			{
-				if ((this._CollarId != value))
-				{
-					if (this._Collar.HasLoadedOrAssignedValue)
-					{
-						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
-					}
-					this.OnCollarIdChanging(value);
-					this.SendPropertyChanging();
-					this._CollarId = value;
-					this.SendPropertyChanged("CollarId");
-					this.OnCollarIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosFileProcessingIssue", Storage="_ArgosPlatform", ThisKey="PlatformId", OtherKey="PlatformId", IsForeignKey=true, DeleteRule="CASCADE")]
-		public ArgosPlatform ArgosPlatform
-		{
-			get
-			{
-				return this._ArgosPlatform.Entity;
-			}
-			set
-			{
-				ArgosPlatform previousValue = this._ArgosPlatform.Entity;
-				if (((previousValue != value) 
-							|| (this._ArgosPlatform.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._ArgosPlatform.Entity = null;
-						previousValue.ArgosFileProcessingIssues.Remove(this);
-					}
-					this._ArgosPlatform.Entity = value;
-					if ((value != null))
-					{
-						value.ArgosFileProcessingIssues.Add(this);
-						this._PlatformId = value.PlatformId;
-					}
-					else
-					{
-						this._PlatformId = default(string);
-					}
-					this.SendPropertyChanged("ArgosPlatform");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosFileProcessingIssue", Storage="_CollarFile", ThisKey="FileId", OtherKey="FileId", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
-		public CollarFile CollarFile
-		{
-			get
-			{
-				return this._CollarFile.Entity;
-			}
-			set
-			{
-				CollarFile previousValue = this._CollarFile.Entity;
-				if (((previousValue != value) 
-							|| (this._CollarFile.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._CollarFile.Entity = null;
-						previousValue.ArgosFileProcessingIssues.Remove(this);
-					}
-					this._CollarFile.Entity = value;
-					if ((value != null))
-					{
-						value.ArgosFileProcessingIssues.Add(this);
-						this._FileId = value.FileId;
-					}
-					else
-					{
-						this._FileId = default(int);
-					}
-					this.SendPropertyChanged("CollarFile");
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_ArgosFileProcessingIssue", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true, DeleteRule="CASCADE")]
-		public Collar Collar
-		{
-			get
-			{
-				return this._Collar.Entity;
-			}
-			set
-			{
-				Collar previousValue = this._Collar.Entity;
-				if (((previousValue != value) 
-							|| (this._Collar.HasLoadedOrAssignedValue == false)))
-				{
-					this.SendPropertyChanging();
-					if ((previousValue != null))
-					{
-						this._Collar.Entity = null;
-						previousValue.ArgosFileProcessingIssues.Remove(this);
-					}
-					this._Collar.Entity = value;
-					if ((value != null))
-					{
-						value.ArgosFileProcessingIssues.Add(this);
-						this._CollarManufacturer = value.CollarManufacturer;
-						this._CollarId = value.CollarId;
-					}
-					else
-					{
-						this._CollarManufacturer = default(string);
-						this._CollarId = default(string);
-					}
-					this.SendPropertyChanged("Collar");
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.LookupFileStatus")]
 	public partial class LookupFileStatus : INotifyPropertyChanging, INotifyPropertyChanged
 	{
@@ -4502,13 +4191,13 @@ namespace DataModel
 		
 		private System.Nullable<System.DateTime> _DisposalDate;
 		
-		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
+		private EntitySet<ArgosDownload> _ArgosDownloads;
 		
 		private EntitySet<ArgosDeployment> _ArgosDeployments;
 		
 		private EntitySet<ArgosFilePlatformDate> _ArgosFilePlatformDates;
 		
-		private EntitySet<ArgosDownload> _ArgosDownloads;
+		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
 		
 		private EntityRef<ArgosProgram> _ArgosProgram;
 		
@@ -4530,10 +4219,10 @@ namespace DataModel
 		
 		public ArgosPlatform()
 		{
-			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
+			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
 			this._ArgosDeployments = new EntitySet<ArgosDeployment>(new Action<ArgosDeployment>(this.attach_ArgosDeployments), new Action<ArgosDeployment>(this.detach_ArgosDeployments));
 			this._ArgosFilePlatformDates = new EntitySet<ArgosFilePlatformDate>(new Action<ArgosFilePlatformDate>(this.attach_ArgosFilePlatformDates), new Action<ArgosFilePlatformDate>(this.detach_ArgosFilePlatformDates));
-			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
+			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
 			this._ArgosProgram = default(EntityRef<ArgosProgram>);
 			OnCreated();
 		}
@@ -4642,16 +4331,16 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="PlatformId", OtherKey="PlatformId")]
-		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosDownload", Storage="_ArgosDownloads", ThisKey="PlatformId", OtherKey="PlatformId")]
+		public EntitySet<ArgosDownload> ArgosDownloads
 		{
 			get
 			{
-				return this._ArgosFileProcessingIssues;
+				return this._ArgosDownloads;
 			}
 			set
 			{
-				this._ArgosFileProcessingIssues.Assign(value);
+				this._ArgosDownloads.Assign(value);
 			}
 		}
 		
@@ -4681,16 +4370,16 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosDownload", Storage="_ArgosDownloads", ThisKey="PlatformId", OtherKey="PlatformId")]
-		public EntitySet<ArgosDownload> ArgosDownloads
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="PlatformId", OtherKey="PlatformId")]
+		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
 		{
 			get
 			{
-				return this._ArgosDownloads;
+				return this._ArgosFileProcessingIssues;
 			}
 			set
 			{
-				this._ArgosDownloads.Assign(value);
+				this._ArgosFileProcessingIssues.Assign(value);
 			}
 		}
 		
@@ -4748,13 +4437,13 @@ namespace DataModel
 			}
 		}
 		
-		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		private void attach_ArgosDownloads(ArgosDownload entity)
 		{
 			this.SendPropertyChanging();
 			entity.ArgosPlatform = this;
 		}
 		
-		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		private void detach_ArgosDownloads(ArgosDownload entity)
 		{
 			this.SendPropertyChanging();
 			entity.ArgosPlatform = null;
@@ -4784,13 +4473,13 @@ namespace DataModel
 			entity.ArgosPlatform = null;
 		}
 		
-		private void attach_ArgosDownloads(ArgosDownload entity)
+		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
 		{
 			this.SendPropertyChanging();
 			entity.ArgosPlatform = this;
 		}
 		
-		private void detach_ArgosDownloads(ArgosDownload entity)
+		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
 		{
 			this.SendPropertyChanging();
 			entity.ArgosPlatform = null;
@@ -4821,9 +4510,9 @@ namespace DataModel
 		
 		private System.Nullable<bool> _Active;
 		
-		private EntitySet<ArgosPlatform> _ArgosPlatforms;
-		
 		private EntitySet<ArgosDownload> _ArgosDownloads;
+		
+		private EntitySet<ArgosPlatform> _ArgosPlatforms;
 		
 		private EntityRef<ProjectInvestigator> _ProjectInvestigator;
 		
@@ -4853,8 +4542,8 @@ namespace DataModel
 		
 		public ArgosProgram()
 		{
-			this._ArgosPlatforms = new EntitySet<ArgosPlatform>(new Action<ArgosPlatform>(this.attach_ArgosPlatforms), new Action<ArgosPlatform>(this.detach_ArgosPlatforms));
 			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
+			this._ArgosPlatforms = new EntitySet<ArgosPlatform>(new Action<ArgosPlatform>(this.attach_ArgosPlatforms), new Action<ArgosPlatform>(this.detach_ArgosPlatforms));
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
 			OnCreated();
 		}
@@ -5043,19 +4732,6 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosPlatform", Storage="_ArgosPlatforms", ThisKey="ProgramId", OtherKey="ProgramId")]
-		public EntitySet<ArgosPlatform> ArgosPlatforms
-		{
-			get
-			{
-				return this._ArgosPlatforms;
-			}
-			set
-			{
-				this._ArgosPlatforms.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosDownload", Storage="_ArgosDownloads", ThisKey="ProgramId", OtherKey="ProgramId")]
 		public EntitySet<ArgosDownload> ArgosDownloads
 		{
@@ -5066,6 +4742,19 @@ namespace DataModel
 			set
 			{
 				this._ArgosDownloads.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosProgram_ArgosPlatform", Storage="_ArgosPlatforms", ThisKey="ProgramId", OtherKey="ProgramId")]
+		public EntitySet<ArgosPlatform> ArgosPlatforms
+		{
+			get
+			{
+				return this._ArgosPlatforms;
+			}
+			set
+			{
+				this._ArgosPlatforms.Assign(value);
 			}
 		}
 		
@@ -5123,18 +4812,6 @@ namespace DataModel
 			}
 		}
 		
-		private void attach_ArgosPlatforms(ArgosPlatform entity)
-		{
-			this.SendPropertyChanging();
-			entity.ArgosProgram = this;
-		}
-		
-		private void detach_ArgosPlatforms(ArgosPlatform entity)
-		{
-			this.SendPropertyChanging();
-			entity.ArgosProgram = null;
-		}
-		
 		private void attach_ArgosDownloads(ArgosDownload entity)
 		{
 			this.SendPropertyChanging();
@@ -5142,6 +4819,18 @@ namespace DataModel
 		}
 		
 		private void detach_ArgosDownloads(ArgosDownload entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosProgram = null;
+		}
+		
+		private void attach_ArgosPlatforms(ArgosPlatform entity)
+		{
+			this.SendPropertyChanging();
+			entity.ArgosProgram = this;
+		}
+		
+		private void detach_ArgosPlatforms(ArgosPlatform entity)
 		{
 			this.SendPropertyChanging();
 			entity.ArgosProgram = null;
@@ -6033,13 +5722,13 @@ namespace DataModel
 		
 		private EntitySet<CollarFix> _CollarFixes;
 		
-		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
-		
 		private EntitySet<ArgosDownload> _ArgosDownloads;
 		
 		private EntitySet<CollarFile> _CollarFiles;
 		
 		private EntitySet<ArgosFilePlatformDate> _ArgosFilePlatformDates;
+		
+		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
 		
 		private EntityRef<ArgosDeployment> _ArgosDeployment;
 		
@@ -6096,10 +5785,10 @@ namespace DataModel
 		public CollarFile()
 		{
 			this._CollarFixes = new EntitySet<CollarFix>(new Action<CollarFix>(this.attach_CollarFixes), new Action<CollarFix>(this.detach_CollarFixes));
-			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
 			this._ArgosDownloads = new EntitySet<ArgosDownload>(new Action<ArgosDownload>(this.attach_ArgosDownloads), new Action<ArgosDownload>(this.detach_ArgosDownloads));
 			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
 			this._ArgosFilePlatformDates = new EntitySet<ArgosFilePlatformDate>(new Action<ArgosFilePlatformDate>(this.attach_ArgosFilePlatformDates), new Action<ArgosFilePlatformDate>(this.detach_ArgosFilePlatformDates));
+			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
 			this._ArgosDeployment = default(EntityRef<ArgosDeployment>);
 			this._CollarFile1 = default(EntityRef<CollarFile>);
 			this._CollarParameter = default(EntityRef<CollarParameter>);
@@ -6460,19 +6149,6 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="FileId", OtherKey="FileId")]
-		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
-		{
-			get
-			{
-				return this._ArgosFileProcessingIssues;
-			}
-			set
-			{
-				this._ArgosFileProcessingIssues.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosDownload", Storage="_ArgosDownloads", ThisKey="FileId", OtherKey="FileId")]
 		public EntitySet<ArgosDownload> ArgosDownloads
 		{
@@ -6509,6 +6185,19 @@ namespace DataModel
 			set
 			{
 				this._ArgosFilePlatformDates.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="FileId", OtherKey="FileId")]
+		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
+		{
+			get
+			{
+				return this._ArgosFileProcessingIssues;
+			}
+			set
+			{
+				this._ArgosFileProcessingIssues.Assign(value);
 			}
 		}
 		
@@ -6818,18 +6507,6 @@ namespace DataModel
 			entity.CollarFile = null;
 		}
 		
-		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile = this;
-		}
-		
-		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
-		{
-			this.SendPropertyChanging();
-			entity.CollarFile = null;
-		}
-		
 		private void attach_ArgosDownloads(ArgosDownload entity)
 		{
 			this.SendPropertyChanging();
@@ -6861,6 +6538,18 @@ namespace DataModel
 		}
 		
 		private void detach_ArgosFilePlatformDates(ArgosFilePlatformDate entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile = null;
+		}
+		
+		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		{
+			this.SendPropertyChanging();
+			entity.CollarFile = this;
+		}
+		
+		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
 		{
 			this.SendPropertyChanging();
 			entity.CollarFile = null;
@@ -6897,13 +6586,13 @@ namespace DataModel
 		
 		private EntitySet<CollarDeployment> _CollarDeployments;
 		
-		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
-		
 		private EntitySet<CollarParameter> _CollarParameters;
 		
 		private EntitySet<ArgosDeployment> _ArgosDeployments;
 		
 		private EntitySet<CollarFile> _CollarFiles;
+		
+		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
 		
 		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
 		
@@ -6941,10 +6630,10 @@ namespace DataModel
 		{
 			this._CollarFixes = new EntitySet<CollarFix>(new Action<CollarFix>(this.attach_CollarFixes), new Action<CollarFix>(this.detach_CollarFixes));
 			this._CollarDeployments = new EntitySet<CollarDeployment>(new Action<CollarDeployment>(this.attach_CollarDeployments), new Action<CollarDeployment>(this.detach_CollarDeployments));
-			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
 			this._CollarParameters = new EntitySet<CollarParameter>(new Action<CollarParameter>(this.attach_CollarParameters), new Action<CollarParameter>(this.detach_CollarParameters));
 			this._ArgosDeployments = new EntitySet<ArgosDeployment>(new Action<ArgosDeployment>(this.attach_ArgosDeployments), new Action<ArgosDeployment>(this.detach_ArgosDeployments));
 			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
+			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
 			this._LookupCollarManufacturer = default(EntityRef<LookupCollarManufacturer>);
 			this._LookupCollarModel = default(EntityRef<LookupCollarModel>);
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
@@ -7189,19 +6878,6 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
-		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
-		{
-			get
-			{
-				return this._ArgosFileProcessingIssues;
-			}
-			set
-			{
-				this._ArgosFileProcessingIssues.Assign(value);
-			}
-		}
-		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarParameter", Storage="_CollarParameters", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
 		public EntitySet<CollarParameter> CollarParameters
 		{
@@ -7238,6 +6914,19 @@ namespace DataModel
 			set
 			{
 				this._CollarFiles.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_ArgosFileProcessingIssue", Storage="_ArgosFileProcessingIssues", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
+		public EntitySet<ArgosFileProcessingIssue> ArgosFileProcessingIssues
+		{
+			get
+			{
+				return this._ArgosFileProcessingIssues;
+			}
+			set
+			{
+				this._ArgosFileProcessingIssues.Assign(value);
 			}
 		}
 		
@@ -7389,18 +7078,6 @@ namespace DataModel
 			entity.Collar = null;
 		}
 		
-		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
-		{
-			this.SendPropertyChanging();
-			entity.Collar = this;
-		}
-		
-		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
-		{
-			this.SendPropertyChanging();
-			entity.Collar = null;
-		}
-		
 		private void attach_CollarParameters(CollarParameter entity)
 		{
 			this.SendPropertyChanging();
@@ -7432,6 +7109,18 @@ namespace DataModel
 		}
 		
 		private void detach_CollarFiles(CollarFile entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = null;
+		}
+		
+		private void attach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = this;
+		}
+		
+		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
 		{
 			this.SendPropertyChanging();
 			entity.Collar = null;
@@ -7773,6 +7462,365 @@ namespace DataModel
 					if ((value != null))
 					{
 						value.ArgosFilePlatformDates.Add(this);
+						this._PlatformId = value.PlatformId;
+					}
+					else
+					{
+						this._PlatformId = default(string);
+					}
+					this.SendPropertyChanged("ArgosPlatform");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ArgosFileProcessingIssues")]
+	public partial class ArgosFileProcessingIssue : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _IssueId;
+		
+		private int _FileId;
+		
+		private string _Issue;
+		
+		private string _PlatformId;
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarId;
+		
+		private System.Nullable<System.DateTime> _FirstTransmission;
+		
+		private System.Nullable<System.DateTime> _LastTransmission;
+		
+		private EntityRef<CollarFile> _CollarFile;
+		
+		private EntityRef<Collar> _Collar;
+		
+		private EntityRef<ArgosPlatform> _ArgosPlatform;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIssueIdChanging(int value);
+    partial void OnIssueIdChanged();
+    partial void OnFileIdChanging(int value);
+    partial void OnFileIdChanged();
+    partial void OnIssueChanging(string value);
+    partial void OnIssueChanged();
+    partial void OnPlatformIdChanging(string value);
+    partial void OnPlatformIdChanged();
+    partial void OnCollarManufacturerChanging(string value);
+    partial void OnCollarManufacturerChanged();
+    partial void OnCollarIdChanging(string value);
+    partial void OnCollarIdChanged();
+    partial void OnFirstTransmissionChanging(System.Nullable<System.DateTime> value);
+    partial void OnFirstTransmissionChanged();
+    partial void OnLastTransmissionChanging(System.Nullable<System.DateTime> value);
+    partial void OnLastTransmissionChanged();
+    #endregion
+		
+		public ArgosFileProcessingIssue()
+		{
+			this._CollarFile = default(EntityRef<CollarFile>);
+			this._Collar = default(EntityRef<Collar>);
+			this._ArgosPlatform = default(EntityRef<ArgosPlatform>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IssueId", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int IssueId
+		{
+			get
+			{
+				return this._IssueId;
+			}
+			set
+			{
+				if ((this._IssueId != value))
+				{
+					this.OnIssueIdChanging(value);
+					this.SendPropertyChanging();
+					this._IssueId = value;
+					this.SendPropertyChanged("IssueId");
+					this.OnIssueIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FileId", DbType="Int NOT NULL")]
+		public int FileId
+		{
+			get
+			{
+				return this._FileId;
+			}
+			set
+			{
+				if ((this._FileId != value))
+				{
+					if (this._CollarFile.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnFileIdChanging(value);
+					this.SendPropertyChanging();
+					this._FileId = value;
+					this.SendPropertyChanged("FileId");
+					this.OnFileIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Issue", DbType="NVarChar(MAX) NOT NULL", CanBeNull=false)]
+		public string Issue
+		{
+			get
+			{
+				return this._Issue;
+			}
+			set
+			{
+				if ((this._Issue != value))
+				{
+					this.OnIssueChanging(value);
+					this.SendPropertyChanging();
+					this._Issue = value;
+					this.SendPropertyChanged("Issue");
+					this.OnIssueChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PlatformId", DbType="VarChar(8)")]
+		public string PlatformId
+		{
+			get
+			{
+				return this._PlatformId;
+			}
+			set
+			{
+				if ((this._PlatformId != value))
+				{
+					if (this._ArgosPlatform.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnPlatformIdChanging(value);
+					this.SendPropertyChanging();
+					this._PlatformId = value;
+					this.SendPropertyChanged("PlatformId");
+					this.OnPlatformIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16)")]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarManufacturerChanging(value);
+					this.SendPropertyChanging();
+					this._CollarManufacturer = value;
+					this.SendPropertyChanged("CollarManufacturer");
+					this.OnCollarManufacturerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16)")]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarIdChanging(value);
+					this.SendPropertyChanging();
+					this._CollarId = value;
+					this.SendPropertyChanged("CollarId");
+					this.OnCollarIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_FirstTransmission", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> FirstTransmission
+		{
+			get
+			{
+				return this._FirstTransmission;
+			}
+			set
+			{
+				if ((this._FirstTransmission != value))
+				{
+					this.OnFirstTransmissionChanging(value);
+					this.SendPropertyChanging();
+					this._FirstTransmission = value;
+					this.SendPropertyChanged("FirstTransmission");
+					this.OnFirstTransmissionChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LastTransmission", DbType="DateTime2")]
+		public System.Nullable<System.DateTime> LastTransmission
+		{
+			get
+			{
+				return this._LastTransmission;
+			}
+			set
+			{
+				if ((this._LastTransmission != value))
+				{
+					this.OnLastTransmissionChanging(value);
+					this.SendPropertyChanging();
+					this._LastTransmission = value;
+					this.SendPropertyChanged("LastTransmission");
+					this.OnLastTransmissionChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="CollarFile_ArgosFileProcessingIssue", Storage="_CollarFile", ThisKey="FileId", OtherKey="FileId", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
+		public CollarFile CollarFile
+		{
+			get
+			{
+				return this._CollarFile.Entity;
+			}
+			set
+			{
+				CollarFile previousValue = this._CollarFile.Entity;
+				if (((previousValue != value) 
+							|| (this._CollarFile.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._CollarFile.Entity = null;
+						previousValue.ArgosFileProcessingIssues.Remove(this);
+					}
+					this._CollarFile.Entity = value;
+					if ((value != null))
+					{
+						value.ArgosFileProcessingIssues.Add(this);
+						this._FileId = value.FileId;
+					}
+					else
+					{
+						this._FileId = default(int);
+					}
+					this.SendPropertyChanged("CollarFile");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_ArgosFileProcessingIssue", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true, DeleteRule="CASCADE")]
+		public Collar Collar
+		{
+			get
+			{
+				return this._Collar.Entity;
+			}
+			set
+			{
+				Collar previousValue = this._Collar.Entity;
+				if (((previousValue != value) 
+							|| (this._Collar.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Collar.Entity = null;
+						previousValue.ArgosFileProcessingIssues.Remove(this);
+					}
+					this._Collar.Entity = value;
+					if ((value != null))
+					{
+						value.ArgosFileProcessingIssues.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+						this._CollarId = value.CollarId;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+						this._CollarId = default(string);
+					}
+					this.SendPropertyChanged("Collar");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="ArgosPlatform_ArgosFileProcessingIssue", Storage="_ArgosPlatform", ThisKey="PlatformId", OtherKey="PlatformId", IsForeignKey=true)]
+		public ArgosPlatform ArgosPlatform
+		{
+			get
+			{
+				return this._ArgosPlatform.Entity;
+			}
+			set
+			{
+				ArgosPlatform previousValue = this._ArgosPlatform.Entity;
+				if (((previousValue != value) 
+							|| (this._ArgosPlatform.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._ArgosPlatform.Entity = null;
+						previousValue.ArgosFileProcessingIssues.Remove(this);
+					}
+					this._ArgosPlatform.Entity = value;
+					if ((value != null))
+					{
+						value.ArgosFileProcessingIssues.Add(this);
 						this._PlatformId = value.PlatformId;
 					}
 					else

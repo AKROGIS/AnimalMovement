@@ -1308,6 +1308,8 @@ CREATE TABLE [dbo].[ArgosFileProcessingIssues](
 	[PlatformId] [varchar](8) NULL,
 	[CollarManufacturer] [varchar](16) NULL,
 	[CollarId] [varchar](16) NULL,
+	[FirstTransmission] [datetime2](7) NULL,
+	[LastTransmission] [datetime2](7) NULL,
  CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
 (
 	[IssueId] ASC
@@ -3351,13 +3353,12 @@ BEGIN
         RETURN
     END
 
-    -- 2. Ensure the Deployment begins before the DisposalDate of the Collar
+    -- 2. Ensure the Parameter begins before the DisposalDate of the Collar
     IF EXISTS (SELECT 1
                  FROM inserted AS I
            INNER JOIN Collars AS C
                    ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
                 WHERE C.DisposalDate < I.StartDate
-                   OR (I.StartDate IS NULL AND C.DisposalDate IS NOT NULL)
               )
     BEGIN
         RAISERROR('The parameter must begin before the collar is disposed.', 18, 0)
@@ -4082,30 +4083,28 @@ BEGIN
         RETURN
     END
 
-    -- 2a. Ensure both Dates are before the DisposalDate of the Collar
+    -- 2a. Ensure start date is before the DisposalDate of the Collar
     IF EXISTS (SELECT 1
                  FROM inserted AS I
            INNER JOIN Collars AS C
                    ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
-                WHERE C.DisposalDate < I.EndDate
-                   OR (I.EndDate IS NULL AND C.DisposalDate IS NOT NULL)
+                WHERE C.DisposalDate < I.StartDate
               )
     BEGIN
-        RAISERROR('The deployment must end before the collar is disposed.', 18, 0)
+        RAISERROR('The deployment must start before the collar is disposed.', 18, 0)
         ROLLBACK TRANSACTION;
         RETURN
     END
 
-    -- 2b. Ensure both Dates are before the DisposalDate of the ArgosPlatform
+    -- 2b. Ensure start is before the DisposalDate of the ArgosPlatform
     IF EXISTS (SELECT 1
                  FROM inserted AS I
            INNER JOIN ArgosPlatforms AS P
                    ON P.PlatformId = I.PlatformId
-                WHERE P.DisposalDate < I.EndDate
-                   OR (I.EndDate IS NULL AND P.DisposalDate IS NOT NULL)
+                WHERE P.DisposalDate < I.StartDate
               )
     BEGIN
-        RAISERROR('The deployment must end before the Argos platfrom is disposed.', 18, 0)
+        RAISERROR('The deployment must start before the Argos platfrom is disposed.', 18, 0)
         ROLLBACK TRANSACTION;
         RETURN
     END
@@ -4374,10 +4373,12 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[ArgosFileProcessingIssues_Insert] 
 	@FileId				INT,
-	@Issue				NVARCHAR(max), 
-	@PlatformId			NVARCHAR(255) = NULL, 
+	@Issue				NVARCHAR(max),
+	@PlatformId			NVARCHAR(255) = NULL,
 	@CollarManufacturer NVARCHAR(255) = NULL,
-	@CollarId			NVARCHAR(255) = NULL 
+	@CollarId			NVARCHAR(255) = NULL,
+	@FirstTransmission  DATETIME2(7)  = NULL,
+	@LastTransmission   DATETIME2(7)  = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -4396,8 +4397,8 @@ BEGIN
 
 	-- All other verification is handled by primary/foreign key and column constraints.
 	INSERT INTO [dbo].[ArgosFileProcessingIssues]
-				([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
-		 VALUES (@FileId,  @Issue,  @PlatformId,  @CollarManufacturer,  @CollarId)
+				([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId], [FirstTransmission], [LastTransmission])
+		 VALUES (@FileId,  @Issue,  @PlatformId,  @CollarManufacturer,  @CollarId,  @FirstTransmission,  @LastTransmission)
 END
 GO
 SET ANSI_NULLS ON

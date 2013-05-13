@@ -170,21 +170,21 @@ namespace FileLibrary
             {
                 var msg = String.Format("No Collar for ArgosId {0} from {1:g} to {2:g}",
                                         platformId, first, last);
-                LogIssueForFile(file.FileId, msg, platformId);
+                LogIssueForFile(file.FileId, msg, platformId, null, null, first, last);
                 return;
             }
             if (parameterSets[0].StartDate != null && first < parameterSets[0].StartDate)
             {
                 var msg = String.Format("No Collar for ArgosId {0} from {1:g} to {2:g}",
                                         platformId, first, parameterSets[0].StartDate);
-                LogIssueForFile(file.FileId, msg, platformId);
+                LogIssueForFile(file.FileId, msg, platformId, null, null, first, parameterSets[0].StartDate);
             }
             int lastIndex = parameterSets.Count - 1;
             if (parameterSets[lastIndex].EndDate != null && parameterSets[lastIndex].EndDate < last)
             {
                 var msg = String.Format("No Collar for ArgosId {0} from {1:g} to {2:g}",
                                         platformId, parameterSets[lastIndex].EndDate, last);
-                LogIssueForFile(file.FileId, msg, platformId);
+                LogIssueForFile(file.FileId, msg, platformId, null, null, parameterSets[lastIndex].EndDate, last);
             }
             foreach (var parameterSet in parameterSets)
             {
@@ -196,7 +196,7 @@ namespace FileLibrary
                     var end = parameterSet.EndDate ?? last;
                     var msg = String.Format("No Telonics Parameters for Collar {0}/{3} from {1:g} to {2:g}",
                                             parameterSet.CollarManufacturer, start, end, parameterSet.CollarId);
-                    LogIssueForFile(file.FileId, msg, platformId, parameterSet.CollarManufacturer, parameterSet.CollarId);
+                    LogIssueForFile(file.FileId, msg, platformId, parameterSet.CollarManufacturer, parameterSet.CollarId, start, end);
                     continue;
                 }
                 try
@@ -210,7 +210,7 @@ namespace FileLibrary
                         ex.Message, parameterSet.PlatformId, first, last,
                         parameterSet.CollarManufacturer, parameterSet.CollarId);
                     LogIssueForFile(file.FileId, message, parameterSet.PlatformId, parameterSet.CollarManufacturer,
-                                    parameterSet.CollarId);
+                                    parameterSet.CollarId, first, last);
                 }
             }
             LogGeneralMessage("  Finished processing transmissions");
@@ -377,7 +377,8 @@ namespace FileLibrary
         #region Logging
 
         private static void LogIssueForFile(int fileid, string message, string platform = null, string collarMfgr = null,
-                                            string collarId = null)
+                                            string collarId = null, DateTime? firstTransmission = null,
+                                            DateTime? lastTransmission = null)
         {
             if (Properties.Settings.Default.LogErrorsToConsole)
                 Console.WriteLine(message);
@@ -397,7 +398,9 @@ namespace FileLibrary
                     Issue = message,
                     PlatformId = platform,
                     CollarManufacturer = collarMfgr,
-                    CollarId = collarId
+                    CollarId = collarId,
+                    FirstTransmission = firstTransmission,
+                    LastTransmission = lastTransmission
                 };
             var database = new AnimalMovementDataContext();
             database.ArgosFileProcessingIssues.InsertOnSubmit(issue);

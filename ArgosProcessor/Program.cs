@@ -124,7 +124,7 @@ namespace ArgosProcessor
             }
             var db = new AnimalMovementDataContext();
             db.ArgosFileProcessingIssues_Insert(file.FileId, ex.Message, platform == null ? null : platform.PlatformId,
-                                                null, null);
+                                                null, null, null, null);
         }
 
         private static bool ClearCollarFile(string arg)
