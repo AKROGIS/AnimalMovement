@@ -1460,119 +1460,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[ProjectEditors](
-	[ProjectId] [varchar](16) NOT NULL,
-	[Editor] [sysname] NOT NULL,
- CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[Editor] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Settings](
-	[Username] [sysname] NOT NULL,
-	[Key] [nvarchar](30) NOT NULL,
-	[Value] [nvarchar](500) NULL,
- CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
-(
-	[Username] ASC,
-	[Key] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 22, 2013
---              Description: Processes only the transmission for a single platform in a file.
---              This may be called by the Argos Processor library by a client not on the server
---              It will call the Argos Processor library on the server.
---              Ignore any failures.  If this really needs to happen, then it will be caught when
---              the Argos Processor runs as a scheduled on the server.
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
-    @FileId INT,
-    @PlatformId VARCHAR(255)
-
-WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
-
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Make sure we have a suitable FileId
-	DECLARE @ProjectId nvarchar(255);
-	DECLARE @Owner sysname;
-	DECLARE @Uploader sysname;
-	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
-	  FROM CollarFiles AS C
-	  JOIN ArgosFilePlatformDates AS D
-	    ON D.FileId = C.FileId
-	 WHERE C.FileId = @FileId AND D.PlatformId = @PlatformId
-	IF @ProjectId IS NULL AND @Owner IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Validate permission for this operation	
-	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
-	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
-	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
-	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
-       AND NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-	BEGIN
-		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must be the owner ('+ISNULL(@Owner,'<NULL>')+'), or have uploaded the file, or be an editor on this project ('+ISNULL(@ProjectId,'<NULL>')+') to process the collar file.';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-	
-
-	-- Clear any (if any) prior processing results
-	-- This will ensure that the database is setup to respond to a query for all
-	-- files needing partial processing, should the xp_cmdshell not work. 
-	EXEC dbo.ArgosFile_UnProcessPlatform @FileId, @PlatformId
- 
-	-- Run the External command
-	DECLARE @exe nvarchar (255);
-	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
-	IF @exe IS NULL
-		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
-	DECLARE @cmd nvarchar(200) = '"' + @exe + '" /f:' + CONVERT(NVARCHAR(10),@FileId) + ' /p:' + @PlatformId;
-    BEGIN TRY
-		EXEC xp_cmdshell @cmd
-    END TRY
-    BEGIN CATCH
-		SELECT 1 -- Do nothing, we tried, we failed, hopefully the ArgosProcesor is running as a scheduled task.
-    END CATCH
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ArgosDeployments](
 	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[PlatformId] [varchar](8) NOT NULL,
@@ -3315,6 +3202,21 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[Settings](
+	[Username] [sysname] NOT NULL,
+	[Key] [nvarchar](30) NOT NULL,
+	[Value] [nvarchar](500) NULL,
+ CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
+(
+	[Username] ASC,
+	[Key] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[LookupQueryLayerServers](
 	[Location] [nvarchar](128) NOT NULL,
 	[Connection] [nvarchar](255) NOT NULL,
@@ -3923,6 +3825,14 @@ BEGIN
     SET NOCOUNT ON;
 
     -- Validate Business Rules
+    -- 0. Deny updating the ParameterId
+    IF UPDATE(DeploymentId)
+    BEGIN
+        RAISERROR('The primary key (DeploymnentId) cannot be changed.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+    
     -- 1. Ensure StartDate is before the EndDate
     IF EXISTS (SELECT 1
                  FROM inserted AS I
@@ -4029,232 +3939,75 @@ BEGIN
     -- May be part of a batch update (happens with a cascading update or when the SA bypasses the SP)
     -- Triggers always execute in the context of a transaction, so the following code is all or nothing.
     -- to keep the logic manageble, I will create a cursor to handle each deployment separately.
-    
-    DECLARE @FileId int;
-    DECLARE @DeploymentId int;
-    DECLARE @PlatformId varchar(255);
-    DECLARE @OldPlatform varchar(255), @NewPlatform varchar(255);
-    DECLARE @OldMfgr varchar(255), @NewMfgr varchar(255);
-    DECLARE @OldCollar varchar(255), @NewCollar varchar(255);
-    DECLARE @OldStart datetime2(7), @NewStart datetime2(7);
-    DECLARE @OldEnd datetime2(7), @NewEnd datetime2(7);
-    DECLARE update_deployment_cursor CURSOR FOR 
-          -- get the new and old values of the deployment
-             SELECT I.DeploymentId,
-                    D.PlatformId, I.PlatformId, D.CollarManufacturer, I.CollarManufacturer,
-                    D.CollarId, I.CollarId, D.StartDate, I.StartDate, D.EndDate, I.EndDate
-               FROM inserted AS I
-               JOIN deleted AS D
-                 ON I.DeploymentId = D.DeploymentId
-        
-    OPEN update_deployment_cursor;
 
-    FETCH NEXT FROM update_deployment_cursor INTO @DeploymentId,@OldPlatform,@NewPlatform,@OldMfgr,@NewMfgr,@OldCollar,@NewCollar,@OldStart,@NewStart,@OldEnd,@NewEnd
-
-    WHILE @@FETCH_STATUS = 0
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+                 JOIN deleted AS D
+                   ON D.DeploymentId = I.DeploymentId
+                WHERE I.CollarId <> D.CollarId
+                   OR I.CollarManufacturer <> D.CollarManufacturer
+                   OR I.PlatformId <> D.PlatformId
+               )
     BEGIN
-        IF (@OldPlatform = @NewPlatform AND @OldMfgr = @NewMfgr AND @OldCollar = @NewCollar)
-        -- only the dates have changes
-        BEGIN
-            -- End Shrunk
-            IF ((@NewEnd IS NOT NULL AND @OldEnd IS NULL) OR @NewEnd < @OldEnd)
-            BEGIN
-                -- Create a processing issue for:
-                --  any parent files of files created with this deployment with transmission outside the new date range
-                INSERT INTO [dbo].[ArgosFileProcessingIssues]
-                            ([FileId], [Issue], [PlatformId])
-                     SELECT P.FileId, 'No Collar for Argos Platform from ' + 
-                            CONVERT(varchar(20), @newEnd, 20) + ' to ' + CONVERT(varchar(20), LastTransmission, 20), PlatformId
-                       FROM CollarFiles AS C
-                 INNER JOIN CollarFiles AS P
-                         ON P.FileId = C.ParentFileId
-                 INNER JOIN ArgosFilePlatformDates AS S
-                         ON S.FileId = P.FileId
-                      WHERE C.ArgosDeploymentId = @DeploymentId
-                        AND S.PlatformId = @OldPlatform
-                        AND @newEnd < LastTransmission
-            END
-            -- Start Shrunk
-            IF ((@NewStart IS NOT NULL AND @OldStart IS NULL) OR @OldStart < @NewStart)
-            BEGIN
-                -- Create a processing issue for:
-                --  any parent files of files created with this deployment with transmission outside the new date range
-                INSERT INTO [dbo].[ArgosFileProcessingIssues]
-                            ([FileId], [Issue], [PlatformId])
-                     SELECT P.FileId, 'No Collar for Argos Platform from ' + 
-                            CONVERT(varchar(20), FirstTransmission, 20) + ' to ' + CONVERT(varchar(20), @newStart, 20), PlatformId
-                       FROM CollarFiles AS C
-                 INNER JOIN CollarFiles AS P
-                         ON P.FileId = C.ParentFileId
-                 INNER JOIN ArgosFilePlatformDates AS S
-                         ON S.FileId = P.FileId
-                      WHERE C.ArgosDeploymentId = @DeploymentId
-                        AND S.PlatformId = @OldPlatform
-                        AND FirstTransmission < @newStart
-            END
-            -- End Grew
-            IF ((@OldEnd IS NOT NULL AND @NewEnd IS NULL) OR @OldEnd < @NewEnd)
-            BEGIN
-                -- Process files with processing issues for this platform, and with transmissions in the new part of the date range
-                DECLARE end_grew_update_deployment_cursor CURSOR FOR 
-                      -- select all files (by platform) with processing issues for this platform
-                         SELECT P.FileId, P.PlatformId
-                           FROM ArgosFileProcessingIssues AS P
-                     INNER JOIN ArgosFilePlatformDates AS D
-                             ON P.PlatformId = D.PlatformId AND P.FileId = D.FileId
-                          WHERE P.PlatformId = @OldPlatform
-                            AND dbo.DoDateRangesOverlap(D.FirstTransmission, D.LastTransmission, @OldEnd, @NewEnd) = 1
-                    
-                OPEN end_grew_update_deployment_cursor;
-
-                FETCH NEXT FROM end_grew_update_deployment_cursor INTO @FileId, @PlatformId;
-
-                WHILE @@FETCH_STATUS = 0
-                BEGIN
-                    EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
-                    FETCH NEXT FROM end_grew_update_deployment_cursor INTO @FileId, @PlatformId;
-                END
-                CLOSE end_grew_update_deployment_cursor;
-                DEALLOCATE end_grew_update_deployment_cursor;
-            END
-            -- Start Grew
-            IF ((@OldStart IS NOT NULL AND @NewStart IS NULL) OR @NewStart < @OldStart)
-            BEGIN
-                -- Process files with processing issues for this platform, and with transmissions in the new part of the date range
-                DECLARE start_grew_update_deployment_cursor CURSOR FOR 
-                      -- select all files (by platform) with processing issues for this platform
-                         SELECT P.FileId, P.PlatformId
-                           FROM ArgosFileProcessingIssues AS P
-                     INNER JOIN ArgosFilePlatformDates AS D
-                             ON P.PlatformId = D.PlatformId AND P.FileId = D.FileId
-                          WHERE P.PlatformId = @OldPlatform
-                            AND dbo.DoDateRangesOverlap(D.FirstTransmission, D.LastTransmission, @NewStart, @OldStart) = 1
-                    
-                OPEN start_grew_update_deployment_cursor;
-
-                FETCH NEXT FROM start_grew_update_deployment_cursor INTO @FileId, @PlatformId;
-
-                WHILE @@FETCH_STATUS = 0
-                BEGIN
-                    EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
-                    FETCH NEXT FROM start_grew_update_deployment_cursor INTO @FileId, @PlatformId;
-                END
-                CLOSE start_grew_update_deployment_cursor;
-                DEALLOCATE start_grew_update_deployment_cursor;
-            END
-        END  
-        ELSE
-        BEGIN
-            IF (@OldPlatform = @NewPlatform)
-            BEGIN
-                -- only the collar has changed; find all the collar files and update them
-                -- I need a cursor, because changing the collar of an active file is a multi-step process
-                DECLARE update_collar_deployment_cursor CURSOR FOR 
-                      -- find the result files from the old collar and the platform
-                         SELECT FileId
-                           FROM CollarFiles
-                          WHERE ArgosDeploymentId = @DeploymentId
-                   
-                OPEN update_collar_deployment_cursor;
-
-                FETCH NEXT FROM update_collar_deployment_cursor INTO @FileId;
-
-                WHILE @@FETCH_STATUS = 0
-                BEGIN
-                    IF EXISTS (SELECT 1 FROM CollarFiles WHERE [Status] = 'I' AND FileId = @FileId)
-                        UPDATE CollarFiles SET CollarManufacturer = @NewMfgr, CollarId = @NewCollar WHERE FileId = @FileId
-                    ELSE
-                    BEGIN
-                        -- I must do this in several steps, as we can't change the Collar of an Active file 
-                        UPDATE CollarFiles SET [Status] = 'I' WHERE FileId = @FileId
-                        UPDATE CollarFiles SET CollarManufacturer = @NewMfgr, CollarId = @NewCollar WHERE FileId = @FileId
-                        UPDATE CollarFiles SET [Status] = 'A' WHERE FileId = @FileId
-                    END
-                    FETCH NEXT FROM update_collar_deployment_cursor INTO @FileId;
-                END
-                CLOSE update_collar_deployment_cursor;
-                DEALLOCATE update_collar_deployment_cursor;
-            END
-            ELSE
-            BEGIN
-                --Platform has changed. Use delete/insert procedure
-                -- This should match the delete/insert triggers (see it for comments)
-                --Delete:
-                DELETE C
-                  FROM CollarFiles AS C
-                  JOIN deleted AS D
-                    ON D.DeploymentId = C.ArgosDeploymentId
-
-                --Insert:
-                DECLARE insert_platform_update_deployment_cursor CURSOR FOR 
-                      -- select all files (by platform) with processing issues for this platform
-                         SELECT A.FileId, A.PlatformId
-                           FROM inserted AS I
-                     INNER JOIN ArgosFilePlatformDates AS D
-                             ON D.PlatformId = I.PlatformId
-                     INNER JOIN ArgosFileProcessingIssues AS A
-                             ON A.PlatformId = D.PlatformId AND A.FileId = D.FileId
-                          WHERE dbo.DoDateRangesOverlap(D.FirstTransmission, D.LastTransmission, I.StartDate, I.EndDate) = 1
-                    
-                OPEN insert_platform_update_deployment_cursor;
-
-                FETCH NEXT FROM insert_platform_update_deployment_cursor INTO @FileId, @PlatformId;
-
-                WHILE @@FETCH_STATUS = 0
-                BEGIN
-                    EXEC dbo.ArgosFile_ProcessPlatform @FileId, @PlatformId
-                    FETCH NEXT FROM insert_platform_update_deployment_cursor INTO @FileId, @PlatformId;
-                END
-                CLOSE insert_platform_update_deployment_cursor;
-                DEALLOCATE insert_platform_update_deployment_cursor;
-     
-            END
-        END 
-        FETCH NEXT FROM update_deployment_cursor INTO @DeploymentId,@OldPlatform,@NewPlatform,@OldMfgr,@NewMfgr,@OldCollar,@NewCollar,@OldStart,@NewStart,@OldEnd,@NewEnd
+        -- Brute Force Solution:
+        -- 1. Delete => Delete files derived from the old deployment
+            DELETE F 
+              FROM inserted AS I
+        INNER JOIN CollarFiles AS F
+                ON F.ArgosDeploymentId = I.DeploymentId
+        -- 2. Insert => Delete Processing Issues for the new platform
+            DELETE A 
+              FROM inserted AS I
+        INNER JOIN ArgosFileProcessingIssues AS A
+                ON A.PlatformId = I.PlatformId
     END
-    CLOSE update_deployment_cursor;
-    DEALLOCATE update_deployment_cursor;
-    
-    -- We need to deal with the E&F files with non-GPS collars.  We do not anticipate a lot of non-gps collars, so I
-    -- will handle this a brute force delete and insert.
-    -- This should match the delete/insert triggers (see it for comments)
-    -- Delete:
-    DELETE F
-      FROM CollarFixes AS F
-      JOIN Collars AS C
-        ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
-      JOIN deleted as D
-        ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-     WHERE C.HasGps = 0
-       AND (F.FixDate <= D.EndDate OR D.EndDate IS NULL)
-       AND (D.StartDate <= F.FixDate  OR D.StartDate IS NULL)
-    
-    -- Insert:
-    DECLARE insert_platform_update_deployment_cursor2 CURSOR FOR 
-             SELECT A.FileId, I.DeploymentId
-               FROM inserted AS I
-         INNER JOIN Collars AS C
-                 ON C.CollarManufacturer = I.CollarManufacturer AND C.CollarId = I.CollarId
-         INNER JOIN ArgosFilePlatformDates AS A
-                 ON A.PlatformId = I.PlatformId
-         INNER JOIN CollarFiles AS F
-                 ON F.FileId = A.FileId
-              WHERE C.HasGps = 0
-                AND (F.Format = 'E' OR F.Format = 'F')
-                AND dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, I.StartDate, I.EndDate) = 1
-        
-    OPEN insert_platform_update_deployment_cursor2;
-
-    FETCH NEXT FROM insert_platform_update_deployment_cursor2 INTO @FileId, @DeploymentId;
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        EXEC dbo.CollarFixes_Insert @FileId, @DeploymentId
-        FETCH NEXT FROM insert_deployment_cursor2 INTO @FileId, @DeploymentId;
+    ELSE BEGIN
+        -- Only the dates have changed
+        -- Date range shrunk - Create a new processing issue to explain any missed data
+            -- Start Shrunk to after first transmission
+            INSERT INTO [dbo].[ArgosFileProcessingIssues]
+                        ([FileId], [Issue], [PlatformId])
+                 SELECT P.FileId, 'No deployment for Argos Id from ' + 
+                        CONVERT(varchar(20), S.FirstTransmission, 20) + ' to ' + CONVERT(varchar(20), I.StartDate, 20),
+                        I.PlatformId
+                   FROM CollarFiles AS C
+             INNER JOIN CollarFiles AS P
+                     ON P.FileId = C.ParentFileId
+             INNER JOIN inserted AS I
+                     ON I.DeploymentId = C.CollarParameterId
+             INNER JOIN deleted AS D
+                     ON D.DeploymentId = I.DeploymentId
+             INNER JOIN ArgosFilePlatformDates AS S
+                     ON S.FileId = P.FileId
+                  WHERE (D.StartDate IS NULL AND I.StartDate IS NOT NULL) OR (D.StartDate < I.StartDate) 
+                    AND S.FirstTransmission < I.StartDate
+            -- End Shrunk before last transmission
+            INSERT INTO [dbo].[ArgosFileProcessingIssues]
+                        ([FileId], [Issue], [PlatformId])
+                 SELECT P.FileId, 'No deployment for Argos Id from ' + 
+                        CONVERT(varchar(20), I.EndDate, 20) + ' to ' + CONVERT(varchar(20), S.LastTransmission, 20),
+                        I.PlatformId
+                   FROM CollarFiles AS C
+             INNER JOIN CollarFiles AS P
+                     ON P.FileId = C.ParentFileId
+             INNER JOIN inserted AS I
+                     ON I.DeploymentId = C.ArgosDeploymentId
+             INNER JOIN deleted AS D
+                     ON D.DeploymentId = I.DeploymentId
+             INNER JOIN ArgosFilePlatformDates AS S
+                     ON S.FileId = P.FileId
+                  WHERE (D.EndDate IS NULL AND I.EndDate IS NOT NULL) OR (I.EndDate < D.EndDate) 
+                    AND I.EndDate < S.LastTransmission
+        -- Date range increased - Remove overlapping processing issue to trigger a re-process
+                 DELETE P
+                   FROM ArgosFileProcessingIssues AS P
+             INNER JOIN inserted AS I
+                     ON I.PlatformId = P.PlatformId
+             INNER JOIN deleted AS D
+                     ON D.DeploymentId = I.DeploymentId
+                  WHERE dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, I.StartDate, D.StartDate) = 1
+                     OR dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, D.EndDate, I.EndDate) = 1
     END
-    CLOSE insert_platform_update_deployment_cursor2;
-    DEALLOCATE insert_platform_update_deployment_cursor2;
-
 END
 GO
 SET ANSI_NULLS ON
@@ -6215,6 +5968,24 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProjectEditors](
+	[ProjectId] [varchar](16) NOT NULL,
+	[Editor] [sysname] NOT NULL,
+ CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[Editor] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
@@ -6535,6 +6306,86 @@ BEGIN
                          VALUES (@FileName,  @ProjectId,  @Owner,  @CollarManufacturer,  @CollarId,  @Format,  @Status,  @Contents,  @ParentFileId,  @ArgosDeploymentId,  @CollarParameterId)
     SET @FileId = SCOPE_IDENTITY();
     SELECT @UploadDate = [UploadDate], @UserName = [UserName], @Sha1Hash = [Sha1Hash] FROM dbo.CollarFiles WHERE FileId = @FileId
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 22, 2013
+--              Description: Processes only the transmission for a single platform in a file.
+--              This may be called by the Argos Processor library by a client not on the server
+--              It will call the Argos Processor library on the server.
+--              Ignore any failures.  If this really needs to happen, then it will be caught when
+--              the Argos Processor runs as a scheduled on the server.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
+    @FileId INT,
+    @PlatformId VARCHAR(255)
+
+WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Make sure we have a suitable FileId
+	DECLARE @ProjectId nvarchar(255);
+	DECLARE @Owner sysname;
+	DECLARE @Uploader sysname;
+	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
+	  FROM CollarFiles AS C
+	  JOIN ArgosFilePlatformDates AS D
+	    ON D.FileId = C.FileId
+	 WHERE C.FileId = @FileId AND D.PlatformId = @PlatformId
+	IF @ProjectId IS NULL AND @Owner IS NULL
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation	
+	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
+	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
+	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
+	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
+       AND NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
+	BEGIN
+		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must be the owner ('+ISNULL(@Owner,'<NULL>')+'), or have uploaded the file, or be an editor on this project ('+ISNULL(@ProjectId,'<NULL>')+') to process the collar file.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+	
+
+	-- Clear any (if any) prior processing results
+	-- This will ensure that the database is setup to respond to a query for all
+	-- files needing partial processing, should the xp_cmdshell not work. 
+	EXEC dbo.ArgosFile_UnProcessPlatform @FileId, @PlatformId
+ 
+	-- Run the External command
+	DECLARE @exe nvarchar (255);
+	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
+	IF @exe IS NULL
+		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
+	DECLARE @cmd nvarchar(200) = '"' + @exe + '" /f:' + CONVERT(NVARCHAR(10),@FileId) + ' /p:' + @PlatformId;
+    BEGIN TRY
+		EXEC xp_cmdshell @cmd
+    END TRY
+    BEGIN CATCH
+		SELECT 1 -- Do nothing, we tried, we failed, hopefully the ArgosProcesor is running as a scheduled task.
+    END CATCH
 END
 GO
 SET ANSI_NULLS ON
