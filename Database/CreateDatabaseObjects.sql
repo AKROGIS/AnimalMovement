@@ -3331,6 +3331,209 @@ SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
 -- Author:      Regan Sarwas
+-- Create date: March 21, 2013
+-- Description: Validates the business rules for an Updated CollarParameter
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarParameterUpdate] 
+   ON  [dbo].[CollarParameters] 
+   AFTER UPDATE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate Business Rules
+    
+    -- 0. Deny updating the ParameterId
+    IF UPDATE(ParameterId)
+    BEGIN
+        RAISERROR('The primary key (ParameterId) cannot be changed.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+    
+    -- 1. Ensure StartDate is before the EndDate
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+                WHERE I.EndDate <= I.StartDate  -- false if either is NULL
+              )
+    BEGIN
+        RAISERROR('The end of the parameter must occur after the start of the parameter.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- 2a. Ensure the start date is before the DisposalDate of the Collar
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+           INNER JOIN Collars AS C
+                   ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
+                WHERE C.DisposalDate < I.StartDate
+              )
+    BEGIN
+        RAISERROR('The parameter must start before the collar is disposed.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- 3. Ensure a Collar does not have multiple Parameters at the same time
+    -- We are checking each inserted parameter against all existing parameters, and all other inserted parameters 
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I1
+            LEFT JOIN inserted AS I2
+                   ON I1.CollarManufacturer = I2.CollarManufacturer AND I1.CollarId = I2.CollarId AND I1.ParameterId <> I2.ParameterId
+           INNER JOIN dbo.CollarParameters AS P
+                   ON P.CollarManufacturer = I1.CollarManufacturer AND P.CollarId = I1.CollarId AND P.ParameterId <> I1.ParameterId
+                WHERE dbo.DoDateRangesOverlap(P.StartDate, P.EndDate, I1.StartDate, I1.EndDate) = 1
+                   OR (I2.ParameterId IS NOT NULL AND
+                       dbo.DoDateRangesOverlap(I1.StartDate, I1.EndDate, I2.StartDate, I2.EndDate) = 1)
+              )
+    BEGIN
+        RAISERROR('Collars cannot have overlapping parameter dates.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- 4. Ensure that one and only one of FileId and Gen3Period are non-null
+    IF EXISTS (SELECT 1
+                 FROM inserted
+                WHERE (Gen3Period IS NULL AND FileId IS NULL) OR
+                      (Gen3Period IS NOT NULL AND FileId IS NOT NULL)
+              )
+    BEGIN
+        RAISERROR('One and only one of Gen3 period and parameter file must be provided.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+    -- 5. Inactive parameter files cannot be linked to a collar
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+           INNER JOIN CollarParameterFiles AS F
+                   ON F.FileId = I.FileId
+                WHERE F.[Status] <> 'A'
+              )
+    BEGIN
+        RAISERROR('Inactive parameter files cannot be linked to a collar.', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    /*
+    An update can be thought of as a delete and an insert, and the logic in the
+    delete and insert triggers is basically replicated here when more than the
+    dates change in a Collar Parameter.
+    However this is very ineffcient in the typical situation:
+      A parameter is created with StartDate = XXX and EndDate = NULL. The user wants
+      to create a a new parameter with a StartDate = YYY and EndDate = NULL. where XXX < YYY.
+      before the insert can succeed the EndDate of the existing parameter must be set to YYY.
+    Using a brute force method, all existing processing based on the parameter would
+    be deleted then recreated.
+    Instead, I will check for these cases:
+    If only the dates have changed (no collar, fileid, or Gen3period change):
+      Start or End date has shrunk:
+        Flag any files with transmission outside the new date range as
+        a processing issue (The same as would happen if the deployment had the non-null dates
+        to start with.)  No additional processing needs to happen until a new deployment is created.
+      Start or End date has grown:
+        Find files with processing issues for this platform, and with transmissions in the new part
+        of the date range, then reprocess them, because the expanded dates will add transmissions. 
+    Else if only the Collar has changed (no date or platform change)
+      I though I might find the result files for the old collar, deactive them, change the collar,
+      then reactivate them, but there may be results files for other deployments for the same old
+      collar which should not be changed. Since we cannot trivially determine the deployment (or
+      even the platform) for a results file, we cannot select just the collar files to change.
+      It might be possible to do something more clever, but my head already hurts, so I will
+      simply handle it safely as follows.
+    Else if the platform changed, or there were multiple items changing,
+      use the brute force delete/insert method. 
+    */
+
+    -- May be part of a batch update (happens with a cascading update or when the SA bypasses the SP)
+    -- Triggers always execute in the context of a transaction, so the following code is all or nothing.
+    -- to keep the logic managable, I will create a cursor to handle each deployment separately.
+
+    IF EXISTS (SELECT 1
+                 FROM inserted AS I
+                 JOIN deleted AS D
+                   ON D.ParameterId = I.ParameterId
+                WHERE I.CollarId <> D.CollarId
+                   OR I.CollarManufacturer <> D.CollarManufacturer
+                   OR I.FileId <> D.FileId OR (I.FileId IS NULL AND D.FileId IS NOT NULL) OR (I.FileId IS NOT NULL AND D.FileId IS NULL)
+                   OR I.Gen3Period <> D.Gen3Period OR (I.Gen3Period IS NULL AND D.Gen3Period IS NOT NULL) OR (I.Gen3Period IS NOT NULL AND D.Gen3Period IS NULL)
+               )
+    BEGIN
+        -- Brute Force Solution:
+        -- 1. Delete => Delete files derived from this parameter
+            DELETE F 
+              FROM inserted AS I
+        INNER JOIN CollarFiles AS F
+                ON F.CollarParameterId = I.ParameterId
+        -- 2. Insert => Delete Processing Issues for the new collar
+            DELETE A 
+              FROM inserted AS I
+        INNER JOIN ArgosFileProcessingIssues AS A
+                ON A.CollarManufacturer = I.CollarManufacturer AND A.CollarId = I.CollarId
+    END
+    ELSE BEGIN
+        -- Only the dates have changed
+        -- Date range shrunk - Create a new processing issue to explain any missed data
+            -- Start Shrunk to after first transmission
+            INSERT INTO [dbo].[ArgosFileProcessingIssues]
+                        ([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
+                 SELECT P.FileId, 'No Collar Parameter for Collar from ' + 
+                        CONVERT(varchar(20), S.FirstTransmission, 20) + ' to ' + CONVERT(varchar(20), I.StartDate, 20),
+                        A.PlatformId, I.CollarManufacturer, I.CollarId
+                   FROM CollarFiles AS C
+             INNER JOIN CollarFiles AS P
+                     ON P.FileId = C.ParentFileId
+             INNER JOIN inserted AS I
+                     ON I.ParameterId = C.CollarParameterId
+             INNER JOIN deleted AS D
+                     ON D.ParameterId = I.ParameterId
+             INNER JOIN ArgosDeployments AS A
+                     ON A.DeploymentId = C.ArgosDeploymentId
+             INNER JOIN ArgosFilePlatformDates AS S
+                     ON S.FileId = P.FileId
+                  WHERE (D.StartDate IS NULL AND I.StartDate IS NOT NULL) OR (D.StartDate < I.StartDate) 
+                    AND S.FirstTransmission < I.StartDate
+            -- End Shrunk before last transmission
+            INSERT INTO [dbo].[ArgosFileProcessingIssues]
+                        ([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
+                 SELECT P.FileId, 'No Collar Parameter for Collar from ' + 
+                        CONVERT(varchar(20), I.EndDate, 20) + ' to ' + CONVERT(varchar(20), S.LastTransmission, 20),
+                        A.PlatformId, I.CollarManufacturer, I.CollarId
+                   FROM CollarFiles AS C
+             INNER JOIN CollarFiles AS P
+                     ON P.FileId = C.ParentFileId
+             INNER JOIN inserted AS I
+                     ON I.ParameterId = C.CollarParameterId
+             INNER JOIN deleted AS D
+                     ON D.ParameterId = I.ParameterId
+             INNER JOIN ArgosDeployments AS A
+                     ON A.DeploymentId = C.ArgosDeploymentId
+             INNER JOIN ArgosFilePlatformDates AS S
+                     ON S.FileId = P.FileId
+                  WHERE (D.EndDate IS NULL AND I.EndDate IS NOT NULL) OR (I.EndDate < D.EndDate) 
+                    AND I.EndDate < S.LastTransmission
+        -- Date range increased - Remove overlapping processing issue to trigger a re-process
+                 DELETE P
+                   FROM ArgosFileProcessingIssues AS P
+             INNER JOIN inserted AS I
+                     ON I.CollarManufacturer = P.CollarManufacturer AND I.CollarId = P.CollarId
+             INNER JOIN deleted AS D
+                     ON D.ParameterId = I.ParameterId
+                  WHERE dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, I.StartDate, D.StartDate) = 1
+                     OR dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, D.EndDate, I.EndDate) = 1
+    END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
 -- Create date: May 13, 2013
 -- Description: Validates the business rules for a new CollarParameter
 -- =============================================
@@ -3708,17 +3911,17 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
--- Author:		Regan Sarwas
+-- Author:      Regan Sarwas
 -- Create date: March 21, 2013
 -- Description: Validates the business rules for an Updated ArgosDeployment
 -- =============================================
 CREATE TRIGGER [dbo].[AfterArgosDeploymentUpdate] 
    ON  [dbo].[ArgosDeployments] 
    AFTER UPDATE
-AS 
+AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     -- Validate Business Rules
     -- 1. Ensure StartDate is before the EndDate
     IF EXISTS (SELECT 1
@@ -3731,30 +3934,28 @@ BEGIN
         RETURN
     END
 
-    -- 2a. Ensure both Dates are before the DisposalDate of the Collar
+    -- 2a. Ensure start date is before the DisposalDate of the Collar
     IF EXISTS (SELECT 1
                  FROM inserted AS I
            INNER JOIN Collars AS C
                    ON I.CollarManufacturer = C.CollarManufacturer AND I.CollarId = C.CollarId
-                WHERE C.DisposalDate < I.EndDate
-                   OR (I.EndDate IS NULL AND C.DisposalDate IS NOT NULL)
+                WHERE C.DisposalDate < I.StartDate
               )
     BEGIN
-        RAISERROR('The deployment must end before the collar is disposed.', 18, 0)
+        RAISERROR('The deployment must start before the collar is disposed.', 18, 0)
         ROLLBACK TRANSACTION;
         RETURN
     END
 
-    -- 2b. Ensure both Dates are before the DisposalDate of the ArgosPlatform
+    -- 2b. Ensure start Date is before the DisposalDate of the ArgosPlatform
     IF EXISTS (SELECT 1
                  FROM inserted AS I
            INNER JOIN ArgosPlatforms AS P
                    ON P.PlatformId = I.PlatformId
-                WHERE P.DisposalDate < I.EndDate
-                   OR (I.EndDate IS NULL AND P.DisposalDate IS NOT NULL)
+                WHERE P.DisposalDate < I.StartDate
               )
     BEGIN
-        RAISERROR('The deployment must end before the Argos platfrom is disposed.', 18, 0)
+        RAISERROR('The deployment must start before the Argos platfrom is disposed.', 18, 0)
         ROLLBACK TRANSACTION;
         RETURN
     END
@@ -3797,14 +3998,15 @@ BEGIN
 
     /*
     An update can be thought of as a delete and an insert, and the logic in the
-    delete and insert triggers is basically replicated here when the platform in
+    delete and insert triggers is basically replicated here when more than the dates in
     the deployment changes.
     However this is very ineffcient in the typical situation:
-      A deployment is created with StartDate = NULL and EndDate = NULL. The deployment
-      is update with a non-null EndDate, so that a new deployment can be created.
-    Using a brute force method, all existing processing for the updated collar would
+      A deployment is created with StartDate = XXX and EndDate = NULL. The user wants
+      to create a a new deployment with a StartDate = YYY and EndDate = NULL. where XXX < YYY.
+      before the insert can succeed the EndDate of the first deployment must be set to YYY.
+    Using a brute force method, all existing processing based on this deployment would
     be deleted then recreated.
-    Instead, I will be can check for these case:
+    Instead, I will check for these cases:
     If only the dates have changed (no collar or platform change):
       Start or End date has shrunk:
         Flag any files with transmission outside the new date range as
