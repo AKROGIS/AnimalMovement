@@ -530,8 +530,6 @@ namespace AnimalMovement
                     f.Status,
                     f.Collar,
                     Parent = f.ParentFile,
-                    f.ArgosDeploymentId,
-                    f.ArgosDeployment.PlatformId
                 }).ToList();
             DerivedDataGridView.Columns[0].HeaderText = "Derived File";
             DerivedDataGridView.Columns[1].HeaderText = "Format";

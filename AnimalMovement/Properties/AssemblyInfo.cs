@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 
 //FIXME - DATABASE - Hide the ArgosPlatforms.Password from all but the Manager, and the Download API
-//FIXME - DATABASE - The ArgosProcesser called from the database only works if the SQL_Proxy account is logged in.
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a collar is updated (HasGps, Model, DispDate), then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
