@@ -3105,13 +3105,11 @@ GO
 -- Author:      Regan Sarwas
 -- Create date: March 22, 2013
 -- Description: Un-processes the transmissions for a single platform in a file.
---              This is called by the AfterArgosDeploymentDelete and
---              AfterArgosDeploymentUpdate triggers.  It is also called by the
+--              This is called by the
 --              Argos Processor in response a to an ArgosFile_ProcessPlatform request.
 --              It may be that a client might want to call this (though I doubt it)
 --              nevertheless, it won't hurt, since the results can be regenerated
 --              (and will be if the Argos Processor is running a scheduled task with no parameters).
---              When called by the delete trigger, it must clear the results files and issues.
 --              Usually when the Argos Processor calls this, there are no results/issues
 --              (that is how it got included in the query ArgosFile_NeedsPartialProcessing),
 --              but it may get called in other situations, besides, it doesn't hurt to try to
@@ -3139,7 +3137,7 @@ BEGIN
                 AND F.ParentFileId = @FileId  -- parent is the file specified
 
             -- Find and delete all issues for this @FileId and @PlatformId
-            DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId AND PlatformId = @PlatformId
+             DELETE FROM ArgosFileProcessingIssues WHERE FileId = @FileId AND PlatformId = @PlatformId
 
         COMMIT TRANSACTION
     END TRY
@@ -4008,6 +4006,50 @@ BEGIN
                   WHERE dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, I.StartDate, D.StartDate) = 1
                      OR dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, D.EndDate, I.EndDate) = 1
     END
+
+
+    -- We need to deal with the E&F files with non-GPS collars.  We do not anticipate a lot of non-gps collars, so I
+    -- will handle this a brute force delete and insert.
+    -- This should match the delete/insert triggers (see it for comments)
+    -- Delete:
+    DELETE F
+      FROM CollarFixes AS F
+      JOIN Collars AS C
+        ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+      JOIN deleted as D
+        ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+     WHERE C.HasGps = 0
+       AND (F.FixDate <= D.EndDate OR D.EndDate IS NULL)
+       AND (D.StartDate <= F.FixDate  OR D.StartDate IS NULL)
+
+    -- Insert:
+    DECLARE @FileId INT;
+    DECLARE @DeploymentId INT;
+    DECLARE insert_deployment_cursor2 CURSOR FOR 
+             SELECT A.FileId, I.DeploymentId
+               FROM inserted AS I
+         INNER JOIN Collars AS C
+                 ON C.CollarManufacturer = I.CollarManufacturer AND C.CollarId = I.CollarId
+         INNER JOIN ArgosFilePlatformDates AS A
+                 ON A.PlatformId = I.PlatformId
+         INNER JOIN CollarFiles AS F
+                 ON F.FileId = A.FileId
+              WHERE C.HasGps = 0
+                AND (F.Format = 'E' OR F.Format = 'F')
+                AND dbo.DoDateRangesOverlap(A.FirstTransmission, A.LastTransmission, I.StartDate, I.EndDate) = 1
+
+    OPEN insert_deployment_cursor2;
+
+    FETCH NEXT FROM insert_deployment_cursor2 INTO @FileId, @DeploymentId;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC dbo.CollarFixes_Insert @FileId, @DeploymentId
+        FETCH NEXT FROM insert_deployment_cursor2 INTO @FileId, @DeploymentId;
+    END
+    CLOSE insert_deployment_cursor2;
+    DEALLOCATE insert_deployment_cursor2;
+
 END
 GO
 SET ANSI_NULLS ON
@@ -6373,8 +6415,11 @@ BEGIN
 	-- This will ensure that the database is setup to respond to a query for all
 	-- files needing partial processing, should the xp_cmdshell not work. 
 	EXEC dbo.ArgosFile_UnProcessPlatform @FileId, @PlatformId
- 
+
+
 	-- Run the External command
+	-- This will fail if the sql_proxy user is not logged in.
+	-- We will rely on a regularly scheduled external OS task.
 	DECLARE @exe nvarchar (255);
 	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
 	IF @exe IS NULL
