@@ -302,7 +302,7 @@ namespace AnimalMovement
         {
             OnDatabaseChanged();
             LoadDataContext();
-            SetUpForm();
+            SetUpPlatformsTab();
         }
 
         private void AddPlatformButton_Click(object sender, EventArgs e)
