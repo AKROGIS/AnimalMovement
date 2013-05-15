@@ -2,21 +2,9 @@
 <reports>
   <!--If a query has the string '@PI' it will be replaced with the current project investigator-->
   <report>
-    <name>Argos files that have not been processed</name>
-    <description>
-      <![CDATA[List all Argos files you have in the database that have never been processed]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT F.[FileName], F.UploadDate, F.UserName, L.Name, F.[Status]
-       FROM CollarFiles AS F
- INNER JOIN ArgosFile_NeverProcessed AS U
-         ON U.FileId = F.FileId
- INNER JOIN LookupCollarFileFormats AS L
-         ON L.Code = F.Format
-        AND F.[Owner] = @PI
-      ]]>
-    </query>
+    <name>---------------</name>
+    <description></description>
+    <query></query>
   </report>
   <report>
     <name>Unprocessed Argos data</name>
@@ -34,6 +22,23 @@
       WHERE I.PlatformId IS NOT NULL
         AND P2.Manager = @PI
    GROUP BY I.PlatformId, I.Issue
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Argos files that have not been processed</name>
+    <description>
+      <![CDATA[List all Argos files you have in the database that have never been processed]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT F.[FileName], F.UploadDate, F.UserName, L.Name, F.[Status]
+       FROM CollarFiles AS F
+ INNER JOIN ArgosFile_NeverProcessed AS U
+         ON U.FileId = F.FileId
+ INNER JOIN LookupCollarFileFormats AS L
+         ON L.Code = F.Format
+        AND F.[Owner] = @PI
       ]]>
     </query>
   </report>

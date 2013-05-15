@@ -43,7 +43,7 @@
             this.UploadButton.Enabled = false;
             this.UploadButton.Location = new System.Drawing.Point(12, 70);
             this.UploadButton.Name = "UploadButton";
-            this.UploadButton.Size = new System.Drawing.Size(205, 23);
+            this.UploadButton.Size = new System.Drawing.Size(158, 23);
             this.UploadButton.TabIndex = 2;
             this.UploadButton.Text = "Upload Collar Data";
             this.UploadButton.UseVisualStyleBackColor = true;
@@ -53,9 +53,9 @@
             // 
             this.QuitButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.QuitButton.Location = new System.Drawing.Point(12, 177);
+            this.QuitButton.Location = new System.Drawing.Point(12, 155);
             this.QuitButton.Name = "QuitButton";
-            this.QuitButton.Size = new System.Drawing.Size(205, 23);
+            this.QuitButton.Size = new System.Drawing.Size(158, 23);
             this.QuitButton.TabIndex = 5;
             this.QuitButton.Text = "Quit";
             this.QuitButton.UseVisualStyleBackColor = true;
@@ -68,7 +68,7 @@
             this.ProjectsButton.Enabled = false;
             this.ProjectsButton.Location = new System.Drawing.Point(12, 41);
             this.ProjectsButton.Name = "ProjectsButton";
-            this.ProjectsButton.Size = new System.Drawing.Size(205, 23);
+            this.ProjectsButton.Size = new System.Drawing.Size(158, 23);
             this.ProjectsButton.TabIndex = 1;
             this.ProjectsButton.Text = "Project List";
             this.ProjectsButton.UseVisualStyleBackColor = true;
@@ -81,7 +81,7 @@
             this.GenerateMapButton.Enabled = false;
             this.GenerateMapButton.Location = new System.Drawing.Point(12, 99);
             this.GenerateMapButton.Name = "GenerateMapButton";
-            this.GenerateMapButton.Size = new System.Drawing.Size(205, 23);
+            this.GenerateMapButton.Size = new System.Drawing.Size(158, 23);
             this.GenerateMapButton.TabIndex = 3;
             this.GenerateMapButton.Text = "Create Map File";
             this.GenerateMapButton.UseVisualStyleBackColor = true;
@@ -93,7 +93,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MyProfileButton.Location = new System.Drawing.Point(12, 12);
             this.MyProfileButton.Name = "MyProfileButton";
-            this.MyProfileButton.Size = new System.Drawing.Size(205, 23);
+            this.MyProfileButton.Size = new System.Drawing.Size(158, 23);
             this.MyProfileButton.TabIndex = 0;
             this.MyProfileButton.Text = "Connecting...";
             this.MyProfileButton.UseVisualStyleBackColor = true;
@@ -106,7 +106,7 @@
             this.QuickStartWizardButton.Enabled = false;
             this.QuickStartWizardButton.Location = new System.Drawing.Point(12, 128);
             this.QuickStartWizardButton.Name = "QuickStartWizardButton";
-            this.QuickStartWizardButton.Size = new System.Drawing.Size(205, 23);
+            this.QuickStartWizardButton.Size = new System.Drawing.Size(158, 23);
             this.QuickStartWizardButton.TabIndex = 4;
             this.QuickStartWizardButton.Text = "Quick Start Wizard";
             this.QuickStartWizardButton.UseVisualStyleBackColor = true;
@@ -116,7 +116,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(231, 212);
+            this.ClientSize = new System.Drawing.Size(184, 190);
             this.Controls.Add(this.QuickStartWizardButton);
             this.Controls.Add(this.MyProfileButton);
             this.Controls.Add(this.GenerateMapButton);
@@ -124,7 +124,7 @@
             this.Controls.Add(this.QuitButton);
             this.Controls.Add(this.UploadButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.MinimumSize = new System.Drawing.Size(200, 202);
+            this.MinimumSize = new System.Drawing.Size(200, 224);
             this.Name = "MainForm";
             this.Text = "Animal Movement";
             this.ResumeLayout(false);
