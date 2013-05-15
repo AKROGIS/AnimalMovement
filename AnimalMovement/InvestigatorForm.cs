@@ -909,6 +909,8 @@ namespace AnimalMovement
 
         private void SetUpReportsTab()
         {
+            if (_queryDocument != null)
+                return;
             var xmlFilePath = Properties.Settings.Default.InvestigatorReportsXml;
             string error = null;
             try

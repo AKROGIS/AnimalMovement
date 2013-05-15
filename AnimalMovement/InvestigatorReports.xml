@@ -2,224 +2,40 @@
 <reports>
   <!--If a query has the string '@PI' it will be replaced with the current project investigator-->
   <report>
-    <name>All Collars</name>
+    <name>Argos files that have not been processed</name>
     <description>
-      <![CDATA[List all collars.  To copy this data into Excel or another application, select the rows to copy (click the top left corner to select all rows), then press Ctrl-C, then paste into the other application.]]>
+      <![CDATA[List all Argos files you have in the database that have never been processed]]>
     </description>
     <query>
       <![CDATA[
-      SELECT * FROM Collars WHERE Manager = @PI
+     SELECT F.[FileName], F.UploadDate, F.UserName, L.Name, F.[Status]
+       FROM CollarFiles AS F
+ INNER JOIN ArgosFile_NeverProcessed AS U
+         ON U.FileId = F.FileId
+ INNER JOIN LookupCollarFileFormats AS L
+         ON L.Code = F.Format
+        AND F.[Owner] = @PI
       ]]>
     </query>
   </report>
   <report>
-    <name>Summary of TPF data</name>
+    <name>Unprocessed Argos data</name>
     <description>
-      <![CDATA[List all collars in each TPF (Telonics Parameter File).]]>
+      <![CDATA[Argos data (email or download) require a collar assignment and collar parameters in order to be processed.  The following Argos Ids have unprocessed data.  This can be corrected by assigning a collar with parameters to the Argos Id.]]>
     </description>
     <query>
       <![CDATA[
-     SELECT TPF.[FileName], TPF.CTN, TPF.[Platform], TPF.Frequency, TPF.[TimeStamp]
-       FROM AllTpfFileData AS TPF
- INNER JOIN CollarParameterFiles as F
-         ON F.FileId = TPF.FileId
-      WHERE F.[Owner] = @PI
-   ORDER BY TPF.[FileName], TPF.CTN
+     SELECT I.PlatformId AS [Argos Id], I.Issue
+       FROM ArgosFileProcessingIssues AS I
+       JOIN ArgosPlatforms AS P1
+         ON I.PlatformId = P1.PlatformId
+       JOIN ArgosPrograms AS P2
+         ON P1.ProgramId = P2.ProgramId
+      WHERE I.PlatformId IS NOT NULL
+        AND P2.Manager = @PI
+   GROUP BY I.PlatformId, I.Issue
       ]]>
     </query>
-  </report>
-  <report>
-    <name>Collars without GPS</name>
-    <description>
-      <![CDATA[Lists all the collars that do not have an onboard GPS.  These collars collect Argos locations (if they have an Argos Id), or are used for radio (VHF) tracking.  The database will store Argos (PPT) locations, but not VHF locations.]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.Frequency, HasGps, D.PlatformId AS ArgosId
-       FROM Collars AS C
-  LEFT JOIN ArgosDeployments AS D
-         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-      WHERE HasGps = 0
-        AND C.Manager = @PI
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Collars without Argos Platform</name>
-    <description>
-      <![CDATA[A collar is not required to have an Argos Id, but if a collar has an Argos assignment that the database does not know about, Argos data (emails or downloads), cannot be assigned to the collar/animal.]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.Frequency, HasGps, D.PlatformId AS ArgosId
-       FROM Collars AS C
-  LEFT JOIN ArgosDeployments AS D
-         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-      WHERE D.PlatformId IS NULL
-        AND C.Manager = @PI
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Telonics Gen4 Collars without TPF file</name>
-    <description>
-      <![CDATA[The database requires a Telonics Parameter File (*.tpf) in order to extract GPS fixes from Argos data (emails or downloads) for Gen 4 collars.]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.CollarModel, C.CollarId, C.Frequency, HasGps, D.PlatformId AS ArgosId
-       FROM Collars AS C
-  LEFT JOIN CollarParameters AS P
-         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-  LEFT JOIN CollarParameterFiles AS F
-         ON F.FileId = P.FileId
-  LEFT JOIN ArgosDeployments AS D
-         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4'
-        AND (F.Format IS NULL OR F.Format <> 'A')
-        AND C.Manager = @PI
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Telonics Gen3 Collars with an active PPF File</name>
-    <description>
-      <![CDATA[Gen3 collars with a non-constant fix interval have a platform parameter file (*.ppf) to describe when fixes are obtained.  Unfortunately, the database cannot extract fix data from Argos data (emails or downloads) for collars with PPF files.  Argos data for these collars must be preprocessed before it is uploaded to the database.]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.CollarModel, C.CollarId, D.PlatformId AS ArgosId, C.Frequency, F.[FileName], P.Gen3Period
-       FROM Collars AS C
-  LEFT JOIN CollarParameters AS P
-         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-  LEFT JOIN CollarParameterFiles AS F
-         ON P.FileId = F.FileId
-  LEFT JOIN ArgosDeployments AS D
-         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
-        AND F.Format = 'B' AND F.Status = 'A'
-        AND C.Manager = @PI
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Telonics Gen3 Collars without a fix interval</name>
-    <description>
-      <![CDATA[The database requires a fix interval (hours or minutes between fixes) in order to extract Gen3 collar fix data from Argos data (emails or downloads).]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.CollarModel, C.CollarId, D.PlatformId AS ArgosId, C.Frequency, P.Gen3Period
-       FROM Collars AS C
-  LEFT JOIN CollarParameters AS P
-         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-  LEFT JOIN ArgosDeployments AS D
-         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
-        AND P.Gen3Period IS NULL
-        AND C.Manager = @PI
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Collars in multiple TPF files</name>
-    <description>
-      <![CDATA[A collar in multiple TPF files should have multiple parameter assignments to ensure that the data is correctly processed to match the parameters in effect when the data was collected.]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
-       FROM AllTpfFileData AS T
-  LEFT JOIN CollarParameters AS P
-         ON T.FileId = P.FileId AND T.CTN = P.CollarId
-  LEFT JOIN Collars AS C
-         ON C.CollarManufacturer = 'Telonics' AND T.CTN = C.CollarId
-      WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
-        AND C.Manager = @PI
-   ORDER BY T.CTN, T.[Status]
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Active dates for each collar</name>
-    <description>
-      <![CDATA[Lists the dates that each collar has been active (deployed)]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.CollarManufacturer, C.CollarId, MIN(D.DeploymentDate) AS [FirstDeployment], MAX(D.RetrievalDate) AS [LastRetrieval],C.DisposalDate
-       FROM Collars as C
-  LEFT JOIN CollarDeployments AS D
-         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
-      WHERE C.Manager = @PI
-   GROUP BY C.CollarManufacturer, C.CollarId, C.DisposalDate
-   ORDER BY C.CollarManufacturer, C.CollarId
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Count of unused fixes for each collar</name>
-    <description>
-      <![CDATA[A list of the fixes not assigned to an animal.  Typically these are fixes occur outside the dates of a deployment, or after a mortality.  Collars with a large number of fixes, may not be properly assigned.]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.Manager, F.CollarManufacturer, F.CollarId, MIN(F.FixDate) AS [First Fix], MAX(F.FixDate) AS [Last Fix], COUNT(F.FixDate) AS [Fix Count]
-       FROM CollarFixes AS F
-  LEFT JOIN Locations AS L
-         ON F.FixId = L.FixId
-  LEFT JOIN Collars AS C
-         ON F.CollarManufacturer = C.CollarManufacturer AND  F.CollarId = C.CollarId
-      WHERE L.FixId IS NULL
-        AND F.HiddenBy IS NULL
-        AND C.Manager = @PI
-   GROUP BY C.Manager, F.CollarManufacturer, F.CollarId
-   ORDER BY COUNT(F.FixDate) DESC
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Collars that do not have fixes</name>
-    <description>
-      <![CDATA[A list of collars that do not have any fixes]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, D.PlatformId AS ArgosId, C.Frequency
-       FROM Collars AS C
-  LEFT JOIN CollarFixes as F
-         ON C.CollarId = F.CollarId
-  LEFT JOIN ArgosDeployments AS D
-         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-      WHERE C.Manager = @PI
-        AND F.CollarId IS NULL
-   ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Collars that do not have files</name>
-    <description>
-      <![CDATA[A list of collars that do not have any data files in the database]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, D.PlatformId AS ArgosId, C.Frequency
-       FROM Collars AS C
-  LEFT JOIN CollarFiles as F
-         ON C.CollarId = F.CollarId
-  LEFT JOIN ArgosDeployments AS D
-         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-      WHERE C.Manager = @PI
-        AND F.CollarId IS NULL
-   ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>---------------</name>
-    <description></description>
-    <query></query>
   </report>
   <report>
     <name>Argos Platforms with no downloaded data</name>
@@ -270,24 +86,248 @@
       ]]>
     </query>
   </report>
+
+
   <report>
-    <name>Unprocessed Argos data</name>
+    <name>---------------</name>
+    <description></description>
+    <query></query>
+  </report>
+  <report>
+    <name>All Collars</name>
     <description>
-      <![CDATA[Argos data (email or download) require a collar assignment and collar parameters in order to be processed.  The following Argos Ids have unprocessed data.  This can be corrected by assigning a collar with parameters to the Argos Id.]]>
+      <![CDATA[List all collars.  To copy this data into Excel or another application, select the rows to copy (click the top left corner to select all rows), then press Ctrl-C, then paste into the other application.]]>
     </description>
     <query>
       <![CDATA[
-     SELECT I.PlatformId AS [Argos Id], I.Issue
-       FROM ArgosFileProcessingIssues AS I
-       JOIN ArgosPlatforms AS P1
-         ON I.PlatformId = P1.PlatformId
-       JOIN ArgosPrograms AS P2
-         ON P1.ProgramId = P2.ProgramId
-      WHERE I.PlatformId IS NOT NULL
-        AND P2.Manager = @PI
-   GROUP BY I.PlatformId, I.Issue
+      SELECT * FROM Collars WHERE Manager = @PI
       ]]>
     </query>
+  </report>
+  <report>
+    <name>Collars without GPS</name>
+    <description>
+      <![CDATA[Lists all the collars that do not have an onboard GPS.  These collars collect Argos locations (if they have an Argos Id), or are used for radio (VHF) tracking.  The database will store Argos (PPT) locations, but not VHF locations.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.Frequency, HasGps, D.PlatformId AS ArgosId
+       FROM Collars AS C
+  LEFT JOIN ArgosDeployments AS D
+         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+      WHERE HasGps = 0
+        AND C.Manager = @PI
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Collars without Argos Platform</name>
+    <description>
+      <![CDATA[A collar is not required to have an Argos Id, but if a collar has an Argos assignment that the database does not know about, Argos data (emails or downloads), cannot be assigned to the collar/animal.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, C.Frequency, HasGps, D.PlatformId AS ArgosId
+       FROM Collars AS C
+  LEFT JOIN ArgosDeployments AS D
+         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+      WHERE D.PlatformId IS NULL
+        AND C.Manager = @PI
+      ]]>
+    </query>
+  </report>
+
+
+  <report>
+    <name>---------------</name>
+    <description></description>
+    <query></query>
+  </report>
+  <report>
+    <name>Active dates for each collar</name>
+    <description>
+      <![CDATA[Lists the dates that each collar has been active (deployed)]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarManufacturer, C.CollarId, MIN(D.DeploymentDate) AS [FirstDeployment], MAX(D.RetrievalDate) AS [LastRetrieval],C.DisposalDate
+       FROM Collars as C
+  LEFT JOIN CollarDeployments AS D
+         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+      WHERE C.Manager = @PI
+   GROUP BY C.CollarManufacturer, C.CollarId, C.DisposalDate
+   ORDER BY C.CollarManufacturer, C.CollarId
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Collars that do not have fixes</name>
+    <description>
+      <![CDATA[A list of collars that do not have any fixes]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, D.PlatformId AS ArgosId, C.Frequency
+       FROM Collars AS C
+  LEFT JOIN CollarFixes as F
+         ON C.CollarId = F.CollarId
+  LEFT JOIN ArgosDeployments AS D
+         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+      WHERE C.Manager = @PI
+        AND F.CollarId IS NULL
+   ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Collars that do not have files</name>
+    <description>
+      <![CDATA[A list of collars that do not have any data files in the database]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarManufacturer, C.CollarModel, C.CollarId, D.PlatformId AS ArgosId, C.Frequency
+       FROM Collars AS C
+  LEFT JOIN CollarFiles as F
+         ON C.CollarId = F.CollarId
+  LEFT JOIN ArgosDeployments AS D
+         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+      WHERE C.Manager = @PI
+        AND F.CollarId IS NULL
+   ORDER BY C.CollarManufacturer, C.CollarModel, C.CollarId
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Count of unused fixes for each collar</name>
+    <description>
+      <![CDATA[A list of the fixes not assigned to an animal.  Typically these are fixes occur outside the dates of a deployment, or after a mortality.  Collars with a large number of fixes, may not be properly assigned.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.Manager, F.CollarManufacturer, F.CollarId, MIN(F.FixDate) AS [First Fix], MAX(F.FixDate) AS [Last Fix], COUNT(F.FixDate) AS [Fix Count]
+       FROM CollarFixes AS F
+  LEFT JOIN Locations AS L
+         ON F.FixId = L.FixId
+  LEFT JOIN Collars AS C
+         ON F.CollarManufacturer = C.CollarManufacturer AND  F.CollarId = C.CollarId
+      WHERE L.FixId IS NULL
+        AND F.HiddenBy IS NULL
+        AND C.Manager = @PI
+   GROUP BY C.Manager, F.CollarManufacturer, F.CollarId
+   ORDER BY COUNT(F.FixDate) DESC
+      ]]>
+    </query>
+  </report>
+
+  
+  <report>
+    <name>---------------</name>
+    <description></description>
+    <query></query>
+  </report>
+  <report>
+    <name>Summary of TPF data</name>
+    <description>
+      <![CDATA[List all collars in each TPF (Telonics Parameter File).]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT TPF.[FileName], TPF.CTN, TPF.[Platform], TPF.Frequency, TPF.[TimeStamp]
+       FROM AllTpfFileData AS TPF
+ INNER JOIN CollarParameterFiles as F
+         ON F.FileId = TPF.FileId
+      WHERE F.[Owner] = @PI
+   ORDER BY TPF.[FileName], TPF.CTN
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Telonics Gen4 Collars without TPF file</name>
+    <description>
+      <![CDATA[The database requires a Telonics Parameter File (*.tpf) in order to extract GPS fixes from Argos data (emails or downloads) for Gen 4 collars.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarModel, C.CollarId, C.Frequency, HasGps, D.PlatformId AS ArgosId
+       FROM Collars AS C
+  LEFT JOIN CollarParameters AS P
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+  LEFT JOIN CollarParameterFiles AS F
+         ON F.FileId = P.FileId
+  LEFT JOIN ArgosDeployments AS D
+         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen4'
+        AND (F.Format IS NULL OR F.Format <> 'A')
+        AND C.Manager = @PI
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Collars in multiple TPF files</name>
+    <description>
+      <![CDATA[A collar in multiple TPF files should have multiple parameter assignments to ensure that the data is correctly processed to match the parameters in effect when the data was collected.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT T.CTN, T.[Platform], T.[Status], T.FileId, T.[FileName], T.[TimeStamp], P.StartDate, P.EndDate
+       FROM AllTpfFileData AS T
+  LEFT JOIN CollarParameters AS P
+         ON T.FileId = P.FileId AND T.CTN = P.CollarId
+  LEFT JOIN Collars AS C
+         ON C.CollarManufacturer = 'Telonics' AND T.CTN = C.CollarId
+      WHERE T.CTN in (SELECT CTN FROM AllTpfFileData GROUP BY CTN HAVING COUNT(*) > 1)
+        AND C.Manager = @PI
+   ORDER BY T.CTN, T.[Status]
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Telonics Gen3 Collars with an active PPF File</name>
+    <description>
+      <![CDATA[Gen3 collars with a non-constant fix interval have a platform parameter file (*.ppf) to describe when fixes are obtained.  Unfortunately, the database cannot extract fix data from Argos data (emails or downloads) for collars with PPF files.  Argos data for these collars must be preprocessed before it is uploaded to the database.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarModel, C.CollarId, D.PlatformId AS ArgosId, C.Frequency, F.[FileName], P.Gen3Period
+       FROM Collars AS C
+  LEFT JOIN CollarParameters AS P
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+  LEFT JOIN CollarParameterFiles AS F
+         ON P.FileId = F.FileId
+  LEFT JOIN ArgosDeployments AS D
+         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
+        AND F.Format = 'B' AND F.Status = 'A'
+        AND C.Manager = @PI
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Telonics Gen3 Collars without a fix interval</name>
+    <description>
+      <![CDATA[The database requires a fix interval (hours or minutes between fixes) in order to extract Gen3 collar fix data from Argos data (emails or downloads).]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT C.CollarModel, C.CollarId, D.PlatformId AS ArgosId, C.Frequency, P.Gen3Period
+       FROM Collars AS C
+  LEFT JOIN CollarParameters AS P
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+  LEFT JOIN ArgosDeployments AS D
+         ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+      WHERE C.CollarManufacturer = 'Telonics' AND C.CollarModel = 'Gen3'
+        AND P.Gen3Period IS NULL
+        AND C.Manager = @PI
+      ]]>
+    </query>
+  </report>
+
+
+  <report>
+    <name>---------------</name>
+    <description></description>
+    <query></query>
   </report>
   <report>
     <name>Collars with conflicting fixes in the last 30 days - Slow!</name>
@@ -351,23 +391,6 @@ CROSS APPLY (SELECT * FROM CollarFixSummary (c.CollarManufacturer,c.CollarId)) A
       WHERE DATEDIFF(day, [TimeStamp], GETDATE()) < 10
         AND (P.Manager = @PI OR P2.Manager = @PI)
    ORDER BY [TimeStamp] DESC
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Argos files that have not been processed</name>
-    <description>
-      <![CDATA[List all Argos files you have in the database that have never been processed]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT F.[FileName], F.UploadDate, F.UserName, L.Name, F.[Status]
-       FROM CollarFiles AS F
- INNER JOIN ArgosFile_NeverProcessed AS U
-         ON U.FileId = F.FileId
- INNER JOIN LookupCollarFileFormats AS L
-         ON L.Code = F.Format
-        AND F.[Owner] = @PI
       ]]>
     </query>
   </report>
