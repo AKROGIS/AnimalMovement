@@ -52,7 +52,7 @@
             this.cancelButton.Location = new System.Drawing.Point(116, 201);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 30;
+            this.cancelButton.TabIndex = 8;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
@@ -63,7 +63,7 @@
             this.UploadButton.Location = new System.Drawing.Point(197, 201);
             this.UploadButton.Name = "UploadButton";
             this.UploadButton.Size = new System.Drawing.Size(75, 23);
-            this.UploadButton.TabIndex = 31;
+            this.UploadButton.TabIndex = 9;
             this.UploadButton.Text = "Upload";
             this.UploadButton.UseVisualStyleBackColor = true;
             this.UploadButton.Click += new System.EventHandler(this.UploadButton_Click);
@@ -77,7 +77,7 @@
             this.FormatComboBox.Location = new System.Drawing.Point(51, 39);
             this.FormatComboBox.Name = "FormatComboBox";
             this.FormatComboBox.Size = new System.Drawing.Size(221, 21);
-            this.FormatComboBox.TabIndex = 28;
+            this.FormatComboBox.TabIndex = 1;
             this.FormatComboBox.SelectedIndexChanged += new System.EventHandler(this.FormatComboBox_SelectedIndexChanged);
             // 
             // label2
@@ -95,7 +95,7 @@
             this.BrowseButton.Location = new System.Drawing.Point(248, 64);
             this.BrowseButton.Name = "BrowseButton";
             this.BrowseButton.Size = new System.Drawing.Size(24, 23);
-            this.BrowseButton.TabIndex = 26;
+            this.BrowseButton.TabIndex = 3;
             this.BrowseButton.Text = "...";
             this.BrowseButton.UseVisualStyleBackColor = true;
             this.BrowseButton.Click += new System.EventHandler(this.BrowseButton_Click);
@@ -116,7 +116,7 @@
             this.FileNameTextBox.Location = new System.Drawing.Point(50, 66);
             this.FileNameTextBox.Name = "FileNameTextBox";
             this.FileNameTextBox.Size = new System.Drawing.Size(192, 20);
-            this.FileNameTextBox.TabIndex = 25;
+            this.FileNameTextBox.TabIndex = 2;
             this.FileNameTextBox.TextChanged += new System.EventHandler(this.FileNameTextBox_TextChanged);
             // 
             // openFileDialog
@@ -132,7 +132,7 @@
             this.OwnerComboBox.Location = new System.Drawing.Point(51, 12);
             this.OwnerComboBox.Name = "OwnerComboBox";
             this.OwnerComboBox.Size = new System.Drawing.Size(221, 21);
-            this.OwnerComboBox.TabIndex = 32;
+            this.OwnerComboBox.TabIndex = 0;
             this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
             // label3
@@ -153,7 +153,7 @@
             this.StatusComboBox.Location = new System.Drawing.Point(51, 91);
             this.StatusComboBox.Name = "StatusComboBox";
             this.StatusComboBox.Size = new System.Drawing.Size(221, 21);
-            this.StatusComboBox.TabIndex = 38;
+            this.StatusComboBox.TabIndex = 4;
             // 
             // label4
             // 
@@ -172,7 +172,7 @@
             this.CreateParametersCheckBox.Location = new System.Drawing.Point(50, 118);
             this.CreateParametersCheckBox.Name = "CreateParametersCheckBox";
             this.CreateParametersCheckBox.Size = new System.Drawing.Size(179, 17);
-            this.CreateParametersCheckBox.TabIndex = 40;
+            this.CreateParametersCheckBox.TabIndex = 5;
             this.CreateParametersCheckBox.Text = "Match TPF parameters to collars";
             this.CreateParametersCheckBox.UseVisualStyleBackColor = true;
             this.CreateParametersCheckBox.CheckedChanged += new System.EventHandler(this.CreateParametersCheckBox_CheckedChanged);
@@ -185,7 +185,7 @@
             this.CreateCollarsCheckBox.Location = new System.Drawing.Point(72, 141);
             this.CreateCollarsCheckBox.Name = "CreateCollarsCheckBox";
             this.CreateCollarsCheckBox.Size = new System.Drawing.Size(135, 17);
-            this.CreateCollarsCheckBox.TabIndex = 41;
+            this.CreateCollarsCheckBox.TabIndex = 6;
             this.CreateCollarsCheckBox.Text = "Create collars if missing";
             this.CreateCollarsCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -197,7 +197,7 @@
             this.IgnoreSuffixCheckBox.Location = new System.Drawing.Point(72, 164);
             this.IgnoreSuffixCheckBox.Name = "IgnoreSuffixCheckBox";
             this.IgnoreSuffixCheckBox.Size = new System.Drawing.Size(176, 17);
-            this.IgnoreSuffixCheckBox.TabIndex = 42;
+            this.IgnoreSuffixCheckBox.TabIndex = 7;
             this.IgnoreSuffixCheckBox.Text = "Ignore suffix on CTN for CollarId";
             this.IgnoreSuffixCheckBox.UseVisualStyleBackColor = true;
             // 

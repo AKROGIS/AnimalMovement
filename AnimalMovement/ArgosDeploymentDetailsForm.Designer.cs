@@ -48,7 +48,7 @@
             this.FixItButton.Location = new System.Drawing.Point(12, 159);
             this.FixItButton.Name = "FixItButton";
             this.FixItButton.Size = new System.Drawing.Size(75, 23);
-            this.FixItButton.TabIndex = 24;
+            this.FixItButton.TabIndex = 4;
             this.FixItButton.Text = "Fix It";
             this.FixItButton.UseVisualStyleBackColor = true;
             this.FixItButton.Visible = false;
@@ -89,7 +89,7 @@
             this.ArgosComboBox.Location = new System.Drawing.Point(101, 39);
             this.ArgosComboBox.Name = "ArgosComboBox";
             this.ArgosComboBox.Size = new System.Drawing.Size(200, 21);
-            this.ArgosComboBox.TabIndex = 21;
+            this.ArgosComboBox.TabIndex = 1;
             this.ArgosComboBox.SelectedIndexChanged += new System.EventHandler(this.ArgosComboBox_SelectedIndexChanged);
             // 
             // label3
@@ -122,7 +122,7 @@
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.ShowCheckBox = true;
             this.StartDateTimePicker.Size = new System.Drawing.Size(200, 20);
-            this.StartDateTimePicker.TabIndex = 18;
+            this.StartDateTimePicker.TabIndex = 2;
             this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
             // 
             // EndDateTimePicker
@@ -135,7 +135,7 @@
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.ShowCheckBox = true;
             this.EndDateTimePicker.Size = new System.Drawing.Size(200, 20);
-            this.EndDateTimePicker.TabIndex = 17;
+            this.EndDateTimePicker.TabIndex = 3;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
@@ -146,7 +146,7 @@
             this.cancelButton.Location = new System.Drawing.Point(145, 159);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 16;
+            this.cancelButton.TabIndex = 5;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -157,7 +157,7 @@
             this.SaveButton.Location = new System.Drawing.Point(226, 159);
             this.SaveButton.Name = "SaveButton";
             this.SaveButton.Size = new System.Drawing.Size(75, 23);
-            this.SaveButton.TabIndex = 15;
+            this.SaveButton.TabIndex = 6;
             this.SaveButton.Text = "Save";
             this.SaveButton.UseVisualStyleBackColor = true;
             this.SaveButton.Click += new System.EventHandler(this.SaveButton_Click);
@@ -180,7 +180,7 @@
             this.CollarComboBox.Location = new System.Drawing.Point(101, 12);
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(200, 21);
-            this.CollarComboBox.TabIndex = 25;
+            this.CollarComboBox.TabIndex = 0;
             this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // ArgosDeploymentDetailsForm

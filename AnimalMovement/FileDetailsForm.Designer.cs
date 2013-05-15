@@ -139,7 +139,7 @@
             this.FileNameTextBox.MaxLength = 255;
             this.FileNameTextBox.Name = "FileNameTextBox";
             this.FileNameTextBox.Size = new System.Drawing.Size(188, 20);
-            this.FileNameTextBox.TabIndex = 3;
+            this.FileNameTextBox.TabIndex = 0;
             // 
             // FormatTextBox
             // 
@@ -148,7 +148,7 @@
             this.FormatTextBox.Location = new System.Drawing.Point(343, 38);
             this.FormatTextBox.Name = "FormatTextBox";
             this.FormatTextBox.Size = new System.Drawing.Size(180, 20);
-            this.FormatTextBox.TabIndex = 5;
+            this.FormatTextBox.TabIndex = 3;
             // 
             // UploadDateTextBox
             // 
@@ -157,7 +157,7 @@
             this.UploadDateTextBox.Location = new System.Drawing.Point(343, 64);
             this.UploadDateTextBox.Name = "UploadDateTextBox";
             this.UploadDateTextBox.Size = new System.Drawing.Size(180, 20);
-            this.UploadDateTextBox.TabIndex = 6;
+            this.UploadDateTextBox.TabIndex = 5;
             // 
             // UserNameTextBox
             // 
@@ -166,7 +166,7 @@
             this.UserNameTextBox.Location = new System.Drawing.Point(343, 90);
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(180, 20);
-            this.UserNameTextBox.TabIndex = 8;
+            this.UserNameTextBox.TabIndex = 7;
             // 
             // label3
             // 
@@ -222,7 +222,7 @@
             this.ShowContentsButton.Location = new System.Drawing.Point(343, 116);
             this.ShowContentsButton.Name = "ShowContentsButton";
             this.ShowContentsButton.Size = new System.Drawing.Size(180, 23);
-            this.ShowContentsButton.TabIndex = 11;
+            this.ShowContentsButton.TabIndex = 9;
             this.ShowContentsButton.Text = "Show Contents";
             this.ShowContentsButton.UseVisualStyleBackColor = true;
             this.ShowContentsButton.Click += new System.EventHandler(this.ShowContentsButton_Click);
@@ -335,7 +335,7 @@
             this.DoneCancelButton.Location = new System.Drawing.Point(12, 411);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.DoneCancelButton.TabIndex = 46;
+            this.DoneCancelButton.TabIndex = 11;
             this.DoneCancelButton.Text = "Done";
             this.DoneCancelButton.UseVisualStyleBackColor = true;
             this.DoneCancelButton.Click += new System.EventHandler(this.DoneCancelButton_Click);
@@ -347,7 +347,7 @@
             this.EditSaveButton.Location = new System.Drawing.Point(448, 411);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
-            this.EditSaveButton.TabIndex = 47;
+            this.EditSaveButton.TabIndex = 12;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
@@ -358,7 +358,7 @@
             this.SourceFileButton.Location = new System.Drawing.Point(343, 145);
             this.SourceFileButton.Name = "SourceFileButton";
             this.SourceFileButton.Size = new System.Drawing.Size(180, 23);
-            this.SourceFileButton.TabIndex = 48;
+            this.SourceFileButton.TabIndex = 10;
             this.SourceFileButton.Text = "Show Source File";
             this.SourceFileButton.UseVisualStyleBackColor = true;
             this.SourceFileButton.Click += new System.EventHandler(this.SourceFileButton_Click);
@@ -402,7 +402,7 @@
             this.ProjectComboBox.Location = new System.Drawing.Point(64, 38);
             this.ProjectComboBox.Name = "ProjectComboBox";
             this.ProjectComboBox.Size = new System.Drawing.Size(188, 21);
-            this.ProjectComboBox.TabIndex = 53;
+            this.ProjectComboBox.TabIndex = 2;
             this.ProjectComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
             // 
             // OwnerComboBox
@@ -414,7 +414,7 @@
             this.OwnerComboBox.Location = new System.Drawing.Point(64, 65);
             this.OwnerComboBox.Name = "OwnerComboBox";
             this.OwnerComboBox.Size = new System.Drawing.Size(188, 21);
-            this.OwnerComboBox.TabIndex = 54;
+            this.OwnerComboBox.TabIndex = 4;
             this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
             // StatusComboBox
@@ -426,7 +426,7 @@
             this.StatusComboBox.Location = new System.Drawing.Point(64, 119);
             this.StatusComboBox.Name = "StatusComboBox";
             this.StatusComboBox.Size = new System.Drawing.Size(188, 21);
-            this.StatusComboBox.TabIndex = 55;
+            this.StatusComboBox.TabIndex = 8;
             this.StatusComboBox.SelectedIndexChanged += new System.EventHandler(this.StatusComboBox_SelectedIndexChanged);
             // 
             // CollarComboBox
@@ -438,7 +438,7 @@
             this.CollarComboBox.Location = new System.Drawing.Point(64, 92);
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(188, 21);
-            this.CollarComboBox.TabIndex = 56;
+            this.CollarComboBox.TabIndex = 6;
             this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // label5
@@ -526,7 +526,7 @@
             this.ArgosPlatformsDataGridView.RowHeadersVisible = false;
             this.ArgosPlatformsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ArgosPlatformsDataGridView.Size = new System.Drawing.Size(497, 179);
-            this.ArgosPlatformsDataGridView.TabIndex = 52;
+            this.ArgosPlatformsDataGridView.TabIndex = 0;
             // 
             // GpsFixesTabPage
             // 

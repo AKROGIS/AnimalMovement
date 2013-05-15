@@ -47,7 +47,7 @@
             this.CreateButton.Location = new System.Drawing.Point(197, 181);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(75, 23);
-            this.CreateButton.TabIndex = 17;
+            this.CreateButton.TabIndex = 6;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
@@ -59,7 +59,7 @@
             this.cancelButton.Location = new System.Drawing.Point(12, 181);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 18;
+            this.cancelButton.TabIndex = 5;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
@@ -82,7 +82,7 @@
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
             this.NotesTextBox.Size = new System.Drawing.Size(260, 64);
-            this.NotesTextBox.TabIndex = 15;
+            this.NotesTextBox.TabIndex = 4;
             // 
             // ActiveCheckBox
             // 
@@ -93,7 +93,7 @@
             this.ActiveCheckBox.Location = new System.Drawing.Point(216, 91);
             this.ActiveCheckBox.Name = "ActiveCheckBox";
             this.ActiveCheckBox.Size = new System.Drawing.Size(56, 17);
-            this.ActiveCheckBox.TabIndex = 14;
+            this.ActiveCheckBox.TabIndex = 3;
             this.ActiveCheckBox.Text = "Active";
             this.ActiveCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -106,7 +106,7 @@
             this.ArgosProgramComboBox.Location = new System.Drawing.Point(119, 12);
             this.ArgosProgramComboBox.Name = "ArgosProgramComboBox";
             this.ArgosProgramComboBox.Size = new System.Drawing.Size(153, 21);
-            this.ArgosProgramComboBox.TabIndex = 13;
+            this.ArgosProgramComboBox.TabIndex = 0;
             this.ArgosProgramComboBox.SelectedIndexChanged += new System.EventHandler(this.ArgosProgramComboBox_SelectedIndexChanged);
             // 
             // label2
@@ -125,7 +125,7 @@
             this.ArgosIdTextBox.Location = new System.Drawing.Point(119, 39);
             this.ArgosIdTextBox.Name = "ArgosIdTextBox";
             this.ArgosIdTextBox.Size = new System.Drawing.Size(153, 20);
-            this.ArgosIdTextBox.TabIndex = 11;
+            this.ArgosIdTextBox.TabIndex = 1;
             this.ArgosIdTextBox.TextChanged += new System.EventHandler(this.ArgosIdTextBox_TextChanged);
             // 
             // label1
@@ -157,7 +157,7 @@
             this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
             this.DisposalDateTimePicker.ShowCheckBox = true;
             this.DisposalDateTimePicker.Size = new System.Drawing.Size(153, 20);
-            this.DisposalDateTimePicker.TabIndex = 8;
+            this.DisposalDateTimePicker.TabIndex = 2;
             this.DisposalDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
             // 

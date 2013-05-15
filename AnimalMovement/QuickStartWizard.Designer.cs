@@ -44,7 +44,7 @@
             this.InvestigatorComboBox.Location = new System.Drawing.Point(119, 12);
             this.InvestigatorComboBox.Name = "InvestigatorComboBox";
             this.InvestigatorComboBox.Size = new System.Drawing.Size(153, 21);
-            this.InvestigatorComboBox.TabIndex = 0;
+            this.InvestigatorComboBox.TabIndex = 1;
             this.InvestigatorComboBox.SelectedIndexChanged += new System.EventHandler(this.InvestigatorComboBox_SelectedIndexChanged);
             // 
             // NextButton
@@ -53,7 +53,7 @@
             this.NextButton.Location = new System.Drawing.Point(197, 181);
             this.NextButton.Name = "NextButton";
             this.NextButton.Size = new System.Drawing.Size(75, 23);
-            this.NextButton.TabIndex = 1;
+            this.NextButton.TabIndex = 4;
             this.NextButton.Text = "Next >>";
             this.NextButton.UseVisualStyleBackColor = true;
             this.NextButton.Click += new System.EventHandler(this.NextButton_Click);
@@ -65,7 +65,7 @@
             this.QuitButton.Location = new System.Drawing.Point(116, 181);
             this.QuitButton.Name = "QuitButton";
             this.QuitButton.Size = new System.Drawing.Size(75, 23);
-            this.QuitButton.TabIndex = 2;
+            this.QuitButton.TabIndex = 3;
             this.QuitButton.Text = "Quit";
             this.QuitButton.UseVisualStyleBackColor = true;
             this.QuitButton.Click += new System.EventHandler(this.QuitButton_Click);
@@ -76,7 +76,7 @@
             this.label1.Location = new System.Drawing.Point(12, 15);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(101, 13);
-            this.label1.TabIndex = 3;
+            this.label1.TabIndex = 0;
             this.label1.Text = "Project Investigator:";
             // 
             // InstructionsRichTextBox
@@ -87,7 +87,7 @@
             this.InstructionsRichTextBox.Location = new System.Drawing.Point(13, 39);
             this.InstructionsRichTextBox.Name = "InstructionsRichTextBox";
             this.InstructionsRichTextBox.Size = new System.Drawing.Size(259, 136);
-            this.InstructionsRichTextBox.TabIndex = 4;
+            this.InstructionsRichTextBox.TabIndex = 2;
             this.InstructionsRichTextBox.Text = "";
             // 
             // QuickStartWizard

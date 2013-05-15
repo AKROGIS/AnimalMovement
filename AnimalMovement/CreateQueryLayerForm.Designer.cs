@@ -90,7 +90,7 @@
             this.GenerateButton.Location = new System.Drawing.Point(392, 354);
             this.GenerateButton.Name = "GenerateButton";
             this.GenerateButton.Size = new System.Drawing.Size(110, 23);
-            this.GenerateButton.TabIndex = 7;
+            this.GenerateButton.TabIndex = 2;
             this.GenerateButton.Text = "Generate";
             this.GenerateButton.UseVisualStyleBackColor = true;
             this.GenerateButton.Click += new System.EventHandler(this.GenerateButton_Click);
@@ -102,7 +102,7 @@
             this.DatabaseComboBox.Location = new System.Drawing.Point(71, 6);
             this.DatabaseComboBox.Name = "DatabaseComboBox";
             this.DatabaseComboBox.Size = new System.Drawing.Size(208, 21);
-            this.DatabaseComboBox.TabIndex = 19;
+            this.DatabaseComboBox.TabIndex = 0;
             // 
             // StartDateTimePicker
             // 
@@ -114,7 +114,7 @@
             this.StartDateTimePicker.Location = new System.Drawing.Point(67, 255);
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.Size = new System.Drawing.Size(328, 20);
-            this.StartDateTimePicker.TabIndex = 20;
+            this.StartDateTimePicker.TabIndex = 1;
             // 
             // EndDateTimePicker
             // 
@@ -126,7 +126,7 @@
             this.EndDateTimePicker.Location = new System.Drawing.Point(67, 281);
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.Size = new System.Drawing.Size(328, 20);
-            this.EndDateTimePicker.TabIndex = 21;
+            this.EndDateTimePicker.TabIndex = 2;
             // 
             // label7
             // 
@@ -146,7 +146,7 @@
             this.UseEarliestDateCheckBox.Location = new System.Drawing.Point(401, 257);
             this.UseEarliestDateCheckBox.Name = "UseEarliestDateCheckBox";
             this.UseEarliestDateCheckBox.Size = new System.Drawing.Size(82, 17);
-            this.UseEarliestDateCheckBox.TabIndex = 23;
+            this.UseEarliestDateCheckBox.TabIndex = 3;
             this.UseEarliestDateCheckBox.Text = "Use Earliest";
             this.UseEarliestDateCheckBox.UseVisualStyleBackColor = true;
             this.UseEarliestDateCheckBox.CheckedChanged += new System.EventHandler(this.FilterByDatesCheckBox_CheckedChanged);
@@ -159,7 +159,7 @@
             this.UseLatestDateCheckBox.Location = new System.Drawing.Point(401, 283);
             this.UseLatestDateCheckBox.Name = "UseLatestDateCheckBox";
             this.UseLatestDateCheckBox.Size = new System.Drawing.Size(77, 17);
-            this.UseLatestDateCheckBox.TabIndex = 24;
+            this.UseLatestDateCheckBox.TabIndex = 4;
             this.UseLatestDateCheckBox.Text = "Use Latest";
             this.UseLatestDateCheckBox.UseVisualStyleBackColor = true;
             this.UseLatestDateCheckBox.CheckedChanged += new System.EventHandler(this.FilterByDatesCheckBox_CheckedChanged);
@@ -181,7 +181,7 @@
             this.groupBox1.MinimumSize = new System.Drawing.Size(351, 240);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(490, 309);
-            this.groupBox1.TabIndex = 31;
+            this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Filter By";
             // 
@@ -192,7 +192,7 @@
             this.FilterByDatesCheckBox.Location = new System.Drawing.Point(6, 238);
             this.FilterByDatesCheckBox.Name = "FilterByDatesCheckBox";
             this.FilterByDatesCheckBox.Size = new System.Drawing.Size(54, 17);
-            this.FilterByDatesCheckBox.TabIndex = 32;
+            this.FilterByDatesCheckBox.TabIndex = 0;
             this.FilterByDatesCheckBox.Text = "Dates";
             this.FilterByDatesCheckBox.UseVisualStyleBackColor = true;
             this.FilterByDatesCheckBox.CheckedChanged += new System.EventHandler(this.FilterByDatesCheckBox_CheckedChanged);
@@ -229,7 +229,7 @@
             this.AllProjectsButton.Location = new System.Drawing.Point(3, 180);
             this.AllProjectsButton.Name = "AllProjectsButton";
             this.AllProjectsButton.Size = new System.Drawing.Size(50, 23);
-            this.AllProjectsButton.TabIndex = 17;
+            this.AllProjectsButton.TabIndex = 2;
             this.AllProjectsButton.Text = "All";
             this.AllProjectsButton.UseVisualStyleBackColor = true;
             this.AllProjectsButton.Click += new System.EventHandler(this.AllAnimalsButton_Click);
@@ -241,7 +241,7 @@
             this.ClearProjectsButton.Location = new System.Drawing.Point(132, 180);
             this.ClearProjectsButton.Name = "ClearProjectsButton";
             this.ClearProjectsButton.Size = new System.Drawing.Size(50, 23);
-            this.ClearProjectsButton.TabIndex = 18;
+            this.ClearProjectsButton.TabIndex = 3;
             this.ClearProjectsButton.Text = "Clear";
             this.ClearProjectsButton.UseVisualStyleBackColor = true;
             this.ClearProjectsButton.Click += new System.EventHandler(this.ClearAnimalsButton_Click);
@@ -258,7 +258,7 @@
             this.ProjectsCheckedListBox.Location = new System.Drawing.Point(3, 20);
             this.ProjectsCheckedListBox.Name = "ProjectsCheckedListBox";
             this.ProjectsCheckedListBox.Size = new System.Drawing.Size(179, 155);
-            this.ProjectsCheckedListBox.TabIndex = 16;
+            this.ProjectsCheckedListBox.TabIndex = 1;
             // 
             // FilterByProjectsCheckBox
             // 
@@ -266,7 +266,7 @@
             this.FilterByProjectsCheckBox.Location = new System.Drawing.Point(3, 3);
             this.FilterByProjectsCheckBox.Name = "FilterByProjectsCheckBox";
             this.FilterByProjectsCheckBox.Size = new System.Drawing.Size(64, 17);
-            this.FilterByProjectsCheckBox.TabIndex = 28;
+            this.FilterByProjectsCheckBox.TabIndex = 0;
             this.FilterByProjectsCheckBox.Text = "Projects";
             this.FilterByProjectsCheckBox.UseVisualStyleBackColor = true;
             this.FilterByProjectsCheckBox.CheckedChanged += new System.EventHandler(this.FilterByProjectCheckBox_CheckedChanged);
@@ -308,7 +308,7 @@
             this.SpeciesCheckedListBox.Location = new System.Drawing.Point(3, 20);
             this.SpeciesCheckedListBox.Name = "SpeciesCheckedListBox";
             this.SpeciesCheckedListBox.Size = new System.Drawing.Size(106, 155);
-            this.SpeciesCheckedListBox.TabIndex = 8;
+            this.SpeciesCheckedListBox.TabIndex = 1;
             // 
             // AllSpeciesButton
             // 
@@ -317,7 +317,7 @@
             this.AllSpeciesButton.Location = new System.Drawing.Point(3, 180);
             this.AllSpeciesButton.Name = "AllSpeciesButton";
             this.AllSpeciesButton.Size = new System.Drawing.Size(50, 23);
-            this.AllSpeciesButton.TabIndex = 9;
+            this.AllSpeciesButton.TabIndex = 2;
             this.AllSpeciesButton.Text = "All";
             this.AllSpeciesButton.UseVisualStyleBackColor = true;
             this.AllSpeciesButton.Click += new System.EventHandler(this.AllSpeciesButton_Click);
@@ -329,7 +329,7 @@
             this.ClearSpeciesButton.Location = new System.Drawing.Point(59, 180);
             this.ClearSpeciesButton.Name = "ClearSpeciesButton";
             this.ClearSpeciesButton.Size = new System.Drawing.Size(50, 23);
-            this.ClearSpeciesButton.TabIndex = 10;
+            this.ClearSpeciesButton.TabIndex = 3;
             this.ClearSpeciesButton.Text = "Clear";
             this.ClearSpeciesButton.UseVisualStyleBackColor = true;
             this.ClearSpeciesButton.Click += new System.EventHandler(this.ClearSpeciesButton_Click);
@@ -340,7 +340,7 @@
             this.FilterBySpeciesCheckBox.Location = new System.Drawing.Point(3, 3);
             this.FilterBySpeciesCheckBox.Name = "FilterBySpeciesCheckBox";
             this.FilterBySpeciesCheckBox.Size = new System.Drawing.Size(64, 17);
-            this.FilterBySpeciesCheckBox.TabIndex = 27;
+            this.FilterBySpeciesCheckBox.TabIndex = 0;
             this.FilterBySpeciesCheckBox.Text = "Species";
             this.FilterBySpeciesCheckBox.UseVisualStyleBackColor = true;
             this.FilterBySpeciesCheckBox.CheckedChanged += new System.EventHandler(this.FilterBySpeciesCheckBox_CheckedChanged);
@@ -357,7 +357,7 @@
             this.AnimalsCheckedListBox.Location = new System.Drawing.Point(3, 20);
             this.AnimalsCheckedListBox.Name = "AnimalsCheckedListBox";
             this.AnimalsCheckedListBox.Size = new System.Drawing.Size(172, 155);
-            this.AnimalsCheckedListBox.TabIndex = 12;
+            this.AnimalsCheckedListBox.TabIndex = 1;
             // 
             // AllAnimalsButton
             // 
@@ -366,7 +366,7 @@
             this.AllAnimalsButton.Location = new System.Drawing.Point(3, 180);
             this.AllAnimalsButton.Name = "AllAnimalsButton";
             this.AllAnimalsButton.Size = new System.Drawing.Size(50, 23);
-            this.AllAnimalsButton.TabIndex = 13;
+            this.AllAnimalsButton.TabIndex = 2;
             this.AllAnimalsButton.Text = "All";
             this.AllAnimalsButton.UseVisualStyleBackColor = true;
             this.AllAnimalsButton.Click += new System.EventHandler(this.AllProjectsButton_Click);
@@ -377,7 +377,7 @@
             this.FilterByAnimalsCheckBox.Location = new System.Drawing.Point(3, 3);
             this.FilterByAnimalsCheckBox.Name = "FilterByAnimalsCheckBox";
             this.FilterByAnimalsCheckBox.Size = new System.Drawing.Size(62, 17);
-            this.FilterByAnimalsCheckBox.TabIndex = 29;
+            this.FilterByAnimalsCheckBox.TabIndex = 0;
             this.FilterByAnimalsCheckBox.Text = "Animals";
             this.FilterByAnimalsCheckBox.UseVisualStyleBackColor = true;
             this.FilterByAnimalsCheckBox.CheckedChanged += new System.EventHandler(this.FilterByAnimalCheckBox_CheckedChanged);
@@ -389,7 +389,7 @@
             this.ClearAnimalsButton.Location = new System.Drawing.Point(125, 180);
             this.ClearAnimalsButton.Name = "ClearAnimalsButton";
             this.ClearAnimalsButton.Size = new System.Drawing.Size(50, 23);
-            this.ClearAnimalsButton.TabIndex = 14;
+            this.ClearAnimalsButton.TabIndex = 3;
             this.ClearAnimalsButton.Text = "Clear";
             this.ClearAnimalsButton.UseVisualStyleBackColor = true;
             this.ClearAnimalsButton.Click += new System.EventHandler(this.ClearProjectsButton_Click);

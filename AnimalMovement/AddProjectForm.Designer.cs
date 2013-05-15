@@ -86,7 +86,7 @@
             this.ProjectIdTextBox.MaxLength = 16;
             this.ProjectIdTextBox.Name = "ProjectIdTextBox";
             this.ProjectIdTextBox.Size = new System.Drawing.Size(226, 20);
-            this.ProjectIdTextBox.TabIndex = 2;
+            this.ProjectIdTextBox.TabIndex = 1;
             this.ProjectIdTextBox.TextChanged += new System.EventHandler(this.CodeTextBox_TextChanged);
             // 
             // ProjectNameTextBox
@@ -97,7 +97,7 @@
             this.ProjectNameTextBox.MaxLength = 150;
             this.ProjectNameTextBox.Name = "ProjectNameTextBox";
             this.ProjectNameTextBox.Size = new System.Drawing.Size(226, 20);
-            this.ProjectNameTextBox.TabIndex = 3;
+            this.ProjectNameTextBox.TabIndex = 2;
             this.ProjectNameTextBox.TextChanged += new System.EventHandler(this.NameTextBox_TextChanged);
             // 
             // UnitCodeTextBox
@@ -108,7 +108,7 @@
             this.UnitCodeTextBox.MaxLength = 4;
             this.UnitCodeTextBox.Name = "UnitCodeTextBox";
             this.UnitCodeTextBox.Size = new System.Drawing.Size(226, 20);
-            this.UnitCodeTextBox.TabIndex = 4;
+            this.UnitCodeTextBox.TabIndex = 3;
             // 
             // DescriptionTextBox
             // 
@@ -120,7 +120,7 @@
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
             this.DescriptionTextBox.Size = new System.Drawing.Size(226, 61);
-            this.DescriptionTextBox.TabIndex = 5;
+            this.DescriptionTextBox.TabIndex = 4;
             // 
             // CreateButton
             // 
@@ -128,7 +128,7 @@
             this.CreateButton.Location = new System.Drawing.Point(237, 185);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(75, 23);
-            this.CreateButton.TabIndex = 7;
+            this.CreateButton.TabIndex = 6;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
@@ -140,7 +140,7 @@
             this.cancelButton.Location = new System.Drawing.Point(156, 185);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 6;
+            this.cancelButton.TabIndex = 5;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
@@ -154,7 +154,7 @@
             this.ProjectInvestigatorComboBox.Location = new System.Drawing.Point(86, 13);
             this.ProjectInvestigatorComboBox.Name = "ProjectInvestigatorComboBox";
             this.ProjectInvestigatorComboBox.Size = new System.Drawing.Size(226, 21);
-            this.ProjectInvestigatorComboBox.TabIndex = 1;
+            this.ProjectInvestigatorComboBox.TabIndex = 0;
             // 
             // label3
             // 

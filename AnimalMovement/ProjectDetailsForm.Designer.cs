@@ -88,7 +88,7 @@
             this.label5.Location = new System.Drawing.Point(42, 15);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(38, 13);
-            this.label5.TabIndex = 7;
+            this.label5.TabIndex = 0;
             this.label5.Text = "Name:";
             // 
             // label6
@@ -97,7 +97,7 @@
             this.label6.Location = new System.Drawing.Point(15, 41);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(65, 13);
-            this.label6.TabIndex = 8;
+            this.label6.TabIndex = 3;
             this.label6.Text = "Investigator:";
             // 
             // label7
@@ -106,7 +106,7 @@
             this.label7.Location = new System.Drawing.Point(15, 65);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(63, 13);
-            this.label7.TabIndex = 9;
+            this.label7.TabIndex = 8;
             this.label7.Text = "Description:";
             // 
             // label8
@@ -116,7 +116,7 @@
             this.label8.Location = new System.Drawing.Point(322, 41);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(29, 13);
-            this.label8.TabIndex = 10;
+            this.label8.TabIndex = 6;
             this.label8.Text = "Unit:";
             // 
             // UnitTextBox
@@ -127,7 +127,7 @@
             this.UnitTextBox.MaxLength = 4;
             this.UnitTextBox.Name = "UnitTextBox";
             this.UnitTextBox.Size = new System.Drawing.Size(101, 20);
-            this.UnitTextBox.TabIndex = 6;
+            this.UnitTextBox.TabIndex = 7;
             // 
             // DescriptionTextBox
             // 
@@ -139,7 +139,7 @@
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
             this.DescriptionTextBox.Size = new System.Drawing.Size(443, 65);
-            this.DescriptionTextBox.TabIndex = 21;
+            this.DescriptionTextBox.TabIndex = 9;
             // 
             // ProjectNameTextBox
             // 
@@ -185,7 +185,7 @@
             this.EditSaveButton.Location = new System.Drawing.Point(383, 386);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
-            this.EditSaveButton.TabIndex = 10;
+            this.EditSaveButton.TabIndex = 12;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
@@ -197,7 +197,7 @@
             this.DoneCancelButton.Location = new System.Drawing.Point(15, 386);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.DoneCancelButton.TabIndex = 9;
+            this.DoneCancelButton.TabIndex = 11;
             this.DoneCancelButton.Text = "Done";
             this.DoneCancelButton.UseVisualStyleBackColor = true;
             this.DoneCancelButton.Click += new System.EventHandler(this.DoneCancelButton_Click);
@@ -213,7 +213,7 @@
             this.EditorsListBox.Name = "EditorsListBox";
             this.EditorsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.EditorsListBox.Size = new System.Drawing.Size(429, 166);
-            this.EditorsListBox.TabIndex = 11;
+            this.EditorsListBox.TabIndex = 0;
             this.EditorsListBox.SelectedIndexChanged += new System.EventHandler(this.EditorsListBox_SelectedIndexChanged);
             // 
             // AddEditorButton
@@ -224,7 +224,7 @@
             this.AddEditorButton.Location = new System.Drawing.Point(3, 175);
             this.AddEditorButton.Name = "AddEditorButton";
             this.AddEditorButton.Size = new System.Drawing.Size(24, 24);
-            this.AddEditorButton.TabIndex = 12;
+            this.AddEditorButton.TabIndex = 1;
             this.AddEditorButton.UseVisualStyleBackColor = true;
             this.AddEditorButton.Click += new System.EventHandler(this.AddEditorButton_Click);
             // 
@@ -236,7 +236,7 @@
             this.DeleteEditorButton.Location = new System.Drawing.Point(30, 175);
             this.DeleteEditorButton.Name = "DeleteEditorButton";
             this.DeleteEditorButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteEditorButton.TabIndex = 13;
+            this.DeleteEditorButton.TabIndex = 2;
             this.DeleteEditorButton.UseVisualStyleBackColor = true;
             this.DeleteEditorButton.Click += new System.EventHandler(this.DeleteEditorButton_Click);
             // 
@@ -252,7 +252,7 @@
             this.AnimalsListBox.Name = "AnimalsListBox";
             this.AnimalsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.AnimalsListBox.Size = new System.Drawing.Size(429, 166);
-            this.AnimalsListBox.TabIndex = 21;
+            this.AnimalsListBox.TabIndex = 0;
             this.AnimalsListBox.SelectedIndexChanged += new System.EventHandler(this.AnimalsListBox_SelectedIndexChanged);
             this.AnimalsListBox.DoubleClick += new System.EventHandler(this.InfoAnimalButton_Click);
             // 
@@ -264,7 +264,7 @@
             this.AddAnimalButton.Location = new System.Drawing.Point(3, 175);
             this.AddAnimalButton.Name = "AddAnimalButton";
             this.AddAnimalButton.Size = new System.Drawing.Size(24, 24);
-            this.AddAnimalButton.TabIndex = 22;
+            this.AddAnimalButton.TabIndex = 1;
             this.AddAnimalButton.UseVisualStyleBackColor = true;
             this.AddAnimalButton.Click += new System.EventHandler(this.AddAnimalButton_Click);
             // 
@@ -276,7 +276,7 @@
             this.DeleteAnimalsButton.Location = new System.Drawing.Point(30, 175);
             this.DeleteAnimalsButton.Name = "DeleteAnimalsButton";
             this.DeleteAnimalsButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteAnimalsButton.TabIndex = 23;
+            this.DeleteAnimalsButton.TabIndex = 2;
             this.DeleteAnimalsButton.UseVisualStyleBackColor = true;
             this.DeleteAnimalsButton.Click += new System.EventHandler(this.DeleteAnimalsButton_Click);
             // 
@@ -289,7 +289,7 @@
             this.InfoAnimalsButton.Location = new System.Drawing.Point(55, 175);
             this.InfoAnimalsButton.Name = "InfoAnimalsButton";
             this.InfoAnimalsButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoAnimalsButton.TabIndex = 24;
+            this.InfoAnimalsButton.TabIndex = 3;
             this.InfoAnimalsButton.UseVisualStyleBackColor = true;
             this.InfoAnimalsButton.Click += new System.EventHandler(this.InfoAnimalButton_Click);
             // 
@@ -305,7 +305,7 @@
             this.FilesListBox.Name = "FilesListBox";
             this.FilesListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.FilesListBox.Size = new System.Drawing.Size(429, 166);
-            this.FilesListBox.TabIndex = 31;
+            this.FilesListBox.TabIndex = 0;
             this.FilesListBox.SelectedIndexChanged += new System.EventHandler(this.FilesListBox_SelectedIndexChanged);
             this.FilesListBox.DoubleClick += new System.EventHandler(this.InfoFileButton_Click);
             // 
@@ -317,7 +317,7 @@
             this.AddFilesButton.Location = new System.Drawing.Point(3, 175);
             this.AddFilesButton.Name = "AddFilesButton";
             this.AddFilesButton.Size = new System.Drawing.Size(24, 24);
-            this.AddFilesButton.TabIndex = 32;
+            this.AddFilesButton.TabIndex = 1;
             this.AddFilesButton.UseVisualStyleBackColor = true;
             this.AddFilesButton.Click += new System.EventHandler(this.AddFilesButton_Click);
             // 
@@ -329,7 +329,7 @@
             this.DeleteFilesButton.Location = new System.Drawing.Point(30, 175);
             this.DeleteFilesButton.Name = "DeleteFilesButton";
             this.DeleteFilesButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteFilesButton.TabIndex = 33;
+            this.DeleteFilesButton.TabIndex = 2;
             this.DeleteFilesButton.UseVisualStyleBackColor = true;
             this.DeleteFilesButton.Click += new System.EventHandler(this.DeleteFilesButton_Click);
             // 
@@ -342,7 +342,7 @@
             this.InfoFilesButton.Location = new System.Drawing.Point(55, 175);
             this.InfoFilesButton.Name = "InfoFilesButton";
             this.InfoFilesButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoFilesButton.TabIndex = 34;
+            this.InfoFilesButton.TabIndex = 3;
             this.InfoFilesButton.UseVisualStyleBackColor = true;
             this.InfoFilesButton.Click += new System.EventHandler(this.InfoFileButton_Click);
             // 
@@ -359,7 +359,7 @@
             this.ProjectTabs.Name = "ProjectTabs";
             this.ProjectTabs.SelectedIndex = 0;
             this.ProjectTabs.Size = new System.Drawing.Size(443, 228);
-            this.ProjectTabs.TabIndex = 22;
+            this.ProjectTabs.TabIndex = 1;
             this.ProjectTabs.SelectedIndexChanged += new System.EventHandler(this.ProjectTabs_SelectedIndexChanged);
             // 
             // AnimalsTabPage
@@ -401,7 +401,7 @@
             this.ShowEmailFilesCheckBox.Location = new System.Drawing.Point(88, 180);
             this.ShowEmailFilesCheckBox.Name = "ShowEmailFilesCheckBox";
             this.ShowEmailFilesCheckBox.Size = new System.Drawing.Size(86, 17);
-            this.ShowEmailFilesCheckBox.TabIndex = 46;
+            this.ShowEmailFilesCheckBox.TabIndex = 4;
             this.ShowEmailFilesCheckBox.Text = "Show Emails";
             this.ShowEmailFilesCheckBox.UseVisualStyleBackColor = true;
             this.ShowEmailFilesCheckBox.CheckedChanged += new System.EventHandler(this.ShowFilesCheckBox_CheckedChanged);
@@ -414,7 +414,7 @@
             this.ShowDownloadFilesCheckBox.Location = new System.Drawing.Point(180, 180);
             this.ShowDownloadFilesCheckBox.Name = "ShowDownloadFilesCheckBox";
             this.ShowDownloadFilesCheckBox.Size = new System.Drawing.Size(109, 17);
-            this.ShowDownloadFilesCheckBox.TabIndex = 47;
+            this.ShowDownloadFilesCheckBox.TabIndex = 5;
             this.ShowDownloadFilesCheckBox.Text = "Show Downloads";
             this.ShowDownloadFilesCheckBox.UseVisualStyleBackColor = true;
             this.ShowDownloadFilesCheckBox.CheckedChanged += new System.EventHandler(this.ShowFilesCheckBox_CheckedChanged);
@@ -427,7 +427,7 @@
             this.ShowDerivedFilesCheckBox.Location = new System.Drawing.Point(297, 180);
             this.ShowDerivedFilesCheckBox.Name = "ShowDerivedFilesCheckBox";
             this.ShowDerivedFilesCheckBox.Size = new System.Drawing.Size(93, 17);
-            this.ShowDerivedFilesCheckBox.TabIndex = 48;
+            this.ShowDerivedFilesCheckBox.TabIndex = 6;
             this.ShowDerivedFilesCheckBox.Text = "Show Derived";
             this.ShowDerivedFilesCheckBox.UseVisualStyleBackColor = true;
             this.ShowDerivedFilesCheckBox.CheckedChanged += new System.EventHandler(this.ShowFilesCheckBox_CheckedChanged);
@@ -469,7 +469,7 @@
             this.ReportDescriptionTextBox.ReadOnly = true;
             this.ReportDescriptionTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.ReportDescriptionTextBox.Size = new System.Drawing.Size(422, 34);
-            this.ReportDescriptionTextBox.TabIndex = 7;
+            this.ReportDescriptionTextBox.TabIndex = 1;
             // 
             // label1
             // 
@@ -489,7 +489,7 @@
             this.ReportComboBox.Location = new System.Drawing.Point(57, 6);
             this.ReportComboBox.Name = "ReportComboBox";
             this.ReportComboBox.Size = new System.Drawing.Size(371, 21);
-            this.ReportComboBox.TabIndex = 5;
+            this.ReportComboBox.TabIndex = 0;
             this.ReportComboBox.SelectedIndexChanged += new System.EventHandler(this.ReportComboBox_SelectedIndexChanged);
             // 
             // ReportDataGridView
@@ -506,7 +506,7 @@
             this.ReportDataGridView.Name = "ReportDataGridView";
             this.ReportDataGridView.ReadOnly = true;
             this.ReportDataGridView.Size = new System.Drawing.Size(422, 123);
-            this.ReportDataGridView.TabIndex = 4;
+            this.ReportDataGridView.TabIndex = 2;
             // 
             // InvestigatorComboBox
             // 
@@ -517,7 +517,7 @@
             this.InvestigatorComboBox.Location = new System.Drawing.Point(86, 38);
             this.InvestigatorComboBox.Name = "InvestigatorComboBox";
             this.InvestigatorComboBox.Size = new System.Drawing.Size(194, 21);
-            this.InvestigatorComboBox.TabIndex = 23;
+            this.InvestigatorComboBox.TabIndex = 4;
             // 
             // ProjectDetailsForm
             // 

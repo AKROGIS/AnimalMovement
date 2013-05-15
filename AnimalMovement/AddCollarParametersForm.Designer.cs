@@ -53,7 +53,7 @@
             this.FixItButton.Location = new System.Drawing.Point(10, 188);
             this.FixItButton.Name = "FixItButton";
             this.FixItButton.Size = new System.Drawing.Size(75, 23);
-            this.FixItButton.TabIndex = 24;
+            this.FixItButton.TabIndex = 8;
             this.FixItButton.Text = "Fix It";
             this.FixItButton.UseVisualStyleBackColor = true;
             this.FixItButton.Visible = false;
@@ -94,7 +94,7 @@
             this.FileComboBox.Location = new System.Drawing.Point(117, 39);
             this.FileComboBox.Name = "FileComboBox";
             this.FileComboBox.Size = new System.Drawing.Size(119, 21);
-            this.FileComboBox.TabIndex = 21;
+            this.FileComboBox.TabIndex = 1;
             this.FileComboBox.SelectedIndexChanged += new System.EventHandler(this.FileComboBox_SelectedIndexChanged);
             // 
             // label3
@@ -127,7 +127,7 @@
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.ShowCheckBox = true;
             this.StartDateTimePicker.Size = new System.Drawing.Size(200, 20);
-            this.StartDateTimePicker.TabIndex = 18;
+            this.StartDateTimePicker.TabIndex = 4;
             this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
             // 
             // EndDateTimePicker
@@ -140,7 +140,7 @@
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.ShowCheckBox = true;
             this.EndDateTimePicker.Size = new System.Drawing.Size(200, 20);
-            this.EndDateTimePicker.TabIndex = 17;
+            this.EndDateTimePicker.TabIndex = 5;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
@@ -151,7 +151,7 @@
             this.cancelButton.Location = new System.Drawing.Point(162, 188);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 16;
+            this.cancelButton.TabIndex = 9;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -162,7 +162,7 @@
             this.CreateButton.Location = new System.Drawing.Point(243, 188);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(75, 23);
-            this.CreateButton.TabIndex = 15;
+            this.CreateButton.TabIndex = 10;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
@@ -183,7 +183,7 @@
             this.Gen3PeriodTextBox.Location = new System.Drawing.Point(118, 117);
             this.Gen3PeriodTextBox.Name = "Gen3PeriodTextBox";
             this.Gen3PeriodTextBox.Size = new System.Drawing.Size(119, 20);
-            this.Gen3PeriodTextBox.TabIndex = 26;
+            this.Gen3PeriodTextBox.TabIndex = 6;
             this.Gen3PeriodTextBox.Text = "24";
             this.Gen3PeriodTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.Gen3PeriodTextBox.TextChanged += new System.EventHandler(this.Gen3PeriodTextBox_TextChanged);
@@ -208,7 +208,7 @@
             this.Gen3TimeUnitComboBox.Location = new System.Drawing.Point(243, 117);
             this.Gen3TimeUnitComboBox.Name = "Gen3TimeUnitComboBox";
             this.Gen3TimeUnitComboBox.Size = new System.Drawing.Size(75, 21);
-            this.Gen3TimeUnitComboBox.TabIndex = 27;
+            this.Gen3TimeUnitComboBox.TabIndex = 7;
             // 
             // BrowseButton
             // 
@@ -216,7 +216,7 @@
             this.BrowseButton.Location = new System.Drawing.Point(293, 38);
             this.BrowseButton.Name = "BrowseButton";
             this.BrowseButton.Size = new System.Drawing.Size(25, 23);
-            this.BrowseButton.TabIndex = 28;
+            this.BrowseButton.TabIndex = 3;
             this.BrowseButton.Text = "...";
             this.BrowseButton.UseVisualStyleBackColor = true;
             this.BrowseButton.Click += new System.EventHandler(this.BrowseButton_Click);
@@ -228,7 +228,7 @@
             this.ClearFileButton.Location = new System.Drawing.Point(242, 38);
             this.ClearFileButton.Name = "ClearFileButton";
             this.ClearFileButton.Size = new System.Drawing.Size(47, 23);
-            this.ClearFileButton.TabIndex = 29;
+            this.ClearFileButton.TabIndex = 2;
             this.ClearFileButton.Text = "Clear";
             this.ClearFileButton.UseVisualStyleBackColor = true;
             this.ClearFileButton.Click += new System.EventHandler(this.ClearFileButton_Click);
@@ -241,7 +241,7 @@
             this.CollarComboBox.Location = new System.Drawing.Point(118, 12);
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(199, 21);
-            this.CollarComboBox.TabIndex = 30;
+            this.CollarComboBox.TabIndex = 0;
             this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // AddCollarParametersForm

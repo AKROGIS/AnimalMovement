@@ -118,7 +118,7 @@
             this.HasGpsCheckBox.Location = new System.Drawing.Point(376, 61);
             this.HasGpsCheckBox.Name = "HasGpsCheckBox";
             this.HasGpsCheckBox.Size = new System.Drawing.Size(67, 17);
-            this.HasGpsCheckBox.TabIndex = 83;
+            this.HasGpsCheckBox.TabIndex = 8;
             this.HasGpsCheckBox.Text = "Has Gps";
             this.toolTip1.SetToolTip(this.HasGpsCheckBox, "Check this box if the collar has an onboard GPS");
             this.HasGpsCheckBox.UseVisualStyleBackColor = true;
@@ -145,7 +145,7 @@
             this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
             this.DisposalDateTimePicker.ShowCheckBox = true;
             this.DisposalDateTimePicker.Size = new System.Drawing.Size(129, 20);
-            this.DisposalDateTimePicker.TabIndex = 81;
+            this.DisposalDateTimePicker.TabIndex = 6;
             this.toolTip1.SetToolTip(this.DisposalDateTimePicker, "The date the collar was lost, destroyed, or retired");
             this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
             // 
@@ -177,7 +177,7 @@
             this.OwnerTextBox.MaxLength = 100;
             this.OwnerTextBox.Name = "OwnerTextBox";
             this.OwnerTextBox.Size = new System.Drawing.Size(153, 20);
-            this.OwnerTextBox.TabIndex = 6;
+            this.OwnerTextBox.TabIndex = 5;
             this.toolTip1.SetToolTip(this.OwnerTextBox, "This should be an organization (NPS, FWS, USGS, AKF&G,  etc)");
             // 
             // label8
@@ -198,7 +198,7 @@
             this.SerialNumberTextBox.MaxLength = 100;
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
             this.SerialNumberTextBox.Size = new System.Drawing.Size(129, 20);
-            this.SerialNumberTextBox.TabIndex = 7;
+            this.SerialNumberTextBox.TabIndex = 4;
             this.toolTip1.SetToolTip(this.SerialNumberTextBox, "For Telonics collars this is the same as the ID (optional)");
             // 
             // ModelComboBox
@@ -209,7 +209,7 @@
             this.ModelComboBox.Location = new System.Drawing.Point(290, 6);
             this.ModelComboBox.Name = "ModelComboBox";
             this.ModelComboBox.Size = new System.Drawing.Size(153, 21);
-            this.ModelComboBox.TabIndex = 4;
+            this.ModelComboBox.TabIndex = 3;
             this.toolTip1.SetToolTip(this.ModelComboBox, "Required, but currently not used.");
             // 
             // label7
@@ -232,7 +232,7 @@
             this.ManagerComboBox.Location = new System.Drawing.Point(90, 6);
             this.ManagerComboBox.Name = "ManagerComboBox";
             this.ManagerComboBox.Size = new System.Drawing.Size(129, 21);
-            this.ManagerComboBox.TabIndex = 3;
+            this.ManagerComboBox.TabIndex = 2;
             this.toolTip1.SetToolTip(this.ManagerComboBox, "If you assign this collar to another PI you will not be able to edit it.");
             // 
             // AddDeploymentButton
@@ -243,7 +243,7 @@
             this.AddDeploymentButton.Location = new System.Drawing.Point(6, 306);
             this.AddDeploymentButton.Name = "AddDeploymentButton";
             this.AddDeploymentButton.Size = new System.Drawing.Size(24, 24);
-            this.AddDeploymentButton.TabIndex = 29;
+            this.AddDeploymentButton.TabIndex = 1;
             this.toolTip1.SetToolTip(this.AddDeploymentButton, "Deploy this collar on a new animal");
             this.AddDeploymentButton.UseVisualStyleBackColor = true;
             this.AddDeploymentButton.Click += new System.EventHandler(this.AddDeploymentButton_Click);
@@ -256,7 +256,7 @@
             this.DeleteDeploymentButton.Location = new System.Drawing.Point(33, 306);
             this.DeleteDeploymentButton.Name = "DeleteDeploymentButton";
             this.DeleteDeploymentButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteDeploymentButton.TabIndex = 30;
+            this.DeleteDeploymentButton.TabIndex = 2;
             this.toolTip1.SetToolTip(this.DeleteDeploymentButton, "Delete the selected deployment(s)");
             this.DeleteDeploymentButton.UseVisualStyleBackColor = true;
             this.DeleteDeploymentButton.Click += new System.EventHandler(this.DeleteDeploymentButton_Click);
@@ -270,7 +270,7 @@
             this.InfoAnimalButton.Location = new System.Drawing.Point(84, 306);
             this.InfoAnimalButton.Name = "InfoAnimalButton";
             this.InfoAnimalButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoAnimalButton.TabIndex = 31;
+            this.InfoAnimalButton.TabIndex = 4;
             this.toolTip1.SetToolTip(this.InfoAnimalButton, "Show details on the animal in the selected deployment");
             this.InfoAnimalButton.UseVisualStyleBackColor = true;
             this.InfoAnimalButton.Click += new System.EventHandler(this.InfoAnimalButton_Click);
@@ -283,7 +283,7 @@
             this.EditDeploymentButton.Location = new System.Drawing.Point(60, 306);
             this.EditDeploymentButton.Name = "EditDeploymentButton";
             this.EditDeploymentButton.Size = new System.Drawing.Size(24, 24);
-            this.EditDeploymentButton.TabIndex = 32;
+            this.EditDeploymentButton.TabIndex = 3;
             this.toolTip1.SetToolTip(this.EditDeploymentButton, "Change the selected deployment");
             this.EditDeploymentButton.UseVisualStyleBackColor = true;
             this.EditDeploymentButton.Click += new System.EventHandler(this.EditDeploymentButton_Click);
@@ -304,7 +304,7 @@
             this.CollarTabControl.Name = "CollarTabControl";
             this.CollarTabControl.SelectedIndex = 0;
             this.CollarTabControl.Size = new System.Drawing.Size(459, 362);
-            this.CollarTabControl.TabIndex = 54;
+            this.CollarTabControl.TabIndex = 0;
             this.CollarTabControl.SelectedIndexChanged += new System.EventHandler(this.CollarTabControl_SelectedIndexChanged);
             // 
             // GeneralTabPage
@@ -343,7 +343,7 @@
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
             this.NotesTextBox.Size = new System.Drawing.Size(353, 211);
-            this.NotesTextBox.TabIndex = 10;
+            this.NotesTextBox.TabIndex = 9;
             // 
             // DoneCancelButton
             // 
@@ -352,7 +352,7 @@
             this.DoneCancelButton.Location = new System.Drawing.Point(90, 305);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.DoneCancelButton.TabIndex = 20;
+            this.DoneCancelButton.TabIndex = 0;
             this.DoneCancelButton.Text = "Done";
             this.DoneCancelButton.UseVisualStyleBackColor = true;
             this.DoneCancelButton.Click += new System.EventHandler(this.DoneCancelButton_Click);
@@ -365,7 +365,7 @@
             this.EditSaveButton.Location = new System.Drawing.Point(368, 305);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
-            this.EditSaveButton.TabIndex = 26;
+            this.EditSaveButton.TabIndex = 1;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
@@ -396,7 +396,7 @@
             this.FrequencyTextBox.MaxLength = 32;
             this.FrequencyTextBox.Name = "FrequencyTextBox";
             this.FrequencyTextBox.Size = new System.Drawing.Size(73, 20);
-            this.FrequencyTextBox.TabIndex = 8;
+            this.FrequencyTextBox.TabIndex = 7;
             this.FrequencyTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.ValidateFrequency);
             // 
             // AnimalsTabPage
@@ -436,7 +436,7 @@
             this.DeploymentDataGridView.RowHeadersVisible = false;
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DeploymentDataGridView.Size = new System.Drawing.Size(437, 293);
-            this.DeploymentDataGridView.TabIndex = 11;
+            this.DeploymentDataGridView.TabIndex = 0;
             this.DeploymentDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DeploymentDataGridView_CellDoubleClick);
             this.DeploymentDataGridView.SelectionChanged += new System.EventHandler(this.DeploymentDataGridView_SelectionChanged);
             this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.InfoAnimalButton_Click);
@@ -500,7 +500,7 @@
             this.EditArgosButton.Location = new System.Drawing.Point(60, 306);
             this.EditArgosButton.Name = "EditArgosButton";
             this.EditArgosButton.Size = new System.Drawing.Size(24, 24);
-            this.EditArgosButton.TabIndex = 30;
+            this.EditArgosButton.TabIndex = 3;
             this.EditArgosButton.UseVisualStyleBackColor = true;
             this.EditArgosButton.Click += new System.EventHandler(this.EditArgosButton_Click);
             // 
@@ -525,7 +525,7 @@
             this.ArgosDataGridView.ShowEditingIcon = false;
             this.ArgosDataGridView.ShowRowErrors = false;
             this.ArgosDataGridView.Size = new System.Drawing.Size(439, 294);
-            this.ArgosDataGridView.TabIndex = 29;
+            this.ArgosDataGridView.TabIndex = 0;
             this.ArgosDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ArgosDataGridView_CellDoubleClick);
             this.ArgosDataGridView.SelectionChanged += new System.EventHandler(this.ArgosDataGridView_SelectionChanged);
             // 
@@ -537,7 +537,7 @@
             this.AddArgosButton.Location = new System.Drawing.Point(6, 306);
             this.AddArgosButton.Name = "AddArgosButton";
             this.AddArgosButton.Size = new System.Drawing.Size(24, 24);
-            this.AddArgosButton.TabIndex = 26;
+            this.AddArgosButton.TabIndex = 1;
             this.AddArgosButton.UseVisualStyleBackColor = true;
             this.AddArgosButton.Click += new System.EventHandler(this.AddArgosButton_Click);
             // 
@@ -549,7 +549,7 @@
             this.DeleteArgosButton.Location = new System.Drawing.Point(33, 306);
             this.DeleteArgosButton.Name = "DeleteArgosButton";
             this.DeleteArgosButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteArgosButton.TabIndex = 27;
+            this.DeleteArgosButton.TabIndex = 2;
             this.DeleteArgosButton.UseVisualStyleBackColor = true;
             this.DeleteArgosButton.Click += new System.EventHandler(this.DeleteArgosButton_Click);
             // 
@@ -562,7 +562,7 @@
             this.InfoArgosButton.Location = new System.Drawing.Point(84, 306);
             this.InfoArgosButton.Name = "InfoArgosButton";
             this.InfoArgosButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoArgosButton.TabIndex = 28;
+            this.InfoArgosButton.TabIndex = 4;
             this.InfoArgosButton.UseVisualStyleBackColor = true;
             this.InfoArgosButton.Click += new System.EventHandler(this.InfoArgosButton_Click);
             // 
@@ -594,7 +594,7 @@
             this.IgnoreSuffixCheckBox.Location = new System.Drawing.Point(290, 11);
             this.IgnoreSuffixCheckBox.Name = "IgnoreSuffixCheckBox";
             this.IgnoreSuffixCheckBox.Size = new System.Drawing.Size(155, 17);
-            this.IgnoreSuffixCheckBox.TabIndex = 69;
+            this.IgnoreSuffixCheckBox.TabIndex = 0;
             this.IgnoreSuffixCheckBox.Text = "Ignore Alpha Suffix on CTN";
             this.IgnoreSuffixCheckBox.UseVisualStyleBackColor = true;
             this.IgnoreSuffixCheckBox.CheckedChanged += new System.EventHandler(this.IgnoreSuffixCheckBox_CheckedChanged);
@@ -629,7 +629,7 @@
             this.TpfDataGridView.RowHeadersVisible = false;
             this.TpfDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.TpfDataGridView.Size = new System.Drawing.Size(439, 99);
-            this.TpfDataGridView.TabIndex = 66;
+            this.TpfDataGridView.TabIndex = 1;
             this.TpfDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TpfDataGridView_CellDoubleClick);
             // 
             // EditParameterButton
@@ -640,7 +640,7 @@
             this.EditParameterButton.Location = new System.Drawing.Point(60, 306);
             this.EditParameterButton.Name = "EditParameterButton";
             this.EditParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.EditParameterButton.TabIndex = 65;
+            this.EditParameterButton.TabIndex = 5;
             this.EditParameterButton.UseVisualStyleBackColor = true;
             this.EditParameterButton.Click += new System.EventHandler(this.EditParameterButton_Click);
             // 
@@ -664,7 +664,7 @@
             this.ParametersDataGridView.ShowEditingIcon = false;
             this.ParametersDataGridView.ShowRowErrors = false;
             this.ParametersDataGridView.Size = new System.Drawing.Size(439, 148);
-            this.ParametersDataGridView.TabIndex = 29;
+            this.ParametersDataGridView.TabIndex = 2;
             this.ParametersDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellDoubleClick);
             this.ParametersDataGridView.SelectionChanged += new System.EventHandler(this.ParametersDataGridView_SelectionChanged);
             // 
@@ -676,7 +676,7 @@
             this.AddParameterButton.Location = new System.Drawing.Point(6, 306);
             this.AddParameterButton.Name = "AddParameterButton";
             this.AddParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.AddParameterButton.TabIndex = 30;
+            this.AddParameterButton.TabIndex = 3;
             this.AddParameterButton.UseVisualStyleBackColor = true;
             this.AddParameterButton.Click += new System.EventHandler(this.AddParameterButton_Click);
             // 
@@ -688,7 +688,7 @@
             this.DeleteParameterButton.Location = new System.Drawing.Point(33, 306);
             this.DeleteParameterButton.Name = "DeleteParameterButton";
             this.DeleteParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteParameterButton.TabIndex = 31;
+            this.DeleteParameterButton.TabIndex = 4;
             this.DeleteParameterButton.UseVisualStyleBackColor = true;
             this.DeleteParameterButton.Click += new System.EventHandler(this.DeleteParameterButton_Click);
             // 
@@ -701,7 +701,7 @@
             this.InfoParameterButton.Location = new System.Drawing.Point(84, 306);
             this.InfoParameterButton.Name = "InfoParameterButton";
             this.InfoParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoParameterButton.TabIndex = 32;
+            this.InfoParameterButton.TabIndex = 6;
             this.InfoParameterButton.UseVisualStyleBackColor = true;
             this.InfoParameterButton.Click += new System.EventHandler(this.InfoParameterButton_Click);
             // 
@@ -724,7 +724,7 @@
             this.ChangeFileStatusButton.Location = new System.Drawing.Point(287, 305);
             this.ChangeFileStatusButton.Name = "ChangeFileStatusButton";
             this.ChangeFileStatusButton.Size = new System.Drawing.Size(75, 23);
-            this.ChangeFileStatusButton.TabIndex = 27;
+            this.ChangeFileStatusButton.TabIndex = 1;
             this.ChangeFileStatusButton.Text = "Deactivate";
             this.ChangeFileStatusButton.UseVisualStyleBackColor = true;
             this.ChangeFileStatusButton.Click += new System.EventHandler(this.ChangeFileStatusButton_Click);
@@ -735,7 +735,7 @@
             this.FileInfoButton.Location = new System.Drawing.Point(368, 305);
             this.FileInfoButton.Name = "FileInfoButton";
             this.FileInfoButton.Size = new System.Drawing.Size(75, 23);
-            this.FileInfoButton.TabIndex = 26;
+            this.FileInfoButton.TabIndex = 2;
             this.FileInfoButton.Text = "Info";
             this.FileInfoButton.UseVisualStyleBackColor = true;
             this.FileInfoButton.Click += new System.EventHandler(this.FileInfoButton_Click);
@@ -782,7 +782,7 @@
             this.UnhideFixButton.Location = new System.Drawing.Point(368, 305);
             this.UnhideFixButton.Name = "UnhideFixButton";
             this.UnhideFixButton.Size = new System.Drawing.Size(75, 23);
-            this.UnhideFixButton.TabIndex = 3;
+            this.UnhideFixButton.TabIndex = 1;
             this.UnhideFixButton.Text = "Unhide Fix";
             this.UnhideFixButton.UseVisualStyleBackColor = true;
             this.UnhideFixButton.Click += new System.EventHandler(this.UnhideFixButton_Click);
@@ -805,7 +805,7 @@
             this.FixConflictsDataGridView.RowHeadersVisible = false;
             this.FixConflictsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.FixConflictsDataGridView.Size = new System.Drawing.Size(437, 248);
-            this.FixConflictsDataGridView.TabIndex = 2;
+            this.FixConflictsDataGridView.TabIndex = 0;
             this.FixConflictsDataGridView.SelectionChanged += new System.EventHandler(this.FixConflictsDataGridView_SelectionChanged);
             // 
             // label11
@@ -862,7 +862,7 @@
             this.ProcessingIssuesDataGridView.RowHeadersVisible = false;
             this.ProcessingIssuesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(445, 305);
-            this.ProcessingIssuesDataGridView.TabIndex = 7;
+            this.ProcessingIssuesDataGridView.TabIndex = 0;
             this.ProcessingIssuesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProcessingIssuesDataGridView_CellDoubleClick);
             // 
             // ManufacturerTextBox

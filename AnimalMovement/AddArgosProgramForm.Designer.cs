@@ -56,7 +56,7 @@
             this.cancelButton.Location = new System.Drawing.Point(12, 281);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 29;
+            this.cancelButton.TabIndex = 9;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
@@ -67,7 +67,7 @@
             this.CreateButton.Location = new System.Drawing.Point(247, 281);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(75, 23);
-            this.CreateButton.TabIndex = 28;
+            this.CreateButton.TabIndex = 10;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
@@ -90,7 +90,7 @@
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
             this.NotesTextBox.Size = new System.Drawing.Size(310, 60);
-            this.NotesTextBox.TabIndex = 26;
+            this.NotesTextBox.TabIndex = 8;
             // 
             // ActiveCheckBox
             // 
@@ -101,7 +101,7 @@
             this.ActiveCheckBox.Location = new System.Drawing.Point(266, 195);
             this.ActiveCheckBox.Name = "ActiveCheckBox";
             this.ActiveCheckBox.Size = new System.Drawing.Size(56, 17);
-            this.ActiveCheckBox.TabIndex = 25;
+            this.ActiveCheckBox.TabIndex = 7;
             this.ActiveCheckBox.Text = "Active";
             this.ActiveCheckBox.ThreeState = true;
             this.ActiveCheckBox.UseVisualStyleBackColor = true;
@@ -115,7 +115,7 @@
             this.OwnerComboBox.Location = new System.Drawing.Point(119, 12);
             this.OwnerComboBox.Name = "OwnerComboBox";
             this.OwnerComboBox.Size = new System.Drawing.Size(203, 21);
-            this.OwnerComboBox.TabIndex = 24;
+            this.OwnerComboBox.TabIndex = 0;
             this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
             // label2
@@ -134,7 +134,7 @@
             this.ProgramIdTextBox.Location = new System.Drawing.Point(119, 39);
             this.ProgramIdTextBox.Name = "ProgramIdTextBox";
             this.ProgramIdTextBox.Size = new System.Drawing.Size(203, 20);
-            this.ProgramIdTextBox.TabIndex = 22;
+            this.ProgramIdTextBox.TabIndex = 1;
             this.ProgramIdTextBox.TextChanged += new System.EventHandler(this.ProgramIdTextBox_TextChanged);
             // 
             // label1
@@ -166,7 +166,7 @@
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.ShowCheckBox = true;
             this.EndDateTimePicker.Size = new System.Drawing.Size(203, 20);
-            this.EndDateTimePicker.TabIndex = 19;
+            this.EndDateTimePicker.TabIndex = 6;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
@@ -177,7 +177,7 @@
             this.ProgramNameTextBox.Location = new System.Drawing.Point(119, 65);
             this.ProgramNameTextBox.Name = "ProgramNameTextBox";
             this.ProgramNameTextBox.Size = new System.Drawing.Size(203, 20);
-            this.ProgramNameTextBox.TabIndex = 31;
+            this.ProgramNameTextBox.TabIndex = 2;
             // 
             // label5
             // 
@@ -195,7 +195,7 @@
             this.UserNameTextBox.Location = new System.Drawing.Point(119, 91);
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(203, 20);
-            this.UserNameTextBox.TabIndex = 33;
+            this.UserNameTextBox.TabIndex = 3;
             this.UserNameTextBox.TextChanged += new System.EventHandler(this.UserNameTextBox_TextChanged);
             // 
             // label6
@@ -214,7 +214,7 @@
             this.PasswordTextBox.Location = new System.Drawing.Point(119, 117);
             this.PasswordTextBox.Name = "PasswordTextBox";
             this.PasswordTextBox.Size = new System.Drawing.Size(203, 20);
-            this.PasswordTextBox.TabIndex = 35;
+            this.PasswordTextBox.TabIndex = 4;
             this.PasswordTextBox.TextChanged += new System.EventHandler(this.PasswordTextBox_TextChanged);
             // 
             // label7
@@ -246,7 +246,7 @@
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.ShowCheckBox = true;
             this.StartDateTimePicker.Size = new System.Drawing.Size(203, 20);
-            this.StartDateTimePicker.TabIndex = 36;
+            this.StartDateTimePicker.TabIndex = 5;
             this.StartDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
             // 

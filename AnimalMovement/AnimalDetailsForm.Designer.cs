@@ -92,7 +92,7 @@
             this.DeploymentDataGridView.RowHeadersVisible = false;
             this.DeploymentDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DeploymentDataGridView.Size = new System.Drawing.Size(423, 119);
-            this.DeploymentDataGridView.TabIndex = 7;
+            this.DeploymentDataGridView.TabIndex = 0;
             this.DeploymentDataGridView.SelectionChanged += new System.EventHandler(this.DeploymentDataGridView_SelectionChanged);
             this.DeploymentDataGridView.DoubleClick += new System.EventHandler(this.InfoCollarButton_Click);
             // 
@@ -151,7 +151,7 @@
             this.DoneCancelButton.Location = new System.Drawing.Point(87, 131);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.DoneCancelButton.TabIndex = 8;
+            this.DoneCancelButton.TabIndex = 5;
             this.DoneCancelButton.Text = "Done";
             this.DoneCancelButton.UseVisualStyleBackColor = true;
             this.DoneCancelButton.Click += new System.EventHandler(this.DoneCancelButton_Click);
@@ -164,7 +164,7 @@
             this.EditSaveButton.Location = new System.Drawing.Point(356, 131);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
-            this.EditSaveButton.TabIndex = 11;
+            this.EditSaveButton.TabIndex = 6;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
@@ -186,7 +186,7 @@
             this.GroupTextBox.MaxLength = 500;
             this.GroupTextBox.Name = "GroupTextBox";
             this.GroupTextBox.Size = new System.Drawing.Size(344, 20);
-            this.GroupTextBox.TabIndex = 5;
+            this.GroupTextBox.TabIndex = 3;
             // 
             // SpeciesComboBox
             // 
@@ -197,7 +197,7 @@
             this.SpeciesComboBox.Location = new System.Drawing.Point(87, 6);
             this.SpeciesComboBox.Name = "SpeciesComboBox";
             this.SpeciesComboBox.Size = new System.Drawing.Size(184, 21);
-            this.SpeciesComboBox.TabIndex = 3;
+            this.SpeciesComboBox.TabIndex = 0;
             // 
             // GenderComboBox
             // 
@@ -207,7 +207,7 @@
             this.GenderComboBox.Location = new System.Drawing.Point(336, 6);
             this.GenderComboBox.Name = "GenderComboBox";
             this.GenderComboBox.Size = new System.Drawing.Size(95, 21);
-            this.GenderComboBox.TabIndex = 4;
+            this.GenderComboBox.TabIndex = 1;
             // 
             // label3
             // 
@@ -228,7 +228,7 @@
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
             this.DescriptionTextBox.Size = new System.Drawing.Size(344, 40);
-            this.DescriptionTextBox.TabIndex = 6;
+            this.DescriptionTextBox.TabIndex = 4;
             // 
             // AnimalIdTextBox
             // 
@@ -291,7 +291,7 @@
             this.AnimalTabControl.Name = "AnimalTabControl";
             this.AnimalTabControl.SelectedIndex = 0;
             this.AnimalTabControl.Size = new System.Drawing.Size(449, 188);
-            this.AnimalTabControl.TabIndex = 79;
+            this.AnimalTabControl.TabIndex = 1;
             this.AnimalTabControl.SelectedIndexChanged += new System.EventHandler(this.AnimalTabControl_SelectedIndexChanged);
             // 
             // tabPage1
@@ -337,7 +337,7 @@
             this.MortatlityDateTimePicker.Name = "MortatlityDateTimePicker";
             this.MortatlityDateTimePicker.ShowCheckBox = true;
             this.MortatlityDateTimePicker.Size = new System.Drawing.Size(344, 20);
-            this.MortatlityDateTimePicker.TabIndex = 79;
+            this.MortatlityDateTimePicker.TabIndex = 2;
             this.MortatlityDateTimePicker.ValueChanged += new System.EventHandler(this.MortatlityDateTimePicker_ValueChanged);
             // 
             // tabPage2
@@ -363,7 +363,7 @@
             this.EditDeploymentButton.Location = new System.Drawing.Point(62, 132);
             this.EditDeploymentButton.Name = "EditDeploymentButton";
             this.EditDeploymentButton.Size = new System.Drawing.Size(24, 24);
-            this.EditDeploymentButton.TabIndex = 36;
+            this.EditDeploymentButton.TabIndex = 4;
             this.EditDeploymentButton.UseVisualStyleBackColor = true;
             this.EditDeploymentButton.Click += new System.EventHandler(this.EditDeploymentButton_Click);
             // 
@@ -375,7 +375,7 @@
             this.AddDeploymentButton.Location = new System.Drawing.Point(8, 132);
             this.AddDeploymentButton.Name = "AddDeploymentButton";
             this.AddDeploymentButton.Size = new System.Drawing.Size(24, 24);
-            this.AddDeploymentButton.TabIndex = 33;
+            this.AddDeploymentButton.TabIndex = 2;
             this.AddDeploymentButton.UseVisualStyleBackColor = true;
             this.AddDeploymentButton.Click += new System.EventHandler(this.AddDeploymentButton_Click);
             // 
@@ -387,7 +387,7 @@
             this.DeleteDeploymentButton.Location = new System.Drawing.Point(35, 132);
             this.DeleteDeploymentButton.Name = "DeleteDeploymentButton";
             this.DeleteDeploymentButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteDeploymentButton.TabIndex = 34;
+            this.DeleteDeploymentButton.TabIndex = 3;
             this.DeleteDeploymentButton.UseVisualStyleBackColor = true;
             this.DeleteDeploymentButton.Click += new System.EventHandler(this.DeleteDeploymentButton_Click);
             // 
@@ -400,7 +400,7 @@
             this.InfoCollarButton.Location = new System.Drawing.Point(86, 132);
             this.InfoCollarButton.Name = "InfoCollarButton";
             this.InfoCollarButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoCollarButton.TabIndex = 35;
+            this.InfoCollarButton.TabIndex = 0;
             this.InfoCollarButton.UseVisualStyleBackColor = true;
             this.InfoCollarButton.Click += new System.EventHandler(this.InfoCollarButton_Click);
             // 

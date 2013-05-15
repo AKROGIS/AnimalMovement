@@ -72,7 +72,7 @@
             this.cancelButton.Location = new System.Drawing.Point(256, 291);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 13;
+            this.cancelButton.TabIndex = 4;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -83,7 +83,7 @@
             this.helpButton.Location = new System.Drawing.Point(175, 291);
             this.helpButton.Name = "helpButton";
             this.helpButton.Size = new System.Drawing.Size(75, 23);
-            this.helpButton.TabIndex = 12;
+            this.helpButton.TabIndex = 3;
             this.helpButton.Text = "Help";
             this.helpButton.UseVisualStyleBackColor = true;
             this.helpButton.Click += new System.EventHandler(this.HelpButton_Click);
@@ -94,7 +94,7 @@
             this.UploadButton.Location = new System.Drawing.Point(337, 291);
             this.UploadButton.Name = "UploadButton";
             this.UploadButton.Size = new System.Drawing.Size(75, 23);
-            this.UploadButton.TabIndex = 14;
+            this.UploadButton.TabIndex = 5;
             this.UploadButton.Text = "Upload";
             this.UploadButton.UseVisualStyleBackColor = true;
             this.UploadButton.Click += new System.EventHandler(this.UploadButton_Click);
@@ -108,7 +108,7 @@
             this.statusGroupBox.Location = new System.Drawing.Point(12, 215);
             this.statusGroupBox.Name = "statusGroupBox";
             this.statusGroupBox.Size = new System.Drawing.Size(400, 70);
-            this.statusGroupBox.TabIndex = 8;
+            this.statusGroupBox.TabIndex = 2;
             this.statusGroupBox.TabStop = false;
             this.statusGroupBox.Text = "Status";
             // 
@@ -150,7 +150,7 @@
             this.groupBox2.Location = new System.Drawing.Point(12, 111);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(400, 98);
-            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Associate file with:";
             // 
@@ -160,7 +160,7 @@
             this.ClearCollarButton.Location = new System.Drawing.Point(349, 71);
             this.ClearCollarButton.Name = "ClearCollarButton";
             this.ClearCollarButton.Size = new System.Drawing.Size(45, 21);
-            this.ClearCollarButton.TabIndex = 9;
+            this.ClearCollarButton.TabIndex = 6;
             this.ClearCollarButton.Text = "Clear";
             this.ClearCollarButton.UseVisualStyleBackColor = true;
             this.ClearCollarButton.Click += new System.EventHandler(this.ClearCollarButton_Click);
@@ -171,7 +171,7 @@
             this.label1.Location = new System.Drawing.Point(25, 74);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(36, 13);
-            this.label1.TabIndex = 9;
+            this.label1.TabIndex = 4;
             this.label1.Text = "Collar:";
             // 
             // InvestigatorComboBox
@@ -183,7 +183,7 @@
             this.InvestigatorComboBox.Location = new System.Drawing.Point(95, 44);
             this.InvestigatorComboBox.Name = "InvestigatorComboBox";
             this.InvestigatorComboBox.Size = new System.Drawing.Size(299, 21);
-            this.InvestigatorComboBox.TabIndex = 7;
+            this.InvestigatorComboBox.TabIndex = 3;
             this.InvestigatorComboBox.SelectedIndexChanged += new System.EventHandler(this.InvestigatorComboBox_SelectedIndexChanged);
             // 
             // CollarComboBox
@@ -195,7 +195,7 @@
             this.CollarComboBox.Location = new System.Drawing.Point(95, 71);
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(248, 21);
-            this.CollarComboBox.TabIndex = 8;
+            this.CollarComboBox.TabIndex = 5;
             this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // ProjectComboBox
@@ -207,7 +207,7 @@
             this.ProjectComboBox.Location = new System.Drawing.Point(95, 18);
             this.ProjectComboBox.Name = "ProjectComboBox";
             this.ProjectComboBox.Size = new System.Drawing.Size(299, 21);
-            this.ProjectComboBox.TabIndex = 6;
+            this.ProjectComboBox.TabIndex = 1;
             this.ProjectComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
             // 
             // InvestigatorRadioButton
@@ -216,7 +216,7 @@
             this.InvestigatorRadioButton.Location = new System.Drawing.Point(6, 45);
             this.InvestigatorRadioButton.Name = "InvestigatorRadioButton";
             this.InvestigatorRadioButton.Size = new System.Drawing.Size(83, 17);
-            this.InvestigatorRadioButton.TabIndex = 3;
+            this.InvestigatorRadioButton.TabIndex = 2;
             this.InvestigatorRadioButton.Text = "Investigator:";
             this.InvestigatorRadioButton.UseVisualStyleBackColor = true;
             this.InvestigatorRadioButton.CheckedChanged += new System.EventHandler(this.ProjectRadioButton_CheckedChanged);
@@ -246,7 +246,7 @@
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(400, 93);
-            this.groupBox1.TabIndex = 1;
+            this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Data source:";
             // 
@@ -257,7 +257,7 @@
             this.FolderNameTextBox.Location = new System.Drawing.Point(69, 44);
             this.FolderNameTextBox.Name = "FolderNameTextBox";
             this.FolderNameTextBox.Size = new System.Drawing.Size(295, 20);
-            this.FolderNameTextBox.TabIndex = 3;
+            this.FolderNameTextBox.TabIndex = 4;
             this.FolderNameTextBox.TextChanged += new System.EventHandler(this.FolderNameTextBox_TextChanged);
             // 
             // AllowDuplicatesCheckBox
@@ -266,7 +266,7 @@
             this.AllowDuplicatesCheckBox.Location = new System.Drawing.Point(6, 70);
             this.AllowDuplicatesCheckBox.Name = "AllowDuplicatesCheckBox";
             this.AllowDuplicatesCheckBox.Size = new System.Drawing.Size(102, 17);
-            this.AllowDuplicatesCheckBox.TabIndex = 5;
+            this.AllowDuplicatesCheckBox.TabIndex = 6;
             this.AllowDuplicatesCheckBox.Text = "Allow duplicates";
             this.AllowDuplicatesCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -276,7 +276,7 @@
             this.FolderBrowserButton.Location = new System.Drawing.Point(370, 41);
             this.FolderBrowserButton.Name = "FolderBrowserButton";
             this.FolderBrowserButton.Size = new System.Drawing.Size(24, 24);
-            this.FolderBrowserButton.TabIndex = 4;
+            this.FolderBrowserButton.TabIndex = 5;
             this.FolderBrowserButton.Text = "...";
             this.FolderBrowserButton.UseVisualStyleBackColor = true;
             this.FolderBrowserButton.Click += new System.EventHandler(this.FolderBrowserButton_Click);

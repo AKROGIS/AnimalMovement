@@ -62,7 +62,7 @@
             this.QuitButton.Location = new System.Drawing.Point(247, 310);
             this.QuitButton.Name = "QuitButton";
             this.QuitButton.Size = new System.Drawing.Size(75, 23);
-            this.QuitButton.TabIndex = 6;
+            this.QuitButton.TabIndex = 5;
             this.QuitButton.Text = "Cancel";
             this.QuitButton.UseVisualStyleBackColor = true;
             this.QuitButton.Click += new System.EventHandler(this.QuitButton_Click);
@@ -73,7 +73,7 @@
             this.ProcessButton.Location = new System.Drawing.Point(328, 310);
             this.ProcessButton.Name = "ProcessButton";
             this.ProcessButton.Size = new System.Drawing.Size(75, 23);
-            this.ProcessButton.TabIndex = 5;
+            this.ProcessButton.TabIndex = 6;
             this.ProcessButton.Text = "Process";
             this.ProcessButton.UseVisualStyleBackColor = true;
             this.ProcessButton.Click += new System.EventHandler(this.ProcessButton_Click);
@@ -87,7 +87,7 @@
             this.InvestigatorComboBox.Location = new System.Drawing.Point(121, 12);
             this.InvestigatorComboBox.Name = "InvestigatorComboBox";
             this.InvestigatorComboBox.Size = new System.Drawing.Size(282, 21);
-            this.InvestigatorComboBox.TabIndex = 4;
+            this.InvestigatorComboBox.TabIndex = 0;
             this.InvestigatorComboBox.SelectedIndexChanged += new System.EventHandler(this.InvestigatorComboBox_SelectedIndexChanged);
             // 
             // BrowseButton
@@ -96,7 +96,7 @@
             this.BrowseButton.Location = new System.Drawing.Point(377, 39);
             this.BrowseButton.Name = "BrowseButton";
             this.BrowseButton.Size = new System.Drawing.Size(24, 23);
-            this.BrowseButton.TabIndex = 29;
+            this.BrowseButton.TabIndex = 2;
             this.BrowseButton.Text = "...";
             this.BrowseButton.UseVisualStyleBackColor = true;
             this.BrowseButton.Click += new System.EventHandler(this.BrowseButton_Click);
@@ -117,7 +117,7 @@
             this.FileNameTextBox.Location = new System.Drawing.Point(50, 41);
             this.FileNameTextBox.Name = "FileNameTextBox";
             this.FileNameTextBox.Size = new System.Drawing.Size(321, 20);
-            this.FileNameTextBox.TabIndex = 28;
+            this.FileNameTextBox.TabIndex = 1;
             this.FileNameTextBox.TextChanged += new System.EventHandler(this.FileNameTextBox_TextChanged);
             // 
             // ProgressTextBox
@@ -128,7 +128,7 @@
             this.ProgressTextBox.Multiline = true;
             this.ProgressTextBox.Name = "ProgressTextBox";
             this.ProgressTextBox.Size = new System.Drawing.Size(390, 47);
-            this.ProgressTextBox.TabIndex = 31;
+            this.ProgressTextBox.TabIndex = 3;
             // 
             // ExcelDataGridView
             // 
@@ -139,7 +139,7 @@
             this.ExcelDataGridView.Location = new System.Drawing.Point(11, 122);
             this.ExcelDataGridView.Name = "ExcelDataGridView";
             this.ExcelDataGridView.Size = new System.Drawing.Size(390, 182);
-            this.ExcelDataGridView.TabIndex = 32;
+            this.ExcelDataGridView.TabIndex = 4;
             // 
             // AddDeploymentCsvForm
             // 

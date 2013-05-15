@@ -50,7 +50,7 @@
             this.CollarComboBox.Location = new System.Drawing.Point(102, 12);
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(200, 21);
-            this.CollarComboBox.TabIndex = 37;
+            this.CollarComboBox.TabIndex = 0;
             this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // FixItButton
@@ -59,7 +59,7 @@
             this.FixItButton.Location = new System.Drawing.Point(12, 159);
             this.FixItButton.Name = "FixItButton";
             this.FixItButton.Size = new System.Drawing.Size(75, 23);
-            this.FixItButton.TabIndex = 36;
+            this.FixItButton.TabIndex = 4;
             this.FixItButton.Text = "Fix It";
             this.FixItButton.UseVisualStyleBackColor = true;
             this.FixItButton.Visible = false;
@@ -100,7 +100,7 @@
             this.AnimalComboBox.Location = new System.Drawing.Point(102, 39);
             this.AnimalComboBox.Name = "AnimalComboBox";
             this.AnimalComboBox.Size = new System.Drawing.Size(200, 21);
-            this.AnimalComboBox.TabIndex = 33;
+            this.AnimalComboBox.TabIndex = 1;
             this.AnimalComboBox.SelectedIndexChanged += new System.EventHandler(this.AnimalComboBox_SelectedIndexChanged);
             // 
             // label3
@@ -132,7 +132,7 @@
             this.StartDateTimePicker.Location = new System.Drawing.Point(102, 66);
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.Size = new System.Drawing.Size(200, 20);
-            this.StartDateTimePicker.TabIndex = 30;
+            this.StartDateTimePicker.TabIndex = 2;
             this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
             // 
             // EndDateTimePicker
@@ -145,7 +145,7 @@
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.ShowCheckBox = true;
             this.EndDateTimePicker.Size = new System.Drawing.Size(200, 20);
-            this.EndDateTimePicker.TabIndex = 29;
+            this.EndDateTimePicker.TabIndex = 3;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
@@ -156,7 +156,7 @@
             this.cancelButton.Location = new System.Drawing.Point(146, 159);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 28;
+            this.cancelButton.TabIndex = 5;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -167,7 +167,7 @@
             this.SaveButton.Location = new System.Drawing.Point(227, 159);
             this.SaveButton.Name = "SaveButton";
             this.SaveButton.Size = new System.Drawing.Size(75, 23);
-            this.SaveButton.TabIndex = 27;
+            this.SaveButton.TabIndex = 6;
             this.SaveButton.Text = "Save";
             this.SaveButton.UseVisualStyleBackColor = true;
             this.SaveButton.Click += new System.EventHandler(this.SaveButton_Click);

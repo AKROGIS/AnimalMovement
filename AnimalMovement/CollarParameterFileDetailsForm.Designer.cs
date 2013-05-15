@@ -78,7 +78,7 @@
             this.DoneCancelButton.Location = new System.Drawing.Point(16, 424);
             this.DoneCancelButton.Name = "DoneCancelButton";
             this.DoneCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.DoneCancelButton.TabIndex = 70;
+            this.DoneCancelButton.TabIndex = 10;
             this.DoneCancelButton.Text = "Done";
             this.DoneCancelButton.UseVisualStyleBackColor = true;
             this.DoneCancelButton.Click += new System.EventHandler(this.DoneCancelButton_Click);
@@ -90,7 +90,7 @@
             this.EditSaveButton.Location = new System.Drawing.Point(394, 424);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
-            this.EditSaveButton.TabIndex = 71;
+            this.EditSaveButton.TabIndex = 11;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
@@ -122,7 +122,7 @@
             this.ShowContentsButton.Location = new System.Drawing.Point(307, 116);
             this.ShowContentsButton.Name = "ShowContentsButton";
             this.ShowContentsButton.Size = new System.Drawing.Size(162, 23);
-            this.ShowContentsButton.TabIndex = 59;
+            this.ShowContentsButton.TabIndex = 7;
             this.ShowContentsButton.Text = "Show Contents";
             this.ShowContentsButton.UseVisualStyleBackColor = true;
             this.ShowContentsButton.Click += new System.EventHandler(this.ShowContentsButton_Click);
@@ -164,7 +164,7 @@
             this.FileIdTextBox.Location = new System.Drawing.Point(307, 12);
             this.FileIdTextBox.Name = "FileIdTextBox";
             this.FileIdTextBox.Size = new System.Drawing.Size(162, 20);
-            this.FileIdTextBox.TabIndex = 49;
+            this.FileIdTextBox.TabIndex = 1;
             // 
             // UserNameTextBox
             // 
@@ -173,7 +173,7 @@
             this.UserNameTextBox.Location = new System.Drawing.Point(307, 90);
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(162, 20);
-            this.UserNameTextBox.TabIndex = 56;
+            this.UserNameTextBox.TabIndex = 6;
             // 
             // UploadDateTextBox
             // 
@@ -182,7 +182,7 @@
             this.UploadDateTextBox.Location = new System.Drawing.Point(307, 64);
             this.UploadDateTextBox.Name = "UploadDateTextBox";
             this.UploadDateTextBox.Size = new System.Drawing.Size(162, 20);
-            this.UploadDateTextBox.TabIndex = 54;
+            this.UploadDateTextBox.TabIndex = 5;
             // 
             // FormatTextBox
             // 
@@ -191,7 +191,7 @@
             this.FormatTextBox.Location = new System.Drawing.Point(307, 38);
             this.FormatTextBox.Name = "FormatTextBox";
             this.FormatTextBox.Size = new System.Drawing.Size(162, 20);
-            this.FormatTextBox.TabIndex = 53;
+            this.FormatTextBox.TabIndex = 3;
             // 
             // label6
             // 
@@ -230,7 +230,7 @@
             this.FileNameTextBox.MaxLength = 255;
             this.FileNameTextBox.Name = "FileNameTextBox";
             this.FileNameTextBox.Size = new System.Drawing.Size(151, 20);
-            this.FileNameTextBox.TabIndex = 51;
+            this.FileNameTextBox.TabIndex = 0;
             this.FileNameTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.FileNameTextBox_Validating);
             // 
             // label4
@@ -252,7 +252,7 @@
             this.OwnerComboBox.Location = new System.Drawing.Point(62, 37);
             this.OwnerComboBox.Name = "OwnerComboBox";
             this.OwnerComboBox.Size = new System.Drawing.Size(151, 21);
-            this.OwnerComboBox.TabIndex = 74;
+            this.OwnerComboBox.TabIndex = 2;
             // 
             // StatusComboBox
             // 
@@ -264,7 +264,7 @@
             this.StatusComboBox.Location = new System.Drawing.Point(62, 64);
             this.StatusComboBox.Name = "StatusComboBox";
             this.StatusComboBox.Size = new System.Drawing.Size(151, 21);
-            this.StatusComboBox.TabIndex = 77;
+            this.StatusComboBox.TabIndex = 4;
             // 
             // FileTabControl
             // 
@@ -277,7 +277,7 @@
             this.FileTabControl.Name = "FileTabControl";
             this.FileTabControl.SelectedIndex = 0;
             this.FileTabControl.Size = new System.Drawing.Size(453, 261);
-            this.FileTabControl.TabIndex = 79;
+            this.FileTabControl.TabIndex = 9;
             this.FileTabControl.Tag = "";
             this.FileTabControl.SelectedIndexChanged += new System.EventHandler(this.FileTabControl_SelectedIndexChanged);
             // 
@@ -305,7 +305,7 @@
             this.EditParameterButton.Location = new System.Drawing.Point(57, 208);
             this.EditParameterButton.Name = "EditParameterButton";
             this.EditParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.EditParameterButton.TabIndex = 64;
+            this.EditParameterButton.TabIndex = 2;
             this.EditParameterButton.UseVisualStyleBackColor = true;
             this.EditParameterButton.Click += new System.EventHandler(this.EditParameterButton_Click);
             // 
@@ -317,7 +317,7 @@
             this.AddParameterButton.Location = new System.Drawing.Point(3, 208);
             this.AddParameterButton.Name = "AddParameterButton";
             this.AddParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.AddParameterButton.TabIndex = 61;
+            this.AddParameterButton.TabIndex = 0;
             this.AddParameterButton.UseVisualStyleBackColor = true;
             this.AddParameterButton.Click += new System.EventHandler(this.AddParameterButton_Click);
             // 
@@ -329,7 +329,7 @@
             this.DeleteParameterButton.Location = new System.Drawing.Point(30, 208);
             this.DeleteParameterButton.Name = "DeleteParameterButton";
             this.DeleteParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteParameterButton.TabIndex = 62;
+            this.DeleteParameterButton.TabIndex = 1;
             this.DeleteParameterButton.UseVisualStyleBackColor = true;
             this.DeleteParameterButton.Click += new System.EventHandler(this.DeleteParameterButton_Click);
             // 
@@ -342,7 +342,7 @@
             this.InfoParameterButton.Location = new System.Drawing.Point(81, 208);
             this.InfoParameterButton.Name = "InfoParameterButton";
             this.InfoParameterButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoParameterButton.TabIndex = 63;
+            this.InfoParameterButton.TabIndex = 3;
             this.InfoParameterButton.UseVisualStyleBackColor = true;
             this.InfoParameterButton.Click += new System.EventHandler(this.InfoParameterButton_Click);
             // 
@@ -369,7 +369,7 @@
             this.CheckButton.Location = new System.Drawing.Point(249, 204);
             this.CheckButton.Name = "CheckButton";
             this.CheckButton.Size = new System.Drawing.Size(69, 23);
-            this.CheckButton.TabIndex = 56;
+            this.CheckButton.TabIndex = 4;
             this.CheckButton.Text = "Check";
             this.CheckButton.UseVisualStyleBackColor = true;
             this.CheckButton.Click += new System.EventHandler(this.CheckButton_Click);
@@ -380,7 +380,7 @@
             this.AddArgosButton.Location = new System.Drawing.Point(97, 204);
             this.AddArgosButton.Name = "AddArgosButton";
             this.AddArgosButton.Size = new System.Drawing.Size(85, 23);
-            this.AddArgosButton.TabIndex = 55;
+            this.AddArgosButton.TabIndex = 2;
             this.AddArgosButton.Text = "Add Argos";
             this.AddArgosButton.UseVisualStyleBackColor = true;
             this.AddArgosButton.Click += new System.EventHandler(this.AddArgosButton_Click);
@@ -391,7 +391,7 @@
             this.AddFixParameterButton.Location = new System.Drawing.Point(188, 204);
             this.AddFixParameterButton.Name = "AddFixParameterButton";
             this.AddFixParameterButton.Size = new System.Drawing.Size(88, 23);
-            this.AddFixParameterButton.TabIndex = 54;
+            this.AddFixParameterButton.TabIndex = 3;
             this.AddFixParameterButton.Text = "Add Parameter";
             this.AddFixParameterButton.UseVisualStyleBackColor = true;
             this.AddFixParameterButton.Click += new System.EventHandler(this.AddFixParameterButton_Click);
@@ -402,7 +402,7 @@
             this.AddFixCollarButton.Location = new System.Drawing.Point(2, 204);
             this.AddFixCollarButton.Name = "AddFixCollarButton";
             this.AddFixCollarButton.Size = new System.Drawing.Size(89, 23);
-            this.AddFixCollarButton.TabIndex = 53;
+            this.AddFixCollarButton.TabIndex = 1;
             this.AddFixCollarButton.Text = "Add Collar";
             this.AddFixCollarButton.UseVisualStyleBackColor = true;
             this.AddFixCollarButton.Click += new System.EventHandler(this.AddCollarButton_Click);
@@ -416,7 +416,7 @@
             this.IgnoreSuffixCheckBox.Location = new System.Drawing.Point(324, 208);
             this.IgnoreSuffixCheckBox.Name = "IgnoreSuffixCheckBox";
             this.IgnoreSuffixCheckBox.Size = new System.Drawing.Size(115, 17);
-            this.IgnoreSuffixCheckBox.TabIndex = 52;
+            this.IgnoreSuffixCheckBox.TabIndex = 5;
             this.IgnoreSuffixCheckBox.Text = "Ignore Alpha Suffix";
             this.IgnoreSuffixCheckBox.UseVisualStyleBackColor = true;
             this.IgnoreSuffixCheckBox.CheckedChanged += new System.EventHandler(this.IgnoreSuffixCheckBox_CheckedChanged);
@@ -439,7 +439,7 @@
             this.TpfDataGridView.RowHeadersVisible = false;
             this.TpfDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.TpfDataGridView.Size = new System.Drawing.Size(440, 195);
-            this.TpfDataGridView.TabIndex = 51;
+            this.TpfDataGridView.TabIndex = 0;
             this.TpfDataGridView.SelectionChanged += new System.EventHandler(this.TpfDataGridView_SelectionChanged);
             // 
             // ValidationTextBox

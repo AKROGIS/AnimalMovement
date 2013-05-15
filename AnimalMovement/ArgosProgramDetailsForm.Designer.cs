@@ -89,7 +89,7 @@
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.ShowCheckBox = true;
             this.StartDateTimePicker.Size = new System.Drawing.Size(233, 20);
-            this.StartDateTimePicker.TabIndex = 55;
+            this.StartDateTimePicker.TabIndex = 4;
             this.StartDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
             // 
@@ -109,7 +109,7 @@
             this.UserNameTextBox.Location = new System.Drawing.Point(113, 59);
             this.UserNameTextBox.Name = "UserNameTextBox";
             this.UserNameTextBox.Size = new System.Drawing.Size(233, 20);
-            this.UserNameTextBox.TabIndex = 52;
+            this.UserNameTextBox.TabIndex = 2;
             this.UserNameTextBox.TextChanged += new System.EventHandler(this.UserNameTextBox_TextChanged);
             // 
             // label6
@@ -128,7 +128,7 @@
             this.ProgramNameTextBox.Location = new System.Drawing.Point(113, 33);
             this.ProgramNameTextBox.Name = "ProgramNameTextBox";
             this.ProgramNameTextBox.Size = new System.Drawing.Size(233, 20);
-            this.ProgramNameTextBox.TabIndex = 50;
+            this.ProgramNameTextBox.TabIndex = 1;
             // 
             // label5
             // 
@@ -145,7 +145,7 @@
             this.cancelButton.Location = new System.Drawing.Point(6, 232);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 48;
+            this.cancelButton.TabIndex = 8;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Visible = false;
@@ -157,7 +157,7 @@
             this.EditSaveButton.Location = new System.Drawing.Point(271, 232);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
-            this.EditSaveButton.TabIndex = 47;
+            this.EditSaveButton.TabIndex = 9;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
@@ -180,7 +180,7 @@
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
             this.NotesTextBox.Size = new System.Drawing.Size(340, 43);
-            this.NotesTextBox.TabIndex = 45;
+            this.NotesTextBox.TabIndex = 7;
             // 
             // ActiveCheckBox
             // 
@@ -192,7 +192,7 @@
             this.ActiveCheckBox.Location = new System.Drawing.Point(212, 163);
             this.ActiveCheckBox.Name = "ActiveCheckBox";
             this.ActiveCheckBox.Size = new System.Drawing.Size(134, 17);
-            this.ActiveCheckBox.TabIndex = 44;
+            this.ActiveCheckBox.TabIndex = 6;
             this.ActiveCheckBox.Text = "Download this program";
             this.ActiveCheckBox.ThreeState = true;
             this.toolTip1.SetToolTip(this.ActiveCheckBox, "Yes, No, or defer to the individual platforms");
@@ -207,7 +207,7 @@
             this.OwnerComboBox.Location = new System.Drawing.Point(113, 6);
             this.OwnerComboBox.Name = "OwnerComboBox";
             this.OwnerComboBox.Size = new System.Drawing.Size(233, 21);
-            this.OwnerComboBox.TabIndex = 43;
+            this.OwnerComboBox.TabIndex = 0;
             this.OwnerComboBox.SelectedIndexChanged += new System.EventHandler(this.OwnerComboBox_SelectedIndexChanged);
             // 
             // label2
@@ -226,6 +226,7 @@
             this.ProgramIdTextBox.Enabled = false;
             this.ProgramIdTextBox.Location = new System.Drawing.Point(119, 12);
             this.ProgramIdTextBox.Name = "ProgramIdTextBox";
+            this.ProgramIdTextBox.ReadOnly = true;
             this.ProgramIdTextBox.Size = new System.Drawing.Size(253, 20);
             this.ProgramIdTextBox.TabIndex = 41;
             // 
@@ -258,7 +259,7 @@
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.ShowCheckBox = true;
             this.EndDateTimePicker.Size = new System.Drawing.Size(233, 20);
-            this.EndDateTimePicker.TabIndex = 38;
+            this.EndDateTimePicker.TabIndex = 5;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
@@ -269,7 +270,7 @@
             this.PasswordMaskedTextBox.Location = new System.Drawing.Point(113, 85);
             this.PasswordMaskedTextBox.Name = "PasswordMaskedTextBox";
             this.PasswordMaskedTextBox.Size = new System.Drawing.Size(233, 20);
-            this.PasswordMaskedTextBox.TabIndex = 57;
+            this.PasswordMaskedTextBox.TabIndex = 3;
             this.PasswordMaskedTextBox.MaskInputRejected += new System.Windows.Forms.MaskInputRejectedEventHandler(this.PasswordMaskedTextBox_MaskInputRejected);
             // 
             // AddMissingPlatformsButton
@@ -278,7 +279,7 @@
             this.AddMissingPlatformsButton.Location = new System.Drawing.Point(226, 232);
             this.AddMissingPlatformsButton.Name = "AddMissingPlatformsButton";
             this.AddMissingPlatformsButton.Size = new System.Drawing.Size(123, 23);
-            this.AddMissingPlatformsButton.TabIndex = 58;
+            this.AddMissingPlatformsButton.TabIndex = 4;
             this.AddMissingPlatformsButton.Text = "Add Missing Platforms";
             this.AddMissingPlatformsButton.UseVisualStyleBackColor = true;
             this.AddMissingPlatformsButton.Click += new System.EventHandler(this.AddMissingPlatformsButton_Click);
@@ -298,7 +299,7 @@
             this.PlatformsGridView.RowHeadersVisible = false;
             this.PlatformsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.PlatformsGridView.Size = new System.Drawing.Size(346, 226);
-            this.PlatformsGridView.TabIndex = 59;
+            this.PlatformsGridView.TabIndex = 0;
             this.PlatformsGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.PlatformsGridView_CellDoubleClick);
             this.PlatformsGridView.SelectionChanged += new System.EventHandler(this.PlatformsGridView_SelectedIndexChanged);
             // 
@@ -310,7 +311,7 @@
             this.DeletePlatformButton.Location = new System.Drawing.Point(33, 234);
             this.DeletePlatformButton.Name = "DeletePlatformButton";
             this.DeletePlatformButton.Size = new System.Drawing.Size(24, 24);
-            this.DeletePlatformButton.TabIndex = 61;
+            this.DeletePlatformButton.TabIndex = 2;
             this.DeletePlatformButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.DeletePlatformButton.UseVisualStyleBackColor = true;
             this.DeletePlatformButton.Click += new System.EventHandler(this.DeletePlatformButton_Click);
@@ -325,7 +326,7 @@
             this.InfoPlatformButton.Location = new System.Drawing.Point(58, 234);
             this.InfoPlatformButton.Name = "InfoPlatformButton";
             this.InfoPlatformButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoPlatformButton.TabIndex = 62;
+            this.InfoPlatformButton.TabIndex = 3;
             this.InfoPlatformButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.InfoPlatformButton.UseVisualStyleBackColor = true;
             this.InfoPlatformButton.Click += new System.EventHandler(this.InfoPlatformButton_Click);
@@ -338,7 +339,7 @@
             this.AddPlatformButton.Location = new System.Drawing.Point(3, 234);
             this.AddPlatformButton.Name = "AddPlatformButton";
             this.AddPlatformButton.Size = new System.Drawing.Size(24, 24);
-            this.AddPlatformButton.TabIndex = 60;
+            this.AddPlatformButton.TabIndex = 1;
             this.AddPlatformButton.UseVisualStyleBackColor = true;
             this.AddPlatformButton.Click += new System.EventHandler(this.AddPlatformButton_Click);
             // 
@@ -354,7 +355,7 @@
             this.ArgosProgramTabControl.Name = "ArgosProgramTabControl";
             this.ArgosProgramTabControl.SelectedIndex = 0;
             this.ArgosProgramTabControl.Size = new System.Drawing.Size(360, 287);
-            this.ArgosProgramTabControl.TabIndex = 63;
+            this.ArgosProgramTabControl.TabIndex = 1;
             this.ArgosProgramTabControl.SelectedIndexChanged += new System.EventHandler(this.ArgosTabControl_SelectedIndexChanged);
             // 
             // GeneralTabPage
@@ -436,7 +437,7 @@
             this.DownloadsDataGridView.RowHeadersVisible = false;
             this.DownloadsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DownloadsDataGridView.Size = new System.Drawing.Size(346, 230);
-            this.DownloadsDataGridView.TabIndex = 60;
+            this.DownloadsDataGridView.TabIndex = 0;
             this.DownloadsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DownloadsDataGridView_CellDoubleClick);
             // 
             // CloseButton
@@ -446,7 +447,7 @@
             this.CloseButton.Location = new System.Drawing.Point(297, 331);
             this.CloseButton.Name = "CloseButton";
             this.CloseButton.Size = new System.Drawing.Size(75, 23);
-            this.CloseButton.TabIndex = 58;
+            this.CloseButton.TabIndex = 0;
             this.CloseButton.Text = "Close";
             this.CloseButton.UseVisualStyleBackColor = true;
             this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);

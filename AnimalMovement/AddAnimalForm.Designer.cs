@@ -54,7 +54,7 @@
             this.AnimalIdTextBox.MaxLength = 16;
             this.AnimalIdTextBox.Name = "AnimalIdTextBox";
             this.AnimalIdTextBox.Size = new System.Drawing.Size(249, 20);
-            this.AnimalIdTextBox.TabIndex = 35;
+            this.AnimalIdTextBox.TabIndex = 1;
             this.AnimalIdTextBox.TextChanged += new System.EventHandler(this.AnimalIdTextBox_TextChanged);
             // 
             // GroupTextBox
@@ -65,7 +65,7 @@
             this.GroupTextBox.MaxLength = 500;
             this.GroupTextBox.Name = "GroupTextBox";
             this.GroupTextBox.Size = new System.Drawing.Size(249, 20);
-            this.GroupTextBox.TabIndex = 38;
+            this.GroupTextBox.TabIndex = 5;
             // 
             // label8
             // 
@@ -131,7 +131,7 @@
             this.DescriptionTextBox.Multiline = true;
             this.DescriptionTextBox.Name = "DescriptionTextBox";
             this.DescriptionTextBox.Size = new System.Drawing.Size(249, 75);
-            this.DescriptionTextBox.TabIndex = 39;
+            this.DescriptionTextBox.TabIndex = 6;
             // 
             // SpeciesComboBox
             // 
@@ -142,7 +142,7 @@
             this.SpeciesComboBox.Location = new System.Drawing.Point(93, 64);
             this.SpeciesComboBox.Name = "SpeciesComboBox";
             this.SpeciesComboBox.Size = new System.Drawing.Size(249, 21);
-            this.SpeciesComboBox.TabIndex = 36;
+            this.SpeciesComboBox.TabIndex = 2;
             this.SpeciesComboBox.SelectedIndexChanged += new System.EventHandler(this.SpeciesComboBox_SelectedIndexChanged);
             // 
             // GenderComboBox
@@ -154,7 +154,7 @@
             this.GenderComboBox.Location = new System.Drawing.Point(93, 91);
             this.GenderComboBox.Name = "GenderComboBox";
             this.GenderComboBox.Size = new System.Drawing.Size(249, 21);
-            this.GenderComboBox.TabIndex = 37;
+            this.GenderComboBox.TabIndex = 3;
             // 
             // CreateButton
             // 
@@ -162,7 +162,7 @@
             this.CreateButton.Location = new System.Drawing.Point(267, 251);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(75, 23);
-            this.CreateButton.TabIndex = 43;
+            this.CreateButton.TabIndex = 8;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
@@ -174,7 +174,7 @@
             this.cancelButton.Location = new System.Drawing.Point(186, 251);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 42;
+            this.cancelButton.TabIndex = 7;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
@@ -199,7 +199,7 @@
             this.MortatlityDateTimePicker.Name = "MortatlityDateTimePicker";
             this.MortatlityDateTimePicker.ShowCheckBox = true;
             this.MortatlityDateTimePicker.Size = new System.Drawing.Size(249, 20);
-            this.MortatlityDateTimePicker.TabIndex = 81;
+            this.MortatlityDateTimePicker.TabIndex = 4;
             this.MortatlityDateTimePicker.ValueChanged += new System.EventHandler(this.MortatlityDateTimePicker_ValueChanged);
             // 
             // ProjectComboBox
@@ -209,7 +209,7 @@
             this.ProjectComboBox.Location = new System.Drawing.Point(93, 12);
             this.ProjectComboBox.Name = "ProjectComboBox";
             this.ProjectComboBox.Size = new System.Drawing.Size(249, 21);
-            this.ProjectComboBox.TabIndex = 83;
+            this.ProjectComboBox.TabIndex = 0;
             this.ProjectComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
             // 
             // AddAnimalForm

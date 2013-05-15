@@ -88,7 +88,7 @@
             this.cancelButton.Location = new System.Drawing.Point(6, 232);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 29;
+            this.cancelButton.TabIndex = 4;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Visible = false;
@@ -100,7 +100,7 @@
             this.EditSaveButton.Location = new System.Drawing.Point(421, 232);
             this.EditSaveButton.Name = "EditSaveButton";
             this.EditSaveButton.Size = new System.Drawing.Size(75, 23);
-            this.EditSaveButton.TabIndex = 28;
+            this.EditSaveButton.TabIndex = 5;
             this.EditSaveButton.Text = "Edit";
             this.EditSaveButton.UseVisualStyleBackColor = true;
             this.EditSaveButton.Click += new System.EventHandler(this.EditSaveButton_Click);
@@ -123,7 +123,7 @@
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
             this.NotesTextBox.Size = new System.Drawing.Size(490, 144);
-            this.NotesTextBox.TabIndex = 26;
+            this.NotesTextBox.TabIndex = 3;
             // 
             // ActiveCheckBox
             // 
@@ -135,7 +135,7 @@
             this.ActiveCheckBox.Location = new System.Drawing.Point(362, 59);
             this.ActiveCheckBox.Name = "ActiveCheckBox";
             this.ActiveCheckBox.Size = new System.Drawing.Size(134, 17);
-            this.ActiveCheckBox.TabIndex = 25;
+            this.ActiveCheckBox.TabIndex = 2;
             this.ActiveCheckBox.Text = "Download this Platform";
             this.ActiveCheckBox.UseVisualStyleBackColor = true;
             // 
@@ -148,7 +148,7 @@
             this.ArgosProgramComboBox.Location = new System.Drawing.Point(116, 6);
             this.ArgosProgramComboBox.Name = "ArgosProgramComboBox";
             this.ArgosProgramComboBox.Size = new System.Drawing.Size(380, 21);
-            this.ArgosProgramComboBox.TabIndex = 24;
+            this.ArgosProgramComboBox.TabIndex = 0;
             // 
             // label2
             // 
@@ -166,6 +166,7 @@
             this.ArgosIdTextBox.Enabled = false;
             this.ArgosIdTextBox.Location = new System.Drawing.Point(67, 12);
             this.ArgosIdTextBox.Name = "ArgosIdTextBox";
+            this.ArgosIdTextBox.ReadOnly = true;
             this.ArgosIdTextBox.Size = new System.Drawing.Size(455, 20);
             this.ArgosIdTextBox.TabIndex = 22;
             // 
@@ -198,7 +199,7 @@
             this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
             this.DisposalDateTimePicker.ShowCheckBox = true;
             this.DisposalDateTimePicker.Size = new System.Drawing.Size(380, 20);
-            this.DisposalDateTimePicker.TabIndex = 19;
+            this.DisposalDateTimePicker.TabIndex = 1;
             this.DisposalDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
             // 
@@ -222,7 +223,7 @@
             this.ArgosTabControl.Name = "ArgosTabControl";
             this.ArgosTabControl.SelectedIndex = 0;
             this.ArgosTabControl.Size = new System.Drawing.Size(510, 287);
-            this.ArgosTabControl.TabIndex = 30;
+            this.ArgosTabControl.TabIndex = 1;
             this.ArgosTabControl.SelectedIndexChanged += new System.EventHandler(this.ArgosTabControl_SelectedIndexChanged);
             // 
             // DetailsTabPage
@@ -267,7 +268,7 @@
             this.EditCollarButton.Location = new System.Drawing.Point(57, 234);
             this.EditCollarButton.Name = "EditCollarButton";
             this.EditCollarButton.Size = new System.Drawing.Size(24, 24);
-            this.EditCollarButton.TabIndex = 34;
+            this.EditCollarButton.TabIndex = 3;
             this.EditCollarButton.UseVisualStyleBackColor = true;
             this.EditCollarButton.Click += new System.EventHandler(this.EditCollarButton_Click);
             // 
@@ -279,7 +280,7 @@
             this.AddCollarButton.Location = new System.Drawing.Point(3, 234);
             this.AddCollarButton.Name = "AddCollarButton";
             this.AddCollarButton.Size = new System.Drawing.Size(24, 24);
-            this.AddCollarButton.TabIndex = 31;
+            this.AddCollarButton.TabIndex = 1;
             this.AddCollarButton.UseVisualStyleBackColor = true;
             this.AddCollarButton.Click += new System.EventHandler(this.AddCollarButton_Click);
             // 
@@ -291,7 +292,7 @@
             this.DeleteCollarButton.Location = new System.Drawing.Point(30, 234);
             this.DeleteCollarButton.Name = "DeleteCollarButton";
             this.DeleteCollarButton.Size = new System.Drawing.Size(24, 24);
-            this.DeleteCollarButton.TabIndex = 32;
+            this.DeleteCollarButton.TabIndex = 2;
             this.DeleteCollarButton.UseVisualStyleBackColor = true;
             this.DeleteCollarButton.Click += new System.EventHandler(this.DeleteCollarButton_Click);
             // 
@@ -304,7 +305,7 @@
             this.InfoCollarButton.Location = new System.Drawing.Point(81, 234);
             this.InfoCollarButton.Name = "InfoCollarButton";
             this.InfoCollarButton.Size = new System.Drawing.Size(24, 24);
-            this.InfoCollarButton.TabIndex = 33;
+            this.InfoCollarButton.TabIndex = 4;
             this.InfoCollarButton.UseVisualStyleBackColor = true;
             this.InfoCollarButton.Click += new System.EventHandler(this.InfoCollarButton_Click);
             // 
@@ -322,7 +323,7 @@
             this.CollarsDataGridView.RowHeadersVisible = false;
             this.CollarsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.CollarsDataGridView.Size = new System.Drawing.Size(496, 225);
-            this.CollarsDataGridView.TabIndex = 4;
+            this.CollarsDataGridView.TabIndex = 0;
             this.CollarsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.CollarDataGridView_CellDoubleClick);
             this.CollarsDataGridView.SelectionChanged += new System.EventHandler(this.CollarDataGridView_SelectionChanged);
             // 
@@ -360,7 +361,7 @@
             this.ParametersDataGridView.RowHeadersVisible = false;
             this.ParametersDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ParametersDataGridView.Size = new System.Drawing.Size(496, 230);
-            this.ParametersDataGridView.TabIndex = 4;
+            this.ParametersDataGridView.TabIndex = 0;
             this.ParametersDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ParametersDataGridView_CellDoubleClick);
             // 
             // DownloadsTabPage
@@ -389,7 +390,7 @@
             this.DownloadsDataGridView.RowHeadersVisible = false;
             this.DownloadsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DownloadsDataGridView.Size = new System.Drawing.Size(496, 197);
-            this.DownloadsDataGridView.TabIndex = 2;
+            this.DownloadsDataGridView.TabIndex = 0;
             this.DownloadsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DownloadsDataGridView_CellDoubleClick);
             // 
             // ProgramDownloadsButton
@@ -447,7 +448,7 @@
             this.TransmissionsDataGridView.RowHeadersVisible = false;
             this.TransmissionsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.TransmissionsDataGridView.Size = new System.Drawing.Size(496, 230);
-            this.TransmissionsDataGridView.TabIndex = 4;
+            this.TransmissionsDataGridView.TabIndex = 0;
             this.TransmissionsDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.TransmissionsDataGridView_CellDoubleClick);
             // 
             // ProcessingIssuesTabPage
@@ -485,7 +486,7 @@
             this.ProcessingIssuesDataGridView.RowHeadersVisible = false;
             this.ProcessingIssuesDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ProcessingIssuesDataGridView.Size = new System.Drawing.Size(496, 230);
-            this.ProcessingIssuesDataGridView.TabIndex = 3;
+            this.ProcessingIssuesDataGridView.TabIndex = 0;
             this.ProcessingIssuesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProcessingIssuesDataGridView_CellDoubleClick);
             // 
             // DerivedDataTabPage
@@ -522,7 +523,7 @@
             this.DerivedDataGridView.RowHeadersVisible = false;
             this.DerivedDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.DerivedDataGridView.Size = new System.Drawing.Size(496, 230);
-            this.DerivedDataGridView.TabIndex = 4;
+            this.DerivedDataGridView.TabIndex = 0;
             this.DerivedDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DerivedDataGridView_CellDoubleClick);
             // 
             // CloseButton
@@ -532,7 +533,7 @@
             this.CloseButton.Location = new System.Drawing.Point(447, 331);
             this.CloseButton.Name = "CloseButton";
             this.CloseButton.Size = new System.Drawing.Size(75, 23);
-            this.CloseButton.TabIndex = 30;
+            this.CloseButton.TabIndex = 0;
             this.CloseButton.Text = "Close";
             this.CloseButton.UseVisualStyleBackColor = true;
             this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);

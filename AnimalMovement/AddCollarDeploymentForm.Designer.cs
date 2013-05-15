@@ -44,11 +44,11 @@
             // 
             // FixItButton
             // 
-            this.FixItButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.FixItButton.Location = new System.Drawing.Point(227, 124);
+            this.FixItButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.FixItButton.Location = new System.Drawing.Point(12, 159);
             this.FixItButton.Name = "FixItButton";
             this.FixItButton.Size = new System.Drawing.Size(75, 23);
-            this.FixItButton.TabIndex = 24;
+            this.FixItButton.TabIndex = 4;
             this.FixItButton.Text = "Fix It";
             this.FixItButton.UseVisualStyleBackColor = true;
             this.FixItButton.Visible = false;
@@ -65,7 +65,7 @@
             this.ValidationTextBox.Multiline = true;
             this.ValidationTextBox.Name = "ValidationTextBox";
             this.ValidationTextBox.ReadOnly = true;
-            this.ValidationTextBox.Size = new System.Drawing.Size(208, 35);
+            this.ValidationTextBox.Size = new System.Drawing.Size(290, 35);
             this.ValidationTextBox.TabIndex = 23;
             this.ValidationTextBox.Tag = "";
             this.ValidationTextBox.Text = "Validation Error";
@@ -89,7 +89,7 @@
             this.AnimalComboBox.Location = new System.Drawing.Point(102, 39);
             this.AnimalComboBox.Name = "AnimalComboBox";
             this.AnimalComboBox.Size = new System.Drawing.Size(200, 21);
-            this.AnimalComboBox.TabIndex = 21;
+            this.AnimalComboBox.TabIndex = 1;
             this.AnimalComboBox.SelectedIndexChanged += new System.EventHandler(this.AnimalComboBox_SelectedIndexChanged);
             // 
             // label3
@@ -121,7 +121,7 @@
             this.StartDateTimePicker.Location = new System.Drawing.Point(102, 66);
             this.StartDateTimePicker.Name = "StartDateTimePicker";
             this.StartDateTimePicker.Size = new System.Drawing.Size(200, 20);
-            this.StartDateTimePicker.TabIndex = 18;
+            this.StartDateTimePicker.TabIndex = 2;
             this.StartDateTimePicker.Value = new System.DateTime(2013, 4, 24, 9, 3, 0, 0);
             this.StartDateTimePicker.ValueChanged += new System.EventHandler(this.StartDateTimePicker_ValueChanged);
             // 
@@ -135,7 +135,7 @@
             this.EndDateTimePicker.Name = "EndDateTimePicker";
             this.EndDateTimePicker.ShowCheckBox = true;
             this.EndDateTimePicker.Size = new System.Drawing.Size(200, 20);
-            this.EndDateTimePicker.TabIndex = 17;
+            this.EndDateTimePicker.TabIndex = 3;
             this.EndDateTimePicker.Value = new System.DateTime(2013, 4, 19, 0, 0, 0, 0);
             this.EndDateTimePicker.ValueChanged += new System.EventHandler(this.EndDateTimePicker_ValueChanged);
             // 
@@ -146,7 +146,7 @@
             this.cancelButton.Location = new System.Drawing.Point(146, 159);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 16;
+            this.cancelButton.TabIndex = 5;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -157,7 +157,7 @@
             this.CreateButton.Location = new System.Drawing.Point(227, 159);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(75, 23);
-            this.CreateButton.TabIndex = 15;
+            this.CreateButton.TabIndex = 6;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
@@ -180,7 +180,7 @@
             this.CollarComboBox.Location = new System.Drawing.Point(102, 12);
             this.CollarComboBox.Name = "CollarComboBox";
             this.CollarComboBox.Size = new System.Drawing.Size(200, 21);
-            this.CollarComboBox.TabIndex = 25;
+            this.CollarComboBox.TabIndex = 0;
             this.CollarComboBox.SelectedIndexChanged += new System.EventHandler(this.CollarComboBox_SelectedIndexChanged);
             // 
             // AddCollarDeploymentForm

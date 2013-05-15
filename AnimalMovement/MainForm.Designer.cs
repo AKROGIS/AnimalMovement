@@ -44,7 +44,7 @@
             this.UploadButton.Location = new System.Drawing.Point(12, 70);
             this.UploadButton.Name = "UploadButton";
             this.UploadButton.Size = new System.Drawing.Size(205, 23);
-            this.UploadButton.TabIndex = 3;
+            this.UploadButton.TabIndex = 2;
             this.UploadButton.Text = "Upload Collar Data";
             this.UploadButton.UseVisualStyleBackColor = true;
             this.UploadButton.Click += new System.EventHandler(this.UploadButton_Click);
@@ -69,7 +69,7 @@
             this.ProjectsButton.Location = new System.Drawing.Point(12, 41);
             this.ProjectsButton.Name = "ProjectsButton";
             this.ProjectsButton.Size = new System.Drawing.Size(205, 23);
-            this.ProjectsButton.TabIndex = 2;
+            this.ProjectsButton.TabIndex = 1;
             this.ProjectsButton.Text = "Project List";
             this.ProjectsButton.UseVisualStyleBackColor = true;
             this.ProjectsButton.Click += new System.EventHandler(this.ProjectsButton_Click);
@@ -82,7 +82,7 @@
             this.GenerateMapButton.Location = new System.Drawing.Point(12, 99);
             this.GenerateMapButton.Name = "GenerateMapButton";
             this.GenerateMapButton.Size = new System.Drawing.Size(205, 23);
-            this.GenerateMapButton.TabIndex = 4;
+            this.GenerateMapButton.TabIndex = 3;
             this.GenerateMapButton.Text = "Create Map File";
             this.GenerateMapButton.UseVisualStyleBackColor = true;
             this.GenerateMapButton.Click += new System.EventHandler(this.GenerateMapButton_Click);
@@ -94,7 +94,7 @@
             this.MyProfileButton.Location = new System.Drawing.Point(12, 12);
             this.MyProfileButton.Name = "MyProfileButton";
             this.MyProfileButton.Size = new System.Drawing.Size(205, 23);
-            this.MyProfileButton.TabIndex = 1;
+            this.MyProfileButton.TabIndex = 0;
             this.MyProfileButton.Text = "Connecting...";
             this.MyProfileButton.UseVisualStyleBackColor = true;
             this.MyProfileButton.Click += new System.EventHandler(this.MyProfileButton_Click);
@@ -107,7 +107,7 @@
             this.QuickStartWizardButton.Location = new System.Drawing.Point(12, 128);
             this.QuickStartWizardButton.Name = "QuickStartWizardButton";
             this.QuickStartWizardButton.Size = new System.Drawing.Size(205, 23);
-            this.QuickStartWizardButton.TabIndex = 6;
+            this.QuickStartWizardButton.TabIndex = 4;
             this.QuickStartWizardButton.Text = "Quick Start Wizard";
             this.QuickStartWizardButton.UseVisualStyleBackColor = true;
             this.QuickStartWizardButton.Click += new System.EventHandler(this.button1_Click);

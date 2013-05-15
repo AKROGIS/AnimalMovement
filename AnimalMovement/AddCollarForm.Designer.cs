@@ -75,7 +75,7 @@
             this.DisposalDateTimePicker.Name = "DisposalDateTimePicker";
             this.DisposalDateTimePicker.ShowCheckBox = true;
             this.DisposalDateTimePicker.Size = new System.Drawing.Size(259, 20);
-            this.DisposalDateTimePicker.TabIndex = 20;
+            this.DisposalDateTimePicker.TabIndex = 8;
             this.toolTip1.SetToolTip(this.DisposalDateTimePicker, "When was this collar replaced (if it was) by a newer version.  Argos Id cannot be" +
         " shared by active collars ");
             this.DisposalDateTimePicker.ValueChanged += new System.EventHandler(this.DisposalDateTimePicker_ValueChanged);
@@ -90,7 +90,7 @@
             this.HasGpsCheckBox.Location = new System.Drawing.Point(287, 147);
             this.HasGpsCheckBox.Name = "HasGpsCheckBox";
             this.HasGpsCheckBox.Size = new System.Drawing.Size(67, 17);
-            this.HasGpsCheckBox.TabIndex = 16;
+            this.HasGpsCheckBox.TabIndex = 6;
             this.HasGpsCheckBox.Text = "Has Gps";
             this.toolTip1.SetToolTip(this.HasGpsCheckBox, "Check this box if the collar has an onboard GPS");
             this.HasGpsCheckBox.UseVisualStyleBackColor = true;
@@ -113,7 +113,7 @@
             this.FrequencyTextBox.MaxLength = 32;
             this.FrequencyTextBox.Name = "FrequencyTextBox";
             this.FrequencyTextBox.Size = new System.Drawing.Size(259, 20);
-            this.FrequencyTextBox.TabIndex = 18;
+            this.FrequencyTextBox.TabIndex = 7;
             this.toolTip1.SetToolTip(this.FrequencyTextBox, "The VHF frequency for radio tracking this collar");
             // 
             // label8
@@ -134,7 +134,7 @@
             this.SerialNumberTextBox.MaxLength = 100;
             this.SerialNumberTextBox.Name = "SerialNumberTextBox";
             this.SerialNumberTextBox.Size = new System.Drawing.Size(188, 20);
-            this.SerialNumberTextBox.TabIndex = 17;
+            this.SerialNumberTextBox.TabIndex = 5;
             this.toolTip1.SetToolTip(this.SerialNumberTextBox, "For Telonics collars this is the CTN number without the alpha suffix (optional)");
             // 
             // label7
@@ -156,7 +156,7 @@
             this.ManagerComboBox.Location = new System.Drawing.Point(95, 12);
             this.ManagerComboBox.Name = "ManagerComboBox";
             this.ManagerComboBox.Size = new System.Drawing.Size(259, 21);
-            this.ManagerComboBox.TabIndex = 10;
+            this.ManagerComboBox.TabIndex = 0;
             this.toolTip1.SetToolTip(this.ManagerComboBox, "If you assign this collar to another PI you will not be able to edit it.");
             this.ManagerComboBox.SelectedIndexChanged += new System.EventHandler(this.ManagerComboBox_SelectedIndexChanged);
             // 
@@ -169,7 +169,7 @@
             this.ModelComboBox.Location = new System.Drawing.Point(95, 66);
             this.ModelComboBox.Name = "ModelComboBox";
             this.ModelComboBox.Size = new System.Drawing.Size(259, 21);
-            this.ModelComboBox.TabIndex = 12;
+            this.ModelComboBox.TabIndex = 2;
             this.toolTip1.SetToolTip(this.ModelComboBox, "Required to decide how to decode raw Telonics data files");
             this.ModelComboBox.SelectedIndexChanged += new System.EventHandler(this.ModelComboBox_SelectedIndexChanged);
             // 
@@ -181,7 +181,7 @@
             this.OwnerTextBox.MaxLength = 100;
             this.OwnerTextBox.Name = "OwnerTextBox";
             this.OwnerTextBox.Size = new System.Drawing.Size(259, 20);
-            this.OwnerTextBox.TabIndex = 14;
+            this.OwnerTextBox.TabIndex = 4;
             this.toolTip1.SetToolTip(this.OwnerTextBox, "This should be an organization (NPS, FWS, USGS, AKF&G,  etc)");
             // 
             // CollarIdTextBox
@@ -192,7 +192,7 @@
             this.CollarIdTextBox.MaxLength = 16;
             this.CollarIdTextBox.Name = "CollarIdTextBox";
             this.CollarIdTextBox.Size = new System.Drawing.Size(259, 20);
-            this.CollarIdTextBox.TabIndex = 13;
+            this.CollarIdTextBox.TabIndex = 3;
             this.toolTip1.SetToolTip(this.CollarIdTextBox, "Unique identifier provided by manufacturer.\r\nFor Telonics this is the CTN number." +
         "");
             this.CollarIdTextBox.TextChanged += new System.EventHandler(this.CollarIdTextBox_TextChanged);
@@ -234,7 +234,7 @@
             this.CreateButton.Location = new System.Drawing.Point(289, 307);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(65, 23);
-            this.CreateButton.TabIndex = 21;
+            this.CreateButton.TabIndex = 11;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
@@ -246,7 +246,7 @@
             this.cancelButton.Location = new System.Drawing.Point(218, 307);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(65, 23);
-            this.cancelButton.TabIndex = 20;
+            this.cancelButton.TabIndex = 10;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
@@ -269,7 +269,7 @@
             this.ManufacturerComboBox.Location = new System.Drawing.Point(95, 39);
             this.ManufacturerComboBox.Name = "ManufacturerComboBox";
             this.ManufacturerComboBox.Size = new System.Drawing.Size(259, 21);
-            this.ManufacturerComboBox.TabIndex = 11;
+            this.ManufacturerComboBox.TabIndex = 1;
             this.ManufacturerComboBox.SelectedIndexChanged += new System.EventHandler(this.ManufacturerComboBox_SelectedIndexChanged);
             // 
             // NotesTextBox
@@ -281,7 +281,7 @@
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
             this.NotesTextBox.Size = new System.Drawing.Size(259, 78);
-            this.NotesTextBox.TabIndex = 99;
+            this.NotesTextBox.TabIndex = 9;
             // 
             // label5
             // 

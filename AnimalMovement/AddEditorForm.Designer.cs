@@ -56,7 +56,7 @@
             this.EditorTextBox.Location = new System.Drawing.Point(51, 94);
             this.EditorTextBox.Name = "EditorTextBox";
             this.EditorTextBox.Size = new System.Drawing.Size(289, 20);
-            this.EditorTextBox.TabIndex = 2;
+            this.EditorTextBox.TabIndex = 1;
             this.EditorTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.EditorTextBox_KeyDown);
             // 
             // label2
@@ -75,7 +75,7 @@
             this.CreateButton.Location = new System.Drawing.Point(316, 209);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(75, 23);
-            this.CreateButton.TabIndex = 6;
+            this.CreateButton.TabIndex = 5;
             this.CreateButton.Text = "Create";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.CreateButton_Click);
@@ -87,7 +87,7 @@
             this.cancelButton.Location = new System.Drawing.Point(11, 209);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 5;
+            this.cancelButton.TabIndex = 4;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             // 
@@ -100,7 +100,7 @@
             this.SelectorComboBox.Location = new System.Drawing.Point(119, 12);
             this.SelectorComboBox.Name = "SelectorComboBox";
             this.SelectorComboBox.Size = new System.Drawing.Size(272, 21);
-            this.SelectorComboBox.TabIndex = 10;
+            this.SelectorComboBox.TabIndex = 0;
             this.SelectorComboBox.SelectedIndexChanged += new System.EventHandler(this.ProjectComboBox_SelectedIndexChanged);
             // 
             // InvestigatorLabel
@@ -118,7 +118,7 @@
             this.FindButton.Location = new System.Drawing.Point(346, 92);
             this.FindButton.Name = "FindButton";
             this.FindButton.Size = new System.Drawing.Size(45, 23);
-            this.FindButton.TabIndex = 3;
+            this.FindButton.TabIndex = 2;
             this.FindButton.Text = "Find";
             this.FindButton.UseVisualStyleBackColor = true;
             this.FindButton.Click += new System.EventHandler(this.FindButton_Click);
@@ -132,7 +132,7 @@
             this.ResultsListBox.Location = new System.Drawing.Point(11, 121);
             this.ResultsListBox.Name = "ResultsListBox";
             this.ResultsListBox.Size = new System.Drawing.Size(380, 82);
-            this.ResultsListBox.TabIndex = 4;
+            this.ResultsListBox.TabIndex = 3;
             this.ResultsListBox.SelectedIndexChanged += new System.EventHandler(this.ResultsListBox_SelectedIndexChanged);
             // 
             // ProjectLabel
