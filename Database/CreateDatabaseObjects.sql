@@ -1977,7 +1977,15 @@ BEGIN
     DELETE X FROM dbo.CollarFixes AS X
        INNER JOIN deleted AS D
                ON D.FileId = X.FileId
-               
+
+	-- This trigger will NOT be called when deleting sub files,
+	-- so we must delete sub-file fixes before deleting the sub-files
+    DELETE X FROM dbo.CollarFixes AS X
+       INNER JOIN dbo.CollarFiles AS F
+               ON X.FileId = F.FileId
+       INNER JOIN deleted AS D
+               ON D.FileId = F.ParentFileId
+
     -- Delete children of the deleted files       
     DELETE F FROM dbo.CollarFiles AS F
        INNER JOIN deleted AS D
