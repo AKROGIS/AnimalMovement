@@ -537,7 +537,7 @@
             this.GpsFixesTabPage.Size = new System.Drawing.Size(502, 185);
             this.GpsFixesTabPage.TabIndex = 0;
             this.GpsFixesTabPage.Tag = "GpsFixes";
-            this.GpsFixesTabPage.Text = "GPS Fixes in File";
+            this.GpsFixesTabPage.Text = "Animal Locations";
             this.GpsFixesTabPage.UseVisualStyleBackColor = true;
             // 
             // ArgosFixesTabPage
