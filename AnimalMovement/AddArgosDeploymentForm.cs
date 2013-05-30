@@ -113,8 +113,10 @@ namespace AnimalMovement
         private void ValidateEditor()
         {
             //If Collar is provided, it will be locked, so you must be the pi or an assistant
-            if (Collar != null && Collar.Manager != CurrentUser &&
-                Collar.ProjectInvestigator.ProjectInvestigatorAssistants.All(a => a.Assistant != CurrentUser))
+            if (Collar != null &&
+                !Collar.Manager.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase) &&
+                Collar.ProjectInvestigator.ProjectInvestigatorAssistants.All(
+                    a => !a.Assistant.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)))
             {
                 MessageBox.Show(
                     "You do not have permission to edit this collar.", "No Permission",
@@ -132,8 +134,11 @@ namespace AnimalMovement
                 return;
             }
             //If Platform is provided, it will be locked, so you must be the pi or an assistant
-            if (Platform != null && Platform.ArgosProgram.Manager != CurrentUser &&
-                Platform.ArgosProgram.ProjectInvestigator.ProjectInvestigatorAssistants.All(a => a.Assistant != CurrentUser))
+            if (Platform != null &&
+                !Platform.ArgosProgram.Manager.Normalize()
+                         .Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase) &&
+                Platform.ArgosProgram.ProjectInvestigator.ProjectInvestigatorAssistants.All(
+                    a => !a.Assistant.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)))
             {
                 MessageBox.Show(
                     "You do not have permission to edit this Argos Platform.", "No Permission",

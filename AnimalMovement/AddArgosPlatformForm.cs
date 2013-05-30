@@ -103,8 +103,10 @@ namespace AnimalMovement
             base.OnLoad(e);
             IsEditor = true; //Hope for the best
             //If Program provided, it will be locked, so you must be an editor on that program
-            if (Program != null && Program.Manager != CurrentUser &&
-                Program.ProjectInvestigator.ProjectInvestigatorAssistants.All(a => a.Assistant != CurrentUser))
+            if (Program != null &&
+                !Program.Manager.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase) &&
+                Program.ProjectInvestigator.ProjectInvestigatorAssistants.All(
+                    a => !a.Assistant.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)))
             {
                 MessageBox.Show(
                     "You do not have permission to add platforms to this program.", "No Permission",

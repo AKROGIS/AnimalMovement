@@ -70,8 +70,10 @@ namespace AnimalMovement
         private void ValidateEditor()
         {
             //If Investigator is provided, it will be locked, so you must be the pi or an assistant
-            if (Investigator != null && Investigator.Login != CurrentUser &&
-                Investigator.ProjectInvestigatorAssistants.All(a => a.Assistant != CurrentUser))
+            if (Investigator != null &&
+                !Investigator.Login.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase) &&
+                Investigator.ProjectInvestigatorAssistants.All(
+                    a => !a.Assistant.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)))
             {
                 MessageBox.Show(
                     "You do not have permission to load deployments for this investigator.", "No Permission",
