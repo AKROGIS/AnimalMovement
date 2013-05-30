@@ -132,6 +132,19 @@
       WHERE F2.Format = 'F'
    GROUP BY P.PlatformId
 
+----------- Platforms in Argos files that are not in the Database
+     SELECT D.PlatformId AS [Argos Id], D.ProgramId AS [Argos Program], D.FileId
+       FROM ArgosFilePlatformDates AS D
+  LEFT JOIN ArgosPlatforms AS P
+         ON P.PlatformId = D.PlatformId
+      WHERE P.PlatformId IS NULL
+
+----------- Programs in Argos files that are not in the Database
+     SELECT D.ProgramId AS [Argos Program], D.FileId
+       FROM ArgosFilePlatformDates AS D
+  LEFT JOIN ArgosPrograms AS P
+         ON P.ProgramId = D.ProgramId
+      WHERE P.ProgramId IS NULL AND D.ProgramId IS NOT NULL
 
 ----------- Recent downloads
      SELECT *

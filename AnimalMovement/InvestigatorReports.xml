@@ -7,6 +7,42 @@
     <query></query>
   </report>
   <report>
+    <name>Missing Argos Platforms</name>
+    <description>
+      <![CDATA[Argos data (email or download) requires a matching Argos platform in the database before it can be assigned to a collar (and then processed to locations).]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT D.PlatformId AS [Argos Id], D.ProgramId AS [Argos Program], D.FileId, F.[FileName]
+       FROM ArgosFilePlatformDates AS D
+  LEFT JOIN ArgosPlatforms AS P
+         ON P.PlatformId = D.PlatformId
+ INNER JOIN CollarFiles AS F
+         ON F.FileId = D.FileId
+      WHERE P.PlatformId IS NULL
+        AND F.[Owner] = @PI
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Missing Argos Programs</name>
+    <description>
+      <![CDATA[Argos platform must have a program in the database before it can be added.  The following programs are listed in your Argos data (email or download) and will need to be added to the database before this data can be processed.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT D.ProgramId AS [Argos Program], D.FileId, F.[FileName]
+       FROM ArgosFilePlatformDates AS D
+  LEFT JOIN ArgosPrograms AS P
+         ON P.ProgramId = D.ProgramId
+ INNER JOIN CollarFiles AS F
+         ON F.FileId = D.FileId
+      WHERE P.ProgramId IS NULL AND D.ProgramId IS NOT NULL
+        AND F.[Owner] = @PI
+      ]]>
+    </query>
+  </report>
+  <report>
     <name>Unprocessed Argos data</name>
     <description>
       <![CDATA[Argos data (email or download) require a collar assignment and collar parameters in order to be processed.  The following Argos Ids have unprocessed data.  This can be corrected by assigning a collar with parameters to the Argos Id.]]>

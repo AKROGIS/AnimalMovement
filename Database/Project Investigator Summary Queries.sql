@@ -11,6 +11,26 @@
       WHERE F.[Owner] = @PI
    ORDER BY TPF.[FileName], TPF.CTN
 
+----------- Platforms in Argos files that are not in the Database
+     SELECT D.PlatformId AS [Argos Id], D.ProgramId AS [Argos Program], D.FileId, F.[FileName]
+       FROM ArgosFilePlatformDates AS D
+  LEFT JOIN ArgosPlatforms AS P
+         ON P.PlatformId = D.PlatformId
+ INNER JOIN CollarFiles AS F
+         ON F.FileId = D.FileId
+      WHERE P.PlatformId IS NULL
+        AND F.[Owner] = @PI
+
+----------- Programs in Argos files that are not in the Database
+     SELECT D.ProgramId AS [Argos Program], D.FileId, F.[FileName]
+       FROM ArgosFilePlatformDates AS D
+  LEFT JOIN ArgosPrograms AS P
+         ON P.ProgramId = D.ProgramId
+ INNER JOIN CollarFiles AS F
+         ON F.FileId = D.FileId
+      WHERE P.ProgramId IS NULL AND D.ProgramId IS NOT NULL
+        AND F.[Owner] = @PI
+
 ----------- Downloads in the last 10 days 
      SELECT D.*
        FROM ArgosDownloads AS D
