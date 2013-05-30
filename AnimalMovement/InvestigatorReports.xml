@@ -49,15 +49,16 @@
     </description>
     <query>
       <![CDATA[
-     SELECT I.PlatformId AS [Argos Id], I.Issue
+     SELECT I.PlatformId AS [Argos Id], I.FileId, F.[FileName], I.Issue
        FROM ArgosFileProcessingIssues AS I
+       JOIN CollarFiles AS F
+         ON F.FileId = I.FileId
        JOIN ArgosPlatforms AS P1
          ON I.PlatformId = P1.PlatformId
        JOIN ArgosPrograms AS P2
          ON P1.ProgramId = P2.ProgramId
       WHERE I.PlatformId IS NOT NULL
         AND P2.Manager = @PI
-   GROUP BY I.PlatformId, I.Issue
       ]]>
     </query>
   </report>
@@ -79,13 +80,38 @@
     </query>
   </report>
   <report>
-    <name>Argos Platforms with no downloaded data</name>
+    <name>Argos Platforms with no download data</name>
     <description>
-      <![CDATA[The list of Argos platforms in the database that do not have any downloaded data.  These may be platforms that are required to process historic Argos email data, but the Argos Id has been retired.]]>
+      <![CDATA[The list of Argos platforms in the database that do not have any downloaded Argos data files.  These may be platforms that are required to process historic Argos email data, but the Argos Id has been retired.]]>
     </description>
     <query>
       <![CDATA[
-     SELECT P2.Manager, P.PlatformId, C.*
+     SELECT P.PlatformId, C.*
+       FROM ArgosPlatforms AS P
+  LEFT JOIN ArgosPrograms AS P2
+         ON P.ProgramId = P2.ProgramId
+  LEFT JOIN ArgosDeployments AS AD
+         ON P.PlatformId = AD.PlatformId
+  LEFT JOIN Collars AS C
+         ON AD.CollarManufacturer = C.CollarManufacturer AND AD.CollarId = C.CollarId
+  LEFT JOIN (ArgosFilePlatformDates AS T
+             INNER JOIN CollarFiles AS F
+             ON F.FileId = T.FileId AND F.Format = 'F')
+         ON T.PlatformId = P.PlatformId
+      WHERE T.PlatformId IS NULL
+        AND P2.Manager = @PI
+   ORDER BY P.PlatformId
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Argos Platforms with no data</name>
+    <description>
+      <![CDATA[The list of Argos platforms in the database that do not have any Argos data (downloaded or emails).  This indicates either missing data files or unused Argos Ids.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT P.PlatformId, C.*
        FROM ArgosPlatforms AS P
   LEFT JOIN ArgosPrograms AS P2
          ON P.ProgramId = P2.ProgramId
@@ -97,7 +123,7 @@
          ON T.PlatformId = P.PlatformId
       WHERE T.PlatformId IS NULL
         AND P2.Manager = @PI
-   ORDER BY P2.Manager, P.PlatformId
+   ORDER BY P.PlatformId
       ]]>
     </query>
   </report>
