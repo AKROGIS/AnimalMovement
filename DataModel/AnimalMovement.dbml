@@ -269,8 +269,8 @@
       <Column Name="DisposalDate" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Association Name="ArgosPlatform_ArgosDownload" Member="ArgosDownloads" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosDownload" />
       <Association Name="ArgosPlatform_ArgosDeployment" Member="ArgosDeployments" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosDeployment" />
-      <Association Name="ArgosPlatform_ArgosFilePlatformDate" Member="ArgosFilePlatformDates" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFilePlatformDate" />
       <Association Name="ArgosPlatform_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFileProcessingIssue" />
+      <Association Name="ArgosPlatform_ArgosFilePlatformDate" Member="ArgosFilePlatformDates" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosFilePlatformDate" />
       <Association Name="ArgosProgram_ArgosPlatform" Member="ArgosProgram" ThisKey="ProgramId" OtherKey="ProgramId" Type="ArgosProgram" IsForeignKey="true" />
     </Type>
     <InsertFunction FunctionId="FunctionId17">
@@ -418,8 +418,8 @@
       <Association Name="CollarFile_CollarFix" Member="CollarFixes" ThisKey="FileId" OtherKey="FileId" Type="CollarFix" />
       <Association Name="CollarFile_ArgosDownload" Member="ArgosDownloads" ThisKey="FileId" OtherKey="FileId" Type="ArgosDownload" />
       <Association Name="CollarFile_CollarFile" Member="SubFiles" Storage="_CollarFiles" ThisKey="FileId" OtherKey="ParentFileId" Type="CollarFile" />
-      <Association Name="CollarFile_ArgosFilePlatformDate" Member="ArgosFilePlatformDates" ThisKey="FileId" OtherKey="FileId" Type="ArgosFilePlatformDate" />
       <Association Name="CollarFile_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="FileId" OtherKey="FileId" Type="ArgosFileProcessingIssue" />
+      <Association Name="CollarFile_ArgosFilePlatformDate" Member="ArgosFilePlatformDates" ThisKey="FileId" OtherKey="FileId" Type="ArgosFilePlatformDate" />
       <Association Name="ArgosDeployment_CollarFile" Member="ArgosDeployment" ThisKey="ArgosDeploymentId" OtherKey="DeploymentId" Type="ArgosDeployment" IsForeignKey="true" />
       <Association Name="CollarFile_CollarFile" Member="ParentFile" Storage="_CollarFile1" ThisKey="ParentFileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" />
       <Association Name="CollarParameter_CollarFile" Member="CollarParameter" ThisKey="CollarParameterId" OtherKey="ParameterId" Type="CollarParameter" IsForeignKey="true" />
@@ -525,17 +525,6 @@
       <Argument Parameter="assistant" Member="Assistant" Version="Original" />
     </DeleteFunction>
   </Table>
-  <Table Name="dbo.ArgosFilePlatformDates" Member="ArgosFilePlatformDates">
-    <Type Name="ArgosFilePlatformDate">
-      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="ProgramId" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
-      <Column Name="FirstTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
-      <Column Name="LastTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
-      <Association Name="CollarFile_ArgosFilePlatformDate" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
-      <Association Name="ArgosPlatform_ArgosFilePlatformDate" Member="ArgosPlatform" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosPlatform" IsForeignKey="true" />
-    </Type>
-  </Table>
   <Table Name="dbo.ArgosFileProcessingIssues" Member="ArgosFileProcessingIssues">
     <Type Name="ArgosFileProcessingIssue">
       <Column Name="IssueId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -559,6 +548,18 @@
       <Argument Parameter="firstTransmission" Member="FirstTransmission" />
       <Argument Parameter="lastTransmission" Member="LastTransmission" />
     </InsertFunction>
+  </Table>
+  <Table Name="dbo.ArgosFilePlatformDates" Member="ArgosFilePlatformDates">
+    <Type Name="ArgosFilePlatformDate">
+      <Column Name="ItemId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PlatformId" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
+      <Column Name="ProgramId" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
+      <Column Name="FirstTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
+      <Column Name="LastTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
+      <Association Name="CollarFile_ArgosFilePlatformDate" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="ArgosPlatform_ArgosFilePlatformDate" Member="ArgosPlatform" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosPlatform" IsForeignKey="true" />
+    </Type>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />

@@ -91,7 +91,7 @@
         <elementListCompartment Id="8555616c-22a1-4131-9ba7-e33074a240da" absoluteBounds="14.14, 10.835, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(11.5 : 5.53125); (13.2916666666667 : 5.53125 : JumpStart); (13.4583333333333 : 5.53125 : JumpEnd); (14.6875 : 5.53125); (14.6875 : 10.375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(11.5 : 5.53125); (11.9479171666667 : 5.53125 : JumpStart); (12.1145838333333 : 5.53125 : JumpEnd); (12.1666666666667 : 5.53125 : JumpStart); (12.3333333333333 : 5.53125 : JumpEnd); (14.6875 : 5.53125); (14.6875 : 10.375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/AnimalMovementDataContext/LookupCollarManufacturer/LookupCollarManufacturer_LookupCollarParameterFileFormat" />
       <nodes>
         <classShapeMoniker Id="a7053ff7-6489-4a5c-bbad-6458d5a1aafb" />
@@ -241,7 +241,7 @@
         <classShapeMoniker Id="ee747553-4a92-4a45-86c6-9ada8bca3076" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(9 : 2.42192260742187); (11.9479171666667 : 2.42192260742187 : JumpStart); (12.1145838333333 : 2.42192260742187 : JumpEnd); (13.2916666666667 : 2.42192260742187 : JumpStart); (13.4583333333333 : 2.42192260742187 : JumpEnd); (15.3854141666667 : 2.42192260742187 : JumpStart); (15.5520808333333 : 2.42192260742187 : JumpEnd); (17.625 : 2.42192260742187)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(9 : 2.42192260742187); (11.9479171666667 : 2.42192260742187 : JumpStart); (12.1145838333333 : 2.42192260742187 : JumpEnd); (13.2916666666667 : 2.42192260742187 : JumpStart); (13.4583333333333 : 2.42192260742187 : JumpEnd); (15.3854141666667 : 2.42192260742187 : JumpStart); (15.5520808333333 : 2.42192260742187 : JumpEnd); (17.625 : 2.42192260742187)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/AnimalMovementDataContext/CollarFile/CollarFile_ArgosDownload" />
       <nodes>
         <classShapeMoniker Id="865e9976-5e02-404a-9704-cee324f33bc4" />
@@ -255,7 +255,7 @@
         <classShapeMoniker Id="865e9976-5e02-404a-9704-cee324f33bc4" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(7.70923076923077 : 4.1939111328125); (7.70923076923077 : 4.4439111328125); (8.30461538461539 : 4.4439111328125); (8.30461538461539 : 4.1939111328125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(7.70923076923077 : 4.1939111328125); (7.70923076923077 : 4.4439111328125); (7.92358974358975 : 4.4439111328125 : JumpStart); (8.09025641025641 : 4.4439111328125 : JumpEnd); (8.30461538461539 : 4.4439111328125); (8.30461538461539 : 4.1939111328125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/AnimalMovementDataContext/CollarFile/CollarFile_CollarFile" />
       <nodes>
         <classShapeMoniker Id="865e9976-5e02-404a-9704-cee324f33bc4" />
@@ -303,14 +303,14 @@
         <elementListCompartment Id="99f800c2-feeb-4023-86db-61e5847cac78" absoluteBounds="6.64, 5.835, 1.9700000000000002, 2.1724039713541665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(8.625 : 7.35179768880208); (8.76041666666667 : 7.35179768880208 : JumpStart); (8.92708333333333 : 7.35179768880208 : JumpEnd); (10.4166666666667 : 7.35179768880208 : JumpStart); (10.5833333333333 : 7.35179768880208 : JumpEnd); (11.9479171666667 : 7.35179768880208 : JumpStart); (12.1145838333333 : 7.35179768880208 : JumpEnd); (12.1666666666667 : 7.35179768880208 : JumpStart); (12.3333333333333 : 7.35179768880208 : JumpEnd); (12.375 : 7.35179768880208)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(8.625 : 7.35179768880208); (8.76041666666667 : 7.35179768880208 : JumpStart); (8.92708333333333 : 7.35179768880208 : JumpEnd); (11.9479171666667 : 7.35179768880208 : JumpStart); (12.1145838333333 : 7.35179768880208 : JumpEnd); (12.375 : 7.35179768880208)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/AnimalMovementDataContext/Collar/Collar_CollarFix" />
       <nodes>
         <classShapeMoniker Id="c67816b3-33a8-41fe-8d43-5d2b44df06cb" />
         <classShapeMoniker Id="ee747553-4a92-4a45-86c6-9ada8bca3076" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(6.625 : 7.96079752604167); (2.71875 : 7.96079752604167); (2.71875 : 8.375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(6.625 : 7.96079752604167); (6.05208458333333 : 7.96079752604167 : JumpStart); (5.88541791666667 : 7.96079752604167 : JumpEnd); (2.71875 : 7.96079752604167); (2.71875 : 8.375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/AnimalMovementDataContext/Collar/Collar_CollarDeployment" />
       <nodes>
         <classShapeMoniker Id="c67816b3-33a8-41fe-8d43-5d2b44df06cb" />
@@ -324,7 +324,7 @@
         <classShapeMoniker Id="aaa20e12-31c0-4b5e-9a5b-ff0ed1177d4e" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(8.0625025 : 8.10740397135417); (8.0625025 : 9.48484537760417); (8.76041666666667 : 9.48484537760417 : JumpStart); (8.92708333333333 : 9.48484537760417 : JumpEnd); (11.9479171666667 : 9.48484537760417 : JumpStart); (12.1145838333333 : 9.48484537760417 : JumpEnd); (12.1666666666667 : 9.48484537760417 : JumpStart); (12.3333333333333 : 9.48484537760417 : JumpEnd); (14.6041666666667 : 9.48484537760417 : JumpStart); (14.7708333333333 : 9.48484537760417 : JumpEnd); (15 : 9.48484537760417)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(8.0625025 : 8.10740397135417); (8.0625025 : 9.48484537760417); (8.76041666666667 : 9.48484537760417 : JumpStart); (8.92708333333333 : 9.48484537760417 : JumpEnd); (15 : 9.48484537760417)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/AnimalMovementDataContext/Collar/Collar_ArgosDeployment" />
       <nodes>
         <classShapeMoniker Id="c67816b3-33a8-41fe-8d43-5d2b44df06cb" />
@@ -345,14 +345,14 @@
         <classShapeMoniker Id="c67816b3-33a8-41fe-8d43-5d2b44df06cb" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(9.5 : 8.6194507421875); (6.9999975 : 8.6194507421875); (6.9999975 : 8.10740397135417)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(9.5 : 8.6194507421875); (8.92708333333333 : 8.6194507421875 : JumpStart); (8.76041666666667 : 8.6194507421875 : JumpEnd); (8.14583583333333 : 8.6194507421875 : JumpStart); (7.97916916666667 : 8.6194507421875 : JumpEnd); (6.9999975 : 8.6194507421875); (6.9999975 : 8.10740397135417)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/AnimalMovementDataContext/LookupCollarModel/LookupCollarModel_Collar" />
       <nodes>
         <classShapeMoniker Id="3f891016-34a1-44cf-81a8-17934ce028d6" />
         <classShapeMoniker Id="c67816b3-33a8-41fe-8d43-5d2b44df06cb" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(5.6874975 : 4.45359537760417); (5.6874975 : 6.62584554036458); (6.625 : 6.62584554036458)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(5.6874975 : 4.45359537760417); (5.6874975 : 6.62584554036458); (5.88541791666667 : 6.62584554036458 : JumpStart); (6.05208458333333 : 6.62584554036458 : JumpEnd); (6.625 : 6.62584554036458)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/AnimalMovementDataContext/ProjectInvestigator/ProjectInvestigator_Collar" />
       <nodes>
         <classShapeMoniker Id="c9a850e1-177e-4511-8de1-639418ad2a4c" />
@@ -370,26 +370,6 @@
       <nodes>
         <classShapeMoniker Id="c9a850e1-177e-4511-8de1-639418ad2a4c" />
         <classShapeMoniker Id="c32452cb-3271-4aa7-8338-999edae0cb07" />
-      </nodes>
-    </associationConnector>
-    <classShape Id="2fc68dd0-7c3c-4b52-af1c-520843d17867" absoluteBounds="17.625, 2.75, 2, 1.7708968098958331">
-      <DataClassMoniker Name="/AnimalMovementDataContext/ArgosFilePlatformDate" />
-      <nestedChildShapes>
-        <elementListCompartment Id="9262c2a1-05f7-4de1-92c0-7d85b9946665" absoluteBounds="17.64, 3.21, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
-      </nestedChildShapes>
-    </classShape>
-    <associationConnector edgePoints="[(8.00692307692308 : 4.1939111328125); (8.00692307692308 : 4.48964680989583); (8.76041666666667 : 4.48964680989583 : JumpStart); (9.03646083333333 : 4.48964680989583 : JumpEnd); (10.5729166666667 : 4.48964680989583 : JumpStart); (10.7395833333333 : 4.48964680989583 : JumpEnd); (11.9479171666667 : 4.48964680989583 : JumpStart); (12.1145838333333 : 4.48964680989583 : JumpEnd); (13.2916666666667 : 4.48964680989583 : JumpStart); (13.4583333333333 : 4.48964680989583 : JumpEnd); (15.3854141666667 : 4.48964680989583 : JumpStart); (15.5520808333333 : 4.48964680989583 : JumpEnd); (17.625 : 4.48964680989583)]" fixedFrom="Algorithm" fixedTo="Algorithm">
-      <AssociationMoniker Name="/AnimalMovementDataContext/CollarFile/CollarFile_ArgosFilePlatformDate" />
-      <nodes>
-        <classShapeMoniker Id="865e9976-5e02-404a-9704-cee324f33bc4" />
-        <classShapeMoniker Id="2fc68dd0-7c3c-4b52-af1c-520843d17867" />
-      </nodes>
-    </associationConnector>
-    <associationConnector edgePoints="[(19.625 : 8.77263590494792); (20 : 8.77263590494792); (20 : 3.93884632711151); (19.625 : 3.93884632711151)]" manuallyRouted="true" fixedFrom="NotFixed" fixedTo="NotFixed">
-      <AssociationMoniker Name="/AnimalMovementDataContext/ArgosPlatform/ArgosPlatform_ArgosFilePlatformDate" />
-      <nodes>
-        <classShapeMoniker Id="1028ad1d-fd2e-4fc9-9b34-d630c3556dc2" />
-        <classShapeMoniker Id="2fc68dd0-7c3c-4b52-af1c-520843d17867" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(19.625 : 8.88296145777347); (20.5234375 : 8.88296145777347); (20.5234375 : 1.68542663414858); (19.625 : 1.68542663414858)]" manuallyRouted="true" fixedFrom="NotFixed" fixedTo="NotFixed">
@@ -412,25 +392,45 @@
         <elementListCompartment Id="76b7044b-01ab-4fae-8f21-a290c978acb7" absoluteBounds="17.64, 5.46, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(8.9531275 : 4.1939111328125); (8.9531275 : 5.09375); (10.5729166666667 : 5.09375 : JumpStart); (10.7395833333333 : 5.09375 : JumpEnd); (11.9479171666667 : 5.09375 : JumpStart); (12.1145838333333 : 5.09375 : JumpEnd); (12.1666666666667 : 5.09375 : JumpStart); (12.3333333333333 : 5.09375 : JumpEnd); (13.2916666666667 : 5.09375 : JumpStart); (13.4583333333333 : 5.09375 : JumpEnd); (15.3854141666667 : 5.09375 : JumpStart); (15.5520808333333 : 5.09375 : JumpEnd); (17.1666666666667 : 5.09375 : JumpStart); (17.3333333333333 : 5.09375 : JumpEnd); (17.625 : 5.09375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(8.9531275 : 4.1939111328125); (8.9531275 : 5.09375); (10.5729166666667 : 5.09375 : JumpStart); (10.7395833333333 : 5.09375 : JumpEnd); (11.9479171666667 : 5.09375 : JumpStart); (12.1145838333333 : 5.09375 : JumpEnd); (12.1666666666667 : 5.09375 : JumpStart); (12.3333333333333 : 5.09375 : JumpEnd); (13.2916666666667 : 5.09375 : JumpStart); (13.4583333333333 : 5.09375 : JumpEnd); (15.3854141666667 : 5.09375 : JumpStart); (15.5520808333333 : 5.09375 : JumpEnd); (17.625 : 5.09375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/AnimalMovementDataContext/CollarFile/CollarFile_ArgosFileProcessingIssue" />
       <nodes>
         <classShapeMoniker Id="865e9976-5e02-404a-9704-cee324f33bc4" />
         <classShapeMoniker Id="f9ca92fd-bd35-41bc-82bd-8e1cf1b3d337" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(7.625 : 5.375); (7.625 : 4.875); (8.76041666666667 : 4.875 : JumpStart); (9.03646083333333 : 4.875 : JumpEnd); (10.5729166666667 : 4.875 : JumpStart); (10.7395833333333 : 4.875 : JumpEnd); (11.9479171666667 : 4.875 : JumpStart); (12.1145838333333 : 4.875 : JumpEnd); (12.1666666666667 : 4.875 : JumpStart); (12.3333333333333 : 4.875 : JumpEnd); (13.2916666666667 : 4.875 : JumpStart); (13.4583333333333 : 4.875 : JumpEnd); (15.3854141666667 : 4.875 : JumpStart); (15.5520808333333 : 4.875 : JumpEnd); (17.25 : 4.875); (17.25 : 5.61748135001754); (17.625 : 5.61748135001754)]" fixedFrom="Algorithm" fixedTo="Caller">
+    <associationConnector edgePoints="[(7.9687525 : 5.375); (7.9687525 : 5.0624975); (8.76041666666667 : 5.0624975 : JumpStart); (8.92708333333333 : 5.0624975 : JumpEnd); (10.5729166666667 : 5.0624975 : JumpStart); (10.7395833333333 : 5.0624975 : JumpEnd); (11.9479171666667 : 5.0624975 : JumpStart); (12.1145838333333 : 5.0624975 : JumpEnd); (12.1666666666667 : 5.0624975 : JumpStart); (12.3333333333333 : 5.0624975 : JumpEnd); (13.2916666666667 : 5.0624975 : JumpStart); (13.4583333333333 : 5.0624975 : JumpEnd); (15.3854141666667 : 5.0624975 : JumpStart); (15.5520808333333 : 5.0624975 : JumpEnd); (17.625 : 5.0624975)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/AnimalMovementDataContext/Collar/Collar_ArgosFileProcessingIssue" />
       <nodes>
         <classShapeMoniker Id="c67816b3-33a8-41fe-8d43-5d2b44df06cb" />
         <classShapeMoniker Id="f9ca92fd-bd35-41bc-82bd-8e1cf1b3d337" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(18.625 : 8); (18.625 : 7.34780110677083)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(18.625 : 8); (18.625 : 7.34780110677083)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/AnimalMovementDataContext/ArgosPlatform/ArgosPlatform_ArgosFileProcessingIssue" />
       <nodes>
         <classShapeMoniker Id="1028ad1d-fd2e-4fc9-9b34-d630c3556dc2" />
         <classShapeMoniker Id="f9ca92fd-bd35-41bc-82bd-8e1cf1b3d337" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="1b6a97b7-f6bd-47fd-8aa5-62904b1ac537" absoluteBounds="17.625, 2.75, 2, 1.9631982421875">
+      <DataClassMoniker Name="/AnimalMovementDataContext/ArgosFilePlatformDate" />
+      <nestedChildShapes>
+        <elementListCompartment Id="39a3716b-324b-439b-a931-24d7cc980a96" absoluteBounds="17.64, 3.21, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(8.00692307692308 : 4.1939111328125); (8.00692307692308 : 4.55214680989583); (8.76041666666667 : 4.55214680989583 : JumpStart); (9.03646083333333 : 4.55214680989583 : JumpEnd); (10.5729166666667 : 4.55214680989583 : JumpStart); (10.7395833333333 : 4.55214680989583 : JumpEnd); (11.9479171666667 : 4.55214680989583 : JumpStart); (12.1145838333333 : 4.55214680989583 : JumpEnd); (13.2916666666667 : 4.55214680989583 : JumpStart); (13.4583333333333 : 4.55214680989583 : JumpEnd); (15.3854141666667 : 4.55214680989583 : JumpStart); (15.5520808333333 : 4.55214680989583 : JumpEnd); (17.625 : 4.55214680989583)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AnimalMovementDataContext/CollarFile/CollarFile_ArgosFilePlatformDate" />
+      <nodes>
+        <classShapeMoniker Id="865e9976-5e02-404a-9704-cee324f33bc4" />
+        <classShapeMoniker Id="1b6a97b7-f6bd-47fd-8aa5-62904b1ac537" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(19.625 : 8.62058039695705); (20 : 8.62058039695705); (20 : 3.65428911522521); (19.625 : 3.65428911522521)]" fixedFrom="Caller" fixedTo="Caller">
+      <AssociationMoniker Name="/AnimalMovementDataContext/ArgosPlatform/ArgosPlatform_ArgosFilePlatformDate" />
+      <nodes>
+        <classShapeMoniker Id="1028ad1d-fd2e-4fc9-9b34-d630c3556dc2" />
+        <classShapeMoniker Id="1b6a97b7-f6bd-47fd-8aa5-62904b1ac537" />
       </nodes>
     </associationConnector>
   </nestedChildShapes>

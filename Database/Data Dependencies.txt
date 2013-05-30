@@ -647,6 +647,12 @@ Telonics messages).  These files will have no parent, but they will (at some poi
 sub files.  These files may have multiple platforms, so the FileId is not sufficient for
 a primary key, however the (FileId, PlatformId) tuple is sufficient for a primary key.
 
+Addendum: (FileId, PlatformId) tuple is NOT sufficient for a PK.  The summerize tool for
+Argos Emails sorts by programId, then PlatformId.  As it turns out, an ArgosId can be in
+two different programs in the same file.  We cannot make PlatformId part of the PK,
+because it is null for some file types (Debevek files).  Solution: use a artificial PK,
+and create indexes on fileId, and PlatformId
+
 This table is not dependent on anything beyond the contents (and format) of the related
 collar file. Since the CollarFile contents/format are immutable, this table is also
 immutable.
