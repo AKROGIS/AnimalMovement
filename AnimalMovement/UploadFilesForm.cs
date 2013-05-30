@@ -184,8 +184,11 @@ namespace AnimalMovement
 
         private void UploadButton_Click(object sender, EventArgs e)
         {
-            if(UploadButton.Text == "Close")
+            if (UploadButton.Text == "Close")
+            {
                 Close();
+                return;
+            }
             if (FolderRadioButton.Checked)
                 UploadPath(FolderNameTextBox.Text);
             else
