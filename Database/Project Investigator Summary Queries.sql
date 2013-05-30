@@ -22,7 +22,7 @@
         AND F.[Owner] = @PI
 
 ----------- Programs in Argos files that are not in the Database
-     SELECT D.ProgramId AS [Argos Program], D.FileId, F.[FileName]
+     SELECT D.ProgramId AS [Argos Program], D.PlatformId AS [Argos Id], D.FileId, F.[FileName]
        FROM ArgosFilePlatformDates AS D
   LEFT JOIN ArgosPrograms AS P
          ON P.ProgramId = D.ProgramId
