@@ -2,9 +2,9 @@ USE [master]
 GO
 
 CREATE DATABASE [Animal_Movement] ON  PRIMARY 
-( NAME = N'Animal_Movement', FILENAME = N'C:\SqlDB\SQL2008R2\Data\Animal_Movement.mdf' , SIZE = 113088KB , MAXSIZE = UNLIMITED, FILEGROWTH = 10%)
+( NAME = N'Animal_Movement', FILENAME = N'D:\SqlDb\MSSQLSERVER\DATA\AM\Animal_Movement.mdf' , SIZE = 113088KB , MAXSIZE = UNLIMITED, FILEGROWTH = 10%)
  LOG ON 
-( NAME = N'Animal_Movement_log', FILENAME = N'C:\SqlDB\SQL2008R2\Log\Animal_Movement_log.ldf' , SIZE = 833024KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+( NAME = N'Animal_Movement_log', FILENAME = N'D:\SqlDb\MSSQLSERVER\LOG\Animal_Movement_log.ldf' , SIZE = 833024KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
 GO
 
 ALTER DATABASE [Animal_Movement] SET COMPATIBILITY_LEVEL = 100
@@ -102,10 +102,3 @@ GO
 
 USE [Animal_Movement]
 GO
-
-GRANT ALTER ANY USER TO [Investigator] AS [dbo]
-GO
-
-GRANT CONNECT TO [NPS\Domain Users] AS [dbo]
-GO
-

@@ -7,6 +7,7 @@ Animal Movements Installation Instructions
 
 Prerequisites and Assumptions
 =============================
+MSSMS = Microsoft SQL Server Management Studio
 
 Install SqlServer
 =================
@@ -24,6 +25,17 @@ Create Animal Movements Database
 Create The Database Files
 -------------------------
 
+Copy and edit the file ``{installdir}\Database\CreateDatabase.sql``.
+The edits must include:
+
+1. If you already have a database called ``Animal_Movement`` or you would like to use
+   a different name, the do a global search and replace on ``Animal_Movement``.
+2. Ensure that the Name and path of the mdf and log files are valid and appropriate
+   (lines 5 and 7)
+
+Open and run the file in MSSMS with a connection to the instance where you wish to create
+the database.
+ 
 Create The Empty Schema
 -----------------------
 
