@@ -5535,9 +5535,6 @@ BEGIN
     INSERT INTO [dbo].[ArgosPlatforms] ([PlatformId], [ProgramId], [DisposalDate], [Notes], [Active])
                                 VALUES (@PlatformId, @ProgramId, @DisposalDate, @Notes, @Active)
 END
-
-
-GRANT EXECUTE ON [dbo].[ArgosPlatform_Insert] TO [Investigator] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -7117,9 +7114,6 @@ BEGIN
                                VALUES (@ProgramId, @ProgramName, @UserName, @Password,
                                        @Manager, @StartDate, @EndDate, @Notes, @Active)
 END
-
-
-GRANT EXECUTE ON [dbo].[ArgosProgram_Insert] TO [Investigator] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8363,11 +8357,13 @@ GRANT EXECUTE ON [dbo].[ArgosFileProcessingIssues_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosPlatform_Delete] TO [Editor] AS [dbo]
 GO
-GRANT EXECUTE ON [dbo].[ArgosPlatform_Insert] TO [Investigator] AS [dbo]
+GRANT EXECUTE ON [dbo].[ArgosPlatform_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosPlatform_Update] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosProgram_Delete] TO [Editor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[ArgosProgram_Insert] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[ArgosProgram_Update] TO [Editor] AS [dbo]
 GO
