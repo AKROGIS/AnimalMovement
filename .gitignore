@@ -1,5 +1,8 @@
 Documentation/*.pdf
 Documentation/*.html
+Distribution/Database/*
+Distribution/Client/*
+Distribution/Server/*
 
 #OS junk files
 [Tt]humbs.db

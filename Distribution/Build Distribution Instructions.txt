@@ -1,0 +1,35 @@
+
+if ..\Database\CreateDatabase.sql is newer than .\Database\CreateDatabase.sql
+ then
+ 1. Copy and replace
+ 2. Remove all the GRANT commands at the end of the script
+ 3. Edit the 5th and 7th lines to change the size of the files to 10240KB and 10240KB respectively
+
+if ../Database/CreateDatabaseObjects.sql is newer than .\Database\CreateDatabaseObjects.sql
+ then
+ 1. Copy and replace
+ 2. Do a global search and replace removing all SET ANSI_PADDING OFF
+    # This setting causes creation of spatial indices to fail.  The setting is deprecated (see http://msdn.microsoft.com/en-us/library/ms187403(v=sql.90).aspx)
+    # SSMS incorrectly inserts it in the script (see https://connect.microsoft.com/SQLServer/feedback/details/127167/trailing-set-ansi-padding-off-when-scripting-tables#details)
+ 3. Remove all the CREATE USER commands at the start of the script
+ 4. Remove the CREATE ROLE commands for the replication roles
+ 5. Remove all the EXEC dbo.sp_addrolemember commands from the end of the script
+
+if ..\Database\CreateAutomationUser.sql is newer than .\Database\CreateAutomationUser.sql
+  then copy and replace
+
+if ..\Database\CreateReplicationUsers.sql is newer than .\Database\CreateReplicationUsers.sql
+  then copy and replace
+
+if ..\Database\CreateUsers.sql is newer than .\Database\CreateUsers.sql
+  then copy and replace
+
+if ..\SqlServer_Files\bin\Release\SqlServer_Files.sql is newer than .\Database\SqlServer_CLR.sql
+ then copy the CREATE ASSEMBLY and ALTER ASSEMBLY commands from the source to the correct section in the destination
+repeat for ..\SqlServer_Functions\bin\Release\SqlServer_Functions.sql is newer than Database\SqlServer_CLR.sql
+repeat for ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.sql is newer than Database\SqlServer_CLR.sql
+repeat for ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.sql is newer than Database\SqlServer_CLR.sql
+
+if ../Database/LookupTableData.sql is newer than .\Database\LookupTableData.sql
+  then Copy and replace
+

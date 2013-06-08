@@ -2,9 +2,9 @@ USE [master]
 GO
 
 CREATE DATABASE [Animal_Movement] ON  PRIMARY 
-( NAME = N'Animal_Movement', FILENAME = N'D:\SqlDb\MSSQLSERVER\DATA\AM\Animal_Movement.mdf' , SIZE = 113088KB , MAXSIZE = UNLIMITED, FILEGROWTH = 10%)
+( NAME = N'Animal_Movement', FILENAME = N'D:\SqlDb\MSSQLSERVER\DATA\AM\Animal_Movement.mdf' , SIZE = 3464896KB , MAXSIZE = UNLIMITED, FILEGROWTH = 10%)
  LOG ON 
-( NAME = N'Animal_Movement_log', FILENAME = N'D:\SqlDb\MSSQLSERVER\LOG\Animal_Movement_log.ldf' , SIZE = 833024KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+( NAME = N'Animal_Movement_log', FILENAME = N'D:\SqlDb\MSSQLSERVER\LOG\Animal_Movement_log.ldf' , SIZE = 19593984KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
 GO
 
 ALTER DATABASE [Animal_Movement] SET COMPATIBILITY_LEVEL = 100
@@ -102,3 +102,47 @@ GO
 
 USE [Animal_Movement]
 GO
+
+GRANT CONNECT TO [INPAKROMS53AIS\repl_distribution] AS [dbo]
+GO
+
+GRANT CONNECT REPLICATION TO [INPAKROMS53AIS\repl_distribution] AS [dbo]
+GO
+
+GRANT CONNECT TO [INPAKROMS53AIS\repl_logreader] AS [dbo]
+GO
+
+GRANT CONNECT TO [INPAKROMS53AIS\repl_merge] AS [dbo]
+GO
+
+GRANT CONNECT TO [INPAKROMS53AIS\repl_snapshot] AS [dbo]
+GO
+
+GRANT CONNECT TO [INPAKROMS53AIS\sql_proxy] AS [dbo]
+GO
+
+GRANT ALTER ANY USER TO [Investigator] AS [dbo]
+GO
+
+GRANT CONNECT TO [NPS\BBorg] AS [dbo]
+GO
+
+GRANT CONNECT TO [NPS\Domain Users] AS [dbo]
+GO
+
+GRANT CONNECT TO [NPS\GColligan] AS [dbo]
+GO
+
+GRANT CONNECT TO [NPS\JPLawler] AS [dbo]
+GO
+
+GRANT CONNECT TO [NPS\MLJohnson] AS [dbo]
+GO
+
+GRANT CONNECT TO [NPS\PAOwen] AS [dbo]
+GO
+
+GRANT CONNECT TO [NPS\RESarwas] AS [dbo]
+GO
+
+
