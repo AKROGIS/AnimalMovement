@@ -159,8 +159,35 @@
 -- Checks associated with Hidden Locations 
 -- =======================================
 
+/*
+  Preserving hidden locations.
+  Deactivating a file deletes a location, including its status, reactivating
+  a file creates a new location with a non-hidden status.  This can cause some
+  confusion for users.  Until the database manages this better, we can do the 
+  following before mucking with the files backing locations.
+  1. create a table of hidden fixes, we track the fixtime and the files Sha1Hash,
+     because the fileid will change if the file is deleted and reloaded, and the
+     fixid will change if a file is deactivated/reactivated.
+  2. load the table
+  3. rehide locations
+  
+CREATE TABLE [dbo].[HiddenFixes](
+	[FixDate] [datetime2](7) NOT NULL,
+	[Sha1Hash] [varbinary](8000) NULL
+) ON [PRIMARY]
 
------------ Locations which are not but should be hidden    
+----------- Locations that are hidden
+--INSERT INTO [dbo].[HiddenFixes] ([FixDate], [Sha1Hash])
+     SELECT X.FixDate, F.Sha1Hash
+       FROM Locations AS L
+       JOIN CollarFixes AS X
+         ON X.FixId = L.FixId
+       JOIN CollarFiles AS F
+         ON F.FileId = X.FileId
+      WHERE L.[Status] IS NOT NULL 
+
+----------- Locations which are not but should be hidden
+   --UPDATE L SET [Status] = 'H'    
      SELECT L.FixDate, F.Sha1Hash, L.ProjectId, L.AnimalId, L.[Status]
        FROM HiddenFixes AS H
  INNER JOIN (
@@ -172,6 +199,7 @@
             )
          ON H.FixDate = L.FixDate AND H.Sha1Hash = F.Sha1Hash
       WHERE L.[Status] IS NULL
+*/
 
 ----------- FixDate and FileHash for hidden locations    
      SELECT L.FixDate, F.Sha1Hash --, L.ProjectId, L.AnimalId, L.[Status]

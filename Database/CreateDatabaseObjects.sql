@@ -1608,190 +1608,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
-	[Code] [char](1) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Description] [nvarchar](255) NULL,
- CONSTRAINT [PK_LookupCollarParameterFileFormats] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarParameterFiles](
-	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[Owner] [sysname] NOT NULL,
-	[FileName] [nvarchar](255) NOT NULL,
-	[Format] [char](1) NOT NULL,
-	[UploadDate] [datetime2](7) NOT NULL,
-	[UploadUser] [sysname] NOT NULL,
-	[Contents] [varbinary](max) NOT NULL,
-	[Status] [char](1) NOT NULL,
-	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
- CONSTRAINT [PK_CollarParameterFiles] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 8, 2013
--- Description:	Returns a table of Telonics processing parameters
---              for the Argos Id in the date range. 
--- Example:     SELECT * FROM GetTelonicsParametersForArgosDates('37470', '2008-03-01', '2014-03-01') ORDER BY StartDate
--- Caller need to check that the results cover the entire requested date range
--- Caller should order the results by startdate, then check the following:
---   if @StartDate < firstrecord.startDate(and not null) then Missing parameters
---   if @EndDate > lastrecord.EndDate(and not null) more missing parameters
-
--- Update May 8, 2013
---   Removed valid parameter check.  The processor will now be able to check
---   if there is a valid Argos-collar deployment, but no collar-parameter
---   assignment, and therefore write a better error message.
---   The client must now check for invalid parameters.
--- =============================================
-CREATE FUNCTION [dbo].[GetTelonicsParametersForArgosDates] 
-(
-    @PlatformID VARCHAR(8),
-    @StartDate DATETIME2(7),
-    @EndDate DATETIME2(7)
-)
-RETURNS TABLE 
-AS
-    RETURN
-     SELECT A.DeploymentId, P.ParameterId, A.PlatformId, A.CollarManufacturer, A.CollarId, C.CollarModel,
-            P.Gen3Period, F.Format, F.[FileName], F.Contents,
-            CASE WHEN (A.StartDate IS NOT NULL AND P.StartDate IS NOT NULL)
-                 THEN (CASE WHEN A.StartDate < P.StartDate THEN P.StartDate ELSE A.StartDate END)
-                 ELSE (CASE WHEN A.StartDate IS NULL THEN P.StartDate ELSE A.StartDate END) END AS StartDate,
-            CASE WHEN (A.EndDate IS NOT NULL AND P.EndDate IS NOT NULL)
-                 THEN (CASE WHEN A.EndDate < P.EndDate THEN A.EndDate ELSE P.EndDate END)
-                 ELSE (CASE WHEN A.EndDate IS NULL THEN P.EndDate ELSE A.EndDate END) END AS EndDate
-       FROM ArgosDeployments AS A
- INNER JOIN Collars AS C
-         ON A.CollarManufacturer = C.CollarManufacturer AND A.CollarId = C.CollarId
-  LEFT JOIN CollarParameters AS P
-         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-  LEFT JOIN CollarParameterFiles AS F
-         ON P.FileId = F.FileId
-      WHERE A.PlatformId = @PlatformID
-        AND (A.StartDate IS NULL OR A.StartDate < @EndDate)
-        AND (P.StartDate IS NULL OR P.StartDate < @EndDate)
-        AND (A.EndDate IS NULL OR @StartDate < A.EndDate)
-        AND (P.EndDate IS NULL OR @StartDate < P.EndDate)
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[GetLocationGeography]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS GEOGRAPHY
-AS
-BEGIN
-	DECLARE @Result GEOGRAPHY
-	SET @Result = (SELECT [Location] 
-	                 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [FixDate] = @Time);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[Gen3StoreOnBoardLocations]
-AS
-SELECT     dbo.CollarDataTelonicsGen3StoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
-                      dbo.CollarFiles.UploadDate
-FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
-                      dbo.CollarFixes ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFixes.FileId AND 
-                      dbo.CollarDataTelonicsGen3StoreOnBoard.LineNumber = dbo.CollarFixes.LineNumber INNER JOIN
-                      dbo.Locations ON dbo.CollarFixes.FixId = dbo.Locations.FixId INNER JOIN
-                      dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
-                      dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 4, 2013
--- Description:	Returns a bit (boolean) if we need to use TDC.exe on this file
---              This is true for files of Gen4 datalog files (format 'H')
---              Email and AWS files ('E', 'F'), may have only Gen3 collars in them
---              Check if the file has transmissions that map to a Gen4 collar.
--- =============================================
-
-CREATE FUNCTION [dbo].[FileHasGen4Data] 
-(
-	@FileId INT
-)
-RETURNS BIT
-AS
-BEGIN
-	IF EXISTS(   SELECT 1
-				   FROM ArgosFilePlatformDates AS D
-			CROSS APPLY GetTelonicsParametersForArgosDates(D.PlatformId, D.FirstTransmission, D.LastTransmission) AS P
-				  WHERE D.FileId = @FileId AND P.CollarModel = 'Gen4'
-			 )
-		RETURN 1
-	IF EXISTS(   SELECT 1
-	               FROM CollarFiles
-	              WHERE FileId = @FileId AND Format = 'H'
-	         )
-	    RETURN 1
-	RETURN 0
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
-(
-)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @Result INT;
-
-	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
-	  FROM ArgosDownloads
-	 WHERE ErrorMessage IS NULL
-	
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
 ON [dbo].[CollarFixes] 
 INSTEAD OF INSERT AS
@@ -2032,6 +1848,171 @@ BEGIN
        INNER JOIN deleted AS D
                ON D.FileId = F.FileId
 
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
+	[Code] [char](1) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Description] [nvarchar](255) NULL,
+ CONSTRAINT [PK_LookupCollarParameterFileFormats] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarParameterFiles](
+	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[Owner] [sysname] NOT NULL,
+	[FileName] [nvarchar](255) NOT NULL,
+	[Format] [char](1) NOT NULL,
+	[UploadDate] [datetime2](7) NOT NULL,
+	[UploadUser] [sysname] NOT NULL,
+	[Contents] [varbinary](max) NOT NULL,
+	[Status] [char](1) NOT NULL,
+	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
+ CONSTRAINT [PK_CollarParameterFiles] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 8, 2013
+-- Description:	Returns a table of Telonics processing parameters
+--              for the Argos Id in the date range. 
+-- Example:     SELECT * FROM GetTelonicsParametersForArgosDates('37470', '2008-03-01', '2014-03-01') ORDER BY StartDate
+-- Caller need to check that the results cover the entire requested date range
+-- Caller should order the results by startdate, then check the following:
+--   if @StartDate < firstrecord.startDate(and not null) then Missing parameters
+--   if @EndDate > lastrecord.EndDate(and not null) more missing parameters
+
+-- Update May 8, 2013
+--   Removed valid parameter check.  The processor will now be able to check
+--   if there is a valid Argos-collar deployment, but no collar-parameter
+--   assignment, and therefore write a better error message.
+--   The client must now check for invalid parameters.
+-- =============================================
+CREATE FUNCTION [dbo].[GetTelonicsParametersForArgosDates] 
+(
+    @PlatformID VARCHAR(8),
+    @StartDate DATETIME2(7),
+    @EndDate DATETIME2(7)
+)
+RETURNS TABLE 
+AS
+    RETURN
+     SELECT A.DeploymentId, P.ParameterId, A.PlatformId, A.CollarManufacturer, A.CollarId, C.CollarModel,
+            P.Gen3Period, F.Format, F.[FileName], F.Contents,
+            CASE WHEN (A.StartDate IS NOT NULL AND P.StartDate IS NOT NULL)
+                 THEN (CASE WHEN A.StartDate < P.StartDate THEN P.StartDate ELSE A.StartDate END)
+                 ELSE (CASE WHEN A.StartDate IS NULL THEN P.StartDate ELSE A.StartDate END) END AS StartDate,
+            CASE WHEN (A.EndDate IS NOT NULL AND P.EndDate IS NOT NULL)
+                 THEN (CASE WHEN A.EndDate < P.EndDate THEN A.EndDate ELSE P.EndDate END)
+                 ELSE (CASE WHEN A.EndDate IS NULL THEN P.EndDate ELSE A.EndDate END) END AS EndDate
+       FROM ArgosDeployments AS A
+ INNER JOIN Collars AS C
+         ON A.CollarManufacturer = C.CollarManufacturer AND A.CollarId = C.CollarId
+  LEFT JOIN CollarParameters AS P
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+  LEFT JOIN CollarParameterFiles AS F
+         ON P.FileId = F.FileId
+      WHERE A.PlatformId = @PlatformID
+        AND (A.StartDate IS NULL OR A.StartDate < @EndDate)
+        AND (P.StartDate IS NULL OR P.StartDate < @EndDate)
+        AND (A.EndDate IS NULL OR @StartDate < A.EndDate)
+        AND (P.EndDate IS NULL OR @StartDate < P.EndDate)
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[GetLocationGeography]
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS GEOGRAPHY
+AS
+BEGIN
+	DECLARE @Result GEOGRAPHY
+	SET @Result = (SELECT [Location] 
+	                 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [FixDate] = @Time);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[Gen3StoreOnBoardLocations]
+AS
+SELECT     dbo.CollarDataTelonicsGen3StoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
+                      dbo.CollarFiles.UploadDate
+FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
+                      dbo.CollarFixes ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFixes.FileId AND 
+                      dbo.CollarDataTelonicsGen3StoreOnBoard.LineNumber = dbo.CollarFixes.LineNumber INNER JOIN
+                      dbo.Locations ON dbo.CollarFixes.FixId = dbo.Locations.FixId INNER JOIN
+                      dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
+                      dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 4, 2013
+-- Description:	Returns a bit (boolean) if we need to use TDC.exe on this file
+--              This is true for files of Gen4 datalog files (format 'H')
+--              Email and AWS files ('E', 'F'), may have only Gen3 collars in them
+--              Check if the file has transmissions that map to a Gen4 collar.
+-- =============================================
+
+CREATE FUNCTION [dbo].[FileHasGen4Data] 
+(
+	@FileId INT
+)
+RETURNS BIT
+AS
+BEGIN
+	IF EXISTS(   SELECT 1
+				   FROM ArgosFilePlatformDates AS D
+			CROSS APPLY GetTelonicsParametersForArgosDates(D.PlatformId, D.FirstTransmission, D.LastTransmission) AS P
+				  WHERE D.FileId = @FileId AND P.CollarModel = 'Gen4'
+			 )
+		RETURN 1
+	IF EXISTS(   SELECT 1
+	               FROM CollarFiles
+	              WHERE FileId = @FileId AND Format = 'H'
+	         )
+	    RETURN 1
+	RETURN 0
 END
 GO
 SET ANSI_NULLS ON
@@ -2799,6 +2780,25 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
+(
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Result INT;
+
+	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
+	  FROM ArgosDownloads
+	 WHERE ErrorMessage IS NULL
+	
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[PreviousLocationTime] 
 (
 	@Project VARCHAR(16)   = NULL, 
@@ -3215,6 +3215,28 @@ CREATE TABLE [dbo].[Settings](
 	[Key] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/* Converts a datetime to the ordinal date (day of the year)
+ * commonly confused with the Julian date (days sine 1/1/4713BC)
+ */
+CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
+    @Date DATETIME2  
+)   
+	RETURNS INT
+    WITH SCHEMABINDING -- This is a deterministic function.
+
+AS
+BEGIN
+    RETURN 1 + DATEDIFF (day,
+                         CONVERT(DATETIME2,
+                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
+                                 112), -- format 112 (yyyymmdd) is deterministic
+                         @Date)
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -4205,41 +4227,6 @@ BEGIN
     CLOSE insert_deployment_cursor2;
     DEALLOCATE insert_deployment_cursor2;
 
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[HiddenFixes](
-	[FixDate] [datetime2](7) NOT NULL,
-	[Sha1Hash] [varbinary](8000) NULL
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-/* Converts a datetime to the ordinal date (day of the year)
- * commonly confused with the Julian date (days sine 1/1/4713BC)
- */
-CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
-    @Date DATETIME2  
-)   
-	RETURNS INT
-    WITH SCHEMABINDING -- This is a deterministic function.
-
-AS
-BEGIN
-    RETURN 1 + DATEDIFF (day,
-                         CONVERT(DATETIME2,
-                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
-                                 112), -- format 112 (yyyymmdd) is deterministic
-                         @Date)
 END
 GO
 CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
@@ -5814,11 +5801,6 @@ BEGIN
 
 END
 GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
-GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -5968,6 +5950,11 @@ AS
        FROM CollarParameterFiles AS P
 CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
       WHERE P.Format = 'A'
+GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
 GO
 SET ANSI_NULLS ON
 GO
@@ -6691,34 +6678,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[IsInvestigatorEditor] 
-(
-    @ProjectInvestigator sysname, 
-    @User                sysname
-)
-RETURNS BIT
-AS
-BEGIN
-    -- Check that @User is in the Investigator or the Editor Role
-    IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
-                                                   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
-        RETURN 0
-    
-    --Check that @User is either an Assistant or the PI
-    IF EXISTS(     SELECT 1 FROM dbo.ProjectInvestigators AS P 
-                LEFT JOIN [dbo].[ProjectInvestigatorAssistants] AS A 
-                       ON A.ProjectInvestigator = P.[Login] 
-                    WHERE (@User = @ProjectInvestigator AND P.[Login] = @User) 
-                       OR (A.ProjectInvestigator = @ProjectInvestigator AND @User = A.Assistant)
-             )
-        RETURN 1
-    RETURN 0
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 28, 2012
@@ -6964,6 +6923,34 @@ CREATE TABLE [dbo].[LookupCollarFileHeaders](
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[IsInvestigatorEditor] 
+(
+    @ProjectInvestigator sysname, 
+    @User                sysname
+)
+RETURNS BIT
+AS
+BEGIN
+    -- Check that @User is in the Investigator or the Editor Role
+    IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
+                                                   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
+        RETURN 0
+    
+    --Check that @User is either an Assistant or the PI
+    IF EXISTS(     SELECT 1 FROM dbo.ProjectInvestigators AS P 
+                LEFT JOIN [dbo].[ProjectInvestigatorAssistants] AS A 
+                       ON A.ProjectInvestigator = P.[Login] 
+                    WHERE (@User = @ProjectInvestigator AND P.[Login] = @User) 
+                       OR (A.ProjectInvestigator = @ProjectInvestigator AND @User = A.Assistant)
+             )
+        RETURN 1
+    RETURN 0
+END
 GO
 SET ANSI_NULLS ON
 GO

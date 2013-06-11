@@ -4,9 +4,7 @@ using System.Runtime.InteropServices;
 //FIXME - DATABASE - Hide the ArgosPlatforms.Password from all but the Manager, and the Download API
 //TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a collar is updated (HasGps, Model, DispDate), then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
-//TODO - DATABASE - Write local time to the Location and movements layers - make the views simpler/faster
-//TODO - DATABASE - Writing local time to the Location and movements layers, will simplify replication - do not replicate localtime function
-//TODO - DATABASE - Add a Hidden attribute to the CollarFixes table which caches Location.Hidden, for when locations are deleted/restored.
+//TODO - DATABASE - Track the preserve the status of locations when files are reloaded/reactivated. (this is hard - all inserts to locations needs to first scan the preservation table)
 //TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings -- Need special exception for sql_proxy
 //TODO - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
 //TODO - DATABASE - Add more unit testing.
@@ -37,6 +35,8 @@ using System.Runtime.InteropServices;
 //  do not require that CollarDeployments.RetrievalDate < Collar.DisposalDate; just limit locations to before disposal date
 //  (collar may be disposed but never be retreived)
 //  do not limit collar fixes to those before the Collar.DisposalDate; just limit locations
+//  Do not remove UTC fixtime from Locations.  this is used to create movement vectors, and due to daylight savings time, local time will not work
+//    also, removing the functions from the spatial view did not make them any faster.
 
 //Deployment Notes:
 //  The connection string for the DataModel.dll (app.config) must be copied in and replace the connection string in the
