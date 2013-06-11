@@ -5974,7 +5974,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
-	@Login sysname, 
+	@Login NVARCHAR(255), 
 	@Name  NVARCHAR(255), 
 	@Email NVARCHAR(255),
 	@Phone NVARCHAR(255)
