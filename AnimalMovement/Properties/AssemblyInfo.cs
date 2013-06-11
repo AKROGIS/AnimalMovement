@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 
 //FIXME - DATABASE - Hide the ArgosPlatforms.Password from all but the Manager, and the Download API
-//TODO - DATABASE - Must the CollarDeployments update trigger preclude changes to collar and animal (provided the change maintains RI)? - Changing a collar id in collars table cascades the change to deployments where it fails.
 //TODO - DATABASE - If a collar is updated (HasGps, Model, DispDate), then the collar may gain (or lose) fixes in files already processed - provide tool to rescan files
 //TODO - DATABASE - Track the preserve the status of locations when files are reloaded/reactivated. (this is hard - all inserts to locations needs to first scan the preservation table)
 //TODO - DATABASE - Make viewing the Settings table off limits, provide a Store Procedure to see only your settings -- Need special exception for sql_proxy

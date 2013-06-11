@@ -241,6 +241,25 @@ They can make all changes that a PI can make to a project, except
 add or delete project editors (an editor can delete him/herself).
 they can edit all properties of a project except the PI.
 
+
+CollarDeployments
+=================
+
+CollarDeployments has Foriegn keys to Collars, but it blocks cascading updates
+This is because it would require permitting changing the collar in a collardeployment,
+this would be fine if it only happened as a result of a collar id changing, in which
+case all references to a collar would be changing simultaneously and consistantly.
+However changing the collar in a deployment is tricky if it doesn't start from the collar
+table.  (see the Argos deployment triggers).  We therefore are prohibiting changing the
+collar in a deployment.
+The same goes for animals in the CollarDeployment table.
+
+If I relied on the SPROC to limit changes to CollarDeployments, I could allow changes to
+the collar columns in the table, but to protect against RI damage by the SA, I enforce
+the no change column rule in the trigger.
+
+*** FINISH DOCUMENTATION ***
+
 CollarFixes
 ===========
 All writes to this table are done by CollarFixes_Insert, which is not visible to clients
