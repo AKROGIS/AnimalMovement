@@ -14,7 +14,8 @@ Install SqlServer
 
 See the Microsoft documentation for this step.  The application was developed
 on Microsoft SqlServer 2008R2 enterprise edition, but any edition, including
-express should work, as well as any subsequent version.
+express should work, as well as any subsequent version.  The database uses features
+new in 2008R2, so previous versions will *NOT* work.
 
 Create Instance Logons
 ----------------------
@@ -30,12 +31,17 @@ To run custom code in the database, you must enable CLR (Common Language Runtime
 integration.  This is equivalent to enabling "plugins" for the database.
 Open a SSMS query and enter the following text::
 
+  sp_configure 'show advanced options', 1;
+  GO
+  RECONFIGURE;
+  GO
   sp_configure 'clr enabled', 1
   GO
   RECONFIGURE
   GO
 
 then press the execute button.
+For more details, see `Enabling CLR Integration`_ on the Microsoft Developer Network
 
 Create Animal Movements Database
 ================================
@@ -52,6 +58,7 @@ The edits must include:
 
 1. If you already have a database called ``Animal_Movement`` or you would like to use
    a different name, the do a global search and replace on ``Animal_Movement``.
+   
 2. Ensure that the Name and path of the mdf and log files are valid and appropriate
    (lines 5 and 7)
 
@@ -81,7 +88,7 @@ Create Database Users
 
 Open the file ``{installdir}\Database\CreateUsers.sql`` in in SSMS with a connection to
 the instance where you wish to create the database.  Turn on ``SQLCMD Mode`` in the Query
-menu of SSMS.  Edit the lines 10th and 11th lines to set the name of the domain group that
+menu of SSMS.  Edit the 10th and 11th lines to set the name of the domain group that
 has viewing permissions, and the name of the database (if you have changed it)
 respectively. Then execute the query.
 
@@ -89,11 +96,11 @@ Adding the Automation User
 ++++++++++++++++++++++++++
 
 If you want to use an automated process to automatically download Argos data, or
-process Argos emails for users that do not have the Telonics Data Convertor on their
+process Argos emails for users that do not have the Telonics Data Convertor (TDC) on their
 computer, then you will need to add the automation user.
 
 You will need the create a local windows account on the database server.  See the
-section  Create External Services, SqlProxy Account below.
+section `Automation Account`_ for details.
 
 Open the file ``{installdir}\Database\CreateAutomationUser.sql`` in in SSMS with a
 connection to the instance where you wish to create the database.  Turn on
@@ -107,16 +114,20 @@ automation account.  Edit the 9th line to reflect the name of the database
 Create Project Investigators
 ++++++++++++++++++++++++++++
 
-In SSMS expand the new animal movements database.  Expand the Programmability and Stored
-Procedures section.  Right click on ``ProjectInvestigator_Insert_SA`` and select
+In the Object Explorer in SSMS browse to the server, then 
+``Databases -> Animal_Movement -> Programmability -> Stored Procedures``.
+Right click on ``ProjectInvestigator_Insert_SA`` and select
 ``Execute Stored Procedure...`` from the pop up menu.  Fill in the information for a
 project investigator.  The first parameter (``@Login``) is the users network/database
-user name with the domain name  i.e. 'NPS\RESarwas'.  The stored procedure will ensure
+login name with the domain  i.e. ``NPS\RESarwas``.  The stored procedure will ensure
 that the user has a database login.  A project investigator is a database
 user that can create and manage projects and collars.  They can also enable other database
-users to do editing on thier behalf.  Only project investigators (and their editors) have
+users to do editing on their behalf.  Only project investigators (and their editors) have
 permission to make changes in the database. Run the stored procedure as many times as
 necessary to create all the project investigators that will be using the database.
+A collar, project, and file can only be *owned* by one project investigator, so if an
+item is *jointly* managed, then pick one manager as the project investigator, and make
+the other an assistant.
 
 Populate Domains
 ----------------
@@ -134,19 +145,120 @@ for optimal performance.
 Open and run the file in SSMS with a connection to the instance where you wish to create
 the database.
 
+Settings Table
+--------------
+Open the file ``{installdir}\Database\Settings.sql`` in SSMS with a connection to
+the instance where you wish to create the database.  Edit the file as follows
 
-Other Initialization
---------------------
+1. Change the database name on the first line as appropriate.
+  
+2. Change the value of ``dba_contact`` to reflect your (the admin/installer's)
+   contact information
+  
+3. Change the value of ``argosProcessor`` to the path of the ArgosProcessor.exe
+   file as set in `Automation Applications`_.
+   If you are not using the automation account to process Argos files,
+   then remove this line.
+  
+4. Change the value of ``sa_email`` and ``sa_email_password`` to reflect the name
+   and password of the email account to be used by the automation account to email
+   project investigators of problems encountered while downloading Argos data.
+   See section `Optional Email Notifications`_ for more details.
+   If you are not using email notifications, remove these lines.
+
+Then execute the query.
+
+
+Client Application
+==================
+
+Interaction with the Animal Movements database occurs in two distinct flavors.
+
+1. The Animal Movements Application (``AnimalMovement.exe``) - For creating lists of
+   animals, collars, and deployments
+   and for uploading data files, or configuring the automatic download options.
+ 
+2. ArcMap layer files - for viewing animal locations, and movement vectors.
+ 
+Installing the Animal Movements Application
+-------------------------------------------
+Copy all the files from ``{installdir}\Client`` to some local or network drive.
+The application can run from any folder and does not need any special administrative
+permissions to be installed or configured.  All the files do need to be installed in
+the same folder, so if you want a copy on your desktop you will need to create a shortcut
+to AnimalMovement.exe, and not a copy.
+
+Edit Configuration File 
++++++++++++++++++++++++
+The configuration file is ``AnimalMovement.exe.config``.  If your computer settings are
+hiding file extensions, then the file name will appear as ``AnimalMovement.exe``, and
+the application (the file with the paw icon) ``AnimalMovement.exe`` will appear as
+``AnimalMovement``. Edit, *with a text editor like notepad, not MS word*, the
+connection string in this file (line 15). The line should look like::
+
+  connectionString="Data Source=INPAKROms53ais;Initial Catalog=Animal_Movement;Integrated Security=True"
+
+Change ``INPAKROms53ais`` to reflect the name of the SqlServer instance where the database
+is installed.  By default this is the server name of the machine where SqlServer is
+installed.  Change ``Animal_Movement`` to reflect the name of the database if you have
+changed it.
+
+If you have TDC (Telonics Data Convertor) installed and autorized on your computer you can
+use your local copy to process files files when uploading (as an alternative to setting
+up an automation account on the server to do the processing).  The Setting looks
+like (starting on line 44)::
+
+        <setting name="TdcPathToExecutable" serializeAs="String">
+          <value>C:\Program Files (x86)\Telonics\Data Converter\TDC.exe</value>
+        </setting>
+
+Edit the path to reflect the location of TDC on your machine.  If you do not have TDC on
+your computer or it is installed at a different location and you do not change this
+setting then Argos and direct download files will be processed on the server (if you set
+up the automation account), or left unprocessed (i.e. there will be no fixes/locations
+derived from those files).
+
+Animal Movements was developed and tested with TDC version 2.02, with default settings for
+formating dates and lat/long.  It is possible that different versions and/or different
+settings may result in unexpected behavior.
+
+There are numerous other options in this file which can be edited, however the defaults
+are suitable for most installations.
+
+Other Config Files
+++++++++++++++++++
+You can also edit ``InvestigatorReports.xml`` and ``ProjectReports.xml`` to add or remove
+quality control queries to suit your tastes.  If the program is installed in a network
+location, then these changes will be visible to all users.  If you want to make changes
+for just yourself, then make a copy of the entire folder to a private location, and edit
+and run your copy.
+
+Installing ArcMap
+-----------------
+
+See the ESRI documentation for installation instruction of ArcMap.
+The Animal Movements tools require ArcMap 10.0 or higher with only a ArcView license.
+No additional configuration of ArcMap is required to view animal movement data.
+
+Use the *Create Map File* button on the Animal Movements
+Application will create a 10.1 layer file to your specifications.
+
+Alternatively, you can use the Query Layer feature of ArcMap 10.0 or higher
+(from the menu select ``File -> Add Data -> Add Query Layer...``).
+See the online help for `Query Layers`_ for more information.
+This option requires experience with SQL and an understanding of
+the database schema, but provides the most flexibility, power and
+efficiency.  
 
 
 Create External Services
 ========================
 
-SqlProxy Account
-----------------
+Automation Account
+------------------
 
-Install Applications
---------------------
+Automation Applications
+-----------------------
 Install, configure and authorize TDC
 Configure Gmail (optional)
 
@@ -171,5 +283,132 @@ Set Argos Downloader Configuration
 ----------------------------------
 
 
+Configuring Replication
+=======================
+
+Configure the Master
+--------------------
+
+Configure the Slave(s)
+----------------------
 
 
+Configuration Files
+===================
+
+AnimalMovement.exe.config
+-------------------------
+
+CollarFileLoader.exe.config
+---------------------------
+
+ArgosDownloader.exe.config
+--------------------------
+
+ArgosProcessor.exe.config
+-------------------------
+
+connectionStrings
+-----------------
+
+ArgosDownloader.Properties.Settings
+-----------------------------------
+
+DataModel.Properties.Settings
+-----------------------------
+
+FileLibrary.Properties.Settings
+-------------------------------
+
+Telonics.Properties.Settings
+----------------------------
+
+============================  =======================================================================  =====================================================
+Setting                       Default                                                                  Valid Values
+============================  =======================================================================  =====================================================
+TdcPathToExecutable           C:\\Program Files (x86)\\
+                              Telonics\\Data Converter\\TDC.exe                                        A valid file path to the TDC executable
+TdcMillisecondTimeout         20000                                                                    Any positive integer.  The number of milliseconds to
+                                                                                                       to wait the TDC application to yield a result before
+                                                                                                       giving up.  Default is 20 seconds.
+TdcArgosBatchFileFormat       ::
+
+                              <BatchSettings>                                                          The TDC batch file template for
+                              <ArgosFile>{0}</ArgosFile>                                               processing Argos email/web files
+                              <ParameterFile>{1}</ParameterFile>                                       See the TDC documentation for
+                              <OutputFolder>{2}</OutputFolder>                                         a discusion of the format of this
+                              <BatchLog>{3}</BatchLog>                                                 file.  {0} to {4} will be replaced
+                              <MoveFiles>false</MoveFiles>                                             the appropriate file/folder name
+                              <GoogleEarth>false</GoogleEarth>                                         when the file is created.
+                              </BatchSettings>
+TdcDatalogBatchFileFormat     ::
+
+                              <BatchSettings>                                                          The TDC batch file template for
+                              <DatalogFile>{0}</DatalogFile>                                           datalog (direct download) files
+                              <OutputFolder>{1}</OutputFolder>                                         See the TDC documentation for
+                              <BatchLog>{2}</BatchLog>                                                 a discusion of the format of this
+                              <MoveFiles>false</MoveFiles>                                             file.  {0} to {4} will be replaced
+                              <GoogleEarth>false</GoogleEarth>                                         the appropriate file/folder name
+                              </BatchSettings>                                                         when the file is created.
+ArgosServerMinDownloadDays    1                                                                        An integer between 0 and
+                                                                                                       ArgosServerMaxDownloadDays.  The user
+                                                                                                       must provide a value in this range.
+ArgosServerMaxDownloadDays    10                                                                       Max number of days available for
+                                                                                                       download (set by the Argos service)
+ArgosUrl                      http://ws-argos.clsamerica.com/argosDws/services/DixService              The URL of the Argos web service.
+ArgosPlatformSoapRequest      ::
+
+                               <soap:Envelope xmlns:soap=""http://www.w3.org/2003/05/soap-envelope""   Message to send to the Argos web
+                               xmlns:argos=""http://service.dataxmldistribution.argos.cls.fr/types"">  server to request data for a platform.
+                               <soap:Header/>                                                          {0} to {3} will be replaced by the
+                               <soap:Body>                                                             appropriate values before the file is
+                               <argos:csvRequest>                                                      sent to the web server.  See Argos
+                               <argos:username>{0}</argos:username>                                    website for details on the web service
+                               <argos:password>{1}</argos:password>                                    request protocol.  Changing the request
+                               <argos:platformId>{2}</argos:platformId>                                may cause the results file to  be
+                               <argos:nbDaysFromNow>{3}</argos:nbDaysFromNow>                          un-recognizable by the database.
+                               <argos:displayLocation>true</argos:displayLocation>
+                               <argos:displayDiagnostic>true</argos:displayDiagnostic>
+                               <argos:displayRawData>true</argos:displayRawData>
+                               <argos:displayImageLocation>true</argos:displayImageLocation>
+                               <argos:displayHexId>true</argos:displayHexId>
+                               <argos:showHeader>true</argos:showHeader>
+                               </argos:csvRequest>
+                               </soap:Body>
+                               </soap:Envelope>
+ArgosProgramSoapRequest       ::
+
+                               <soap:Envelope xmlns:soap=""http://www.w3.org/2003/05/soap-envelope""   Message to send to the Argos web
+                               xmlns:argos=""http://service.dataxmldistribution.argos.cls.fr/types"">  server to request data for a program.
+                               <soap:Header/>                                                          {0} to {3} will be replaced by the
+                               <soap:Body>                                                             appropriate values before the file is
+                               <argos:csvRequest>                                                      sent to the web server.  See Argos
+                               <argos:username>{0}</argos:username>                                    website for details on the web service
+                               <argos:password>{1}</argos:password>                                    request protocol.  Changing the request
+                               <argos:programNumber>{2}</argos:programNumber>                          may cause the results file to  be
+                               <argos:nbDaysFromNow>{3}</argos:nbDaysFromNow>                          un-recognizable by the database.
+                               <argos:displayLocation>true</argos:displayLocation>
+                               <argos:displayDiagnostic>true</argos:displayDiagnostic>
+                               <argos:displayRawData>true</argos:displayRawData>
+                               <argos:displayImageLocation>true</argos:displayImageLocation>
+                               <argos:displayHexId>true</argos:displayHexId>
+                               <argos:showHeader>true</argos:showHeader>
+                               </argos:csvRequest>
+                               </soap:Body>
+                               </soap:Envelope>
+ArgosPlatformListSoapRequest  ::
+
+                               <soap:Envelope xmlns:soap=""http://www.w3.org/2003/05/soap-envelope""   Message to send to the Argos web
+                               xmlns:argos=""http://service.dataxmldistribution.argos.cls.fr/types"">  server to request a list of programs
+                               <soap:Header/>                                                          and platforms for a given user.
+                               <soap:Body>                                                             {0} and {1} will be replaced by the
+                               <argos:platformListRequest>                                             appropriate values before the file is
+                               <argos:username>{0}</argos:username>                                    sent to the web server.  See Argos
+                               <argos:password>{1}</argos:password>                                    website for details on the web service
+                               </argos:platformListRequest>                                            request protocol.
+                               </soap:Body>
+                               </soap:Envelope>
+============================  =======================================================================  =====================================================
+
+.. _`Query Layers`: http://resources.arcgis.com/en/help/main/10.1/index.html#//00s50000000n000000 
+.. _`Enabling CLR Integration`: http://msdn.microsoft.com/en-us/library/ms131048(v=SQL.105).aspx

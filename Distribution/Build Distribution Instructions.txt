@@ -5,7 +5,7 @@ if ..\Database\CreateDatabase.sql is newer than .\Database\CreateDatabase.sql
  2. Remove all the GRANT commands at the end of the script
  3. Edit the 5th and 7th lines to change the size of the files to 10240KB and 10240KB respectively
 
-if ../Database/CreateDatabaseObjects.sql is newer than .\Database\CreateDatabaseObjects.sql
+if ..\Database\CreateDatabaseObjects.sql is newer than .\Database\CreateDatabaseObjects.sql
  then
  1. Copy and replace
  2. Do a global search and replace removing all SET ANSI_PADDING OFF
@@ -30,6 +30,9 @@ repeat if ..\SqlServer_Functions\bin\Release\SqlServer_Functions.sql is newer th
 repeat if ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.sql is newer than Database\SqlServer_CLR.sql
 repeat if ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.sql is newer than Database\SqlServer_CLR.sql
 
-if ../Database/LookupTableData.sql is newer than .\Database\LookupTableData.sql
+if ..\Database\LookupTableData.sql is newer than .\Database\LookupTableData.sql
+  then Copy and replace
+
+if ..\Database\Settings.sql is newer than .\Database\Settings.sql
   then Copy and replace
 
