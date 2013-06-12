@@ -26,9 +26,9 @@ if ..\Database\CreateUsers.sql is newer than .\Database\CreateUsers.sql
 
 if ..\SqlServer_Files\bin\Release\SqlServer_Files.sql is newer than .\Database\SqlServer_CLR.sql
  then copy the CREATE ASSEMBLY and ALTER ASSEMBLY commands from the source to the correct section in the destination
-repeat for ..\SqlServer_Functions\bin\Release\SqlServer_Functions.sql is newer than Database\SqlServer_CLR.sql
-repeat for ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.sql is newer than Database\SqlServer_CLR.sql
-repeat for ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.sql is newer than Database\SqlServer_CLR.sql
+repeat if ..\SqlServer_Functions\bin\Release\SqlServer_Functions.sql is newer than Database\SqlServer_CLR.sql
+repeat if ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.sql is newer than Database\SqlServer_CLR.sql
+repeat if ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.sql is newer than Database\SqlServer_CLR.sql
 
 if ../Database/LookupTableData.sql is newer than .\Database\LookupTableData.sql
   then Copy and replace

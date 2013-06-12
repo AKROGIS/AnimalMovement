@@ -12,6 +12,10 @@ SSMS = Microsoft SQL Server Management Studio
 Install SqlServer
 =================
 
+See the Microsoft documentation for this step.  The application was developed
+on Microsoft SqlServer 2008R2 enterprise edition, but any edition, including
+express should work, as well as any subsequent version.
+
 Create Instance Logons
 ----------------------
 
@@ -19,11 +23,19 @@ This will be done during the database creation phase.  Depending on the needs of
 installation.  Since Instance logins are shared with all databases, the scripts
 should be checked to ensure that the creation of existing logins is commented out
 
-Set Configuration Options
--------------------------
+Enable CLR Integration
+----------------------
 
-Loading CLR, XP Command Mode
-**FIXME - ADD XPCMD stuff to the AutomationUser script **
+To run custom code in the database, you must enable CLR (Common Language Runtime)
+integration.  This is equivalent to enabling "plugins" for the database.
+Open a SSMS query and enter the following text::
+
+  sp_configure 'clr enabled', 1
+  GO
+  RECONFIGURE
+  GO
+
+then press the execute button.
 
 Create Animal Movements Database
 ================================
@@ -70,25 +82,27 @@ Create Database Users
 Open the file ``{installdir}\Database\CreateUsers.sql`` in in SSMS with a connection to
 the instance where you wish to create the database.  Turn on ``SQLCMD Mode`` in the Query
 menu of SSMS.  Edit the lines 10th and 11th lines to set the name of the domain group that
-has viewing permissions, and the name of the database (if you have changed it) respectively.
-Then execute the query.
-
-If you want to will be using an automated process to automatically download Argos data, or
-process Argos emails for users that do not have the Telonics Data Convertor on their computer,
-then you will need to add the automation user.
+has viewing permissions, and the name of the database (if you have changed it)
+respectively. Then execute the query.
 
 Adding the Automation User
 ++++++++++++++++++++++++++
 
-Create the windows account on the server with the database.
-**FIXME expand** 
+If you want to use an automated process to automatically download Argos data, or
+process Argos emails for users that do not have the Telonics Data Convertor on their
+computer, then you will need to add the automation user.
 
-Open the file ``{installdir}\Database\CreateAutomationUser.sql`` in in SSMS with a connection to
-the instance where you wish to create the database.  Turn on ``SQLCMD Mode`` in the Query
-menu of SSMS.  Edit the 6th line to reflect the server where the database is installed.
-Edit the 7th line to reflect the name of the automation account created on that server.
-Edit the 8th line to reflect the name of the database (if you have changed it).  Then
-execute the query.
+You will need the create a local windows account on the database server.  See the
+section  Create External Services, SqlProxy Account below.
+
+Open the file ``{installdir}\Database\CreateAutomationUser.sql`` in in SSMS with a
+connection to the instance where you wish to create the database.  Turn on
+``SQLCMD Mode`` in the Query menu of SSMS.  Edit the 6th line to reflect the server
+where the database is installed. Edit the 7th line to reflect the name of the automation
+account created on that server. Edit the 8th line to reflect the password of the
+automation account.  Edit the 9th line to reflect the name of the database
+(if you have changed it).  Then execute the query.
+
 
 Create Project Investigators
 ++++++++++++++++++++++++++++
