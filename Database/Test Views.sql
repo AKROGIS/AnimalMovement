@@ -17,12 +17,14 @@ SELECT TOP 100 * FROM ArgosFile_NeedsPartialProcessing
 -- used by ArgosProcessor/Program.cs to determine which files to process 
 SELECT TOP 100 * FROM ArgosFile_NeverProcessed
 
+-- used by ArgosProcessor/Program.cs to determine which files to process 
+SELECT TOP 100 * FROM DataLog_NeverProcessed
+
 --Spatial layers
+SELECT TOP 100 * FROM Gen3StoreOnBoardLocations
 SELECT TOP 100 * FROM InvalidLocations
 SELECT TOP 100 * FROM LastLocationOfKnownMortalities
 SELECT TOP 100 * FROM MostRecentLocations
 SELECT TOP 100 * FROM NoMovement
-SELECT TOP 100 * FROM StoreOnBoardLocations
 SELECT TOP 100 * FROM ValidLocations
-SELECT TOP 100 * FROM ValidLocationsWithTempAndActivity
 SELECT TOP 100 * FROM VelocityVectors
