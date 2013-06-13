@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 //TODO - DATABASE - Review/Document all the business rules, and then verify they are implemented correctly 
 //TODO - DATABASE - Add more unit testing.
 
+//TODO - Add a user configurable Timeout for the Argos web server request
 //TODO - Document the optimal "getting started" process, and make sure the code supports it
 //TODO - bulk upload (data grid view copy/paste) of multiple animals/collars/deploymnents (optional - sa can do this for PI using SSMS)
 //TODO - Add ability to add Argos Platforms when creating an Argos Program (now we have to go to the details tab after creation)
