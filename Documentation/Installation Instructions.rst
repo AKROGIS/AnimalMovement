@@ -298,30 +298,107 @@ Configuration Files
 
 AnimalMovement.exe.config
 -------------------------
+This is the configuration file for the windows application most commonly used by end users.
+It contains settings for `connectionStrings`_,
+`DataModel.Properties.Settings`_, `FileLibrary.Properties.Settings`_ and
+`Telonics.Properties.Settings`_.  See those sections for more details.
+The file also contains a copy of the default user settings
+(typically size and location of the windows on the screen).
 
 CollarFileLoader.exe.config
 ---------------------------
+This is the configuration file for the command line application which may be used by some
+power users to bulk load collar files.
+It contains settings for `connectionStrings`_, `DataModel.Properties.Settings`_,
+`FileLibrary.Properties.Settings`_ and `Telonics.Properties.Settings`_.
+See those sections for more details.
 
 ArgosDownloader.exe.config
 --------------------------
+This is the configuration file for the command line application that is used by the
+automation user to download Argos Program/Platforms
+It contains settings for `connectionStrings`_, `DataModel.Properties.Settings`_,
+`ArgosDownloader.Properties.Settings`_,
+`FileLibrary.Properties.Settings`_ and `Telonics.Properties.Settings`_.
+See those sections for more details.
 
 ArgosProcessor.exe.config
 -------------------------
+This is the configuration file for the command line application that is used by the
+automation user to process un-processed Argos files.
+It contains settings for `connectionStrings`_, `DataModel.Properties.Settings`_,
+`FileLibrary.Properties.Settings`_ and `Telonics.Properties.Settings`_.
+See those sections for more details.
 
 connectionStrings
 -----------------
+The default connection sting configuration settings look like::
+
+  <connectionStrings>
+    <add name="DataModel.Properties.Settings.Animal_MovementConnectionString"
+        connectionString="Data Source=INPAKROMS53AIS;Initial Catalog=Animal_Movement;Integrated Security=True"
+        providerName="System.Data.SqlClient" />
+  </connectionStrings>
+
+The text ``INPAKROMS53AIS`` must be replaced with the SqlServer Instance name (typically the name of the
+machine where a default instance of Sql Server is installed).  If more than one instance of SqlServer is
+installed on a machine, then the text must include tha machine and instance name.
+
+The text ``Animal_Movement`` must be replaced with the name of the database in the instance where
+the animal movement schema has been created.
 
 ArgosDownloader.Properties.Settings
 -----------------------------------
+Settings that control the Argos downloader library.  This library is used in multiple executables, and each executable
+has a copy of these settings, so the defaults may be vary.
+
+============================  ===================  ====================================================================================
+Setting                       Default              Valid Values
+============================  ===================  ====================================================================================
+LogFile                       ArgosDownloader.log  Any valid filename, the file will be created or appended to in the folder where
+                                                   the executable is started.
+MailServer                    smtp.gmail.com       The domain name of the mail server, must be consistent with the email address
+                                                   used in the settings table.
+MailServerPort                587                  Port used to connect to the mail server.  This is defined by the mail server.
+MailServerMilliSecondTimeout  20000                The time in milliseconds to wait for a mail server to respond to our request
+                                                   before giving up.
+============================  ===================  ====================================================================================
 
 DataModel.Properties.Settings
 -----------------------------
+Settings that control the database connection library.  This library is used in multiple executables, and each executable
+has a copy of these settings, so the defaults may be vary. 
+ 
+===================  =======  ====================================================================================
+Setting              Default  Valid Values
+===================  =======  ====================================================================================
+CommandTimeout       300      A valid positive integer.
+                              The time in seconds to wait for a SqlServer request to complete before giving up.
+                              This time should take into consideration the time the command takes on
+                              the server, as well as the time for the network to send the request and receive the
+                              results
+===================  =======  ====================================================================================
 
 FileLibrary.Properties.Settings
 -------------------------------
+Settings that control the Argos file processing library.  This library is used in multiple executables, and each executable
+has a copy of these settings, so the defaults may be vary.
+
+========================  ===================  ====================================================================================
+Setting                   Default              Valid Values
+========================  ===================  ====================================================================================
+FileProcessorLogFilePath  ArgosProcessor.log   Any valid filename, the file will be created or appended to in the folder where
+                                               executable is started.
+LogMessagesToConsole      False                True or False - Should the processor write messages in the console screen?
+LogMessagesToLogFile      True                 True or False - Should the processor write messages in the log file?
+LogErrorsToConsole        False                True or False - Should the processor write errors in the console screen?
+LogErrorsToLogFile        True                 True or False - Should the processor write errors in the log file?
+========================  ===================  ====================================================================================
 
 Telonics.Properties.Settings
 ----------------------------
+Settings that control the Telonics library.  This library is used in multiple executables, and each executable
+has a copy of these settings, so the defaults may be vary.
 
 ============================  =======================================================================  =====================================================
 Setting                       Default                                                                  Valid Values
