@@ -71,7 +71,7 @@ Load CLR assemblies
 If you have changed the name of the database, then copy and edit the tenth line of the
 file ``{installdir}\Database\SqlServer_CLR.sql`` to reflect the correct name.
 
-Open and run the preceeding files in SSMS with a connection to the instance where you
+Open and run the proceeding files in SSMS with a connection to the instance where you
 created the database.
 
 Create The Empty Schema
@@ -96,7 +96,7 @@ Adding the Automation User
 ++++++++++++++++++++++++++
 
 If you want to use an automated process to automatically download Argos data, or
-process Argos emails for users that do not have the Telonics Data Convertor (TDC) on their
+process Argos emails for users that do not have the Telonics Data Converter (TDC) on their
 computer, then you will need to add the automation user.
 
 You will need the create a local windows account on the database server.  See the
@@ -156,7 +156,7 @@ the instance where you wish to create the database.  Edit the file as follows
    contact information
   
 3. Change the value of ``argosProcessor`` to the path of the ArgosProcessor.exe
-   file as set in `Automation Applications`_.
+   file as set in `Animal Movements Software`_.
    If you are not using the automation account to process Argos files,
    then remove this line.
   
@@ -203,7 +203,7 @@ is installed.  By default this is the server name of the machine where SqlServer
 installed.  Change ``Animal_Movement`` to reflect the name of the database if you have
 changed it.
 
-If you have TDC (Telonics Data Convertor) installed and autorized on your computer you can
+If you have TDC (Telonics Data Converter) installed and authorized on your computer you can
 use your local copy to process files files when uploading (as an alternative to setting
 up an automation account on the server to do the processing).  The Setting looks
 like (starting on line 44)::
@@ -222,11 +222,12 @@ Animal Movements was developed and tested with TDC version 2.02, with default se
 formating dates and lat/long.  It is possible that different versions and/or different
 settings may result in unexpected behavior.
 
-There are numerous other options in this file which can be edited, however the defaults
-are suitable for most installations.
+There are numerous other options in the `Configuration Files`_ which can be edited,
+however the defaults are suitable for most installations.
 
-Other Config Files
-++++++++++++++++++
+
+Other Configuration Files
++++++++++++++++++++++++++
 You can also edit ``InvestigatorReports.xml`` and ``ProjectReports.xml`` to add or remove
 quality control queries to suit your tastes.  If the program is installed in a network
 location, then these changes will be visible to all users.  If you want to make changes
@@ -254,21 +255,186 @@ efficiency.
 Create External Services
 ========================
 
+The database relies on a OS account to run some external processes.
+In particular, the Telonics Data Converters are required to convert
+the Argos emails (and webservice downloads) into csv-like files
+that can be processed by the database.  An OS Account can also
+query the Argos Web Server at regularly scheduled intervals to check
+for new data.
+
+These instructions document setting up the Windows account, and
+adding it to the database, so that these external processes will
+work correctly.
+
+These instructions are based on Windows 7 and may vary for other versions of Windows.
+
+
 Automation Account
 ------------------
+open ``Start Menu -> Control Panel -> Administrative Tools -> Computer Management``.
+In the Table of contents on the left, select
+``System Tools -> Local Users and Groups -> Users``.
+Right click in the main window and select ``New User...``.
+Fill out the form as follows:
+
+:User name: sql_proxy
+:Full name: SQL Server Proxy
+:Description:
+  Local account (with Minimal permissions) used by SQL Server to execute external
+  processes requested by non-sysadmin accounts
+
+:Password:
+  Provide a password that meets the Group Policy requirements for the machine.
+  For Alaska Region NPS, see ``T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable`` for the
+  password used.
+
+:User must change password at next logon: Unchecked
+:User cannot change password: Checked
+:Password never expires: Checked
+:Account is disabled: Unchecked
+    
+* The user name and password can vary but the values must be consistent with the
+  values used in `Create Database Users`_
+
+* Be sure that this user is not included in any groups which may elevate its permissions
+
+The account must be configured with permissions to logon as a batch job.
+This is done with
+``Start Menu -> Control Panel -> Administrative Tools -> Local Security Policy``.
+In the Table of contents on the left, select
+``Security Settings -> Local Policies -> User Rights Assignment``.
+In the main panel, scroll down to ``Log on as a batch job``.
+double click on ``Log on as a batch job`` and add the new account
+to the list of authorized users.
+
+**Log on a batch job may be limited by group policies on your domain.  If so, contact
+your IT staff for support.**
 
 Automation Applications
 -----------------------
-Install, configure and authorize TDC
-Configure Gmail (optional)
 
-Edit Configuration Files
-------------------------
+Telonics Software
++++++++++++++++++
+
+Telonics software must be installed by an administrator.
+
+Download Telonics Software
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+TDC:
+  * Telonics Data Converter - for Gen 4 Argos files (email/web) and datalog (.tdf)
+  * http://www.telonics.com/software/tdc.php
+  * Current version: http://www.telonics.com/software/setup-TDCv2.02.exe
+  * Notes: Should be installed for all users.
+    Device drivers do not need to be installed on the server.
+
+The following Telonics software is not used with this version of Animal Movements:
+             
+DU:
+  * Download Utility for Gen2 & Gen3 GPS - for Gen3 Datalog files (.tdf)
+  * http://www.telonics.com/software/du-3.php
+  * Current version: http://www.telonics.com/software/DU-Setup-1.41.exe
+  * Note: The username and organization is not important.
+    
+ADC-T03:
+  * Argos data translator for Gen3 collars
+  * http://www.telonics.com/software/adc-t03.php
+  * Current version: http://www.telonics.com/software/ADC-T03-Setup-4.04.0011.exe
+  * Notes: Should be installed for all users. 
+    The username and organization is not important.
+
+
+Configure Telonics Software
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Log on with the new `Automation Account`_
+   (be sure to check the domain, and use the local machine name if necessary)
+2. Authorize the Telonics software.
+
+   a. For TDC select ``About Telonics Data Convertor...`` in the ``About`` menu.
+   b. Click the ``Add...`` button to enter the authorization code
+   c. For Alaska Region NPS, see ``T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable``
+      for the authorization code
+
+3. Animal Movements was written for and tested without changing the options in TDC.
+   Animal Movements may not work correctly if the options are changed. 
+
+   
+Animal Movements Software
++++++++++++++++++++++++++
+
+1. Log on with the new `Automation Account`_
+   (be sure to check the domain, and use the local machine name if necessary)
+2. Copy all the files from ``{installdir}\Server`` to some local folder.
+   The application can run from any folder and does not need any special administrative
+   permissions to be installed or configured.  All the files do need to be installed in
+   the same folder.
+3. Edit the configuration files `ArgosDownloader.exe.config`_
+   and `ArgosProcessor.exe.config`_.
+   See `Edit Configuration File`_ in the section `Client Application`_ for more details.
+4. The stored procedures ``ArgosFile_Process`` and ``ArgosFile_ProcessPlatform`` have a
+   default path to the ArgosProcessor application  of
+   ``C:\Users\sql_proxy\ArgosProcessor.exe``.  If the executable is installed in a
+   different location, be sure to set that path in the Settings table with
+   Username = 'system' and Key = 'argosProcessor'.  See `Settings Table`_ for details.
+
+
 
 Set Schedule for Services
 -------------------------
 
+Argos Downloader
+++++++++++++++++
+This program will never be run by the database, so it must be configured as a scheduled
+task.
 
+The following instructions are based on Windows Server 2003.  Newer systems should be
+similar.
+
+1. Open ``Control Panel -> Scheduled Tasks``
+2. Double-click on ``Add Schedule Task``
+3. Follow the wizard
+
+   a. Browse to and select ``ArgosDownloader.exe``
+   b. Select a period of ``daily``
+   c. Select a time that has minimal activity in your location and in France (UTC +1).
+      For Alaska, 8PM ADT equals 5AM in France
+   d. Provide the password for the Automation User
+4. Verify that the new task is added to the list of scheduled tasks.
+   
+See `Optional Email Notifications`_ if you want the scheduled ArgosDownloader.exe task to
+send email notifications of warnings or errors to the project investigators.  If emails
+are sent, the admin should check the sent email log in the account used to send the emails
+for any issues.  If email notifications are not used, then the log file on the server
+should be checked regularly.  Be sure this is option is turned on in the
+`Configuration Files`_
+
+
+Argos Processor
++++++++++++++++
+When changes are made to the database (typically uploading a file, but also adding or
+changing the Argos Id assigned to a collar), the database will try to reprocess the
+file, by calling ArgosProcessor.exe with the id of the file (and argos id) to be
+reprocessed.  However in some cases, the external command will not run correctly
+(the details and solution to this problem have not been resolved).
+
+It is a good idea to schedule the ArgosProcessor.exe to run on a regular schedule.
+if it is run with no arguments, then it will query the database for any outstanding
+processing that is required and execute accordingly.  In this way it acts as a backup
+in case the processing initiated by the database fails for any reason.
+
+The set up is the same as the Argos Downloader, except:
+
+  1. As the last step in the wizard, check the box to open the advanced options
+  2. In the advanced options, select the ``Schedule`` tab
+  3. Click the ``Advanced...`` button
+  4. Check the ``Repeat Task`` section
+  5. Have the task repeat every 10 minutes for 24 hours.   You can adjust 10 minutes up
+     or down.  The longer you make the time, the longer users might have to wait to 
+     see the results of changes to the database.  Making the time shorter will increase
+     the work the server does to wake up and make the check, often to find out there is
+     nothing more to do.
+ 
 
 Optional Email Notifications
 ============================
@@ -298,8 +464,8 @@ Configuration Files
 
 AnimalMovement.exe.config
 -------------------------
-This is the configuration file for the windows application most commonly used by end users.
-It contains settings for `connectionStrings`_,
+This is the configuration file for the windows application most commonly used by end
+users. It contains settings for `connectionStrings`_,
 `DataModel.Properties.Settings`_, `FileLibrary.Properties.Settings`_ and
 `Telonics.Properties.Settings`_.  See those sections for more details.
 The file also contains a copy of the default user settings
@@ -340,17 +506,18 @@ The default connection sting configuration settings look like::
         providerName="System.Data.SqlClient" />
   </connectionStrings>
 
-The text ``INPAKROMS53AIS`` must be replaced with the SqlServer Instance name (typically the name of the
-machine where a default instance of Sql Server is installed).  If more than one instance of SqlServer is
-installed on a machine, then the text must include tha machine and instance name.
+The text ``INPAKROMS53AIS`` must be replaced with the SqlServer Instance name (typically
+the name of the machine where a default instance of Sql Server is installed).  If more
+than one instance of SqlServer is installed on a machine, then the text must include the
+machine and instance name.
 
-The text ``Animal_Movement`` must be replaced with the name of the database in the instance where
-the animal movement schema has been created.
+The text ``Animal_Movement`` must be replaced with the name of the database in the
+instance where the animal movement schema has been created.
 
 ArgosDownloader.Properties.Settings
 -----------------------------------
-Settings that control the Argos downloader library.  This library is used in multiple executables, and each executable
-has a copy of these settings, so the defaults may be vary.
+Settings that control the Argos downloader library.  This library is used in multiple
+executables, and each executable has a copy of these settings, so the defaults may vary.
 
 ============================  ===================  ====================================================================================
 Setting                       Default              Valid Values
@@ -366,8 +533,8 @@ MailServerMilliSecondTimeout  20000                The time in milliseconds to w
 
 DataModel.Properties.Settings
 -----------------------------
-Settings that control the database connection library.  This library is used in multiple executables, and each executable
-has a copy of these settings, so the defaults may be vary. 
+Settings that control the database connection library.  This library is used in multiple
+executables, and each executable has a copy of these settings, so the defaults may vary. 
  
 ===================  =======  ====================================================================================
 Setting              Default  Valid Values
@@ -381,8 +548,9 @@ CommandTimeout       300      A valid positive integer.
 
 FileLibrary.Properties.Settings
 -------------------------------
-Settings that control the Argos file processing library.  This library is used in multiple executables, and each executable
-has a copy of these settings, so the defaults may be vary.
+Settings that control the Argos file processing library.  This library is used in
+multiple executables, and each executable has a copy of these settings, so the defaults
+may vary.
 
 ========================  ===================  ====================================================================================
 Setting                   Default              Valid Values
@@ -397,8 +565,9 @@ LogErrorsToLogFile        True                 True or False - Should the proces
 
 Telonics.Properties.Settings
 ----------------------------
-Settings that control the Telonics library.  This library is used in multiple executables, and each executable
-has a copy of these settings, so the defaults may be vary.
+Settings that control the Telonics library.  This library is used in multiple
+executables, and each executable has a copy of these settings, so the defaults
+may vary.
 
 ============================  =======================================================================  =====================================================
 Setting                       Default                                                                  Valid Values
@@ -413,7 +582,7 @@ TdcArgosBatchFileFormat       ::
                               <BatchSettings>                                                          The TDC batch file template for
                               <ArgosFile>{0}</ArgosFile>                                               processing Argos email/web files
                               <ParameterFile>{1}</ParameterFile>                                       See the TDC documentation for
-                              <OutputFolder>{2}</OutputFolder>                                         a discusion of the format of this
+                              <OutputFolder>{2}</OutputFolder>                                         a discussion of the format of this
                               <BatchLog>{3}</BatchLog>                                                 file.  {0} to {4} will be replaced
                               <MoveFiles>false</MoveFiles>                                             the appropriate file/folder name
                               <GoogleEarth>false</GoogleEarth>                                         when the file is created.
@@ -423,7 +592,7 @@ TdcDatalogBatchFileFormat     ::
                               <BatchSettings>                                                          The TDC batch file template for
                               <DatalogFile>{0}</DatalogFile>                                           datalog (direct download) files
                               <OutputFolder>{1}</OutputFolder>                                         See the TDC documentation for
-                              <BatchLog>{2}</BatchLog>                                                 a discusion of the format of this
+                              <BatchLog>{2}</BatchLog>                                                 a discussion of the format of this
                               <MoveFiles>false</MoveFiles>                                             file.  {0} to {4} will be replaced
                               <GoogleEarth>false</GoogleEarth>                                         the appropriate file/folder name
                               </BatchSettings>                                                         when the file is created.
