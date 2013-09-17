@@ -14,6 +14,9 @@ if ..\Database\CreateDatabaseObjects.sql is newer than .\Database\CreateDatabase
  3. Remove all the CREATE USER commands at the start of the script
  4. Remove the CREATE ROLE commands for the replication roles
  5. Remove all the EXEC dbo.sp_addrolemember commands from the end of the script
+ 6. Search for "CREATE PROCEDURE [dbo].[Summerize]", and add "WITH EXECUTE AS OWNER" on a
+    new line before the line with only "AS".
+	# That this is missing may be a bug that gets fixed in an update of SSMS
 
 if ..\Database\CreateAutomationUser.sql is newer than .\Database\CreateAutomationUser.sql
   then copy and replace
