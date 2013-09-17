@@ -452,12 +452,106 @@ Set Argos Downloader Configuration
 Configuring Replication
 =======================
 
-Configure the Master
---------------------
+The database design is based on a single master database that all clients can connect to
+add and edit thier animal movement data.  The visualization of this data in GIS will
+require significant bandwidth to transfer the requested locations to a remote
+client.  In cases where the network does not provide a acceptable experience for GIS,
+the database can be replicated to a server closer to the GIS client.
 
-Configure the Slave(s)
-----------------------
+The replication strategy is  `Transactional Replication`_ in which a snapshot of the
+database is copied from master (publisher) to client (subscriber).  The publisher then
+sends a copy of each transaction that occurs on the publisher to the each subscriber,
+so that the subscriber dtabases can be kept in sync with the publisher in near real time.
+It is not necessary to publish the entire database, in fact we will only publish the table
+necessary for GIS visualization.  Other database information must be obtained by
+connecting to the master database.
 
+Setting up the publisher and subscriber databases for transactional replication is
+clearly described in the `Microsoft Replication Tutorial`_.  The documentation that
+is provided here is mearly a summary for those who are already familar with the process.
+
+Any version os SQL Server except Express or Compact 3.5 SP2 can be a publisher.
+Any version of SQL Server except SQL Server Compact 3.5 SP2 can be a subscriber.
+Replication is installed by default in all versions except SQL Server Express.
+
+* These instructions assume the user executing them has SA permissions on both the
+publisher and subscriber SQL server instances*
+
+Create Windows Accounts on the Master (Publisher)
+-------------------------------------------------
+
+1. Snapshot Agent:  <machine_name>\repl_snapshot
+
+2. Log Reader Agent: <machine_name>\repl_logreader
+
+3. Distribution Agent: <machine_name>\repl_distribution
+
+4. Merge Agent: <machine_name>\repl_merge
+
+
+Create Windows Accounts on the Client (Subscriber)
+-------------------------------------------------
+
+1. Distribution Agent: <machine_name>\repl_distribution
+
+2. Merge Agent: <machine_name>\repl_merge
+
+Note that these accounts must have the same name and password as the
+equivalent accounts on the publication server (except the machine name
+of course).
+
+
+Configure the Master (Publisher)
+--------------------------------
+
+1. Prepare the Snapshot Folder
+
+	Create a folder named repldata at a convenient location on the server.  Share it
+	with repl_snapshot (full control), repl_distribution (read), and repl_merge (read)
+
+2. Configure the Distribution
+
+	a. In SqlServer, expand Replication and click Configure Distribution
+	b. select the server as it's own distributor (this will create a distribtuion database
+	on the publisher.
+	c. enter \\<publisher machine name>\repldata (as created above) as the snapshot folder
+	d. Set up permissions on the published database
+		1. in SSMS add login for repl_snapshot and add this login as a user and *db_owner*
+		in animal_movements and distribution databases.
+		2. repeat for repl_logreader
+		3. add login for repl_distribution as a user and *db_owner* in the distribution db
+		4. add login for repl_merge as a user in the distribution db
+	
+3. Create a publication and select the articles for publishing
+
+	a. in SSMS, right click on Replication->Local Publications and select New Publication
+	b. Select Animal Movements as a Transactional publication
+	c. In the Articles page select:
+		All the tables/views/functions that will be available on the client
+	d. Select Create Snapshot and keep available
+	e. On the security page, provide the name and password of the repl_snapshot account
+	e. repeat for the repl_logreader account
+	f. finish by giving the publication a name.
+
+4. Create a subscription to the publication
+
+	a. In SSMS right click on the publication just created and select New Subscription
+	b. Select Run all agents at the distributor
+	c. On the subscriber page, connect to the subscriber server was an SA account
+	d. provide a name for the new database to create on the subscriber
+	e. enter repl_distribution and the password as the account for the security agent
+	f. Add repl_distribution as a user and DB_owner on the new database on the subscriber
+
+Configure the Client (Subscriber)
+---------------------------------
+
+1. Connect to the subscriber instance/database, and add repl_distribution as a db user
+and memeber of *db_owner*
+
+2. Add any other users ie. domain users who need read access to the database.
+
+
+ 
 
 Configuration Files
 ===================
@@ -658,3 +752,7 @@ ArgosPlatformListSoapRequest  ::
 
 .. _`Query Layers`: http://resources.arcgis.com/en/help/main/10.1/index.html#//00s50000000n000000 
 .. _`Enabling CLR Integration`: http://msdn.microsoft.com/en-us/library/ms131048(v=SQL.105).aspx
+.. _`Transactional Replication`: http://technet.microsoft.com/en-us/library/ms151706(v=sql.105).aspx
+.. _`Transaction Documentation`: http://technet.microsoft.com/en-us/library/ms151198(v=sql.105).aspx
+.. _`Microsoft Replication Tutorial` http://technet.microsoft.com/en-us/library/bb500344(v=sql.105).aspx
+
