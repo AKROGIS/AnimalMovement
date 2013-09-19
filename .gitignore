@@ -68,3 +68,7 @@ packages/
 
 #Test files
 *.testsettings
+
+#python binary files
+*.pyc
+*.pyo
