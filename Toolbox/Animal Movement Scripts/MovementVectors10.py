@@ -22,9 +22,9 @@
 #   4) The input feature must have an ArcGIS date field.  The shapefile date
 #      field does not have a time component, so you are limited to one point
 #      per day, and duration/speed will always be on 24 hour intervals
+#   5) Works with Animal Movements database
+#   6) Honors the definition query and selection set in ArcMap
 # ---------------------------------------------------------------------------
-
-# test with animal movements db layer
 
 import os, math
 from operator import itemgetter
@@ -97,9 +97,6 @@ def CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
 
 
 def BuildVelocityVector(fix1, fix2, hasAnimal):
-    # if hasAnimal and animal1 != animal2 return None
-    # if hasAnimal then fix = (animal, date, (x,y)) else (date, (x,y))
-    # returns ({animal}, date1, date2, duration, velocity, shape@WKT)
     if hasAnimal:
         if fix1[0] != fix2[0]:
             return None
@@ -142,7 +139,7 @@ if __name__ == "__main__":
     spatialReference = arcpy.GetParameter(8)
 
 
-    test = True
+    test = False
     if test:
         telemetryLayer = r"C:\tmp\test.gdb\fix_ll"
         #telemetryLayer = r"C:\tmp\test.gdb\fix_a_c96"
