@@ -2,17 +2,33 @@
 # MovementVectors.py
 # Created on: Fri Sep 28 2013
 # Created by: Regan Sarwas, GIS Team, Alaska Region, National Park Service
-#  re-write of 9.3 version of tool for 10.1+
+#  A re-write of 9.3 version of tool for 10.1sp1 or greater.
+#     requires arcgis 10.1 for new data access cursors.
+#     requires arcgis 10.1sp1 for shape@wkt.
+#  Vectors are drawn connecting points in order of the datetime attribute
+#    if two features have the same datetime, then the ordering of the
+#    features will retain the database ordering (usually this is by feature
+#    creation, but it may be random), and they will get a speed of -1.
+#    If the animal id is provided, then the points are first sorted by
+#    animal, and the points for different animals are not connected.
+#  Notes:
+#   1) A projected coordinate system for the output is required
+#        The first of the following will be used:
+#          1) the spatialReference parameter for this tool,
+#          2) the output spatial reference specified in the environment
+#          3) the spatial reference of the input feature class
+#   2) Duration will always be in hours
+#   3) Speed will always be in projected units per hour
+#   4) The input feature must have an ArcGIS date field.  The shapefile date
+#      field does not have a time component, so you are limited to one point
+#      per day, and duration/speed will always be on 24 hour intervals
 # ---------------------------------------------------------------------------
 
-#FIXME length units
-#test projection
+# test with animal movements db layer
 
-
-# Import system modules
 import os, math
-#import sys, string, os, datetime
-import arcpy #, arcpy.da
+from operator import itemgetter
+import arcpy
 import utils
 
 def CreateSchema(outputFeature, animalField, startFieldName, endFieldName,
@@ -61,11 +77,16 @@ def CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
         ) as updateCursor, arcpy.da.SearchCursor(
              telemetryLayer, searchFields, spatial_reference=spatialReference
         ) as searchCursor:
-        # searchCursor does not support orderby for all datasourses
+        # searchCursor does not support orderby for all datasources
         # particularly shapefiles, so I will do the sorting in python
         # the cursor returns each row as a comparable tuple 
         rows = [row for row in searchCursor]
-        rows.sort()
+        #sort() is stable, so if a multiple rows have the same animal and
+        # date, the points will be connected in data source order
+        if hasAnimal:
+            rows.sort(key=itemgetter(0,1))
+        else:
+            rows.sort(key=itemgetter(0))
         previousRow = None
         for row in rows:
             if previousRow:
@@ -96,7 +117,6 @@ def BuildVelocityVector(fix1, fix2, hasAnimal):
     x1,y1 = fix1[offset+1]
     x2,y2 = fix2[offset+1]
     length = math.sqrt((x2-x1)**2 + (y2-y1)**2)
-    #FIXME check units of spatial reference, and convert to meters
     if days == 0 and seconds == 0:
         speed = -1
     else:
@@ -124,30 +144,32 @@ if __name__ == "__main__":
 
     test = True
     if test:
-        #telemetryLayer = r"C:\tmp\test.gdb\fix_ll"
-        telemetryLayer = r"C:\tmp\test.gdb\fix_a_c96"
-        outputFeature = r"C:\tmp\test.gdb\vv05"
+        telemetryLayer = r"C:\tmp\test.gdb\fix_ll"
+        #telemetryLayer = r"C:\tmp\test.gdb\fix_a_c96"
+        telemetryLayer = r"C:\tmp\vvtest.shp"
+        outputFeature = r"C:\tmp\vv08.test.shp"
+        #outputFeature = r"C:\tmp\test.gdb\vv09"
         animalFieldName = "" #"AnimalId"
         dateFieldName = "FixDate"
         startFieldName = "StartTime"
         endFieldName = "EndTime"
-        durationFieldName = "Timespan_H"
-        velocityFieldName = "Speed_MtPH"
+        durationFieldName = "Duration_Hour"
+        velocityFieldName = "Speed_PerHour"
         #spatialReference = arcpy.SpatialReference()
-        #spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        #spatialReference.loadFromString("Projected Coordinate Systems/State Systems/NAD 1927 Alaska Albers (US Feet)")
         spatialReference = None
         
     #
     # Default Values
     #
     if not startFieldName or startFieldName == "#":
-        startFieldName = "StartTime"
+        startFieldName = "Start_Time"
     if not endFieldName or endFieldName == "#":
-        endFieldName = "EndTime"
+        endFieldName = "End_Time"
     if not durationFieldName or durationFieldName == "#":
-        durationFieldName = "Timespan_H"
+        durationFieldName = "Duration_Hour"
     if not velocityFieldName or velocityFieldName == "#":
-        velocityFieldName = "Speed_MtPH"
+        velocityFieldName = "Speed_PerHour"
 
     #
     # Input validation
@@ -174,7 +196,7 @@ if __name__ == "__main__":
             utils.info("Telemetry layer does not have a field named '"+
                   animalFieldName+"'. Using nothing.")
             animalFieldName = None
-        
+
     dateNames = [f.name for f in arcpy.ListFields(telemetryLayer,"","Date")]
     if dateFieldName not in dateNames:
         utils.die("Telemetry layer does not have a date field named '"+
@@ -183,9 +205,16 @@ if __name__ == "__main__":
     workspace,table = os.path.split(outputFeature)
     if not arcpy.Exists(workspace):
         utils.die("Output workspace does not exists. Quitting.")
-        
+
+    # file.shp will be converted to file_shp, so treat it special
+    # FIXME will still fail on c:\tmp\fgdb.gdb\file.shp
+    file,ext = os.path.splitext(table)
+    if ext.lower() == ".shp":
+        table = file
     newTableName = arcpy.ValidateTableName(table,workspace)
     if newTableName != table:
+        if ext.lower() == ".shp":
+            newTableName = newTableName + ext
         outputFeature = os.path.join(workspace,newTableName)
         utils.info("Feature class was renamed to " + newTableName +
                    " to meet workspace requirements.")
