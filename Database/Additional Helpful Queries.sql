@@ -465,12 +465,19 @@ CREATE TABLE [dbo].[HiddenFixes](
     DECLARE @MinLon Real = -163.0;
     DECLARE @MaxLon Real = -142.0;
 */
+/*
     DECLARE @Project varchar(255) = 'Yuch_Wolf';
     DECLARE @MinLat Real = 63.7;
     DECLARE @MaxLat Real = 66.0;
     DECLARE @MinLon Real = -146.8;
     DECLARE @MaxLon Real = -140.3;
-   
+*/  
+    DECLARE @Project varchar(255) = 'ARCNVSID022';
+    DECLARE @MinLat Real = 65;
+    DECLARE @MaxLat Real = 68.6;
+    DECLARE @MinLon Real = -168.5;
+    DECLARE @MaxLon Real = -161.7;
+  
 ----------- Preview fixes outside the range
      SELECT AnimalId, FixDate, Location.Long as Lon, Location.Lat as Lat
        FROM Locations
