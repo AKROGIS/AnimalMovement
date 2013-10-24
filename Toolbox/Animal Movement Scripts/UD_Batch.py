@@ -142,6 +142,7 @@ import os
 import arcpy
 import numpy
 import utils
+#import utils101 as utils
 
 import UD_SmoothingFactor
 import UD_Raster
@@ -160,8 +161,12 @@ def GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmetho
         arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
         try:
             points = utils.GetPoints(layer, sr, shapeName)
-            h = UD_SmoothingFactor.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
-            hList.append(h)
+            #points = utils.GetPoints(layer, sr)
+            if len(points) < 3:
+              utils.warn("Insufficient locations ("+str(len(points))+") for "+value)
+            else:
+              h = UD_SmoothingFactor.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
+              hList.append(h)
         finally:
             arcpy.Delete_management(layer)
     return hList
