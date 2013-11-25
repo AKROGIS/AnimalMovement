@@ -5,8 +5,110 @@ Animal Movements
 .. contents:: Table of Contents
    :depth: 2
 
-Loading Store on Board Data
-===========================
+Creating a new Project
+============================
+
+1. Start the Animal Movements application (NPS-Alaska users will find it at
+   ``X:\GIS\Apps\AnimalMovement\10.1\AnimalMovement.exe``).
+
+2. Click on the **Project Investigator Details** button.  If you do not see this button,
+   then you are not a PI, and cannot create you own project.  If you should be a PI, please
+   contact the database administrator (regan_sarwas@nps.gov).  If you want to create a
+   project for another PI, then click on the **Project List** instead.
+
+3. Below the project list, click on the green add(+) button.
+
+  a. If you are creating this project for another PI, then select their name in the list.
+     The list is all the PIs that have given you permission to assist them.  If the name
+     need is not in the list, contact the PI and ask that they give you permission.
+  
+  b. Provide a short (less than 16 characters) code for the project.  This will be used
+     in some lists, and in database queries to identify the new project.  The code is
+     required, and must be unique.
+
+  c. Provide a short but descriptive name for the project.  This name will be used in
+     most reports, and in the application to identify your project.  A name is required.
+  
+  d. Optionally provide a Park Service Unit code and additional descriptive details.
+  
+  e. Click **Create**.  If the Code you choose was not unique, you will be notified,
+     and given a chance to select a new code.
+  
+
+Creating a new Argos Project
+============================
+
+These instructions assume you have purchased the Argos service from CLS America, and that
+they have allocated Argos ID numbers to you.  Furthermore you will need the Program
+number, username, and password that they provide.
+
+An **Argos Platform** is a unique Argos ID cooresponding to the hardware installed on a
+animal tracking collar.  An Argos Platform may be re-used on different collars, but will
+only be on one collar at a time.  A refurbished collar may be given a new Argos ID.  Once
+again, a collar can only have zero or one single Argos Platform at a given point in time.
+The Argos Platform is often refered to as the Argos Id of a collar.  Argos Platforms are
+organized into an Argos Project.  A project investigator is given a username and password
+to manage the Argos Program on the Argos website (https://argos-system.clsamerica.com).
+
+Once given the necessary program information, the Animal Movements application can
+contact the Argos website and download the details on the Argos Platforms in the
+program.  The PI can specify if the program will be automatically and regularly queried
+for new collar data.  It is the PI's responsibility to relate the Argos Platforms to
+a collar.  For Telonics Gen4 collars this is done automatically when the TPF file is
+loaded into the database.
+
+1. Start the Animal Movements application (NPS-Alaska users will find it at
+   ``X:\GIS\Apps\AnimalMovement\10.1\AnimalMovement.exe``).
+
+2. Click on the **Project Investigator Details** button.  If you do not see this button,
+   then you are not a PI, and cannot create you own Argos program.  If you should be a PI,
+   please contact the database administrator (regan_sarwas@nps.gov).  If you want to create a
+   project for another PI, then click on the **Project List**, select one of thier projects,
+   and then click the PI info button on the project details page.
+
+3. Click the **Argos** tab on the Project Investigator Details** page.
+
+4. Below the program list, click on the green add(+) button.  (NOTE: if the program
+   number is already in the list, then you "re-create" it.  You must get a new program
+   number from CLS America, or skip the program creation step and add the new platforms
+   to the existing program.
+
+  a. Provide the Program Id, Program Name, Username, and Password exactly as provided by
+     CLS America.
+  
+  b. The start and end dates can also be entered, however they are purely informational
+     and not used by the database in any automated processes.
+  
+  c. By checking the **Active** option, you are declaring your wish that this program
+     is downloaded from the Argos website on a regular (daily) basis.  If the collars in
+     this project are not yet deployed, then you can check this option when the collars
+     are deployed, however the website only maintains 10 days worth of data, so if you want
+     this feature, be sure to do it with 10 days of deploying your collars.
+  
+  d. Click **Create**.  If the Code you choose was not unique, you will be notified,
+     and given a chance to select a new code.
+  
+5. Select newly created program in the list, and click the info(i) button, or double
+   click the program number/name in the program list.
+
+6. Select the **Argos Platforms** tab on the **Argos Program Details** page.
+
+7. Click the **Add Missing Platforms** button.
+
+8. Click the Close button(s) as necessary.
+
+
+Loading Collars Into the Database
+====================================
+
+Loading Animals Into the Database
+====================================
+
+Deploying Collars On Animals
+====================================
+
+Uploading Store on Board Data
+====================================
 
 Gen4 datalog files (\*.tdf) files can be uploaded directly to the database. The database
 will archive this file and use Telonics Data Convertor (TDC) software in the background
