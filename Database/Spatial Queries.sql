@@ -11,8 +11,24 @@ LEFT JOIN CollarDataTelonicsGen4 AS G2 ON G2.FileId = F2.FileId AND G2.LineNumbe
 LEFT JOIN CollarDataTelonicsGen4 AS G2A ON G2A.FileId = G2.FileId AND G1A.LineNumber BETWEEN G1.LineNumber -1 AND G1.LineNumber + 1 AND G2A.AcquisitionStartTime = G2.AcquisitionStartTime AND G2A.Temperature IS NOT NULL
     WHERE M.ProjectId = 'WACH'
 
---------- Locations with Gen4 Temperature    
-   SELECT L.*, G2.Temperature
+--------- 3D Locations (from Gen4)    
+   SELECT L.*, G2.GpsFixAttempt, G2.GpsAltitude, G2.GpsHorizontalError, G2.GpsHorizontalDilution AS HDOP, G2.GpsPositionalDilution AS PDOP
+     FROM Locations as L
+     JOIN CollarFixes AS F ON F.FixId = L.FixId
+LEFT JOIN CollarDataTelonicsGen4 AS G1 ON G1.FileId = F.FileId AND G1.LineNumber = F.LineNumber
+LEFT JOIN CollarDataTelonicsGen4 AS G2 ON G2.FileId = G1.FileId AND G2.LineNumber BETWEEN G1.LineNumber -1 AND G1.LineNumber + 1 AND G2.AcquisitionStartTime = G1.AcquisitionStartTime AND G2.GpsFixAttempt IS NOT NULL
+    WHERE [Status] IS NULL AND G2.GpsFixAttempt = 'Succeeded (3D)' AND L.ProjectId = 'WACH' AND L.FixDate > '2012-09-01'
+
+--------- Locations with Gen4 GPS Status    
+   SELECT L.*, G2.GpsFixAttempt, G2.GpsAltitude, G2.GpsHorizontalError, G2.GpsHorizontalDilution AS HDOP, G2.GpsPositionalDilution AS PDOP
+     FROM Locations as L
+     JOIN CollarFixes AS F ON F.FixId = L.FixId
+LEFT JOIN CollarDataTelonicsGen4 AS G1 ON G1.FileId = F.FileId AND G1.LineNumber = F.LineNumber
+LEFT JOIN CollarDataTelonicsGen4 AS G2 ON G2.FileId = G1.FileId AND G2.LineNumber BETWEEN G1.LineNumber -1 AND G1.LineNumber + 1 AND G2.AcquisitionStartTime = G1.AcquisitionStartTime AND G2.GpsFixAttempt IS NOT NULL
+    WHERE [Status] IS NULL AND L.ProjectId = 'WACH'
+
+--------- 3D Locations with Gen4 Temperature    
+   SELECT top 1000 L.*, G2.Temperature, G2.GpsFixAttempt
      FROM Locations as L
      JOIN CollarFixes AS F ON F.FixId = L.FixId
 LEFT JOIN CollarDataTelonicsGen4 AS G1 ON G1.FileId = F.FileId AND G1.LineNumber = F.LineNumber
