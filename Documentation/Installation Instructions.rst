@@ -323,8 +323,11 @@ Download Telonics Software
    
 TDC:
   * Telonics Data Converter - for Gen 4 Argos files (email/web) and datalog (.tdf)
+  
   * http://www.telonics.com/software/tdc.php
+  
   * Current version: http://www.telonics.com/software/setup-TDCv2.02.exe
+  
   * Notes: Should be installed for all users.
     Device drivers do not need to be installed on the server.
 
@@ -332,14 +335,20 @@ The following Telonics software is not used with this version of Animal Movement
              
 DU:
   * Download Utility for Gen2 & Gen3 GPS - for Gen3 Datalog files (.tdf)
+  
   * http://www.telonics.com/software/du-3.php
+  
   * Current version: http://www.telonics.com/software/DU-Setup-1.41.exe
+  
   * Note: The username and organization is not important.
     
 ADC-T03:
   * Argos data translator for Gen3 collars
+  
   * http://www.telonics.com/software/adc-t03.php
+  
   * Current version: http://www.telonics.com/software/ADC-T03-Setup-4.04.0011.exe
+  
   * Notes: Should be installed for all users. 
     The username and organization is not important.
 
@@ -349,10 +358,13 @@ Configure Telonics Software
 
 1. Log on with the new `Automation Account`_
    (be sure to check the domain, and use the local machine name if necessary)
+   
 2. Authorize the Telonics software.
 
    a. For TDC select ``About Telonics Data Convertor...`` in the ``About`` menu.
+   
    b. Click the ``Add...`` button to enter the authorization code
+   
    c. For Alaska Region NPS, see ``T:\PROJECTS\AKR\ArcSDE Deployment\KeePassPortable``
       for the authorization code
 
@@ -365,13 +377,16 @@ Animal Movements Software
 
 1. Log on with the new `Automation Account`_
    (be sure to check the domain, and use the local machine name if necessary)
+   
 2. Copy all the files from ``{installdir}\Server`` to some local folder.
    The application can run from any folder and does not need any special administrative
    permissions to be installed or configured.  All the files do need to be installed in
    the same folder.
+   
 3. Edit the configuration files `ArgosDownloader.exe.config`_
    and `ArgosProcessor.exe.config`_.
    See `Edit Configuration File`_ in the section `Client Application`_ for more details.
+   
 4. The stored procedures ``ArgosFile_Process`` and ``ArgosFile_ProcessPlatform`` have a
    default path to the ArgosProcessor application  of
    ``C:\Users\sql_proxy\ArgosProcessor.exe``.  If the executable is installed in a
@@ -392,14 +407,20 @@ The following instructions are based on Windows Server 2003.  Newer systems shou
 similar.
 
 1. Open ``Control Panel -> Scheduled Tasks``
+
 2. Double-click on ``Add Schedule Task``
+
 3. Follow the wizard
 
    a. Browse to and select ``ArgosDownloader.exe``
+   
    b. Select a period of ``daily``
+   
    c. Select a time that has minimal activity in your location and in France (UTC +1).
       For Alaska, 8PM ADT equals 5AM in France
+	  
    d. Provide the password for the Automation User
+   
 4. Verify that the new task is added to the list of scheduled tasks.
    
 See `Optional Email Notifications`_ if you want the scheduled ArgosDownloader.exe task to
@@ -426,9 +447,13 @@ in case the processing initiated by the database fails for any reason.
 The set up is the same as the Argos Downloader, except:
 
   1. As the last step in the wizard, check the box to open the advanced options
+  
   2. In the advanced options, select the ``Schedule`` tab
+  
   3. Click the ``Advanced...`` button
+  
   4. Check the ``Repeat Task`` section
+  
   5. Have the task repeat every 10 minutes for 24 hours.   You can adjust 10 minutes up
      or down.  The longer you make the time, the longer users might have to wait to 
      see the results of changes to the database.  Making the time shorter will increase
@@ -474,7 +499,7 @@ Any version os SQL Server except Express or Compact 3.5 SP2 can be a publisher.
 Any version of SQL Server except SQL Server Compact 3.5 SP2 can be a subscriber.
 Replication is installed by default in all versions except SQL Server Express.
 
-* These instructions assume the user executing them has SA permissions on both the
+*These instructions assume the user executing them has SA permissions on both the
 publisher and subscriber SQL server instances*
 
 Create Windows Accounts on the Master (Publisher)
@@ -490,7 +515,7 @@ Create Windows Accounts on the Master (Publisher)
 
 
 Create Windows Accounts on the Client (Subscriber)
--------------------------------------------------
+--------------------------------------------------
 
 1. Distribution Agent: <machine_name>\repl_distribution
 
@@ -513,11 +538,14 @@ Configure the Master (Publisher)
 
 	a. In SqlServer, expand Replication and click Configure Distribution
 	b. select the server as it's own distributor (this will create a distribtuion database
-	on the publisher.
+	   on the publisher.
+	   
 	c. enter \\<publisher machine name>\repldata (as created above) as the snapshot folder
 	d. Set up permissions on the published database
+	
 		1. in SSMS add login for repl_snapshot and add this login as a user and *db_owner*
-		in animal_movements and distribution databases.
+		   in animal_movements and distribution databases.
+		   
 		2. repeat for repl_logreader
 		3. add login for repl_distribution as a user and *db_owner* in the distribution db
 		4. add login for repl_merge as a user in the distribution db
@@ -525,28 +553,39 @@ Configure the Master (Publisher)
 3. Create a publication and select the articles for publishing
 
 	a. in SSMS, right click on Replication->Local Publications and select New Publication
+	
 	b. Select Animal Movements as a Transactional publication
+	
 	c. In the Articles page select:
 		All the tables/views/functions that will be available on the client
+		
 	d. Select Create Snapshot and keep available
+	
 	e. On the security page, provide the name and password of the repl_snapshot account
-	e. repeat for the repl_logreader account
-	f. finish by giving the publication a name.
+	
+	f. repeat for the repl_logreader account
+	
+	g. finish by giving the publication a name.
 
 4. Create a subscription to the publication
 
 	a. In SSMS right click on the publication just created and select New Subscription
+	
 	b. Select Run all agents at the distributor
+	
 	c. On the subscriber page, connect to the subscriber server was an SA account
+	
 	d. provide a name for the new database to create on the subscriber
+	
 	e. enter repl_distribution and the password as the account for the security agent
+	
 	f. Add repl_distribution as a user and DB_owner on the new database on the subscriber
 
 Configure the Client (Subscriber)
 ---------------------------------
 
 1. Connect to the subscriber instance/database, and add repl_distribution as a db user
-and memeber of *db_owner*
+   and memeber of *db_owner*
 
 2. Add any other users ie. domain users who need read access to the database.
 
@@ -754,5 +793,5 @@ ArgosPlatformListSoapRequest  ::
 .. _`Enabling CLR Integration`: http://msdn.microsoft.com/en-us/library/ms131048(v=SQL.105).aspx
 .. _`Transactional Replication`: http://technet.microsoft.com/en-us/library/ms151706(v=sql.105).aspx
 .. _`Transaction Documentation`: http://technet.microsoft.com/en-us/library/ms151198(v=sql.105).aspx
-.. _`Microsoft Replication Tutorial` http://technet.microsoft.com/en-us/library/bb500344(v=sql.105).aspx
+.. _`Microsoft Replication Tutorial`: http://technet.microsoft.com/en-us/library/bb500344(v=sql.105).aspx
 
