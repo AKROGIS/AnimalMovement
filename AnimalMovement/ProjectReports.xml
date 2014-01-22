@@ -48,6 +48,21 @@
     </query>
   </report>
   <report>
+    <name>Short Duration Movements</name>
+    <description>
+      <![CDATA[All movement vectors less than 10 minutes for all animals in the project.  One of the end point locations is probably redundant and should be hidden (use the GIS tools)]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT AnimalId, StartDate, EndDate, ROUND(Duration*60,2) AS [Duration(min)], ROUND(Distance,0) AS [Distance(meters)]
+       FROM Movements
+      WHERE Duration < (10/60.0)
+        AND ProjectId = @Project
+   ORDER BY AnimalId, StartDate
+	  ]]>
+    </query>
+  </report>
+  <report>
     <name>Living Animals without a collar</name>
     <description>
       <![CDATA[A Project's living animals without a collar]]>
