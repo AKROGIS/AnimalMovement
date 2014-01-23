@@ -111,7 +111,7 @@
             this.QuickStartWizardButton.TabIndex = 4;
             this.QuickStartWizardButton.Text = "Quick Start Wizard";
             this.QuickStartWizardButton.UseVisualStyleBackColor = true;
-            this.QuickStartWizardButton.Click += new System.EventHandler(this.button1_Click);
+            this.QuickStartWizardButton.Click += new System.EventHandler(this.QuickStartWizardButton_Click);
             // 
             // InvestigatorsButton
             // 

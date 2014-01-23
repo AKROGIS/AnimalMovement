@@ -82,17 +82,16 @@ namespace AnimalMovement
             form.Show(this);
         }
 
-        private void QuitButton_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
+        private void QuickStartWizardButton_Click(object sender, EventArgs e)
         {
             var form = new QuickStartWizard();
             form.Show(this);
         }
 
+        private void QuitButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
 
     }
 }
