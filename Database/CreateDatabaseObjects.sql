@@ -30,6 +30,8 @@ CREATE USER [NPS\PAOwen] FOR LOGIN [NPS\PAOwen] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
+CREATE USER [NPS\SArthur] FOR LOGIN [NPS\SArthur] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\SDMiller] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE ROLE [ArgosProcessor] AUTHORIZATION [dbo]
@@ -4600,7 +4602,7 @@ AS
           ,M.[EndDate]
           ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
           ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(M.[StartDate]) as [Year]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
           ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
           ,M.[Duration]
           ,M.[Distance]
@@ -4627,7 +4629,7 @@ AS
           ,L.AnimalId
           ,L.[FixDate]
           ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(L.[FixDate]) as [Year]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
           ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
           ,P.[UnitCode]
           ,A.[Species]
@@ -4653,7 +4655,7 @@ AS
           --,M.[EndDate]
           ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
           ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(M.[StartDate]) as [Year]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
           ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
           ,M.[Duration]
           --,M.[Distance]
@@ -4720,7 +4722,7 @@ AS
           ,L.AnimalId
           ,L.[FixDate]
           ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(L.[FixDate]) as [Year]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
           ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
           ,P.[UnitCode]
           ,A.[Species]
@@ -8455,6 +8457,8 @@ GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\PAOwen'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\GColligan'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Editor', @membername=N'NPS\SArthur'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\SDMiller'
 GO
