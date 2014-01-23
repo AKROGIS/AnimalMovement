@@ -6689,87 +6689,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 28, 2012
--- Description:	Updates an Animal
--- =============================================
-CREATE PROCEDURE [dbo].[Animal_Update] 
-	@ProjectId NVARCHAR(255)= NULL,
-	@AnimalId NVARCHAR(255) = NULL, 
-	@Species NVARCHAR(255) = NULL, 
-	@Gender NVARCHAR(7) = NULL, 
-	@MortalityDate DATETIME2(7),
-	@GroupName NVARCHAR(255) = NULL, 
-	@Description NVARCHAR(4000) = NULL 
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to update an animal.';
-			RAISERROR(@message1, 18, 0)
-			RETURN (1)
-		END
-	END
-
-	-- Verify this is an existing animal
-	-- Otherwise, the update will silently succeed, which could be confusing.
-	IF NOT EXISTS (SELECT 1 FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId)
-	BEGIN
-		DECLARE @message2 nvarchar(100) = 'There is no such animal (' + @AnimalId + ') in project (' + @ProjectId + ').';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-		
-	-- If a parameter is not provided, use the existing value.
-	-- (to put null in a field the user will need to pass an empty string)
-	IF @Species IS NULL
-	BEGIN
-		SELECT @Species = [Species] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
-	END
-	
-	IF @Gender IS NULL
-	BEGIN
-		SELECT @Gender = [Gender] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
-	END
-	
-	-- There is no default value for mortality date, since we can't pass '' to express null,
-	
-	IF @GroupName IS NULL
-	BEGIN
-		SELECT @GroupName = [GroupName] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
-	END
-	
-	IF @Description IS NULL
-	BEGIN
-		SELECT @Description = [Description] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
-	END
-	
-	-- Do the update, replacing empty strings with NULLs
-	-- All other verification is handled by primary/foreign key and column constraints.
-
-	UPDATE dbo.Animals SET [Species] = nullif(@Species,''),
-						   [Gender] = nullif(@Gender,''),
-						   [GroupName] = nullif(@GroupName,''),
-						   [MortalityDate] = @MortalityDate,
-						   [Description] = nullif(@Description,'')
-					 WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarFileHeaders](
@@ -7719,6 +7638,84 @@ BEGIN
 
 
     DELETE FROM dbo.CollarDeployments WHERE DeploymentId = @DeploymentId
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 28, 2012
+-- Description:	Updates an Animal
+-- =============================================
+CREATE PROCEDURE [dbo].[Animal_Update] 
+	@ProjectId NVARCHAR(255)= NULL,
+	@AnimalId NVARCHAR(255) = NULL, 
+	@Species NVARCHAR(255) = NULL, 
+	@Gender NVARCHAR(7) = NULL, 
+	@MortalityDate DATETIME2(7),
+	@GroupName NVARCHAR(255) = NULL, 
+	@Description NVARCHAR(4000) = NULL 
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Validate permission for this operation
+	-- The caller must be authorized to edit the project
+	IF dbo.IsProjectEditor(@ProjectId, @Caller) = 0
+	BEGIN
+		DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator, assistant or editor on this project ('+@ProjectId+') to update an animal.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Verify this is an existing animal
+	-- Otherwise, the update will silently succeed, which could be confusing.
+	IF NOT EXISTS (SELECT 1 FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId)
+	BEGIN
+		DECLARE @message2 nvarchar(100) = 'There is no such animal (' + @AnimalId + ') in project (' + @ProjectId + ').';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+		
+	-- If a parameter is not provided, use the existing value.
+	-- (to put null in a field the user will need to pass an empty string)
+	IF @Species IS NULL
+	BEGIN
+		SELECT @Species = [Species] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
+	END
+	
+	IF @Gender IS NULL
+	BEGIN
+		SELECT @Gender = [Gender] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
+	END
+	
+	-- There is no default value for mortality date, since we can't pass '' to express null,
+	
+	IF @GroupName IS NULL
+	BEGIN
+		SELECT @GroupName = [GroupName] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
+	END
+	
+	IF @Description IS NULL
+	BEGIN
+		SELECT @Description = [Description] FROM [dbo].[Animals] WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
+	END
+	
+	-- Do the update, replacing empty strings with NULLs
+	-- All other verification is handled by primary/foreign key and column constraints.
+
+	UPDATE dbo.Animals SET [Species] = nullif(@Species,''),
+						   [Gender] = nullif(@Gender,''),
+						   [GroupName] = nullif(@GroupName,''),
+						   [MortalityDate] = @MortalityDate,
+						   [Description] = nullif(@Description,'')
+					 WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId;
 
 END
 GO
