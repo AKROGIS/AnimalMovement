@@ -19,8 +19,10 @@
          ON P.PlatformId = D.PlatformId
  INNER JOIN CollarFiles AS F
          ON F.FileId = D.FileId
+  LEFT JOIN Projects as Pr
+         ON Pr.ProjectId = F.ProjectId
       WHERE P.PlatformId IS NULL
-        AND F.[Owner] = @PI
+        AND F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI
       ]]>
     </query>
   </report>
@@ -37,8 +39,10 @@
          ON P.ProgramId = D.ProgramId
  INNER JOIN CollarFiles AS F
          ON F.FileId = D.FileId
+  LEFT JOIN Projects as Pr
+         ON Pr.ProjectId = F.ProjectId
       WHERE P.ProgramId IS NULL AND D.ProgramId IS NOT NULL
-        AND F.[Owner] = @PI
+        AND F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI
       ]]>
     </query>
   </report>
