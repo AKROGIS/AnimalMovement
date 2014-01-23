@@ -105,6 +105,8 @@ namespace Telonics
                     UseShellExecute = false,
                     RedirectStandardError = true
                 });
+                if (p == null)
+                    throw new InvalidOperationException("TDC process already running, Please wait and try again.");
                 string errors = p.StandardError.ReadToEnd();
                 bool exitedNormally = p.WaitForExit(TdcTimeout);
                 if (!exitedNormally)
