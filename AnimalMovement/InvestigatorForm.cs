@@ -253,6 +253,7 @@ namespace AnimalMovement
                                           ProjectsListBox.SelectedItems.Cast<ProjectListItem>()
                                                         .Any(item => item.CanDelete);
             InfoProjectButton.Enabled = !IsEditMode && ProjectsListBox.SelectedItems.Count == 1;
+            ProjectsListBox.Enabled = !IsEditMode;
         }
 
         private void ProjectDataChanged()
@@ -337,6 +338,7 @@ namespace AnimalMovement
                                           CollarsListBox.SelectedItems.Cast<CollarListItem>()
                                                         .Any(item => item.CanDelete);
             InfoCollarButton.Enabled = !IsEditMode && CollarsListBox.SelectedItems.Count == 1;
+            CollarsListBox.Enabled = !IsEditMode;
         }
 
         private static bool CanDeleteCollar(Collar collar)
@@ -429,6 +431,9 @@ namespace AnimalMovement
             InfoArgosCollarButton.Enabled = !IsEditMode && ArgosDeploymentsGridView.SelectedRows.Count == 1;
 
             EmailCheckBox.Enabled = !IsEditMode && IsInvestigator;
+            ProgramsListBox.Enabled = !IsEditMode;
+            PlatformsListBox.Enabled = !IsEditMode;
+            ArgosDeploymentsGridView.Enabled = !IsEditMode;
         }
 
         private void ArgosDataChanged()
@@ -727,6 +732,7 @@ namespace AnimalMovement
                                               CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>()
                                                                 .Any(item => item.CanDelete);
             InfoCollarFileButton.Enabled = !IsEditMode && CollarFilesListBox.SelectedItems.Count == 1;
+            CollarFilesListBox.Enabled = !IsEditMode;
         }
 
         private void CollarFileDataChanged()
@@ -815,6 +821,7 @@ namespace AnimalMovement
                                               ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>()
                                                                 .Any(item => item.CanDelete);
             InfoParameterFileButton.Enabled = !IsEditMode && ParameterFilesListBox.SelectedItems.Count == 1;
+            ParameterFilesListBox.Enabled = !IsEditMode;
         }
 
         private void ParameterFileDataChanged()
@@ -873,6 +880,7 @@ namespace AnimalMovement
                                              (IsEditor && AssistantsListBox.SelectedItems.Count == 1 &&
                                               String.Equals(((ProjectInvestigatorAssistant)AssistantsListBox.SelectedItem).Assistant.Normalize(),
                                                             CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)));
+            AssistantsListBox.Enabled = !IsEditMode;
         }
 
         private void AssistantDataChanged()
