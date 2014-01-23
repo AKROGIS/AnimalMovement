@@ -34,7 +34,6 @@
             this.AddProjectButton = new System.Windows.Forms.Button();
             this.ShowHideButton = new System.Windows.Forms.Button();
             this.ProjectsGridView = new System.Windows.Forms.DataGridView();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.ProjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Lead = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.UnitCode = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -42,6 +41,7 @@
             this.ProjectId = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CanDelete = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Project = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.ProjectsGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -125,8 +125,8 @@
             this.ProjectsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ProjectsGridView.Size = new System.Drawing.Size(578, 167);
             this.ProjectsGridView.TabIndex = 2;
+            this.ProjectsGridView.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProjectsGridView_CellContentClick);
             this.ProjectsGridView.SelectionChanged += new System.EventHandler(this.ProjectsGridView_SelectionChanged);
-            this.ProjectsGridView.DoubleClick += new System.EventHandler(this.InfoProjectButton_Click);
             // 
             // ProjectName
             // 
