@@ -271,6 +271,7 @@ namespace AnimalMovement
                     AnimalsListBox.SetItemColor(i, Color.DarkGray);
             }
             AnimalsTabPage.Text = sortedList.Count < 5 ? "Animals" : String.Format("Animals ({0})", sortedList.Count);
+            EnableAnimalControls();
         }
 
         private static string GetName(Animal animal)
@@ -385,6 +386,7 @@ namespace AnimalMovement
                 }
             }
             FilesTabPage.Text = sortedList.Count < 5 ? "Files" : String.Format("Files ({0})", sortedList.Count);
+            EnableFileControls();
         }
 
         private void EnableFileControls()
