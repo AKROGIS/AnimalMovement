@@ -6238,10 +6238,10 @@ BEGIN
     -- Get the name of the caller
     DECLARE @Caller sysname = ORIGINAL_LOGIN();
     
-    -- If the caller is not the PI for the project, then error and return
-    IF @ProjectInvestigator <> @Caller
+    -- If the caller is not the PI or the assistant, then error and return
+    IF @ProjectInvestigator <> @Caller AND @Assistant <> @Caller
     BEGIN
-        DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') cannot delete the assistant for another principal investigator (' + @ProjectInvestigator + ')';
+        DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') cannot delete an assistant for another principal investigator (' + @ProjectInvestigator + ')';
         RAISERROR(@message1, 18, 0)
         RETURN 1
     END
