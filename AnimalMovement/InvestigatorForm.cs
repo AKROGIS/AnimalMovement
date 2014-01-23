@@ -413,22 +413,22 @@ namespace AnimalMovement
 
         private void EnableArgosControls()
         {
-            AddProgramButton.Enabled = IsEditor;
-            DeleteProgramButton.Enabled = ProgramsListBox.SelectedItems.Cast<ProgramListItem>().Any(i => i.CanDelete);
-            InfoProgramButton.Enabled = ProgramsListBox.SelectedItems.Count == 1;
+            AddProgramButton.Enabled = !IsEditMode && IsEditor;
+            DeleteProgramButton.Enabled = !IsEditMode && ProgramsListBox.SelectedItems.Cast<ProgramListItem>().Any(i => i.CanDelete);
+            InfoProgramButton.Enabled = !IsEditMode && ProgramsListBox.SelectedItems.Count == 1;
 
-            AddPlatformButton.Enabled = IsEditor && ProgramsListBox.SelectedItems.Count == 1;
-            DeletePlatformButton.Enabled = PlatformsListBox.SelectedItems.Cast<PlatformListItem>().Any(i => i.CanDelete);
-            InfoPlatformButton.Enabled = PlatformsListBox.SelectedItems.Count == 1;
-            
-            AddArgosDeploymentButton.Enabled = IsEditor && PlatformsListBox.SelectedItems.Count == 1;
-            DeleteArgosDeploymentButton.Enabled =
+            AddPlatformButton.Enabled = !IsEditMode && IsEditor && ProgramsListBox.SelectedItems.Count == 1;
+            DeletePlatformButton.Enabled = !IsEditMode && PlatformsListBox.SelectedItems.Cast<PlatformListItem>().Any(i => i.CanDelete);
+            InfoPlatformButton.Enabled = !IsEditMode && PlatformsListBox.SelectedItems.Count == 1;
+
+            AddArgosDeploymentButton.Enabled = !IsEditMode && IsEditor && PlatformsListBox.SelectedItems.Count == 1;
+            DeleteArgosDeploymentButton.Enabled = !IsEditMode && 
                 ArgosDeploymentsGridView.SelectedRows.Cast<DataGridViewRow>()
                                         .Any(r => (bool) r.Cells["CanDelete"].Value);
-            EditArgosDeploymentButton.Enabled = ArgosDeploymentsGridView.SelectedRows.Count == 1;
-            InfoArgosCollarButton.Enabled = ArgosDeploymentsGridView.SelectedRows.Count == 1;
+            EditArgosDeploymentButton.Enabled = !IsEditMode && ArgosDeploymentsGridView.SelectedRows.Count == 1;
+            InfoArgosCollarButton.Enabled = !IsEditMode && ArgosDeploymentsGridView.SelectedRows.Count == 1;
 
-            EmailCheckBox.Enabled = IsInvestigator;
+            EmailCheckBox.Enabled = !IsEditMode && IsInvestigator;
         }
 
         private void ArgosDataChanged()
