@@ -64,6 +64,12 @@ namespace AnimalMovement
             form.Show(this);
         }
 
+        private void InvestigatorsButton_Click(object sender, EventArgs e)
+        {
+            var form = new InvestigatorsForm();
+            form.Show(this);
+        }
+
         private void UploadButton_Click(object sender, EventArgs e)
         {
             var form = new UploadFilesForm();
