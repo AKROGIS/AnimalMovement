@@ -298,6 +298,7 @@ namespace AnimalMovement
                                           AnimalsListBox.SelectedItems.Cast<AnimalListItem>()
                                                         .Any(item => item.CanDelete);
             InfoAnimalsButton.Enabled = !IsEditMode && AnimalsListBox.SelectedItems.Count == 1;
+            AnimalsListBox.Enabled = !IsEditMode;
         }
 
         private void AnimalDataChanged()
@@ -396,6 +397,7 @@ namespace AnimalMovement
                                           FilesListBox.SelectedItems.Cast<FileListItem>()
                                                         .Any(item => item.CanDelete);
             InfoFilesButton.Enabled = !IsEditMode && FilesListBox.SelectedItems.Count == 1;
+            FilesListBox.Enabled = !IsEditMode;
         }
 
         private void FileDataChanged()
@@ -460,6 +462,7 @@ namespace AnimalMovement
                                              (IsEditor && EditorsListBox.SelectedItems.Count == 1 &&
                                               String.Equals(((ProjectEditor)EditorsListBox.SelectedItem).Editor.Normalize(),
                                                             CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase)));
+            EditorsListBox.Enabled = !IsEditMode;
         }
 
         private void EditorDataChanged()
