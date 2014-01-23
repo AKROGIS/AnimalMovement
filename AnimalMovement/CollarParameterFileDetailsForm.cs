@@ -335,9 +335,9 @@ namespace AnimalMovement
 
         private void IgnoreSuffixCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (collars == null)
+            if (_collars == null)
                 return;
-            collars = null;
+            _collars = null;
             TpfDataGridView.DataSource = null;
             SetUpTpfDetailsTab();
             EnableTpfDetailsControls();
@@ -350,14 +350,14 @@ namespace AnimalMovement
 
         private void EnableTpfDetailsControls()
         {
-            CheckButton.Visible = collars == null;
-            AddFixCollarButton.Visible = collars != null;
-            AddArgosButton.Visible = collars != null;
-            AddFixParameterButton.Visible = collars != null;
-            if (collars == null || TpfDataGridView.SelectedRows.Count != 1)
+            CheckButton.Visible = _collars == null;
+            AddFixCollarButton.Visible = _collars != null;
+            AddArgosButton.Visible = _collars != null;
+            AddFixParameterButton.Visible = _collars != null;
+            if (_collars == null || TpfDataGridView.SelectedRows.Count != 1)
                 return;
             var index = TpfDataGridView.SelectedRows[0].Index;
-            var collar = collars[index];
+            var collar = _collars[index];
             if (collar == null)
             {
                 var ctn = (string) TpfDataGridView.Rows[index].Cells[1].Value;
@@ -388,7 +388,7 @@ namespace AnimalMovement
         {
             //TODO support multi-select
             var index = TpfDataGridView.SelectedRows[0].Index;
-            var collar = collars[index];
+            var collar = _collars[index];
             if (collar == null)
             {
                 var ctn = (string)TpfDataGridView.Rows[index].Cells[1].Value;
@@ -458,7 +458,7 @@ namespace AnimalMovement
         private void AddArgosButton_Click(object sender, EventArgs e)
         {
             var index = TpfDataGridView.SelectedRows[0].Index;
-            var collar = collars[index];
+            var collar = _collars[index];
             var argosId = (string)TpfDataGridView.SelectedRows[0].Cells[2].Value;
             var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[4].Value;
             if (Database.ArgosPlatforms.Any(a => a.PlatformId == argosId))
@@ -546,7 +546,7 @@ namespace AnimalMovement
         {
             var index = TpfDataGridView.SelectedRows[0].Index;
             var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[4].Value;
-            var collar = collars[index];
+            var collar = _collars[index];
             DateTime? endDate = null;
             if (AddFixParameterButton.Text == "Fix Parameter")
             {
@@ -640,15 +640,15 @@ namespace AnimalMovement
         }
 
         //Array of collars that match a CTN, Index of the enclosing array is the row number of the datagridview
-        private Collar[] collars;
+        private Collar[] _collars;
 
         private void CheckTpfData()
         {
-            if (collars == null)
-                collars = GetCollars();
+            if (_collars == null)
+                _collars = GetCollars();
             foreach (DataGridViewRow row in TpfDataGridView.Rows)
             {
-                var collar = collars[row.Index];
+                var collar = _collars[row.Index];
                 var argosId = (string)row.Cells[2].Value;
                 var frequency = (double)row.Cells[3].Value;
                 var paramaterStart = (DateTime)row.Cells[4].Value;

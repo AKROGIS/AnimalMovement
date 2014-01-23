@@ -12,8 +12,8 @@ namespace AnimalMovement
         private string CurrentUser { get; set; }
         private bool IsEditor { get; set; }
         internal event EventHandler DatabaseChanged;
-        private object myProjects;
-        private object allProjects;
+        private object _myProjects;
+        private object _allProjects;
 
         internal ProjectsForm()
         {
@@ -37,7 +37,7 @@ namespace AnimalMovement
 
         private void MakeLists()
         {
-            myProjects = (from p in Database.Projects
+            _myProjects = (from p in Database.Projects
                           where p.ProjectInvestigator == CurrentUser ||
                                 p.ProjectEditors.Any(u => u.Editor == CurrentUser)
                           select new
@@ -53,7 +53,7 @@ namespace AnimalMovement
                                      && !p.Animals.Any() && !p.CollarFiles.Any(),
                                   Project = p
                               }).ToList();
-            allProjects = (from p in Database.Projects
+            _allProjects = (from p in Database.Projects
                            select new
                                {
                                    p.ProjectId,
@@ -72,7 +72,7 @@ namespace AnimalMovement
         private void SetUpForm()
         {
             SelectProjectFilter();
-            ProjectsGridView.DataSource = ShowHideButton.Text == "Show All Projects" ? myProjects : allProjects;
+            ProjectsGridView.DataSource = ShowHideButton.Text == "Show All Projects" ? _myProjects : _allProjects;
             EnableControls();
         }
 

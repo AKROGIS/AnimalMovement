@@ -98,19 +98,19 @@ namespace TelonicsTest
             const string id = "60793";
             const int hours = 25;
 
-            const string in_path = @"C:\tmp\Argos_Emails";
-            const string out_path = @"C:\tmp\reports\" + id + "_2012a.txt";
+            const string inPath = @"C:\tmp\Argos_Emails";
+            const string outPath = @"C:\tmp\reports\" + id + "_2012a.txt";
 
-            if (!Directory.Exists(in_path))
+            if (!Directory.Exists(inPath))
             {
-                Console.Write("Invalid Directory {0}", in_path);
+                Console.Write("Invalid Directory {0}", inPath);
             }
-            Console.Write("Processing Directory {0}", in_path);
-            using (var f = new StreamWriter(out_path))
+            Console.Write("Processing Directory {0}", inPath);
+            using (var f = new StreamWriter(outPath))
             {
-                foreach (var file in Directory.EnumerateFiles(in_path))
+                foreach (var file in Directory.EnumerateFiles(inPath))
                 {
-                    var path = Path.Combine(in_path, file);
+                    var path = Path.Combine(inPath, file);
                     Console.WriteLine("  File {0}", file);
                     ArgosFile a = new ArgosEmailFile(path);
                     var processor = new Gen3Processor(TimeSpan.FromMinutes(hours*60));
@@ -169,14 +169,14 @@ namespace TelonicsTest
             }
 
             // Calculate CRC value
-            var crc = new CRC();
+            var crc = new Crc();
             for (int i = 0; i < 8; i++)
                 crc.Update(testCase[i].Value, testCase[i].Length);
 
             // Display CRC value
             int a = crc.Value; 	// Get final CRC value
-            string binary_str = Convert.ToString(a, 2);
-            Console.WriteLine("\n6-bit CRC of all fields = {0:X} (hex) = {1} (binary)", a, binary_str);
+            string binaryStr = Convert.ToString(a, 2);
+            Console.WriteLine("\n6-bit CRC of all fields = {0:X} (hex) = {1} (binary)", a, binaryStr);
             Console.WriteLine("Done.");
         }
 

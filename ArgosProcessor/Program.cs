@@ -60,7 +60,7 @@ namespace ArgosProcessor
             try
             {
                 if (args.Length == 0)
-                    FileProcessor.ProcessAll(handleException);
+                    FileProcessor.ProcessAll(HandleException);
                 else
                 {
                     ArgosPlatform platform = null;
@@ -96,7 +96,7 @@ namespace ArgosProcessor
                             }
                         }
                         if (args.Length == 1 && pi != null)
-                            FileProcessor.ProcessAll(handleException, pi);
+                            FileProcessor.ProcessAll(HandleException, pi);
                         if (file != null)
                             try
                             {
@@ -104,7 +104,7 @@ namespace ArgosProcessor
                             }
                             catch (Exception ex)
                             {
-                                handleException(ex, file, platform);
+                                HandleException(ex, file, platform);
                             }
                     }
                 }
@@ -115,7 +115,7 @@ namespace ArgosProcessor
             }
         }
 
-        private static void handleException(Exception ex, CollarFile file, ArgosPlatform platform)
+        private static void HandleException(Exception ex, CollarFile file, ArgosPlatform platform)
         {
             if (file == null)
             {

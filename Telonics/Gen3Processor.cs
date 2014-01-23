@@ -107,33 +107,33 @@ namespace Telonics
             };
         }
 
-        private ArgosFix[] GetFixes(DateTime transmissionDateTime, ICollection<byte> _message)
+        private ArgosFix[] GetFixes(DateTime transmissionDateTime, ICollection<byte> message)
         {
-            if (_message == null)
+            if (message == null)
                 return new ArgosFix[0];
 
             //Get the message header
-            bool messageHasSensorData = _message.BooleanAt(0);
+            bool messageHasSensorData = message.BooleanAt(0);
             //ignore sensor or error messages
             if (messageHasSensorData)
                 return new ArgosFix[0];
-            if (_message.Count < 9) //72 bits (9 bytes) required for a full absolute fix
+            if (message.Count < 9) //72 bits (9 bytes) required for a full absolute fix
                 return new[] { new ArgosFix { ConditionCode = ArgosConditionCode.Invalid } };
 
             //Get the absolute Fix
-            byte reportedCrc = _message.ByteAt(1, 6);
-            byte fixBufferType = _message.ByteAt(7, 2);
-            uint longitudeBits = _message.UInt32At(9, 22);
+            byte reportedCrc = message.ByteAt(1, 6);
+            byte fixBufferType = message.ByteAt(7, 2);
+            uint longitudeBits = message.UInt32At(9, 22);
             double longitude = longitudeBits.TwosComplement(22, 4);
-            uint latitudeBits = _message.UInt32At(31, 21);
+            uint latitudeBits = message.UInt32At(31, 21);
             double latitude = latitudeBits.TwosComplement(21, 4);
-            ushort julian = _message.UInt16At(52, 9);
-            byte hour = _message.ByteAt(61, 5);
-            byte minute = _message.ByteAt(66, 6);
+            ushort julian = message.UInt16At(52, 9);
+            byte hour = message.ByteAt(61, 5);
+            byte minute = message.ByteAt(66, 6);
             DateTime fixDate = CalculateFixDate(transmissionDateTime, julian, hour, minute);
 
             // Cyclical Redundancy Check
-            var crc = new CRC();
+            var crc = new Crc();
             crc.Update(fixBufferType, 2);
             crc.Update((int)longitudeBits, 22);
             crc.Update((int)latitudeBits, 21);
@@ -166,24 +166,24 @@ namespace Telonics
             {
                 int firstBit = 72 + i * relativeFixLength;
                 int bytesRequired = (firstBit + relativeFixLength + 7) / 8; //+7 to round up
-                if (_message.Count < bytesRequired)
+                if (message.Count < bytesRequired)
                     break;
-                reportedCrc = _message.ByteAt(firstBit, 6);
+                reportedCrc = message.ByteAt(firstBit, 6);
                 firstBit += 6;
-                longitudeBits = _message.UInt32At(firstBit, doubleLength);
+                longitudeBits = message.UInt32At(firstBit, doubleLength);
                 double longitudeDelta = longitudeBits.TwosComplement(doubleLength, 4);
                 firstBit += doubleLength;
-                latitudeBits = _message.UInt32At(firstBit, doubleLength);
+                latitudeBits = message.UInt32At(firstBit, doubleLength);
                 double latitudeDelta = latitudeBits.TwosComplement(doubleLength, 4);
                 firstBit += doubleLength;
                 //Get the time of the relative fixes
-                byte delay = _message.ByteAt(firstBit, 6);
+                byte delay = message.ByteAt(firstBit, 6);
 
                 TimeSpan timeOffset = TimeSpan.FromMinutes((i + 1) * Period.TotalMinutes);
                 fixDate = fixDate.AddMinutes(-fixDate.Minute); //Round down to the hour
 
                 // Cyclical Redundancy Check
-                crc = new CRC();
+                crc = new Crc();
                 crc.Update((int)longitudeBits, doubleLength);
                 crc.Update((int)latitudeBits, doubleLength);
                 crc.Update(delay, 6);

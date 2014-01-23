@@ -4,14 +4,14 @@ namespace Telonics
     /***************************************************************************
      * These are the T03 Format 6-bit CRC routines
      **************************************************************************/
-    public class CRC
+    public class Crc
     {
         private int _crc;
 
         public void Update(int value, int numberOfBits)
         {
-            const byte FEEDBACK = 0x43;
-            const byte MAXTAP = 0x40;
+            const byte feedback = 0x43;
+            const byte maxtap = 0x40;
 
             // Left justify the input value
             for (int i = numberOfBits; i < 32; i++)
@@ -20,10 +20,10 @@ namespace Telonics
             // Update CRC
             for (int i = 0; i < numberOfBits; i++, value <<= 1)
             {
-                bool bit1 = (_crc & MAXTAP) != 0; // ? 1: 0;			// Get bit from CRC
+                bool bit1 = (_crc & maxtap) != 0; // ? 1: 0;			// Get bit from CRC
                 bool bit2 = (value & 0x80000000L) != 0; //? 1: 0;	// Get bit from input value
                 if (bit1 ^ bit2)
-                    _crc ^= FEEDBACK;
+                    _crc ^= feedback;
                 _crc <<= 1;
             }
         }
