@@ -336,7 +336,7 @@ namespace AnimalMovement
             DeleteCollarsButton.Enabled = !IsEditMode && IsEditor &&
                                           CollarsListBox.SelectedItems.Cast<CollarListItem>()
                                                         .Any(item => item.CanDelete);
-            InfoCollarButton.Enabled = !IsEditMode;
+            InfoCollarButton.Enabled = !IsEditMode && CollarsListBox.SelectedItems.Count == 1;
         }
 
         private static bool CanDeleteCollar(Collar collar)
@@ -726,7 +726,7 @@ namespace AnimalMovement
             DeleteCollarFilesButton.Enabled = !IsEditMode && IsEditor &&
                                               CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>()
                                                                 .Any(item => item.CanDelete);
-            InfoCollarFileButton.Enabled = !IsEditMode;
+            InfoCollarFileButton.Enabled = !IsEditMode && CollarFilesListBox.SelectedItems.Count == 1;
         }
 
         private void CollarFileDataChanged()
@@ -814,7 +814,7 @@ namespace AnimalMovement
             DeleteParameterFilesButton.Enabled = !IsEditMode && IsEditor &&
                                               ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>()
                                                                 .Any(item => item.CanDelete);
-            InfoParameterFileButton.Enabled = !IsEditMode;
+            InfoParameterFileButton.Enabled = !IsEditMode && ParameterFilesListBox.SelectedItems.Count == 1;
         }
 
         private void ParameterFileDataChanged()
