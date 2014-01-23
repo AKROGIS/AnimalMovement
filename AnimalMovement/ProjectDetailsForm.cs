@@ -170,6 +170,8 @@ namespace AnimalMovement
             UnitTextBox.Enabled = IsEditMode;
             InvestigatorComboBox.Enabled = IsEditMode && InvestigatorComboBox.Items.Count > 1;
             InvestigatorDetailsButton.Enabled = !IsEditMode;
+            //trigger's the active tab to enable/disable it's controls
+            ProjectTabs_SelectedIndexChanged(null, null);
         }
 
         private void GeneralDataChanged()
