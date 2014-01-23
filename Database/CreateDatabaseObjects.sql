@@ -67,6 +67,16 @@ BEGIN
 	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
 END
 GO
+CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
+RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
+GO
+CREATE PROCEDURE [dbo].[Summerize]
+	@fileId [int]
+AS
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -140,16 +150,6 @@ CREATE TABLE [dbo].[LookupCollarFileFormats](
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
-GO
-CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
-RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
-GO
-CREATE PROCEDURE [dbo].[Summerize]
-	@fileId [int]
-AS
-EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
 GO
 SET ANSI_NULLS ON
 GO
@@ -2477,216 +2477,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[PreviousLocationTime] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [FixDate] 
-					 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [Status] IS NULL
-					  AND [FixDate] < @Time
-			     ORDER BY [FixDate] DESC);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[UpdateMovementAfterLocationUpdate] 
-ON [dbo].[Locations]
-AFTER UPDATE AS
-IF UPDATE ([Status])
-	BEGIN
-		SET NOCOUNT ON;
-		DECLARE
-			@Project   VARCHAR(32),
-			@Animal    VARCHAR(32),
-			@Time      DATETIME2,
-			@OldStatus CHAR(1),
-			@NewStatus CHAR(1);
-		  
-		-- In an update, the old row is in 'deleted', and the new row is in 'inserted'.
-
-		DECLARE up_cursor CURSOR FOR 
-			SELECT [ProjectId], [AnimalId], [FixDate], [Status] FROM deleted ORDER BY [ProjectId], [AnimalId], [FixDate];
-
-		OPEN up_cursor;
-
-		FETCH NEXT FROM up_cursor INTO @Project, @Animal, @Time, @OldStatus;
-
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			SET @NewStatus = (SELECT [Status] FROM inserted WHERE [ProjectId] = @Project AND [AnimalId] = @Animal AND [FixDate] = @Time);
-			
-			IF @OldStatus IS NULL and @NewStatus IS NOT NULL
-				EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
-			
-			IF @OldStatus IS NOT NULL and @NewStatus IS NULL
-				EXEC [dbo].[Location_Added] @Project, @Animal, @Time; 
-			
-			FETCH NEXT FROM up_cursor INTO @Project, @Animal, @Time, @OldStatus;
-		END
-		CLOSE up_cursor;
-		DEALLOCATE up_cursor;
-	END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[UpdateMovementAfterLocationInsert] 
-ON [dbo].[Locations] 
-AFTER INSERT AS
-BEGIN
-	SET NOCOUNT ON;
-	DECLARE
-		@Project VARCHAR(32),
-		@Animal  VARCHAR(32),
-		@Time    DATETIME2;
-	  
-	DECLARE ins_cursor CURSOR FOR 
-		SELECT [ProjectId], [AnimalId], [FixDate]
-		  FROM inserted
-		 WHERE [Status] IS NULL  -- Inserting a location with a non-null status will not change the movements
-	  ORDER BY [ProjectId], [AnimalId], [FixDate];
-
-	OPEN ins_cursor;
-
-	FETCH NEXT FROM ins_cursor INTO @Project, @Animal, @Time;
-
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		EXEC [dbo].[Location_Added] @Project, @Animal, @Time ;
-		FETCH NEXT FROM ins_cursor INTO @Project, @Animal, @Time;
-	END
-	CLOSE ins_cursor;
-	DEALLOCATE ins_cursor;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- Microsoft Says: We do not recommend using cursors in triggers because they could potentially reduce performance. 
---                 To design a trigger that affects multiple rows, use rowset-based logic instead of cursors
--- However, the rowset based logic was too difficult to manage:
---   Because I think procedurally, and I needed to break the problem up into procedures to understand/code, however
---   while I can put a function in rowset logic, a function cannot use an INSERT/DELETE
---   while I can put an INSERT/DELETE in a stored procedure, I can't put a stored procedure in rowset logic.
---   Therefore I need to abandon my procedure based thinking, or I can use cursors. 
---   Example rowset logic with multi-column key in deleted and inserted virtual tables
---     DELETE m from [dbo].[Movement] as m inner join deleted as d on m.AnimalID = d.AnimalID and (d.fixdate = m.startdate or d.fixdate = m.enddate);
---     SELECT * FROM Movements as m Where Exists(Select 1 from inserted as i where i.AnimalID = m.AnimalID and (i.FixDate = m.StartDate or i.FixDate = m.EndDate)) 
-
--- I do not delete all movements in one operation (possible and faster),
---   because it is too hard to then figure out how to close all possible gaps
---   with new movements - the new locations may be in sequence, or random.
-
-
-CREATE TRIGGER [dbo].[UpdateMovementAfterLocationDelete] 
-ON [dbo].[Locations] 
-AFTER DELETE AS
-BEGIN
-	SET NOCOUNT ON;
-	DECLARE
-		@Project VARCHAR(32),
-		@Animal  VARCHAR(32),
-		@Time    DATETIME2;
-	  
-	DECLARE del_cursor CURSOR FOR 
-		SELECT [ProjectId], [AnimalId], [FixDate]
-		  FROM deleted
-		 WHERE [Status] IS NULL  --Deleting a location with a non-null status will not change the movements
-	  ORDER BY [ProjectId], [AnimalId], [FixDate];
-
-	OPEN del_cursor;
-
-	FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
-
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
-		FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
-	END
-	CLOSE del_cursor;
-	DEALLOCATE del_cursor;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TRIGGER [dbo].[UpdateLocationAfterCollarFixesUpdate] 
-ON [dbo].[CollarFixes]
-AFTER UPDATE AS
-IF UPDATE ([HiddenBy])
-	-- HiddenBy is the only field that is allowed to be updated (all other changes must
-	-- be done with a delete/insert.  This is managed with permissions on the table and
-	-- the functionality of permitted stored procedures
-	BEGIN
-		SET NOCOUNT ON;
-
-		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
-		-- deleted/inserted are tables, since multiple records can be changed at once.
-		-- All updated rows are included, even those that didn't update hiddenby
-		
-		-- Basic logic for a changing a SINGLE CollarFix:
-		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
-		--   if HiddenBy goes from NOT NULL to NULL then add new record to Locations table
-		
-		-- Can I change multiple fixes at once?
-		--  Yes.  Since changes to CollarFixes are managed, and only done by routines
-		--        that honor the requirements of the HiddenBy relationship between
-		--        records in the table, I do not need to worry about how these changes
-		--        effect other records in the table.  I only need to manage the changes
-		--        to the locations table.
-		
-		-- if HiddenBy goes from NULL to NOT NULL then
-		-- remove record from Locations table
-		DELETE L FROM Locations as L
-		   INNER JOIN deleted as D
-				   ON L.FixId = D.FixId
-		   INNER JOIN inserted as I
-				   ON L.FixId = I.FixId
-				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
-		
-		-- if HiddenBy goes from NOT NULL to NULL then
-		-- Add new record to Locations table, if FixDate is acceptable 
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT CD.ProjectId, CD.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
-			   FROM inserted as I
-		 INNER JOIN deleted as D
-				 ON D.FixId = I.FixId
-		 INNER JOIN dbo.CollarDeployments as CD
-				 ON CD.CollarManufacturer = I.CollarManufacturer
-				AND CD.CollarId = I.CollarId
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = CD.ProjectId
-		    	AND A.AnimalId = CD.AnimalId
-		 INNER JOIN dbo.Collars AS C
-				 ON C.CollarManufacturer = CD.CollarManufacturer
-				AND C.CollarId = CD.CollarId
-			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
-			    AND CD.DeploymentDate <= I.FixDate
-			    AND (CD.RetrievalDate IS NULL OR I.FixDate <= CD.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
-				AND (C.DisposalDate IS NULL OR I.FixDate <= C.DisposalDate)
-
-	END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE FUNCTION [dbo].[NextLocationTime] 
 (
 	@Project VARCHAR(16)   = NULL, 
@@ -2752,52 +2542,6 @@ CREATE SPATIAL INDEX [SIndex_Movements_Shape] ON [dbo].[Movements]
 WITH (
 GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
 CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [StartDate] 
-					 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [EndDate] = @Time);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[StartOfOverlappingMovement] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [StartDate]
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [StartDate] < @Time
-	                  AND [EndDate] > @Time
-	             ORDER BY [StartDate] DESC);
-	RETURN @Result
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -3057,52 +2801,257 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Settings](
-	[Username] [sysname] NOT NULL,
-	[Key] [nvarchar](30) NOT NULL,
-	[Value] [nvarchar](500) NULL,
- CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
+CREATE FUNCTION [dbo].[PreviousLocationTime] 
 (
-	[Username] ASC,
-	[Key] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-/* Converts a datetime to the ordinal date (day of the year)
- * commonly confused with the Julian date (days sine 1/1/4713BC)
- */
-CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
-    @Date DATETIME2  
-)   
-	RETURNS INT
-    WITH SCHEMABINDING -- This is a deterministic function.
-
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
 AS
 BEGIN
-    RETURN 1 + DATEDIFF (day,
-                         CONVERT(DATETIME2,
-                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
-                                 112), -- format 112 (yyyymmdd) is deterministic
-                         @Date)
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [FixDate] 
+					 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [Status] IS NULL
+					  AND [FixDate] < @Time
+			     ORDER BY [FixDate] DESC);
+	RETURN @Result
 END
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[LookupQueryLayerServers](
-	[Location] [nvarchar](128) NOT NULL,
-	[Connection] [nvarchar](255) NOT NULL,
-	[Database] [sysname] NULL,
- CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
+CREATE TRIGGER [dbo].[UpdateMovementAfterLocationUpdate] 
+ON [dbo].[Locations]
+AFTER UPDATE AS
+IF UPDATE ([Status])
+	BEGIN
+		SET NOCOUNT ON;
+		DECLARE
+			@Project   VARCHAR(32),
+			@Animal    VARCHAR(32),
+			@Time      DATETIME2,
+			@OldStatus CHAR(1),
+			@NewStatus CHAR(1);
+		  
+		-- In an update, the old row is in 'deleted', and the new row is in 'inserted'.
+
+		DECLARE up_cursor CURSOR FOR 
+			SELECT [ProjectId], [AnimalId], [FixDate], [Status] FROM deleted ORDER BY [ProjectId], [AnimalId], [FixDate];
+
+		OPEN up_cursor;
+
+		FETCH NEXT FROM up_cursor INTO @Project, @Animal, @Time, @OldStatus;
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			SET @NewStatus = (SELECT [Status] FROM inserted WHERE [ProjectId] = @Project AND [AnimalId] = @Animal AND [FixDate] = @Time);
+			
+			IF @OldStatus IS NULL and @NewStatus IS NOT NULL
+				EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
+			
+			IF @OldStatus IS NOT NULL and @NewStatus IS NULL
+				EXEC [dbo].[Location_Added] @Project, @Animal, @Time; 
+			
+			FETCH NEXT FROM up_cursor INTO @Project, @Animal, @Time, @OldStatus;
+		END
+		CLOSE up_cursor;
+		DEALLOCATE up_cursor;
+	END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[UpdateMovementAfterLocationInsert] 
+ON [dbo].[Locations] 
+AFTER INSERT AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE
+		@Project VARCHAR(32),
+		@Animal  VARCHAR(32),
+		@Time    DATETIME2;
+	  
+	DECLARE ins_cursor CURSOR FOR 
+		SELECT [ProjectId], [AnimalId], [FixDate]
+		  FROM inserted
+		 WHERE [Status] IS NULL  -- Inserting a location with a non-null status will not change the movements
+	  ORDER BY [ProjectId], [AnimalId], [FixDate];
+
+	OPEN ins_cursor;
+
+	FETCH NEXT FROM ins_cursor INTO @Project, @Animal, @Time;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		EXEC [dbo].[Location_Added] @Project, @Animal, @Time ;
+		FETCH NEXT FROM ins_cursor INTO @Project, @Animal, @Time;
+	END
+	CLOSE ins_cursor;
+	DEALLOCATE ins_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Microsoft Says: We do not recommend using cursors in triggers because they could potentially reduce performance. 
+--                 To design a trigger that affects multiple rows, use rowset-based logic instead of cursors
+-- However, the rowset based logic was too difficult to manage:
+--   Because I think procedurally, and I needed to break the problem up into procedures to understand/code, however
+--   while I can put a function in rowset logic, a function cannot use an INSERT/DELETE
+--   while I can put an INSERT/DELETE in a stored procedure, I can't put a stored procedure in rowset logic.
+--   Therefore I need to abandon my procedure based thinking, or I can use cursors. 
+--   Example rowset logic with multi-column key in deleted and inserted virtual tables
+--     DELETE m from [dbo].[Movement] as m inner join deleted as d on m.AnimalID = d.AnimalID and (d.fixdate = m.startdate or d.fixdate = m.enddate);
+--     SELECT * FROM Movements as m Where Exists(Select 1 from inserted as i where i.AnimalID = m.AnimalID and (i.FixDate = m.StartDate or i.FixDate = m.EndDate)) 
+
+-- I do not delete all movements in one operation (possible and faster),
+--   because it is too hard to then figure out how to close all possible gaps
+--   with new movements - the new locations may be in sequence, or random.
+
+
+CREATE TRIGGER [dbo].[UpdateMovementAfterLocationDelete] 
+ON [dbo].[Locations] 
+AFTER DELETE AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE
+		@Project VARCHAR(32),
+		@Animal  VARCHAR(32),
+		@Time    DATETIME2;
+	  
+	DECLARE del_cursor CURSOR FOR 
+		SELECT [ProjectId], [AnimalId], [FixDate]
+		  FROM deleted
+		 WHERE [Status] IS NULL  --Deleting a location with a non-null status will not change the movements
+	  ORDER BY [ProjectId], [AnimalId], [FixDate];
+
+	OPEN del_cursor;
+
+	FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		EXEC [dbo].[Location_Deleted] @Project, @Animal, @Time;
+		FETCH NEXT FROM del_cursor INTO @Project, @Animal, @Time;
+	END
+	CLOSE del_cursor;
+	DEALLOCATE del_cursor;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TRIGGER [dbo].[UpdateLocationAfterCollarFixesUpdate] 
+ON [dbo].[CollarFixes]
+AFTER UPDATE AS
+IF UPDATE ([HiddenBy])
+	-- HiddenBy is the only field that is allowed to be updated (all other changes must
+	-- be done with a delete/insert.  This is managed with permissions on the table and
+	-- the functionality of permitted stored procedures
+	BEGIN
+		SET NOCOUNT ON;
+
+		-- In an update, the old rows are in 'deleted', and the new rows are in 'inserted'.
+		-- deleted/inserted are tables, since multiple records can be changed at once.
+		-- All updated rows are included, even those that didn't update hiddenby
+		
+		-- Basic logic for a changing a SINGLE CollarFix:
+		--   if HiddenBy goes from NULL to NOT NULL then remove record from Locations table
+		--   if HiddenBy goes from NOT NULL to NULL then add new record to Locations table
+		
+		-- Can I change multiple fixes at once?
+		--  Yes.  Since changes to CollarFixes are managed, and only done by routines
+		--        that honor the requirements of the HiddenBy relationship between
+		--        records in the table, I do not need to worry about how these changes
+		--        effect other records in the table.  I only need to manage the changes
+		--        to the locations table.
+		
+		-- if HiddenBy goes from NULL to NOT NULL then
+		-- remove record from Locations table
+		DELETE L FROM Locations as L
+		   INNER JOIN deleted as D
+				   ON L.FixId = D.FixId
+		   INNER JOIN inserted as I
+				   ON L.FixId = I.FixId
+				WHERE D.HiddenBy IS NULL AND I.HiddenBy IS NOT NULL
+		
+		-- if HiddenBy goes from NOT NULL to NULL then
+		-- Add new record to Locations table, if FixDate is acceptable 
+		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+			 SELECT CD.ProjectId, CD.AnimalId, I.FixDate, geography::Point(I.Lat, I.Lon, 4326) AS Location, I.FixId
+			   FROM inserted as I
+		 INNER JOIN deleted as D
+				 ON D.FixId = I.FixId
+		 INNER JOIN dbo.CollarDeployments as CD
+				 ON CD.CollarManufacturer = I.CollarManufacturer
+				AND CD.CollarId = I.CollarId
+         INNER JOIN dbo.Animals AS A
+ 	             ON A.ProjectId = CD.ProjectId
+		    	AND A.AnimalId = CD.AnimalId
+		 INNER JOIN dbo.Collars AS C
+				 ON C.CollarManufacturer = CD.CollarManufacturer
+				AND C.CollarId = CD.CollarId
+			  WHERE D.HiddenBy IS NOT NULL AND I.HiddenBy IS NULL
+			    AND CD.DeploymentDate <= I.FixDate
+			    AND (CD.RetrievalDate IS NULL OR I.FixDate <= CD.RetrievalDate)
+	    	    AND (A.MortalityDate IS NULL OR I.FixDate <= A.MortalityDate) 
+				AND (C.DisposalDate IS NULL OR I.FixDate <= C.DisposalDate)
+
+	END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
 (
-	[Location] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [StartDate] 
+					 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [EndDate] = @Time);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[StartOfOverlappingMovement] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [StartDate]
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [StartDate] < @Time
+	                  AND [EndDate] > @Time
+	             ORDER BY [StartDate] DESC);
+	RETURN @Result
+END
 GO
 SET ANSI_NULLS ON
 GO
@@ -3253,6 +3202,57 @@ BEGIN
     END CATCH
 
 END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Settings](
+	[Username] [sysname] NOT NULL,
+	[Key] [nvarchar](30) NOT NULL,
+	[Value] [nvarchar](500) NULL,
+ CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
+(
+	[Username] ASC,
+	[Key] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/* Converts a datetime to the ordinal date (day of the year)
+ * commonly confused with the Julian date (days sine 1/1/4713BC)
+ */
+CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
+    @Date DATETIME2  
+)   
+	RETURNS INT
+    WITH SCHEMABINDING -- This is a deterministic function.
+
+AS
+BEGIN
+    RETURN 1 + DATEDIFF (day,
+                         CONVERT(DATETIME2,
+                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
+                                 112), -- format 112 (yyyymmdd) is deterministic
+                         @Date)
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[LookupQueryLayerServers](
+	[Location] [nvarchar](128) NOT NULL,
+	[Connection] [nvarchar](255) NOT NULL,
+	[Database] [sysname] NULL,
+ CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
+(
+	[Location] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
 GO
 SET ANSI_NULLS ON
 GO
@@ -4380,79 +4380,6 @@ RETURNS [nchar](1) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[FileFormat]
 GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
-	@Login NVARCHAR(255), 
-	@Name  NVARCHAR(255), 
-	@Email NVARCHAR(255),
-	@Phone NVARCHAR(255)
-AS
-BEGIN
-	SET NOCOUNT ON
-
-	-- This can only be run be the Sysadmin
-	-- This script is mostly to remind the SA of the steps, so there is no error checking.
-
-	-- create a login
-	IF NOT EXISTS (select 1 from sys.server_principals where name = @Login)
-	BEGIN
-		EXEC ('CREATE LOGIN [' + @Login + '] FROM WINDOWS')
-	END
-
-	-- create a db user
-	IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Login)
-	BEGIN
-		EXEC ('CREATE USER ['  + @Login + ']') --  LOGIN defaults to the same name
-	END
-
-	-- Add the user to the Investigator role
-	IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
-				   INNER JOIN sys.database_principals AS P1  
-				   ON U.member_principal_id = P1.principal_id
-				   INNER JOIN sys.database_principals AS P2 
-				   ON U.role_principal_id = p2.principal_id 
-				   WHERE p1.name = @Login AND p2.name = 'Investigator' )
-	BEGIN
-		EXEC sp_addrolemember 'Investigator', @Login
-	END
-
-	-- Add the user to the Investigator table
-	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
-		 VALUES (@Login, @Name, @Email, @Phone);
-END
-GO
-CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
-RETURNS  TABLE (
-	[FileId] [int] NULL,
-	[CTN] [nvarchar](16) NULL,
-	[Platform] [nvarchar](8) NULL,
-	[Frequency] [float] NULL,
-	[TimeStamp] [datetime2](7) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_TpfSummerizer].[SqlServer_TpfSummerizer.TfpSummerizer].[SummarizeTpfFile]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AllTpfFileData]
-AS
-
--- All TPF Data
-     SELECT T.*, P.[FileName], P.[Status]
-       FROM CollarParameterFiles AS P
-CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
-      WHERE P.Format = 'A'
-GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4662,301 +4589,6 @@ BEGIN
     DEALLOCATE collarfiles_afterupdate_cursor;
 
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: Mar 25, 2013
--- Description: Ensure Data integrity on Insert
--- =============================================
-CREATE TRIGGER [dbo].[AfterCollarFileInsert] 
-    ON [dbo].[CollarFiles] 
-    AFTER INSERT
-AS 
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Business Rule: CollarFiles must have one and only one non-null value for (Owner,ProjectId)
-    IF EXISTS (    SELECT 1
-                     FROM inserted 
-                    WHERE (ProjectId IS NULL AND [Owner] IS NULL)
-                       OR (ProjectId IS NOT NULL AND [Owner] IS NOT NULL)
-              )
-    BEGIN
-        RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
-        ROLLBACK TRANSACTION;
-        RETURN
-    END
-
-
-    -- Business Rule: A Collar Mfgr/Id is required unless the file format has Argos data.
-    --                (referential integrity already guarantees a non-null collar is valid)
-    IF EXISTS (    SELECT 1
-                     FROM inserted AS i
-                     JOIN LookupCollarFileFormats AS F
-                       ON i.Format = F.Code
-                    WHERE F.ArgosData = 'N' AND i.CollarId IS NULL
-              )
-    BEGIN
-        RAISERROR('Integrity Violation. A Collar Mfgr/Id is required unless the file format has Argos data as the parent', 18, 0)
-        ROLLBACK TRANSACTION;
-        RETURN
-    END
-
-
-    -- Business Rule: A CollarFile with a parent, must have the same owner, project, and status
-    --                (since a child cannot be inserted with a parent -- the parentid does not exist
-    --                 I do not need to join the inserted with the inserted to find the parent)
-    IF EXISTS (    SELECT 1
-                     FROM inserted AS C
-                     JOIN CollarFiles AS P
-                       ON C.ParentFileId = P.FileId
-                    WHERE C.[Owner] <> P.[Owner]
-                       OR (C.[Owner] IS NULL AND P.[Owner] IS NOT NULL)
-                       OR (C.[Owner] IS NOT NULL AND P.[Owner] IS NULL)
-                       OR C.[ProjectId] <> P.[ProjectId]
-                       OR (C.[ProjectId] IS NULL AND P.[ProjectId] IS NOT NULL)
-                       OR (C.[ProjectId] IS NOT NULL AND P.[ProjectId] IS NULL)
-                       OR C.[Status] <> P.[Status]
-                       OR (C.[Status] IS NULL AND P.[Status] IS NOT NULL)
-                       OR (C.[Status] IS NOT NULL AND P.[Status] IS NULL)
-              )
-    BEGIN
-        RAISERROR('Integrity Violation. A CollarFile with a parent, must have the same owner, project, and status as the parent', 18, 0)
-        ROLLBACK TRANSACTION;
-        RETURN
-    END
-
-
-    -- Business Rule: ArgosDeploymentId and CollarParameterId must be non-null if and only if the ParentFile has argos data
-    IF EXISTS (    SELECT 1
-                     FROM inserted AS C
-               INNER JOIN CollarFiles AS P
-                       ON C.ParentFileId = P.FileId 
-               INNER JOIN LookupCollarFileFormats AS F
-                       ON P.Format = F.Code
-                    WHERE ((C.ArgosDeploymentId IS NOT NULL OR C.CollarParameterId IS NOT NULL) AND F.ArgosData = 'N')
-                       OR ((C.ArgosDeploymentId IS NULL OR C.CollarParameterId IS NULL) AND F.ArgosData = 'Y')
-              )
-    BEGIN
-        RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
-        ROLLBACK TRANSACTION;
-        RETURN
-    END
-
-
-    -- Business Rule: All new CollarFiles with Argos data need to be summerized
-    -- Business Rule: All new files need to have their data parsed in to a collardata table
-    DECLARE @FileId int
-    DECLARE @ArgosData char
-    DECLARE collarfiles_afterinsert_cursor CURSOR FOR 
-               SELECT i.FileId, F.ArgosData
-                 FROM inserted AS i
-                 JOIN LookupCollarFileFormats AS F
-                   ON i.Format = F.Code
-
-    OPEN collarfiles_afterinsert_cursor;
-    FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId, @ArgosData
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        EXEC [dbo].[CollarData_Insert] @FileId 
-        IF (@ArgosData = 'Y')
-            EXEC [dbo].[Summerize] @FileId
-        FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId, @ArgosData
-    END
-    CLOSE collarfiles_afterinsert_cursor;
-    DEALLOCATE collarfiles_afterinsert_cursor;
-
-
-    -- Business Rule: An active collar file has fixes, and an inactive file does not.
-    DECLARE collarfiles_afterinsert_cursor CURSOR FOR 
-               SELECT i.FileId
-                 FROM inserted AS i
-                WHERE i.[Status] = 'A'
-
-    OPEN collarfiles_afterinsert_cursor;
-    FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        EXEC [dbo].[CollarFixes_Insert] @FileId
-        FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId
-    END
-    CLOSE collarfiles_afterinsert_cursor;
-    DEALLOCATE collarfiles_afterinsert_cursor;
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[VelocityVectors]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          ,M.[StartDate]
-          ,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          ,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance <> 0
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ValidLocations]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          --,L.[Status]
-          ,L.[Location] AS [Shape]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[NoMovement]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          --,M.[StartDate]
-          --,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          --,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance = 0
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[NextAnimalId] 
-(
-	@ProjectId VARCHAR(32)   = NULL 
-)
-RETURNS VARCHAR(16)
-AS
-BEGIN
-	-- Check that project exists
-	IF NOT EXISTS( SELECT 1 FROM Projects WHERE ProjectId = @ProjectId)
-	BEGIN
-			-- You can't raise errors in a function, so you can either do an illegal operation to
-			-- stop the process, or in may case I will just return a safe result
-			RETURN NULL
-	END
-	
-	DECLARE @Year CHAR(2)
-	DECLARE @Count int
-	DECLARE @Id VARCHAR(16)
-
-	--Get the prefix for the current year (i.e. 2012 -> '12')
-	SELECT @Year  = SUBSTRING(CONVERT(CHAR(4),YEAR(GETDATE())),3,2)
-	SELECT @Count =	convert(varchar(10),(max(id) + 1))
-	  from (select case WHEN ISNUMERIC(SUBSTRING(AnimalId, 3, 9)) = 1
-	                    then convert(int,SUBSTRING(AnimalId, 3, 9))
-	                    ELSE 0 END as id
-	          from Animals
-	         where ProjectId = @ProjectId AND AnimalId LIKE @Year+'%') as t
-	if (@Count < 100)
-		SELECT @Id = @Year + REPLACE(STR(@Count, 2, 0), ' ', '0')
-	else
-		SELECT @Id = @Year + REPLACE(STR(@Count, 6, 0), ' ', '')
-	If @Id is null
-		SET @Id = @Year + '01'
-	RETURN @id
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[InvalidLocations]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,L.[Status]
-          ,L.[Location] AS [Shape]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NOT NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AnimalFixesByFile]
-AS
-
------------ Animal Fixes by File
-     SELECT F.FileId, M.Name AS Manufacturer, F.CollarId, P.ProjectName AS Project, CD.AnimalId,
-		    dbo.LocalTime(MIN(F.FixDate)) AS [First Fix],
-			dbo.LocalTime(MAX(F.FixDate)) AS [Last Fix],
-            COUNT(F.FixDate) AS [Number of Fixes]
-	   FROM dbo.CollarFixes AS F
- INNER JOIN dbo.CollarDeployments AS CD
-	     ON F.CollarManufacturer = CD.CollarManufacturer AND F.CollarId = CD.CollarId
- INNER JOIN dbo.LookupCollarManufacturers AS M
-	     ON F.CollarManufacturer = M.CollarManufacturer
-  LEFT JOIN dbo.Projects AS P
-         ON CD.ProjectId = P.ProjectId
-	  WHERE F.FixDate > CD.DeploymentDate
-        AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
-   GROUP BY P.ProjectName, CD.AnimalId, F.FileId, M.Name, F.CollarId
 GO
 SET ANSI_NULLS ON
 GO
@@ -6006,6 +5638,506 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE VIEW [dbo].[VelocityVectors]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          ,M.[StartDate]
+          ,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          ,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance <> 0
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ValidLocations]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          --,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[NoMovement]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          --,M.[StartDate]
+          --,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          --,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance = 0
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[NextAnimalId] 
+(
+	@ProjectId VARCHAR(32)   = NULL 
+)
+RETURNS VARCHAR(16)
+AS
+BEGIN
+	-- Check that project exists
+	IF NOT EXISTS( SELECT 1 FROM Projects WHERE ProjectId = @ProjectId)
+	BEGIN
+			-- You can't raise errors in a function, so you can either do an illegal operation to
+			-- stop the process, or in may case I will just return a safe result
+			RETURN NULL
+	END
+	
+	DECLARE @Year CHAR(2)
+	DECLARE @Count int
+	DECLARE @Id VARCHAR(16)
+
+	--Get the prefix for the current year (i.e. 2012 -> '12')
+	SELECT @Year  = SUBSTRING(CONVERT(CHAR(4),YEAR(GETDATE())),3,2)
+	SELECT @Count =	convert(varchar(10),(max(id) + 1))
+	  from (select case WHEN ISNUMERIC(SUBSTRING(AnimalId, 3, 9)) = 1
+	                    then convert(int,SUBSTRING(AnimalId, 3, 9))
+	                    ELSE 0 END as id
+	          from Animals
+	         where ProjectId = @ProjectId AND AnimalId LIKE @Year+'%') as t
+	if (@Count < 100)
+		SELECT @Id = @Year + REPLACE(STR(@Count, 2, 0), ' ', '0')
+	else
+		SELECT @Id = @Year + REPLACE(STR(@Count, 6, 0), ' ', '')
+	If @Id is null
+		SET @Id = @Year + '01'
+	RETURN @id
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[InvalidLocations]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NOT NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AnimalFixesByFile]
+AS
+
+----------- Animal Fixes by File
+     SELECT F.FileId, M.Name AS Manufacturer, F.CollarId, P.ProjectName AS Project, CD.AnimalId,
+		    dbo.LocalTime(MIN(F.FixDate)) AS [First Fix],
+			dbo.LocalTime(MAX(F.FixDate)) AS [Last Fix],
+            COUNT(F.FixDate) AS [Number of Fixes]
+	   FROM dbo.CollarFixes AS F
+ INNER JOIN dbo.CollarDeployments AS CD
+	     ON F.CollarManufacturer = CD.CollarManufacturer AND F.CollarId = CD.CollarId
+ INNER JOIN dbo.LookupCollarManufacturers AS M
+	     ON F.CollarManufacturer = M.CollarManufacturer
+  LEFT JOIN dbo.Projects AS P
+         ON CD.ProjectId = P.ProjectId
+	  WHERE F.FixDate > CD.DeploymentDate
+        AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
+   GROUP BY P.ProjectName, CD.AnimalId, F.FileId, M.Name, F.CollarId
+GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
+	@Login NVARCHAR(255), 
+	@Name  NVARCHAR(255), 
+	@Email NVARCHAR(255),
+	@Phone NVARCHAR(255)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	-- This can only be run be the Sysadmin
+	-- This script is mostly to remind the SA of the steps, so there is no error checking.
+
+	-- create a login
+	IF NOT EXISTS (select 1 from sys.server_principals where name = @Login)
+	BEGIN
+		EXEC ('CREATE LOGIN [' + @Login + '] FROM WINDOWS')
+	END
+
+	-- create a db user
+	IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Login)
+	BEGIN
+		EXEC ('CREATE USER ['  + @Login + ']') --  LOGIN defaults to the same name
+	END
+
+	-- Add the user to the Investigator role
+	IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
+				   INNER JOIN sys.database_principals AS P1  
+				   ON U.member_principal_id = P1.principal_id
+				   INNER JOIN sys.database_principals AS P2 
+				   ON U.role_principal_id = p2.principal_id 
+				   WHERE p1.name = @Login AND p2.name = 'Investigator' )
+	BEGIN
+		EXEC sp_addrolemember 'Investigator', @Login
+	END
+
+	-- Add the user to the Investigator table
+	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
+		 VALUES (@Login, @Name, @Email, @Phone);
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Mar 25, 2013
+-- Description: Ensure Data integrity on Insert
+-- =============================================
+CREATE TRIGGER [dbo].[AfterCollarFileInsert] 
+    ON [dbo].[CollarFiles] 
+    AFTER INSERT
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Business Rule: CollarFiles must have one and only one non-null value for (Owner,ProjectId)
+    IF EXISTS (    SELECT 1
+                     FROM inserted 
+                    WHERE (ProjectId IS NULL AND [Owner] IS NULL)
+                       OR (ProjectId IS NOT NULL AND [Owner] IS NOT NULL)
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: A Collar Mfgr/Id is required unless the file format has Argos data.
+    --                (referential integrity already guarantees a non-null collar is valid)
+    IF EXISTS (    SELECT 1
+                     FROM inserted AS i
+                     JOIN LookupCollarFileFormats AS F
+                       ON i.Format = F.Code
+                    WHERE F.ArgosData = 'N' AND i.CollarId IS NULL
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. A Collar Mfgr/Id is required unless the file format has Argos data as the parent', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: A CollarFile with a parent, must have the same owner, project, and status
+    --                (since a child cannot be inserted with a parent -- the parentid does not exist
+    --                 I do not need to join the inserted with the inserted to find the parent)
+    IF EXISTS (    SELECT 1
+                     FROM inserted AS C
+                     JOIN CollarFiles AS P
+                       ON C.ParentFileId = P.FileId
+                    WHERE C.[Owner] <> P.[Owner]
+                       OR (C.[Owner] IS NULL AND P.[Owner] IS NOT NULL)
+                       OR (C.[Owner] IS NOT NULL AND P.[Owner] IS NULL)
+                       OR C.[ProjectId] <> P.[ProjectId]
+                       OR (C.[ProjectId] IS NULL AND P.[ProjectId] IS NOT NULL)
+                       OR (C.[ProjectId] IS NOT NULL AND P.[ProjectId] IS NULL)
+                       OR C.[Status] <> P.[Status]
+                       OR (C.[Status] IS NULL AND P.[Status] IS NOT NULL)
+                       OR (C.[Status] IS NOT NULL AND P.[Status] IS NULL)
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. A CollarFile with a parent, must have the same owner, project, and status as the parent', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: ArgosDeploymentId and CollarParameterId must be non-null if and only if the ParentFile has argos data
+    IF EXISTS (    SELECT 1
+                     FROM inserted AS C
+               INNER JOIN CollarFiles AS P
+                       ON C.ParentFileId = P.FileId 
+               INNER JOIN LookupCollarFileFormats AS F
+                       ON P.Format = F.Code
+                    WHERE ((C.ArgosDeploymentId IS NOT NULL OR C.CollarParameterId IS NOT NULL) AND F.ArgosData = 'N')
+                       OR ((C.ArgosDeploymentId IS NULL OR C.CollarParameterId IS NULL) AND F.ArgosData = 'Y')
+              )
+    BEGIN
+        RAISERROR('Integrity Violation. CollarFiles must have only one non-null value between Owner and ProjectId', 18, 0)
+        ROLLBACK TRANSACTION;
+        RETURN
+    END
+
+
+    -- Business Rule: All new CollarFiles with Argos data need to be summerized
+    -- Business Rule: All new files need to have their data parsed in to a collardata table
+    DECLARE @FileId int
+    DECLARE @ArgosData char
+    DECLARE collarfiles_afterinsert_cursor CURSOR FOR 
+               SELECT i.FileId, F.ArgosData
+                 FROM inserted AS i
+                 JOIN LookupCollarFileFormats AS F
+                   ON i.Format = F.Code
+
+    OPEN collarfiles_afterinsert_cursor;
+    FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId, @ArgosData
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC [dbo].[CollarData_Insert] @FileId 
+        IF (@ArgosData = 'Y')
+            EXEC [dbo].[Summerize] @FileId
+        FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId, @ArgosData
+    END
+    CLOSE collarfiles_afterinsert_cursor;
+    DEALLOCATE collarfiles_afterinsert_cursor;
+
+
+    -- Business Rule: An active collar file has fixes, and an inactive file does not.
+    DECLARE collarfiles_afterinsert_cursor CURSOR FOR 
+               SELECT i.FileId
+                 FROM inserted AS i
+                WHERE i.[Status] = 'A'
+
+    OPEN collarfiles_afterinsert_cursor;
+    FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC [dbo].[CollarFixes_Insert] @FileId
+        FETCH NEXT FROM collarfiles_afterinsert_cursor INTO @FileId
+    END
+    CLOSE collarfiles_afterinsert_cursor;
+    DEALLOCATE collarfiles_afterinsert_cursor;
+
+END
+GO
+CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
+RETURNS  TABLE (
+	[FileId] [int] NULL,
+	[CTN] [nvarchar](16) NULL,
+	[Platform] [nvarchar](8) NULL,
+	[Frequency] [float] NULL,
+	[TimeStamp] [datetime2](7) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_TpfSummerizer].[SqlServer_TpfSummerizer.TfpSummerizer].[SummarizeTpfFile]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AllTpfFileData]
+AS
+
+-- All TPF Data
+     SELECT T.*, P.[FileName], P.[Status]
+       FROM CollarParameterFiles AS P
+CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
+      WHERE P.Format = 'A'
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 20, 2012
+-- Description: Updates the settings table
+-- =============================================
+CREATE PROCEDURE [dbo].[Settings_Update] 
+    @Key   nvarchar(30),
+    @Value nvarchar(500)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @Key   = NULLIF(@Key,'')
+    SET @Value = NULLIF(@Value,'')
+    
+    IF @Key = 'project' AND NOT EXISTS (SELECT 1 FROM [dbo].[Projects] WHERE ProjectId = @Value)
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'Project (' + @Value + ') is not an existing project';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    IF     @Key NOT IN ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format',
+                        'parameter_file_format', 'wants_email', 'ignore_ctn_suffix', 'othervalidkeys...') --Add valid keys to this list
+       AND @Key NOT IN (select 'collar_model_' + CollarManufacturer from LookupCollarManufacturers)
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'Invalid key (' + @Key + ') for settings';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+
+    IF EXISTS (SELECT 1 FROM [dbo].[Settings] WHERE [Username] = @Caller AND [Key] = @Key)
+        UPDATE [dbo].[Settings] SET [Value] = @Value WHERE [Username] = @Caller AND [Key] = @Key
+    ELSE
+        INSERT [dbo].[Settings] ([Username], [Key], [Value]) VALUES (@Caller, @Key, @Value) 
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProjectEditors](
+	[ProjectId] [varchar](16) NOT NULL,
+	[Editor] [sysname] NOT NULL,
+ CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[Editor] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 28, 2012
+-- Description: Adds a new project to the database.
+-- =============================================
+CREATE PROCEDURE [dbo].[Project_Insert] 
+    @ProjectId           NVARCHAR(255),
+    @ProjectName         NVARCHAR(255), 
+    @ProjectInvestigator SYSNAME, 
+    @UnitCode            NVARCHAR(255) = NULL, 
+    @Description         NVARCHAR(4000) = NULL 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @ProjectId           = NULLIF(@ProjectId,'')
+    SET @ProjectName         = NULLIF(@ProjectName,'')
+    SET @UnitCode            = NULLIF(@UnitCode,'')
+    SET @ProjectInvestigator = NULLIF(@ProjectInvestigator,'')
+    SET @Description         = NULLIF(@Description,'')
+
+    --default PI is the calling user
+    SET @ProjectInvestigator = ISNULL(@ProjectInvestigator, @Caller) 
+
+    -- If the caller is not a PI or assistant then error and return
+    IF @ProjectInvestigator != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator)
+    BEGIN
+        DECLARE @message1 NVARCHAR(100) = 'You ('+@Caller+') must be a project investigator (or assitant) to create a project';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
+         VALUES              (@ProjectId,  @ProjectName,  @ProjectInvestigator,  @UnitCode,  @Description)
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarFileHeaders](
+	[Header] [nvarchar](450) NOT NULL,
+	[FileFormat] [char](1) NOT NULL,
+	[Regex] [nvarchar](450) NULL,
+ CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
+(
+	[Header] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: April 25, 2013
@@ -6189,524 +6321,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ProjectEditors](
-	[ProjectId] [varchar](16) NOT NULL,
-	[Editor] [sysname] NOT NULL,
- CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[Editor] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 2, 2012
--- Description:	Updates the Status of a Location
--- =============================================
-CREATE PROCEDURE [dbo].[Location_UpdateStatus] 
-	@ProjectId NVARCHAR(255) = NULL, 
-	@AnimalId  NVARCHAR(255) = NULL, 
-	@FixDate   DATETIME2     = NULL,
-	@Status    CHAR          = NULL
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor on this project ('+@ProjectId+') to update this location.';
-			RAISERROR(@message1, 18, 0)
-			RETURN (1)
-		END
-	END
-	
-	UPDATE [Locations]
-	   SET [Status] = @Status
-	 WHERE [ProjectId] = @ProjectId
-	   AND [AnimalId] = @AnimalId
-	   AND [FixDate] = @FixDate;
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 3, 2012
--- Description:	Adjusts which of several conflicting fixes will be the active one.
---
--- A fix may hide zero or one other fix
--- A fix may be hidden by zero or one other fix
--- A fix cannot hide itself
--- Therefore in a set of fixes that share the same collar and fixdate,
--- there is one and only one fix that is not hidden
--- there is one and only one fix that is not hidding any other fixes
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFixes_UpdateUnhideFix] 
-	@FixId int = Null
-AS
-BEGIN
-	SET NOCOUNT ON;
-	
-	-- Get some information about the fix to update
-	DECLARE @HiddenBy  INT;
-	DECLARE @ProjectId NVARCHAR(255);
-	 SELECT @HiddenBy  = [HiddenBy],
-		    @ProjectId = [ProjectId]
-	   FROM [dbo].[CollarFixes] AS F1
-	  INNER JOIN [dbo].[CollarFiles] AS F2
-	     ON F1.FileId = F2.FileId
-	  WHERE [FixId] = @FixId;
-
-	IF @ProjectId IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid parameter: (' + @FixId + ') was not found in the CollarFixes table';
-		RAISERROR(@message1, 18, 0)
-		RETURN 1
-	END
-	-- If ProjectId was found, then HiddenBy is guaranteed.
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Validate permission for this operation
-	-- The caller must be the PI or editor on the project
-	IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)
-		BEGIN
-			DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator or editor of the project ('+@ProjectId+') to update this file.';
-			RAISERROR(@message2, 18, 0)
-			RETURN (1)
-		END
-	END
-	
-	IF  @HiddenBy IS NULL
-	BEGIN
-		RETURN 0  --Nothing to do.
-	END
-	
-	-- Fix is hidden, and we have permissions, lets do it.
-	DECLARE @ConflictingFixes TABLE
-	(
-		FixId int,
-		HiddenBy int
-	);
-	DECLARE @NotHidden int;
-	DECLARE @NotHider int;
-
-	BEGIN TRY
-		BEGIN TRAN
-
-			INSERT INTO @ConflictingFixes 
-				SELECT DISTINCT F1.FixId, F1.HiddenBy FROM dbo.CollarFixes AS F1
-				INNER JOIN dbo.CollarFixes AS F2
-				   ON F1.CollarManufacturer = F2.CollarManufacturer
-				  AND F1.CollarId = F2.CollarId
-				  AND F1.FixDate = F2.FixDate
-				WHERE F1.FixId != F2.FixId AND (F1.FixId = @FixId OR F2.FixId = @FixId) ORDER BY F1.FixId;
-
-			-- The fix in the set that is not hidden
-			SET @NotHidden = (SELECT FixId FROM @ConflictingFixes WHERE HiddenBy IS NULL)
-			-- The fix in the set that is not hidding any other fixes
-			SET @NotHider = (SELECT FixId FROM @ConflictingFixes WHERE FixId NOT IN (SELECT HiddenBy FROM @ConflictingFixes WHERE HiddenBy IS NOT NULL))
-			
-			--Hide the currently Un Hidden fix with the fix not hidding any other fixes
-			--(creates circlular loop of hidden-ness)
-			UPDATE dbo.CollarFixes SET HiddenBy = @NotHider WHERE FixId = @NotHidden
-			--Unhide the selected fix 
-			UPDATE dbo.CollarFixes SET HiddenBy = NULL WHERE FixId = @FixId
-
-		COMMIT TRANSACTION
-	END TRY
-	BEGIN CATCH
-		IF XACT_STATE() <> 0
-			ROLLBACK TRANSACTION;
-		EXEC [dbo].[Utility_RethrowError]
-		RETURN 1
-	END CATCH
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- ===============================================
--- Author:      Regan Sarwas
--- Create date: March 2, 2012
--- Description: Updates the editable fields of a CollarFile
--- ===============================================
-CREATE PROCEDURE [dbo].[CollarFile_Update] 
-    @FileId INT, 
-    @FileName NVARCHAR(255) = NULL,
-    @Status CHAR(1),
-    @CollarManufacturer NVARCHAR(255),
-    @CollarId NVARCHAR(255),
-    @ProjectId NVARCHAR(255),
-    @Owner NVARCHAR(255)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-    --Fix Text Inputs
-    SET @FileName           = NULLIF(@FileName,'')
-    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
-    SET @CollarId           = NULLIF(@CollarId,'')
-    SET @ProjectId          = NULLIF(@ProjectId,'')
-    SET @Owner              = NULLIF(@Owner,'')
-
-    -- Validate permission for this operation
-    -- Verify we are updating a valid collar
-    DECLARE @CurrentOwner NVARCHAR(255) = NULL
-    DECLARE @CurrentProjectId NVARCHAR(255) = NULL
-    SELECT @CurrentOwner = [Owner], @CurrentProjectId = [ProjectId] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-    IF @CurrentOwner IS NULL AND @CurrentProjectId IS NULL
-    BEGIN
-        DECLARE @message1 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
-        RAISERROR(@message1, 18, 0)
-        RETURN 1
-    END
-
-    -- caller must be old owner or their assistant 
-    IF @CurrentOwner IS NOT NULL
-       AND @caller != @CurrentOwner
-       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
-                        WHERE Assistant = @Caller AND ProjectInvestigator = @CurrentOwner) -- Not the file Owner's Assistant
-    BEGIN
-        DECLARE @message2 nvarchar(100) = 'You ('+@Caller+') are not the owner (' + @CurrentOwner + ') (or their assistant) of the file.';
-        RAISERROR(@message2, 18, 0)
-        RETURN 2
-    END
-
-    -- caller must be new owner or their assistant 
-    IF @Owner IS NOT NULL
-       AND @caller != @Owner
-       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
-                        WHERE Assistant = @Caller AND ProjectInvestigator = @Owner) -- Not the file Owner's Assistant
-    BEGIN
-        DECLARE @message3 nvarchar(100) = 'You ('+@Caller+') are not the new owner (' + @Owner + ') (or their assistant) of the file.';
-        RAISERROR(@message3, 18, 0)
-        RETURN 3
-    END
-
-    -- caller must be old project PI or a project editor 
-    IF @CurrentProjectId IS NOT NULL
-       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @CurrentProjectId AND ProjectInvestigator = @Caller)  -- Not the project's PI
-       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @CurrentProjectId AND Editor = @Caller)  -- Not an editor on the project
-    BEGIN
-        DECLARE @message4 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@CurrentProjectId+').';
-        RAISERROR(@message4, 18, 0)
-        RETURN 4
-    END
-
-    -- caller must be new project PI or a project editor 
-    IF @ProjectId IS NOT NULL
-       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)  -- Not the project's PI
-       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not an editor on the project
-    BEGIN
-        DECLARE @message5 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
-        RAISERROR(@message5, 18, 0)
-        RETURN 5
-    END
-
-    -- I use NULL to indicate don't change value only on non-null fields.
-    -- The defaults for nullable field should match the insert SP.
-    -- If the client does not want to change a nullable field they must provide the original value.
-    IF @FileName IS NULL
-        SELECT @FileName = [FileName] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
-
-    -- Do the update
-    UPDATE [dbo].[CollarFiles]
-       SET [FileName] = @FileName, [Status] = @Status, [CollarManufacturer] = @CollarManufacturer,
-           [CollarId] = @CollarId, [ProjectId] = @ProjectId, [Owner] = @Owner
-     WHERE [FileId] = @FileId
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 3, 2012
--- Description:	Adds a new collar file to the database.
--- =============================================
-CREATE PROCEDURE [dbo].[CollarFile_Insert] 
-    @FileName NVARCHAR(255),
-    @Status CHAR = 'I', 
-    @Contents VARBINARY(max),
-    @ProjectId NVARCHAR(255) = NULL, 
-    @Owner NVARCHAR(255) = NULL, 
-    @ParentFileId INT = NULL,
-    @ArgosDeploymentId INT = NULL,
-    @CollarParameterId INT = NULL,
-    @CollarManufacturer NVARCHAR(255) = NULL, 
-    @CollarId NVARCHAR(255) = NULL, 
-    @FileId INT OUTPUT,
-    @Format CHAR OUTPUT,
-    @UploadDate DATETIME2(7) OUTPUT,
-    @UserName NVARCHAR(128) OUTPUT,
-    @Sha1Hash VARBINARY(8000) OUTPUT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Get the name of the caller
-    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
-
-    --Fix Text Inputs
-    SET @FileName           = NULLIF(@FileName,'')
-    SET @ProjectId          = NULLIF(@ProjectId,'')
-    SET @Owner              = NULLIF(@Owner,'')
-    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
-    SET @CollarId           = NULLIF(@CollarId,'')
-
-    -- Fix the defaults
-    IF @Owner IS NULL AND @ProjectId IS NULL
-        SET @Owner = @Caller
-
-    -- Validate permission for this operation
-    -- The caller must be in the ArgosProcessor role
-    -- OR if @Owner is non-null the caller must be the owner or the owner's assistant (owner may not be a PI, but that will be caught with ref integrity).
-    -- OR if @ProjectID is non-null the caller must be the project PI or editor on the project
-    IF     NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-       AND @Caller != @Owner  -- Not the file's owner
-       AND NOT EXISTS (SELECT 1
-                         FROM ProjectInvestigatorAssistants
-                        WHERE Assistant = @Caller AND ProjectInvestigator = @Owner) -- Not the file Owner's Assistant
-       AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller)  -- Not the project's PI
-       AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not an editor on the project
-    BEGIN
-        DECLARE @message1 nvarchar(200)
-        IF @ProjectId IS NOT NULL
-            SET @message1 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
-        ELSE
-            SET @message1 = 'Either you ('+@Caller+') or the owner (' + @Owner + ') are not a principal investigator.';
-        RAISERROR(@message1, 18, 0)
-        RETURN (1)
-    END
-
-    -- Get the format of the file, and determine if this format has Argos data (to determine processing required)
-    SET @Format = [dbo].[FileFormat](@Contents)
-    IF NOT EXISTS (SELECT 1 FROM dbo.LookupCollarFileFormats WHERE Code = @Format)
-    BEGIN
-        DECLARE @message2 nvarchar(100) = 'Invalid parameter: The contents of this file is not in a format the system recognizes.';
-        RAISERROR(@message2, 18, 0)
-        RETURN (1)
-    END
-
-    -- Do the update, the rest of the integrity checks are done in the trigger
-    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [Owner], [CollarManufacturer], [CollarId], [Format], [Status], [Contents], [ParentFileId], [ArgosDeploymentId], [CollarParameterId])
-                         VALUES (@FileName,  @ProjectId,  @Owner,  @CollarManufacturer,  @CollarId,  @Format,  @Status,  @Contents,  @ParentFileId,  @ArgosDeploymentId,  @CollarParameterId)
-    SET @FileId = SCOPE_IDENTITY();
-    SELECT @UploadDate = [UploadDate], @UserName = [UserName], @Sha1Hash = [Sha1Hash] FROM dbo.CollarFiles WHERE FileId = @FileId
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 22, 2013
---              Description: Processes only the transmission for a single platform in a file.
---              This may be called by the Argos Processor library by a client not on the server
---              It will call the Argos Processor library on the server.
---              Ignore any failures.  If this really needs to happen, then it will be caught when
---              the Argos Processor runs as a scheduled on the server.
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
-    @FileId INT,
-    @PlatformId VARCHAR(255)
-
-WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
-
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Make sure we have a suitable FileId
-	DECLARE @ProjectId nvarchar(255);
-	DECLARE @Owner sysname;
-	DECLARE @Uploader sysname;
-	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
-	  FROM CollarFiles AS C
-	  JOIN ArgosFilePlatformDates AS D
-	    ON D.FileId = C.FileId
-	 WHERE C.FileId = @FileId AND D.PlatformId = @PlatformId
-	IF @ProjectId IS NULL AND @Owner IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Validate permission for this operation	
-	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
-	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
-	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
-	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
-       AND NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-	BEGIN
-		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must be the owner ('+ISNULL(@Owner,'<NULL>')+'), or have uploaded the file, or be an editor on this project ('+ISNULL(@ProjectId,'<NULL>')+') to process the collar file.';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-	
-
-	-- Clear any (if any) prior processing results
-	-- This will ensure that the database is setup to respond to a query for all
-	-- files needing partial processing, should the xp_cmdshell not work. 
-	EXEC dbo.ArgosFile_UnProcessPlatform @FileId, @PlatformId
-
-
-	-- Run the External command
-	-- This will fail if the sql_proxy user is not logged in.
-	-- We will rely on a regularly scheduled external OS task.
-	DECLARE @exe nvarchar (255);
-	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
-	IF @exe IS NULL
-		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
-	DECLARE @cmd nvarchar(200) = '"' + @exe + '" /f:' + CONVERT(NVARCHAR(10),@FileId) + ' /p:' + @PlatformId;
-    BEGIN TRY
-		EXEC xp_cmdshell @cmd
-    END TRY
-    BEGIN CATCH
-		SELECT 1 -- Do nothing, we tried, we failed, hopefully the ArgosProcesor is running as a scheduled task.
-    END CATCH
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 5, 2013
--- Description: Processes all the collars in an Argos file
--- =============================================
-CREATE PROCEDURE [dbo].[ArgosFile_Process] 
-	@FileId INT = NULL
-	
-WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
-
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- Get the name of the caller
-	DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-	-- Make sure we have a suitable FileId
-	DECLARE @ProjectId nvarchar(255);
-	DECLARE @Owner sysname;
-	DECLARE @Uploader sysname;
-	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
-	  FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F ON C.Format = F.Code
-	 WHERE FileId = @FileId AND [Status] = 'A' AND F.ArgosData = 'Y'
-	IF @ProjectId IS NULL AND @Owner IS NULL
-	BEGIN
-		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
-		RAISERROR(@message1, 18, 0)
-		RETURN (1)
-	END
-
-	-- Validate permission for this operation	
-	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
-	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
-	   AND NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE ProjectId = @ProjectId AND ProjectInvestigator = @Caller) -- Not Project Owner
-	   AND NOT EXISTS (SELECT 1 FROM dbo.ProjectEditors WHERE ProjectId = @ProjectId AND Editor = @Caller)  -- Not a project editor
-       AND NOT EXISTS (SELECT 1 
-                         FROM sys.database_role_members AS RM 
-                         JOIN sys.database_principals AS U 
-                           ON RM.member_principal_id = U.principal_id 
-                         JOIN sys.database_principals AS R 
-                           ON RM.role_principal_id = R.principal_id 
-                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
-	BEGIN
-		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must be the owner ('+ISNULL(@Owner,'<NULL>')+'), or have uploaded the file, or be an editor on this project ('+ISNULL(@ProjectId,'<NULL>')+') to process the collar file.';
-		RAISERROR(@message2, 18, 0)
-		RETURN (1)
-	END
-	
-	
-	-- Clear any (if any) prior processing results 
-	EXEC [dbo].[ArgosFile_ClearProcessingResults] @FileId
-
-
-	-- Run the External command
-	DECLARE @exe nvarchar (255);
-	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
-	IF @exe IS NULL
-		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
-	DECLARE @cmd nvarchar(200) = '"' + @exe + '" /f:' + CONVERT(NVARCHAR(10),@FileId);
-    BEGIN TRY
-		EXEC xp_cmdshell @cmd
-    END TRY
-    BEGIN CATCH
-		SELECT 1 -- Do nothing, we tried, we failed, hopefully the ArgosProcesor is running as a scheduled task.
-    END CATCH
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarFileHeaders](
-	[Header] [nvarchar](450) NOT NULL,
-	[FileFormat] [char](1) NOT NULL,
-	[Regex] [nvarchar](450) NULL,
- CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
-(
-	[Header] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE FUNCTION [dbo].[IsInvestigatorEditor] 
 (
     @ProjectInvestigator sysname, 
@@ -6729,102 +6343,6 @@ BEGIN
              )
         RETURN 1
     RETURN 0
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 20, 2012
--- Description: Updates the settings table
--- =============================================
-CREATE PROCEDURE [dbo].[Settings_Update] 
-    @Key   nvarchar(30),
-    @Value nvarchar(500)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the name of the caller
-    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
-
-    --Fix Text Inputs
-    SET @Key   = NULLIF(@Key,'')
-    SET @Value = NULLIF(@Value,'')
-    
-    IF @Key = 'project' AND NOT EXISTS (SELECT 1 FROM [dbo].[Projects] WHERE ProjectId = @Value)
-    BEGIN
-        DECLARE @message1 nvarchar(100) = 'Project (' + @Value + ') is not an existing project';
-        RAISERROR(@message1, 18, 0)
-        RETURN 1
-    END
-
-    IF     @Key NOT IN ('project', 'collar_manufacturer', 'filter_projects', 'species', 'file_format',
-                        'parameter_file_format', 'wants_email', 'ignore_ctn_suffix', 'othervalidkeys...') --Add valid keys to this list
-       AND @Key NOT IN (select 'collar_model_' + CollarManufacturer from LookupCollarManufacturers)
-    BEGIN
-        DECLARE @message2 nvarchar(100) = 'Invalid key (' + @Key + ') for settings';
-        RAISERROR(@message2, 18, 0)
-        RETURN 2
-    END
-
-
-    IF EXISTS (SELECT 1 FROM [dbo].[Settings] WHERE [Username] = @Caller AND [Key] = @Key)
-        UPDATE [dbo].[Settings] SET [Value] = @Value WHERE [Username] = @Caller AND [Key] = @Key
-    ELSE
-        INSERT [dbo].[Settings] ([Username], [Key], [Value]) VALUES (@Caller, @Key, @Value) 
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 28, 2012
--- Description: Adds a new project to the database.
--- =============================================
-CREATE PROCEDURE [dbo].[Project_Insert] 
-    @ProjectId           NVARCHAR(255),
-    @ProjectName         NVARCHAR(255), 
-    @ProjectInvestigator SYSNAME, 
-    @UnitCode            NVARCHAR(255) = NULL, 
-    @Description         NVARCHAR(4000) = NULL 
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the name of the caller
-    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
-
-    --Fix Text Inputs
-    SET @ProjectId           = NULLIF(@ProjectId,'')
-    SET @ProjectName         = NULLIF(@ProjectName,'')
-    SET @UnitCode            = NULLIF(@UnitCode,'')
-    SET @ProjectInvestigator = NULLIF(@ProjectInvestigator,'')
-    SET @Description         = NULLIF(@Description,'')
-
-    --default PI is the calling user
-    SET @ProjectInvestigator = ISNULL(@ProjectInvestigator, @Caller) 
-
-    -- If the caller is not a PI or assistant then error and return
-    IF @ProjectInvestigator != @Caller
-       AND NOT EXISTS (SELECT 1
-                         FROM ProjectInvestigatorAssistants
-                        WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator)
-    BEGIN
-        DECLARE @message1 NVARCHAR(100) = 'You ('+@Caller+') must be a project investigator (or assitant) to create a project';
-        RAISERROR(@message1, 18, 0)
-        RETURN 1
-    END
-
-
-    INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
-         VALUES              (@ProjectId,  @ProjectName,  @ProjectInvestigator,  @UnitCode,  @Description)
-
 END
 GO
 SET ANSI_NULLS ON
@@ -7148,111 +6666,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 27, 2012
--- Description:	Removes an Investigator from the database
--- =============================================
-CREATE PROCEDURE [dbo].[ProjectInvestigator_Delete_SA] 
-	@Investigator sysname = Null
-AS
-BEGIN
-	SET NOCOUNT ON;
-
-	-- This can only be run be the Sysadmin
-	-- This script is mostly to remind the SA of the steps, so there is no error checking.
-
-	-- Remove the user to the Investigator table
-	DELETE FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Investigator;
-
-	-- Remove the user from the Investigator role
-	EXEC sp_droprolemember 'Investigator', @Investigator
-	
-	-- remove the user from the db, unless they are an editor
-	IF EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE [Editor] = @Investigator)
-	BEGIN
-		RETURN
-	END
-	EXEC ('DROP USER ['  + @Investigator + ']')
-
-	-- remove the login (if it is not used anywhere else)	
-	-- If the editor login does not map to a user on have any other databases, then remove the login
-	DECLARE	@cmd nvarchar(500) = 'USE ?; IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = ''' + @Investigator + ''') raiserror('''',18,0)'
-	DECLARE @Found int = 0
-	begin try
-		EXEC sp_MSforeachdb @cmd;
-	end try
-	BEGIN CATCH
-		SET @Found = 1
-	END CATCH
-
-	IF @Found = 0
-	BEGIN
-		-- make sure the login does not have a server role
-		IF NOT EXISTS (select 1 from sys.server_role_members AS R INNER JOIN sys.server_principals AS P 
-					   ON R.member_principal_id = P.principal_id where P.name = @Investigator)
-		BEGIN
-			EXEC ('DROP LOGIN ['  + @Investigator + ']')
-		END
-	END
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 2, 2012
--- Description: Deletes a project
--- =============================================
-CREATE PROCEDURE [dbo].[Project_Delete] 
-    @ProjectId NVARCHAR(255) = NULL 
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the name of the caller
-    DECLARE @Caller sysname = ORIGINAL_LOGIN();
-
-    -- Get the Project Investigator to check permissions
-    DECLARE @ProjectInvestigator sysname
-    SELECT @ProjectInvestigator = ProjectInvestigator FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId
-    IF @ProjectInvestigator IS NULL
-        RETURN 0 --There is no project to delete, we must be done.
-    
-    -- You must be the ProjectInvestigator or assistant to delete the project
-    IF (@ProjectInvestigator != @Caller
-        AND NOT EXISTS (SELECT 1
-                          FROM ProjectInvestigatorAssistants
-                         WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator))
-    BEGIN
-        DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the owner (or assitant) of the ' + @ProjectId + ' project.';
-        RAISERROR(@message1, 18, 0)
-        RETURN 1
-    END
-
-
-    -- wrap the two operations in a transaction
-    BEGIN TRY
-        BEGIN TRANSACTION
-            DELETE FROM dbo.ProjectEditors WHERE [ProjectId] = @ProjectId
-            DELETE FROM dbo.Projects WHERE [ProjectId] = @ProjectId
-        COMMIT TRANSACTION
-    END TRY
-    BEGIN CATCH
-        IF XACT_STATE() <> 0
-            ROLLBACK TRANSACTION;
-        EXEC [dbo].[Utility_RethrowError]
-        RETURN 1
-    END CATCH
-    
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE FUNCTION [dbo].[IsProjectEditor] 
 (
     @Project VARCHAR(32)   = NULL, 
@@ -7286,6 +6699,43 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 2, 2012
+-- Description:	Updates the Status of a Location
+-- =============================================
+CREATE PROCEDURE [dbo].[Location_UpdateStatus] 
+    @ProjectId NVARCHAR(255) = NULL, 
+    @AnimalId  NVARCHAR(255) = NULL, 
+    @FixDate   DATETIME2     = NULL,
+    @Status    CHAR          = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    -- Validate permission for this operation
+    -- The caller must be authorized to edit the project data
+    IF dbo.IsProjectEditor(@ProjectId, @Caller) = 0
+    BEGIN
+        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator, assistant or editor on this project ('+@ProjectId+') to update this location.';
+        RAISERROR(@message1, 18, 0)
+        RETURN (1)
+    END
+    
+    UPDATE [Locations]
+       SET [Status] = @Status
+     WHERE [ProjectId] = @ProjectId
+       AND [AnimalId] = @AnimalId
+       AND [FixDate] = @FixDate;
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[IsFixEditor] 
 (
 	@FixId    INT = NULL, 
@@ -7303,6 +6753,286 @@ BEGIN
 		 WHERE [x].[FixId] = @FixId;
 		 
 	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 3, 2012
+-- Description:	Adjusts which of several conflicting fixes will be the active one.
+--
+-- A fix may hide zero or one other fix
+-- A fix may be hidden by zero or one other fix
+-- A fix cannot hide itself
+-- Therefore in a set of fixes that share the same collar and fixdate,
+-- there is one and only one fix that is not hidden
+-- there is one and only one fix that is not hidding any other fixes
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFixes_UpdateUnhideFix] 
+    @FixId int = Null
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Get some information about the fix to update
+    DECLARE @HiddenBy  INT;
+    DECLARE @ProjectId NVARCHAR(255);
+     SELECT @HiddenBy  = [HiddenBy],
+            @ProjectId = [ProjectId]
+       FROM [dbo].[CollarFixes] AS F1
+      INNER JOIN [dbo].[CollarFiles] AS F2
+         ON F1.FileId = F2.FileId
+      WHERE [FixId] = @FixId;
+
+    IF @ProjectId IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'Invalid parameter: (' + @FixId + ') was not found in the CollarFixes table';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+    -- If ProjectId was found, then HiddenBy is guaranteed.
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    -- Validate permission for this operation
+    -- The caller must be authorized to edit the project data
+    IF dbo.IsProjectEditor(@ProjectId, @Caller) = 0
+    BEGIN
+        DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the principal investigator, assistant or editor on this project ('+@ProjectId+') to update this file.';
+        RAISERROR(@message2, 18, 0)
+        RETURN (1)
+    END
+    
+    IF  @HiddenBy IS NULL
+    BEGIN
+        RETURN 0  --Nothing to do.
+    END
+    
+    -- Fix is hidden, and we have permissions, lets do it.
+    DECLARE @ConflictingFixes TABLE
+    (
+        FixId int,
+        HiddenBy int
+    );
+    DECLARE @NotHidden int;
+    DECLARE @NotHider int;
+
+    BEGIN TRY
+        BEGIN TRAN
+
+            INSERT INTO @ConflictingFixes 
+                SELECT DISTINCT F1.FixId, F1.HiddenBy FROM dbo.CollarFixes AS F1
+                INNER JOIN dbo.CollarFixes AS F2
+                   ON F1.CollarManufacturer = F2.CollarManufacturer
+                  AND F1.CollarId = F2.CollarId
+                  AND F1.FixDate = F2.FixDate
+                WHERE F1.FixId != F2.FixId AND (F1.FixId = @FixId OR F2.FixId = @FixId) ORDER BY F1.FixId;
+
+            -- The fix in the set that is not hidden
+            SET @NotHidden = (SELECT FixId FROM @ConflictingFixes WHERE HiddenBy IS NULL)
+            -- The fix in the set that is not hidding any other fixes
+            SET @NotHider = (SELECT FixId FROM @ConflictingFixes WHERE FixId NOT IN (SELECT HiddenBy FROM @ConflictingFixes WHERE HiddenBy IS NOT NULL))
+            
+            --Hide the currently Un Hidden fix with the fix not hidding any other fixes
+            --(creates circlular loop of hidden-ness)
+            UPDATE dbo.CollarFixes SET HiddenBy = @NotHider WHERE FixId = @NotHidden
+            --Unhide the selected fix 
+            UPDATE dbo.CollarFixes SET HiddenBy = NULL WHERE FixId = @FixId
+
+        COMMIT TRANSACTION
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        EXEC [dbo].[Utility_RethrowError]
+        RETURN 1
+    END CATCH
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- ===============================================
+-- Author:      Regan Sarwas
+-- Create date: March 2, 2012
+-- Description: Updates the editable fields of a CollarFile
+-- ===============================================
+CREATE PROCEDURE [dbo].[CollarFile_Update] 
+    @FileId INT, 
+    @FileName NVARCHAR(255) = NULL,
+    @Status CHAR(1),
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId NVARCHAR(255),
+    @ProjectId NVARCHAR(255),
+    @Owner NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @FileName           = NULLIF(@FileName,'')
+    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
+    SET @CollarId           = NULLIF(@CollarId,'')
+    SET @ProjectId          = NULLIF(@ProjectId,'')
+    SET @Owner              = NULLIF(@Owner,'')
+
+    -- Validate permission for this operation
+    -- Verify we are updating a valid collar
+    DECLARE @CurrentOwner NVARCHAR(255) = NULL
+    DECLARE @CurrentProjectId NVARCHAR(255) = NULL
+    SELECT @CurrentOwner = [Owner], @CurrentProjectId = [ProjectId] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+    IF @CurrentOwner IS NULL AND @CurrentProjectId IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarFiles table';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    -- caller must be old owner or their assistant 
+    IF @CurrentOwner IS NOT NULL
+       AND @caller != @CurrentOwner
+       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @CurrentOwner) -- Not the file Owner's Assistant
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You ('+@Caller+') are not the owner (' + @CurrentOwner + ') (or their assistant) of the file.';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+    -- caller must be new owner or their assistant 
+    IF @Owner IS NOT NULL
+       AND @caller != @Owner
+       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Owner) -- Not the file Owner's Assistant
+    BEGIN
+        DECLARE @message3 nvarchar(100) = 'You ('+@Caller+') are not the new owner (' + @Owner + ') (or their assistant) of the file.';
+        RAISERROR(@message3, 18, 0)
+        RETURN 3
+    END
+
+    -- caller must be old project PI or a project editor 
+    IF @CurrentProjectId IS NOT NULL
+       AND dbo.IsProjectEditor(@CurrentProjectId, @Caller) = 0  -- Not an editor on the current project
+    BEGIN
+        DECLARE @message4 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator, assistant or  an editor of this file''s project ('+@CurrentProjectId+').';
+        RAISERROR(@message4, 18, 0)
+        RETURN 4
+    END
+
+    -- caller must be new project PI or a project editor 
+    IF @ProjectId IS NOT NULL
+       AND dbo.IsProjectEditor(@ProjectId, @Caller) = 0  -- Not an editor on the new project
+    BEGIN
+        DECLARE @message5 nvarchar(100) = 'You ('+@Caller+') are not the principal investigator, assistant or  an editor of this file''s project ('+@ProjectId+').';
+        RAISERROR(@message5, 18, 0)
+        RETURN 5
+    END
+
+    -- I use NULL to indicate don't change value only on non-null fields.
+    -- The defaults for nullable field should match the insert SP.
+    -- If the client does not want to change a nullable field they must provide the original value.
+    IF @FileName IS NULL
+        SELECT @FileName = [FileName] FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
+
+    -- Do the update
+    UPDATE [dbo].[CollarFiles]
+       SET [FileName] = @FileName, [Status] = @Status, [CollarManufacturer] = @CollarManufacturer,
+           [CollarId] = @CollarId, [ProjectId] = @ProjectId, [Owner] = @Owner
+     WHERE [FileId] = @FileId
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 3, 2012
+-- Description:	Adds a new collar file to the database.
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarFile_Insert] 
+    @FileName NVARCHAR(255),
+    @Status CHAR = 'I', 
+    @Contents VARBINARY(max),
+    @ProjectId NVARCHAR(255) = NULL, 
+    @Owner NVARCHAR(255) = NULL, 
+    @ParentFileId INT = NULL,
+    @ArgosDeploymentId INT = NULL,
+    @CollarParameterId INT = NULL,
+    @CollarManufacturer NVARCHAR(255) = NULL, 
+    @CollarId NVARCHAR(255) = NULL, 
+    @FileId INT OUTPUT,
+    @Format CHAR OUTPUT,
+    @UploadDate DATETIME2(7) OUTPUT,
+    @UserName NVARCHAR(128) OUTPUT,
+    @Sha1Hash VARBINARY(8000) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @FileName           = NULLIF(@FileName,'')
+    SET @ProjectId          = NULLIF(@ProjectId,'')
+    SET @Owner              = NULLIF(@Owner,'')
+    SET @CollarManufacturer = NULLIF(@CollarManufacturer,'')
+    SET @CollarId           = NULLIF(@CollarId,'')
+
+    -- Fix the defaults
+    IF @Owner IS NULL AND @ProjectId IS NULL
+        SET @Owner = @Caller
+
+    -- Validate permission for this operation
+    -- The caller must be in the ArgosProcessor role
+    -- OR if @Owner is non-null the caller must be the owner or the owner's assistant (owner may not be a PI, but that will be caught with ref integrity).
+    -- OR if @ProjectID is non-null the caller must be the project PI or editor on the project
+    IF     NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
+       AND @Caller != @Owner  -- Not the file's owner
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Owner) -- Not the file Owner's Assistant
+       AND dbo.IsProjectEditor(@ProjectId, @Caller) = 0  -- Not an editor on the project
+    BEGIN
+        DECLARE @message1 nvarchar(200)
+        IF @ProjectId IS NOT NULL
+            SET @message1 = 'You ('+@Caller+') are not the principal investigator or an editor of this file''s project ('+@ProjectId+').';
+        ELSE
+            SET @message1 = 'Either you ('+@Caller+') or the owner (' + @Owner + ') are not a principal investigator.';
+        RAISERROR(@message1, 18, 0)
+        RETURN (1)
+    END
+
+    -- Get the format of the file, and determine if this format has Argos data (to determine processing required)
+    SET @Format = [dbo].[FileFormat](@Contents)
+    IF NOT EXISTS (SELECT 1 FROM dbo.LookupCollarFileFormats WHERE Code = @Format)
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'Invalid parameter: The contents of this file is not in a format the system recognizes.';
+        RAISERROR(@message2, 18, 0)
+        RETURN (1)
+    END
+
+    -- Do the update, the rest of the integrity checks are done in the trigger
+    INSERT INTO dbo.CollarFiles ([FileName], [ProjectId], [Owner], [CollarManufacturer], [CollarId], [Format], [Status], [Contents], [ParentFileId], [ArgosDeploymentId], [CollarParameterId])
+                         VALUES (@FileName,  @ProjectId,  @Owner,  @CollarManufacturer,  @CollarId,  @Format,  @Status,  @Contents,  @ParentFileId,  @ArgosDeploymentId,  @CollarParameterId)
+    SET @FileId = SCOPE_IDENTITY();
+    SELECT @UploadDate = [UploadDate], @UserName = [UserName], @Sha1Hash = [Sha1Hash] FROM dbo.CollarFiles WHERE FileId = @FileId
 END
 GO
 SET ANSI_NULLS ON
@@ -7646,6 +7376,160 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 -- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 22, 2013
+--              Description: Processes only the transmission for a single platform in a file.
+--              This may be called by the Argos Processor library by a client not on the server
+--              It will call the Argos Processor library on the server.
+--              Ignore any failures.  If this really needs to happen, then it will be caught when
+--              the Argos Processor runs as a scheduled on the server.
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_ProcessPlatform] 
+    @FileId INT,
+    @PlatformId VARCHAR(255)
+
+WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Make sure we have a suitable FileId
+	DECLARE @ProjectId nvarchar(255);
+	DECLARE @Owner sysname;
+	DECLARE @Uploader sysname;
+	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
+	  FROM CollarFiles AS C
+	  JOIN ArgosFilePlatformDates AS D
+	    ON D.FileId = C.FileId
+	 WHERE C.FileId = @FileId AND D.PlatformId = @PlatformId
+	IF @ProjectId IS NULL AND @Owner IS NULL
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation	
+	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
+	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
+	   AND dbo.IsProjectEditor(@ProjectId, @Caller) = 0  -- Not an editor on the project
+       AND NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
+	BEGIN
+		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must be the owner ('+ISNULL(@Owner,'<NULL>')+'), or have uploaded the file, or be an editor on this project ('+ISNULL(@ProjectId,'<NULL>')+') to process the collar file.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+	
+
+	-- Clear any (if any) prior processing results
+	-- This will ensure that the database is setup to respond to a query for all
+	-- files needing partial processing, should the xp_cmdshell not work. 
+	EXEC dbo.ArgosFile_UnProcessPlatform @FileId, @PlatformId
+
+
+	-- Run the External command
+	-- This will fail if the sql_proxy user is not logged in.
+	-- We will rely on a regularly scheduled external OS task.
+	DECLARE @exe nvarchar (255);
+	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
+	IF @exe IS NULL
+		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
+	DECLARE @cmd nvarchar(200) = '"' + @exe + '" /f:' + CONVERT(NVARCHAR(10),@FileId) + ' /p:' + @PlatformId;
+    BEGIN TRY
+		EXEC xp_cmdshell @cmd
+    END TRY
+    BEGIN CATCH
+		SELECT 1 -- Do nothing, we tried, we failed, hopefully the ArgosProcesor is running as a scheduled task.
+    END CATCH
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 5, 2013
+-- Description: Processes all the collars in an Argos file
+-- =============================================
+CREATE PROCEDURE [dbo].[ArgosFile_Process] 
+	@FileId INT = NULL
+	
+WITH EXECUTE AS OWNER  -- To run XP_cmdshell (only available to SA)
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- Get the name of the caller
+	DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+	-- Make sure we have a suitable FileId
+	DECLARE @ProjectId nvarchar(255);
+	DECLARE @Owner sysname;
+	DECLARE @Uploader sysname;
+	SELECT @ProjectId = ProjectId, @Owner = [Owner], @Uploader = UserName
+	  FROM CollarFiles AS C JOIN LookupCollarFileFormats AS F ON C.Format = F.Code
+	 WHERE FileId = @FileId AND [Status] = 'A' AND F.ArgosData = 'Y'
+	IF @ProjectId IS NULL AND @Owner IS NULL
+	BEGIN
+		DECLARE @message1 nvarchar(100) = 'Invalid Input: FileId provided is not a valid active file in a suitable format.';
+		RAISERROR(@message1, 18, 0)
+		RETURN (1)
+	END
+
+	-- Validate permission for this operation	
+	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
+	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
+	   AND dbo.IsProjectEditor(@ProjectId, @Caller) = 0  -- Not an editor on the project
+       AND NOT EXISTS (SELECT 1 
+                         FROM sys.database_role_members AS RM 
+                         JOIN sys.database_principals AS U 
+                           ON RM.member_principal_id = U.principal_id 
+                         JOIN sys.database_principals AS R 
+                           ON RM.role_principal_id = R.principal_id 
+                        WHERE U.name = @Caller AND R.name = 'ArgosProcessor') -- Not in the ArgosProcessor Role
+	BEGIN
+		DECLARE @message2 nvarchar(200) = 'Invalid Permission: You ('+@Caller+') must be the owner ('+ISNULL(@Owner,'<NULL>')+'), or have uploaded the file, or be an editor on this project ('+ISNULL(@ProjectId,'<NULL>')+') to process the collar file.';
+		RAISERROR(@message2, 18, 0)
+		RETURN (1)
+	END
+	
+	
+	-- Clear any (if any) prior processing results 
+	EXEC [dbo].[ArgosFile_ClearProcessingResults] @FileId
+
+
+	-- Run the External command
+	DECLARE @exe nvarchar (255);
+	SELECT @exe = Value FROM Settings WHERE Username = 'system' AND [Key] = 'argosProcessor'
+	IF @exe IS NULL
+		SET @exe = 'C:\Users\sql_proxy\ArgosProcessor.exe'
+	DECLARE @cmd nvarchar(200) = '"' + @exe + '" /f:' + CONVERT(NVARCHAR(10),@FileId);
+    BEGIN TRY
+		EXEC xp_cmdshell @cmd
+    END TRY
+    BEGIN CATCH
+		SELECT 1 -- Do nothing, we tried, we failed, hopefully the ArgosProcesor is running as a scheduled task.
+    END CATCH
+
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 28, 2012
 -- Description:	Updates an Animal
@@ -7793,6 +7677,111 @@ BEGIN
 	-- deleting a non-existing animal will silently succeed.
 	-- All other verification is handled by primary/foreign key and column constraints.
 	DELETE FROM dbo.Animals WHERE [ProjectId] = @ProjectId AND [AnimalId] = @AnimalId
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 27, 2012
+-- Description:	Removes an Investigator from the database
+-- =============================================
+CREATE PROCEDURE [dbo].[ProjectInvestigator_Delete_SA] 
+	@Investigator sysname = Null
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	-- This can only be run be the Sysadmin
+	-- This script is mostly to remind the SA of the steps, so there is no error checking.
+
+	-- Remove the user to the Investigator table
+	DELETE FROM [dbo].[ProjectInvestigators] WHERE [Login] = @Investigator;
+
+	-- Remove the user from the Investigator role
+	EXEC sp_droprolemember 'Investigator', @Investigator
+	
+	-- remove the user from the db, unless they are an editor
+	IF EXISTS(SELECT 1 FROM [dbo].[ProjectEditors] WHERE [Editor] = @Investigator)
+	BEGIN
+		RETURN
+	END
+	EXEC ('DROP USER ['  + @Investigator + ']')
+
+	-- remove the login (if it is not used anywhere else)	
+	-- If the editor login does not map to a user on have any other databases, then remove the login
+	DECLARE	@cmd nvarchar(500) = 'USE ?; IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = ''' + @Investigator + ''') raiserror('''',18,0)'
+	DECLARE @Found int = 0
+	begin try
+		EXEC sp_MSforeachdb @cmd;
+	end try
+	BEGIN CATCH
+		SET @Found = 1
+	END CATCH
+
+	IF @Found = 0
+	BEGIN
+		-- make sure the login does not have a server role
+		IF NOT EXISTS (select 1 from sys.server_role_members AS R INNER JOIN sys.server_principals AS P 
+					   ON R.member_principal_id = P.principal_id where P.name = @Investigator)
+		BEGIN
+			EXEC ('DROP LOGIN ['  + @Investigator + ']')
+		END
+	END
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 2, 2012
+-- Description: Deletes a project
+-- =============================================
+CREATE PROCEDURE [dbo].[Project_Delete] 
+    @ProjectId NVARCHAR(255) = NULL 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    -- Get the Project Investigator to check permissions
+    DECLARE @ProjectInvestigator sysname
+    SELECT @ProjectInvestigator = ProjectInvestigator FROM [dbo].[Projects] WHERE [ProjectId] = @ProjectId
+    IF @ProjectInvestigator IS NULL
+        RETURN 0 --There is no project to delete, we must be done.
+    
+    -- You must be the ProjectInvestigator or assistant to delete the project
+    IF (@ProjectInvestigator != @Caller
+        AND NOT EXISTS (SELECT 1
+                          FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator))
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'You ('+@Caller+') are not the owner (or assitant) of the ' + @ProjectId + ' project.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    -- wrap the two operations in a transaction
+    BEGIN TRY
+        BEGIN TRANSACTION
+            DELETE FROM dbo.ProjectEditors WHERE [ProjectId] = @ProjectId
+            DELETE FROM dbo.Projects WHERE [ProjectId] = @ProjectId
+        COMMIT TRANSACTION
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0
+            ROLLBACK TRANSACTION;
+        EXEC [dbo].[Utility_RethrowError]
+        RETURN 1
+    END CATCH
+    
 END
 GO
 SET ANSI_NULLS ON
