@@ -217,11 +217,11 @@
     <Compile Include="FileDetailsForm.Designer.cs">
       <DependentUpon>FileDetailsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="InvestigatorForm.cs">
+    <Compile Include="InvestigatorDetailsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="InvestigatorForm.Designer.cs">
-      <DependentUpon>InvestigatorForm.cs</DependentUpon>
+    <Compile Include="InvestigatorDetailsForm.Designer.cs">
+      <DependentUpon>InvestigatorDetailsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -321,8 +321,8 @@
     <EmbeddedResource Include="ProjectsForm.resx">
       <DependentUpon>ProjectsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="InvestigatorForm.resx">
-      <DependentUpon>InvestigatorForm.cs</DependentUpon>
+    <EmbeddedResource Include="InvestigatorDetailsForm.resx">
+      <DependentUpon>InvestigatorDetailsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

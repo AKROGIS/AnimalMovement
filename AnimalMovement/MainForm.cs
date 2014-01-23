@@ -54,7 +54,7 @@ namespace AnimalMovement
 
         private void MyProfileButton_Click(object sender, EventArgs e)
         {
-            var form = new InvestigatorForm(_investigator);
+            var form = new InvestigatorDetailsForm(_investigator);
             form.Show(this);
         }
 

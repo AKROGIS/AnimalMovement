@@ -22,7 +22,7 @@ using DataModel;
 
 namespace AnimalMovement
 {
-    internal partial class InvestigatorForm : BaseForm
+    internal partial class InvestigatorDetailsForm : BaseForm
     {
         private AnimalMovementDataContext Database { get; set; }
         private string CurrentUser { get; set; }
@@ -32,7 +32,7 @@ namespace AnimalMovement
         private bool IsEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
-        internal InvestigatorForm(ProjectInvestigator investigator)
+        internal InvestigatorDetailsForm(ProjectInvestigator investigator)
         {
             InitializeComponent();
             RestoreWindow();

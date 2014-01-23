@@ -1,6 +1,6 @@
 ﻿namespace AnimalMovement
 {
-    partial class InvestigatorForm
+    partial class InvestigatorDetailsForm
     {
         /// <summary>
         /// Required designer variable.
