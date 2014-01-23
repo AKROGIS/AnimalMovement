@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows.Forms;
 using DataModel;
 
@@ -28,6 +29,8 @@ namespace AnimalMovement
         private void SetUpForm()
         {
             InvestigatorsGridView.DataSource = Database.ProjectInvestigators;
+            InvestigatorsGridView.Columns[0].Visible = false;
+            InvestigatorsGridView.Sort(InvestigatorsGridView.Columns[1],ListSortDirection.Ascending);
             SelectInvestigatorRow(CurrentUser);
             EnableControls();
         }
@@ -69,7 +72,7 @@ namespace AnimalMovement
         {
             foreach (DataGridViewRow row in InvestigatorsGridView.Rows)
                 if (((ProjectInvestigator)row.DataBoundItem).Login == login)
-                    InvestigatorsGridView.CurrentCell = row.HeaderCell;
+                    InvestigatorsGridView.CurrentCell = row.Cells[1];
         }
 
         private void InvestigatorsGridView_SelectionChanged(object sender, EventArgs e)

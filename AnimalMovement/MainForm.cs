@@ -47,6 +47,7 @@ namespace AnimalMovement
             MyProfileButton.Visible = (_investigator != null);
             MyProfileButton.Text = "Project Investigator Details";
             ProjectsButton.Enabled = true;
+            InvestigatorsButton.Enabled = true;
             UploadButton.Enabled = true;
             GenerateMapButton.Enabled = true;
             QuickStartWizardButton.Enabled = true;
