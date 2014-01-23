@@ -906,7 +906,7 @@
             this.ReportDataGridView.Size = new System.Drawing.Size(498, 209);
             this.ReportDataGridView.TabIndex = 2;
             // 
-            // InvestigatorForm
+            // InvestigatorDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -925,7 +925,7 @@
             this.Controls.Add(this.LoginTextBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(470, 460);
-            this.Name = "InvestigatorForm";
+            this.Name = "InvestigatorDetailsForm";
             this.Text = "Project Investigator Details";
             this.ProjectInvestigatorTabs.ResumeLayout(false);
             this.ProjectsTab.ResumeLayout(false);

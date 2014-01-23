@@ -63,7 +63,7 @@
             this.InvestigatorsGridView.ReadOnly = true;
             this.InvestigatorsGridView.RowHeadersWidth = 25;
             this.InvestigatorsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.InvestigatorsGridView.Size = new System.Drawing.Size(425, 141);
+            this.InvestigatorsGridView.Size = new System.Drawing.Size(410, 160);
             this.InvestigatorsGridView.TabIndex = 7;
             this.InvestigatorsGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.InvestigatorsGridView_CellContentClick);
             this.InvestigatorsGridView.SelectionChanged += new System.EventHandler(this.InvestigatorsGridView_SelectionChanged);
@@ -139,7 +139,7 @@
             this.InfoInvestigatorButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.InfoInvestigatorButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.InfoInvestigatorButton.Image = global::AnimalMovement.Properties.Resources.GenericInformation_B_16;
-            this.InfoInvestigatorButton.Location = new System.Drawing.Point(12, 159);
+            this.InfoInvestigatorButton.Location = new System.Drawing.Point(12, 178);
             this.InfoInvestigatorButton.Name = "InfoInvestigatorButton";
             this.InfoInvestigatorButton.Size = new System.Drawing.Size(24, 24);
             this.InfoInvestigatorButton.TabIndex = 10;
@@ -151,7 +151,7 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(43, 166);
+            this.label1.Location = new System.Drawing.Point(43, 185);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(300, 13);
             this.label1.TabIndex = 11;
@@ -161,7 +161,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(449, 192);
+            this.ClientSize = new System.Drawing.Size(434, 211);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.InvestigatorsGridView);
             this.Controls.Add(this.InfoInvestigatorButton);

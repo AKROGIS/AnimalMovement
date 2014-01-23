@@ -41,7 +41,7 @@
     <Setting Name="FileDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
-    <Setting Name="InvestigatorFormLocation" Type="System.Drawing.Point" Scope="User">
+    <Setting Name="InvestigatorDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
     <Setting Name="MainFormLocation" Type="System.Drawing.Point" Scope="User">
@@ -95,11 +95,11 @@
     <Setting Name="FileDetailsFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">492, 331</Value>
     </Setting>
-    <Setting Name="InvestigatorFormSize" Type="System.Drawing.Size" Scope="User">
+    <Setting Name="InvestigatorDetailsFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">462, 434</Value>
     </Setting>
     <Setting Name="MainFormSize" Type="System.Drawing.Size" Scope="User">
-      <Value Profile="(Default)">231, 194</Value>
+      <Value Profile="(Default)">200, 280</Value>
     </Setting>
     <Setting Name="ProjectDetailsFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">536, 406</Value>
@@ -220,6 +220,12 @@
     </Setting>
     <Setting Name="CollarParameterFileDetailsFormActiveTab" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="InvestigatorsFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="InvestigatorsFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">450, 250</Value>
     </Setting>
   </Settings>
 </SettingsFile>
