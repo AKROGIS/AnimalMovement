@@ -163,6 +163,8 @@ namespace AnimalMovement
             NameTextBox.Enabled = IsEditMode;
             EmailTextBox.Enabled = IsEditMode;
             PhoneTextBox.Enabled = IsEditMode;
+            //trigger's the active tab to enable/disable it's controls
+            ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
         }
 
         private void EditSaveButton_Click(object sender, EventArgs e)
