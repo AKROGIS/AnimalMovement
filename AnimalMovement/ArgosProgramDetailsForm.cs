@@ -353,7 +353,7 @@ namespace AnimalMovement
             {
                 string error;
                 var programPlatforms = ArgosWebSite.GetPlatformList(Program.UserName, Program.Password, out error);
-                var AddedNewPlatform = false;
+                var addedNewPlatform = false;
                 if (error != null)
                 {
                     MessageBox.Show("Argos Web Server returned an error" + Environment.NewLine + error, "Server Error",
@@ -373,11 +373,11 @@ namespace AnimalMovement
                                 Active = true
                             };
                             Database.ArgosPlatforms.InsertOnSubmit(platform);
-                            AddedNewPlatform = true;
+                            addedNewPlatform = true;
                         }
                     }
                 }
-                if (AddedNewPlatform && SubmitChanges())
+                if (addedNewPlatform && SubmitChanges())
                     PlatformDataChanged();
             }
             finally
