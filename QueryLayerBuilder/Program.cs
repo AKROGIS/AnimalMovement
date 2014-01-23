@@ -105,7 +105,7 @@ namespace QueryLayerBuilder
                                  BuildSpecialQueryLayer("Velocity Vectors", connection, predicate),
                                  BuildSpecialQueryLayer("Valid Locations", connection, predicate),
                                  BuildSpecialQueryLayer("Invalid Locations", connection, predicate),
-                                 BuildSpecialQueryLayer("No Movement Points", connection, predicate),
+                                 BuildSpecialQueryLayer("No Movement Points", connection, predicate)
                              };
             var layer = BuildLayerGroup(layers);
             layer.Name = System.IO.Path.GetFileNameWithoutExtension(layerFilePath) ;

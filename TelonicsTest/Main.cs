@@ -156,7 +156,7 @@ namespace TelonicsTest
                     new Field(111, 7),
                     new Field(222, 8),
                     new Field(950, 10),
-                    new Field(3999, 12),
+                    new Field(3999, 12)
                 };
 
             // Display test values

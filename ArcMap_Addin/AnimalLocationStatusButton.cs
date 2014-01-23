@@ -97,6 +97,7 @@ namespace ArcMap_Addin
             // to ensure that the correct layer has selected features before being modified.
             const string geoFeatureLayerTypeId = "{E156D7E5-22AF-11D3-9F99-00C04F6BC78E}";
             IEnumerable<ILayer> layers = LayerUtils.GetAllLayers(ArcMap.Document, geoFeatureLayerTypeId);
+            // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
             foreach (IGeoFeatureLayer layer in layers)
             {
                 var w = ((IDataset) layer).Workspace as ISqlWorkspace;
