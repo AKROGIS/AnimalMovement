@@ -205,6 +205,12 @@
     <Compile Include="ColoredListBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="InvestigatorsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InvestigatorsForm.Designer.cs">
+      <DependentUpon>InvestigatorsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ProjectsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -317,6 +323,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FileDetailsForm.resx">
       <DependentUpon>FileDetailsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InvestigatorsForm.resx">
+      <DependentUpon>InvestigatorsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProjectsForm.resx">
       <DependentUpon>ProjectsForm.cs</DependentUpon>
