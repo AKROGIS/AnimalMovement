@@ -91,7 +91,7 @@ namespace AnimalMovement
                     SetupFixesTab();
                     break;
                 case 6:
-                    SetupFixesTab();
+                    SetUpIssuesTab();
                     break;
             }
         }
