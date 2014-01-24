@@ -93,23 +93,6 @@
     </query>
   </report>
   <report>
-    <name>Argos files that have not been processed</name>
-    <description>
-      <![CDATA[List all Argos files you have in the database that have never been processed]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT F.[FileName], F.UploadDate, F.UserName, L.Name, F.[Status]
-       FROM CollarFiles AS F
- INNER JOIN ArgosFile_NeverProcessed AS U
-         ON U.FileId = F.FileId
- INNER JOIN LookupCollarFileFormats AS L
-         ON L.Code = F.Format
-        AND F.[Owner] = @PI
-      ]]>
-    </query>
-  </report>
-  <report>
     <name>Argos Platforms with no download data</name>
     <description>
       <![CDATA[The list of Argos platforms in the database that do not have any downloaded Argos data files.  These may be platforms that are required to process historic Argos email data, but the Argos Id has been retired.]]>
