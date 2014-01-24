@@ -1016,7 +1016,7 @@ BEGIN
            AND (D.StartDate IS NULL OR D.StartDate < I.locationDate)
            AND (D.EndDate IS NULL OR I.locationDate < D.EndDate)
     INNER JOIN Collars AS C
-            ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+            ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
          WHERE F.[Status] = 'A'
            AND I.FileId = @FileId
            AND I.latitude IS NOT NULL AND I.longitude IS NOT NULL
@@ -5666,6 +5666,32 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE VIEW [dbo].[ValidLocationsWithLatLong]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Location] AS [Shape]
+          ,L.[Location].Lat AS [Lat_WGS84]
+          ,L.[Location].Long AS [Lon_WGS84]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE VIEW [dbo].[ValidLocations]
 AS
     SELECT L.FixId
@@ -7416,6 +7442,7 @@ BEGIN
 	-- Validate permission for this operation	
 	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
 	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
+	   AND dbo.IsInvestigatorEditor(@Owner,@Caller) = 0  -- Not an assistant to the owner
 	   AND dbo.IsProjectEditor(@ProjectId, @Caller) = 0  -- Not an editor on the project
        AND NOT EXISTS (SELECT 1 
                          FROM sys.database_role_members AS RM 
@@ -7491,6 +7518,7 @@ BEGIN
 	-- Validate permission for this operation	
 	-- The caller must be the owner or uploader of the file, the PI or editor on the project, or and ArgosProcessor 
 	IF @Caller <> @Owner AND @Caller <> @Uploader  -- Not the file owner or uploader
+	   AND dbo.IsInvestigatorEditor(@Owner,@Caller) = 0  -- Not an assistant to the owner
 	   AND dbo.IsProjectEditor(@ProjectId, @Caller) = 0  -- Not an editor on the project
        AND NOT EXISTS (SELECT 1 
                          FROM sys.database_role_members AS RM 
