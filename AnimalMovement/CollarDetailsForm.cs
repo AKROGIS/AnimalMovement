@@ -708,8 +708,12 @@ namespace AnimalMovement
             SummaryLabel.Text = summary == null
                               ? "There are NO fixes."
                               : (summary.Count == summary.Unique
-                                 ? String.Format("{0} fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last)
-                                 : String.Format("{3}/{0} unique/total fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last, summary.Unique));
+                                 ? String.Format("{0} fixes between {1:d} and {2:d}.", summary.Count, summary.First, summary.Last)
+                                 : String.Format("{3}/{0} unique/total fixes between {1:d} and {2:d}.", summary.Count, summary.First, summary.Last, summary.Unique));
+            var query = from fix in Database.CollarFixes
+                        where fix.Collar == Collar
+                        select new { fix.FixDate, fix.Lat, fix.Lon, fix.CollarFile.FileName, fix.LineNumber };
+            FixesGridView.DataSource = query;
             FixConflictsDataGridView_SelectionChanged(null, null);
         }
 
