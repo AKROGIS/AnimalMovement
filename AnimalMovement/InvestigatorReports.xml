@@ -57,12 +57,10 @@
        FROM ArgosFileProcessingIssues AS I
        JOIN CollarFiles AS F
          ON F.FileId = I.FileId
-       JOIN ArgosPlatforms AS P1
-         ON I.PlatformId = P1.PlatformId
-       JOIN ArgosPrograms AS P2
-         ON P1.ProgramId = P2.ProgramId
+  LEFT JOIN Projects as Pr
+         ON Pr.ProjectId = F.ProjectId
       WHERE I.PlatformId IS NOT NULL
-        AND P2.Manager = @PI
+        AND F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI
       ]]>
     </query>
   </report>
