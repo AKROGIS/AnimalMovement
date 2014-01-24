@@ -48,6 +48,30 @@
     </query>
   </report>
   <report>
+    <name>Collars with Unavailable Argos Data</name>
+    <description>
+      <![CDATA[These Collars contain Argos data in the named files that could not be processed by the Telonics Data Convertor.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT I.CollarManufacturer + '/' + I.CollarId AS Collar, I.PlatformId AS [Argos Id], F.[FileName] AS [File], I.Issue
+       FROM ArgosFileProcessingIssues AS I
+ INNER JOIN Collars AS C
+         ON C.CollarManufacturer = I.CollarManufacturer AND C.CollarId = I.CollarId
+  LEFT JOIN ArgosPlatforms AS P1
+         ON P1.PlatformId = I.PlatformId
+  LEFT JOIN ArgosPrograms AS P
+         ON P.ProgramId = P1.ProgramId
+ INNER JOIN CollarFiles AS F
+         ON F.FileId = I.FileId
+  LEFT JOIN Projects AS Pr
+         ON Pr.ProjectId = F.ProjectId
+      WHERE C.HasGps = 1
+        AND (P.Manager = @PI OR C.[Manager] = @PI OR Pr.ProjectInvestigator = @PI)
+      ]]>
+    </query>
+  </report>
+  <report>
     <name>Argos Data Without a Collar</name>
     <description>
       <![CDATA[Argos data (email or download) require a collar assignment and collar parameters in order to be processed.  The following Argos Ids have unprocessed data.  This can be corrected by assigning a collar with parameters to the Argos Id.]]>
