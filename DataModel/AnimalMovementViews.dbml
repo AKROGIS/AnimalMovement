@@ -39,6 +39,19 @@
       <Column Name="Status" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
     </Type>
   </Table>
+  <Table Name="dbo.AnimalLocations" Member="AnimalLocations">
+    <Type Name="AnimalLocation">
+      <Column Name="ProjectId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="AnimalId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="[Local DateTime]" Member="Local_DateTime" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="Species" Type="System.String" DbType="VarChar(32)" CanBeNull="true" />
+      <Column Name="Gender" Type="System.String" DbType="VarChar(7) NOT NULL" CanBeNull="false" />
+      <Column Name="GroupName" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
+      <Column Name="[Lat WGS84]" Member="Lat_WGS84" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="[Lon WGS84]" Member="Lon_WGS84" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="Status" Type="System.Char" DbType="Char(1)" CanBeNull="true" />
+    </Type>
+  </Table>
   <Function Name="dbo.AnimalLocationSummary" Method="AnimalLocationSummary" IsComposable="true">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />

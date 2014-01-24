@@ -318,18 +318,16 @@ namespace AnimalMovement
             if (summary == null)
             {
                 SummaryLabel.Text = "There are NO locations.";
-                TopTextBox.Text = String.Empty;
-                BottomTextBox.Text = String.Empty;
-                LeftTextBox.Text = String.Empty;
-                RightTextBox.Text = String.Empty;
+                LocationsGridView.Visible = false;
             }
             else
             {
-                SummaryLabel.Text = String.Format("{0} fixes between {1:yyyy-MM-dd} and {2:yyyy-MM-dd}.", summary.Count, summary.First, summary.Last);
-                TopTextBox.Text = String.Format("{0}", summary.Top);
-                BottomTextBox.Text = String.Format("{0}", summary.Bottom);
-                LeftTextBox.Text = String.Format("{0}", summary.Left);
-                RightTextBox.Text = String.Format("{0}", summary.Right);
+                SummaryLabel.Text = String.Format("{0} fixes between {1:d} and {2:d}.", summary.Count, summary.First, summary.Last);
+                LocationsGridView.Visible = true;
+                var query = from location in views.AnimalLocations
+                            where location.ProjectId == Animal.ProjectId && location.AnimalId == Animal.AnimalId
+                            select new {location.Local_DateTime, location.Lat_WGS84, location.Lon_WGS84, Hidden = location.Status};
+                LocationsGridView.DataSource = query;
             }
         }
 

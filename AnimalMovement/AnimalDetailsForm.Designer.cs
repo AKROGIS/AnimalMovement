@@ -57,18 +57,14 @@
             this.DeleteDeploymentButton = new System.Windows.Forms.Button();
             this.InfoCollarButton = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.label7 = new System.Windows.Forms.Label();
-            this.TopTextBox = new System.Windows.Forms.TextBox();
-            this.BottomTextBox = new System.Windows.Forms.TextBox();
-            this.RightTextBox = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.LeftTextBox = new System.Windows.Forms.TextBox();
+            this.LocationsGridView = new System.Windows.Forms.DataGridView();
             this.SummaryLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.DeploymentDataGridView)).BeginInit();
             this.AnimalTabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.LocationsGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // DeploymentDataGridView
@@ -406,12 +402,7 @@
             // 
             // tabPage3
             // 
-            this.tabPage3.Controls.Add(this.label7);
-            this.tabPage3.Controls.Add(this.TopTextBox);
-            this.tabPage3.Controls.Add(this.BottomTextBox);
-            this.tabPage3.Controls.Add(this.RightTextBox);
-            this.tabPage3.Controls.Add(this.label8);
-            this.tabPage3.Controls.Add(this.LeftTextBox);
+            this.tabPage3.Controls.Add(this.LocationsGridView);
             this.tabPage3.Controls.Add(this.SummaryLabel);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
@@ -421,56 +412,21 @@
             this.tabPage3.Text = "Locations";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // label7
+            // LocationsGridView
             // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(8, 139);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(114, 18);
-            this.label7.TabIndex = 6;
-            this.label7.Text = "More to come...";
-            // 
-            // TopTextBox
-            // 
-            this.TopTextBox.Location = new System.Drawing.Point(114, 47);
-            this.TopTextBox.Name = "TopTextBox";
-            this.TopTextBox.ReadOnly = true;
-            this.TopTextBox.Size = new System.Drawing.Size(100, 20);
-            this.TopTextBox.TabIndex = 5;
-            // 
-            // BottomTextBox
-            // 
-            this.BottomTextBox.Location = new System.Drawing.Point(114, 99);
-            this.BottomTextBox.Name = "BottomTextBox";
-            this.BottomTextBox.ReadOnly = true;
-            this.BottomTextBox.Size = new System.Drawing.Size(100, 20);
-            this.BottomTextBox.TabIndex = 4;
-            // 
-            // RightTextBox
-            // 
-            this.RightTextBox.Location = new System.Drawing.Point(165, 73);
-            this.RightTextBox.Name = "RightTextBox";
-            this.RightTextBox.ReadOnly = true;
-            this.RightTextBox.Size = new System.Drawing.Size(100, 20);
-            this.RightTextBox.TabIndex = 3;
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(8, 76);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(45, 13);
-            this.label8.TabIndex = 2;
-            this.label8.Text = "Extents:";
-            // 
-            // LeftTextBox
-            // 
-            this.LeftTextBox.Location = new System.Drawing.Point(59, 73);
-            this.LeftTextBox.Name = "LeftTextBox";
-            this.LeftTextBox.ReadOnly = true;
-            this.LeftTextBox.Size = new System.Drawing.Size(100, 20);
-            this.LeftTextBox.TabIndex = 1;
+            this.LocationsGridView.AllowUserToAddRows = false;
+            this.LocationsGridView.AllowUserToDeleteRows = false;
+            this.LocationsGridView.AllowUserToResizeRows = false;
+            this.LocationsGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.LocationsGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.LocationsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.LocationsGridView.Location = new System.Drawing.Point(6, 33);
+            this.LocationsGridView.Name = "LocationsGridView";
+            this.LocationsGridView.ReadOnly = true;
+            this.LocationsGridView.Size = new System.Drawing.Size(429, 121);
+            this.LocationsGridView.TabIndex = 6;
             // 
             // SummaryLabel
             // 
@@ -503,6 +459,7 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.LocationsGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -531,12 +488,6 @@
         private System.Windows.Forms.DateTimePicker MortatlityDateTimePicker;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox TopTextBox;
-        private System.Windows.Forms.TextBox BottomTextBox;
-        private System.Windows.Forms.TextBox RightTextBox;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox LeftTextBox;
         private System.Windows.Forms.Label SummaryLabel;
         private System.Windows.Forms.Button EditDeploymentButton;
         private System.Windows.Forms.Button AddDeploymentButton;
@@ -546,6 +497,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn CollarIdColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn DeployDateColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn RetrieveDateColumn;
+        private System.Windows.Forms.DataGridView LocationsGridView;
 
     }
 }

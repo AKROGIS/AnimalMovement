@@ -4375,6 +4375,25 @@ AS
 		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
 		 GROUP BY ProjectId, AnimalId
 GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AnimalLocations]
+AS
+    SELECT L.ProjectId
+          ,L.AnimalId
+          ,dbo.LocalTime(L.[FixDate]) as [Local DateTime]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Location].Lat AS [Lat WGS84]
+          ,L.[Location].Long AS [Lon WGS84]
+          ,L.[Status]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+                              AND L.AnimalId  = A.AnimalId
+GO
 CREATE FUNCTION [dbo].[FileFormat](@data [varbinary](max))
 RETURNS [nchar](1) WITH EXECUTE AS CALLER
 AS 
