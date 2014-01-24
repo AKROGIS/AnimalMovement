@@ -40,6 +40,24 @@
    ORDER BY C.Manager, C.CollarModel, A.PlatformId
   
 
+---------- ERROR: Argos files with deployment and parameters BUT not processed and with NO error report 
+    SELECT F.*,D.DeploymentId, P.ParameterId, I.IssueId, CF.FileId, AP.Manager
+      FROM ArgosFilePlatformDates AS F
+ LEFT JOIN ArgosPrograms AS AP
+        ON AP.ProgramId = F.ProgramId
+ LEFT JOIN ArgosDeployments AS D
+        ON D.PlatformId = F.PlatformId
+ LEFT JOIN CollarParameters AS P
+        ON p.CollarManufacturer = d.CollarManufacturer AND p.CollarId = D.CollarId
+ LEFT JOIN CollarFiles AS CF
+        ON CF.ParentFileId = F.FileId AND (CF.ArgosDeploymentId = D.DeploymentId OR CF.CollarParameterId = P.ParameterId)
+ LEFT JOIN ArgosFileProcessingIssues AS I
+        ON I.FileId = F.FileId AND I.PlatformId = F.PlatformId
+     WHERE D.DeploymentId IS NOT NULL AND P.ParameterId IS NOT NULL AND CF.FileId IS NULL AND I.IssueId IS NULL
+       AND (D.StartDate IS NULL OR D.StartDate <= F.LastTransmission) AND (D.EndDate IS NULL OR F.FirstTransmission <= D.EndDate) 
+       AND (P.StartDate IS NULL OR P.StartDate <= F.LastTransmission) AND (P.EndDate IS NULL OR F.FirstTransmission <= P.EndDate)
+
+
 ----------- ERROR: ArgosFiles_WithoutSummary
      SELECT P.ProjectId, P.Owner, P.FileId, P.Format, P.FileName, P.UploadDate, P.UserName
        FROM CollarFiles AS P
