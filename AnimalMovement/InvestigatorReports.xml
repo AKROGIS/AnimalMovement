@@ -22,7 +22,7 @@
   LEFT JOIN Projects as Pr
          ON Pr.ProjectId = F.ProjectId
       WHERE P.PlatformId IS NULL
-        AND F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI
+        AND (F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI)
       ]]>
     </query>
   </report>
@@ -42,7 +42,7 @@
   LEFT JOIN Projects as Pr
          ON Pr.ProjectId = F.ProjectId
       WHERE P.ProgramId IS NULL AND D.ProgramId IS NOT NULL
-        AND F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI
+        AND (F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI)
       ]]>
     </query>
   </report>
@@ -60,7 +60,7 @@
   LEFT JOIN Projects as Pr
          ON Pr.ProjectId = F.ProjectId
       WHERE I.PlatformId IS NOT NULL
-        AND F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI
+        AND (F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI)
       ]]>
     </query>
   </report>
