@@ -33,7 +33,7 @@
     </description>
     <query>
       <![CDATA[
-     SELECT D.ProgramId AS [Argos Program], D.FileId, F.[FileName]
+     SELECT D.ProgramId AS [Argos Program], F.[FileName]
        FROM ArgosFilePlatformDates AS D
   LEFT JOIN ArgosPrograms AS P
          ON P.ProgramId = D.ProgramId
@@ -43,24 +43,52 @@
          ON Pr.ProjectId = F.ProjectId
       WHERE P.ProgramId IS NULL AND D.ProgramId IS NOT NULL
         AND (F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI)
+   GROUP BY D.ProgramId, F.[FileName]
       ]]>
     </query>
   </report>
   <report>
-    <name>Unprocessed Argos data</name>
+    <name>Argos Data Without a Collar</name>
     <description>
       <![CDATA[Argos data (email or download) require a collar assignment and collar parameters in order to be processed.  The following Argos Ids have unprocessed data.  This can be corrected by assigning a collar with parameters to the Argos Id.]]>
     </description>
     <query>
       <![CDATA[
-     SELECT I.PlatformId AS [Argos Id], I.FileId, F.[FileName], I.Issue
+     SELECT I.PlatformId AS [Argos Id], MIN(FirstTransmission) AS [First Fix], MAX(LastTransmission) AS [Last Fix]
+       FROM ArgosFileProcessingIssues AS I
+  LEFT JOIN ArgosPlatforms AS P1
+         ON P1.PlatformId = I.PlatformId
+  LEFT JOIN ArgosPrograms AS P
+         ON P.ProgramId = P1.ProgramId
+ INNER JOIN CollarFiles AS F
+         ON F.FileId = I.FileId
+  LEFT JOIN Projects AS Pr
+         ON Pr.ProjectId = F.ProjectId
+      WHERE I.CollarId IS NULL
+        AND (P.Manager = @PI OR Pr.ProjectInvestigator = @PI)
+   GROUP BY I.PlatformId
+   ORDER BY MAX(LastTransmission) DESC
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Argos Files with Unprocessed Data</name>
+    <description>
+      <![CDATA[Argos files require a collar assignment and collar parameters (if GPS) in order to be processed.  The following Files have Argos Ids have unprocessed data.  This can be corrected by assigning a collar (and parameters if GPS) to the Argos Id.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT F.[FileName] AS [File], I.PlatformId AS [Argos Id], I.Issue
        FROM ArgosFileProcessingIssues AS I
        JOIN CollarFiles AS F
          ON F.FileId = I.FileId
-  LEFT JOIN Projects as Pr
+  LEFT JOIN Collars AS C
+         ON C.CollarManufacturer = I.CollarManufacturer AND C.CollarId = I.CollarId
+  LEFT JOIN Projects AS Pr
          ON Pr.ProjectId = F.ProjectId
-      WHERE I.PlatformId IS NOT NULL
+      WHERE I.PlatformId IS NOT NULL AND (C.HasGps IS NULL OR C.HasGps = 1)
         AND (F.[Owner] = @PI OR Pr.ProjectInvestigator = @PI)
+   ORDER BY F.[FileName], I.PlatformId
       ]]>
     </query>
   </report>
