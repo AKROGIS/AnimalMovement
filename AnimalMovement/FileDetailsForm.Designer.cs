@@ -537,7 +537,7 @@
             this.GpsFixesTabPage.Size = new System.Drawing.Size(502, 185);
             this.GpsFixesTabPage.TabIndex = 0;
             this.GpsFixesTabPage.Tag = "GpsFixes";
-            this.GpsFixesTabPage.Text = "Animal Locations";
+            this.GpsFixesTabPage.Text = "Animal Locations (GPS)";
             this.GpsFixesTabPage.UseVisualStyleBackColor = true;
             // 
             // ArgosFixesTabPage
@@ -549,7 +549,7 @@
             this.ArgosFixesTabPage.Size = new System.Drawing.Size(502, 185);
             this.ArgosFixesTabPage.TabIndex = 4;
             this.ArgosFixesTabPage.Tag = "ArgosFixes";
-            this.ArgosFixesTabPage.Text = "Argos Fixes in File";
+            this.ArgosFixesTabPage.Text = "Animal Locations (PTT)";
             this.ArgosFixesTabPage.UseVisualStyleBackColor = true;
             // 
             // ArgosFixesDataGridView
