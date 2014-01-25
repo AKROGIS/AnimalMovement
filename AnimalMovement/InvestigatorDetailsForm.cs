@@ -345,7 +345,8 @@ namespace AnimalMovement
         {
             return !collar.CollarDeployments.Any() &&
                    !collar.CollarFixes.Any() &&
-                   !collar.CollarParameters.Any(p => p.CollarFiles.Any());
+                   !collar.CollarParameters.Any(p => p.CollarFiles.Any()) &&
+                   !collar.ArgosDeployments.Any();
         }
 
         private string BuildCollarText(Collar collar)
