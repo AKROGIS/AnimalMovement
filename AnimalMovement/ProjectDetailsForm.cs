@@ -418,7 +418,7 @@ namespace AnimalMovement
 
         private void DeleteFilesButton_Click(object sender, EventArgs e)
         {
-            foreach (FileListItem item in AnimalsListBox.SelectedItems.Cast<FileListItem>().Where(item => item.CanDelete))
+            foreach (FileListItem item in FilesListBox.SelectedItems.Cast<FileListItem>().Where(item => item.CanDelete))
                 Database.CollarFiles.DeleteOnSubmit(item.File);
             if (SubmitChanges())
                 FileDataChanged();
