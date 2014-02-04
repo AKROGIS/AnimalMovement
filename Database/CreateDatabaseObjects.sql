@@ -72,11 +72,6 @@ RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
 GO
-CREATE PROCEDURE [dbo].[Summerize]
-	@fileId [int]
-AS
-EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
-GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -111,6 +106,11 @@ CREATE TABLE [dbo].[Projects](
 ) ON [PRIMARY]
 GO
 SET ANSI_PADDING OFF
+GO
+CREATE PROCEDURE [dbo].[Summerize]
+	@fileId [int]
+AS
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[Summerize]
 GO
 SET ANSI_NULLS ON
 GO
@@ -2477,6 +2477,25 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
+(
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Result INT;
+
+	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
+	  FROM ArgosDownloads
+	 WHERE ErrorMessage IS NULL
+	
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[NextLocationTime] 
 (
 	@Project VARCHAR(16)   = NULL, 
@@ -2542,50 +2561,6 @@ CREATE SPATIAL INDEX [SIndex_Movements_Shape] ON [dbo].[Movements]
 WITH (
 GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
 CELLS_PER_OBJECT = 16, PAD_INDEX  = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[EndOfMovement]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [EndDate] 
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [StartDate] = @Time);
-	RETURN @Result
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[EndOfFollowingConnectedMovement] 
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [EndDate] 
-					 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [StartDate] = @Time);
-	RETURN @Result
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -2782,18 +2757,43 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
+CREATE FUNCTION [dbo].[EndOfMovement]
 (
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
 )
-RETURNS INT
+RETURNS DATETIME2
 AS
 BEGIN
-    DECLARE @Result INT;
-
-	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
-	  FROM ArgosDownloads
-	 WHERE ErrorMessage IS NULL
-	
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [EndDate] 
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [StartDate] = @Time);
+	RETURN @Result
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[EndOfFollowingConnectedMovement] 
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [EndDate] 
+					 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [StartDate] = @Time);
 	RETURN @Result
 END
 GO
@@ -3057,6 +3057,21 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[Settings](
+	[Username] [sysname] NOT NULL,
+	[Key] [nvarchar](30) NOT NULL,
+	[Value] [nvarchar](500) NULL,
+ CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
+(
+	[Username] ASC,
+	[Key] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- Create the stored procedure to generate an error using 
 -- RAISERROR. The original error information is used to
 -- construct the msg_str for RAISERROR.
@@ -3202,57 +3217,6 @@ BEGIN
     END CATCH
 
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Settings](
-	[Username] [sysname] NOT NULL,
-	[Key] [nvarchar](30) NOT NULL,
-	[Value] [nvarchar](500) NULL,
- CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
-(
-	[Username] ASC,
-	[Key] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-/* Converts a datetime to the ordinal date (day of the year)
- * commonly confused with the Julian date (days sine 1/1/4713BC)
- */
-CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
-    @Date DATETIME2  
-)   
-	RETURNS INT
-    WITH SCHEMABINDING -- This is a deterministic function.
-
-AS
-BEGIN
-    RETURN 1 + DATEDIFF (day,
-                         CONVERT(DATETIME2,
-                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
-                                 112), -- format 112 (yyyymmdd) is deterministic
-                         @Date)
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[LookupQueryLayerServers](
-	[Location] [nvarchar](128) NOT NULL,
-	[Connection] [nvarchar](255) NOT NULL,
-	[Database] [sysname] NULL,
- CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
-(
-	[Location] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
 GO
 SET ANSI_NULLS ON
 GO
@@ -4231,6 +4195,42 @@ BEGIN
 
 END
 GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[LookupQueryLayerServers](
+	[Location] [nvarchar](128) NOT NULL,
+	[Connection] [nvarchar](255) NOT NULL,
+	[Database] [sysname] NULL,
+ CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
+(
+	[Location] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/* Converts a datetime to the ordinal date (day of the year)
+ * commonly confused with the Julian date (days sine 1/1/4713BC)
+ */
+CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
+    @Date DATETIME2  
+)   
+	RETURNS INT
+    WITH SCHEMABINDING -- This is a deterministic function.
+
+AS
+BEGIN
+    RETURN 1 + DATEDIFF (day,
+                         CONVERT(DATETIME2,
+                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
+                                 112), -- format 112 (yyyymmdd) is deterministic
+                         @Date)
+END
+GO
 CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
@@ -4607,6 +4607,50 @@ BEGIN
     CLOSE collarfiles_afterupdate_cursor;
     DEALLOCATE collarfiles_afterupdate_cursor;
 
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
+	@Login NVARCHAR(255), 
+	@Name  NVARCHAR(255), 
+	@Email NVARCHAR(255),
+	@Phone NVARCHAR(255)
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	-- This can only be run be the Sysadmin
+	-- This script is mostly to remind the SA of the steps, so there is no error checking.
+
+	-- create a login
+	IF NOT EXISTS (select 1 from sys.server_principals where name = @Login)
+	BEGIN
+		EXEC ('CREATE LOGIN [' + @Login + '] FROM WINDOWS')
+	END
+
+	-- create a db user
+	IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Login)
+	BEGIN
+		EXEC ('CREATE USER ['  + @Login + ']') --  LOGIN defaults to the same name
+	END
+
+	-- Add the user to the Investigator role
+	IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
+				   INNER JOIN sys.database_principals AS P1  
+				   ON U.member_principal_id = P1.principal_id
+				   INNER JOIN sys.database_principals AS P2 
+				   ON U.role_principal_id = p2.principal_id 
+				   WHERE p1.name = @Login AND p2.name = 'Investigator' )
+	BEGIN
+		EXEC sp_addrolemember 'Investigator', @Login
+	END
+
+	-- Add the user to the Investigator table
+	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
+		 VALUES (@Login, @Name, @Email, @Phone);
 END
 GO
 SET ANSI_NULLS ON
@@ -5653,249 +5697,10 @@ BEGIN
 
 END
 GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[VelocityVectors]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          ,M.[StartDate]
-          ,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          ,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance <> 0
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ValidLocationsWithLatLong]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,L.[Location] AS [Shape]
-          ,L.[Location].Lat AS [Lat_WGS84]
-          ,L.[Location].Long AS [Lon_WGS84]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[ValidLocations]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          --,L.[Status]
-          ,L.[Location] AS [Shape]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[NoMovement]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          --,M.[StartDate]
-          --,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          --,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance = 0
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE FUNCTION [dbo].[NextAnimalId] 
-(
-	@ProjectId VARCHAR(32)   = NULL 
-)
-RETURNS VARCHAR(16)
-AS
-BEGIN
-	-- Check that project exists
-	IF NOT EXISTS( SELECT 1 FROM Projects WHERE ProjectId = @ProjectId)
-	BEGIN
-			-- You can't raise errors in a function, so you can either do an illegal operation to
-			-- stop the process, or in may case I will just return a safe result
-			RETURN NULL
-	END
-	
-	DECLARE @Year CHAR(2)
-	DECLARE @Count int
-	DECLARE @Id VARCHAR(16)
-
-	--Get the prefix for the current year (i.e. 2012 -> '12')
-	SELECT @Year  = SUBSTRING(CONVERT(CHAR(4),YEAR(GETDATE())),3,2)
-	SELECT @Count =	convert(varchar(10),(max(id) + 1))
-	  from (select case WHEN ISNUMERIC(SUBSTRING(AnimalId, 3, 9)) = 1
-	                    then convert(int,SUBSTRING(AnimalId, 3, 9))
-	                    ELSE 0 END as id
-	          from Animals
-	         where ProjectId = @ProjectId AND AnimalId LIKE @Year+'%') as t
-	if (@Count < 100)
-		SELECT @Id = @Year + REPLACE(STR(@Count, 2, 0), ' ', '0')
-	else
-		SELECT @Id = @Year + REPLACE(STR(@Count, 6, 0), ' ', '')
-	If @Id is null
-		SET @Id = @Year + '01'
-	RETURN @id
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[InvalidLocations]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,L.[Status]
-          ,L.[Location] AS [Shape]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NOT NULL
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AnimalFixesByFile]
-AS
-
------------ Animal Fixes by File
-     SELECT F.FileId, M.Name AS Manufacturer, F.CollarId, P.ProjectName AS Project, CD.AnimalId,
-		    dbo.LocalTime(MIN(F.FixDate)) AS [First Fix],
-			dbo.LocalTime(MAX(F.FixDate)) AS [Last Fix],
-            COUNT(F.FixDate) AS [Number of Fixes]
-	   FROM dbo.CollarFixes AS F
- INNER JOIN dbo.CollarDeployments AS CD
-	     ON F.CollarManufacturer = CD.CollarManufacturer AND F.CollarId = CD.CollarId
- INNER JOIN dbo.LookupCollarManufacturers AS M
-	     ON F.CollarManufacturer = M.CollarManufacturer
-  LEFT JOIN dbo.Projects AS P
-         ON CD.ProjectId = P.ProjectId
-	  WHERE F.FixDate > CD.DeploymentDate
-        AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
-   GROUP BY P.ProjectName, CD.AnimalId, F.FileId, M.Name, F.CollarId
-GO
 CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
 RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE procedure [dbo].[ProjectInvestigator_Insert_SA]
-	@Login NVARCHAR(255), 
-	@Name  NVARCHAR(255), 
-	@Email NVARCHAR(255),
-	@Phone NVARCHAR(255)
-AS
-BEGIN
-	SET NOCOUNT ON
-
-	-- This can only be run be the Sysadmin
-	-- This script is mostly to remind the SA of the steps, so there is no error checking.
-
-	-- create a login
-	IF NOT EXISTS (select 1 from sys.server_principals where name = @Login)
-	BEGIN
-		EXEC ('CREATE LOGIN [' + @Login + '] FROM WINDOWS')
-	END
-
-	-- create a db user
-	IF NOT EXISTS (select 1 from sys.database_principals WHERE type = 'U' AND name = @Login)
-	BEGIN
-		EXEC ('CREATE USER ['  + @Login + ']') --  LOGIN defaults to the same name
-	END
-
-	-- Add the user to the Investigator role
-	IF NOT EXISTS (SELECT 1 from sys.database_role_members as U 
-				   INNER JOIN sys.database_principals AS P1  
-				   ON U.member_principal_id = P1.principal_id
-				   INNER JOIN sys.database_principals AS P2 
-				   ON U.role_principal_id = p2.principal_id 
-				   WHERE p1.name = @Login AND p2.name = 'Investigator' )
-	BEGIN
-		EXEC sp_addrolemember 'Investigator', @Login
-	END
-
-	-- Add the user to the Investigator table
-	INSERT INTO dbo.ProjectInvestigators ([Login],[Name],[Email],[Phone])
-		 VALUES (@Login, @Name, @Email, @Phone);
-END
 GO
 SET ANSI_NULLS ON
 GO
@@ -6051,6 +5856,285 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE VIEW [dbo].[VelocityVectors_NPS]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          ,M.[StartDate]
+          ,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          ,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance <> 0
+       AND M.StartDate < DATEADD(DAY,-30,GETDATE())
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[VelocityVectors]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          ,M.[StartDate]
+          ,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          ,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance <> 0
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ValidLocationsWithLatLong]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Location] AS [Shape]
+          ,L.[Location].Lat AS [Lat_WGS84]
+          ,L.[Location].Long AS [Lon_WGS84]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ValidLocations_NPS]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          --,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+       AND L.[FixDate] < DATEADD(DAY,-30,GETDATE())
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[ValidLocations]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          --,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[NoMovement_NPS]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          --,M.[StartDate]
+          --,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          --,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance = 0
+       AND M.StartDate < DATEADD(DAY,-30,GETDATE())
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[NoMovement]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          --,M.[StartDate]
+          --,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          --,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance = 0
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[NextAnimalId] 
+(
+	@ProjectId VARCHAR(32)   = NULL 
+)
+RETURNS VARCHAR(16)
+AS
+BEGIN
+	-- Check that project exists
+	IF NOT EXISTS( SELECT 1 FROM Projects WHERE ProjectId = @ProjectId)
+	BEGIN
+			-- You can't raise errors in a function, so you can either do an illegal operation to
+			-- stop the process, or in may case I will just return a safe result
+			RETURN NULL
+	END
+	
+	DECLARE @Year CHAR(2)
+	DECLARE @Count int
+	DECLARE @Id VARCHAR(16)
+
+	--Get the prefix for the current year (i.e. 2012 -> '12')
+	SELECT @Year  = SUBSTRING(CONVERT(CHAR(4),YEAR(GETDATE())),3,2)
+	SELECT @Count =	convert(varchar(10),(max(id) + 1))
+	  from (select case WHEN ISNUMERIC(SUBSTRING(AnimalId, 3, 9)) = 1
+	                    then convert(int,SUBSTRING(AnimalId, 3, 9))
+	                    ELSE 0 END as id
+	          from Animals
+	         where ProjectId = @ProjectId AND AnimalId LIKE @Year+'%') as t
+	if (@Count < 100)
+		SELECT @Id = @Year + REPLACE(STR(@Count, 2, 0), ' ', '0')
+	else
+		SELECT @Id = @Year + REPLACE(STR(@Count, 6, 0), ' ', '')
+	If @Id is null
+		SET @Id = @Year + '01'
+	RETURN @id
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[InvalidLocations]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NOT NULL
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[AnimalFixesByFile]
+AS
+
+----------- Animal Fixes by File
+     SELECT F.FileId, M.Name AS Manufacturer, F.CollarId, P.ProjectName AS Project, CD.AnimalId,
+		    dbo.LocalTime(MIN(F.FixDate)) AS [First Fix],
+			dbo.LocalTime(MAX(F.FixDate)) AS [Last Fix],
+            COUNT(F.FixDate) AS [Number of Fixes]
+	   FROM dbo.CollarFixes AS F
+ INNER JOIN dbo.CollarDeployments AS CD
+	     ON F.CollarManufacturer = CD.CollarManufacturer AND F.CollarId = CD.CollarId
+ INNER JOIN dbo.LookupCollarManufacturers AS M
+	     ON F.CollarManufacturer = M.CollarManufacturer
+  LEFT JOIN dbo.Projects AS P
+         ON CD.ProjectId = P.ProjectId
+	  WHERE F.FixDate > CD.DeploymentDate
+        AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
+   GROUP BY P.ProjectName, CD.AnimalId, F.FileId, M.Name, F.CollarId
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 20, 2012
@@ -6093,91 +6177,6 @@ BEGIN
         INSERT [dbo].[Settings] ([Username], [Key], [Value]) VALUES (@Caller, @Key, @Value) 
 
 END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ProjectEditors](
-	[ProjectId] [varchar](16) NOT NULL,
-	[Editor] [sysname] NOT NULL,
- CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[Editor] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:      Regan Sarwas
--- Create date: March 28, 2012
--- Description: Adds a new project to the database.
--- =============================================
-CREATE PROCEDURE [dbo].[Project_Insert] 
-    @ProjectId           NVARCHAR(255),
-    @ProjectName         NVARCHAR(255), 
-    @ProjectInvestigator SYSNAME, 
-    @UnitCode            NVARCHAR(255) = NULL, 
-    @Description         NVARCHAR(4000) = NULL 
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Get the name of the caller
-    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
-
-    --Fix Text Inputs
-    SET @ProjectId           = NULLIF(@ProjectId,'')
-    SET @ProjectName         = NULLIF(@ProjectName,'')
-    SET @UnitCode            = NULLIF(@UnitCode,'')
-    SET @ProjectInvestigator = NULLIF(@ProjectInvestigator,'')
-    SET @Description         = NULLIF(@Description,'')
-
-    --default PI is the calling user
-    SET @ProjectInvestigator = ISNULL(@ProjectInvestigator, @Caller) 
-
-    -- If the caller is not a PI or assistant then error and return
-    IF @ProjectInvestigator != @Caller
-       AND NOT EXISTS (SELECT 1
-                         FROM ProjectInvestigatorAssistants
-                        WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator)
-    BEGIN
-        DECLARE @message1 NVARCHAR(100) = 'You ('+@Caller+') must be a project investigator (or assitant) to create a project';
-        RAISERROR(@message1, 18, 0)
-        RETURN 1
-    END
-
-
-    INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
-         VALUES              (@ProjectId,  @ProjectName,  @ProjectInvestigator,  @UnitCode,  @Description)
-
-END
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarFileHeaders](
-	[Header] [nvarchar](450) NOT NULL,
-	[FileFormat] [char](1) NOT NULL,
-	[Regex] [nvarchar](450) NULL,
- CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
-(
-	[Header] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
@@ -6366,6 +6365,42 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarFileHeaders](
+	[Header] [nvarchar](450) NOT NULL,
+	[FileFormat] [char](1) NOT NULL,
+	[Regex] [nvarchar](450) NULL,
+ CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
+(
+	[Header] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProjectEditors](
+	[ProjectId] [varchar](16) NOT NULL,
+	[Editor] [sysname] NOT NULL,
+ CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[Editor] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE FUNCTION [dbo].[IsInvestigatorEditor] 
 (
     @ProjectInvestigator sysname, 
@@ -6388,6 +6423,55 @@ BEGIN
              )
         RETURN 1
     RETURN 0
+END
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: March 28, 2012
+-- Description: Adds a new project to the database.
+-- =============================================
+CREATE PROCEDURE [dbo].[Project_Insert] 
+    @ProjectId           NVARCHAR(255),
+    @ProjectName         NVARCHAR(255), 
+    @ProjectInvestigator SYSNAME, 
+    @UnitCode            NVARCHAR(255) = NULL, 
+    @Description         NVARCHAR(4000) = NULL 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    --Fix Text Inputs
+    SET @ProjectId           = NULLIF(@ProjectId,'')
+    SET @ProjectName         = NULLIF(@ProjectName,'')
+    SET @UnitCode            = NULLIF(@UnitCode,'')
+    SET @ProjectInvestigator = NULLIF(@ProjectInvestigator,'')
+    SET @Description         = NULLIF(@Description,'')
+
+    --default PI is the calling user
+    SET @ProjectInvestigator = ISNULL(@ProjectInvestigator, @Caller) 
+
+    -- If the caller is not a PI or assistant then error and return
+    IF @ProjectInvestigator != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @ProjectInvestigator)
+    BEGIN
+        DECLARE @message1 NVARCHAR(100) = 'You ('+@Caller+') must be a project investigator (or assitant) to create a project';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    INSERT INTO dbo.Projects ([ProjectId], [ProjectName], [ProjectInvestigator], [UnitCode], [Description])
+         VALUES              (@ProjectId,  @ProjectName,  @ProjectInvestigator,  @UnitCode,  @Description)
+
 END
 GO
 SET ANSI_NULLS ON
@@ -8338,6 +8422,110 @@ REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[Projects] CHECK CONSTRAINT [FK_Projects_ProjectInvestigators]
 GO
+GRANT SELECT ON [dbo].[Animals] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ArgosDeployments] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ArgosDownloads] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ArgosFilePlatformDates] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ArgosFileProcessingIssues] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ArgosPlatforms] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ArgosPrograms] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarDataArgosEmail] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarDataArgosWebService] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarDataDebevekFormat] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarDataTelonicsGen3] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarDataTelonicsGen3StoreOnBoard] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarDataTelonicsGen4] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarDeployments] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarFiles] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarFixes] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarParameterFiles] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[CollarParameters] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Collars] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Locations] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupCollarFileFormats] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupCollarFileHeaders] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupCollarManufacturers] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupCollarModels] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupCollarParameterFileFormats] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupFileStatus] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupGender] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupQueryLayerServers] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LookupSpecies] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Movements] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ProjectEditors] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ProjectInvestigatorAssistants] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ProjectInvestigators] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Projects] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Settings] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[AnimalFixesByFile] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[AnimalLocations] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ArgosFile_NeedsPartialProcessing] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ArgosFile_NeverProcessed] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[DataLog_NeverProcessed] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Gen3StoreOnBoardLocations] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[InvalidLocations] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[LastLocationOfKnownMortalities] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[MostRecentLocations] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[NoMovement] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[NoMovement_NPS] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ValidLocations] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ValidLocations_NPS] TO [Viewer] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ValidLocationsWithLatLong] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[VelocityVectors] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[VelocityVectors_NPS] TO [Viewer] AS [dbo]
+GO
 GRANT EXECUTE ON [dbo].[Animal_Delete] TO [Editor] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[Animal_Insert] TO [Editor] AS [dbo]
@@ -8510,9 +8698,35 @@ EXEC dbo.sp_addrolemember @rolename=N'MStran_PAL_role', @membername=N'INPAKROMS5
 GO
 EXEC dbo.sp_addrolemember @rolename=N'MStran_PAL_role', @membername=N'MSReplPAL_7_1'
 GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'Editor'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\SDMiller'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\RESarwas'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\KCJoly'
+GO
 EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\Domain Users'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'INPAKROMS53AIS\sql_proxy'
 GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\BAMangipane'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\JWBurch'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\BBorg'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\JPLawler'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'Investigator'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\MLJohnson'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\PAOwen'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\GColligan'
+GO
 EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'ArgosProcessor'
+GO
+EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'NPS\SArthur'
 GO
