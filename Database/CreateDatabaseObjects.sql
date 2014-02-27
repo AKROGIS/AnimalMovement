@@ -8642,6 +8642,8 @@ GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [Viewer] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[FileHasGen4Data] TO [Viewer] AS [dbo]
 GO
+GRANT SELECT ON [dbo].[GetTelonicsParametersForArgosDates] TO [Viewer] AS [dbo]
+GO
 GRANT EXECUTE ON [dbo].[IsFixEditor] TO [Viewer] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[IsInvestigatorEditor] TO [Viewer] AS [dbo]
@@ -8649,6 +8651,8 @@ GO
 GRANT EXECUTE ON [dbo].[IsProjectEditor] TO [Viewer] AS [dbo]
 GO
 GRANT EXECUTE ON [dbo].[NextAnimalId] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[SummarizeTpfFile] TO [Viewer] AS [dbo]
 GO
 EXEC dbo.sp_addrolemember @rolename=N'ArgosProcessor', @membername=N'INPAKROMS53AIS\sql_proxy'
 GO
