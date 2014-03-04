@@ -465,15 +465,18 @@ CREATE TABLE [dbo].[HiddenFixes](
 -- Project location data cleanup and sanity checking
 -- =========================================================
 
+----------- Extents of Valid Locations by Project
+     SELECT ProjectId, MIN(Location.Lat) AS South, MAX(Location.Lat) AS North, MIN(Location.Long) AS West, MAX(Location.Long) AS East
+       FROM Locations
+      WHERE [Status] IS NULL
+   GROUP BY ProjectId
 
 ----------- Really Bad Fixes
-     SELECT MIN(Lat), MAX(Lat), MIN(Lon), MAX(Lon) FROM CollarFixes 
-     SELECT F.FileId
+     SELECT X.Lat, X.Lon, F.FileId, F.FileName, F.Owner, F.ProjectId
        FROM CollarFixes AS X
  INNER JOIN CollarFiles AS F
          ON X.fileId = F.fileId
-      WHERE X.Lon < -180
-   GROUP BY F.FileId
+      WHERE X.Lon <= -180 OR 0 <= X.Lon OR X.Lat <= 0 OR 90 <= X.Lat
 
 ----------- Preview/Hide the fixes outside a nominal range for a project
 /*
