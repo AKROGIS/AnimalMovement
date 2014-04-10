@@ -64,7 +64,7 @@ def CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
 
     searchFields = [dateFieldName, 'SHAPE@XY']
     insertFields = [startFieldName, endFieldName, durationFieldName,
-                    velocityFieldName, 'SHAPE@WKT']
+                    velocityFieldName, directionFieldName, 'SHAPE@WKT']
     if animalFieldName:
         hasAnimal = True
         animalField = arcpy.ListFields(telemetryLayer, animalFieldName)[0]
