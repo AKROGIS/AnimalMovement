@@ -23,13 +23,31 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="MovementVectors10.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="MovementVectors10.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Animal Movement Scripts/MovementVectors10.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="151" column="7" selection-start="6742" selection-end="6742" vertical-scroll-proportion="1.0784314" vertical-offset="1632" max-vertical-offset="4845">
+            <state line="109" column="0" selection-start="5290" selection-end="5290" vertical-scroll-proportion="0.0" vertical-offset="2040" max-vertical-offset="4845">
               <folding>
                 <element signature="e#1623#1632#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UD_Batch.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Animal Movement Scripts/UD_Batch.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="198" column="0" selection-start="13003" selection-end="13130" vertical-scroll-proportion="0.0" vertical-offset="2954" max-vertical-offset="6103">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UD_Batch_forKyle.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Animal Movement Scripts/UD_Batch_forKyle.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="204" column="66" selection-start="13501" selection-end="13501" vertical-scroll-proportion="-0.5327869" vertical-offset="3872" max-vertical-offset="6239">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -45,12 +63,13 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/Animal Movement Scripts/MovementVectors10.py" />
+        <option value="$PROJECT_DIR$/Animal Movement Scripts/UD_Batch_forKyle.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="492" />
-    <option name="y" value="147" />
+    <option name="x" value="154" />
+    <option name="y" value="91" />
     <option name="width" value="1399" />
     <option name="height" value="1000" />
   </component>
@@ -80,7 +99,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -115,6 +133,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -123,6 +142,12 @@
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
     <property name="last_opened_file_path" value="C:/Python27/ArcGIS10.2/pythonw.exe" />
+    <property name="FullScreen" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\resarwas\Documents\GitHub\AnimalMovement\Toolbox\Animal Movement Scripts" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration default="true" type="tests" factoryName="py.test">
@@ -258,19 +283,19 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="492" y="147" width="1399" height="1000" extended-state="0" />
-    <editor active="true" />
+    <frame x="154" y="91" width="1399" height="1000" extended-state="0" />
+    <editor active="false" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25018078" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -299,10 +324,33 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/Animal Movement Scripts/MovementVectors10.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="151" column="7" selection-start="6742" selection-end="6742" vertical-scroll-proportion="1.0784314" vertical-offset="1632" max-vertical-offset="4845">
+        <state line="109" column="0" selection-start="5290" selection-end="5290" vertical-scroll-proportion="0.0" vertical-offset="2040" max-vertical-offset="4845">
           <folding>
             <element signature="e#1623#1632#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Animal Movement Scripts/MovementVectors10.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="109" column="0" selection-start="5290" selection-end="5290" vertical-scroll-proportion="0.0" vertical-offset="2040" max-vertical-offset="4845">
+          <folding>
+            <element signature="e#1623#1632#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Animal Movement Scripts/UD_Batch.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="198" column="0" selection-start="13003" selection-end="13130" vertical-scroll-proportion="0.0" vertical-offset="2954" max-vertical-offset="6103">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Animal Movement Scripts/UD_Batch_forKyle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="204" column="66" selection-start="13501" selection-end="13501" vertical-scroll-proportion="-0.5327869" vertical-offset="3872" max-vertical-offset="6239">
+          <folding />
         </state>
       </provider>
     </entry>
