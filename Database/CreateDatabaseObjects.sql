@@ -16,7 +16,7 @@ CREATE USER [NPS\BBorg] FOR LOGIN [NPS\BBorg] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\Domain Users] FOR LOGIN [NPS\Domain Users]
 GO
-CREATE USER [NPS\GColligan] FOR LOGIN [NPS\GColligan] WITH DEFAULT_SCHEMA=[dbo]
+CREATE USER [NPS\GColligan] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\JPLawler] FOR LOGIN [NPS\JPLawler] WITH DEFAULT_SCHEMA=[dbo]
 GO
@@ -39,10 +39,6 @@ GO
 CREATE ROLE [Editor] AUTHORIZATION [dbo]
 GO
 CREATE ROLE [Investigator] AUTHORIZATION [dbo]
-GO
-CREATE ROLE [MSReplPAL_7_1] AUTHORIZATION [dbo]
-GO
-CREATE ROLE [MStran_PAL_role] AUTHORIZATION [dbo]
 GO
 CREATE ROLE [Viewer] AUTHORIZATION [dbo]
 GO
@@ -2143,8 +2139,11 @@ BEGIN
     -- Business Rule: Format cannot be changed if CollarParameterFile is used in a CollarParameter
     IF EXISTS (    SELECT 1
                      FROM inserted AS i
+                     JOIN deleted AS d
+                       ON i.FileId = d.FileId
                INNER JOIN CollarParameters AS P
                        ON P.FileId = i.FileId
+                    WHERE i.[Format] <> d.[Format]
               )
     BEGIN
         RAISERROR('Integrity Violation. Format cannot be changed when the file is linked to a Collar', 18, 0)
@@ -2156,8 +2155,11 @@ BEGIN
     -- Business Rule: Status cannot be changed if CollarParameterFile is used in a CollarParameter
     IF EXISTS (    SELECT 1
                      FROM inserted AS i
+                     JOIN deleted AS d
+                       ON i.FileId = d.FileId
                INNER JOIN CollarParameters AS P
                        ON P.FileId = i.FileId
+                    WHERE i.[Status] <> d.[Status]
               )
     BEGIN
         RAISERROR('Integrity Violation. Status cannot be changed when the file is linked to a Collar', 18, 0)
@@ -8696,11 +8698,7 @@ EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\BBorg'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\JPLawler'
 GO
-EXEC dbo.sp_addrolemember @rolename=N'MSReplPAL_7_1', @membername=N'INPAKROMS53AIS\repl_distribution'
-GO
-EXEC dbo.sp_addrolemember @rolename=N'MStran_PAL_role', @membername=N'INPAKROMS53AIS\repl_distribution'
-GO
-EXEC dbo.sp_addrolemember @rolename=N'MStran_PAL_role', @membername=N'MSReplPAL_7_1'
+EXEC dbo.sp_addrolemember @rolename=N'Investigator', @membername=N'NPS\SArthur'
 GO
 EXEC dbo.sp_addrolemember @rolename=N'Viewer', @membername=N'Editor'
 GO
