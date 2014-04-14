@@ -437,6 +437,10 @@ namespace AnimalMovement
                 form.SetDefaultPlatform(argosId);
                 form.Show(this);
             }
+            else
+            {
+                AddArgosDeployment(argosId, collar, start);
+            }
         }
 
         private void ArgosAdded(string argosId, Collar collar, DateTime start)
@@ -502,11 +506,11 @@ namespace AnimalMovement
             var deployment1 =
                 collar.ArgosDeployments.SingleOrDefault(d =>
                                                         d.ArgosPlatform != platform &&
-                                                        d.StartDate < start && d.EndDate == null);
+                                                        ((d.StartDate == null || d.StartDate < start) && d.EndDate == null));
             var deployment2 =
                 platform.ArgosDeployments.SingleOrDefault(d =>
                                                           d.Collar != collar &&
-                                                          d.StartDate < start && d.EndDate == null);
+                                                          ((d.StartDate == null || d.StartDate < start) && d.EndDate == null));
             if (deployment1 != null)
                 deployment1.EndDate = start;
             if (deployment2 != null)
@@ -529,8 +533,9 @@ namespace AnimalMovement
 
             //now check if the new deployment is in conflict with any existing deployments
             DateTime? end = endDate;
+            //Execute the query (.ToList()); otherwise LINQ will try to run the DatesOverlap predicate on the SQL Server
             var competition = Database.ArgosDeployments.Where(d => (d.Collar == collar && d.ArgosPlatform != platform) ||
-                                                                (d.Collar != collar && d.ArgosPlatform == platform));
+                                                                (d.Collar != collar && d.ArgosPlatform == platform)).ToList();
             bool conflict = competition.Any(d => DatesOverlap(d.StartDate, d.EndDate, start, end));
             if (conflict)
             {
@@ -593,6 +598,7 @@ namespace AnimalMovement
         {
             OnDatabaseChanged();
             ParametersDataGridView.DataSource = null; //cause the sister grid to refresh when it becomes active
+            _collars = null; //force a refresh of our collar cache (requery the database since we may have added a collar)
             CheckTpfData(); //Redraw the datagridview
             EnableTpfDetailsControls();
         }
