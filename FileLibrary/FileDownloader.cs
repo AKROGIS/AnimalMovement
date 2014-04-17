@@ -69,7 +69,17 @@ namespace FileLibrary
                                           where log.ProgramId == program.ProgramId && log.FileId != null
                                           orderby log.TimeStamp descending
                                           select log.TimeStamp).FirstOrDefault();
-                daysSinceLastDownload = (DateTime.Now - dateOfLastDownload).Days;
+                //Problem: using Days always truncates.
+                // If I download at 1am on day 1, and then 11pm on day 2, (1.9 days -> 1day),
+                //   I will miss any data created between 1am and 11pm on day 1.
+                // However, rounding up may cause a lot of duplication,
+                // (i.e. 6:01am on day1 and then 6:02am on day2, will need to download 2 days to get the extra minute)
+                // by default we should round up to make sure that all data is obtained.  However, since this is
+                // typically called on a scheduled task at the same time (+/- download/processing time) everyday.
+                // I will check if we are close to an even day, and then round tword that day
+                var timespan = DateTime.Now - dateOfLastDownload;
+                int extraDay = (timespan.Hours == 0 && timespan.Minutes < 5) ? 0 : 1;
+                daysSinceLastDownload = timespan.Days + extraDay;
             }
             var days = Math.Min(ArgosWebSite.MaxDays, daysSinceLastDownload);
             if (days < ArgosWebSite.MinDays)
