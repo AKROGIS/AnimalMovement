@@ -148,11 +148,9 @@ Batch completed at: 2012.12.17 22:32:27
                 string[] paths = Directory.GetFiles(outputFolder);
                 if (paths.Length < 1)
                     throw new InvalidOperationException("TDC Execution error - No output file");
-                if (paths.Length > 1)
-                    throw new InvalidOperationException("TDC Execution error - multiple output files");
-                
-                results = File.ReadAllLines(paths[0]);
-
+                //TDC breaks up the output into CSV files < ~65023 lines long; we need to merge them (with a single header)
+                //I need to force enumerate the files with ToArray() before the finally section deletes the files
+                results = File.ReadAllLines(paths[0]).Concat(FilesWithoutHeader(paths.Skip(1))).ToArray();        
             }
             finally
             {
@@ -178,6 +176,11 @@ Batch completed at: 2012.12.17 22:32:27
             }
 
             return results;
+        }
+
+        private IEnumerable<string> FilesWithoutHeader(IEnumerable<string> paths)
+        {
+            return paths.SelectMany(path => File.ReadAllLines(path).SkipWhile(line => !line.StartsWith("Acquisition Time,")).Skip(1));
         }
 
         private static string GetNewTempDirectory()
