@@ -155,7 +155,7 @@ namespace ArgosProcessor
                 return null;
             var database = new AnimalMovementDataContext();
             return (from collar in database.CollarFiles
-                    where collar.LookupCollarFileFormat.ArgosData == 'Y' && collar.FileId == id
+                    where (collar.LookupCollarFileFormat.Code == 'H' || collar.LookupCollarFileFormat.ArgosData == 'Y') && collar.FileId == id
                     select collar).FirstOrDefault();
         }
 
