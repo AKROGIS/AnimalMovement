@@ -19,13 +19,17 @@ This SDK is an optional install if you have a license to ArcMap Desktop.
 
 The projects are not required, and you can disable them if you want.
 
-  * QueryLayerBuilder - Provides a query builder to allow the user to create an ArcMap
+  * QueryLayerBuilder
+  
+  Provides a query builder to allow the user to create an ArcMap
   query layer to display a subset of the Animal Movements database in ArcMap.  This tool
   is fairly limited. If you are familiar with SQL and the structure of the database
   you will have better luck building the query layers by hand, if not, you should find
   someone who is.
 
-  * ArcMap_Addin - This ArcMap add-in provides a convenient method of hiding (or 
+  * ArcMap_Addin
+  
+  This ArcMap add-in provides a convenient method of hiding (or 
   un-hiding) locations, by selecting them in ArcMap. Bad locations are often very
   obvious when looking at the movement vectors in ArcMap.
 
@@ -33,6 +37,7 @@ The ESRI dependent code works only with ArcMap 10.x.  It will not work with ArcM
 nor with the new ArcGIS Pro (at least as of the Beta release).  The build for ArcMap 10.0
 is different than 10.1 and 10.2.  The projects are currently set up to build with 10.2.
 If you need to build with 10.0, then make the following changes:
+
   * In QueryLayerBuilder properties add a Conditional Compilation Symbol of ARCGIS_10_0 on the build tab
   * In ArcMap_Addin properties add a Conditional Compilation Symbol of ARCGIS_10_0 on the build tab
   * In ArcMap_Addin/Config.esri.addinx, change <Target name="Desktop" version="10.2" /> to 10.0
@@ -72,6 +77,7 @@ if `~\AnimalMovement\Database\CreateDatabaseObjects.sql` is newer than `~\Animal
  2. Do a global search and replace removing all SET ANSI_PADDING OFF
  
 	# This setting causes creation of spatial indices to fail.  The setting is deprecated (see http://msdn.microsoft.com/en-us/library/ms187403(v=sql.90).aspx)
+
 	# SSMS incorrectly inserts it in the script (see https://connect.microsoft.com/SQLServer/feedback/details/127167/trailing-set-ansi-padding-off-when-scripting-tables#details)
 
  3. Remove all the CREATE USER commands at the start of the script
