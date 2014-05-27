@@ -58,6 +58,7 @@ CreateDatabase.sql
 ~~~~~~~~~~~~~~~~~~
 
 if `~\AnimalMovement\Database\CreateDatabase.sql` is newer than `~\AnimalMovement\Distribution\Database\CreateDatabase.sql` then
+
  1. Copy and replace
  2. Remove all the GRANT commands at the end of the script
  3. Edit the 5th and 7th lines to change the size of the files to 10240KB and 10240KB respectively
@@ -66,15 +67,19 @@ CreateDatabaseObjects.sql
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if `~\AnimalMovement\Database\CreateDatabaseObjects.sql` is newer than `~\AnimalMovement\Distribution\Database\\CreateDatabaseObjects.sql` then
+
  1. Copy and replace
  2. Do a global search and replace removing all SET ANSI_PADDING OFF
-    # This setting causes creation of spatial indices to fail.  The setting is deprecated (see http://msdn.microsoft.com/en-us/library/ms187403(v=sql.90).aspx)
-    # SSMS incorrectly inserts it in the script (see https://connect.microsoft.com/SQLServer/feedback/details/127167/trailing-set-ansi-padding-off-when-scripting-tables#details)
+ 
+	# This setting causes creation of spatial indices to fail.  The setting is deprecated (see http://msdn.microsoft.com/en-us/library/ms187403(v=sql.90).aspx)
+	# SSMS incorrectly inserts it in the script (see https://connect.microsoft.com/SQLServer/feedback/details/127167/trailing-set-ansi-padding-off-when-scripting-tables#details)
+
  3. Remove all the CREATE USER commands at the start of the script
  4. Remove the CREATE ROLE commands for the replication roles
  5. Remove all the EXEC dbo.sp_addrolemember commands from the end of the script
  6. Search for "CREATE PROCEDURE [dbo].[Summerize]", and add "WITH EXECUTE AS OWNER" on a
     new line before the line with only "AS".
+	
 	# That this is missing may be a bug that gets fixed in an update of SSMS
 
 SqlServer_CLR.sql
@@ -95,3 +100,10 @@ The following instructions were valid for VS2010 (after a deployment was done) a
 The most reliable method now is to use the command line or Visual Studio deployment feature
 to deploy the dll to a test database.  Then you can use the generate script tool in SSMS
 in the test database that to created this script. Instruction are at `http://msdn.microsoft.com/en-us/library/ms345099(v=sql.105).aspx`
+
+Distributing
+------------
+
+Zip up the Distribution folder (without the make_dist.bat file) and provide to the
+User.   Thuser can then use the installation Instructions in the Documentation folder
+to build and configure the SQL Server database.

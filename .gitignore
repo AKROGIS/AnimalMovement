@@ -3,6 +3,7 @@ Documentation/*.html
 Distribution/Database/*
 Distribution/Client/*
 Distribution/Server/*
+Distribution/Documentation/*
 
 #OS junk files
 [Tt]humbs.db

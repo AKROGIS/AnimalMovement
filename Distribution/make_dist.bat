@@ -4,6 +4,11 @@ SET dest_root=.
 mkdir %dest_root%\Client
 mkdir %dest_root%\Server
 mkdir %dest_root%\Database
+mkdir %dest_root%\Documentation
+
+SET docs=%src_root%\Documentation
+copy /Y %docs%\Documentation.pdf  %dest_root%\Documentation
+copy /Y "%docs%\Installation Instructions.pdf"  %dest_root%\Documentation
 
 SET client=%src_root%\AnimalMovement\bin\Release
 copy /Y %client%\AnimalMovement.exe  %dest_root%\Client
