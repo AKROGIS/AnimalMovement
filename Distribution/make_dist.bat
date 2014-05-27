@@ -1,3 +1,5 @@
+REM See ..\Documentation\Build_Instructions for details on using this script
+
 SET src_root=..
 SET dest_root=.
 
