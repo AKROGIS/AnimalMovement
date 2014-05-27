@@ -1,6 +1,0 @@
-The code for the ESRI portion of this app (projects QueryLayerBuilder and ArcMap_Addin) must be built for a specific version of ArcGIS
-Currently the default is ArcGIS 10.0, and it will build correctly for that version with no changes.
-To build for ArcGIS 10.1 make the following changes:
-  * In QueryLayerBuilder properties add a Conditional Compilation Symbol of ARCGIS_10_1 on the build tab
-  * In ArcMap_Addin properties add a Conditional Compilation Symbol of ARCGIS_10_1 on the build tab
-  * In ArcMap_Addin/Config.esri.addinx, change <Target name="Desktop" version="10.0" /> to 10.1
