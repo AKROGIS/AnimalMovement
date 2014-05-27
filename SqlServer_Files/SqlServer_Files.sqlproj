@@ -1,24 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">10.0</VisualStudioVersion>
+    <PostConversionRemoveFromScc>
+    </PostConversionRemoveFromScc>
+    <PostConversionAddToScc>
+    </PostConversionAddToScc>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectTypeGuids>{c252feb5-a946-4202-b1d4-9916a0590387};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProductVersion>
     </ProductVersion>
-    <SchemaVersion>
-    </SchemaVersion>
-    <ProjectGuid>{DBE62DDD-8B81-4C7C-970F-AC171C97B42A}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputType>Database</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>SqlServer_Files</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <SGenUseProxyTypes>false</SGenUseProxyTypes>
     <ConnectionString>
     </ConnectionString>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\resarwas\Documents\GitHub\AnimalMovement\Backup\SqlServer_Files\</UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
+    <Name>SqlServer_Files</Name>
+    <ProjectVersion>4.0</ProjectVersion>
+    <ProjectGuid>{69768b2e-d5e7-4084-9cac-a0197b24188a}</ProjectGuid>
+    <IncludeSchemaNameInFileName>False</IncludeSchemaNameInFileName>
+    <GenerateDatabaseFile>False</GenerateDatabaseFile>
+    <GenerateCreateScript>False</GenerateCreateScript>
+    <ModelCollation>1033,CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <DefaultSchema>dbo</DefaultSchema>
+    <TargetLanguage>CS</TargetLanguage>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,28 +45,34 @@
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <WarningLevel>4</WarningLevel>
-    <DeployCode>true</DeployCode>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <WarningLevel>4</WarningLevel>
-    <DeployCode>true</DeployCode>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>SqlServer_Files</RootNamespace>
   </PropertyGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildBinPath)\SqlServer.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.XML" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgosAwsFile.cs" />
@@ -62,12 +87,16 @@
     <Content Include="Test Scripts\Test.sql">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="PreDeployScript.sql">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="PostDeployScript.sql">
-      <SubType>Content</SubType>
-    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PreDeploy Include="PreDeployScript.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="PostDeployScript.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+    <Folder Include="Test Scripts\" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -17,6 +17,9 @@
     <ConnectionString>
     </ConnectionString>
     <PermissionLevel>1</PermissionLevel>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>C:\Users\resarwas\Documents\GitHub\AnimalMovement\Backup\SqlServer_Parsers\</UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
