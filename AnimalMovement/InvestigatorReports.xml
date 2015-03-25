@@ -177,14 +177,16 @@
          ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
   LEFT JOIN ArgosDeployments AS A
          ON C.CollarManufacturer = A.CollarManufacturer AND C.CollarId = A.CollarId
-      WHERE A.PlatformId IN (
+  LEFT JOIN ArgosPlatforms AS P
+         ON A.PlatformId = P.PlatformId
+      WHERE A.PlatformId NOT IN (
                             SELECT PlatformId
-                              FROM ArgosDownloads
+                              FROM ArgosFilePlatformDates
                           GROUP BY PlatformId
-                HAVING Max(FileID) IS NULL
             )
         AND C.DisposalDate IS NULL  -- only show active collars
         AND D.RetrievalDate IS NULL -- only show current animal
+		AND P.Active = 1
         AND C.Manager = @PI
    ORDER BY C.Manager, C.CollarModel, A.PlatformId
       ]]>
