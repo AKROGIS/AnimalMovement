@@ -32,7 +32,8 @@ namespace ArcMap_Addin
                 ILayer layer = elayers.Next();
                 while (layer != null)
                 {
-                    yield return layer;
+                    if (layer.Valid)
+                        yield return layer;
                     layer = elayers.Next();
                 }
             }
