@@ -510,7 +510,7 @@ namespace AnimalMovement
             //now check if the new deployment is in conflict with any existing deployments
             DateTime? end = endDate;
             var competition = Database.ArgosDeployments.Where(d => (d.Collar == collar && d.ArgosPlatform != platform) ||
-                                                                (d.Collar != collar && d.ArgosPlatform == platform));
+                                                                (d.Collar != collar && d.ArgosPlatform == platform)).ToList();
             bool conflict = competition.Any(d => DatesOverlap(d.StartDate, d.EndDate, start, end));
             if (conflict)
             {
