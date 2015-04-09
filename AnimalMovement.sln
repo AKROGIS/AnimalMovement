@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataModel", "DataModel\DataModel.csproj", "{4B8A418A-482D-4631-A605-938D52BDF8BC}"
 EndProject
@@ -32,6 +32,8 @@ EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "SqlServer_Files", "SqlServer_Files\SqlServer_Files.sqlproj", "{69768B2E-D5E7-4084-9CAC-A0197B24188A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollarFileLoader", "CollarFileLoader\CollarFileLoader.csproj", "{AE0F7910-911F-47E8-AF3D-D2A16804121D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WachExport", "WachExport\WachExport.csproj", "{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -212,6 +214,16 @@ Global
 		{AE0F7910-911F-47E8-AF3D-D2A16804121D}.Release|Mixed Platforms.Build.0 = Release|x86
 		{AE0F7910-911F-47E8-AF3D-D2A16804121D}.Release|x86.ActiveCfg = Release|x86
 		{AE0F7910-911F-47E8-AF3D-D2A16804121D}.Release|x86.Build.0 = Release|x86
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A1C02C12-0E4A-40A5-A3B0-6051F87BBD20}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
