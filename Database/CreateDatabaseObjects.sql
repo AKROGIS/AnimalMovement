@@ -5970,6 +5970,8 @@ GO
 
 
 
+
+
 CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
 AS
 ----------- ArgosFile_NeedsPartialProcessing
@@ -5979,15 +5981,15 @@ AS
 -----------   but there is no results file, and no processing issues.
 	 SELECT A.FileId, A.PlatformId
 	   FROM ArgosFilePlatformDates AS A
-  LEFT JOIN CollarFiles AS C
-		 ON C.ParentFileId = A.FileId
-  LEFT JOIN ArgosDeployments AS D
-		 ON D.DeploymentId = C.ArgosDeploymentId
-		AND D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-		AND D.PlatformId = A.PlatformId
-  LEFT JOIN CollarParameters AS P
-         ON P.ParameterId = C.CollarParameterId
-        AND P.CollarManufacturer = C.CollarManufacturer AND P.CollarId = C.CollarId
+  LEFT JOIN 
+         ( CollarFiles AS C
+		   LEFT JOIN ArgosDeployments AS D
+				  ON D.DeploymentId = C.ArgosDeploymentId
+				 AND D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+		   LEFT JOIN CollarParameters AS P
+				  ON P.ParameterId = C.CollarParameterId
+				 AND P.CollarManufacturer = C.CollarManufacturer AND P.CollarId = C.CollarId
+		) ON C.ParentFileId = A.FileId AND D.PlatformId = A.PlatformId
   LEFT JOIN ArgosFileProcessingIssues AS I
 		 ON I.PlatformId = A.PlatformId AND I.FileId = A.FileId
 	  WHERE A.FileId IS NOT NULL AND A.PlatformId IS NOT NULL
@@ -5997,6 +5999,8 @@ AS
         AND (P.EndDate IS NULL OR A.LastTransmission < P.EndDate)
 	    AND C.FileId IS NULL  AND I.IssueId IS NULL
 		AND A.FileId NOT IN (SELECT FileId FROM ArgosFile_NeverProcessed)
+
+
 
 
 GO
