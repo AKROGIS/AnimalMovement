@@ -80,6 +80,7 @@
             this.FileInfoButton = new System.Windows.Forms.Button();
             this.FilesDataGridView = new System.Windows.Forms.DataGridView();
             this.FixesTabPage = new System.Windows.Forms.TabPage();
+            this.FixesGridView = new System.Windows.Forms.DataGridView();
             this.UnhideFixButton = new System.Windows.Forms.Button();
             this.FixConflictsDataGridView = new System.Windows.Forms.DataGridView();
             this.label11 = new System.Windows.Forms.Label();
@@ -92,7 +93,6 @@
             this.CollarIdTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.CollarErrorProvider = new System.Windows.Forms.ErrorProvider(this.components);
-            this.FixesGridView = new System.Windows.Forms.DataGridView();
             this.CollarTabControl.SuspendLayout();
             this.GeneralTabPage.SuspendLayout();
             this.AnimalsTabPage.SuspendLayout();
@@ -105,11 +105,11 @@
             this.FilesTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FilesDataGridView)).BeginInit();
             this.FixesTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.FixesGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FixConflictsDataGridView)).BeginInit();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CollarErrorProvider)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.FixesGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // HasGpsCheckBox
@@ -779,6 +779,22 @@
             this.FixesTabPage.Text = "Fixes";
             this.FixesTabPage.UseVisualStyleBackColor = true;
             // 
+            // FixesGridView
+            // 
+            this.FixesGridView.AllowUserToAddRows = false;
+            this.FixesGridView.AllowUserToDeleteRows = false;
+            this.FixesGridView.AllowUserToResizeRows = false;
+            this.FixesGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.FixesGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.FixesGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.FixesGridView.Location = new System.Drawing.Point(6, 30);
+            this.FixesGridView.Name = "FixesGridView";
+            this.FixesGridView.ReadOnly = true;
+            this.FixesGridView.Size = new System.Drawing.Size(437, 138);
+            this.FixesGridView.TabIndex = 7;
+            // 
             // UnhideFixButton
             // 
             this.UnhideFixButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -847,10 +863,9 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(6, 12);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(443, 13);
+            this.label6.Size = new System.Drawing.Size(269, 13);
             this.label6.TabIndex = 8;
-            this.label6.Text = "Results (or problems) encountered when trying to process the raw data for this Ar" +
-    "gos platform";
+            this.label6.Text = "Issues encountered when processing files for this collar.";
             // 
             // ProcessingIssuesDataGridView
             // 
@@ -914,22 +929,6 @@
             // 
             this.CollarErrorProvider.ContainerControl = this;
             // 
-            // FixesGridView
-            // 
-            this.FixesGridView.AllowUserToAddRows = false;
-            this.FixesGridView.AllowUserToDeleteRows = false;
-            this.FixesGridView.AllowUserToResizeRows = false;
-            this.FixesGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.FixesGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.FixesGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.FixesGridView.Location = new System.Drawing.Point(6, 30);
-            this.FixesGridView.Name = "FixesGridView";
-            this.FixesGridView.ReadOnly = true;
-            this.FixesGridView.Size = new System.Drawing.Size(437, 138);
-            this.FixesGridView.TabIndex = 7;
-            // 
             // CollarDetailsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -959,12 +958,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.FilesDataGridView)).EndInit();
             this.FixesTabPage.ResumeLayout(false);
             this.FixesTabPage.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.FixesGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.FixConflictsDataGridView)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ProcessingIssuesDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.CollarErrorProvider)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.FixesGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
