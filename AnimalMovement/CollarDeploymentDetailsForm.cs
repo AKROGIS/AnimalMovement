@@ -110,8 +110,8 @@ namespace AnimalMovement
                    AnimalComboBox.SelectedItem as Animal != CollarDeployment.Animal ||
                    StartDateTimePicker.Value != CollarDeployment.DeploymentDate.ToLocalTime() ||
                    (CollarDeployment.RetrievalDate == null && EndDateTimePicker.Checked) ||
-                   (CollarDeployment.RetrievalDate != null &&
-                    EndDateTimePicker.Value != CollarDeployment.RetrievalDate.Value.ToLocalTime());
+                   (CollarDeployment.RetrievalDate != null && (!EndDateTimePicker.Checked ||
+                    EndDateTimePicker.Value != CollarDeployment.RetrievalDate.Value.ToLocalTime()));
         }
 
         private string ValidateError()

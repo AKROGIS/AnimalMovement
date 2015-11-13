@@ -84,11 +84,11 @@ namespace AnimalMovement
             return CollarComboBox.SelectedItem as Collar != ArgosDeployment.Collar ||
                    ArgosComboBox.SelectedItem as ArgosPlatform != ArgosDeployment.ArgosPlatform ||
                    (ArgosDeployment.StartDate == null && StartDateTimePicker.Checked) ||
-                   (ArgosDeployment.StartDate != null &&
-                    StartDateTimePicker.Value != ArgosDeployment.StartDate.Value.ToLocalTime()) ||
+                   (ArgosDeployment.StartDate != null && (!StartDateTimePicker.Checked ||
+                    StartDateTimePicker.Value != ArgosDeployment.StartDate.Value.ToLocalTime())) ||
                    (ArgosDeployment.EndDate == null && EndDateTimePicker.Checked) ||
-                   (ArgosDeployment.EndDate != null &&
-                    EndDateTimePicker.Value != ArgosDeployment.EndDate.Value.ToLocalTime());
+                   (ArgosDeployment.EndDate != null &&  (!EndDateTimePicker.Checked ||
+                    EndDateTimePicker.Value != ArgosDeployment.EndDate.Value.ToLocalTime()));
         }
 
         private void ValidateForm()

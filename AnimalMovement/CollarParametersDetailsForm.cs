@@ -172,11 +172,11 @@ namespace AnimalMovement
             return CollarComboBox.SelectedItem as Collar != CollarParameter.Collar ||
                    FileComboBox.SelectedItem as CollarParameterFile != CollarParameter.CollarParameterFile ||
                    (CollarParameter.StartDate == null && StartDateTimePicker.Checked) ||
-                   (CollarParameter.StartDate != null &&
-                    StartDateTimePicker.Value != CollarParameter.StartDate.Value.ToLocalTime()) ||
+                   (CollarParameter.StartDate != null && (!StartDateTimePicker.Checked ||
+                    StartDateTimePicker.Value != CollarParameter.StartDate.Value.ToLocalTime())) ||
                    (CollarParameter.EndDate == null && EndDateTimePicker.Checked) ||
-                   (CollarParameter.EndDate != null &&
-                    EndDateTimePicker.Value != CollarParameter.EndDate.Value.ToLocalTime());
+                   (CollarParameter.EndDate != null && (!EndDateTimePicker.Checked ||
+                    EndDateTimePicker.Value != CollarParameter.EndDate.Value.ToLocalTime()));
         }
 
         private string ValidateError()
