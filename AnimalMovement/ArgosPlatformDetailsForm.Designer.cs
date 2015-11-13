@@ -468,10 +468,9 @@
             this.label8.AutoSize = true;
             this.label8.Location = new System.Drawing.Point(6, 12);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(443, 13);
+            this.label8.Size = new System.Drawing.Size(337, 13);
             this.label8.TabIndex = 6;
-            this.label8.Text = "Results (or problems) encountered when trying to process the raw data for this Ar" +
-    "gos platform";
+            this.label8.Text = "Issues encountered when trying to process files for this Argos platform.";
             // 
             // ProcessingIssuesDataGridView
             // 

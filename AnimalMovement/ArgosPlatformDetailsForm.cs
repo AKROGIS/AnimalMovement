@@ -431,12 +431,9 @@ namespace AnimalMovement
 
         private void SetUpIssuesTab()
         {
-            //TODO - creating anonymous (or nested type) is empty unless ToList() is used,  lists do not support sorting.
-            //ProcessingIssuesDataGridView.DataSource = Platform.ArgosFileProcessingIssues; //works but too many fields in wrong order
             ProcessingIssuesDataGridView.DataSource = Platform.ArgosFileProcessingIssues.Select(i => new
                 {
                     i.CollarFile,
-                    i.Collar,
                     i.Issue
                 }).ToList();
         }
