@@ -673,7 +673,7 @@ namespace SqlServer_Parsers
             out SqlString latitude)
         {
             var line = (Line)inputObject;
-            string[] parts = line.LineText.Split(new[] { '\t', ',' });
+            string[] parts = line.LineText.Split('\t', ',');
             lineNumber = line.LineNumber;
             int fileColumn = 0;
             txDate = NullableString(parts[fileColumn++]);

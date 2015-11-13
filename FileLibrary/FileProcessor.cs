@@ -301,6 +301,7 @@ namespace FileLibrary
             return new Gen4Processor(parameters.Contents.ToArray());
         }
 
+        // ReSharper disable once UnusedParameter.Local
         private static IProcessor GetGps8000Processor(GetTelonicsParametersForArgosDatesResult parameters)
         {
             //if (parameters.Format != 'A' || parameters.Contents == null)

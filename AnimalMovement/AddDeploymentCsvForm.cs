@@ -8,6 +8,9 @@ using System.Linq;
 using System.Windows.Forms;
 using DataModel;
 
+//TODO: Finish this wizard
+
+
 namespace AnimalMovement
 {
     internal partial class AddDeploymentCsvForm : BaseForm
@@ -93,6 +96,7 @@ namespace AnimalMovement
             IsEditor = true; //Hope for the best
         }
 
+        // ReSharper disable once UnusedMember.Local
         private bool SubmitChanges()
         {
             Cursor.Current = Cursors.WaitCursor;
@@ -114,6 +118,7 @@ namespace AnimalMovement
             return true;
         }
 
+        // ReSharper disable once UnusedMember.Local
         private void OnDatabaseChanged()
         {
             EventHandler handle = DatabaseChanged;
@@ -123,6 +128,7 @@ namespace AnimalMovement
 
         #region Read Excel File
 
+        // ReSharper disable once UnusedMember.Local
         private DataTable GetDataTableFromExcel(string path, string sheetName = "Sheet1")
         {
             var dataTable = new DataTable();
@@ -194,6 +200,7 @@ namespace AnimalMovement
             try
             {
                 dataTable = ConvertTabFiles(FileNameTextBox.Text);
+                //TODO check for Excel v. CSV and process appropriately
             }
             catch (Exception ex1)
             {
@@ -202,6 +209,7 @@ namespace AnimalMovement
             if (dataTable == null)
                 return;
             ExcelDataGridView.DataSource = dataTable;
+            //TODO: save data to the database
         }
 
         private void BrowseButton_Click(object sender, EventArgs e)

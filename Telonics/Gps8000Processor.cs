@@ -141,7 +141,8 @@ namespace Telonics
             public DateTime Timestamp { get; private set; }
             public bool Is3D { get; private set; }
 
-            public string Csv1
+            // ReSharper disable once UnusedMember.Local
+            public string Csv
             {
                 get
                 {

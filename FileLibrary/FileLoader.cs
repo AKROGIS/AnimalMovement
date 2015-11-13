@@ -504,7 +504,7 @@ namespace FileLibrary
                     //skip empty/blank lines
                     if (string.IsNullOrEmpty(line.Replace(',', ' ').Trim()))
                         continue;
-                    var newArgosId = line.Split(new[] { '\t', ',' })[2];
+                    var newArgosId = line.Split('\t', ',')[2];
                     if (argosId == null)
                     {
                         argosId = newArgosId;

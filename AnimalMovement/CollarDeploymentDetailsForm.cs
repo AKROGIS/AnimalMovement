@@ -21,8 +21,10 @@ namespace AnimalMovement
             InitializeComponent();
             CollarDeployment = collarDeployment;
             //TODO - remove locks when (if) CollarDeployments allows updates to collars or animals
+            // ReSharper disable ConditionIsAlwaysTrueOrFalse
             LockCollar = lockCollar || true;
             LockAnimal = lockAnimal || true;
+            // ReSharper restore ConditionIsAlwaysTrueOrFalse
             CurrentUser = Environment.UserDomainName + @"\" + Environment.UserName;
             LoadDataContext();
             LoadDefaultFormContents();  //Called before events are triggered

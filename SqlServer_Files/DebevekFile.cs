@@ -47,7 +47,7 @@ namespace SqlServer_Files
                 if (_header == String.Empty)
                 {
                     _header = cleanLine;
-                    var columns = _header.Split(new[] { '\t', ',' });
+                    var columns = _header.Split('\t', ',');
                     for (int i = 0; i < columns.Length; i++)
                     {
                         var column = columns[i];
@@ -67,7 +67,7 @@ namespace SqlServer_Files
                     continue;
                 }
 
-                var tokens = cleanLine.Split(new[] { '\t', ',' });
+                var tokens = cleanLine.Split('\t', ',');
                 var timeString = "12:00";
                 if (timeIndex != -1)
                     timeString = tokens[timeIndex];

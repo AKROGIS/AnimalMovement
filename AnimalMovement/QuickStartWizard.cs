@@ -119,6 +119,8 @@ namespace AnimalMovement
             InstructionsRichTextBox.Text = null;
         }
 
+        //TODO: Implement Create a Argos Program Wizard
+        // ReSharper disable once UnusedMember.Local
         private void SetUpArgosProgramPage()
         {
             InstructionsRichTextBox.Text = "Create a Argos Program";
