@@ -12,7 +12,7 @@ namespace Telonics
     /// <summary>
     /// Provides access to data on the Argos Web Server
     /// </summary>
-    static public class ArgosWebSite
+    public static class ArgosWebSite
     {
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Telonics
         /// <param name="days">Number of days in the past to retrieve (1 to 10)</param>
         /// <param name="error">Contains any errors encountered; null with no errors</param>
         /// <returns>Returns the results from the web server.  If null check the error output parameter</returns>
-        static public ArgosWebResult GetCollar(string username, string password, string collar, int days, out string error)
+        public static ArgosWebResult GetCollar(string username, string password, string collar, int days, out string error)
         {
             error = CheckParameters(username, password, collar, days);
             if (error != null)
@@ -92,7 +92,7 @@ namespace Telonics
         /// <param name="days">Number of days in the past to retrieve (1 to 10)</param>
         /// <param name="error">Contains any errors encountered; null with no errors</param>
         /// <returns>Returns the results from the web server.  If null check the error output parameter</returns>
-        static public ArgosWebResult GetProgram(string username, string password, string program, int days, out string error)
+        public static ArgosWebResult GetProgram(string username, string password, string program, int days, out string error)
         {
             error = CheckParameters(username, password, program, days);
             if (error != null)
@@ -108,7 +108,7 @@ namespace Telonics
         /// <param name="password">The user's password</param>
         /// <param name="error">Contains any errors encountered; null with no errors</param>
         /// <returns>Returns the results from the web server.  If null check the error output parameter</returns>
-        static public IEnumerable<Tuple<string,string>> GetPlatformList(string username, string password, out string error)
+        public static IEnumerable<Tuple<string,string>> GetPlatformList(string username, string password, out string error)
         {
             error = CheckParameters(username, password, "no selector required", MinDays);
             if (error != null)
@@ -132,7 +132,7 @@ namespace Telonics
         }
 
 
-        static private string CheckParameters(string username, string password, string selector, int days)
+        private static string CheckParameters(string username, string password, string selector, int days)
         {
             string error = null;
             if (String.IsNullOrEmpty(username))
@@ -164,7 +164,7 @@ namespace Telonics
             return error;
         }
 
-        static private ArgosWebResult GetArgosWebResult(string request, out string error)
+        private static ArgosWebResult GetArgosWebResult(string request, out string error)
         {
             error = null;
             try
@@ -190,7 +190,7 @@ namespace Telonics
             }
         }
 
-        static private HttpWebRequest GetRequest(string request)
+        private static HttpWebRequest GetRequest(string request)
         {
             byte[] buffer = Encoding.ASCII.GetBytes(request);
             var req = WebRequest.Create(ArgosUrl);
@@ -203,7 +203,7 @@ namespace Telonics
             return (HttpWebRequest)req;
         }
 
-        static private string GetResponse(WebRequest request)
+        private static string GetResponse(WebRequest request)
         {
             var resp = (HttpWebResponse)request.GetResponse();
             var respStream = resp.GetResponseStream();

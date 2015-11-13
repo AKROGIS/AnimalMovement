@@ -42,7 +42,7 @@ namespace SqlServer_Files
                     }
                 }
             }
-            if (code == '?' && (new ArgosEmailFile(data.Buffer)).GetPrograms().Any())
+            if (code == '?' && new ArgosEmailFile(data.Buffer).GetPrograms().Any())
                 // We already checked for ArgosAwsFile with the header
                 code = 'E';
             return code;
@@ -112,7 +112,7 @@ namespace SqlServer_Files
                             bytes = results.GetSqlBytes(0).Buffer;
                 }
             }
-            return (new ArgosEmailFile(bytes)).GetTransmissions();
+            return new ArgosEmailFile(bytes).GetTransmissions();
         }
 
         public static void FormatE_FillRow(

@@ -159,7 +159,7 @@ namespace AnimalMovement
                 DisposalDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
                 DisposalDateTimePicker.Value = Collar.DisposalDate.Value.ToLocalTime();
             }
-            DisposalDateTimePicker.Checked = (Collar.DisposalDate != null);
+            DisposalDateTimePicker.Checked = Collar.DisposalDate != null;
         }
 
         private void EnableGeneralControls()
@@ -179,8 +179,8 @@ namespace AnimalMovement
         private void ValidateFrequency(object sender, System.ComponentModel.CancelEventArgs e)
         {
             double frequency;
-            bool ok = (String.IsNullOrEmpty(FrequencyTextBox.Text) ||
-                       (Double.TryParse(FrequencyTextBox.Text, out frequency) && frequency > 0));
+            bool ok = String.IsNullOrEmpty(FrequencyTextBox.Text) ||
+                      (Double.TryParse(FrequencyTextBox.Text, out frequency) && frequency > 0);
             var msg = ok ? "" : "Frequency must be a null or a positive number";
             CollarErrorProvider.SetError(FrequencyTextBox, msg);
             e.Cancel = !ok;

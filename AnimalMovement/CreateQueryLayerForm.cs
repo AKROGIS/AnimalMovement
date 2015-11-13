@@ -235,7 +235,7 @@ namespace AnimalMovement
                 if (string.IsNullOrEmpty(predList[i]))
                     continue;
                 var p = notList[i] + predList[i];
-                sqlEnd = (sqlEnd == String.Empty) ? p : p + opList[i] + sqlEnd;
+                sqlEnd = sqlEnd == String.Empty ? p : p + opList[i] + sqlEnd;
             }
             return sqlEnd;
         }

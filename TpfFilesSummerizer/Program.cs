@@ -8,7 +8,7 @@ namespace TpfFilesSummerizer
     {
         static void Main(string[] args)
         {
-            var collars = args.SelectMany(arg => (new TpfFile(arg)).GetCollars());
+            var collars = args.SelectMany(arg => new TpfFile(arg).GetCollars());
             Console.WriteLine("Ctn, ArgosId, Frequency, TimeStamp, TpfFile");
             foreach (var collar in collars.OrderBy(c => c.ArgosId))
                 //Console.WriteLine(collar);

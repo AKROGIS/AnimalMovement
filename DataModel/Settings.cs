@@ -88,14 +88,14 @@ namespace DataModel
         {
             //default is to get email, unless explicitly and correctly denied
             string setting = GetUsersDefault(WantsEmailKey);
-            return (setting == null || setting != false.ToString(CultureInfo.InvariantCulture));
+            return setting == null || setting != false.ToString(CultureInfo.InvariantCulture);
         }
 
         public static bool GetIgnoreCtnSuffix()
         {
             //default is to get email, unless explicitly and correctly denied
             string setting = GetUsersDefault(IgnoreCtnSuffixKey);
-            return (setting == null || setting != false.ToString(CultureInfo.InvariantCulture));
+            return setting == null || setting != false.ToString(CultureInfo.InvariantCulture);
         }
 
         #endregion
@@ -190,7 +190,7 @@ namespace DataModel
             var db = new SettingsDataContext();
             var setting = db.Settings.FirstOrDefault(s => s.Username == pi.Login && s.Key == WantsEmailKey);
             //default is to get email, unless explicitly and correctly denied
-            return (setting == null || setting.Value != false.ToString(CultureInfo.InvariantCulture));
+            return setting == null || setting.Value != false.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

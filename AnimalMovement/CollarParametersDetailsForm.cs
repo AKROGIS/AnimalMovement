@@ -220,7 +220,7 @@ namespace AnimalMovement
         private static bool DatesOverlap(DateTime start1, DateTime end1, DateTime start2, DateTime end2)
         {
             //touching is not considered overlapping.
-            return (start2 < end1 && start1 < end2);
+            return start2 < end1 && start1 < end2;
         }
 
         private string ValidateWarning()
@@ -238,7 +238,7 @@ namespace AnimalMovement
             CollarParameter.Gen3Period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text)
                                              ? (int?) null
                                              : Int32.Parse(Gen3PeriodTextBox.Text)*
-                                               (((string) Gen3TimeUnitComboBox.SelectedItem) == "Hours" ? 60 : 1);
+                                               ((string) Gen3TimeUnitComboBox.SelectedItem == "Hours" ? 60 : 1);
             CollarParameter.StartDate = StartDateTimePicker.Checked
                                             ? StartDateTimePicker.Value.ToUniversalTime()
                                             : (DateTime?) null;

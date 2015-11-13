@@ -226,7 +226,7 @@ namespace FileLibrary
             var start = parameters.StartDate ?? DateTime.MinValue;
             if (start < first)
                 start = first;
-            var end = (parameters.EndDate ?? DateTime.MaxValue);
+            var end = parameters.EndDate ?? DateTime.MaxValue;
             if (last < end)
                 end = last;
             var processor = GetProcessor(file, parameters);

@@ -390,7 +390,7 @@ namespace FileLibrary
 
         private CollarFile GetDuplicate()
         {
-            var fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(Contents);
+            var fileHash = new SHA1CryptoServiceProvider().ComputeHash(Contents);
             return Database.CollarFiles.FirstOrDefault(f => f.Sha1Hash == fileHash);
         }
 
@@ -592,7 +592,7 @@ namespace FileLibrary
                         break;
                     }
                 }
-                if (code == '?' && (new ArgosEmailFile(Contents)).GetPrograms().Any())
+                if (code == '?' && new ArgosEmailFile(Contents).GetPrograms().Any())
                     // We already checked for ArgosAwsFile with the header
                     code = 'E';
                 return Database.LookupCollarFileFormats.FirstOrDefault(f => f.Code == code);

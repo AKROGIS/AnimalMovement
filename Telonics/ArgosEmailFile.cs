@@ -63,7 +63,7 @@ namespace Telonics
                     //platformid is 5(old) or 6(new) characters.  The rest of the line is offset accordingly
                     //if we always get 6, we may get a trailing space (old files)
                     platformId = line.Substring(6, 6).Trim();
-                    var old = (platformId.Length == 5);
+                    var old = platformId.Length == 5;
                     platformId = platformId.TrimStart('0');
                     location = line.Length < 61
                                    ? null

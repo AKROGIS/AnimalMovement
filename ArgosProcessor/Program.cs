@@ -130,17 +130,17 @@ namespace ArgosProcessor
         private static bool ClearCollarFile(string arg)
         {
             arg = arg.Normalize();
-            return (arg.Equals("/nf", StringComparison.OrdinalIgnoreCase) ||
-                    arg.Equals("/nofile", StringComparison.OrdinalIgnoreCase));
+            return arg.Equals("/nf", StringComparison.OrdinalIgnoreCase) ||
+                   arg.Equals("/nofile", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool ClearPlatform(string arg)
         {
             arg = arg.Normalize();
-            return (arg.Equals("/np", StringComparison.OrdinalIgnoreCase) ||
-                    arg.Equals("/noplatform", StringComparison.OrdinalIgnoreCase) ||
-                    arg.Equals("/na", StringComparison.OrdinalIgnoreCase) ||
-                    arg.Equals("/noargos", StringComparison.OrdinalIgnoreCase));
+            return arg.Equals("/np", StringComparison.OrdinalIgnoreCase) ||
+                   arg.Equals("/noplatform", StringComparison.OrdinalIgnoreCase) ||
+                   arg.Equals("/na", StringComparison.OrdinalIgnoreCase) ||
+                   arg.Equals("/noargos", StringComparison.OrdinalIgnoreCase);
         }
 
         private static CollarFile GetCollarFile(string fileId)

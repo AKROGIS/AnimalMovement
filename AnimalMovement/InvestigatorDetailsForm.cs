@@ -653,7 +653,7 @@ namespace AnimalMovement
 
         private void InfoArgosCollarButton_Click(object sender, EventArgs e)
         {
-            var deployment = ((ArgosDeployment)ArgosDeploymentsGridView.SelectedRows[0].Cells[0].Value);
+            var deployment = (ArgosDeployment)ArgosDeploymentsGridView.SelectedRows[0].Cells[0].Value;
             var form = new CollarDetailsForm(deployment.Collar);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);

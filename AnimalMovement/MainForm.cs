@@ -44,7 +44,7 @@ namespace AnimalMovement
                 return;
             }
             Cursor.Current = Cursors.Default;
-            MyProfileButton.Visible = (_investigator != null);
+            MyProfileButton.Visible = _investigator != null;
             MyProfileButton.Text = "Project Investigator Details";
             ProjectsButton.Enabled = true;
             InvestigatorsButton.Enabled = true;

@@ -14,7 +14,7 @@ namespace Telonics
             int indexOfByte = bit / 8;
             int bitInByte = bit % 8;
             byte mask = 1;
-            mask <<= (7 - bitInByte);
+            mask <<= 7 - bitInByte;
             byte b = data.Skip(indexOfByte).First();
             return (b & mask) != 0;
         }
@@ -67,7 +67,7 @@ namespace Telonics
             if (signBit > 32)
                 throw new IndexOutOfRangeException("Sign bit count for a 32bit integer must be less than 33");
             int signMask = 1 << signBit - 1;
-            int sign = ((number & signMask) == 0) ? 1 : -1;
+            int sign = (number & signMask) == 0 ? 1 : -1;
             uint numberMask = (uint)Math.Pow(2, signBit - 1) - 1;
             uint numberWithoutSign = number & numberMask;
             double decimalShift = Math.Pow(10, decimals);

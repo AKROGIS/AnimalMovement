@@ -64,15 +64,15 @@ namespace Telonics
                                                TransmissionDateTime.ToString("HH:mm:ss"),
                                                PlatformId,
                                                fixNumber,
-                                               (fix.ConditionCode),
-                                               (fix.DateTime == default(DateTime)) ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
-                                               (fix.DateTime == default(DateTime)) ? "Error" : fix.DateTime.ToString("HH:mm"),
+                                               fix.ConditionCode,
+                                               fix.DateTime == default(DateTime) ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
+                                               fix.DateTime == default(DateTime) ? "Error" : fix.DateTime.ToString("HH:mm"),
                                                fix.ConditionCode == ArgosConditionCode.Unavailable
                                                    ? ""
-                                                   : (fix.Longitude < -180 || fix.Longitude > 180) ? "Error" : fix.Longitude.ToString("F7"),
+                                                   : fix.Longitude < -180 || fix.Longitude > 180 ? "Error" : fix.Longitude.ToString("F7"),
                                                fix.ConditionCode == ArgosConditionCode.Unavailable
                                                    ? ""
-                                                   : (fix.Latitude < -90 || fix.Latitude > 90) ? "Error" : fix.Latitude.ToString("F7"));
+                                                   : fix.Latitude < -90 || fix.Latitude > 90 ? "Error" : fix.Latitude.ToString("F7"));
                 }
             }
 
@@ -269,16 +269,16 @@ namespace Telonics
                 var activityBits = data.Skip(9 + offset).First();
                 var activityBytes = data.Skip(10 + offset).Take(4).ToArray();
                 var isMortality = (activityBits & 1) == 1;
-                var activity1 = ((activityBits & 2) == 2) ? activityBytes[0] : (byte?)null;
+                var activity1 = (activityBits & 2) == 2 ? activityBytes[0] : (byte?)null;
                 if (isMortality)
                 {
                     var mortTime = Time(activityBytes.Skip(1));
                     var activityData1 = new LotekActivityData(refTime, activity1, null, null, null);
                     return new LotekData(gpsData, mortTime, activityData1);
                 }
-                var activity2 = ((activityBits & 4) == 4) ? activityBytes[1] : (byte?)null;
-                var activity3 = ((activityBits & 8) == 8) ? activityBytes[2] : (byte?)null;
-                var activity4 = ((activityBits & 16) == 16) ? activityBytes[3] : (byte?)null;
+                var activity2 = (activityBits & 4) == 4 ? activityBytes[1] : (byte?)null;
+                var activity3 = (activityBits & 8) == 8 ? activityBytes[2] : (byte?)null;
+                var activity4 = (activityBits & 16) == 16 ? activityBytes[3] : (byte?)null;
                 var activityData2 = new LotekActivityData(refTime, activity1, activity2, activity3, activity4);
                 return new LotekData(gpsData, activityData2);
             }
@@ -403,7 +403,7 @@ namespace Telonics
     {
         public static DateTime Round(this DateTime date, TimeSpan span)
         {
-            long ticks = (date.Ticks + (span.Ticks / 2) + 1) / span.Ticks;
+            long ticks = (date.Ticks + span.Ticks / 2 + 1) / span.Ticks;
             return new DateTime(ticks * span.Ticks);
         }
     }

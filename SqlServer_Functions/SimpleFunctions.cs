@@ -25,7 +25,7 @@ namespace SqlServer_Functions
         [SqlFunction(IsDeterministic = true, IsPrecise = true)]
         public static SqlBinary Sha1Hash(SqlBytes data)
         {
-            return (new SHA1CryptoServiceProvider()).ComputeHash(data.Stream);
+            return new SHA1CryptoServiceProvider().ComputeHash(data.Stream);
         }
     }
 }

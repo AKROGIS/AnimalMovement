@@ -838,7 +838,7 @@ namespace SqlServer_Parsers
 
         internal static bool Include(UInt64 mask, int column)
         {
-            return (mask & (1ul << column)) == (1ul << column);
+            return (mask & (1ul << column)) == 1ul << column;
         }
 
     };

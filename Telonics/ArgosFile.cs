@@ -107,9 +107,9 @@ namespace Telonics
 
         #region Private Methods
 
-        abstract internal string Header { get; }
+        internal abstract string Header { get; }
 
-        abstract protected IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines);
+        protected abstract IEnumerable<ArgosTransmission> GetTransmissions(IEnumerable<string> lines);
 
         #region Line Readers
 

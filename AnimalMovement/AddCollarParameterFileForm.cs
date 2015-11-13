@@ -350,7 +350,7 @@ namespace AnimalMovement
                 FileNameTextBox.Focus();
                 return;
             }
-            _fileHash = (new SHA1CryptoServiceProvider()).ComputeHash(_fileContents);
+            _fileHash = new SHA1CryptoServiceProvider().ComputeHash(_fileContents);
         }
 
         private bool AbortBecauseDuplicate()
@@ -527,7 +527,7 @@ namespace AnimalMovement
             //I'm willing to move a existing null end date (there can only be one) back to my start date.
             //Any existing non-null enddate must have been explicitly set by the user, so they should be dealt with explicitly
             //If this situation exists, and I correct it, I am guaranteed to be fine (the new one will exist in the space created), so I can exit
-            var parameter = collar.CollarParameters.SingleOrDefault(p => p.CollarParameterFile != file && (p.StartDate < start && p.EndDate == null));
+            var parameter = collar.CollarParameters.SingleOrDefault(p => p.CollarParameterFile != file && p.StartDate < start && p.EndDate == null);
             if (parameter != null)
             {
                 parameter.EndDate = start;
@@ -561,7 +561,7 @@ namespace AnimalMovement
         private static bool DatesOverlap(DateTime? start1, DateTime? end1, DateTime? start2, DateTime? end2)
         {
             //touching is not considered overlapping.
-            return ((start2 ?? DateTime.MinValue) < (end1 ?? DateTime.MaxValue) && (start1 ?? DateTime.MinValue) < (end2 ?? DateTime.MaxValue));
+            return (start2 ?? DateTime.MinValue) < (end1 ?? DateTime.MaxValue) && (start1 ?? DateTime.MinValue) < (end2 ?? DateTime.MaxValue);
         }
 
         #endregion

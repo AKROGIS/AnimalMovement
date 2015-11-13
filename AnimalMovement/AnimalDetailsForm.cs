@@ -137,7 +137,7 @@ namespace AnimalMovement
                 MortatlityDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm";
                 MortatlityDateTimePicker.Value = Animal.MortalityDate.Value.ToLocalTime();
             }
-            MortatlityDateTimePicker.Checked = (Animal.MortalityDate != null);
+            MortatlityDateTimePicker.Checked = Animal.MortalityDate != null;
         }
 
         private void EnableGeneralControls()

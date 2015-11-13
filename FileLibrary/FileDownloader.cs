@@ -78,7 +78,7 @@ namespace FileLibrary
                 // typically called on a scheduled task at the same time (+/- download/processing time) everyday.
                 // I will check if we are close to an even day, and then round tword that day
                 var timespan = DateTime.Now - dateOfLastDownload;
-                int extraDay = (timespan.Hours == 0 && timespan.Minutes < 5) ? 0 : 1;
+                int extraDay = timespan.Hours == 0 && timespan.Minutes < 5 ? 0 : 1;
                 daysSinceLastDownload = timespan.Days + extraDay;
             }
             var days = Math.Min(ArgosWebSite.MaxDays, daysSinceLastDownload);

@@ -12,8 +12,8 @@ namespace ArgosDownloader
     internal static class Program
     {
 
-        static private Dictionary<string, string> _emails;
-        static private string _admin;
+        private static Dictionary<string, string> _emails;
+        private static string _admin;
 
         /// <summary>
         /// Downloads Argos Programs and Platforms from the Argos Server, then uploads and processes the files.
@@ -97,7 +97,7 @@ namespace ArgosDownloader
                         var daysArg = GetDays(arg);
                         if (daysArg != null)
                         {
-                            days = (daysArg == Int32.MinValue ? null : daysArg);
+                            days = daysArg == Int32.MinValue ? null : daysArg;
                             continue;
                         }
                         var piArg = GetProjectInvestigator(arg);
@@ -246,7 +246,7 @@ namespace ArgosDownloader
             }
         }
 
-        static private string _password;
+        private static string _password;
 
         static void SendEmail(string email, string subject, string body)
         {

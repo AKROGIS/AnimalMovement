@@ -66,15 +66,15 @@ namespace Telonics
                                                TransmissionDateTime.ToString("HH:mm:ss"),
                                                PlatformId,
                                                fixNumber,
-                                               (fix.ConditionCode),
-                                               (fix.DateTime == default(DateTime)) ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
-                                               (fix.DateTime == default(DateTime)) ? "Error" : fix.DateTime.ToString("HH:mm"),
+                                               fix.ConditionCode,
+                                               fix.DateTime == default(DateTime) ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
+                                               fix.DateTime == default(DateTime) ? "Error" : fix.DateTime.ToString("HH:mm"),
                                                fix.ConditionCode == ArgosConditionCode.Unavailable
                                                    ? ""
-                                                   : (fix.Longitude < -180 || fix.Longitude > 180) ? "Error" : fix.Longitude.ToString("F4"),
+                                                   : fix.Longitude < -180 || fix.Longitude > 180 ? "Error" : fix.Longitude.ToString("F4"),
                                                fix.ConditionCode == ArgosConditionCode.Unavailable
                                                    ? ""
-                                                   : (fix.Latitude < -90 || fix.Latitude > 90) ? "Error" : fix.Latitude.ToString("F4"));
+                                                   : fix.Latitude < -90 || fix.Latitude > 90 ? "Error" : fix.Latitude.ToString("F4"));
                 }
             }
 
@@ -140,7 +140,7 @@ namespace Telonics
             crc.Update(julian, 9);
             crc.Update(hour, 5);
             crc.Update(minute, 6);
-            ArgosConditionCode cCode = (crc.Value == reportedCrc) ? ArgosConditionCode.Good : ArgosConditionCode.Bad;
+            ArgosConditionCode cCode = crc.Value == reportedCrc ? ArgosConditionCode.Good : ArgosConditionCode.Bad;
 
 
             var fixes = new List<ArgosFix>
@@ -157,9 +157,9 @@ namespace Telonics
             //Setup for the relative fixes
             if (fixBufferType > 3)
                 throw new InvalidDataException("Argos Message has invalid Fix Buffer Type.");
-            int numberOfRelativeFixes = (new[] { 0, 3, 4, 5 })[fixBufferType];
-            int doubleLength = (new[] { 0, 17, 12, 9 })[fixBufferType];
-            int relativeFixLength = (new[] { 0, 46, 36, 30 })[fixBufferType];
+            int numberOfRelativeFixes = new[] { 0, 3, 4, 5 }[fixBufferType];
+            int doubleLength = new[] { 0, 17, 12, 9 }[fixBufferType];
+            int relativeFixLength = new[] { 0, 46, 36, 30 }[fixBufferType];
 
             //Get the relative fixes
             for (var i = 0; i < numberOfRelativeFixes; i++)
@@ -187,7 +187,7 @@ namespace Telonics
                 crc.Update((int)longitudeBits, doubleLength);
                 crc.Update((int)latitudeBits, doubleLength);
                 crc.Update(delay, 6);
-                cCode = (crc.Value == reportedCrc) ? ArgosConditionCode.Good : ArgosConditionCode.Bad;
+                cCode = crc.Value == reportedCrc ? ArgosConditionCode.Good : ArgosConditionCode.Bad;
 
                 //If the CRC is good we still need to check for values out of range
                 if (cCode == ArgosConditionCode.Good)

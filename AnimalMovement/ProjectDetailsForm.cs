@@ -254,15 +254,15 @@ namespace AnimalMovement
 
         private void SetUpAnimalTab()
         {
-            var query = (from animal in Database.Animals
-                         where animal.Project == Project
-                         //orderby animal.MortalityDate , animal.AnimalId
-                         select new AnimalListItem
-                         {
-                             Animal = animal,
-                             Name = GetName(animal),
-                             CanDelete = CanDeleteAnimal(animal)
-                         });
+            var query = from animal in Database.Animals
+                where animal.Project == Project
+                //orderby animal.MortalityDate , animal.AnimalId
+                select new AnimalListItem
+                {
+                    Animal = animal,
+                    Name = GetName(animal),
+                    CanDelete = CanDeleteAnimal(animal)
+                };
             var sortedList = query.OrderBy(a => a.Animal.MortalityDate != null).ThenBy(a => a.Animal.AnimalId).ToList();
             AnimalsListBox.DataSource = sortedList;
             AnimalsListBox.DisplayMember = "Name";
