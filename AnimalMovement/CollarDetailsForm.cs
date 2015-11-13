@@ -788,7 +788,6 @@ namespace AnimalMovement
             ProcessingIssuesDataGridView.DataSource = Collar.ArgosFileProcessingIssues.Select(i => new
             {
                 i.CollarFile,
-                i.Collar,
                 i.Issue
             }).ToList();
         }
