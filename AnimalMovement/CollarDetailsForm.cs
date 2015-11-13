@@ -635,7 +635,7 @@ namespace AnimalMovement
         {
             FileInfoButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode && FilesDataGridView.SelectedRows.Count == 1;
             ChangeFileStatusButton.Enabled = FilesDataGridView.CurrentRow != null && !IsEditMode && IsEditor;
-            if (FilesDataGridView.SelectedRows.Count > 1)
+            if (FilesDataGridView.SelectedRows.Count > 0)
             {
                 var firstRowStatus = (string)FilesDataGridView.SelectedRows[0].Cells["Status"].Value;
                 ChangeFileStatusButton.Text = firstRowStatus != "Active" ? "Activate" : "Deactivate";
