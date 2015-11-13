@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 // ReSharper disable PossibleMultipleEnumeration
 
@@ -91,6 +92,8 @@ namespace Telonics
             public ArgosConditionCode ConditionCode { get; set; }
         }
 
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Local")]
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private struct LotekData
         {
             public LotekData(LotekGpsData gpsData)
@@ -121,6 +124,8 @@ namespace Telonics
             public LotekActivityData? ActivityData { get; private set; }
         }
 
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Local")]
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private struct LotekGpsData
         {
             public LotekGpsData(double lat, double lon, DateTime timestamp, bool is3D)
@@ -146,6 +151,8 @@ namespace Telonics
             }
         }
 
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Local")]
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private struct LotekActivityData
         {
             public LotekActivityData(DateTime timestamp, byte? activity1, byte? activity2, byte? activity3, byte? activity4)

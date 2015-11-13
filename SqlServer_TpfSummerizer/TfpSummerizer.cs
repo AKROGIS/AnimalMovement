@@ -154,7 +154,7 @@ namespace SqlServer_TpfSummerizer
 
             public string Name
             {
-                get { return FilePath == null ? null : Path.GetFileNameWithoutExtension(FilePath); }
+                get { return Path.GetFileNameWithoutExtension(FilePath); }
             }
 
             #endregion

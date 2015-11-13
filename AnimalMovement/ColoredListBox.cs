@@ -74,9 +74,13 @@ namespace AnimalMovement
 
         private string ItemTextFromDataSource(int index)
         {
-            object item = DataSource is IList
-                              ? ((IList)DataSource)[index]
-                              : ((IListSource)DataSource).GetList()[index];
+            var list = DataSource as IList;
+            var listSource = DataSource as IListSource;
+            object item = list != null
+                              ? list[index]
+                              : (listSource == null ? null  : listSource.GetList()[index]);
+            if (item == null)
+                return string.Empty;
             object prop = GetPropValue(item, DisplayMember);
             return prop.ToString();
         }
