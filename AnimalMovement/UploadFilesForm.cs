@@ -38,6 +38,9 @@ namespace AnimalMovement
                 Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
             if (Investigator != null)
                 Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+            if (Project == null && Investigator == null)
+                // Try the current user as the PI
+                Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
             // legal to open the form without a project or PI, but cannot upload unless one is specified
             if (Project != null && Investigator != null)
                 throw new InvalidOperationException("Upload Files Form cannot have both a valid Project AND Project Investigator.");

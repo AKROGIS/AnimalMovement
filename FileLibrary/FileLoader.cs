@@ -426,8 +426,6 @@ namespace FileLibrary
                     ctn = GetCtnFromFormatC();
                 if (Format.Code == 'H')
                     ctn = GetCtnFromFormatH();
-                    if (ctn == null)
-                        ctn = GetCtnFromFormatH2();
                 if (ctn == null)
                     return null;
                 var collar =
@@ -533,27 +531,27 @@ namespace FileLibrary
 
         private string GetCtnFromFormatH()
         {
-            //the H format has 4th line begins with 'unitRecord,621500A,'
-            var line = ReadLines(Contents, Encoding.UTF8).Skip(3).FirstOrDefault();
-            if (line == null)
+            //the H format has multiple header lines that alternate with field names  (starts with #)
+            //and data lines.  items are comma separated.  Looking for the data in a field called 'ctn'
+            var endOfHeader = "packedDatalogRecord";
+            var searchFieldName = "ctn";
+
+            var lines = ReadLines(Contents, Encoding.UTF8).TakeWhile(l => !l.StartsWith(endOfHeader));
+            int indexOfData = -1;
+            foreach (var line in lines)
+            {
+                if (0 <= indexOfData)
+                {
+                    var tokens = line.Split(',');
+                    return tokens[indexOfData];
+                }
+                if (line.StartsWith("#") && line.Contains(','+searchFieldName+','))
+                {
+                    var tokens = line.Split(',');
+                    indexOfData = new List<string>(tokens).IndexOf(searchFieldName);
+                }
+            }
             return null;
-            var tokens = line.Split(',');
-            if (tokens.Length < 2)
-                return null;
-            return tokens[1];
-        }
-
-
-        private string GetCtnFromFormatH2()
-        {
-            //the new H format has 6th line begins with 'unitRecord,621500A,'
-            var line = ReadLines(Contents, Encoding.UTF8).Skip(5).FirstOrDefault();
-            if (line == null)
-                return null;
-            var tokens = line.Split(',');
-            if (tokens.Length < 2)
-                return null;
-            return tokens[1];
         }
 
 
