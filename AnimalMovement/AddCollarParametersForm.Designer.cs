@@ -90,6 +90,7 @@
             // 
             this.FileComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.FileComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.FileComboBox.Enabled = false;
             this.FileComboBox.FormattingEnabled = true;
             this.FileComboBox.Location = new System.Drawing.Point(117, 39);
             this.FileComboBox.Name = "FileComboBox";
@@ -237,6 +238,7 @@
             // 
             this.CollarComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CollarComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.CollarComboBox.Enabled = false;
             this.CollarComboBox.FormattingEnabled = true;
             this.CollarComboBox.Location = new System.Drawing.Point(118, 12);
             this.CollarComboBox.Name = "CollarComboBox";
