@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Windows.Forms;
@@ -228,9 +229,15 @@ namespace AnimalMovement
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {
+            openFileDialog.InitialDirectory = Properties.Settings.Default.AddCollarParameterFileFolderPath;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 FileNameTextBox.Text = string.Join(";", openFileDialog.FileNames);
+                if (openFileDialog.FileNames.Length > 0)
+                {
+                    var folder = Path.GetDirectoryName(openFileDialog.FileNames[0]);
+                    Properties.Settings.Default.AddCollarParameterFileFolderPath = folder;
+                }
             }
         }
 

@@ -227,5 +227,14 @@
     <Setting Name="InvestigatorsFormSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">450, 250</Value>
     </Setting>
+    <Setting Name="UploadFileFolderPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="UploadFileFileFilterIndex" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="AddCollarParameterFileFolderPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

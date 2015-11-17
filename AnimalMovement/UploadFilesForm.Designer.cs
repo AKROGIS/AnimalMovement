@@ -57,6 +57,11 @@
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
+            // folderBrowserDialog
+            // 
+            this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.folderBrowserDialog.ShowNewFolderButton = false;
+            // 
             // openFileDialog
             // 
             this.openFileDialog.DefaultExt = "csv";

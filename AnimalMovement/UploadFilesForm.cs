@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using DataModel;
@@ -158,20 +159,30 @@ namespace AnimalMovement
 
         private void FileBrowserButton_Click(object sender, EventArgs e)
         {
+            openFileDialog.FilterIndex = Properties.Settings.Default.UploadFileFileFilterIndex;
+            openFileDialog.InitialDirectory = Properties.Settings.Default.UploadFileFolderPath;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 FileNameTextBox.Text = string.Join(";", openFileDialog.FileNames);
                 CollarIsRequired = openFileDialog.FileNames.Length == 1 &&
                                    new FileLoader(FileNameTextBox.Text).CollarIsRequired;
+                Properties.Settings.Default.UploadFileFileFilterIndex = openFileDialog.FilterIndex;
+                if (openFileDialog.FileNames.Length > 0)
+                {
+                    var folder = Path.GetDirectoryName(openFileDialog.FileNames[0]);
+                    Properties.Settings.Default.UploadFileFolderPath = folder;                    
+                }
                 EnableUpload();
             }
         }
 
         private void FolderBrowserButton_Click(object sender, EventArgs e)
         {
+            folderBrowserDialog.SelectedPath = Properties.Settings.Default.UploadFileFolderPath;
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
                 FolderNameTextBox.Text = folderBrowserDialog.SelectedPath;
+                Properties.Settings.Default.UploadFileFolderPath = folderBrowserDialog.SelectedPath;
                 CollarIsRequired = false;
                 EnableUpload();
             }
