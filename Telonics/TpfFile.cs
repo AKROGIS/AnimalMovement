@@ -71,19 +71,23 @@ namespace Telonics
             string[] frequencies = GetFrequencies();
             string[] timeStamps = GetTimeStamps();
             string[] argosIds = GetArgosIds();
+            string[] iridiumIds = GetIridiumIds();
+            string[] platformIds = argosIds.Length == 0 ? iridiumIds : argosIds;
+            string platformType = argosIds.Length == 0 ? "Iridium" : "Argos";
             if (ids.Length != frequencies.Length ||
-                ids.Length != argosIds.Length ||
-                frequencies.Length != argosIds.Length)
+                ids.Length != platformIds.Length ||
+                frequencies.Length != platformIds.Length)
                 throw new InvalidOperationException("Indeterminant number of collars in file " + Name);
             return ids.Select((id, index) => new TpfCollar
-                {
-                    Ctn = id,
-                    ArgosId = argosIds[index],
-                    Frequency = GetFrequency(frequencies[index]),
-                    TimeStamp = GetTimeStamp(timeStamps[3*index] + " " + timeStamps[3*index + 1]),
-                    Owner = owner,
-                    TpfFile = this
-                });
+            {
+                Ctn = id,
+                Platform = platformType,
+                PlatformId = platformIds[index],
+                Frequency = GetFrequency(frequencies[index]),
+                TimeStamp = GetTimeStamp(timeStamps[3 * index] + " " + timeStamps[3 * index + 1]),
+                Owner = owner,
+                TpfFile = this
+            });
         }
 
         public override string ToString()
@@ -109,7 +113,14 @@ namespace Telonics
 
         private string[] GetArgosIds()
         {
-            return GetTpfData("sections.units.parameters.decimalArgosIdList").Split();
+            var data = GetTpfData("sections.units.parameters.decimalArgosIdList");
+            return data == null ? new string[0] : data.Split();
+        }
+
+        private string[] GetIridiumIds()
+        {
+            var data = GetTpfData("sections.units.parameters.iridiumImeiList");
+            return data == null ? new string[0] : data.Split();
         }
 
         private string[] GetIds()
@@ -129,7 +140,8 @@ namespace Telonics
                         select line.Replace(key + " ", "");
             var data = value.FirstOrDefault();
             if (String.IsNullOrEmpty(data))
-                throw new FormatException("No value found for Key: " + key + " not found in file "+ Name);
+                //throw new FormatException("No value found for Key: " + key + " not found in file " + Name);
+                return null;
             if (data[0] == '{')
                 //should read until next '}', but we stop at the newline, and assume the '}' is at the end o fthe line
                 return data.Replace("{", "").Replace("}", "").Trim();

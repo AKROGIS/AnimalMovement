@@ -326,7 +326,8 @@ namespace AnimalMovement
                                                     {
                                                         t.Owner,
                                                         CTN = t.Ctn,
-                                                        t.ArgosId,
+                                                        t.Platform,
+                                                        t.PlatformId,
                                                         t.Frequency,
                                                         StartDate = t.TimeStamp,
                                                     }).ToList();

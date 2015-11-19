@@ -20,7 +20,8 @@ namespace SqlServer_TpfSummerizer
                      FillRowMethodName = "FillRow",
                      TableDefinition = @"[FileId] [int],
                                          [CTN] [nvarchar](16),
-                                         [Platform] [nvarchar](8),
+                                         [Platform] [nvarchar](16),
+                                         [PlatformId] [nvarchar](16),
                                          [Frequency] [float],
                                          [TimeStamp] [DateTime2](7)")]
         public static IEnumerable SummarizeTpfFile(SqlInt32 fileId)
@@ -76,13 +77,15 @@ namespace SqlServer_TpfSummerizer
                                    out SqlInt32 fileId,
                                    out SqlString ctn,
                                    out SqlString platform,
+                                   out SqlString platformId,
                                    out SqlDouble frequency,
                                    out DateTime timeStamp)
         {
             var row = (Row) inputObject;
             fileId = row.FileId;
             ctn = row.Collar.Ctn;
-            platform = row.Collar.ArgosId;
+            platform = row.Collar.Platform;
+            platformId = row.Collar.PlatformId;
             frequency = row.Collar.Frequency;
             timeStamp = row.Collar.TimeStamp;
         }
@@ -93,7 +96,8 @@ namespace SqlServer_TpfSummerizer
         public class TpfCollar
         {
             public string Ctn { get; set; }
-            public string ArgosId { get; set; }
+            public string Platform { get; set; }
+            public string PlatformId { get; set; }
             public double Frequency { get; set; }
             public string Owner { get; set; }
             public DateTime TimeStamp { get; set; }
@@ -101,8 +105,8 @@ namespace SqlServer_TpfSummerizer
 
             public override string ToString()
             {
-                return String.Format("File: {5}, CTN: {0}, Argos ID: {1}, Frequency: {2}, Owner: {3}, Time Stamp:{4}",
-                                     Ctn, ArgosId, Frequency, Owner, TimeStamp, TpfFile);
+                return String.Format("File: {5}, CTN: {0}, Platform: {1}, Platform ID: {6}, Frequency: {2}, Owner: {3}, Time Stamp:{4}",
+                                     Ctn, Platform, Frequency, Owner, TimeStamp, TpfFile, PlatformId);
             }
         }
 
@@ -171,14 +175,18 @@ namespace SqlServer_TpfSummerizer
                 string[] frequencies = GetFrequencies();
                 string[] timeStamps = GetTimeStamps();
                 string[] argosIds = GetArgosIds();
+                string[] iridiumIds = GetIridiumIds();
+                string[] platformIds = argosIds.Length == 0 ? iridiumIds : argosIds;
+                string platformType = argosIds.Length == 0 ? "Iridium" : "Argos";
                 if (ids.Length != frequencies.Length ||
-                    ids.Length != argosIds.Length ||
-                    frequencies.Length != argosIds.Length)
+                    ids.Length != platformIds.Length ||
+                    frequencies.Length != platformIds.Length)
                     throw new InvalidOperationException("Indeterminant number of collars in file " + Name);
                 return ids.Select((id, index) => new TpfCollar
                 {
                     Ctn = id,
-                    ArgosId = argosIds[index],
+                    Platform = platformType,
+                    PlatformId = platformIds[index],
                     Frequency = GetFrequency(frequencies[index]),
                     TimeStamp = GetTimeStamp(timeStamps[3 * index] + " " + timeStamps[3 * index + 1]),
                     Owner = owner,
@@ -209,7 +217,14 @@ namespace SqlServer_TpfSummerizer
 
             private string[] GetArgosIds()
             {
-                return GetTpfData("sections.units.parameters.decimalArgosIdList").Split();
+                var data = GetTpfData("sections.units.parameters.decimalArgosIdList");
+                return data == null ? new string[0] : data.Split();
+            }
+
+            private string[] GetIridiumIds()
+            {
+                var data = GetTpfData("sections.units.parameters.iridiumImeiList");
+                return data == null ? new string[0] : data.Split();
             }
 
             private string[] GetIds()
@@ -229,7 +244,8 @@ namespace SqlServer_TpfSummerizer
                             select line.Replace(key + " ", "");
                 var data = value.FirstOrDefault();
                 if (String.IsNullOrEmpty(data))
-                    throw new FormatException("No value found for Key: " + key + " not found in file " + Name);
+                    //throw new FormatException("No value found for Key: " + key + " not found in file " + Name);
+                    return null;
                 if (data[0] == '{')
                     //should read until next '}', but we stop at the newline, and assume the '}' is at the end o fthe line
                     return data.Replace("{", "").Replace("}", "").Trim();

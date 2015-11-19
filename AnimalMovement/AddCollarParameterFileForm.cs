@@ -400,13 +400,13 @@ namespace AnimalMovement
                         continue;
                 }
                 //Does this Argos platform exist?
-                var fileHasArgos = !String.IsNullOrEmpty(tpfCollar.ArgosId) &&
-                                   !tpfCollar.ArgosId.Trim().Normalize().Equals("?", StringComparison.OrdinalIgnoreCase);
+                var fileHasArgos = !String.IsNullOrEmpty(tpfCollar.PlatformId) && tpfCollar.Platform == "Argos" &&
+                                   !tpfCollar.PlatformId.Trim().Normalize().Equals("?", StringComparison.OrdinalIgnoreCase);
                 if (fileHasArgos)
                 {
-                    var platform = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == tpfCollar.ArgosId);
+                    var platform = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == tpfCollar.PlatformId && tpfCollar.Platform == "Argos");
                     if (platform == null && CreateCollarsCheckBox.Checked)
-                        platform = CreatePlatform(tpfCollar.ArgosId);
+                        platform = CreatePlatform(tpfCollar.PlatformId);
                     if (platform != null)
                         //If not paired, then try to parit the collar and platform.  If it fails, or the the dates are wrong, they can correct that later
                         if (!Database.ArgosDeployments.Any(d => d.Collar == collar && d.ArgosPlatform == platform))
