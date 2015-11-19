@@ -762,7 +762,6 @@
             this.FilesDataGridView.TabIndex = 0;
             this.FilesDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.FilesDataGridView_CellDoubleClick);
             this.FilesDataGridView.SelectionChanged += new System.EventHandler(this.FilesDataGridView_SelectionChanged);
-            this.FilesDataGridView.DoubleClick += new System.EventHandler(this.FileInfoButton_Click);
             // 
             // FixesTabPage
             // 
