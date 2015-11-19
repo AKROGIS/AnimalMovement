@@ -731,7 +731,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(508, 326);
             this.Name = "FileDetailsForm";
-            this.Text = "FileDetailsForm";
+            this.Text = "File Details Form";
             ((System.ComponentModel.ISupportInitialize)(this.GpsFixesDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.DerivedFilesDataGridView)).EndInit();
             this.FileTabControl.ResumeLayout(false);
