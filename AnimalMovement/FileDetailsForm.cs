@@ -130,6 +130,9 @@ namespace AnimalMovement
 
         private void FileTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (FileTabControl.TabCount == 0)
+                return;
+
             switch ((string)FileTabControl.SelectedTab.Tag)
             {
                 case "Argos":
@@ -148,7 +151,6 @@ namespace AnimalMovement
                     SetUpProcessingIssuesTab();
                     break;
             }
-
         }
 
 
