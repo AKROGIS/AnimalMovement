@@ -309,7 +309,7 @@ namespace AnimalMovement
 
 
         #region Telonics Parameter File Tab
-
+        
         private void HideTpfDetailsTab()
         {
             if (File.Format != 'A' && FileTabControl.TabPages.Contains(TpfDetailsTabPage))
@@ -353,7 +353,7 @@ namespace AnimalMovement
         {
             CheckButton.Visible = _collars == null;
             AddFixCollarButton.Visible = _collars != null;
-            AddArgosButton.Visible = _collars != null;
+            AddPlatformButton.Visible = _collars != null;
             AddFixParameterButton.Visible = _collars != null;
             if (_collars == null || TpfDataGridView.SelectedRows.Count != 1)
                 return;
@@ -365,14 +365,14 @@ namespace AnimalMovement
                 AddFixCollarButton.Text = "Add " +
                                        (IgnoreSuffixCheckBox.Checked && ctn.Length > 6 ? ctn.Substring(0, 6) : ctn);
                 AddFixCollarButton.Enabled = true;
-                AddArgosButton.Enabled = false;
+                AddPlatformButton.Enabled = false;
                 AddFixParameterButton.Enabled = false;
                 return;
             }
-            var argosColor = TpfDataGridView.Rows[index].Cells[2].Style.ForeColor;
-            var frequencyColor = TpfDataGridView.Rows[index].Cells[3].Style.ForeColor;
-            var paramColor = TpfDataGridView.Rows[index].Cells[4].Style.ForeColor;
-            AddArgosButton.Enabled = argosColor == Color.Red;
+            var platformColor = TpfDataGridView.Rows[index].Cells[3].Style.ForeColor;
+            var frequencyColor = TpfDataGridView.Rows[index].Cells[4].Style.ForeColor;
+            var paramColor = TpfDataGridView.Rows[index].Cells[5].Style.ForeColor;
+            AddPlatformButton.Enabled = platformColor == Color.Red;
             AddFixCollarButton.Enabled = frequencyColor == Color.Red;
             AddFixCollarButton.Text = frequencyColor == Color.Red ? "Fix Frequency" : AddFixCollarButton.Text;
             AddFixParameterButton.Enabled = paramColor == Color.Red || paramColor == Color.Fuchsia;
@@ -396,7 +396,7 @@ namespace AnimalMovement
                 ctn = IgnoreSuffixCheckBox.Checked && ctn.Length > 6 ? ctn.Substring(0, 6) : ctn;
                 var form = new AddCollarForm(File.ProjectInvestigator);
                 form.DatabaseChanged += (o, x) => CollarAdded(ctn);
-                form.SetDefaultFrequency((double)TpfDataGridView.SelectedRows[0].Cells[3].Value);
+                form.SetDefaultFrequency((double)TpfDataGridView.SelectedRows[0].Cells[4].Value);
                 form.SetDefaultModel("Telonics","Gen4");
                 form.SetDefaultId(ctn);
                 form.Show(this);
@@ -404,7 +404,7 @@ namespace AnimalMovement
             else
             {
                 //Fix the frequency
-                collar.Frequency = (double)TpfDataGridView.SelectedRows[0].Cells[3].Value;
+                collar.Frequency = (double)TpfDataGridView.SelectedRows[0].Cells[4].Value;
                 if (SubmitChanges())
                     TpfDataChanged();
             }
@@ -416,7 +416,7 @@ namespace AnimalMovement
             if (collar == null)
                 return;
             //Add Parameter
-            var start = (DateTime) TpfDataGridView.SelectedRows[0].Cells[4].Value;
+            var start = (DateTime) TpfDataGridView.SelectedRows[0].Cells[5].Value;
             //Since this is a new collar, I don't need to worry about any parameter conflicts.
             var param = new CollarParameter
                 {
@@ -428,19 +428,27 @@ namespace AnimalMovement
             if (SubmitChanges())
                 TpfDataChanged();
 
-            //Add ArgosDeployment
-            var argosId = (string) TpfDataGridView.SelectedRows[0].Cells[2].Value;
-            var platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);
-            if (platform == null)
+            //Add PlatformDeployment
+            var platformType = (string)TpfDataGridView.SelectedRows[0].Cells[2].Value;
+            var platformId = (string)TpfDataGridView.SelectedRows[0].Cells[3].Value;
+            if (platformType == "Argos")
             {
-                var form = new AddArgosPlatformForm();
-                form.DatabaseChanged += (o, x) => ArgosAdded(argosId, collar, start);
-                form.SetDefaultPlatform(argosId);
-                form.Show(this);
+                var platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == platformId);
+                if (platform == null)
+                {
+                    var form = new AddArgosPlatformForm();
+                    form.DatabaseChanged += (o, x) => ArgosAdded(platformId, collar, start);
+                    form.SetDefaultPlatform(platformId);
+                    form.Show(this);
+                }
+                else
+                {
+                    AddArgosDeployment(platformId, collar, start);
+                }
             }
-            else
+            if (platformType == "Iridium")
             {
-                AddArgosDeployment(argosId, collar, start);
+                //TODO: implement support for Iridium
             }
         }
 
@@ -460,21 +468,29 @@ namespace AnimalMovement
                 TpfDataChanged();
         }
 
-        private void AddArgosButton_Click(object sender, EventArgs e)
+        private void AddPlatformButton_Click(object sender, EventArgs e)
         {
             var index = TpfDataGridView.SelectedRows[0].Index;
             var collar = _collars[index];
-            var argosId = (string)TpfDataGridView.SelectedRows[0].Cells[2].Value;
-            var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[4].Value;
-            if (Database.ArgosPlatforms.Any(a => a.PlatformId == argosId))
-                AddArgosDeployment(argosId, collar, start);
-            else
+            var platform = (string)TpfDataGridView.SelectedRows[0].Cells[2].Value;
+            var platformId = (string)TpfDataGridView.SelectedRows[0].Cells[3].Value;
+            var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[5].Value;
+            if (platform == "Argos")
             {
-                //First add the Argosplatform
-                var form = new AddArgosPlatformForm();
-                form.SetDefaultPlatform(argosId);
-                form.DatabaseChanged += (o, x) => AddArgosDeployment(argosId, collar, start);
-                form.Show(this);
+                if (Database.ArgosPlatforms.Any(a => a.PlatformId == platformId))
+                    AddArgosDeployment(platformId, collar, start);
+                else
+                {
+                    //First add the Argosplatform
+                    var form = new AddArgosPlatformForm();
+                    form.SetDefaultPlatform(platformId);
+                    form.DatabaseChanged += (o, x) => AddArgosDeployment(platformId, collar, start);
+                    form.Show(this);
+                }
+            }
+            if (platform == "Argos")
+            {
+                //TODO: implement support for Iridium
             }
         }
 
@@ -485,7 +501,7 @@ namespace AnimalMovement
                 return;
             DateTime? endDate = null;
             if (platform.ArgosDeployments.Count > 0 || collar.ArgosDeployments.Count > 0)
-                if (!FixOtherDeployments(collar, platform, start, ref endDate))
+                if (!FixOtherArgosDeployments(collar, platform, start, ref endDate))
                     return;
             var deploy = new ArgosDeployment
             {
@@ -499,7 +515,7 @@ namespace AnimalMovement
                 TpfDataChanged();
         }
 
-        private bool FixOtherDeployments(Collar collar, ArgosPlatform platform, DateTime start, ref DateTime? endDate)
+        private bool FixOtherArgosDeployments(Collar collar, ArgosPlatform platform, DateTime start, ref DateTime? endDate)
         {
             //I'm willing to move a existing null end dates (there can only be one for the platform and one for the collar) back to my start date.
             //Any existing non-null enddate must have been explicitly set by the user, so they should be dealt with explicitly
@@ -654,32 +670,35 @@ namespace AnimalMovement
             foreach (DataGridViewRow row in TpfDataGridView.Rows)
             {
                 var collar = _collars[row.Index];
-                var argosId = (string)row.Cells[2].Value;
-                var frequency = (double)row.Cells[3].Value;
-                var paramaterStart = (DateTime)row.Cells[4].Value;
+                var platform = (string)row.Cells[2].Value;
+                var platformId = (string)row.Cells[3].Value;
+                var frequency = (double)row.Cells[4].Value;
+                var paramaterStart = (DateTime)row.Cells[5].Value;
                 //reset
                 row.DefaultCellStyle.ForeColor = Color.Empty;
                 row.Cells[2].Style.ForeColor = Color.Empty;
                 row.Cells[3].Style.ForeColor = Color.Empty;
                 row.Cells[4].Style.ForeColor = Color.Empty;
+                row.Cells[5].Style.ForeColor = Color.Empty;
 
                 if (collar == null) //No collar highlight all
                 {
                     row.DefaultCellStyle.ForeColor = Color.Red;
                     continue;
                 }
-                if (MissingArgosDeployment(collar, argosId))
-                    row.Cells[2].Style.ForeColor = Color.Red;
-                if (FrequencyMismatch(collar, frequency))
+                //TODO: Add Iridium platform
+                if (platform == "Argos" && MissingArgosDeployment(collar, platformId))
                     row.Cells[3].Style.ForeColor = Color.Red;
-                if (FileNotOnCollar(collar))
+                if (FrequencyMismatch(collar, frequency))
                     row.Cells[4].Style.ForeColor = Color.Red;
+                if (FileNotOnCollar(collar))
+                    row.Cells[5].Style.ForeColor = Color.Red;
                 else
                 {
                     //File is on collar (possibly more than once)
                     if (!ParameterExistsWithDate(collar, paramaterStart))
                         //There is no parameter on this collar with this date (figure out which one to fix later)
-                        row.Cells[4].Style.ForeColor = Color.Fuchsia;
+                        row.Cells[5].Style.ForeColor = Color.Fuchsia;
                 }
             }
         }

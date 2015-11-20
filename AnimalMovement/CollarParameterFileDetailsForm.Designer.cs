@@ -55,7 +55,7 @@
             this.InfoParameterButton = new System.Windows.Forms.Button();
             this.TpfDetailsTabPage = new System.Windows.Forms.TabPage();
             this.CheckButton = new System.Windows.Forms.Button();
-            this.AddArgosButton = new System.Windows.Forms.Button();
+            this.AddPlatformButton = new System.Windows.Forms.Button();
             this.AddFixParameterButton = new System.Windows.Forms.Button();
             this.AddFixCollarButton = new System.Windows.Forms.Button();
             this.IgnoreSuffixCheckBox = new System.Windows.Forms.CheckBox();
@@ -349,7 +349,7 @@
             // TpfDetailsTabPage
             // 
             this.TpfDetailsTabPage.Controls.Add(this.CheckButton);
-            this.TpfDetailsTabPage.Controls.Add(this.AddArgosButton);
+            this.TpfDetailsTabPage.Controls.Add(this.AddPlatformButton);
             this.TpfDetailsTabPage.Controls.Add(this.AddFixParameterButton);
             this.TpfDetailsTabPage.Controls.Add(this.AddFixCollarButton);
             this.TpfDetailsTabPage.Controls.Add(this.IgnoreSuffixCheckBox);
@@ -374,16 +374,16 @@
             this.CheckButton.UseVisualStyleBackColor = true;
             this.CheckButton.Click += new System.EventHandler(this.CheckButton_Click);
             // 
-            // AddArgosButton
+            // AddPlatformButton
             // 
-            this.AddArgosButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.AddArgosButton.Location = new System.Drawing.Point(97, 204);
-            this.AddArgosButton.Name = "AddArgosButton";
-            this.AddArgosButton.Size = new System.Drawing.Size(85, 23);
-            this.AddArgosButton.TabIndex = 2;
-            this.AddArgosButton.Text = "Add Argos";
-            this.AddArgosButton.UseVisualStyleBackColor = true;
-            this.AddArgosButton.Click += new System.EventHandler(this.AddArgosButton_Click);
+            this.AddPlatformButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddPlatformButton.Location = new System.Drawing.Point(97, 204);
+            this.AddPlatformButton.Name = "AddPlatformButton";
+            this.AddPlatformButton.Size = new System.Drawing.Size(85, 23);
+            this.AddPlatformButton.TabIndex = 2;
+            this.AddPlatformButton.Text = "Add Platform";
+            this.AddPlatformButton.UseVisualStyleBackColor = true;
+            this.AddPlatformButton.Click += new System.EventHandler(this.AddPlatformButton_Click);
             // 
             // AddFixParameterButton
             // 
@@ -546,7 +546,7 @@
         private System.Windows.Forms.Button AddFixParameterButton;
         private System.Windows.Forms.Button AddFixCollarButton;
         private System.Windows.Forms.CheckBox IgnoreSuffixCheckBox;
-        private System.Windows.Forms.Button AddArgosButton;
+        private System.Windows.Forms.Button AddPlatformButton;
         private System.Windows.Forms.Button CheckButton;
         private System.Windows.Forms.ErrorProvider ErrorProvider;
 
