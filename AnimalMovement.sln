@@ -33,6 +33,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "SqlServer_Files", "SqlServe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollarFileLoader", "CollarFileLoader\CollarFileLoader.csproj", "{AE0F7910-911F-47E8-AF3D-D2A16804121D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IridiumDownloader", "IridiumDownloader\IridiumDownloader.csproj", "{F5694639-1693-4A09-989F-FFDA43846518}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -212,6 +214,16 @@ Global
 		{AE0F7910-911F-47E8-AF3D-D2A16804121D}.Release|Mixed Platforms.Build.0 = Release|x86
 		{AE0F7910-911F-47E8-AF3D-D2A16804121D}.Release|x86.ActiveCfg = Release|x86
 		{AE0F7910-911F-47E8-AF3D-D2A16804121D}.Release|x86.Build.0 = Release|x86
+		{F5694639-1693-4A09-989F-FFDA43846518}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F5694639-1693-4A09-989F-FFDA43846518}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3544,7 +3544,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", CanBeNull=true, IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Sha1Hash
 		{
 			get
@@ -4861,6 +4861,8 @@ namespace DataModel
 		
 		private char _ArgosData;
 		
+		private char _RequiresCollar;
+		
 		private EntitySet<CollarFile> _CollarFiles;
 		
 		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
@@ -4879,6 +4881,8 @@ namespace DataModel
     partial void OnDescriptionChanged();
     partial void OnArgosDataChanging(char value);
     partial void OnArgosDataChanged();
+    partial void OnRequiresCollarChanging(char value);
+    partial void OnRequiresCollarChanged();
     #endregion
 		
 		public LookupCollarFileFormat()
@@ -4988,6 +4992,26 @@ namespace DataModel
 					this._ArgosData = value;
 					this.SendPropertyChanged("ArgosData");
 					this.OnArgosDataChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RequiresCollar", DbType="Char(1) NOT NULL")]
+		public char RequiresCollar
+		{
+			get
+			{
+				return this._RequiresCollar;
+			}
+			set
+			{
+				if ((this._RequiresCollar != value))
+				{
+					this.OnRequiresCollarChanging(value);
+					this.SendPropertyChanging();
+					this._RequiresCollar = value;
+					this.SendPropertyChanged("RequiresCollar");
+					this.OnRequiresCollarChanged();
 				}
 			}
 		}
@@ -6076,7 +6100,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.OnInsert, DbType="VarBinary(8000)", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.OnInsert, DbType="VarBinary(8000)", CanBeNull=true, IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Sha1Hash
 		{
 			get
