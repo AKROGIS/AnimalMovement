@@ -1624,6 +1624,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
@@ -1697,7 +1698,20 @@ BEGIN
     --IF @Format = 'G'  -- Debevek Format
     -- do not process the parent, only the children ('B')
     
+    --IF @Format = 'H'  -- Gen4 Datalog (store-on-board) Format
+    -- do not process the parent, only the children ('C')
+
+    IF @Format = 'I'  -- Iridium Email Download Format
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataIridiumMail] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataIridiumMail] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatI] (@FileId) 
+        END
+    END
+    
 END
+
 
 
 
@@ -4834,6 +4848,28 @@ RETURNS  TABLE (
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatI](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[EmailAddress] [nvarchar](500) NULL,
+	[EmailUID] [nvarchar](50) NULL,
+	[Imei] [nvarchar](50) NULL,
+	[MessageTime] [nvarchar](50) NULL,
+	[StatusCode] [nvarchar](50) NULL,
+	[StatusString] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[CEPRadius] [nvarchar](50) NULL,
+	[MessageLength] [nvarchar](50) NULL,
+	[MessageBytes] [nvarchar](4000) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatI]
 GO
 SET ANSI_NULLS ON
 GO
