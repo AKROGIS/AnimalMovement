@@ -5954,6 +5954,100 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
+CREATE TABLE [dbo].[CollarDataIridiumMail](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[EmailAddress] [varchar](500) NULL,
+	[EmailUID] [varchar](50) NULL,
+	[Imei] [varchar](50) NULL,
+	[MessageTime] [varchar](50) NULL,
+	[StatusCode] [varchar](50) NULL,
+	[StatusString] [varchar](50) NULL,
+	[Latitude] [varchar](50) NULL,
+	[Longitude] [varchar](50) NULL,
+	[CEPRadius] [varchar](50) NULL,
+	[MessageLength] [varchar](50) NULL,
+	[MessageBytes] [varchar](5000) NULL,
+ CONSTRAINT [PK_CollarDataIridiumMail] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataIridiumMail] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: Feb 22, 2016
+-- Description:	Returns a table with zero or one row containing the collar id and parameter file id
+--              associated with an Iridium download file.
+-- Example:     SELECT * FROM CollarParametersForIridiumDownload(40025)
+-- =============================================
+CREATE FUNCTION [dbo].[CollarParametersForIridiumDownload] 
+(
+	@FileId  INT
+)
+RETURNS TABLE 
+AS
+	RETURN
+	  SELECT TOP 1
+		T.fileid AS [ParameterFileId],
+		'Telelonics' AS [CollarManufacturer],
+		CTN AS [CollarId]
+	  FROM [dbo].[CollarDataIridiumMail] AS D
+	  JOIN [dbo].[AllTpfFileData] AS T
+	  ON T.[PlatformId] = D.[Imei] AND T.[TimeStamp] < D.[MessageTime]
+	  WHERE T.[Platform] = 'Iridium'
+	  AND D.[FileId] = @FileId
+	  ORDER BY T.[TimeStamp] DESC
+
+
+GO
+GRANT SELECT ON [dbo].[CollarParametersForIridiumDownload] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE VIEW [dbo].[IDF_NeverProcessed]
+AS
+----------- IDF_NeverProcessed
+-----------   Is a file of format 'I' (It has no Argos transmissions),
+-----------   but no child files, and no processing issues
+     SELECT P.FileId
+       FROM CollarFiles AS P      
+  LEFT JOIN CollarFiles AS C
+         ON P.FileId = C.ParentFileId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = P.FileId
+      WHERE P.Format = 'I'
+        AND C.FileId IS NULL
+        AND I.FileId IS NULL
+
+
+
+GO
+GRANT SELECT ON [dbo].[IDF_NeverProcessed] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[ArgosFilePlatformDates](
 	[ItemId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[FileId] [int] NOT NULL,
@@ -6378,38 +6472,6 @@ GO
 SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataDebevekFormat] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataIridiumMail](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[EmailAddress] [varchar](500) NULL,
-	[EmailUID] [varchar](50) NULL,
-	[Imei] [varchar](50) NULL,
-	[MessageTime] [varchar](50) NULL,
-	[StatusCode] [varchar](50) NULL,
-	[StatusString] [varchar](50) NULL,
-	[Latitude] [varchar](50) NULL,
-	[Longitude] [varchar](50) NULL,
-	[CEPRadius] [varchar](50) NULL,
-	[MessageLength] [varchar](50) NULL,
-	[MessageBytes] [varchar](5000) NULL,
- CONSTRAINT [PK_CollarDataIridiumMail] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDataIridiumMail] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
