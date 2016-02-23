@@ -361,7 +361,10 @@ namespace SqlServer_Parsers
             UInt64 mask = UInt64.MinValue;
             if (stream == null)
                 return mask;
-            //skip the junk before the header line
+
+            // Read lines from header until the last header row
+            // The last header row has the column names for the data in the file
+            // There is a line in the header (i.e. "Headers Row,24") that specifies how many lines are in the header
             for (int i = 0; i < _formatCHeaderLines - 1; i++)
             {
                 // Look for the line that defines where the header actually is
@@ -373,6 +376,17 @@ namespace SqlServer_Parsers
             if (header == null)
                 return mask;
             string[] columns = header.Split(new[] { '\t', ',' }, 65);
+            //Fix Iridium Column Header
+            columns = columns.Select(x =>
+            {
+                if (x == "Iridium CEP Radius")
+                    return "Argos Location Class";
+                if (x == "Iridium Latitude")
+                    return "Argos Latitude";
+                if (x == "Iridium Longitude")
+                    return "Argos Longitude";
+                return x;
+            }).ToArray();
             var wellKnownColumns = new[]
                                        {
                                 //"Acquisition Time",
@@ -397,6 +411,8 @@ namespace SqlServer_Parsers
             {
                 if (columns.Length <= fileColumn)
                     break;
+                //Assumes that all file columns are in well known columns, and in the same order
+                //If that is not true, then all remaining columns are skipped
                 if (columns[fileColumn] != wellKnownColumns[i])
                     continue;
                 mask = mask | 1ul << i;
