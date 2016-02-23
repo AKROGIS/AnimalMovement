@@ -342,7 +342,7 @@ namespace FileLibrary
                     AllowDuplicates = allowDups
                 };
             var file = fileLoader.Load();
-            if (file.LookupCollarFileFormat.ArgosData == 'Y' || file.Format == 'H' || file.Format == 'I')
+            if (file.LookupCollarFileFormat.ArgosData == 'Y' || file.Format == 'H')
                 FileProcessor.ProcessFile(file);
         }
 
