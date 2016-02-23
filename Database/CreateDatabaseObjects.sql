@@ -2080,6 +2080,73 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
+
+-- ===============================================
+-- Author:      Regan Sarwas
+-- Create date: February 23, 2016
+-- Description: Fixes the owner of an IDF (format I) file based on the relevant Collar Parameter file
+--              These files are loaded before the owner is known.
+--              Once they are loaded (and parsed), the table 'CollarDataIridiumMail' can be used to
+--              find the relevant TPF file (if it exists), and then owner of the collar can be
+--              set to the owner of the TPF file.
+--              It is an error to call this without a format I file ID, or to not have a matching TPF file.
+--              Can be run as any user, as it is always safe to make this fix, but we will limit to editors.
+-- ===============================================
+CREATE PROCEDURE [dbo].[CollarFile_FixOwnerOfIdfFile] 
+    @FileId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- FileId must be an Parsed Iridium Email File (i.e. in CollarDataIridiumMail) 
+    IF NOT EXISTS (SELECT 1 FROM CollarDataIridiumMail WHERE FileId = @FileId)
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'Invalid parameter: FileId ' + CAST(@FileId AS VARCHAR(10)) + ' was not found in the CollarDataIridiumMail table';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    -- File will have one or more (typically one) records in CollarDataIridiumMail for each collar in the email.
+	-- Each email will belong to a specific PI (although we can't tell from the email), so we will assume that all
+	-- the collars in the email belong to the same PI, and only look at the first matching record in CollarDataIridiumMail
+    DECLARE @Owner NVARCHAR(255) = NULL
+	 SELECT TOP 1 @Owner = P.Owner
+	   FROM [dbo].[CollarDataIridiumMail] AS D
+	   JOIN [dbo].[AllTpfFileData] AS T
+	     ON T.[PlatformId] = D.[Imei] AND T.[TimeStamp] < D.[MessageTime]
+	   JOIN [dbo].[CollarParameterFiles] AS P
+	     ON P.FileId = T.FileId
+	  WHERE T.[Platform] = 'Iridium'
+	    AND D.[FileId] = @FileId
+   ORDER BY T.[TimeStamp] DESC
+ 
+    -- Must have found an owner in the TPF file relationship 
+    IF @Owner IS NULL
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'The Iridium Id in file ' + CAST(@FileId AS VARCHAR(10)) + ' is not referenced in any loaded Collar Parameter Files.';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+    -- Do the update
+    UPDATE [dbo].[CollarFiles]
+       SET [Owner] = @Owner
+     WHERE [FileId] = @FileId
+
+END
+
+
+
+
+
+
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 3, 2012
@@ -5988,11 +6055,14 @@ GO
 
 
 
+
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: Feb 22, 2016
 -- Description:	Returns a table with zero or one row containing the collar id and parameter file id
 --              associated with an Iridium download file.
+--              ASSUMES only one IMEI (Iridium ID - or collar) per 'CollarDataIridiumMail' File.
+--              This matches the download data recieved so far.
 -- Example:     SELECT * FROM CollarParametersForIridiumDownload(40025)
 -- =============================================
 CREATE FUNCTION [dbo].[CollarParametersForIridiumDownload] 
@@ -6012,6 +6082,7 @@ AS
 	  WHERE T.[Platform] = 'Iridium'
 	  AND D.[FileId] = @FileId
 	  ORDER BY T.[TimeStamp] DESC
+
 
 
 
@@ -8477,13 +8548,13 @@ BEGIN
     END
 
 
-    -- Business Rule: A Collar Mfgr/Id is required unless the file format has Argos data.
+    -- Business Rule: A Collar Mfgr/Id is required when the file format says so.
     --                (referential integrity already guarantees a non-null collar is valid)
     IF EXISTS (    SELECT 1
                      FROM inserted AS i
                      JOIN LookupCollarFileFormats AS F
                        ON i.Format = F.Code
-                    WHERE F.ArgosData = 'N' AND i.CollarId IS NULL
+                    WHERE F.RequiresCollar = 'Y' AND i.CollarId IS NULL
               )
     BEGIN
         RAISERROR('Integrity Violation. A Collar Mfgr/Id is required unless the file format has Argos data as the parent', 18, 0)
