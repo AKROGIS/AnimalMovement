@@ -4,6 +4,7 @@
     {
         Email = 0,  //default
         WebService,
-        Datalog
+        Datalog,
+        Iridium
     }
 }

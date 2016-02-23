@@ -5987,6 +5987,7 @@ GO
 
 
 
+
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: Feb 22, 2016
@@ -6003,7 +6004,7 @@ AS
 	RETURN
 	  SELECT TOP 1
 		T.fileid AS [ParameterFileId],
-		'Telelonics' AS [CollarManufacturer],
+		'Telonics' AS [CollarManufacturer],
 		CTN AS [CollarId]
 	  FROM [dbo].[CollarDataIridiumMail] AS D
 	  JOIN [dbo].[AllTpfFileData] AS T
@@ -6011,6 +6012,7 @@ AS
 	  WHERE T.[Platform] = 'Iridium'
 	  AND D.[FileId] = @FileId
 	  ORDER BY T.[TimeStamp] DESC
+
 
 
 GO

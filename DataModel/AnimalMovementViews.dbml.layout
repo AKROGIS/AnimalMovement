@@ -38,5 +38,11 @@
         <elementListCompartment Id="9a23cd79-b396-4d9e-b144-c376676049ce" absoluteBounds="1.3899999999999997, 5.96, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
+    <classShape Id="913e5d5c-62de-4d25-9aef-363d59d81067" absoluteBounds="3.75, 5.375, 2, 1.0016910807291668">
+      <DataClassMoniker Name="/AnimalMovementViews/NeverProcessedIdfFiles" />
+      <nestedChildShapes>
+        <elementListCompartment Id="aa9bbf1e-b174-4d07-bf20-fef81d976bf1" absoluteBounds="3.7649999999999997, 5.835, 1.9700000000000002, 0.44169108072916669" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>
