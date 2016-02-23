@@ -150,6 +150,7 @@ namespace FileLibrary
             var databaseFunctions = new AnimalMovementFunctions();
             //FIXME: check that this is generic to all telonics processing and not just Argos files
             databaseFunctions.ArgosFile_ClearProcessingResults(file.FileId);
+            databaseFunctions.CollarFile_FixOwnerOfIdfFile((file.FileId));
 
             var processor = new Gen4Processor(tpfFile.Contents.ToArray());
             var lines = processor.ProcessIdf(file.Contents.ToArray());
@@ -158,11 +159,8 @@ namespace FileLibrary
             var filename = Path.GetFileNameWithoutExtension(file.FileName) + "_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
             var fileLoader = new FileLoader(filename, data)
             {
-                //Project = null,
-                //Owner = collar.ProjectInvestigator,
-                //FIXME: A file must have the same project/owner as the parent; but the parent is wrong
-                Project = file.Project,
-                Owner = file.ProjectInvestigator,
+                Project = null,
+                Owner = tpfFile.ProjectInvestigator,  //Must match result from databaseFunctions.CollarFile_FixOwnerOfIdfFile
                 Collar = collar,
                 Status = file.Status,
                 ParentFileId = file.FileId,
