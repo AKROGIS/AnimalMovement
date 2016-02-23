@@ -33,8 +33,9 @@ namespace FileLibrary
                      .Concat(views.NeverProcessedIdfFiles.Select(x => x.FileId)))
             {
                 var file = database.CollarFiles.First(f => f.FileId == fileId);
-                if (pi != null && file.ProjectInvestigator != pi && (file.Project == null ||
-                                                                     file.Project.ProjectInvestigator1 != pi))
+                if (pi != null && 
+                    (file.ProjectInvestigator == null || file.ProjectInvestigator.Login != pi.Login) && 
+                    (file.Project == null || file.Project.ProjectInvestigator1.Login != pi.Login))
                     continue;
                 try
                 {
