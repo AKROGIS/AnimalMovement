@@ -2142,6 +2142,10 @@ END
 
 
 GO
+GRANT EXECUTE ON [dbo].[CollarFile_FixOwnerOfIdfFile] TO [ArgosProcessor] AS [dbo]
+GO
+GRANT EXECUTE ON [dbo].[CollarFile_FixOwnerOfIdfFile] TO [Editor] AS [dbo]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -6095,10 +6099,11 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
 CREATE VIEW [dbo].[IDF_NeverProcessed]
 AS
 ----------- IDF_NeverProcessed
------------   Is a file of format 'I' (It has no Argos transmissions),
+-----------   Is a Active file of format 'I' (It has no Argos transmissions),
 -----------   but no child files, and no processing issues
      SELECT P.FileId
        FROM CollarFiles AS P      
@@ -6106,9 +6111,11 @@ AS
          ON P.FileId = C.ParentFileId
   LEFT JOIN ArgosFileProcessingIssues AS I
          ON I.FileId = P.FileId
-      WHERE P.Format = 'I'
+      WHERE P.[Format] = 'I'
+	    AND P.[Status] = 'A'
         AND C.FileId IS NULL
         AND I.FileId IS NULL
+
 
 
 
