@@ -27,9 +27,11 @@ namespace SqlServer_Parsers
         //   B - Ed Debevek's Child File Format - for a single deployment of a platform
         //   C - Telonics Gen4 File Format (from Argos or direct download)
         //   D - Telonics Gen3 File Format
-        //   E - Telonics Email File Format (See the SqlServer_Files project)
+        //   E - Telonics Email File Format (parsed with the SqlServer_Files project)
         //   F - Argos WebService CSV File Format (aws)
         //   G - Ed Debevek's Parent File Format, not parsed (children are parsed as 'B')
+        //   H - Telonics Gen4 Store On Board, not parsed (children are parsed as 'C')
+        //   I - Iridium Email Download Format; (contains info needed to select parameter file for processing)
 
         // A - Telonics Store On Board Format
 
@@ -58,7 +60,7 @@ namespace SqlServer_Parsers
 	            [Satellite Data] [nvarchar](150)")]
         public static IEnumerable ParseFormatA(SqlInt32 fileId)
         {
-            return GetLines(fileId, 'A', FormatA_LineSelector, null);
+            return GetLines(fileId, 'A', Default_LineSelector, null);
         }
 
 
@@ -85,7 +87,7 @@ namespace SqlServer_Parsers
 	                [Other] [nvarchar](255) NULL")]
         public static IEnumerable ParseFormatB(SqlInt32 fileId)
         {
-            return GetLines(fileId, 'B', FormatB_LineSelector, FormatB_ColumnSelector);
+            return GetLines(fileId, 'B', Default_LineSelector, FormatB_ColumnSelector);
         }
 
 
@@ -224,6 +226,29 @@ namespace SqlServer_Parsers
         public static IEnumerable ParseFormatF(SqlInt32 fileId)
         {
             return GetLines(fileId, 'F', FormatF_LineSelector, null);
+        }
+
+        // I - Iridium Email Download Format
+
+        [SqlFunction(
+            DataAccess = DataAccessKind.Read,
+            FillRowMethodName = "FormatI_FillRow",
+            TableDefinition =
+                @"[LineNumber] [int],
+	                [EmailAddress] [varchar](500) NULL,
+	                [EmailUID] [varchar](50) NULL,
+	                [Imei] [varchar](50) NULL,
+	                [MessageTime] [varchar](50) NULL,
+	                [StatusCode] [varchar](50) NULL,
+	                [StatusString] [varchar](50) NULL,
+	                [Latitude] [varchar](50) NULL,
+	                [Longitude] [varchar](50) NULL,
+	                [CEPRadius] [varchar](50) NULL,
+	                [MessageLength] [varchar](50) NULL,
+	                [MessageBytes] [varchar](4000) NULL")]
+        public static IEnumerable ParseFormatI(SqlInt32 fileId)
+        {
+            return GetLines(fileId, 'I', Default_LineSelector, null);
         }
 
         #endregion
@@ -384,16 +409,7 @@ namespace SqlServer_Parsers
 
         #region Line Selectors
 
-        internal static bool FormatA_LineSelector(int lineNumber, string lineText)
-        {
-            if (lineNumber == 1)
-                return false;
-            if (string.IsNullOrEmpty(lineText.Trim()))
-                return false;
-            return true;
-        }
-
-        internal static bool FormatB_LineSelector(int lineNumber, string lineText)
+        internal static bool Default_LineSelector(int lineNumber, string lineText)
         {
             if (lineNumber == 1)
                 return false;
@@ -815,6 +831,38 @@ namespace SqlServer_Parsers
             level = NullableString(parts[column++]);
             doppler = NullableString(parts[column++]);
             rawData = NullableString(parts[column].TrimEnd(';').TrimEnd('"'));
+        }
+
+
+        public static void FormatI_FillRow(
+            object inputObject,
+            out SqlInt32 lineNumber,
+            out SqlString emailAddress,
+            out SqlString emailUid,
+            out SqlString imei,
+            out SqlString messageTime,
+            out SqlString statusCode,
+            out SqlString statusText,
+            out SqlString latitude,
+            out SqlString longitude,
+            out SqlString cepRadius,
+            out SqlString messageLength,
+            out SqlString messageBytes)
+        {
+            var line = (Line)inputObject;
+            string[] parts = line.LineText.Split(',');
+            lineNumber = line.LineNumber;
+            emailAddress = parts[0];
+            emailUid = parts[1];
+            imei = parts[2];
+            messageTime = parts[3];
+            statusCode = parts[4];
+            statusText = parts[5];
+            latitude = parts[6];
+            longitude = parts[7];
+            cepRadius = parts[8];
+            messageLength = parts[9];
+            messageBytes = parts[10];
         }
 
 

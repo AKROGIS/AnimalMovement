@@ -399,7 +399,7 @@ namespace FileLibrary
 
         private bool FileFormatRequiresCollar
         {
-            get { return Format != null && Format.ArgosData == 'N'; }
+            get { return Format != null && Format.RequiresCollar == 'Y'; }
         }
 
         private Lazy<Collar> LazyFileCollar { get; set; }

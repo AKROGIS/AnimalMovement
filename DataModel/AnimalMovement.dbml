@@ -341,6 +341,7 @@
       <Column Name="Name" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
       <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
       <Column Name="ArgosData" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
+      <Column Name="RequiresCollar" Type="System.Char" DbType="Char(1) NOT NULL" CanBeNull="false" />
       <Association Name="LookupCollarFileFormat_CollarFile" Member="CollarFiles" ThisKey="Code" OtherKey="Format" Type="CollarFile" />
       <Association Name="LookupCollarManufacturer_LookupCollarFileFormat" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
     </Type>

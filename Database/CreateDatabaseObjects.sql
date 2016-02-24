@@ -40,7 +40,7 @@ CREATE USER [NPS\PAOwen] FOR LOGIN [NPS\PAOwen] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
-CREATE USER [NPS\SArthur] FOR LOGIN [NPS\SArthur] WITH DEFAULT_SCHEMA=[dbo]
+CREATE USER [NPS\SArthur] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\SDMiller] WITH DEFAULT_SCHEMA=[dbo]
 GO
@@ -1624,6 +1624,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
@@ -1697,7 +1698,20 @@ BEGIN
     --IF @Format = 'G'  -- Debevek Format
     -- do not process the parent, only the children ('B')
     
+    --IF @Format = 'H'  -- Gen4 Datalog (store-on-board) Format
+    -- do not process the parent, only the children ('C')
+
+    IF @Format = 'I'  -- Iridium Email Download Format
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataIridiumMail] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataIridiumMail] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatI] (@FileId) 
+        END
+    END
+    
 END
+
 
 
 
@@ -4835,6 +4849,28 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
 GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatI](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[EmailAddress] [nvarchar](500) NULL,
+	[EmailUID] [nvarchar](50) NULL,
+	[Imei] [nvarchar](50) NULL,
+	[MessageTime] [nvarchar](50) NULL,
+	[StatusCode] [nvarchar](50) NULL,
+	[StatusString] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[CEPRadius] [nvarchar](50) NULL,
+	[MessageLength] [nvarchar](50) NULL,
+	[MessageBytes] [nvarchar](4000) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatI]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -4937,7 +4973,8 @@ CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
 RETURNS  TABLE (
 	[FileId] [int] NULL,
 	[CTN] [nvarchar](16) NULL,
-	[Platform] [nvarchar](8) NULL,
+	[Platform] [nvarchar](16) NULL,
+	[PlatformId] [nvarchar](16) NULL,
 	[Frequency] [float] NULL,
 	[TimeStamp] [datetime2](7) NULL
 ) WITH EXECUTE AS CALLER
@@ -5550,30 +5587,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-CREATE TABLE [dbo].[ArgosDeployments](
-	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
- CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
-(
-	[DeploymentId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[ArgosDeployments] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[CollarParameterFiles](
 	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[Owner] [sysname] NOT NULL,
@@ -5594,6 +5607,49 @@ GO
 SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarParameterFiles] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+
+
+CREATE VIEW [dbo].[AllTpfFileData]
+AS
+
+-- All TPF Data
+     SELECT T.*, P.[FileName], P.[Status]
+       FROM CollarParameterFiles AS P
+CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
+      WHERE P.Format = 'A'
+
+
+GO
+GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosDeployments](
+	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
+(
+	[DeploymentId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[ArgosDeployments] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -5891,26 +5947,6 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 GO
 GRANT SELECT ON [dbo].[NoMovement_NPS] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-CREATE VIEW [dbo].[AllTpfFileData]
-AS
-
--- All TPF Data
-     SELECT T.*, P.[FileName], P.[Status]
-       FROM CollarParameterFiles AS P
-CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
-      WHERE P.Format = 'A'
-
-
-
-GO
-GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -6349,6 +6385,38 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
+CREATE TABLE [dbo].[CollarDataIridiumMail](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[EmailAddress] [varchar](500) NULL,
+	[EmailUID] [varchar](50) NULL,
+	[Imei] [varchar](50) NULL,
+	[MessageTime] [varchar](50) NULL,
+	[StatusCode] [varchar](50) NULL,
+	[StatusString] [varchar](50) NULL,
+	[Latitude] [varchar](50) NULL,
+	[Longitude] [varchar](50) NULL,
+	[CEPRadius] [varchar](50) NULL,
+	[MessageLength] [varchar](50) NULL,
+	[MessageBytes] [varchar](5000) NULL,
+ CONSTRAINT [PK_CollarDataIridiumMail] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataIridiumMail] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[CollarDataTelonicsGen3](
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
@@ -6470,6 +6538,7 @@ CREATE TABLE [dbo].[LookupCollarFileFormats](
 	[Name] [nvarchar](100) NOT NULL,
 	[Description] [nvarchar](255) NULL,
 	[ArgosData] [char](1) NOT NULL,
+	[RequiresCollar] [char](1) NULL,
  CONSTRAINT [PK_CollarFileFormats] PRIMARY KEY CLUSTERED 
 (
 	[Code] ASC
@@ -7012,6 +7081,12 @@ REFERENCES [dbo].[CollarFiles] ([FileId])
 ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[CollarDataDebevekFormat] CHECK CONSTRAINT [FK_CollarDataDebevekFormat_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataIridiumMail]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataIridiumMail_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataIridiumMail] CHECK CONSTRAINT [FK_CollarDataIridiumMail_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsGen3]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen3_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
@@ -8164,6 +8239,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: Mar 25, 2013
@@ -8189,13 +8265,13 @@ BEGIN
     END
 
 
-    -- Business Rule: A Collar Mfgr/Id is required unless the file format has Argos data.
+    -- Business Rule: A Collar Mfgr/Id is required when the file format says so.
     --                (referential integrity already guarantees a non-null collar is valid)
     IF EXISTS (    SELECT 1
                      FROM inserted AS i
                      JOIN LookupCollarFileFormats AS F
                        ON i.Format = F.Code
-                    WHERE F.ArgosData = 'N' AND i.CollarId IS NULL
+                    WHERE F.RequiresCollar = 'Y' AND i.CollarId IS NULL
               )
     BEGIN
         RAISERROR('Integrity Violation. A Collar Mfgr/Id is required unless the file format has Argos data as the parent', 18, 0)
@@ -8285,6 +8361,7 @@ BEGIN
     DEALLOCATE collarfiles_afterinsert_cursor;
 
 END
+
 
 
 

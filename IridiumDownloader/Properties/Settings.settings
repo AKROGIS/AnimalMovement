@@ -1,0 +1,39 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="IridiumDownloader.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="TdcPathToExecutable" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\Program Files (x86)\Telonics\Data Converter\TDC.exe</Value>
+    </Setting>
+    <Setting Name="TdcBatchFileTemplate" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">&lt;EmailDownloadSettings&gt;
+        &lt;TransmitterType&gt;1&lt;/TransmitterType&gt;
+        &lt;DownloadFolder&gt;{0}&lt;/DownloadFolder&gt;
+        &lt;BatchLog&gt;{1}&lt;/BatchLog&gt;
+        &lt;NewDataOnly&gt;true&lt;/NewDataOnly&gt;
+        &lt;GmailAccount&gt;
+                &lt;EmailAddress&gt;{2}&lt;/EmailAddress&gt;
+                &lt;Password&gt;{3}&lt;/Password&gt;
+        &lt;/GmailAccount&gt;
+&lt;/EmailDownloadSettings&gt;</Value>
+    </Setting>
+    <Setting Name="TdcMillisecondTimeout" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">20000</Value>
+    </Setting>
+    <Setting Name="DefaultProjectInvestigator" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">NPS\RESarwas</Value>
+    </Setting>
+    <Setting Name="LogFile" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">IridiumDownloader.log</Value>
+    </Setting>
+    <Setting Name="MailServer" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">smtp.gmail.com</Value>
+    </Setting>
+    <Setting Name="MailServerPort" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">587</Value>
+    </Setting>
+    <Setting Name="MailServerMilliSecondTimeout" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">20000</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
