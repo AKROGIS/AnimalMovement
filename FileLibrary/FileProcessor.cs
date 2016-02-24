@@ -29,11 +29,13 @@ namespace FileLibrary
             var views = new AnimalMovementViews();
             foreach (var fileId in
                 views.NeverProcessedArgosFiles.Select(x => x.FileId)
-                     .Concat(views.NeverProcessedDataLogFiles.Select(x => x.FileId)))
+                     .Concat(views.NeverProcessedDataLogFiles.Select(x => x.FileId))
+                     .Concat(views.NeverProcessedIdfFiles.Select(x => x.FileId)))
             {
                 var file = database.CollarFiles.First(f => f.FileId == fileId);
-                if (pi != null && file.ProjectInvestigator != pi && (file.Project == null ||
-                                                                     file.Project.ProjectInvestigator1 != pi))
+                if (pi != null && 
+                    (file.ProjectInvestigator == null || file.ProjectInvestigator.Login != pi.Login) && 
+                    (file.Project == null || file.Project.ProjectInvestigator1.Login != pi.Login))
                     continue;
                 try
                 {
@@ -80,6 +82,8 @@ namespace FileLibrary
             if (!ProcessOnServer(file, platform))
                 if (file.Format == 'H')
                     ProcessDataLogFile(file);
+                else if (file.Format == 'I')
+                    ProcessIdfFile(file);
                 else
                     ProcessFile(file, GetArgosFile(file), platform);
         }
@@ -92,11 +96,12 @@ namespace FileLibrary
         {
             LogGeneralMessage(String.Format("Start local processing of file {0}", file.FileId));
             var databaseFunctions = new AnimalMovementFunctions();
+            //FIXME: check that this is generic to all telonics processing and not just Argos files
             databaseFunctions.ArgosFile_ClearProcessingResults(file.FileId);
 
             var processor = new Gen4Processor(null);
             var lines = processor.ProcessDataLog(file.Contents.ToArray());
-            //Add a newline, so that it matches the exactly matches the direct output from TDC
+            //Add a newline, so that it exactly matches the direct output from TDC
             var data = Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, lines) + Environment.NewLine);
             var filename = Path.GetFileNameWithoutExtension(file.FileName) + "_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
             var fileLoader = new FileLoader(filename, data)
@@ -111,6 +116,56 @@ namespace FileLibrary
                 Status = file.Status,
                 ParentFileId = file.FileId,
                 AllowDuplicates = true
+            };
+            fileLoader.Load();
+            LogGeneralMessage("Finished local processing of file");
+        }
+
+        private static void ProcessIdfFile(CollarFile file)
+        {
+            LogGeneralMessage(String.Format("Start local processing of file {0}", file.FileId));
+
+            var databaseViews = new AnimalMovementViews();
+            var idfLink = databaseViews.CollarParametersForIridiumDownload(file.FileId).FirstOrDefault();
+            if (idfLink == null)
+            {
+                LogGeneralMessage("No parameters found.  Skipping file.");
+                return;
+            }
+            var database = new AnimalMovementDataContext();
+            var tpfFile = database.CollarParameterFiles.FirstOrDefault(f => f.FileId == idfLink.ParameterFileId);
+            if (tpfFile == null)
+            {
+                LogGeneralMessage("No collar parameter file found.  Skipping file.");
+                return;
+            }
+            var collar = database.Collars.FirstOrDefault(
+                    c => c.CollarManufacturer == idfLink.CollarManufacturer && 
+                        (c.CollarId == idfLink.CollarId || c.CollarId == idfLink.CollarId.Substring(0,6)));
+            if (collar == null)
+            {
+                LogGeneralMessage("No collar found.  Skipping file.");
+                return;
+            }
+
+            var databaseFunctions = new AnimalMovementFunctions();
+            //FIXME: check that this is generic to all telonics processing and not just Argos files
+            databaseFunctions.ArgosFile_ClearProcessingResults(file.FileId);
+            databaseFunctions.CollarFile_FixOwnerOfIdfFile((file.FileId));
+
+            var processor = new Gen4Processor(tpfFile.Contents.ToArray());
+            var lines = processor.ProcessIdf(file.Contents.ToArray());
+
+            var data = Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, lines) + Environment.NewLine);
+            var filename = Path.GetFileNameWithoutExtension(file.FileName) + "_" + DateTime.Now.ToString("yyyyMMdd") + ".csv";
+            var fileLoader = new FileLoader(filename, data)
+            {
+                Project = null,
+                Owner = tpfFile.ProjectInvestigator,  //Must match result from databaseFunctions.CollarFile_FixOwnerOfIdfFile
+                Collar = collar,
+                Status = file.Status,
+                ParentFileId = file.FileId,
+                AllowDuplicates = false
             };
             fileLoader.Load();
             LogGeneralMessage("Finished local processing of file");
@@ -322,6 +377,11 @@ namespace FileLibrary
                     throw new InvalidOperationException("No access to Telonics software to process files.");
                 LogGeneralMessage(String.Format("Start processing file {0} on database", file.FileId));
                 var database = new AnimalMovementFunctions();
+                //FIXME: ProcessOnServer may be called with H and I (Teloncs files which need processing, but are not ArgosFiles)
+                //FIXME: If called by Animal Movement App Upload Form on client machine with H or I files, this code will fail
+                // if teloncs file but not argos
+                // database.TelonicsData_Process(file.FileId);
+                // if not telonics or not Argos then fail with warning
                 if (platform == null)
                     database.ArgosFile_Process(file.FileId);
                 else

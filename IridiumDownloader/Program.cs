@@ -15,7 +15,7 @@ namespace IridiumDownloader
         {
             try
             {
-                GetAndLoad();
+                GetAndLoadAndProcess();
             }
             catch (Exception ex)
             {
@@ -23,31 +23,28 @@ namespace IridiumDownloader
             }
         }
 
-        private static void GetAndLoad()
+        private static void GetAndLoadAndProcess()
         {
-            string downloadFolder = null;
-            try //Execute in try block to do cleanup regardless of failure
+            string downloadFolder = GetDownloadFolder();
+            DownloadAllEmailFilesTo(downloadFolder);
+            var defaultPi = GetDefaultProjectInvestagator();
+            foreach (var path in Directory.GetFiles(downloadFolder))
             {
-                downloadFolder = GetNewTempDirectory();
-                DownloadAllEmailFilesTo(downloadFolder);
-                var defaultPi = GetDefaultProjectInvestagator();
-                //TODO: Send error handler to FileLoader to log errors and continue
-                FileLoader.LoadPath(downloadFolder, manager:defaultPi);
-            }
-            finally
-            {
-                //clean & remove downloadFolder
-                if (downloadFolder != null && Directory.Exists(downloadFolder))
+                try
                 {
-                    foreach (var path in Directory.GetFiles(downloadFolder))
-                    {
-                        // remove the readonly flag put on files created by TDC.
-                        File.SetAttributes(path, FileAttributes.Normal);
-                        File.Delete(path);
-                    }
-                    Directory.Delete(downloadFolder);
+                    FileLoader.LoadPath(path, manager: defaultPi);
+                    // File was successfully Loaded, so delete it.
+                    // remove the readonly flag put on files created by TDC
+                    File.SetAttributes(path, FileAttributes.Normal);
+                    File.Delete(path);
+                }
+                catch (Exception ex)
+                {
+                    ReportException(
+                        String.Format("Unexpected Exception ({0}) when loading file: {1}", ex.Message, path));
                 }
             }
+            FileProcessor.ProcessAll(exceptionHandler, defaultPi);
         }
 
         private static void DownloadAllEmailFilesTo(string downloadFolder)
@@ -141,11 +138,19 @@ namespace IridiumDownloader
                                                         !line.StartsWith("Email download completed at:")));
         }
 
-        private static string GetNewTempDirectory()
+        private static string GetDownloadFolder()
         {
-            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(tempDirectory);
-            return tempDirectory;
+            // We use the same directory on each invocation.
+            // This will allow us to keep a email that was downloaded (and will not be downloaded again)
+            // until it can be successfully Loaded.
+            var appDirectory = Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]) ??
+                               Directory.GetCurrentDirectory();
+            var newDirectory = Path.Combine(appDirectory, "IridiumEmailFiles");
+            if (!Directory.Exists(newDirectory))
+            {
+                Directory.CreateDirectory(newDirectory);
+            }
+            return newDirectory;
         }
 
         private static ProjectInvestigator GetDefaultProjectInvestagator()
@@ -181,6 +186,22 @@ namespace IridiumDownloader
                     Console.WriteLine("Could not write to append to " + Properties.Settings.Default.LogFile);
                     Console.WriteLine(message);
                 }
+            }
+        }
+
+        internal static void exceptionHandler(Exception ex, CollarFile file, ArgosPlatform platform)
+        {
+            if (file == null)
+            {
+                ReportException(
+                    String.Format("Unexpected Exception ({0}) when Loading an unknown collar file",
+                    ex.Message));
+            }
+            else
+            {
+                ReportException(
+                    String.Format("Unexpected Exception ({0}) when Loading collar file (id: {1}, name:{2}", 
+                    ex.Message, file.FileId, file.FileName));
             }
         }
 

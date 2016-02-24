@@ -122,6 +122,11 @@ namespace ArgosProcessor
                 Console.WriteLine("Processor exception handler called without a file: {0}", ex.Message);
                 return;
             }
+            if (file.LookupCollarFileFormat.ArgosData != 'Y')
+            {
+                Console.WriteLine("Processor exception handler called with a Non-Argos Data file({1}): {0}", ex.Message, file.FileId);
+                return;
+            }
             var db = new AnimalMovementDataContext();
             db.ArgosFileProcessingIssues_Insert(file.FileId, ex.Message, platform == null ? null : platform.PlatformId,
                                                 null, null, null, null);

@@ -38,6 +38,12 @@ namespace Telonics
             return ProcessFile(Encoding.UTF8.GetString(contents));
         }
 
+        public IEnumerable<string> ProcessIdf(Byte[] contents)
+        {
+            Format = Gen4Format.Iridium;
+            return ProcessFile(Encoding.UTF8.GetString(contents));
+        }
+
         #endregion
 
         #region Private Methods
@@ -88,6 +94,12 @@ namespace Telonics
                     case Gen4Format.WebService:
                         if (BatchFileTemplate == null)
                             BatchFileTemplate = Properties.Settings.Default.TdcArgosBatchFileFormat;
+                        batchCommands = String.Format(BatchFileTemplate, dataFilePath, tpfPath, outputFolder,
+                                                      logFilePath);
+                        break;
+                    case Gen4Format.Iridium:
+                        if (BatchFileTemplate == null)
+                            BatchFileTemplate = Properties.Settings.Default.TdcIridiumBatchFileFormat;
                         batchCommands = String.Format(BatchFileTemplate, dataFilePath, tpfPath, outputFolder,
                                                       logFilePath);
                         break;
