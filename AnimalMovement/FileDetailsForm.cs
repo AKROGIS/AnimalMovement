@@ -232,10 +232,10 @@ namespace AnimalMovement
                 error = "You cannot change the collar of an active file";
             else if (CollarComboBox.SelectedItem != File.Collar && StatusComboBox.SelectedItem != File.LookupFileStatus)
                 error = "You cannot change the collar and the status at the same time";
-            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
-                error = "File must have a collar assignment (unless it has Argos Data)";
-            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
-                error = "If the parent file is inactive, the child must be inactive";
+            else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.RequiresCollar == 'Y')
+                error = "This kind of file must have a collar assignment";
+            //else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.ArgosData != 'Y')
+            //    error = "If the parent file is inactive, the child must be inactive";
             ValidationTextBox.Text = error;
             ValidationTextBox.Visible = error != null;
             return error == null;
