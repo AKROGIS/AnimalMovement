@@ -32,7 +32,7 @@ namespace IridiumDownloader
             {
                 try
                 {
-                    FileLoader.LoadPath(downloadFolder, manager: defaultPi);
+                    FileLoader.LoadPath(path, manager: defaultPi);
                     // File was successfully Loaded, so delete it.
                     // remove the readonly flag put on files created by TDC
                     File.SetAttributes(path, FileAttributes.Normal);
