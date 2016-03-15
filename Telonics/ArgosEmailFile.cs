@@ -40,13 +40,16 @@ namespace Telonics
              * Each transmission starts with the date and time, then a small int, then 3 or 4
              * bytes as a positive integer from 0 to 255.  Typical lines will have 4 bytes. The
              * last line will have only 3 bytes (the first line may also be the last).
+             * 
+             * In some email files, leading white space is removed, and remaining white space is
+             * normalized to a single space per whitespace group; i.e. \s+ => ' '
              */
 
             var transmissions = new List<ArgosTransmission>();
 
-            var platformPattern = new Regex(@"^([0-9]{5}) ([0-9]{5,6}) ", RegexOptions.Compiled);
-            var transmissionPattern = new Regex(@"^( {5,6})([0-9]{4})-([0-9]{2})-([0-9]{2})", RegexOptions.Compiled);
-            var dataPattern = new Regex(@"^( {35,36})", RegexOptions.Compiled);
+            var platformPattern = new Regex(@"^\s*([0-9]{5})\s+([0-9]{5,6})\s+", RegexOptions.Compiled);  //Be more liberal with whitespace
+            var transmissionPattern = new Regex(@"^\s*([0-9]{4})-([0-9]{2})-([0-9]{2})", RegexOptions.Compiled); //Ignore leading space
+            var dataPattern = new Regex(@"^[\s0-9]*$", RegexOptions.Compiled);  //Just white space and decimal digits
 
             string programId = null;
             string platformId = null;
@@ -59,21 +62,20 @@ namespace Telonics
                 lineNumber++;
                 if (platformPattern.IsMatch(line))
                 {
-                    programId = line.Substring(0, 5).Trim().TrimStart('0');
-                    //platformid is 5(old) or 6(new) characters.  The rest of the line is offset accordingly
-                    //if we always get 6, we may get a trailing space (old files)
-                    platformId = line.Substring(6, 6).Trim();
-                    var old = platformId.Length == 5;
-                    platformId = platformId.TrimStart('0');
-                    location = line.Length < 61
+                    var tokens = Regex.Split(line.Trim(), @"\s+");
+                    //do not use String.Split() - It splits on each whitespace character, not groups of whitespace
+                    //since we passed the Regex Match, we know there are at least two tokens
+                    programId = tokens[0].TrimStart('0');
+                    platformId = tokens[1].TrimStart('0');
+                    location = tokens.Length < 11
                                    ? null
                                    : new ArgosTransmission.ArgosLocation
                                        {
-                                           DateTime = DateTime.Parse(line.Substring(23 + (old ? 0 : 1), 19)),
-                                           Latitude = Single.Parse(line.Substring(43 + (old ? 0 : 1), 7)),
-                                           Longitude = Single.Parse(line.Substring(51 + (old ? 0 : 1), 8)),
-                                           Altitude = Single.Parse(line.Substring(60 + (old ? 0 : 1), 6)),
-                                           Class = line[21 + (old ? 0 : 1)]
+                                           DateTime = DateTime.Parse(tokens[6] + " " + tokens[7]),
+                                           Latitude = Single.Parse(tokens[8]),
+                                           Longitude = Single.Parse(tokens[9]),
+                                           Altitude = Single.Parse(tokens[10]),
+                                           Class = tokens[5][0]
                                        };
                     transmission = null;
                     platformheader = line;
