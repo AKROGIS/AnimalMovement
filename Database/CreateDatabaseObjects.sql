@@ -30,6 +30,10 @@ CREATE USER [NPS\JWBurch] FOR LOGIN [NPS\JWBurch] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\KCJoly] FOR LOGIN [NPS\KCJoly] WITH DEFAULT_SCHEMA=[dbo]
 GO
+CREATE USER [NPS\kklauder] FOR LOGIN [NPS\kklauder] WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER [NPS\KLReed] FOR LOGIN [NPS\KLReed] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\mdcameron] FOR LOGIN [NPS\mdcameron] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\MLJohnson] FOR LOGIN [NPS\MLJohnson] WITH DEFAULT_SCHEMA=[dbo]
@@ -42,7 +46,9 @@ CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\SArthur] WITH DEFAULT_SCHEMA=[dbo]
 GO
-CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\SDMiller] WITH DEFAULT_SCHEMA=[dbo]
+CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\sdmiller] WITH DEFAULT_SCHEMA=[dbo]
+GO
+CREATE USER [NPS\SMDevenny] FOR LOGIN [NPS\SMDevenny] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE ROLE [ArgosProcessor]
 GO
@@ -110,6 +116,14 @@ ALTER ROLE [Investigator] ADD MEMBER [NPS\KCJoly]
 GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\KCJoly]
 GO
+ALTER ROLE [Editor] ADD MEMBER [NPS\kklauder]
+GO
+ALTER ROLE [Viewer] ADD MEMBER [NPS\kklauder]
+GO
+ALTER ROLE [Editor] ADD MEMBER [NPS\KLReed]
+GO
+ALTER ROLE [Viewer] ADD MEMBER [NPS\KLReed]
+GO
 ALTER ROLE [Editor] ADD MEMBER [NPS\mdcameron]
 GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\mdcameron]
@@ -143,6 +157,10 @@ GO
 ALTER ROLE [Investigator] ADD MEMBER [NPS\SDMiller]
 GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\SDMiller]
+GO
+ALTER ROLE [Editor] ADD MEMBER [NPS\SMDevenny]
+GO
+ALTER ROLE [Viewer] ADD MEMBER [NPS\SMDevenny]
 GO
 ALTER ROLE [Viewer] ADD MEMBER [ArgosProcessor]
 GO
@@ -8843,6 +8861,7 @@ GO
 
 
 
+
 CREATE TRIGGER [dbo].[InsteadOfCollarFixesInsert] 
 ON [dbo].[CollarFixes] 
 INSTEAD OF INSERT AS
@@ -8930,26 +8949,30 @@ BEGIN
 		-- This should not create a Location if there is no matching deployment
 		-- The new fix is never hidden.
 		-- there must be zero or one deployment/animal for this fixdate
-		INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
-			 SELECT D.ProjectId, D.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
-			   FROM CollarDeployments as D 
-         INNER JOIN dbo.Animals AS A
- 	             ON A.ProjectId = D.ProjectId
-		    	AND A.AnimalId = D.AnimalId
-		 INNER JOIN dbo.Collars AS C
-				 ON C.CollarManufacturer = D.CollarManufacturer
-				AND C.CollarId = D.CollarId
-			  WHERE D.CollarManufacturer = @CollarManufacturer AND D.CollarId = @CollarId
-				AND D.DeploymentDate <= @FixDate
-				AND (D.RetrievalDate IS NULL OR @FixDate <= D.RetrievalDate)
-	    	    AND (A.MortalityDate IS NULL OR @FixDate <= A.MortalityDate)
-				AND (C.DisposalDate IS NULL OR @FixDate <= C.DisposalDate)
-
+		-- A @Lat outside [-90, 90] will throw an exception (https://msdn.microsoft.com/en-us/library/bb964737), so skip.
+		IF -90 <= @Lat AND @Lat <= 90
+		BEGIN
+			INSERT INTO Locations (ProjectId, AnimalId, FixDate, Location, FixId)
+				 SELECT D.ProjectId, D.AnimalId, @FixDate, geography::Point(@Lat, @Lon, 4326) AS Location, @FixId
+				   FROM CollarDeployments as D 
+			 INNER JOIN dbo.Animals AS A
+ 					 ON A.ProjectId = D.ProjectId
+		    		AND A.AnimalId = D.AnimalId
+			 INNER JOIN dbo.Collars AS C
+					 ON C.CollarManufacturer = D.CollarManufacturer
+					AND C.CollarId = D.CollarId
+				  WHERE D.CollarManufacturer = @CollarManufacturer AND D.CollarId = @CollarId
+					AND D.DeploymentDate <= @FixDate
+					AND (D.RetrievalDate IS NULL OR @FixDate <= D.RetrievalDate)
+	    			AND (A.MortalityDate IS NULL OR @FixDate <= A.MortalityDate)
+					AND (C.DisposalDate IS NULL OR @FixDate <= C.DisposalDate)
+		END
 		FETCH NEXT FROM insf_cursor INTO @HiddenBy, @FileId, @LineNumber, @CollarManufacturer, @CollarId, @FixDate, @Lat, @Lon;
 	END
 	CLOSE insf_cursor;
 	DEALLOCATE insf_cursor;
 END
+
 
 
 
