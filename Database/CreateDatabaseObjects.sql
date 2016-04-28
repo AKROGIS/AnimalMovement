@@ -18,6 +18,8 @@ CREATE USER [NPS\BBorg] FOR LOGIN [NPS\BBorg] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\Domain Users] FOR LOGIN [NPS\Domain Users]
 GO
+CREATE USER [NPS\DWSchirokauer] FOR LOGIN [NPS\DWSchirokauer] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\GVHilderbrand] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\JAPutera] FOR LOGIN [NPS\JAPutera] WITH DEFAULT_SCHEMA=[dbo]
@@ -83,6 +85,10 @@ GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\BBorg]
 GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\Domain Users]
+GO
+ALTER ROLE [Editor] ADD MEMBER [NPS\DWSchirokauer]
+GO
+ALTER ROLE [Viewer] ADD MEMBER [NPS\DWSchirokauer]
 GO
 ALTER ROLE [Editor] ADD MEMBER [NPS\GVHilderbrand]
 GO
@@ -4654,6 +4660,8 @@ RETURNS [datetime] WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[LocalTime]
 GO
+GRANT EXECUTE ON [dbo].[LocalTime] TO [Viewer] AS [dbo]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -5257,6 +5265,8 @@ SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[Locations] TO [Editor] AS [dbo]
 GO
+GRANT SELECT ON [dbo].[Locations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -5399,6 +5409,8 @@ GO
 SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[Movements] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Movements] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -6686,6 +6698,14 @@ CREATE TABLE [dbo].[Locations_In_CartoDB](
 ) ON [PRIMARY]
 
 GO
+GRANT DELETE ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT INSERT ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT UPDATE ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -6852,6 +6872,14 @@ CREATE TABLE [dbo].[Movements_In_CartoDB](
 GO
 SET ANSI_PADDING OFF
 GO
+GRANT DELETE ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT INSERT ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT UPDATE ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -6882,6 +6910,8 @@ CREATE TABLE [dbo].[ProjectExportBoundaries](
 	[Shape] [geography] NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
+GO
+GRANT SELECT ON [dbo].[ProjectExportBoundaries] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
