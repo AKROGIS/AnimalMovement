@@ -5287,6 +5287,8 @@ ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDa
 GO
 GRANT SELECT ON [dbo].[MostRecentLocations] TO [Editor] AS [dbo]
 GO
+GRANT SELECT ON [dbo].[MostRecentLocations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -5545,6 +5547,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 GO
 GRANT SELECT ON [dbo].[NoMovement] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[NoMovement] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -5970,6 +5974,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 GO
 GRANT SELECT ON [dbo].[ValidLocations] TO [Editor] AS [dbo]
 GO
+GRANT SELECT ON [dbo].[ValidLocations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -6009,6 +6015,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 GO
 GRANT SELECT ON [dbo].[VelocityVectors] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[VelocityVectors] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
