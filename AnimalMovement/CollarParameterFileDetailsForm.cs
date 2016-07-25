@@ -565,7 +565,7 @@ namespace AnimalMovement
         private void AddFixParameterButton_Click(object sender, EventArgs e)
         {
             var index = TpfDataGridView.SelectedRows[0].Index;
-            var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[4].Value;
+            var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[5].Value;
             var collar = _collars[index];
             DateTime? endDate = null;
             if (AddFixParameterButton.Text == "Fix Parameter")
