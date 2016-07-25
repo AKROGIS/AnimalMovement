@@ -221,7 +221,7 @@ namespace AnimalMovement
 
         private bool AddParameters()
         {
-            int? period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text)
+            int? period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text) || Collar.CollarModel != "Gen3"
                               ? (int?) null
                               : Int32.Parse(Gen3PeriodTextBox.Text)*
                                 ((string) Gen3TimeUnitComboBox.SelectedItem == "Hours" ? 60 : 1);
