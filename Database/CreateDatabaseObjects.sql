@@ -5054,6 +5054,12 @@ BEGIN
     --IF @Format = 'J'  -- VHF Format
     -- do not process in the database; uses a one-time external processor.
 
+    --IF @Format = 'K'  -- Old Argos PPT Email Format
+    -- do not process in the database; uses a one-time external processor.
+
+    --IF @Format = 'L'  -- Old Argos PPT CSV Format
+    -- do not process in the database; uses a one-time external processor.
+
 
 END
 
@@ -5953,6 +5959,12 @@ BEGIN
     -- nothing to do for this format
     
     --IF @Format = 'J'  -- VHF Format
+    -- nothing to do for this format
+    
+    --IF @Format = 'K'  -- Old Argos PPT Email Format
+    -- nothing to do for this format
+    
+    --IF @Format = 'L'  -- Old Argos PPT CSV Format
     -- nothing to do for this format
     
 END
