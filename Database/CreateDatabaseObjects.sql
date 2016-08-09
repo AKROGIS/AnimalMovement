@@ -2980,9 +2980,15 @@ SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[VhfLocations](
 	[LocationId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
 	[ProjectId] [varchar](16) NOT NULL,
 	[AnimalId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
+	[Species] [varchar](32) NULL,
+	[Gender] [varchar](7) NULL,
+	[GroupName] [nvarchar](500) NULL,
+	[Description] [nvarchar](2000) NULL,
+	[LocalFixDate] [datetime2](7) NOT NULL,
 	[Location] [geography] NOT NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
@@ -3471,6 +3477,11 @@ ALTER TABLE [dbo].[Projects]  WITH CHECK ADD  CONSTRAINT [FK_Projects_ProjectInv
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[Projects] CHECK CONSTRAINT [FK_Projects_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[VhfLocations]  WITH CHECK ADD  CONSTRAINT [FK_VhfLocations_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+GO
+ALTER TABLE [dbo].[VhfLocations] CHECK CONSTRAINT [FK_VhfLocations_CollarFiles]
 GO
 ALTER TABLE [dbo].[LookupCollarFileFormats]  WITH CHECK ADD  CONSTRAINT [CK_LookupCollarFileFormats] CHECK  (([ArgosData]='Y' OR [ArgosData]='N'))
 GO
@@ -5034,6 +5045,10 @@ BEGIN
         END
     END
     
+    --IF @Format = 'J'  -- VHF Format
+    -- do not process in the database; uses a one-time external processor.
+
+
 END
 
 
@@ -5923,6 +5938,15 @@ BEGIN
     END
 
     --IF @Format = 'G'  -- Debevek Format
+    -- nothing to do for this format
+    
+    --IF @Format = 'H'  -- Gen4 Datalog (store-on-board) Format
+    -- nothing to do for this format
+    
+    --IF @Format = 'I'  -- Telonics Iridium Email Format
+    -- nothing to do for this format
+    
+    --IF @Format = 'J'  -- VHF Format
     -- nothing to do for this format
     
 END
