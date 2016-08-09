@@ -181,6 +181,3306 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a row of fix information for a specific collar.
+-- Example:     SELECT * FROM CollarFixSummary('Telonics', '96007')
+-- Modified:    Aug 16, 2012, added Unique field
+-- =============================================
+CREATE FUNCTION [dbo].[CollarFixSummary] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS @summary TABLE
+(
+	[Count] int,
+	[Unique] int,
+	[First] datetime2,
+	[Last] datetime2
+) 
+AS
+BEGIN
+	DECLARE @temp int;
+	
+	SELECT @temp = 1 
+	FROM [dbo].[CollarFixes]
+	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+	GROUP BY FixDate
+	
+	INSERT @summary
+	SELECT  COUNT(*) AS [Count],
+			@@ROWCOUNT AS [Unique],
+			dbo.LocalTime(MIN(FixDate)) AS [First],
+			dbo.LocalTime(MAX(FixDate)) AS [Last]
+	FROM [dbo].[CollarFixes]
+	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+	GROUP BY CollarManufacturer, CollarId
+	
+	RETURN
+END
+
+
+
+GO
+GRANT SELECT ON [dbo].[CollarFixSummary] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
+(
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Result INT;
+
+	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
+	  FROM ArgosDownloads
+	 WHERE ErrorMessage IS NULL
+	
+	RETURN @Result
+END
+
+
+
+
+
+GO
+GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE FUNCTION [dbo].[DoDateRangesOverlap] 
+(
+	@StartDate1		DATETIME2 = NULL, 
+	@EndDate1		DATETIME2 = NULL,
+	@StartDate2		DATETIME2 = NULL, 
+	@EndDate2		DATETIME2 = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	-- A StartDate of NULL means the begining of time
+	-- A EndDate of NULL means the ending of time
+	
+	-- Touching i.e. EndDate = StartDate WAS considered overlapping
+	-- At that instant in time, a collar for example would be on two animals
+	-- simultaneously, which violates reality and creates some ambiguity.
+	-- In reality, it is highly unlikely that we will get a fix at this exact instant, and
+	-- even if we did, then that fix would be applied to both animals.  No real problem.
+	-- Since user's are likely to be confused if they get an overlap error when they
+	-- stop and start different deployment on the same date (time = 00:00) I have
+	-- relaxed this requirement:
+	--      EndDate = StartDate IS NOT overlapping
+	
+	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
+	
+	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+	END
+	
+	IF @StartDate1 IS NOT NULL and @EndDate1 IS NOT NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 <= @StartDate1 OR @EndDate1 <= @StartDate2  RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
+		END	
+	END	
+
+	IF @StartDate1 IS NOT NULL and @EndDate1 IS NULL
+	BEGIN
+		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
+		END
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
+		BEGIN
+			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
+		END	
+		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
+		BEGIN
+			RETURN 1
+		END	
+	END
+	-- @StartDate1 IS NULL and @EndDate1 IS NULL, so we are guaranteed to overlap 
+	RETURN 1
+END
+
+
+
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[EndOfFollowingConnectedMovement] 
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [EndDate] 
+					 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [StartDate] = @Time);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[EndOfMovement]
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [EndDate] 
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [StartDate] = @Time);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[FileFormat](@data [varbinary](max))
+RETURNS [nchar](1) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[FileFormat]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: April 4, 2013
+-- Description:	Returns a bit (boolean) if we need to use TDC.exe on this file
+--              This is true for files of Gen4 datalog files (format 'H')
+--              Email and AWS files ('E', 'F'), may have only Gen3 collars in them
+--              Check if the file has transmissions that map to a Gen4 collar.
+-- =============================================
+
+CREATE FUNCTION [dbo].[FileHasGen4Data] 
+(
+	@FileId INT
+)
+RETURNS BIT
+AS
+BEGIN
+	IF EXISTS(   SELECT 1
+				   FROM ArgosFilePlatformDates AS D
+			CROSS APPLY GetTelonicsParametersForArgosDates(D.PlatformId, D.FirstTransmission, D.LastTransmission) AS P
+				  WHERE D.FileId = @FileId AND P.CollarModel = 'Gen4'
+			 )
+		RETURN 1
+	IF EXISTS(   SELECT 1
+	               FROM CollarFiles
+	              WHERE FileId = @FileId AND Format = 'H'
+	         )
+	    RETURN 1
+	RETURN 0
+END
+
+
+GO
+GRANT EXECUTE ON [dbo].[FileHasGen4Data] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[GetLocationGeography]
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS GEOGRAPHY
+AS
+BEGIN
+	DECLARE @Result GEOGRAPHY
+	SET @Result = (SELECT [Location] 
+	                 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [FixDate] = @Time);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[GetMovementEndGeography]
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS GEOGRAPHY
+AS
+BEGIN
+	DECLARE @Result GEOGRAPHY
+	SET @Result = (SELECT [Shape].STEndPoint() 
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [EndDate] = @Time);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[GetMovementStartGeography]
+(
+	@Project VARCHAR(32)   = NULL, 
+	@Animal  VARCHAR(32)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS GEOGRAPHY
+AS
+BEGIN
+	DECLARE @Result GEOGRAPHY
+	SET @Result = (SELECT [Shape].STStartPoint() 
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [StartDate] = @Time);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[IsFixEditor] 
+(
+	@FixId    INT = NULL, 
+	@User sysname = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+	DECLARE @Result BIT
+	
+		SELECT @Result = [dbo].[IsProjectEditor]([f].[ProjectId], @User)
+		  FROM [dbo].[CollarFixes] AS [x]
+	INNER JOIN [dbo].[CollarFiles] AS [f]
+			ON [x].[FileId] = [f].[FileId]
+		 WHERE [x].[FixId] = @FixId;
+		 
+	RETURN @Result
+END
+
+
+
+
+
+
+
+GO
+GRANT EXECUTE ON [dbo].[IsFixEditor] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[IsInvestigatorEditor] 
+(
+    @ProjectInvestigator sysname, 
+    @User                sysname
+)
+RETURNS BIT
+AS
+BEGIN
+    -- Check that @User is in the Investigator or the Editor Role
+    IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
+                                                   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
+        RETURN 0
+    
+    --Check that @User is either an Assistant or the PI
+    IF EXISTS(     SELECT 1 FROM dbo.ProjectInvestigators AS P 
+                LEFT JOIN [dbo].[ProjectInvestigatorAssistants] AS A 
+                       ON A.ProjectInvestigator = P.[Login] 
+                    WHERE (@User = @ProjectInvestigator AND P.[Login] = @User) 
+                       OR (A.ProjectInvestigator = @ProjectInvestigator AND @User = A.Assistant)
+             )
+        RETURN 1
+    RETURN 0
+END
+
+
+
+
+
+GO
+GRANT EXECUTE ON [dbo].[IsInvestigatorEditor] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE FUNCTION [dbo].[IsProjectEditor] 
+(
+    @Project VARCHAR(32)   = NULL, 
+    @User sysname = NULL
+)
+RETURNS BIT
+AS
+BEGIN
+    -- Check that @User is in the Investigator or the Editor Role
+    IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
+                                                   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
+        RETURN 0
+    
+    --Check that the users is either an editor or the PI on the project
+    IF EXISTS(     SELECT 1 FROM dbo.Projects AS P 
+                LEFT JOIN dbo.ProjectEditors AS E ON P.ProjectId = E.ProjectId 
+                    WHERE P.ProjectId = @Project
+                      AND (E.Editor = @User OR P.ProjectInvestigator = @User))
+        RETURN 1
+    
+    -- Check if user is an assistant to the PI of the project
+    IF EXISTS( SELECT 1 FROM dbo.Projects AS P
+                 JOIN [dbo].[ProjectInvestigatorAssistants] AS A 
+                   ON A.ProjectInvestigator = P.ProjectInvestigator 
+                WHERE @Project = P.ProjectId AND @User = A.Assistant)
+        RETURN 1	
+    RETURN 0
+END
+
+
+
+
+GO
+GRANT EXECUTE ON [dbo].[IsProjectEditor] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[LocalTime]
+GO
+GRANT EXECUTE ON [dbo].[LocalTime] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE FUNCTION [dbo].[NextAnimalId] 
+(
+	@ProjectId VARCHAR(32)   = NULL 
+)
+RETURNS VARCHAR(16)
+AS
+BEGIN
+	-- Check that project exists
+	IF NOT EXISTS( SELECT 1 FROM Projects WHERE ProjectId = @ProjectId)
+	BEGIN
+			-- You can't raise errors in a function, so you can either do an illegal operation to
+			-- stop the process, or in may case I will just return a safe result
+			RETURN NULL
+	END
+	
+	DECLARE @Year CHAR(2)
+	DECLARE @Count int
+	DECLARE @Id VARCHAR(16)
+
+	--Get the prefix for the current year (i.e. 2012 -> '12')
+	SELECT @Year  = SUBSTRING(CONVERT(CHAR(4),YEAR(GETDATE())),3,2)
+	SELECT @Count =	convert(varchar(10),(max(id) + 1))
+	  from (select case WHEN ISNUMERIC(SUBSTRING(AnimalId, 3, 9)) = 1
+	                    then convert(int,SUBSTRING(AnimalId, 3, 9))
+	                    ELSE 0 END as id
+	          from Animals
+	         where ProjectId = @ProjectId AND AnimalId LIKE @Year+'%') as t
+	if (@Count < 100)
+		SELECT @Id = @Year + REPLACE(STR(@Count, 2, 0), ' ', '0')
+	else
+		SELECT @Id = @Year + REPLACE(STR(@Count, 6, 0), ' ', '')
+	If @Id is null
+		SET @Id = @Year + '01'
+	RETURN @id
+END
+
+
+
+GO
+GRANT EXECUTE ON [dbo].[NextAnimalId] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[NextLocationTime] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [FixDate] 
+					 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [Status] IS NULL
+					  AND [FixDate] > @Time
+			     ORDER BY [FixDate]);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[Fix #] [nvarchar](50) NULL,
+	[Date] [nvarchar](50) NULL,
+	[Time] [nvarchar](50) NULL,
+	[Fix Status] [nvarchar](50) NULL,
+	[Status Text] [nvarchar](150) NULL,
+	[Velocity East(m s)] [nvarchar](50) NULL,
+	[Velocity North(m s)] [nvarchar](50) NULL,
+	[Velocity Up(m s)] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[Altitude(m)] [nvarchar](50) NULL,
+	[PDOP] [nvarchar](50) NULL,
+	[HDOP] [nvarchar](50) NULL,
+	[VDOP] [nvarchar](50) NULL,
+	[TDOP] [nvarchar](50) NULL,
+	[Temperature Sensor(deg )] [nvarchar](50) NULL,
+	[Activity Sensor] [nvarchar](50) NULL,
+	[Satellite Data] [nvarchar](150) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatA]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[PlatformId] [nvarchar](255) NULL,
+	[AnimalId] [nvarchar](255) NULL,
+	[Species] [nvarchar](255) NULL,
+	[Group] [nvarchar](255) NULL,
+	[Park] [nvarchar](255) NULL,
+	[FixDate] [nvarchar](255) NULL,
+	[FixTime] [nvarchar](255) NULL,
+	[FixMonth] [int] NULL,
+	[FixDay] [int] NULL,
+	[FixYear] [int] NULL,
+	[LatWGS84] [float] NULL,
+	[LonWGS84] [float] NULL,
+	[Temperature] [float] NULL,
+	[Other] [nvarchar](255) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatB]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[AcquisitionTime] [nvarchar](50) NULL,
+	[AcquisitionStartTime] [nvarchar](50) NULL,
+	[Ctn] [nvarchar](50) NULL,
+	[ArgosId] [nvarchar](50) NULL,
+	[ArgosLocationClass] [nvarchar](50) NULL,
+	[ArgosLatitude] [nvarchar](50) NULL,
+	[ArgosLongitude] [nvarchar](50) NULL,
+	[ArgosAltitude] [nvarchar](50) NULL,
+	[GpsFixTime] [nvarchar](50) NULL,
+	[GpsFixAttempt] [nvarchar](50) NULL,
+	[GpsLatitude] [nvarchar](50) NULL,
+	[GpsLongitude] [nvarchar](50) NULL,
+	[GpsUtmZone] [nvarchar](50) NULL,
+	[GpsUtmNorthing] [nvarchar](50) NULL,
+	[GpsUtmEasting] [nvarchar](50) NULL,
+	[GpsAltitude] [nvarchar](50) NULL,
+	[GpsSpeed] [nvarchar](50) NULL,
+	[GpsHeading] [nvarchar](50) NULL,
+	[GpsHorizontalError] [nvarchar](50) NULL,
+	[GpsPositionalDilution] [nvarchar](50) NULL,
+	[GpsHorizontalDilution] [nvarchar](50) NULL,
+	[GpsSatelliteBitmap] [nvarchar](50) NULL,
+	[GpsSatelliteCount] [nvarchar](50) NULL,
+	[GpsNavigationTime] [nvarchar](50) NULL,
+	[UnderwaterPercentage] [nvarchar](50) NULL,
+	[DiveCount] [nvarchar](50) NULL,
+	[AverageDiveDuration] [nvarchar](50) NULL,
+	[MaximumDiveDuration] [nvarchar](50) NULL,
+	[LayerPercentage] [nvarchar](50) NULL,
+	[MaximumDiveDepth] [nvarchar](50) NULL,
+	[DiveStartTime] [nvarchar](50) NULL,
+	[DiveDuration] [nvarchar](50) NULL,
+	[DiveDepth] [nvarchar](50) NULL,
+	[DiveProfile] [nvarchar](50) NULL,
+	[ActivityCount] [nvarchar](50) NULL,
+	[Temperature] [nvarchar](50) NULL,
+	[RemoteAnalog] [nvarchar](50) NULL,
+	[SatelliteUplink] [nvarchar](50) NULL,
+	[ReceiveTime] [nvarchar](50) NULL,
+	[SatelliteName] [nvarchar](50) NULL,
+	[RepetitionCount] [nvarchar](50) NULL,
+	[LowVoltage] [nvarchar](50) NULL,
+	[Mortality] [nvarchar](50) NULL,
+	[SaltwaterFailsafe] [nvarchar](50) NULL,
+	[HaulOut] [nvarchar](50) NULL,
+	[DigitalInput] [nvarchar](50) NULL,
+	[MotionDetected] [nvarchar](50) NULL,
+	[TrapTriggerTime] [nvarchar](50) NULL,
+	[ReleaseTime] [nvarchar](50) NULL,
+	[PredeploymentData] [nvarchar](50) NULL,
+	[Error] [nvarchar](250) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatC]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[TXDate] [nvarchar](50) NULL,
+	[TXTime] [nvarchar](50) NULL,
+	[PTTID] [nvarchar](50) NULL,
+	[FixNum] [nvarchar](50) NULL,
+	[FixQual] [nvarchar](50) NULL,
+	[FixDate] [nvarchar](50) NULL,
+	[FixTime] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatD]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatE](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[ProgramId] [nvarchar](50) NULL,
+	[PlatformId] [nvarchar](50) NULL,
+	[TransmissionDate] [datetime2](7) NULL,
+	[LocationDate] [datetime2](7) NULL,
+	[Latitude] [real] NULL,
+	[Longitude] [real] NULL,
+	[Altitude] [real] NULL,
+	[LocationClass] [nchar](1) NULL,
+	[Message] [varbinary](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[ParseFormatE]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[programNumber] [nvarchar](50) NULL,
+	[platformId] [nvarchar](50) NULL,
+	[platformType] [nvarchar](50) NULL,
+	[platformModel] [nvarchar](50) NULL,
+	[platformName] [nvarchar](50) NULL,
+	[platformHexId] [nvarchar](50) NULL,
+	[satellite] [nvarchar](50) NULL,
+	[bestMsgDate] [nvarchar](50) NULL,
+	[duration] [nvarchar](50) NULL,
+	[nbMessage] [nvarchar](50) NULL,
+	[message120] [nvarchar](50) NULL,
+	[bestLevel] [nvarchar](50) NULL,
+	[frequency] [nvarchar](50) NULL,
+	[locationDate] [nvarchar](50) NULL,
+	[latitude] [nvarchar](50) NULL,
+	[longitude] [nvarchar](50) NULL,
+	[altitude] [nvarchar](50) NULL,
+	[locationClass] [nvarchar](50) NULL,
+	[gpsSpeed] [nvarchar](50) NULL,
+	[gpsHeading] [nvarchar](50) NULL,
+	[latitude2] [nvarchar](50) NULL,
+	[longitude2] [nvarchar](50) NULL,
+	[altitude2] [nvarchar](50) NULL,
+	[index] [nvarchar](50) NULL,
+	[nopc] [nvarchar](50) NULL,
+	[errorRadius] [nvarchar](50) NULL,
+	[semiMajor] [nvarchar](50) NULL,
+	[semiMinor] [nvarchar](50) NULL,
+	[orientation] [nvarchar](50) NULL,
+	[hdop] [nvarchar](50) NULL,
+	[bestDate] [nvarchar](50) NULL,
+	[compression] [nvarchar](50) NULL,
+	[type] [nvarchar](50) NULL,
+	[alarm] [nvarchar](50) NULL,
+	[concatenated] [nvarchar](50) NULL,
+	[date] [nvarchar](50) NULL,
+	[level] [nvarchar](50) NULL,
+	[doppler] [nvarchar](50) NULL,
+	[rawData] [nvarchar](500) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatI](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[EmailAddress] [nvarchar](500) NULL,
+	[EmailUID] [nvarchar](50) NULL,
+	[Imei] [nvarchar](50) NULL,
+	[MessageTime] [nvarchar](50) NULL,
+	[StatusCode] [nvarchar](50) NULL,
+	[StatusString] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[CEPRadius] [nvarchar](50) NULL,
+	[MessageLength] [nvarchar](50) NULL,
+	[MessageBytes] [nvarchar](4000) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatI]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE FUNCTION [dbo].[PreviousLocationTime] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [FixDate] 
+					 FROM [dbo].[Locations]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [Status] IS NULL
+					  AND [FixDate] < @Time
+			     ORDER BY [FixDate] DESC);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
+RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[StartOfOverlappingMovement] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT TOP 1 [StartDate]
+	                 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+	                  AND [StartDate] < @Time
+	                  AND [EndDate] > @Time
+	             ORDER BY [StartDate] DESC);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
+(
+	@Project VARCHAR(16)   = NULL, 
+	@Animal  VARCHAR(16)   = NULL, 
+	@Time    DATETIME2 = NULL
+)
+RETURNS DATETIME2
+AS
+BEGIN
+	DECLARE @Result DATETIME2
+	SET @Result = (SELECT [StartDate] 
+					 FROM [dbo].[Movements]
+					WHERE [ProjectId] = @Project
+					  AND [AnimalId] = @Animal
+					  AND [EndDate] = @Time);
+	RETURN @Result
+END
+
+
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
+RETURNS  TABLE (
+	[FileId] [int] NULL,
+	[CTN] [nvarchar](16) NULL,
+	[Platform] [nvarchar](16) NULL,
+	[PlatformId] [nvarchar](16) NULL,
+	[Frequency] [float] NULL,
+	[TimeStamp] [datetime2](7) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_TpfSummerizer].[SqlServer_TpfSummerizer.TfpSummerizer].[SummarizeTpfFile]
+GO
+GRANT SELECT ON [dbo].[SummarizeTpfFile] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
+RETURNS [datetime] WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarFixes](
+	[FixId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[HiddenBy] [int] NULL,
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[FixDate] [datetime2](7) NOT NULL,
+	[Lat] [float] NOT NULL,
+	[Lon] [float] NOT NULL,
+ CONSTRAINT [PK_CollarFixes] PRIMARY KEY CLUSTERED 
+(
+	[FixId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarFixes] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a table of conflicting fixes for a specific collar.
+-- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007', DEFAULT)
+-- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations
+-- Modified:    Feb 22, 2013, added an optional currency filter to return only conflicts in the last X days 
+-- =============================================
+CREATE FUNCTION [dbo].[ConflictingFixes] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255),
+	@LastXdays          INTEGER = 36500
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT FixId, HiddenBy, FileId, LineNumber, dbo.LocalTime(C.FixDate) AS LocalFixTime, Lat, Lon
+		FROM CollarFixes AS C
+		INNER JOIN 
+			(SELECT   CollarManufacturer, CollarId, FixDate 
+			 FROM
+				(SELECT DISTINCT CollarManufacturer, CollarId, FixDate, Lat, Lon
+				 FROM CollarFixes
+			     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId) AS T
+			 GROUP BY CollarManufacturer, CollarId, FixDate
+			 HAVING   COUNT(FixDate) > 1) AS D
+		ON  C.CollarManufacturer = D.CollarManufacturer
+		AND C.CollarId = D.CollarId
+		AND C.FixDate = D.FixDate
+        AND C.FixDate > DATEADD(DAY, -@LastXdays, GETDATE())
+
+
+GO
+GRANT SELECT ON [dbo].[ConflictingFixes] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFileProcessingIssues](
+	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileId] [int] NOT NULL,
+	[Issue] [nvarchar](max) NOT NULL,
+	[PlatformId] [varchar](8) NULL,
+	[CollarManufacturer] [varchar](16) NULL,
+	[CollarId] [varchar](16) NULL,
+	[FirstTransmission] [datetime2](7) NULL,
+	[LastTransmission] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
+(
+	[IssueId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[ArgosFileProcessingIssues] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarFiles](
+	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileName] [nvarchar](255) NOT NULL,
+	[UploadDate] [datetime2](7) NOT NULL CONSTRAINT [DF_CollarFiles_UploadDate]  DEFAULT (getdate()),
+	[ProjectId] [varchar](16) NULL,
+	[UserName] [sysname] NOT NULL CONSTRAINT [DF_CollarFiles_UserName]  DEFAULT (original_login()),
+	[CollarManufacturer] [varchar](16) NULL,
+	[CollarId] [varchar](16) NULL,
+	[Format] [char](1) NOT NULL,
+	[Status] [char](1) NOT NULL CONSTRAINT [DF_CollarFiles_Status]  DEFAULT ('I'),
+	[Contents] [varbinary](max) NOT NULL,
+	[ParentFileId] [int] NULL,
+	[Owner] [nvarchar](128) NULL,
+	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
+	[ArgosDeploymentId] [int] NULL,
+	[CollarParameterId] [int] NULL,
+ CONSTRAINT [PK_CollarFiles] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarFiles] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[DataLog_NeverProcessed]
+AS
+----------- DataLog_NeverProcessed
+-----------   Is a file of format 'H' (It has no Argos transmissions),
+-----------   but no child files, and no processing issues
+     SELECT P.FileId
+       FROM CollarFiles AS P      
+  LEFT JOIN CollarFiles AS C
+         ON P.FileId = C.ParentFileId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = P.FileId
+      WHERE P.Format = 'H'
+        AND C.FileId IS NULL
+        AND I.FileId IS NULL
+
+
+GO
+GRANT SELECT ON [dbo].[DataLog_NeverProcessed] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Locations](
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[FixDate] [datetime2](7) NOT NULL,
+	[Location] [geography] NOT NULL,
+	[FixId] [int] NOT NULL,
+	[Status] [char](1) NULL,
+ CONSTRAINT [PK_Locations] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC,
+	[FixDate] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[Locations] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Locations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[MostRecentLocations]
+AS
+SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
+FROM   dbo.Locations AS L
+INNER JOIN
+	   (SELECT   ProjectId, AnimalId, MAX(FixDate) AS FixDate
+		FROM     dbo.Locations
+		WHERE    [Status] IS NULL
+		GROUP BY ProjectId, AnimalId) AS F
+ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
+
+
+GO
+GRANT SELECT ON [dbo].[MostRecentLocations] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[MostRecentLocations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE VIEW [dbo].[FirstKnownLocations]
+AS
+SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
+FROM   dbo.Locations AS L
+INNER JOIN
+	   (SELECT   ProjectId, AnimalId, MIN(FixDate) AS FixDate
+		FROM     dbo.Locations
+		WHERE    [Status] IS NULL
+		GROUP BY ProjectId, AnimalId) AS F
+ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
+
+
+
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Animals](
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[Species] [varchar](32) NULL,
+	[Gender] [varchar](7) NOT NULL,
+	[MortalityDate] [datetime2](7) NULL,
+	[GroupName] [nvarchar](500) NULL,
+	[Description] [nvarchar](2000) NULL,
+ CONSTRAINT [PK_Animals] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[Animals] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[LastLocationOfKnownMortalities]
+AS
+SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
+FROM Locations AS L
+INNER JOIN
+   (SELECT A.ProjectId, A.AnimalId, MAX(FixDate) AS FixDate
+	FROM dbo.Locations AS L
+	INNER JOIN dbo.Animals AS A
+	ON A.AnimalId = L.AnimalId AND A.ProjectId = L.ProjectId AND L.FixDate < A.MortalityDate
+	WHERE [Status] IS NULL
+	GROUP BY A.ProjectId, A.AnimalId) AS F
+ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId and F.FixDate = L.FixDate
+
+GO
+GRANT SELECT ON [dbo].[LastLocationOfKnownMortalities] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+/* Converts a datetime to the ordinal date (day of the year)
+ * commonly confused with the Julian date (days sine 1/1/4713BC)
+ */
+CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
+    @Date DATETIME2  
+)   
+	RETURNS INT
+    WITH SCHEMABINDING -- This is a deterministic function.
+
+AS
+BEGIN
+    RETURN 1 + DATEDIFF (day,
+                         CONVERT(DATETIME2,
+                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
+                                 112), -- format 112 (yyyymmdd) is deterministic
+                         @Date)
+END
+
+
+GO
+GRANT EXECUTE ON [dbo].[DateTimeToOrdinal] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Movements](
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[StartDate] [datetime2](7) NOT NULL,
+	[EndDate] [datetime2](7) NOT NULL,
+	[Duration] [float] NOT NULL,
+	[Distance] [float] NOT NULL,
+	[Speed] [float] NOT NULL,
+	[Shape] [geography] NOT NULL,
+ CONSTRAINT [PK_Movement] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC,
+	[StartDate] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[Movements] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Movements] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Projects](
+	[ProjectId] [varchar](16) NOT NULL,
+	[ProjectName] [nvarchar](150) NOT NULL,
+	[ProjectInvestigator] [sysname] NOT NULL CONSTRAINT [DF_Projects_PrincipalInvestigator]  DEFAULT (original_login()),
+	[UnitCode] [char](4) NULL,
+	[Description] [nvarchar](2000) NULL,
+ CONSTRAINT [PK_Projects] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[Projects] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+CREATE VIEW [dbo].[VelocityVectors_NPS]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          ,M.[StartDate]
+          ,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          ,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance <> 0
+       AND M.StartDate < DATEADD(DAY,-30,GETDATE())
+
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[VelocityVectors_NPS] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 30, 2012
+-- Description:	Returns a row of location information for a specific animal.
+-- Example:     SELECT * FROM AnimalLocationSummary('LACL_Sheep', '0501')
+-- =============================================
+CREATE FUNCTION [dbo].[AnimalLocationSummary] 
+(
+	@ProjectId	NVARCHAR(255), 
+	@AnimalId	NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT	COUNT(*) as [Count],
+				MIN(Location.Long) as [Left], MAX(Location.Long) as [Right],
+				MIN(Location.Lat) as [Bottom], MAX(Location.Lat) as [Top],
+				dbo.LocalTime(MIN(FixDate)) AS [First], dbo.LocalTime(MAX(FixDate)) as [Last]
+		 FROM     [dbo].[Locations]
+		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
+		 GROUP BY ProjectId, AnimalId
+
+
+
+GO
+GRANT SELECT ON [dbo].[AnimalLocationSummary] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE VIEW [dbo].[NoMovement]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          --,M.[StartDate]
+          --,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          --,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance = 0
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[NoMovement] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[NoMovement] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+
+CREATE VIEW [dbo].[ValidLocations_NPS]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          --,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+       AND L.[FixDate] < DATEADD(DAY,-30,GETDATE())
+
+
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[ValidLocations_NPS] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupFileStatus](
+	[Code] [char](1) NOT NULL,
+	[Name] [nvarchar](32) NOT NULL,
+	[Description] [nvarchar](255) NULL,
+ CONSTRAINT [PK_CollarFileStatus] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[LookupFileStatus] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: May 31, 2012
+-- Description:	Returns a table of files with fixes for a specific collar.
+-- Example:     SELECT * FROM CollarFixesByFile('Telonics', '96007')
+-- =============================================
+CREATE FUNCTION [dbo].[CollarFixesByFile] 
+(
+	@CollarManufacturer NVARCHAR(255), 
+	@CollarId           NVARCHAR(255)
+)
+RETURNS TABLE 
+AS
+	RETURN
+		SELECT  F.[FileId],
+				F.[FileName] AS [File],
+				S.[Name] AS [Status],
+				COUNT(FixDate) AS [FixCount],
+				dbo.LocalTime(MIN(FixDate)) AS [First],
+				dbo.LocalTime(MAX(FixDate)) AS [Last]
+		FROM [dbo].[CollarFiles] AS F
+		INNER JOIN [dbo].[LookupFileStatus] AS S
+		ON F.[Status] = S.[Code]
+		LEFT JOIN [dbo].[CollarFixes] AS X
+		ON X.FileId = F.FileId
+		WHERE (F.CollarManufacturer = @CollarManufacturer AND F.CollarId = @CollarId)
+		   OR (X.CollarManufacturer = @CollarManufacturer AND X.CollarId = @CollarId)
+		GROUP BY F.[FileId], F.[FileName], S.[Name]
+
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[CollarFixesByFile] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[InvalidLocations]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NOT NULL
+
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[InvalidLocations] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarParameterFiles](
+	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[Owner] [sysname] NOT NULL,
+	[FileName] [nvarchar](255) NOT NULL,
+	[Format] [char](1) NOT NULL,
+	[UploadDate] [datetime2](7) NOT NULL CONSTRAINT [DF_CollarParameterFiles_UploadDate]  DEFAULT (getdate()),
+	[UploadUser] [sysname] NOT NULL CONSTRAINT [DF_CollarParameterFiles_UploadUser]  DEFAULT (original_login()),
+	[Contents] [varbinary](max) NOT NULL,
+	[Status] [char](1) NOT NULL,
+	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
+ CONSTRAINT [PK_CollarParameterFiles] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarParameterFiles] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+
+
+CREATE VIEW [dbo].[AllTpfFileData]
+AS
+
+-- All TPF Data
+     SELECT T.*, P.[FileName], P.[Status]
+       FROM CollarParameterFiles AS P
+CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
+      WHERE P.Format = 'A'
+
+
+GO
+GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosDeployments](
+	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
+(
+	[DeploymentId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[ArgosDeployments] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarParameters](
+	[ParameterId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[FileId] [int] NULL,
+	[Gen3Period] [int] NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_CollarParameters] PRIMARY KEY CLUSTERED 
+(
+	[ParameterId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarParameters] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Collars](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[CollarModel] [varchar](24) NOT NULL,
+	[Manager] [sysname] NOT NULL CONSTRAINT [DF_Collars_Manager]  DEFAULT (original_login()),
+	[Owner] [nvarchar](100) NULL CONSTRAINT [DF_Collars_Owner]  DEFAULT ('NPS'),
+	[SerialNumber] [varchar](100) NULL,
+	[Frequency] [float] NULL,
+	[HasGps] [bit] NOT NULL,
+	[Notes] [nvarchar](max) NULL,
+	[DisposalDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[Collars] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: March 8, 2013
+-- Description:	Returns a table of Telonics processing parameters
+--              for the Argos Id in the date range. 
+-- Example:     SELECT * FROM GetTelonicsParametersForArgosDates('37470', '2008-03-01', '2014-03-01') ORDER BY StartDate
+-- Caller need to check that the results cover the entire requested date range
+-- Caller should order the results by startdate, then check the following:
+--   if @StartDate < firstrecord.startDate(and not null) then Missing parameters
+--   if @EndDate > lastrecord.EndDate(and not null) more missing parameters
+
+-- Update May 8, 2013
+--   Removed valid parameter check.  The processor will now be able to check
+--   if there is a valid Argos-collar deployment, but no collar-parameter
+--   assignment, and therefore write a better error message.
+--   The client must now check for invalid parameters.
+-- =============================================
+CREATE FUNCTION [dbo].[GetTelonicsParametersForArgosDates] 
+(
+    @PlatformID VARCHAR(8),
+    @StartDate DATETIME2(7),
+    @EndDate DATETIME2(7)
+)
+RETURNS TABLE 
+AS
+    RETURN
+     SELECT A.DeploymentId, P.ParameterId, A.PlatformId, A.CollarManufacturer, A.CollarId, C.CollarModel,
+            P.Gen3Period, F.Format, F.[FileName], F.Contents,
+            CASE WHEN (A.StartDate IS NOT NULL AND P.StartDate IS NOT NULL)
+                 THEN (CASE WHEN A.StartDate < P.StartDate THEN P.StartDate ELSE A.StartDate END)
+                 ELSE (CASE WHEN A.StartDate IS NULL THEN P.StartDate ELSE A.StartDate END) END AS StartDate,
+            CASE WHEN (A.EndDate IS NOT NULL AND P.EndDate IS NOT NULL)
+                 THEN (CASE WHEN A.EndDate < P.EndDate THEN A.EndDate ELSE P.EndDate END)
+                 ELSE (CASE WHEN A.EndDate IS NULL THEN P.EndDate ELSE A.EndDate END) END AS EndDate
+       FROM ArgosDeployments AS A
+ INNER JOIN Collars AS C
+         ON A.CollarManufacturer = C.CollarManufacturer AND A.CollarId = C.CollarId
+  LEFT JOIN CollarParameters AS P
+         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
+  LEFT JOIN CollarParameterFiles AS F
+         ON P.FileId = F.FileId
+      WHERE A.PlatformId = @PlatformID
+        AND (A.StartDate IS NULL OR A.StartDate < @EndDate)
+        AND (P.StartDate IS NULL OR P.StartDate < @EndDate)
+        AND (A.EndDate IS NULL OR @StartDate < A.EndDate)
+        AND (P.EndDate IS NULL OR @StartDate < P.EndDate)
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[GetTelonicsParametersForArgosDates] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+
+CREATE VIEW [dbo].[ValidLocationsWithLatLong]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Location] AS [Shape]
+          ,L.[Location].Lat AS [Lat_WGS84]
+          ,L.[Location].Long AS [Lon_WGS84]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+
+
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[ValidLocationsWithLatLong] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[AnimalLocations]
+AS
+    SELECT L.ProjectId
+          ,L.AnimalId
+          ,dbo.LocalTime(L.[FixDate]) as [Local DateTime]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,L.[Location].Lat AS [Lat WGS84]
+          ,L.[Location].Long AS [Lon WGS84]
+          ,L.[Status]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+                              AND L.AnimalId  = A.AnimalId
+
+
+GO
+GRANT SELECT ON [dbo].[AnimalLocations] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+
+CREATE VIEW [dbo].[ValidLocations]
+AS
+    SELECT L.FixId
+          ,L.ProjectId
+          ,L.AnimalId
+          ,L.[FixDate]
+          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
+          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          --,L.[Status]
+          ,L.[Location] AS [Shape]
+      FROM dbo.Locations AS L
+INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
+							  AND L.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE L.Status IS NULL
+
+
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[ValidLocations] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[ValidLocations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+CREATE VIEW [dbo].[VelocityVectors]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          ,M.[StartDate]
+          ,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          ,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance <> 0
+
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[VelocityVectors] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[VelocityVectors] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE VIEW [dbo].[NoMovement_NPS]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          --,M.[StartDate]
+          --,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          --,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance = 0
+       AND M.StartDate < DATEADD(DAY,-30,GETDATE())
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[NoMovement_NPS] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataIridiumMail](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[EmailAddress] [varchar](500) NULL,
+	[EmailUID] [varchar](50) NULL,
+	[Imei] [varchar](50) NULL,
+	[MessageTime] [varchar](50) NULL,
+	[StatusCode] [varchar](50) NULL,
+	[StatusString] [varchar](50) NULL,
+	[Latitude] [varchar](50) NULL,
+	[Longitude] [varchar](50) NULL,
+	[CEPRadius] [varchar](50) NULL,
+	[MessageLength] [varchar](50) NULL,
+	[MessageBytes] [varchar](5000) NULL,
+ CONSTRAINT [PK_CollarDataIridiumMail] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataIridiumMail] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Regan Sarwas
+-- Create date: Feb 22, 2016
+-- Description:	Returns a table with zero or one row containing the collar id and parameter file id
+--              associated with an Iridium download file.
+--              ASSUMES only one IMEI (Iridium ID - or collar) per 'CollarDataIridiumMail' File.
+--              This matches the download data recieved so far.
+-- Example:     SELECT * FROM CollarParametersForIridiumDownload(40025)
+-- =============================================
+CREATE FUNCTION [dbo].[CollarParametersForIridiumDownload] 
+(
+	@FileId  INT
+)
+RETURNS TABLE 
+AS
+	RETURN
+	  SELECT TOP 1
+		T.fileid AS [ParameterFileId],
+		'Telonics' AS [CollarManufacturer],
+		CTN AS [CollarId]
+	  FROM [dbo].[CollarDataIridiumMail] AS D
+	  JOIN [dbo].[AllTpfFileData] AS T
+	  ON T.[PlatformId] = D.[Imei] AND T.[TimeStamp] < D.[MessageTime]
+	  WHERE T.[Platform] = 'Iridium'
+	  AND D.[FileId] = @FileId
+	  ORDER BY T.[TimeStamp] DESC
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[CollarParametersForIridiumDownload] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE VIEW [dbo].[IDF_NeverProcessed]
+AS
+----------- IDF_NeverProcessed
+-----------   Is a Active file of format 'I' (It has no Argos transmissions),
+-----------   but no child files, and no processing issues
+     SELECT P.FileId
+       FROM CollarFiles AS P      
+  LEFT JOIN CollarFiles AS C
+         ON P.FileId = C.ParentFileId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = P.FileId
+      WHERE P.[Format] = 'I'
+	    AND P.[Status] = 'A'
+        AND C.FileId IS NULL
+        AND I.FileId IS NULL
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[IDF_NeverProcessed] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosFilePlatformDates](
+	[ItemId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileId] [int] NOT NULL,
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NULL,
+	[FirstTransmission] [datetime2](7) NOT NULL,
+	[LastTransmission] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
+(
+	[ItemId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[ArgosFilePlatformDates] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE VIEW [dbo].[ArgosFile_NeverProcessed]
+AS
+----------- ArgosFile_NeverProcessed
+-----------   Is a file which has transmissions (ensures file is correct format),
+-----------   but no child files, and no processing issues
+-----------   (relies on files of correct format having been summerized) 
+     SELECT T.FileId
+       FROM ArgosFilePlatformDates AS T      
+  LEFT JOIN CollarFiles AS C
+         ON T.FileId = C.ParentFileId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+         ON I.FileId = T.FileId
+      WHERE C.FileId IS NULL
+        AND I.FileId IS NULL
+   GROUP BY T.FileId
+
+GO
+GRANT SELECT ON [dbo].[ArgosFile_NeverProcessed] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+
+CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
+AS
+----------- ArgosFile_NeedsPartialProcessing
+----------- Files/platforms that can and should be processed (do it as soon as possible)
+-----------   Is a (file,platform) where the file has transmissions
+-----------   that can be processed (overlapping deployment/parameters)
+-----------   but there is no results file, and no processing issues.
+	 SELECT A.FileId, A.PlatformId
+	   FROM ArgosFilePlatformDates AS A
+  LEFT JOIN 
+         ( CollarFiles AS C
+		   LEFT JOIN ArgosDeployments AS D
+				  ON D.DeploymentId = C.ArgosDeploymentId
+				 AND D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
+		   LEFT JOIN CollarParameters AS P
+				  ON P.ParameterId = C.CollarParameterId
+				 AND P.CollarManufacturer = C.CollarManufacturer AND P.CollarId = C.CollarId
+		) ON C.ParentFileId = A.FileId AND D.PlatformId = A.PlatformId
+  LEFT JOIN ArgosFileProcessingIssues AS I
+		 ON I.PlatformId = A.PlatformId AND I.FileId = A.FileId
+	  WHERE A.FileId IS NOT NULL AND A.PlatformId IS NOT NULL
+        AND (D.StartDate IS NULL OR D.StartDate < A.FirstTransmission)
+        AND (P.StartDate IS NULL OR P.StartDate < A.FirstTransmission)
+        AND (D.EndDate IS NULL OR A.LastTransmission < D.EndDate)
+        AND (P.EndDate IS NULL OR A.LastTransmission < P.EndDate)
+	    AND C.FileId IS NULL  AND I.IssueId IS NULL
+		AND A.FileId NOT IN (SELECT FileId FROM ArgosFile_NeverProcessed)
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[ArgosFile_NeedsPartialProcessing] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDeployments](
+	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[DeploymentDate] [datetime2](7) NOT NULL,
+	[RetrievalDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_CollarDeployments] PRIMARY KEY CLUSTERED 
+(
+	[DeploymentId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDeployments] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarManufacturers](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[Name] [nvarchar](200) NULL,
+	[Website] [nvarchar](200) NULL,
+	[Description] [nvarchar](2000) NULL,
+ CONSTRAINT [PK_CollarManufacturers] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[LookupCollarManufacturers] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE VIEW [dbo].[AnimalFixesByFile]
+AS
+
+----------- Animal Fixes by File
+     SELECT F.FileId, M.Name AS Manufacturer, F.CollarId, P.ProjectName AS Project, CD.AnimalId,
+		    dbo.LocalTime(MIN(F.FixDate)) AS [First Fix],
+			dbo.LocalTime(MAX(F.FixDate)) AS [Last Fix],
+            COUNT(F.FixDate) AS [Number of Fixes]
+	   FROM dbo.CollarFixes AS F
+ INNER JOIN dbo.CollarDeployments AS CD
+	     ON F.CollarManufacturer = CD.CollarManufacturer AND F.CollarId = CD.CollarId
+ INNER JOIN dbo.LookupCollarManufacturers AS M
+	     ON F.CollarManufacturer = M.CollarManufacturer
+  LEFT JOIN dbo.Projects AS P
+         ON CD.ProjectId = P.ProjectId
+	  WHERE F.FixDate > CD.DeploymentDate
+        AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
+   GROUP BY P.ProjectName, CD.AnimalId, F.FileId, M.Name, F.CollarId
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[AnimalFixesByFile] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[Fix #] [varchar](50) NULL,
+	[Date] [nvarchar](50) NULL,
+	[Time] [nvarchar](50) NULL,
+	[Fix Status] [varchar](50) NULL,
+	[Status Text] [varchar](150) NULL,
+	[Velocity East(m s)] [varchar](50) NULL,
+	[Velocity North(m s)] [varchar](50) NULL,
+	[Velocity Up(m s)] [varchar](50) NULL,
+	[Latitude] [varchar](50) NULL,
+	[Longitude] [varchar](50) NULL,
+	[Altitude(m)] [varchar](50) NULL,
+	[PDOP] [varchar](50) NULL,
+	[HDOP] [varchar](50) NULL,
+	[VDOP] [varchar](50) NULL,
+	[TDOP] [varchar](50) NULL,
+	[Temperature Sensor(deg )] [varchar](50) NULL,
+	[Activity Sensor] [varchar](50) NULL,
+	[Satellite Data] [varchar](150) NULL,
+ CONSTRAINT [PK_CollarDataTelonicsGen3StoreOnBoard] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataTelonicsGen3StoreOnBoard] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[Gen3StoreOnBoardLocations]
+AS
+SELECT     dbo.CollarDataTelonicsGen3StoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
+                      dbo.CollarFiles.UploadDate
+FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
+                      dbo.CollarFixes ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFixes.FileId AND 
+                      dbo.CollarDataTelonicsGen3StoreOnBoard.LineNumber = dbo.CollarFixes.LineNumber INNER JOIN
+                      dbo.Locations ON dbo.CollarFixes.FixId = dbo.Locations.FixId INNER JOIN
+                      dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
+                      dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
+
+
+GO
+GRANT SELECT ON [dbo].[Gen3StoreOnBoardLocations] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosDownloads](
+	[TimeStamp] [datetime2](7) NOT NULL CONSTRAINT [DF_ArgosDownloads_TimeStamp]  DEFAULT (getdate()),
+	[ProgramId] [varchar](8) NULL,
+	[PlatformId] [varchar](8) NULL,
+	[Days] [int] NULL,
+	[FileId] [int] NULL,
+	[ErrorMessage] [varchar](max) NULL,
+ CONSTRAINT [PK_ArgosDownloads] PRIMARY KEY CLUSTERED 
+(
+	[TimeStamp] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[ArgosDownloads] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPlatforms](
+	[PlatformId] [varchar](8) NOT NULL,
+	[ProgramId] [varchar](8) NOT NULL,
+	[Notes] [nvarchar](max) NULL,
+	[Active] [bit] NOT NULL,
+	[DisposalDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[ArgosPlatforms] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ArgosPrograms](
+	[ProgramId] [varchar](8) NOT NULL,
+	[ProgramName] [nvarchar](255) NULL,
+	[UserName] [sysname] NOT NULL,
+	[Password] [nvarchar](128) NOT NULL,
+	[Manager] [sysname] NOT NULL,
+	[StartDate] [datetime2](7) NULL,
+	[EndDate] [datetime2](7) NULL,
+	[Notes] [nvarchar](max) NULL,
+	[Active] [bit] NULL,
+ CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[ArgosPrograms] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataArgosEmail](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[ProgramId] [varchar](50) NULL,
+	[PlatformId] [varchar](50) NULL,
+	[TransmissionDate] [datetime2](7) NULL,
+	[LocationDate] [datetime2](7) NULL,
+	[Latitude] [real] NULL,
+	[Longitude] [real] NULL,
+	[Altitude] [real] NULL,
+	[LocationClass] [char](1) NULL,
+	[Message] [varbinary](50) NULL,
+ CONSTRAINT [PK_CollarDataArgosEmail] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataArgosEmail] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataArgosWebService](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[programNumber] [varchar](50) NULL,
+	[platformId] [varchar](50) NULL,
+	[platformType] [varchar](50) NULL,
+	[platformModel] [varchar](50) NULL,
+	[platformName] [varchar](50) NULL,
+	[platformHexId] [varchar](50) NULL,
+	[satellite] [varchar](50) NULL,
+	[bestMsgDate] [varchar](50) NULL,
+	[duration] [varchar](50) NULL,
+	[nbMessage] [varchar](50) NULL,
+	[message120] [varchar](50) NULL,
+	[bestLevel] [varchar](50) NULL,
+	[frequency] [varchar](50) NULL,
+	[locationDate] [varchar](50) NULL,
+	[latitude] [varchar](50) NULL,
+	[longitude] [varchar](50) NULL,
+	[altitude] [varchar](50) NULL,
+	[locationClass] [varchar](50) NULL,
+	[gpsSpeed] [varchar](50) NULL,
+	[gpsHeading] [varchar](50) NULL,
+	[latitude2] [varchar](50) NULL,
+	[longitude2] [varchar](50) NULL,
+	[altitude2] [varchar](50) NULL,
+	[index] [varchar](50) NULL,
+	[nopc] [varchar](50) NULL,
+	[errorRadius] [varchar](50) NULL,
+	[semiMajor] [varchar](50) NULL,
+	[semiMinor] [varchar](50) NULL,
+	[orientation] [varchar](50) NULL,
+	[hdop] [varchar](50) NULL,
+	[bestDate] [varchar](50) NULL,
+	[compression] [varchar](50) NULL,
+	[type] [varchar](50) NULL,
+	[alarm] [varchar](50) NULL,
+	[concatenated] [varchar](50) NULL,
+	[date] [varchar](50) NULL,
+	[level] [varchar](50) NULL,
+	[doppler] [varchar](50) NULL,
+	[rawData] [varchar](500) NULL,
+ CONSTRAINT [PK_CollarDataArgosWebService] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataArgosWebService] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataDebevekFormat](
+	[FileID] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[PlatformId] [char](6) NULL,
+	[AnimalId] [char](6) NULL,
+	[Species] [nvarchar](255) NULL,
+	[Group] [nvarchar](255) NULL,
+	[Park] [nvarchar](255) NULL,
+	[FixDate] [nvarchar](255) NULL,
+	[FixTime] [nvarchar](255) NULL,
+	[FixMonth] [float] NULL,
+	[FixDay] [float] NULL,
+	[FixYear] [float] NULL,
+	[LatWGS84] [float] NULL,
+	[LonWGS84] [float] NULL,
+	[Temperature] [float] NULL,
+	[Other] [nvarchar](255) NULL,
+ CONSTRAINT [PK_CollarDataDebevekFormat] PRIMARY KEY CLUSTERED 
+(
+	[FileID] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataDebevekFormat] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataTelonicsGen3](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[TXDate] [varchar](50) NULL,
+	[TXTime] [varchar](50) NULL,
+	[PTTID] [varchar](50) NULL,
+	[FixNum] [varchar](50) NULL,
+	[FixQual] [varchar](50) NULL,
+	[FixDate] [varchar](50) NULL,
+	[FixTime] [varchar](50) NULL,
+	[Longitude] [varchar](50) NULL,
+	[Latitude] [varchar](50) NULL,
+ CONSTRAINT [PK_CollarDataTelonicsGen3] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataTelonicsGen3] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[CollarDataTelonicsGen4](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[AcquisitionTime] [varchar](50) NULL,
+	[AcquisitionStartTime] [varchar](50) NULL,
+	[Ctn] [varchar](50) NULL,
+	[ArgosId] [varchar](50) NULL,
+	[ArgosLocationClass] [varchar](50) NULL,
+	[ArgosLatitude] [varchar](50) NULL,
+	[ArgosLongitude] [varchar](50) NULL,
+	[ArgosAltitude] [varchar](50) NULL,
+	[GpsFixTime] [varchar](50) NULL,
+	[GpsFixAttempt] [varchar](50) NULL,
+	[GpsLatitude] [varchar](50) NULL,
+	[GpsLongitude] [varchar](50) NULL,
+	[GpsUtmZone] [varchar](50) NULL,
+	[GpsUtmNorthing] [varchar](50) NULL,
+	[GpsUtmEasting] [varchar](50) NULL,
+	[GpsAltitude] [varchar](50) NULL,
+	[GpsSpeed] [varchar](50) NULL,
+	[GpsHeading] [varchar](50) NULL,
+	[GpsHorizontalError] [varchar](50) NULL,
+	[GpsPositionalDilution] [varchar](50) NULL,
+	[GpsHorizontalDilution] [varchar](50) NULL,
+	[GpsSatelliteBitmap] [varchar](50) NULL,
+	[GpsSatelliteCount] [varchar](50) NULL,
+	[GpsNavigationTime] [varchar](50) NULL,
+	[UnderwaterPercentage] [varchar](50) NULL,
+	[DiveCount] [varchar](50) NULL,
+	[AverageDiveDuration] [varchar](50) NULL,
+	[MaximumDiveDuration] [varchar](50) NULL,
+	[LayerPercentage] [varchar](50) NULL,
+	[MaximumDiveDepth] [varchar](50) NULL,
+	[DiveStartTime] [varchar](50) NULL,
+	[DiveDuration] [varchar](50) NULL,
+	[DiveDepth] [varchar](50) NULL,
+	[DiveProfile] [varchar](50) NULL,
+	[ActivityCount] [varchar](50) NULL,
+	[Temperature] [varchar](50) NULL,
+	[RemoteAnalog] [varchar](50) NULL,
+	[SatelliteUplink] [varchar](50) NULL,
+	[ReceiveTime] [varchar](50) NULL,
+	[SatelliteName] [varchar](50) NULL,
+	[RepetitionCount] [varchar](50) NULL,
+	[LowVoltage] [varchar](50) NULL,
+	[Mortality] [varchar](50) NULL,
+	[SaltwaterFailsafe] [varchar](50) NULL,
+	[HaulOut] [varchar](50) NULL,
+	[DigitalInput] [varchar](50) NULL,
+	[MotionDetected] [varchar](50) NULL,
+	[TrapTriggerTime] [varchar](50) NULL,
+	[ReleaseTime] [varchar](50) NULL,
+	[PredeploymentData] [varchar](50) NULL,
+	[Error] [varchar](250) NULL,
+ CONSTRAINT [PK_CollarDataTelonicsGen4] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataTelonicsGen4] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Locations_In_CartoDB](
+	[fixid] [int] NOT NULL,
+ CONSTRAINT [PK_Locations_In_CartoDB] PRIMARY KEY CLUSTERED 
+(
+	[fixid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+GRANT DELETE ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT INSERT ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT UPDATE ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarFileFormats](
+	[Code] [char](1) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Description] [nvarchar](255) NULL,
+	[ArgosData] [char](1) NOT NULL,
+	[RequiresCollar] [char](1) NULL,
+ CONSTRAINT [PK_CollarFileFormats] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[LookupCollarFileFormats] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarFileHeaders](
+	[Header] [nvarchar](450) NOT NULL,
+	[FileFormat] [char](1) NOT NULL,
+	[Regex] [nvarchar](450) NULL,
+ CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
+(
+	[Header] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[LookupCollarFileHeaders] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarModels](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarModel] [varchar](24) NOT NULL,
+ CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarModel] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[LookupCollarModels] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
+	[Code] [char](1) NOT NULL,
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Description] [nvarchar](255) NULL,
+ CONSTRAINT [PK_LookupCollarParameterFileFormats] PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[LookupCollarParameterFileFormats] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupGender](
+	[Sex] [varchar](7) NOT NULL,
+ CONSTRAINT [PK_LookupSex] PRIMARY KEY CLUSTERED 
+(
+	[Sex] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[LookupGender] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[LookupQueryLayerServers](
+	[Location] [nvarchar](128) NOT NULL,
+	[Connection] [nvarchar](255) NOT NULL,
+	[Database] [sysname] NULL,
+ CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
+(
+	[Location] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+GRANT SELECT ON [dbo].[LookupQueryLayerServers] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[LookupSpecies](
+	[Species] [varchar](32) NOT NULL,
+ CONSTRAINT [PK_LookupSpecies] PRIMARY KEY CLUSTERED 
+(
+	[Species] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[LookupSpecies] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Movements_In_CartoDB](
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[StartDate] [datetime2](7) NOT NULL,
+	[EndDate] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_Movements_In_CartoDB] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC,
+	[StartDate] ASC,
+	[EndDate] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT DELETE ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT INSERT ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+GRANT UPDATE ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProjectEditors](
+	[ProjectId] [varchar](16) NOT NULL,
+	[Editor] [sysname] NOT NULL,
+ CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
+(
+	[ProjectId] ASC,
+	[Editor] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[ProjectEditors] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ProjectExportBoundaries](
+	[Project] [nvarchar](16) NULL,
+	[Shape] [geography] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+GRANT SELECT ON [dbo].[ProjectExportBoundaries] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ProjectInvestigatorAssistants](
+	[ProjectInvestigator] [sysname] NOT NULL,
+	[Assistant] [sysname] NOT NULL,
+ CONSTRAINT [PK_ProjectInvestigatorAssistants] PRIMARY KEY CLUSTERED 
+(
+	[ProjectInvestigator] ASC,
+	[Assistant] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+GRANT SELECT ON [dbo].[ProjectInvestigatorAssistants] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ProjectInvestigators](
+	[Login] [sysname] NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Email] [nvarchar](200) NOT NULL,
+	[Phone] [nvarchar](100) NOT NULL,
+ CONSTRAINT [PK_ProjectInvestigators] PRIMARY KEY CLUSTERED 
+(
+	[Login] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+GRANT SELECT ON [dbo].[ProjectInvestigators] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Settings](
+	[Username] [sysname] NOT NULL,
+	[Key] [nvarchar](30) NOT NULL,
+	[Value] [nvarchar](500) NULL,
+ CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
+(
+	[Username] ASC,
+	[Key] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+GRANT SELECT ON [dbo].[Settings] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[VhfLocations](
+	[LocationId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[ProjectId] [varchar](16) NOT NULL,
+	[AnimalId] [varchar](16) NOT NULL,
+	[FixDate] [datetime2](7) NOT NULL,
+	[Location] [geography] NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeployments]
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeployments]
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_PlatformId] ON [dbo].[ArgosDownloads]
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_ProgamId] ON [dbo].[ArgosDownloads]
+(
+	[ProgramId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFilePlatformDates_FileId] ON [dbo].[ArgosFilePlatformDates]
+(
+	[FileId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFilePlatformDates_PlatformId] ON [dbo].[ArgosFilePlatformDates]
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues]
+(
+	[FileId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues]
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues]
+(
+	[PlatformId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_ActivityCount] ON [dbo].[CollarDataTelonicsGen4]
+(
+	[ActivityCount] ASC
+)
+INCLUDE ( 	[FileId],
+	[AcquisitionStartTime]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_FileId_AcquisitionStartTime_Temperature] ON [dbo].[CollarDataTelonicsGen4]
+(
+	[FileId] ASC,
+	[AcquisitionStartTime] ASC,
+	[Temperature] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_Temperature] ON [dbo].[CollarDataTelonicsGen4]
+(
+	[Temperature] ASC
+)
+INCLUDE ( 	[FileId],
+	[AcquisitionStartTime]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Animals] ON [dbo].[CollarDeployments]
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Collars] ON [dbo].[CollarDeployments]
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFiles_Format] ON [dbo].[CollarFiles]
+(
+	[Format] ASC
+)
+INCLUDE ( 	[FileId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFiles_ParentFileId] ON [dbo].[CollarFiles]
+(
+	[ParentFileId] ASC
+)
+INCLUDE ( 	[FileId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFiles_Status] ON [dbo].[CollarFiles]
+(
+	[Status] ASC
+)
+INCLUDE ( 	[FileId],
+	[FileName],
+	[CollarManufacturer],
+	[CollarId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_Collar] ON [dbo].[CollarFixes]
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_FileId] ON [dbo].[CollarFixes]
+(
+	[FileId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_FixDate] ON [dbo].[CollarFixes]
+(
+	[FixDate] ASC
+)
+INCLUDE ( 	[CollarManufacturer],
+	[CollarId],
+	[Lat],
+	[Lon]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_CollarFixes_HiddenBy] ON [dbo].[CollarFixes]
+(
+	[HiddenBy] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Locations_FixId] ON [dbo].[Locations]
+(
+	[FixId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE NONCLUSTERED INDEX [IX_Locations_Status] ON [dbo].[Locations]
+(
+	[Status] ASC
+)
+INCLUDE ( 	[ProjectId],
+	[AnimalId],
+	[FixDate]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Movements_EndDate] ON [dbo].[Movements]
+(
+	[ProjectId] ASC,
+	[AnimalId] ASC,
+	[EndDate] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Movements_StartDate_EndDate] ON [dbo].[Movements]
+(
+	[StartDate] ASC,
+	[EndDate] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Gender] FOREIGN KEY([Gender])
+REFERENCES [dbo].[LookupGender] ([Sex])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Gender]
+GO
+ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Projects] FOREIGN KEY([ProjectId])
+REFERENCES [dbo].[Projects] ([ProjectId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Projects]
+GO
+ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Species] FOREIGN KEY([Species])
+REFERENCES [dbo].[LookupSpecies] ([Species])
+GO
+ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Species]
+GO
+ALTER TABLE [dbo].[ArgosDeployments]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDeployments_ArgosPlatforms] FOREIGN KEY([PlatformId])
+REFERENCES [dbo].[ArgosPlatforms] ([PlatformId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosDeployments] CHECK CONSTRAINT [FK_ArgosDeployments_ArgosPlatforms]
+GO
+ALTER TABLE [dbo].[ArgosDeployments]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDeployments_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosDeployments] CHECK CONSTRAINT [FK_ArgosDeployments_Collars]
+GO
+ALTER TABLE [dbo].[ArgosDownloads]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDownloads_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+GO
+ALTER TABLE [dbo].[ArgosDownloads] CHECK CONSTRAINT [FK_ArgosDownloads_CollarFiles]
+GO
+ALTER TABLE [dbo].[ArgosFilePlatformDates]  WITH CHECK ADD  CONSTRAINT [FK_ArgosFilePlatformDates_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosFilePlatformDates] CHECK CONSTRAINT [FK_ArgosFilePlatformDates_CollarFiles]
+GO
+ALTER TABLE [dbo].[ArgosFileProcessingIssues]  WITH CHECK ADD  CONSTRAINT [FK_ArgosFileProcessingIssues_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosFileProcessingIssues] CHECK CONSTRAINT [FK_ArgosFileProcessingIssues_CollarFiles]
+GO
+ALTER TABLE [dbo].[ArgosFileProcessingIssues]  WITH CHECK ADD  CONSTRAINT [FK_ArgosFileProcessingIssues_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosFileProcessingIssues] CHECK CONSTRAINT [FK_ArgosFileProcessingIssues_Collars]
+GO
+ALTER TABLE [dbo].[ArgosPlatforms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPlatforms_ArgosPrograms] FOREIGN KEY([ProgramId])
+REFERENCES [dbo].[ArgosPrograms] ([ProgramId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosPlatforms] CHECK CONSTRAINT [FK_ArgosPlatforms_ArgosPrograms]
+GO
+ALTER TABLE [dbo].[ArgosPrograms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPrograms_ProjectInvestigators] FOREIGN KEY([Manager])
+REFERENCES [dbo].[ProjectInvestigators] ([Login])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[ArgosPrograms] CHECK CONSTRAINT [FK_ArgosPrograms_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[CollarDataArgosEmail]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataArgosEmail_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataArgosEmail] CHECK CONSTRAINT [FK_CollarDataArgosEmail_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataArgosWebService]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataArgosWebService_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataArgosWebService] CHECK CONSTRAINT [FK_CollarDataArgosWebService_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataDebevekFormat]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataDebevekFormat_CollarFiles] FOREIGN KEY([FileID])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataDebevekFormat] CHECK CONSTRAINT [FK_CollarDataDebevekFormat_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataIridiumMail]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataIridiumMail_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataIridiumMail] CHECK CONSTRAINT [FK_CollarDataIridiumMail_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataTelonicsGen3]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen3_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataTelonicsGen3] CHECK CONSTRAINT [FK_CollarDataTelonicsGen3_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen3StoreOnBoard_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard] CHECK CONSTRAINT [FK_CollarDataTelonicsGen3StoreOnBoard_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataTelonicsGen4]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataTelonicsGen4] CHECK CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Animals] FOREIGN KEY([ProjectId], [AnimalId])
+REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Animals]
+GO
+ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Collars]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_ArgosDeployments] FOREIGN KEY([ArgosDeploymentId])
+REFERENCES [dbo].[ArgosDeployments] ([DeploymentId])
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_ArgosDeployments]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_CollarFiles] FOREIGN KEY([ParentFileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_CollarParameters] FOREIGN KEY([CollarParameterId])
+REFERENCES [dbo].[CollarParameters] ([ParameterId])
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_CollarParameters]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_Collars]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupCollarFileFormats] FOREIGN KEY([Format])
+REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarFileFormats]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupFileStatus] FOREIGN KEY([Status])
+REFERENCES [dbo].[LookupFileStatus] ([Code])
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupFileStatus]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_ProjectInvestigators] FOREIGN KEY([Owner])
+REFERENCES [dbo].[ProjectInvestigators] ([Login])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_Projects] FOREIGN KEY([ProjectId])
+REFERENCES [dbo].[Projects] ([ProjectId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_Projects]
+GO
+ALTER TABLE [dbo].[CollarFixes]  WITH CHECK ADD  CONSTRAINT [FK_CollarFixes_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+GO
+ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarFixes]  WITH CHECK ADD  CONSTRAINT [FK_CollarFixes_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_Collars]
+GO
+ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus] FOREIGN KEY([Status])
+REFERENCES [dbo].[LookupFileStatus] ([Code])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus]
+GO
+ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupParameterFileFormats] FOREIGN KEY([Format])
+REFERENCES [dbo].[LookupCollarParameterFileFormats] ([Code])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupParameterFileFormats]
+GO
+ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_ProjectInvestigators] FOREIGN KEY([Owner])
+REFERENCES [dbo].[ProjectInvestigators] ([Login])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[CollarParameters]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameters_CollarParameterFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarParameterFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarParameters] CHECK CONSTRAINT [FK_CollarParameters_CollarParameterFiles]
+GO
+ALTER TABLE [dbo].[CollarParameters]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameters_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarParameters] CHECK CONSTRAINT [FK_CollarParameters_Collars]
+GO
+ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
+REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
+GO
+ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_LookupCollarManufacturers]
+GO
+ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_LookupCollarModels] FOREIGN KEY([CollarManufacturer], [CollarModel])
+REFERENCES [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel])
+GO
+ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_LookupCollarModels]
+GO
+ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_Managers] FOREIGN KEY([Manager])
+REFERENCES [dbo].[ProjectInvestigators] ([Login])
+GO
+ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_Managers]
+GO
+ALTER TABLE [dbo].[Locations]  WITH CHECK ADD  CONSTRAINT [FK_Locations_Animals] FOREIGN KEY([ProjectId], [AnimalId])
+REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[Locations] CHECK CONSTRAINT [FK_Locations_Animals]
+GO
+ALTER TABLE [dbo].[Locations]  WITH CHECK ADD  CONSTRAINT [FK_Locations_CollarFixes] FOREIGN KEY([FixId])
+REFERENCES [dbo].[CollarFixes] ([FixId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Locations] CHECK CONSTRAINT [FK_Locations_CollarFixes]
+GO
+ALTER TABLE [dbo].[LookupCollarFileFormats]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarFileFormats_LookupCollarManufacturer] FOREIGN KEY([CollarManufacturer])
+REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
+GO
+ALTER TABLE [dbo].[LookupCollarFileFormats] CHECK CONSTRAINT [FK_LookupCollarFileFormats_LookupCollarManufacturer]
+GO
+ALTER TABLE [dbo].[LookupCollarFileHeaders]  WITH CHECK ADD  CONSTRAINT [FK_CollarFileHeaders_LookupCollarFileFormats] FOREIGN KEY([FileFormat])
+REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
+GO
+ALTER TABLE [dbo].[LookupCollarFileHeaders] CHECK CONSTRAINT [FK_CollarFileHeaders_LookupCollarFileFormats]
+GO
+ALTER TABLE [dbo].[LookupCollarModels]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarModels_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
+REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
+GO
+ALTER TABLE [dbo].[LookupCollarModels] CHECK CONSTRAINT [FK_LookupCollarModels_LookupCollarManufacturers]
+GO
+ALTER TABLE [dbo].[LookupCollarParameterFileFormats]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarParameterFileFormats_LookupCollarManufacturer] FOREIGN KEY([CollarManufacturer])
+REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
+GO
+ALTER TABLE [dbo].[LookupCollarParameterFileFormats] CHECK CONSTRAINT [FK_LookupCollarParameterFileFormats_LookupCollarManufacturer]
+GO
+ALTER TABLE [dbo].[Movements]  WITH CHECK ADD  CONSTRAINT [FK_Movements_Animals] FOREIGN KEY([ProjectId], [AnimalId])
+REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
+ON UPDATE CASCADE
+GO
+ALTER TABLE [dbo].[Movements] CHECK CONSTRAINT [FK_Movements_Animals]
+GO
+ALTER TABLE [dbo].[ProjectEditors]  WITH CHECK ADD  CONSTRAINT [FK_ProjectEditors_Projects] FOREIGN KEY([ProjectId])
+REFERENCES [dbo].[Projects] ([ProjectId])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ProjectEditors] CHECK CONSTRAINT [FK_ProjectEditors_Projects]
+GO
+ALTER TABLE [dbo].[ProjectInvestigatorAssistants]  WITH CHECK ADD  CONSTRAINT [FK_ProjectInvestigatorAssistants_ProjectInvestigators] FOREIGN KEY([ProjectInvestigator])
+REFERENCES [dbo].[ProjectInvestigators] ([Login])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ProjectInvestigatorAssistants] CHECK CONSTRAINT [FK_ProjectInvestigatorAssistants_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[Projects]  WITH CHECK ADD  CONSTRAINT [FK_Projects_ProjectInvestigators] FOREIGN KEY([ProjectInvestigator])
+REFERENCES [dbo].[ProjectInvestigators] ([Login])
+GO
+ALTER TABLE [dbo].[Projects] CHECK CONSTRAINT [FK_Projects_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[LookupCollarFileFormats]  WITH CHECK ADD  CONSTRAINT [CK_LookupCollarFileFormats] CHECK  (([ArgosData]='Y' OR [ArgosData]='N'))
+GO
+ALTER TABLE [dbo].[LookupCollarFileFormats] CHECK CONSTRAINT [CK_LookupCollarFileFormats]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: March 2, 2012
@@ -4177,3306 +7477,6 @@ CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
         @ErrorLine       -- parameter: original error line number.
         );
 
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a row of fix information for a specific collar.
--- Example:     SELECT * FROM CollarFixSummary('Telonics', '96007')
--- Modified:    Aug 16, 2012, added Unique field
--- =============================================
-CREATE FUNCTION [dbo].[CollarFixSummary] 
-(
-	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255)
-)
-RETURNS @summary TABLE
-(
-	[Count] int,
-	[Unique] int,
-	[First] datetime2,
-	[Last] datetime2
-) 
-AS
-BEGIN
-	DECLARE @temp int;
-	
-	SELECT @temp = 1 
-	FROM [dbo].[CollarFixes]
-	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-	GROUP BY FixDate
-	
-	INSERT @summary
-	SELECT  COUNT(*) AS [Count],
-			@@ROWCOUNT AS [Unique],
-			dbo.LocalTime(MIN(FixDate)) AS [First],
-			dbo.LocalTime(MAX(FixDate)) AS [Last]
-	FROM [dbo].[CollarFixes]
-	WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
-	GROUP BY CollarManufacturer, CollarId
-	
-	RETURN
-END
-
-
-
-GO
-GRANT SELECT ON [dbo].[CollarFixSummary] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
-CREATE FUNCTION [dbo].[DaysSinceLastDownload] 
-(
-)
-RETURNS INT
-AS
-BEGIN
-    DECLARE @Result INT;
-
-	SELECT @Result = DATEDIFF(day, MAX(TimeStamp), GETDATE())
-	  FROM ArgosDownloads
-	 WHERE ErrorMessage IS NULL
-	
-	RETURN @Result
-END
-
-
-
-
-
-GO
-GRANT EXECUTE ON [dbo].[DaysSinceLastDownload] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-CREATE FUNCTION [dbo].[DoDateRangesOverlap] 
-(
-	@StartDate1		DATETIME2 = NULL, 
-	@EndDate1		DATETIME2 = NULL,
-	@StartDate2		DATETIME2 = NULL, 
-	@EndDate2		DATETIME2 = NULL
-)
-RETURNS BIT
-AS
-BEGIN
-	-- A StartDate of NULL means the begining of time
-	-- A EndDate of NULL means the ending of time
-	
-	-- Touching i.e. EndDate = StartDate WAS considered overlapping
-	-- At that instant in time, a collar for example would be on two animals
-	-- simultaneously, which violates reality and creates some ambiguity.
-	-- In reality, it is highly unlikely that we will get a fix at this exact instant, and
-	-- even if we did, then that fix would be applied to both animals.  No real problem.
-	-- Since user's are likely to be confused if they get an overlap error when they
-	-- stop and start different deployment on the same date (time = 00:00) I have
-	-- relaxed this requirement:
-	--      EndDate = StartDate IS NOT overlapping
-	
-	-- There are nine cases: (NULL2DATE, DATE2DATE, DATE2NULL)^2
-	
-	IF @StartDate1 IS NULL and @EndDate1 IS NOT NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-	END
-	
-	IF @StartDate1 IS NOT NULL and @EndDate1 IS NOT NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 <= @StartDate1 OR @EndDate1 <= @StartDate2  RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			IF @EndDate1 <= @StartDate2 RETURN 0 ELSE RETURN 1
-		END	
-	END	
-
-	IF @StartDate1 IS NOT NULL and @EndDate1 IS NULL
-	BEGIN
-		IF @StartDate2 IS NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
-		END
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NOT NULL
-		BEGIN
-			IF @EndDate2 <= @StartDate1 RETURN 0 ELSE RETURN 1
-		END	
-		IF @StartDate2 IS NOT NULL and @EndDate2 IS NULL
-		BEGIN
-			RETURN 1
-		END	
-	END
-	-- @StartDate1 IS NULL and @EndDate1 IS NULL, so we are guaranteed to overlap 
-	RETURN 1
-END
-
-
-
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[EndOfFollowingConnectedMovement] 
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [EndDate] 
-					 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [StartDate] = @Time);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[EndOfMovement]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [EndDate] 
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [StartDate] = @Time);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[FileFormat](@data [varbinary](max))
-RETURNS [nchar](1) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[FileFormat]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
--- =============================================
--- Author:		Regan Sarwas
--- Create date: April 4, 2013
--- Description:	Returns a bit (boolean) if we need to use TDC.exe on this file
---              This is true for files of Gen4 datalog files (format 'H')
---              Email and AWS files ('E', 'F'), may have only Gen3 collars in them
---              Check if the file has transmissions that map to a Gen4 collar.
--- =============================================
-
-CREATE FUNCTION [dbo].[FileHasGen4Data] 
-(
-	@FileId INT
-)
-RETURNS BIT
-AS
-BEGIN
-	IF EXISTS(   SELECT 1
-				   FROM ArgosFilePlatformDates AS D
-			CROSS APPLY GetTelonicsParametersForArgosDates(D.PlatformId, D.FirstTransmission, D.LastTransmission) AS P
-				  WHERE D.FileId = @FileId AND P.CollarModel = 'Gen4'
-			 )
-		RETURN 1
-	IF EXISTS(   SELECT 1
-	               FROM CollarFiles
-	              WHERE FileId = @FileId AND Format = 'H'
-	         )
-	    RETURN 1
-	RETURN 0
-END
-
-
-GO
-GRANT EXECUTE ON [dbo].[FileHasGen4Data] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[GetLocationGeography]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS GEOGRAPHY
-AS
-BEGIN
-	DECLARE @Result GEOGRAPHY
-	SET @Result = (SELECT [Location] 
-	                 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [FixDate] = @Time);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[GetMovementEndGeography]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS GEOGRAPHY
-AS
-BEGIN
-	DECLARE @Result GEOGRAPHY
-	SET @Result = (SELECT [Shape].STEndPoint() 
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [EndDate] = @Time);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[GetMovementStartGeography]
-(
-	@Project VARCHAR(32)   = NULL, 
-	@Animal  VARCHAR(32)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS GEOGRAPHY
-AS
-BEGIN
-	DECLARE @Result GEOGRAPHY
-	SET @Result = (SELECT [Shape].STStartPoint() 
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [StartDate] = @Time);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[IsFixEditor] 
-(
-	@FixId    INT = NULL, 
-	@User sysname = NULL
-)
-RETURNS BIT
-AS
-BEGIN
-	DECLARE @Result BIT
-	
-		SELECT @Result = [dbo].[IsProjectEditor]([f].[ProjectId], @User)
-		  FROM [dbo].[CollarFixes] AS [x]
-	INNER JOIN [dbo].[CollarFiles] AS [f]
-			ON [x].[FileId] = [f].[FileId]
-		 WHERE [x].[FixId] = @FixId;
-		 
-	RETURN @Result
-END
-
-
-
-
-
-
-
-GO
-GRANT EXECUTE ON [dbo].[IsFixEditor] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[IsInvestigatorEditor] 
-(
-    @ProjectInvestigator sysname, 
-    @User                sysname
-)
-RETURNS BIT
-AS
-BEGIN
-    -- Check that @User is in the Investigator or the Editor Role
-    IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
-                                                   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
-        RETURN 0
-    
-    --Check that @User is either an Assistant or the PI
-    IF EXISTS(     SELECT 1 FROM dbo.ProjectInvestigators AS P 
-                LEFT JOIN [dbo].[ProjectInvestigatorAssistants] AS A 
-                       ON A.ProjectInvestigator = P.[Login] 
-                    WHERE (@User = @ProjectInvestigator AND P.[Login] = @User) 
-                       OR (A.ProjectInvestigator = @ProjectInvestigator AND @User = A.Assistant)
-             )
-        RETURN 1
-    RETURN 0
-END
-
-
-
-
-
-GO
-GRANT EXECUTE ON [dbo].[IsInvestigatorEditor] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-CREATE FUNCTION [dbo].[IsProjectEditor] 
-(
-    @Project VARCHAR(32)   = NULL, 
-    @User sysname = NULL
-)
-RETURNS BIT
-AS
-BEGIN
-    -- Check that @User is in the Investigator or the Editor Role
-    IF NOT EXISTS( SELECT 1 FROM sys.sysmembers WHERE (USER_NAME(groupuid) = 'Editor' AND USER_NAME(memberuid) = @user)
-                                                   OR (USER_NAME(groupuid) = 'Investigator' AND USER_NAME(memberuid) = @user))
-        RETURN 0
-    
-    --Check that the users is either an editor or the PI on the project
-    IF EXISTS(     SELECT 1 FROM dbo.Projects AS P 
-                LEFT JOIN dbo.ProjectEditors AS E ON P.ProjectId = E.ProjectId 
-                    WHERE P.ProjectId = @Project
-                      AND (E.Editor = @User OR P.ProjectInvestigator = @User))
-        RETURN 1
-    
-    -- Check if user is an assistant to the PI of the project
-    IF EXISTS( SELECT 1 FROM dbo.Projects AS P
-                 JOIN [dbo].[ProjectInvestigatorAssistants] AS A 
-                   ON A.ProjectInvestigator = P.ProjectInvestigator 
-                WHERE @Project = P.ProjectId AND @User = A.Assistant)
-        RETURN 1	
-    RETURN 0
-END
-
-
-
-
-GO
-GRANT EXECUTE ON [dbo].[IsProjectEditor] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[LocalTime](@utcDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[LocalTime]
-GO
-GRANT EXECUTE ON [dbo].[LocalTime] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-CREATE FUNCTION [dbo].[NextAnimalId] 
-(
-	@ProjectId VARCHAR(32)   = NULL 
-)
-RETURNS VARCHAR(16)
-AS
-BEGIN
-	-- Check that project exists
-	IF NOT EXISTS( SELECT 1 FROM Projects WHERE ProjectId = @ProjectId)
-	BEGIN
-			-- You can't raise errors in a function, so you can either do an illegal operation to
-			-- stop the process, or in may case I will just return a safe result
-			RETURN NULL
-	END
-	
-	DECLARE @Year CHAR(2)
-	DECLARE @Count int
-	DECLARE @Id VARCHAR(16)
-
-	--Get the prefix for the current year (i.e. 2012 -> '12')
-	SELECT @Year  = SUBSTRING(CONVERT(CHAR(4),YEAR(GETDATE())),3,2)
-	SELECT @Count =	convert(varchar(10),(max(id) + 1))
-	  from (select case WHEN ISNUMERIC(SUBSTRING(AnimalId, 3, 9)) = 1
-	                    then convert(int,SUBSTRING(AnimalId, 3, 9))
-	                    ELSE 0 END as id
-	          from Animals
-	         where ProjectId = @ProjectId AND AnimalId LIKE @Year+'%') as t
-	if (@Count < 100)
-		SELECT @Id = @Year + REPLACE(STR(@Count, 2, 0), ' ', '0')
-	else
-		SELECT @Id = @Year + REPLACE(STR(@Count, 6, 0), ' ', '')
-	If @Id is null
-		SET @Id = @Year + '01'
-	RETURN @id
-END
-
-
-
-GO
-GRANT EXECUTE ON [dbo].[NextAnimalId] TO [Editor] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[NextLocationTime] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [FixDate] 
-					 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [Status] IS NULL
-					  AND [FixDate] > @Time
-			     ORDER BY [FixDate]);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[ParseFormatA](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[Fix #] [nvarchar](50) NULL,
-	[Date] [nvarchar](50) NULL,
-	[Time] [nvarchar](50) NULL,
-	[Fix Status] [nvarchar](50) NULL,
-	[Status Text] [nvarchar](150) NULL,
-	[Velocity East(m s)] [nvarchar](50) NULL,
-	[Velocity North(m s)] [nvarchar](50) NULL,
-	[Velocity Up(m s)] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[Altitude(m)] [nvarchar](50) NULL,
-	[PDOP] [nvarchar](50) NULL,
-	[HDOP] [nvarchar](50) NULL,
-	[VDOP] [nvarchar](50) NULL,
-	[TDOP] [nvarchar](50) NULL,
-	[Temperature Sensor(deg )] [nvarchar](50) NULL,
-	[Activity Sensor] [nvarchar](50) NULL,
-	[Satellite Data] [nvarchar](150) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatA]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[ParseFormatB](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[PlatformId] [nvarchar](255) NULL,
-	[AnimalId] [nvarchar](255) NULL,
-	[Species] [nvarchar](255) NULL,
-	[Group] [nvarchar](255) NULL,
-	[Park] [nvarchar](255) NULL,
-	[FixDate] [nvarchar](255) NULL,
-	[FixTime] [nvarchar](255) NULL,
-	[FixMonth] [int] NULL,
-	[FixDay] [int] NULL,
-	[FixYear] [int] NULL,
-	[LatWGS84] [float] NULL,
-	[LonWGS84] [float] NULL,
-	[Temperature] [float] NULL,
-	[Other] [nvarchar](255) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatB]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[ParseFormatC](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[AcquisitionTime] [nvarchar](50) NULL,
-	[AcquisitionStartTime] [nvarchar](50) NULL,
-	[Ctn] [nvarchar](50) NULL,
-	[ArgosId] [nvarchar](50) NULL,
-	[ArgosLocationClass] [nvarchar](50) NULL,
-	[ArgosLatitude] [nvarchar](50) NULL,
-	[ArgosLongitude] [nvarchar](50) NULL,
-	[ArgosAltitude] [nvarchar](50) NULL,
-	[GpsFixTime] [nvarchar](50) NULL,
-	[GpsFixAttempt] [nvarchar](50) NULL,
-	[GpsLatitude] [nvarchar](50) NULL,
-	[GpsLongitude] [nvarchar](50) NULL,
-	[GpsUtmZone] [nvarchar](50) NULL,
-	[GpsUtmNorthing] [nvarchar](50) NULL,
-	[GpsUtmEasting] [nvarchar](50) NULL,
-	[GpsAltitude] [nvarchar](50) NULL,
-	[GpsSpeed] [nvarchar](50) NULL,
-	[GpsHeading] [nvarchar](50) NULL,
-	[GpsHorizontalError] [nvarchar](50) NULL,
-	[GpsPositionalDilution] [nvarchar](50) NULL,
-	[GpsHorizontalDilution] [nvarchar](50) NULL,
-	[GpsSatelliteBitmap] [nvarchar](50) NULL,
-	[GpsSatelliteCount] [nvarchar](50) NULL,
-	[GpsNavigationTime] [nvarchar](50) NULL,
-	[UnderwaterPercentage] [nvarchar](50) NULL,
-	[DiveCount] [nvarchar](50) NULL,
-	[AverageDiveDuration] [nvarchar](50) NULL,
-	[MaximumDiveDuration] [nvarchar](50) NULL,
-	[LayerPercentage] [nvarchar](50) NULL,
-	[MaximumDiveDepth] [nvarchar](50) NULL,
-	[DiveStartTime] [nvarchar](50) NULL,
-	[DiveDuration] [nvarchar](50) NULL,
-	[DiveDepth] [nvarchar](50) NULL,
-	[DiveProfile] [nvarchar](50) NULL,
-	[ActivityCount] [nvarchar](50) NULL,
-	[Temperature] [nvarchar](50) NULL,
-	[RemoteAnalog] [nvarchar](50) NULL,
-	[SatelliteUplink] [nvarchar](50) NULL,
-	[ReceiveTime] [nvarchar](50) NULL,
-	[SatelliteName] [nvarchar](50) NULL,
-	[RepetitionCount] [nvarchar](50) NULL,
-	[LowVoltage] [nvarchar](50) NULL,
-	[Mortality] [nvarchar](50) NULL,
-	[SaltwaterFailsafe] [nvarchar](50) NULL,
-	[HaulOut] [nvarchar](50) NULL,
-	[DigitalInput] [nvarchar](50) NULL,
-	[MotionDetected] [nvarchar](50) NULL,
-	[TrapTriggerTime] [nvarchar](50) NULL,
-	[ReleaseTime] [nvarchar](50) NULL,
-	[PredeploymentData] [nvarchar](50) NULL,
-	[Error] [nvarchar](250) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatC]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[ParseFormatD](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[TXDate] [nvarchar](50) NULL,
-	[TXTime] [nvarchar](50) NULL,
-	[PTTID] [nvarchar](50) NULL,
-	[FixNum] [nvarchar](50) NULL,
-	[FixQual] [nvarchar](50) NULL,
-	[FixDate] [nvarchar](50) NULL,
-	[FixTime] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatD]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[ParseFormatE](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[ProgramId] [nvarchar](50) NULL,
-	[PlatformId] [nvarchar](50) NULL,
-	[TransmissionDate] [datetime2](7) NULL,
-	[LocationDate] [datetime2](7) NULL,
-	[Latitude] [real] NULL,
-	[Longitude] [real] NULL,
-	[Altitude] [real] NULL,
-	[LocationClass] [nchar](1) NULL,
-	[Message] [varbinary](50) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Files].[SqlServer_Files.CollarFileInfo].[ParseFormatE]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[ParseFormatF](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[programNumber] [nvarchar](50) NULL,
-	[platformId] [nvarchar](50) NULL,
-	[platformType] [nvarchar](50) NULL,
-	[platformModel] [nvarchar](50) NULL,
-	[platformName] [nvarchar](50) NULL,
-	[platformHexId] [nvarchar](50) NULL,
-	[satellite] [nvarchar](50) NULL,
-	[bestMsgDate] [nvarchar](50) NULL,
-	[duration] [nvarchar](50) NULL,
-	[nbMessage] [nvarchar](50) NULL,
-	[message120] [nvarchar](50) NULL,
-	[bestLevel] [nvarchar](50) NULL,
-	[frequency] [nvarchar](50) NULL,
-	[locationDate] [nvarchar](50) NULL,
-	[latitude] [nvarchar](50) NULL,
-	[longitude] [nvarchar](50) NULL,
-	[altitude] [nvarchar](50) NULL,
-	[locationClass] [nvarchar](50) NULL,
-	[gpsSpeed] [nvarchar](50) NULL,
-	[gpsHeading] [nvarchar](50) NULL,
-	[latitude2] [nvarchar](50) NULL,
-	[longitude2] [nvarchar](50) NULL,
-	[altitude2] [nvarchar](50) NULL,
-	[index] [nvarchar](50) NULL,
-	[nopc] [nvarchar](50) NULL,
-	[errorRadius] [nvarchar](50) NULL,
-	[semiMajor] [nvarchar](50) NULL,
-	[semiMinor] [nvarchar](50) NULL,
-	[orientation] [nvarchar](50) NULL,
-	[hdop] [nvarchar](50) NULL,
-	[bestDate] [nvarchar](50) NULL,
-	[compression] [nvarchar](50) NULL,
-	[type] [nvarchar](50) NULL,
-	[alarm] [nvarchar](50) NULL,
-	[concatenated] [nvarchar](50) NULL,
-	[date] [nvarchar](50) NULL,
-	[level] [nvarchar](50) NULL,
-	[doppler] [nvarchar](50) NULL,
-	[rawData] [nvarchar](500) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatF]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[ParseFormatI](@fileId [int])
-RETURNS  TABLE (
-	[LineNumber] [int] NULL,
-	[EmailAddress] [nvarchar](500) NULL,
-	[EmailUID] [nvarchar](50) NULL,
-	[Imei] [nvarchar](50) NULL,
-	[MessageTime] [nvarchar](50) NULL,
-	[StatusCode] [nvarchar](50) NULL,
-	[StatusString] [nvarchar](50) NULL,
-	[Latitude] [nvarchar](50) NULL,
-	[Longitude] [nvarchar](50) NULL,
-	[CEPRadius] [nvarchar](50) NULL,
-	[MessageLength] [nvarchar](50) NULL,
-	[MessageBytes] [nvarchar](4000) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatI]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE FUNCTION [dbo].[PreviousLocationTime] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [FixDate] 
-					 FROM [dbo].[Locations]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [Status] IS NULL
-					  AND [FixDate] < @Time
-			     ORDER BY [FixDate] DESC);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[Sha1Hash](@data [varbinary](max))
-RETURNS [varbinary](8000) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[Sha1Hash]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[StartOfOverlappingMovement] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT TOP 1 [StartDate]
-	                 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-	                  AND [StartDate] < @Time
-	                  AND [EndDate] > @Time
-	             ORDER BY [StartDate] DESC);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE FUNCTION [dbo].[StartOfPriorConnectedMovement] 
-(
-	@Project VARCHAR(16)   = NULL, 
-	@Animal  VARCHAR(16)   = NULL, 
-	@Time    DATETIME2 = NULL
-)
-RETURNS DATETIME2
-AS
-BEGIN
-	DECLARE @Result DATETIME2
-	SET @Result = (SELECT [StartDate] 
-					 FROM [dbo].[Movements]
-					WHERE [ProjectId] = @Project
-					  AND [AnimalId] = @Animal
-					  AND [EndDate] = @Time);
-	RETURN @Result
-END
-
-
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[SummarizeTpfFile](@fileId [int])
-RETURNS  TABLE (
-	[FileId] [int] NULL,
-	[CTN] [nvarchar](16) NULL,
-	[Platform] [nvarchar](16) NULL,
-	[PlatformId] [nvarchar](16) NULL,
-	[Frequency] [float] NULL,
-	[TimeStamp] [datetime2](7) NULL
-) WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_TpfSummerizer].[SqlServer_TpfSummerizer.TfpSummerizer].[SummarizeTpfFile]
-GO
-GRANT SELECT ON [dbo].[SummarizeTpfFile] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-CREATE FUNCTION [dbo].[UtcTime](@localDateTime [datetime])
-RETURNS [datetime] WITH EXECUTE AS CALLER
-AS 
-EXTERNAL NAME [SqlServer_Functions].[SqlServer_Functions.SimpleFunctions].[UtcTime]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarFixes](
-	[FixId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[HiddenBy] [int] NULL,
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
-	[Lat] [float] NOT NULL,
-	[Lon] [float] NOT NULL,
- CONSTRAINT [PK_CollarFixes] PRIMARY KEY CLUSTERED 
-(
-	[FixId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarFixes] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a table of conflicting fixes for a specific collar.
--- Example:     SELECT * FROM ConflictingFixes('Telonics', '96007', DEFAULT)
--- Modified:    Aug 15, 2012, filtered conflicts only include series that have different locations
--- Modified:    Feb 22, 2013, added an optional currency filter to return only conflicts in the last X days 
--- =============================================
-CREATE FUNCTION [dbo].[ConflictingFixes] 
-(
-	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255),
-	@LastXdays          INTEGER = 36500
-)
-RETURNS TABLE 
-AS
-	RETURN
-		SELECT FixId, HiddenBy, FileId, LineNumber, dbo.LocalTime(C.FixDate) AS LocalFixTime, Lat, Lon
-		FROM CollarFixes AS C
-		INNER JOIN 
-			(SELECT   CollarManufacturer, CollarId, FixDate 
-			 FROM
-				(SELECT DISTINCT CollarManufacturer, CollarId, FixDate, Lat, Lon
-				 FROM CollarFixes
-			     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId) AS T
-			 GROUP BY CollarManufacturer, CollarId, FixDate
-			 HAVING   COUNT(FixDate) > 1) AS D
-		ON  C.CollarManufacturer = D.CollarManufacturer
-		AND C.CollarId = D.CollarId
-		AND C.FixDate = D.FixDate
-        AND C.FixDate > DATEADD(DAY, -@LastXdays, GETDATE())
-
-
-GO
-GRANT SELECT ON [dbo].[ConflictingFixes] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFileProcessingIssues](
-	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[FileId] [int] NOT NULL,
-	[Issue] [nvarchar](max) NOT NULL,
-	[PlatformId] [varchar](8) NULL,
-	[CollarManufacturer] [varchar](16) NULL,
-	[CollarId] [varchar](16) NULL,
-	[FirstTransmission] [datetime2](7) NULL,
-	[LastTransmission] [datetime2](7) NULL,
- CONSTRAINT [PK_ArgosFileProcessingIssues] PRIMARY KEY CLUSTERED 
-(
-	[IssueId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[ArgosFileProcessingIssues] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarFiles](
-	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[FileName] [nvarchar](255) NOT NULL,
-	[UploadDate] [datetime2](7) NOT NULL CONSTRAINT [DF_CollarFiles_UploadDate]  DEFAULT (getdate()),
-	[ProjectId] [varchar](16) NULL,
-	[UserName] [sysname] NOT NULL CONSTRAINT [DF_CollarFiles_UserName]  DEFAULT (original_login()),
-	[CollarManufacturer] [varchar](16) NULL,
-	[CollarId] [varchar](16) NULL,
-	[Format] [char](1) NOT NULL,
-	[Status] [char](1) NOT NULL CONSTRAINT [DF_CollarFiles_Status]  DEFAULT ('I'),
-	[Contents] [varbinary](max) NOT NULL,
-	[ParentFileId] [int] NULL,
-	[Owner] [nvarchar](128) NULL,
-	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
-	[ArgosDeploymentId] [int] NULL,
-	[CollarParameterId] [int] NULL,
- CONSTRAINT [PK_CollarFiles] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarFiles] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE VIEW [dbo].[DataLog_NeverProcessed]
-AS
------------ DataLog_NeverProcessed
------------   Is a file of format 'H' (It has no Argos transmissions),
------------   but no child files, and no processing issues
-     SELECT P.FileId
-       FROM CollarFiles AS P      
-  LEFT JOIN CollarFiles AS C
-         ON P.FileId = C.ParentFileId
-  LEFT JOIN ArgosFileProcessingIssues AS I
-         ON I.FileId = P.FileId
-      WHERE P.Format = 'H'
-        AND C.FileId IS NULL
-        AND I.FileId IS NULL
-
-
-GO
-GRANT SELECT ON [dbo].[DataLog_NeverProcessed] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Locations](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
-	[Location] [geography] NOT NULL,
-	[FixId] [int] NOT NULL,
-	[Status] [char](1) NULL,
- CONSTRAINT [PK_Locations] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC,
-	[FixDate] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[Locations] TO [Editor] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[Locations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE VIEW [dbo].[MostRecentLocations]
-AS
-SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
-FROM   dbo.Locations AS L
-INNER JOIN
-	   (SELECT   ProjectId, AnimalId, MAX(FixDate) AS FixDate
-		FROM     dbo.Locations
-		WHERE    [Status] IS NULL
-		GROUP BY ProjectId, AnimalId) AS F
-ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
-
-
-GO
-GRANT SELECT ON [dbo].[MostRecentLocations] TO [Editor] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[MostRecentLocations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-CREATE VIEW [dbo].[FirstKnownLocations]
-AS
-SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
-FROM   dbo.Locations AS L
-INNER JOIN
-	   (SELECT   ProjectId, AnimalId, MIN(FixDate) AS FixDate
-		FROM     dbo.Locations
-		WHERE    [Status] IS NULL
-		GROUP BY ProjectId, AnimalId) AS F
-ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
-
-
-
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Animals](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[Species] [varchar](32) NULL,
-	[Gender] [varchar](7) NOT NULL,
-	[MortalityDate] [datetime2](7) NULL,
-	[GroupName] [nvarchar](500) NULL,
-	[Description] [nvarchar](2000) NULL,
- CONSTRAINT [PK_Animals] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[Animals] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE VIEW [dbo].[LastLocationOfKnownMortalities]
-AS
-SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
-FROM Locations AS L
-INNER JOIN
-   (SELECT A.ProjectId, A.AnimalId, MAX(FixDate) AS FixDate
-	FROM dbo.Locations AS L
-	INNER JOIN dbo.Animals AS A
-	ON A.AnimalId = L.AnimalId AND A.ProjectId = L.ProjectId AND L.FixDate < A.MortalityDate
-	WHERE [Status] IS NULL
-	GROUP BY A.ProjectId, A.AnimalId) AS F
-ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId and F.FixDate = L.FixDate
-
-GO
-GRANT SELECT ON [dbo].[LastLocationOfKnownMortalities] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-/* Converts a datetime to the ordinal date (day of the year)
- * commonly confused with the Julian date (days sine 1/1/4713BC)
- */
-CREATE FUNCTION [dbo].[DateTimeToOrdinal] (
-    @Date DATETIME2  
-)   
-	RETURNS INT
-    WITH SCHEMABINDING -- This is a deterministic function.
-
-AS
-BEGIN
-    RETURN 1 + DATEDIFF (day,
-                         CONVERT(DATETIME2,
-                                 CAST(YEAR(@Date) AS CHAR(4))+'0101',
-                                 112), -- format 112 (yyyymmdd) is deterministic
-                         @Date)
-END
-
-
-GO
-GRANT EXECUTE ON [dbo].[DateTimeToOrdinal] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Movements](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[StartDate] [datetime2](7) NOT NULL,
-	[EndDate] [datetime2](7) NOT NULL,
-	[Duration] [float] NOT NULL,
-	[Distance] [float] NOT NULL,
-	[Speed] [float] NOT NULL,
-	[Shape] [geography] NOT NULL,
- CONSTRAINT [PK_Movement] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC,
-	[StartDate] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[Movements] TO [Editor] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[Movements] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Projects](
-	[ProjectId] [varchar](16) NOT NULL,
-	[ProjectName] [nvarchar](150) NOT NULL,
-	[ProjectInvestigator] [sysname] NOT NULL CONSTRAINT [DF_Projects_PrincipalInvestigator]  DEFAULT (original_login()),
-	[UnitCode] [char](4) NULL,
-	[Description] [nvarchar](2000) NULL,
- CONSTRAINT [PK_Projects] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[Projects] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
-CREATE VIEW [dbo].[VelocityVectors_NPS]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          ,M.[StartDate]
-          ,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          ,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance <> 0
-       AND M.StartDate < DATEADD(DAY,-30,GETDATE())
-
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[VelocityVectors_NPS] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 30, 2012
--- Description:	Returns a row of location information for a specific animal.
--- Example:     SELECT * FROM AnimalLocationSummary('LACL_Sheep', '0501')
--- =============================================
-CREATE FUNCTION [dbo].[AnimalLocationSummary] 
-(
-	@ProjectId	NVARCHAR(255), 
-	@AnimalId	NVARCHAR(255)
-)
-RETURNS TABLE 
-AS
-	RETURN
-		SELECT	COUNT(*) as [Count],
-				MIN(Location.Long) as [Left], MAX(Location.Long) as [Right],
-				MIN(Location.Lat) as [Bottom], MAX(Location.Lat) as [Top],
-				dbo.LocalTime(MIN(FixDate)) AS [First], dbo.LocalTime(MAX(FixDate)) as [Last]
-		 FROM     [dbo].[Locations]
-		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
-		 GROUP BY ProjectId, AnimalId
-
-
-
-GO
-GRANT SELECT ON [dbo].[AnimalLocationSummary] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE VIEW [dbo].[NoMovement]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          --,M.[StartDate]
-          --,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          --,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance = 0
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[NoMovement] TO [Editor] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[NoMovement] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
-
-CREATE VIEW [dbo].[ValidLocations_NPS]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          --,L.[Status]
-          ,L.[Location] AS [Shape]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NULL
-       AND L.[FixDate] < DATEADD(DAY,-30,GETDATE())
-
-
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[ValidLocations_NPS] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupFileStatus](
-	[Code] [char](1) NOT NULL,
-	[Name] [nvarchar](32) NOT NULL,
-	[Description] [nvarchar](255) NULL,
- CONSTRAINT [PK_CollarFileStatus] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[LookupFileStatus] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
--- =============================================
--- Author:		Regan Sarwas
--- Create date: May 31, 2012
--- Description:	Returns a table of files with fixes for a specific collar.
--- Example:     SELECT * FROM CollarFixesByFile('Telonics', '96007')
--- =============================================
-CREATE FUNCTION [dbo].[CollarFixesByFile] 
-(
-	@CollarManufacturer NVARCHAR(255), 
-	@CollarId           NVARCHAR(255)
-)
-RETURNS TABLE 
-AS
-	RETURN
-		SELECT  F.[FileId],
-				F.[FileName] AS [File],
-				S.[Name] AS [Status],
-				COUNT(FixDate) AS [FixCount],
-				dbo.LocalTime(MIN(FixDate)) AS [First],
-				dbo.LocalTime(MAX(FixDate)) AS [Last]
-		FROM [dbo].[CollarFiles] AS F
-		INNER JOIN [dbo].[LookupFileStatus] AS S
-		ON F.[Status] = S.[Code]
-		LEFT JOIN [dbo].[CollarFixes] AS X
-		ON X.FileId = F.FileId
-		WHERE (F.CollarManufacturer = @CollarManufacturer AND F.CollarId = @CollarId)
-		   OR (X.CollarManufacturer = @CollarManufacturer AND X.CollarId = @CollarId)
-		GROUP BY F.[FileId], F.[FileName], S.[Name]
-
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[CollarFixesByFile] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE VIEW [dbo].[InvalidLocations]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,L.[Status]
-          ,L.[Location] AS [Shape]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NOT NULL
-
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[InvalidLocations] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarParameterFiles](
-	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[Owner] [sysname] NOT NULL,
-	[FileName] [nvarchar](255) NOT NULL,
-	[Format] [char](1) NOT NULL,
-	[UploadDate] [datetime2](7) NOT NULL CONSTRAINT [DF_CollarParameterFiles_UploadDate]  DEFAULT (getdate()),
-	[UploadUser] [sysname] NOT NULL CONSTRAINT [DF_CollarParameterFiles_UploadUser]  DEFAULT (original_login()),
-	[Contents] [varbinary](max) NOT NULL,
-	[Status] [char](1) NOT NULL,
-	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
- CONSTRAINT [PK_CollarParameterFiles] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarParameterFiles] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS OFF
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-
-
-CREATE VIEW [dbo].[AllTpfFileData]
-AS
-
--- All TPF Data
-     SELECT T.*, P.[FileName], P.[Status]
-       FROM CollarParameterFiles AS P
-CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
-      WHERE P.Format = 'A'
-
-
-GO
-GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosDeployments](
-	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
- CONSTRAINT [PK_ArgosDeployments] PRIMARY KEY CLUSTERED 
-(
-	[DeploymentId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[ArgosDeployments] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarParameters](
-	[ParameterId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[FileId] [int] NULL,
-	[Gen3Period] [int] NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
- CONSTRAINT [PK_CollarParameters] PRIMARY KEY CLUSTERED 
-(
-	[ParameterId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarParameters] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Collars](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[CollarModel] [varchar](24) NOT NULL,
-	[Manager] [sysname] NOT NULL CONSTRAINT [DF_Collars_Manager]  DEFAULT (original_login()),
-	[Owner] [nvarchar](100) NULL CONSTRAINT [DF_Collars_Owner]  DEFAULT ('NPS'),
-	[SerialNumber] [varchar](100) NULL,
-	[Frequency] [float] NULL,
-	[HasGps] [bit] NOT NULL,
-	[Notes] [nvarchar](max) NULL,
-	[DisposalDate] [datetime2](7) NULL,
- CONSTRAINT [PK_Collars] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[Collars] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
--- =============================================
--- Author:		Regan Sarwas
--- Create date: March 8, 2013
--- Description:	Returns a table of Telonics processing parameters
---              for the Argos Id in the date range. 
--- Example:     SELECT * FROM GetTelonicsParametersForArgosDates('37470', '2008-03-01', '2014-03-01') ORDER BY StartDate
--- Caller need to check that the results cover the entire requested date range
--- Caller should order the results by startdate, then check the following:
---   if @StartDate < firstrecord.startDate(and not null) then Missing parameters
---   if @EndDate > lastrecord.EndDate(and not null) more missing parameters
-
--- Update May 8, 2013
---   Removed valid parameter check.  The processor will now be able to check
---   if there is a valid Argos-collar deployment, but no collar-parameter
---   assignment, and therefore write a better error message.
---   The client must now check for invalid parameters.
--- =============================================
-CREATE FUNCTION [dbo].[GetTelonicsParametersForArgosDates] 
-(
-    @PlatformID VARCHAR(8),
-    @StartDate DATETIME2(7),
-    @EndDate DATETIME2(7)
-)
-RETURNS TABLE 
-AS
-    RETURN
-     SELECT A.DeploymentId, P.ParameterId, A.PlatformId, A.CollarManufacturer, A.CollarId, C.CollarModel,
-            P.Gen3Period, F.Format, F.[FileName], F.Contents,
-            CASE WHEN (A.StartDate IS NOT NULL AND P.StartDate IS NOT NULL)
-                 THEN (CASE WHEN A.StartDate < P.StartDate THEN P.StartDate ELSE A.StartDate END)
-                 ELSE (CASE WHEN A.StartDate IS NULL THEN P.StartDate ELSE A.StartDate END) END AS StartDate,
-            CASE WHEN (A.EndDate IS NOT NULL AND P.EndDate IS NOT NULL)
-                 THEN (CASE WHEN A.EndDate < P.EndDate THEN A.EndDate ELSE P.EndDate END)
-                 ELSE (CASE WHEN A.EndDate IS NULL THEN P.EndDate ELSE A.EndDate END) END AS EndDate
-       FROM ArgosDeployments AS A
- INNER JOIN Collars AS C
-         ON A.CollarManufacturer = C.CollarManufacturer AND A.CollarId = C.CollarId
-  LEFT JOIN CollarParameters AS P
-         ON C.CollarManufacturer = P.CollarManufacturer AND C.CollarId = P.CollarId
-  LEFT JOIN CollarParameterFiles AS F
-         ON P.FileId = F.FileId
-      WHERE A.PlatformId = @PlatformID
-        AND (A.StartDate IS NULL OR A.StartDate < @EndDate)
-        AND (P.StartDate IS NULL OR P.StartDate < @EndDate)
-        AND (A.EndDate IS NULL OR @StartDate < A.EndDate)
-        AND (P.EndDate IS NULL OR @StartDate < P.EndDate)
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[GetTelonicsParametersForArgosDates] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
-
-CREATE VIEW [dbo].[ValidLocationsWithLatLong]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,L.[Location] AS [Shape]
-          ,L.[Location].Lat AS [Lat_WGS84]
-          ,L.[Location].Long AS [Lon_WGS84]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NULL
-
-
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[ValidLocationsWithLatLong] TO [Editor] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE VIEW [dbo].[AnimalLocations]
-AS
-    SELECT L.ProjectId
-          ,L.AnimalId
-          ,dbo.LocalTime(L.[FixDate]) as [Local DateTime]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,L.[Location].Lat AS [Lat WGS84]
-          ,L.[Location].Long AS [Lon WGS84]
-          ,L.[Status]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-                              AND L.AnimalId  = A.AnimalId
-
-
-GO
-GRANT SELECT ON [dbo].[AnimalLocations] TO [Editor] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
-
-CREATE VIEW [dbo].[ValidLocations]
-AS
-    SELECT L.FixId
-          ,L.ProjectId
-          ,L.AnimalId
-          ,L.[FixDate]
-          ,dbo.LocalTime(L.[FixDate]) as [LocalDateTime]
-          ,YEAR(dbo.LocalTime(L.[FixDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(L.[FixDate])) as [OrdinalDate]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          --,L.[Status]
-          ,L.[Location] AS [Shape]
-      FROM dbo.Locations AS L
-INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
-							  AND L.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE L.Status IS NULL
-
-
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[ValidLocations] TO [Editor] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[ValidLocations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
-CREATE VIEW [dbo].[VelocityVectors]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          ,M.[StartDate]
-          ,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          ,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance <> 0
-
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[VelocityVectors] TO [Editor] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[VelocityVectors] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-CREATE VIEW [dbo].[NoMovement_NPS]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          --,M.[StartDate]
-          --,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          --,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance = 0
-       AND M.StartDate < DATEADD(DAY,-30,GETDATE())
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[NoMovement_NPS] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataIridiumMail](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[EmailAddress] [varchar](500) NULL,
-	[EmailUID] [varchar](50) NULL,
-	[Imei] [varchar](50) NULL,
-	[MessageTime] [varchar](50) NULL,
-	[StatusCode] [varchar](50) NULL,
-	[StatusString] [varchar](50) NULL,
-	[Latitude] [varchar](50) NULL,
-	[Longitude] [varchar](50) NULL,
-	[CEPRadius] [varchar](50) NULL,
-	[MessageLength] [varchar](50) NULL,
-	[MessageBytes] [varchar](5000) NULL,
- CONSTRAINT [PK_CollarDataIridiumMail] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDataIridiumMail] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
--- =============================================
--- Author:		Regan Sarwas
--- Create date: Feb 22, 2016
--- Description:	Returns a table with zero or one row containing the collar id and parameter file id
---              associated with an Iridium download file.
---              ASSUMES only one IMEI (Iridium ID - or collar) per 'CollarDataIridiumMail' File.
---              This matches the download data recieved so far.
--- Example:     SELECT * FROM CollarParametersForIridiumDownload(40025)
--- =============================================
-CREATE FUNCTION [dbo].[CollarParametersForIridiumDownload] 
-(
-	@FileId  INT
-)
-RETURNS TABLE 
-AS
-	RETURN
-	  SELECT TOP 1
-		T.fileid AS [ParameterFileId],
-		'Telonics' AS [CollarManufacturer],
-		CTN AS [CollarId]
-	  FROM [dbo].[CollarDataIridiumMail] AS D
-	  JOIN [dbo].[AllTpfFileData] AS T
-	  ON T.[PlatformId] = D.[Imei] AND T.[TimeStamp] < D.[MessageTime]
-	  WHERE T.[Platform] = 'Iridium'
-	  AND D.[FileId] = @FileId
-	  ORDER BY T.[TimeStamp] DESC
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[CollarParametersForIridiumDownload] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-CREATE VIEW [dbo].[IDF_NeverProcessed]
-AS
------------ IDF_NeverProcessed
------------   Is a Active file of format 'I' (It has no Argos transmissions),
------------   but no child files, and no processing issues
-     SELECT P.FileId
-       FROM CollarFiles AS P      
-  LEFT JOIN CollarFiles AS C
-         ON P.FileId = C.ParentFileId
-  LEFT JOIN ArgosFileProcessingIssues AS I
-         ON I.FileId = P.FileId
-      WHERE P.[Format] = 'I'
-	    AND P.[Status] = 'A'
-        AND C.FileId IS NULL
-        AND I.FileId IS NULL
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[IDF_NeverProcessed] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosFilePlatformDates](
-	[ItemId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[FileId] [int] NOT NULL,
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NULL,
-	[FirstTransmission] [datetime2](7) NOT NULL,
-	[LastTransmission] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_ArgosFilePlatformDates] PRIMARY KEY CLUSTERED 
-(
-	[ItemId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[ArgosFilePlatformDates] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-CREATE VIEW [dbo].[ArgosFile_NeverProcessed]
-AS
------------ ArgosFile_NeverProcessed
------------   Is a file which has transmissions (ensures file is correct format),
------------   but no child files, and no processing issues
------------   (relies on files of correct format having been summerized) 
-     SELECT T.FileId
-       FROM ArgosFilePlatformDates AS T      
-  LEFT JOIN CollarFiles AS C
-         ON T.FileId = C.ParentFileId
-  LEFT JOIN ArgosFileProcessingIssues AS I
-         ON I.FileId = T.FileId
-      WHERE C.FileId IS NULL
-        AND I.FileId IS NULL
-   GROUP BY T.FileId
-
-GO
-GRANT SELECT ON [dbo].[ArgosFile_NeverProcessed] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
-
-CREATE VIEW [dbo].[ArgosFile_NeedsPartialProcessing]
-AS
------------ ArgosFile_NeedsPartialProcessing
------------ Files/platforms that can and should be processed (do it as soon as possible)
------------   Is a (file,platform) where the file has transmissions
------------   that can be processed (overlapping deployment/parameters)
------------   but there is no results file, and no processing issues.
-	 SELECT A.FileId, A.PlatformId
-	   FROM ArgosFilePlatformDates AS A
-  LEFT JOIN 
-         ( CollarFiles AS C
-		   LEFT JOIN ArgosDeployments AS D
-				  ON D.DeploymentId = C.ArgosDeploymentId
-				 AND D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
-		   LEFT JOIN CollarParameters AS P
-				  ON P.ParameterId = C.CollarParameterId
-				 AND P.CollarManufacturer = C.CollarManufacturer AND P.CollarId = C.CollarId
-		) ON C.ParentFileId = A.FileId AND D.PlatformId = A.PlatformId
-  LEFT JOIN ArgosFileProcessingIssues AS I
-		 ON I.PlatformId = A.PlatformId AND I.FileId = A.FileId
-	  WHERE A.FileId IS NOT NULL AND A.PlatformId IS NOT NULL
-        AND (D.StartDate IS NULL OR D.StartDate < A.FirstTransmission)
-        AND (P.StartDate IS NULL OR P.StartDate < A.FirstTransmission)
-        AND (D.EndDate IS NULL OR A.LastTransmission < D.EndDate)
-        AND (P.EndDate IS NULL OR A.LastTransmission < P.EndDate)
-	    AND C.FileId IS NULL  AND I.IssueId IS NULL
-		AND A.FileId NOT IN (SELECT FileId FROM ArgosFile_NeverProcessed)
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[ArgosFile_NeedsPartialProcessing] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDeployments](
-	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[DeploymentDate] [datetime2](7) NOT NULL,
-	[RetrievalDate] [datetime2](7) NULL,
- CONSTRAINT [PK_CollarDeployments] PRIMARY KEY CLUSTERED 
-(
-	[DeploymentId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDeployments] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarManufacturers](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[Name] [nvarchar](200) NULL,
-	[Website] [nvarchar](200) NULL,
-	[Description] [nvarchar](2000) NULL,
- CONSTRAINT [PK_CollarManufacturers] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[LookupCollarManufacturers] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-CREATE VIEW [dbo].[AnimalFixesByFile]
-AS
-
------------ Animal Fixes by File
-     SELECT F.FileId, M.Name AS Manufacturer, F.CollarId, P.ProjectName AS Project, CD.AnimalId,
-		    dbo.LocalTime(MIN(F.FixDate)) AS [First Fix],
-			dbo.LocalTime(MAX(F.FixDate)) AS [Last Fix],
-            COUNT(F.FixDate) AS [Number of Fixes]
-	   FROM dbo.CollarFixes AS F
- INNER JOIN dbo.CollarDeployments AS CD
-	     ON F.CollarManufacturer = CD.CollarManufacturer AND F.CollarId = CD.CollarId
- INNER JOIN dbo.LookupCollarManufacturers AS M
-	     ON F.CollarManufacturer = M.CollarManufacturer
-  LEFT JOIN dbo.Projects AS P
-         ON CD.ProjectId = P.ProjectId
-	  WHERE F.FixDate > CD.DeploymentDate
-        AND (F.FixDate < CD.RetrievalDate OR CD.RetrievalDate IS NULL)
-   GROUP BY P.ProjectName, CD.AnimalId, F.FileId, M.Name, F.CollarId
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[AnimalFixesByFile] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[Fix #] [varchar](50) NULL,
-	[Date] [nvarchar](50) NULL,
-	[Time] [nvarchar](50) NULL,
-	[Fix Status] [varchar](50) NULL,
-	[Status Text] [varchar](150) NULL,
-	[Velocity East(m s)] [varchar](50) NULL,
-	[Velocity North(m s)] [varchar](50) NULL,
-	[Velocity Up(m s)] [varchar](50) NULL,
-	[Latitude] [varchar](50) NULL,
-	[Longitude] [varchar](50) NULL,
-	[Altitude(m)] [varchar](50) NULL,
-	[PDOP] [varchar](50) NULL,
-	[HDOP] [varchar](50) NULL,
-	[VDOP] [varchar](50) NULL,
-	[TDOP] [varchar](50) NULL,
-	[Temperature Sensor(deg )] [varchar](50) NULL,
-	[Activity Sensor] [varchar](50) NULL,
-	[Satellite Data] [varchar](150) NULL,
- CONSTRAINT [PK_CollarDataTelonicsGen3StoreOnBoard] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDataTelonicsGen3StoreOnBoard] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE VIEW [dbo].[Gen3StoreOnBoardLocations]
-AS
-SELECT     dbo.CollarDataTelonicsGen3StoreOnBoard.*, dbo.Animals.*, dbo.Locations.Location, dbo.CollarFiles.FileName, dbo.CollarFiles.UserName, 
-                      dbo.CollarFiles.UploadDate
-FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
-                      dbo.CollarFixes ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFixes.FileId AND 
-                      dbo.CollarDataTelonicsGen3StoreOnBoard.LineNumber = dbo.CollarFixes.LineNumber INNER JOIN
-                      dbo.Locations ON dbo.CollarFixes.FixId = dbo.Locations.FixId INNER JOIN
-                      dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
-                      dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
-
-
-GO
-GRANT SELECT ON [dbo].[Gen3StoreOnBoardLocations] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosDownloads](
-	[TimeStamp] [datetime2](7) NOT NULL CONSTRAINT [DF_ArgosDownloads_TimeStamp]  DEFAULT (getdate()),
-	[ProgramId] [varchar](8) NULL,
-	[PlatformId] [varchar](8) NULL,
-	[Days] [int] NULL,
-	[FileId] [int] NULL,
-	[ErrorMessage] [varchar](max) NULL,
- CONSTRAINT [PK_ArgosDownloads] PRIMARY KEY CLUSTERED 
-(
-	[TimeStamp] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[ArgosDownloads] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPlatforms](
-	[PlatformId] [varchar](8) NOT NULL,
-	[ProgramId] [varchar](8) NOT NULL,
-	[Notes] [nvarchar](max) NULL,
-	[Active] [bit] NOT NULL,
-	[DisposalDate] [datetime2](7) NULL,
- CONSTRAINT [PK_ArgosPlatforms] PRIMARY KEY CLUSTERED 
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[ArgosPlatforms] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ArgosPrograms](
-	[ProgramId] [varchar](8) NOT NULL,
-	[ProgramName] [nvarchar](255) NULL,
-	[UserName] [sysname] NOT NULL,
-	[Password] [nvarchar](128) NOT NULL,
-	[Manager] [sysname] NOT NULL,
-	[StartDate] [datetime2](7) NULL,
-	[EndDate] [datetime2](7) NULL,
-	[Notes] [nvarchar](max) NULL,
-	[Active] [bit] NULL,
- CONSTRAINT [PK_ArgosPrograms] PRIMARY KEY CLUSTERED 
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[ArgosPrograms] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataArgosEmail](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[ProgramId] [varchar](50) NULL,
-	[PlatformId] [varchar](50) NULL,
-	[TransmissionDate] [datetime2](7) NULL,
-	[LocationDate] [datetime2](7) NULL,
-	[Latitude] [real] NULL,
-	[Longitude] [real] NULL,
-	[Altitude] [real] NULL,
-	[LocationClass] [char](1) NULL,
-	[Message] [varbinary](50) NULL,
- CONSTRAINT [PK_CollarDataArgosEmail] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDataArgosEmail] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataArgosWebService](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[programNumber] [varchar](50) NULL,
-	[platformId] [varchar](50) NULL,
-	[platformType] [varchar](50) NULL,
-	[platformModel] [varchar](50) NULL,
-	[platformName] [varchar](50) NULL,
-	[platformHexId] [varchar](50) NULL,
-	[satellite] [varchar](50) NULL,
-	[bestMsgDate] [varchar](50) NULL,
-	[duration] [varchar](50) NULL,
-	[nbMessage] [varchar](50) NULL,
-	[message120] [varchar](50) NULL,
-	[bestLevel] [varchar](50) NULL,
-	[frequency] [varchar](50) NULL,
-	[locationDate] [varchar](50) NULL,
-	[latitude] [varchar](50) NULL,
-	[longitude] [varchar](50) NULL,
-	[altitude] [varchar](50) NULL,
-	[locationClass] [varchar](50) NULL,
-	[gpsSpeed] [varchar](50) NULL,
-	[gpsHeading] [varchar](50) NULL,
-	[latitude2] [varchar](50) NULL,
-	[longitude2] [varchar](50) NULL,
-	[altitude2] [varchar](50) NULL,
-	[index] [varchar](50) NULL,
-	[nopc] [varchar](50) NULL,
-	[errorRadius] [varchar](50) NULL,
-	[semiMajor] [varchar](50) NULL,
-	[semiMinor] [varchar](50) NULL,
-	[orientation] [varchar](50) NULL,
-	[hdop] [varchar](50) NULL,
-	[bestDate] [varchar](50) NULL,
-	[compression] [varchar](50) NULL,
-	[type] [varchar](50) NULL,
-	[alarm] [varchar](50) NULL,
-	[concatenated] [varchar](50) NULL,
-	[date] [varchar](50) NULL,
-	[level] [varchar](50) NULL,
-	[doppler] [varchar](50) NULL,
-	[rawData] [varchar](500) NULL,
- CONSTRAINT [PK_CollarDataArgosWebService] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDataArgosWebService] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataDebevekFormat](
-	[FileID] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[PlatformId] [char](6) NULL,
-	[AnimalId] [char](6) NULL,
-	[Species] [nvarchar](255) NULL,
-	[Group] [nvarchar](255) NULL,
-	[Park] [nvarchar](255) NULL,
-	[FixDate] [nvarchar](255) NULL,
-	[FixTime] [nvarchar](255) NULL,
-	[FixMonth] [float] NULL,
-	[FixDay] [float] NULL,
-	[FixYear] [float] NULL,
-	[LatWGS84] [float] NULL,
-	[LonWGS84] [float] NULL,
-	[Temperature] [float] NULL,
-	[Other] [nvarchar](255) NULL,
- CONSTRAINT [PK_CollarDataDebevekFormat] PRIMARY KEY CLUSTERED 
-(
-	[FileID] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDataDebevekFormat] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataTelonicsGen3](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[TXDate] [varchar](50) NULL,
-	[TXTime] [varchar](50) NULL,
-	[PTTID] [varchar](50) NULL,
-	[FixNum] [varchar](50) NULL,
-	[FixQual] [varchar](50) NULL,
-	[FixDate] [varchar](50) NULL,
-	[FixTime] [varchar](50) NULL,
-	[Longitude] [varchar](50) NULL,
-	[Latitude] [varchar](50) NULL,
- CONSTRAINT [PK_CollarDataTelonicsGen3] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDataTelonicsGen3] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[CollarDataTelonicsGen4](
-	[FileId] [int] NOT NULL,
-	[LineNumber] [int] NOT NULL,
-	[AcquisitionTime] [varchar](50) NULL,
-	[AcquisitionStartTime] [varchar](50) NULL,
-	[Ctn] [varchar](50) NULL,
-	[ArgosId] [varchar](50) NULL,
-	[ArgosLocationClass] [varchar](50) NULL,
-	[ArgosLatitude] [varchar](50) NULL,
-	[ArgosLongitude] [varchar](50) NULL,
-	[ArgosAltitude] [varchar](50) NULL,
-	[GpsFixTime] [varchar](50) NULL,
-	[GpsFixAttempt] [varchar](50) NULL,
-	[GpsLatitude] [varchar](50) NULL,
-	[GpsLongitude] [varchar](50) NULL,
-	[GpsUtmZone] [varchar](50) NULL,
-	[GpsUtmNorthing] [varchar](50) NULL,
-	[GpsUtmEasting] [varchar](50) NULL,
-	[GpsAltitude] [varchar](50) NULL,
-	[GpsSpeed] [varchar](50) NULL,
-	[GpsHeading] [varchar](50) NULL,
-	[GpsHorizontalError] [varchar](50) NULL,
-	[GpsPositionalDilution] [varchar](50) NULL,
-	[GpsHorizontalDilution] [varchar](50) NULL,
-	[GpsSatelliteBitmap] [varchar](50) NULL,
-	[GpsSatelliteCount] [varchar](50) NULL,
-	[GpsNavigationTime] [varchar](50) NULL,
-	[UnderwaterPercentage] [varchar](50) NULL,
-	[DiveCount] [varchar](50) NULL,
-	[AverageDiveDuration] [varchar](50) NULL,
-	[MaximumDiveDuration] [varchar](50) NULL,
-	[LayerPercentage] [varchar](50) NULL,
-	[MaximumDiveDepth] [varchar](50) NULL,
-	[DiveStartTime] [varchar](50) NULL,
-	[DiveDuration] [varchar](50) NULL,
-	[DiveDepth] [varchar](50) NULL,
-	[DiveProfile] [varchar](50) NULL,
-	[ActivityCount] [varchar](50) NULL,
-	[Temperature] [varchar](50) NULL,
-	[RemoteAnalog] [varchar](50) NULL,
-	[SatelliteUplink] [varchar](50) NULL,
-	[ReceiveTime] [varchar](50) NULL,
-	[SatelliteName] [varchar](50) NULL,
-	[RepetitionCount] [varchar](50) NULL,
-	[LowVoltage] [varchar](50) NULL,
-	[Mortality] [varchar](50) NULL,
-	[SaltwaterFailsafe] [varchar](50) NULL,
-	[HaulOut] [varchar](50) NULL,
-	[DigitalInput] [varchar](50) NULL,
-	[MotionDetected] [varchar](50) NULL,
-	[TrapTriggerTime] [varchar](50) NULL,
-	[ReleaseTime] [varchar](50) NULL,
-	[PredeploymentData] [varchar](50) NULL,
-	[Error] [varchar](250) NULL,
- CONSTRAINT [PK_CollarDataTelonicsGen4] PRIMARY KEY CLUSTERED 
-(
-	[FileId] ASC,
-	[LineNumber] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[CollarDataTelonicsGen4] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Locations_In_CartoDB](
-	[fixid] [int] NOT NULL,
- CONSTRAINT [PK_Locations_In_CartoDB] PRIMARY KEY CLUSTERED 
-(
-	[fixid] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-GRANT DELETE ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-GRANT INSERT ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-GRANT UPDATE ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarFileFormats](
-	[Code] [char](1) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Description] [nvarchar](255) NULL,
-	[ArgosData] [char](1) NOT NULL,
-	[RequiresCollar] [char](1) NULL,
- CONSTRAINT [PK_CollarFileFormats] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[LookupCollarFileFormats] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarFileHeaders](
-	[Header] [nvarchar](450) NOT NULL,
-	[FileFormat] [char](1) NOT NULL,
-	[Regex] [nvarchar](450) NULL,
- CONSTRAINT [PK_CollarFileHeaders] PRIMARY KEY CLUSTERED 
-(
-	[Header] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[LookupCollarFileHeaders] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarModels](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarModel] [varchar](24) NOT NULL,
- CONSTRAINT [PK_LookupCollarModels] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC,
-	[CollarModel] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[LookupCollarModels] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
-	[Code] [char](1) NOT NULL,
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Description] [nvarchar](255) NULL,
- CONSTRAINT [PK_LookupCollarParameterFileFormats] PRIMARY KEY CLUSTERED 
-(
-	[Code] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[LookupCollarParameterFileFormats] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupGender](
-	[Sex] [varchar](7) NOT NULL,
- CONSTRAINT [PK_LookupSex] PRIMARY KEY CLUSTERED 
-(
-	[Sex] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[LookupGender] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[LookupQueryLayerServers](
-	[Location] [nvarchar](128) NOT NULL,
-	[Connection] [nvarchar](255) NOT NULL,
-	[Database] [sysname] NULL,
- CONSTRAINT [PK_QueryLayerServers] PRIMARY KEY CLUSTERED 
-(
-	[Location] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-GRANT SELECT ON [dbo].[LookupQueryLayerServers] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[LookupSpecies](
-	[Species] [varchar](32) NOT NULL,
- CONSTRAINT [PK_LookupSpecies] PRIMARY KEY CLUSTERED 
-(
-	[Species] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[LookupSpecies] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[Movements_In_CartoDB](
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[StartDate] [datetime2](7) NOT NULL,
-	[EndDate] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_Movements_In_CartoDB] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC,
-	[StartDate] ASC,
-	[EndDate] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT DELETE ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-GRANT INSERT ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-GRANT UPDATE ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[ProjectEditors](
-	[ProjectId] [varchar](16) NOT NULL,
-	[Editor] [sysname] NOT NULL,
- CONSTRAINT [PK_ProjectEditors] PRIMARY KEY CLUSTERED 
-(
-	[ProjectId] ASC,
-	[Editor] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-GRANT SELECT ON [dbo].[ProjectEditors] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ProjectExportBoundaries](
-	[Project] [nvarchar](16) NULL,
-	[Shape] [geography] NULL
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-GRANT SELECT ON [dbo].[ProjectExportBoundaries] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ProjectInvestigatorAssistants](
-	[ProjectInvestigator] [sysname] NOT NULL,
-	[Assistant] [sysname] NOT NULL,
- CONSTRAINT [PK_ProjectInvestigatorAssistants] PRIMARY KEY CLUSTERED 
-(
-	[ProjectInvestigator] ASC,
-	[Assistant] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-GRANT SELECT ON [dbo].[ProjectInvestigatorAssistants] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ProjectInvestigators](
-	[Login] [sysname] NOT NULL,
-	[Name] [nvarchar](100) NOT NULL,
-	[Email] [nvarchar](200) NOT NULL,
-	[Phone] [nvarchar](100) NOT NULL,
- CONSTRAINT [PK_ProjectInvestigators] PRIMARY KEY CLUSTERED 
-(
-	[Login] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-GRANT SELECT ON [dbo].[ProjectInvestigators] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Settings](
-	[Username] [sysname] NOT NULL,
-	[Key] [nvarchar](30) NOT NULL,
-	[Value] [nvarchar](500) NULL,
- CONSTRAINT [PK_Settings] PRIMARY KEY CLUSTERED 
-(
-	[Username] ASC,
-	[Key] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-GRANT SELECT ON [dbo].[Settings] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
-CREATE TABLE [dbo].[VhfLocations](
-	[LocationId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
-	[ProjectId] [varchar](16) NOT NULL,
-	[AnimalId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
-	[Location] [geography] NOT NULL
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeployments]
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeployments]
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_PlatformId] ON [dbo].[ArgosDownloads]
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_ProgamId] ON [dbo].[ArgosDownloads]
-(
-	[ProgramId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFilePlatformDates_FileId] ON [dbo].[ArgosFilePlatformDates]
-(
-	[FileId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFilePlatformDates_PlatformId] ON [dbo].[ArgosFilePlatformDates]
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[ArgosFileProcessingIssues]
-(
-	[FileId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues]
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues]
-(
-	[PlatformId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_ActivityCount] ON [dbo].[CollarDataTelonicsGen4]
-(
-	[ActivityCount] ASC
-)
-INCLUDE ( 	[FileId],
-	[AcquisitionStartTime]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_FileId_AcquisitionStartTime_Temperature] ON [dbo].[CollarDataTelonicsGen4]
-(
-	[FileId] ASC,
-	[AcquisitionStartTime] ASC,
-	[Temperature] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_Temperature] ON [dbo].[CollarDataTelonicsGen4]
-(
-	[Temperature] ASC
-)
-INCLUDE ( 	[FileId],
-	[AcquisitionStartTime]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Animals] ON [dbo].[CollarDeployments]
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Collars] ON [dbo].[CollarDeployments]
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFiles_Format] ON [dbo].[CollarFiles]
-(
-	[Format] ASC
-)
-INCLUDE ( 	[FileId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFiles_ParentFileId] ON [dbo].[CollarFiles]
-(
-	[ParentFileId] ASC
-)
-INCLUDE ( 	[FileId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFiles_Status] ON [dbo].[CollarFiles]
-(
-	[Status] ASC
-)
-INCLUDE ( 	[FileId],
-	[FileName],
-	[CollarManufacturer],
-	[CollarId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_Collar] ON [dbo].[CollarFixes]
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_FileId] ON [dbo].[CollarFixes]
-(
-	[FileId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_FixDate] ON [dbo].[CollarFixes]
-(
-	[FixDate] ASC
-)
-INCLUDE ( 	[CollarManufacturer],
-	[CollarId],
-	[Lat],
-	[Lon]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CollarFixes_HiddenBy] ON [dbo].[CollarFixes]
-(
-	[HiddenBy] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-CREATE UNIQUE NONCLUSTERED INDEX [IX_Locations_FixId] ON [dbo].[Locations]
-(
-	[FixId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE NONCLUSTERED INDEX [IX_Locations_Status] ON [dbo].[Locations]
-(
-	[Status] ASC
-)
-INCLUDE ( 	[ProjectId],
-	[AnimalId],
-	[FixDate]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-
-GO
-CREATE UNIQUE NONCLUSTERED INDEX [IX_Movements_EndDate] ON [dbo].[Movements]
-(
-	[ProjectId] ASC,
-	[AnimalId] ASC,
-	[EndDate] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_Movements_StartDate_EndDate] ON [dbo].[Movements]
-(
-	[StartDate] ASC,
-	[EndDate] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Gender] FOREIGN KEY([Gender])
-REFERENCES [dbo].[LookupGender] ([Sex])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Gender]
-GO
-ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Projects] FOREIGN KEY([ProjectId])
-REFERENCES [dbo].[Projects] ([ProjectId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Projects]
-GO
-ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Species] FOREIGN KEY([Species])
-REFERENCES [dbo].[LookupSpecies] ([Species])
-GO
-ALTER TABLE [dbo].[Animals] CHECK CONSTRAINT [FK_Animals_Species]
-GO
-ALTER TABLE [dbo].[ArgosDeployments]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDeployments_ArgosPlatforms] FOREIGN KEY([PlatformId])
-REFERENCES [dbo].[ArgosPlatforms] ([PlatformId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[ArgosDeployments] CHECK CONSTRAINT [FK_ArgosDeployments_ArgosPlatforms]
-GO
-ALTER TABLE [dbo].[ArgosDeployments]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDeployments_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
-REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[ArgosDeployments] CHECK CONSTRAINT [FK_ArgosDeployments_Collars]
-GO
-ALTER TABLE [dbo].[ArgosDownloads]  WITH CHECK ADD  CONSTRAINT [FK_ArgosDownloads_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-GO
-ALTER TABLE [dbo].[ArgosDownloads] CHECK CONSTRAINT [FK_ArgosDownloads_CollarFiles]
-GO
-ALTER TABLE [dbo].[ArgosFilePlatformDates]  WITH CHECK ADD  CONSTRAINT [FK_ArgosFilePlatformDates_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[ArgosFilePlatformDates] CHECK CONSTRAINT [FK_ArgosFilePlatformDates_CollarFiles]
-GO
-ALTER TABLE [dbo].[ArgosFileProcessingIssues]  WITH CHECK ADD  CONSTRAINT [FK_ArgosFileProcessingIssues_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[ArgosFileProcessingIssues] CHECK CONSTRAINT [FK_ArgosFileProcessingIssues_CollarFiles]
-GO
-ALTER TABLE [dbo].[ArgosFileProcessingIssues]  WITH CHECK ADD  CONSTRAINT [FK_ArgosFileProcessingIssues_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
-REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
-ON UPDATE CASCADE
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[ArgosFileProcessingIssues] CHECK CONSTRAINT [FK_ArgosFileProcessingIssues_Collars]
-GO
-ALTER TABLE [dbo].[ArgosPlatforms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPlatforms_ArgosPrograms] FOREIGN KEY([ProgramId])
-REFERENCES [dbo].[ArgosPrograms] ([ProgramId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[ArgosPlatforms] CHECK CONSTRAINT [FK_ArgosPlatforms_ArgosPrograms]
-GO
-ALTER TABLE [dbo].[ArgosPrograms]  WITH CHECK ADD  CONSTRAINT [FK_ArgosPrograms_ProjectInvestigators] FOREIGN KEY([Manager])
-REFERENCES [dbo].[ProjectInvestigators] ([Login])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[ArgosPrograms] CHECK CONSTRAINT [FK_ArgosPrograms_ProjectInvestigators]
-GO
-ALTER TABLE [dbo].[CollarDataArgosEmail]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataArgosEmail_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDataArgosEmail] CHECK CONSTRAINT [FK_CollarDataArgosEmail_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarDataArgosWebService]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataArgosWebService_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDataArgosWebService] CHECK CONSTRAINT [FK_CollarDataArgosWebService_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarDataDebevekFormat]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataDebevekFormat_CollarFiles] FOREIGN KEY([FileID])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDataDebevekFormat] CHECK CONSTRAINT [FK_CollarDataDebevekFormat_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarDataIridiumMail]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataIridiumMail_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDataIridiumMail] CHECK CONSTRAINT [FK_CollarDataIridiumMail_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarDataTelonicsGen3]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen3_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDataTelonicsGen3] CHECK CONSTRAINT [FK_CollarDataTelonicsGen3_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen3StoreOnBoard_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard] CHECK CONSTRAINT [FK_CollarDataTelonicsGen3StoreOnBoard_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarDataTelonicsGen4]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDataTelonicsGen4] CHECK CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Animals] FOREIGN KEY([ProjectId], [AnimalId])
-REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Animals]
-GO
-ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
-REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[CollarDeployments] CHECK CONSTRAINT [FK_CollarDeployments_Collars]
-GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_ArgosDeployments] FOREIGN KEY([ArgosDeploymentId])
-REFERENCES [dbo].[ArgosDeployments] ([DeploymentId])
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_ArgosDeployments]
-GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_CollarFiles] FOREIGN KEY([ParentFileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_CollarParameters] FOREIGN KEY([CollarParameterId])
-REFERENCES [dbo].[CollarParameters] ([ParameterId])
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_CollarParameters]
-GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
-REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_Collars]
-GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupCollarFileFormats] FOREIGN KEY([Format])
-REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupCollarFileFormats]
-GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_LookupFileStatus] FOREIGN KEY([Status])
-REFERENCES [dbo].[LookupFileStatus] ([Code])
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_LookupFileStatus]
-GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_ProjectInvestigators] FOREIGN KEY([Owner])
-REFERENCES [dbo].[ProjectInvestigators] ([Login])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_ProjectInvestigators]
-GO
-ALTER TABLE [dbo].[CollarFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarFiles_Projects] FOREIGN KEY([ProjectId])
-REFERENCES [dbo].[Projects] ([ProjectId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[CollarFiles] CHECK CONSTRAINT [FK_CollarFiles_Projects]
-GO
-ALTER TABLE [dbo].[CollarFixes]  WITH CHECK ADD  CONSTRAINT [FK_CollarFixes_CollarFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarFiles] ([FileId])
-GO
-ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_CollarFiles]
-GO
-ALTER TABLE [dbo].[CollarFixes]  WITH CHECK ADD  CONSTRAINT [FK_CollarFixes_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
-REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_Collars]
-GO
-ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus] FOREIGN KEY([Status])
-REFERENCES [dbo].[LookupFileStatus] ([Code])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus]
-GO
-ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupParameterFileFormats] FOREIGN KEY([Format])
-REFERENCES [dbo].[LookupCollarParameterFileFormats] ([Code])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_LookupParameterFileFormats]
-GO
-ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_ProjectInvestigators] FOREIGN KEY([Owner])
-REFERENCES [dbo].[ProjectInvestigators] ([Login])
-ON UPDATE CASCADE
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarParameterFiles] CHECK CONSTRAINT [FK_CollarParameterFiles_ProjectInvestigators]
-GO
-ALTER TABLE [dbo].[CollarParameters]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameters_CollarParameterFiles] FOREIGN KEY([FileId])
-REFERENCES [dbo].[CollarParameterFiles] ([FileId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarParameters] CHECK CONSTRAINT [FK_CollarParameters_CollarParameterFiles]
-GO
-ALTER TABLE [dbo].[CollarParameters]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameters_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
-REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
-ON UPDATE CASCADE
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CollarParameters] CHECK CONSTRAINT [FK_CollarParameters_Collars]
-GO
-ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
-REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
-GO
-ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_LookupCollarManufacturers]
-GO
-ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_LookupCollarModels] FOREIGN KEY([CollarManufacturer], [CollarModel])
-REFERENCES [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel])
-GO
-ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_LookupCollarModels]
-GO
-ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_Managers] FOREIGN KEY([Manager])
-REFERENCES [dbo].[ProjectInvestigators] ([Login])
-GO
-ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_Managers]
-GO
-ALTER TABLE [dbo].[Locations]  WITH CHECK ADD  CONSTRAINT [FK_Locations_Animals] FOREIGN KEY([ProjectId], [AnimalId])
-REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[Locations] CHECK CONSTRAINT [FK_Locations_Animals]
-GO
-ALTER TABLE [dbo].[Locations]  WITH CHECK ADD  CONSTRAINT [FK_Locations_CollarFixes] FOREIGN KEY([FixId])
-REFERENCES [dbo].[CollarFixes] ([FixId])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[Locations] CHECK CONSTRAINT [FK_Locations_CollarFixes]
-GO
-ALTER TABLE [dbo].[LookupCollarFileFormats]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarFileFormats_LookupCollarManufacturer] FOREIGN KEY([CollarManufacturer])
-REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
-GO
-ALTER TABLE [dbo].[LookupCollarFileFormats] CHECK CONSTRAINT [FK_LookupCollarFileFormats_LookupCollarManufacturer]
-GO
-ALTER TABLE [dbo].[LookupCollarFileHeaders]  WITH CHECK ADD  CONSTRAINT [FK_CollarFileHeaders_LookupCollarFileFormats] FOREIGN KEY([FileFormat])
-REFERENCES [dbo].[LookupCollarFileFormats] ([Code])
-GO
-ALTER TABLE [dbo].[LookupCollarFileHeaders] CHECK CONSTRAINT [FK_CollarFileHeaders_LookupCollarFileFormats]
-GO
-ALTER TABLE [dbo].[LookupCollarModels]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarModels_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
-REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
-GO
-ALTER TABLE [dbo].[LookupCollarModels] CHECK CONSTRAINT [FK_LookupCollarModels_LookupCollarManufacturers]
-GO
-ALTER TABLE [dbo].[LookupCollarParameterFileFormats]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarParameterFileFormats_LookupCollarManufacturer] FOREIGN KEY([CollarManufacturer])
-REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
-GO
-ALTER TABLE [dbo].[LookupCollarParameterFileFormats] CHECK CONSTRAINT [FK_LookupCollarParameterFileFormats_LookupCollarManufacturer]
-GO
-ALTER TABLE [dbo].[Movements]  WITH CHECK ADD  CONSTRAINT [FK_Movements_Animals] FOREIGN KEY([ProjectId], [AnimalId])
-REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
-ON UPDATE CASCADE
-GO
-ALTER TABLE [dbo].[Movements] CHECK CONSTRAINT [FK_Movements_Animals]
-GO
-ALTER TABLE [dbo].[ProjectEditors]  WITH CHECK ADD  CONSTRAINT [FK_ProjectEditors_Projects] FOREIGN KEY([ProjectId])
-REFERENCES [dbo].[Projects] ([ProjectId])
-ON UPDATE CASCADE
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[ProjectEditors] CHECK CONSTRAINT [FK_ProjectEditors_Projects]
-GO
-ALTER TABLE [dbo].[ProjectInvestigatorAssistants]  WITH CHECK ADD  CONSTRAINT [FK_ProjectInvestigatorAssistants_ProjectInvestigators] FOREIGN KEY([ProjectInvestigator])
-REFERENCES [dbo].[ProjectInvestigators] ([Login])
-ON UPDATE CASCADE
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[ProjectInvestigatorAssistants] CHECK CONSTRAINT [FK_ProjectInvestigatorAssistants_ProjectInvestigators]
-GO
-ALTER TABLE [dbo].[Projects]  WITH CHECK ADD  CONSTRAINT [FK_Projects_ProjectInvestigators] FOREIGN KEY([ProjectInvestigator])
-REFERENCES [dbo].[ProjectInvestigators] ([Login])
-GO
-ALTER TABLE [dbo].[Projects] CHECK CONSTRAINT [FK_Projects_ProjectInvestigators]
-GO
-ALTER TABLE [dbo].[LookupCollarFileFormats]  WITH CHECK ADD  CONSTRAINT [CK_LookupCollarFileFormats] CHECK  (([ArgosData]='Y' OR [ArgosData]='N'))
-GO
-ALTER TABLE [dbo].[LookupCollarFileFormats] CHECK CONSTRAINT [CK_LookupCollarFileFormats]
 GO
 SET ANSI_NULLS ON
 GO
