@@ -2980,14 +2980,26 @@ SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[VhfLocations](
 	[LocationId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
 	[ProjectId] [varchar](16) NOT NULL,
 	[AnimalId] [varchar](16) NOT NULL,
-	[FixDate] [datetime2](7) NOT NULL,
-	[Location] [geography] NOT NULL
+	[Species] [varchar](32) NULL,
+	[Gender] [varchar](7) NULL,
+	[GroupName] [nvarchar](500) NULL,
+	[Description] [nvarchar](2000) NULL,
+	[LocalFixDate] [datetime2](7) NOT NULL,
+	[Location] [geography] NOT NULL,
+ CONSTRAINT [PK_VhfLocations] PRIMARY KEY CLUSTERED 
+(
+	[LocationId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
 SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[VhfLocations] TO [Viewer] AS [dbo]
 GO
 SET ANSI_PADDING ON
 
@@ -3471,6 +3483,11 @@ ALTER TABLE [dbo].[Projects]  WITH CHECK ADD  CONSTRAINT [FK_Projects_ProjectInv
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[Projects] CHECK CONSTRAINT [FK_Projects_ProjectInvestigators]
+GO
+ALTER TABLE [dbo].[VhfLocations]  WITH CHECK ADD  CONSTRAINT [FK_VhfLocations_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+GO
+ALTER TABLE [dbo].[VhfLocations] CHECK CONSTRAINT [FK_VhfLocations_CollarFiles]
 GO
 ALTER TABLE [dbo].[LookupCollarFileFormats]  WITH CHECK ADD  CONSTRAINT [CK_LookupCollarFileFormats] CHECK  (([ArgosData]='Y' OR [ArgosData]='N'))
 GO
@@ -5034,6 +5051,10 @@ BEGIN
         END
     END
     
+    --IF @Format = 'J'  -- VHF Format
+    -- do not process in the database; uses a one-time external processor.
+
+
 END
 
 
@@ -5923,6 +5944,15 @@ BEGIN
     END
 
     --IF @Format = 'G'  -- Debevek Format
+    -- nothing to do for this format
+    
+    --IF @Format = 'H'  -- Gen4 Datalog (store-on-board) Format
+    -- nothing to do for this format
+    
+    --IF @Format = 'I'  -- Telonics Iridium Email Format
+    -- nothing to do for this format
+    
+    --IF @Format = 'J'  -- VHF Format
     -- nothing to do for this format
     
 END
@@ -9899,6 +9929,22 @@ GO
 CREATE SPATIAL INDEX [SIndex_Movements_Shape] ON [dbo].[Movements]
 (
 	[Shape]
+)USING  GEOGRAPHY_GRID 
+WITH (GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
+CELLS_PER_OBJECT = 16, PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ARITHABORT ON
+SET CONCAT_NULL_YIELDS_NULL ON
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+SET NUMERIC_ROUNDABORT OFF
+
+GO
+CREATE SPATIAL INDEX [SIndex_VHFLocations_Location] ON [dbo].[VhfLocations]
+(
+	[Location]
 )USING  GEOGRAPHY_GRID 
 WITH (GRIDS =(LEVEL_1 = MEDIUM,LEVEL_2 = MEDIUM,LEVEL_3 = MEDIUM,LEVEL_4 = MEDIUM), 
 CELLS_PER_OBJECT = 16, PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
