@@ -966,6 +966,23 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatI]
 GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatM](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[FixDate] [nvarchar](50) NULL,
+	[FixTime] [nvarchar](50) NULL,
+	[Lat] [nvarchar](50) NULL,
+	[Lon] [nvarchar](50) NULL,
+	[PDOP] [nvarchar](50) NULL,
+	[Fix] [nvarchar](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatM]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -2595,6 +2612,33 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
+CREATE TABLE [dbo].[CollarDataTelevilt](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[FixDate] [varchar](50) NULL,
+	[FixTime] [varchar](50) NULL,
+	[Lat] [varchar](50) NULL,
+	[Lon] [varchar](50) NULL,
+	[PDOP] [varchar](50) NULL,
+	[Fix] [varchar](50) NULL,
+ CONSTRAINT [PK_CollarDataTelevilt] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+GRANT SELECT ON [dbo].[CollarDataTelevilt] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[CollarDataTelonicsGen3](
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
@@ -3295,6 +3339,12 @@ REFERENCES [dbo].[CollarFiles] ([FileId])
 ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[CollarDataIridiumMail] CHECK CONSTRAINT [FK_CollarDataIridiumMail_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataTelevilt]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelevilt_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataTelevilt] CHECK CONSTRAINT [FK_CollarDataTelevilt_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsGen3]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataTelonicsGen3_CollarFiles] FOREIGN KEY([FileId])
 REFERENCES [dbo].[CollarFiles] ([FileId])
@@ -5060,6 +5110,14 @@ BEGIN
     --IF @Format = 'L'  -- Old Argos PPT CSV Format
     -- do not process in the database; uses a one-time external processor.
 
+    IF @Format = 'M'  -- Televilt Format
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataTelevilt] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataTelevilt] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatM] (@FileId) 
+        END
+    END
 
 END
 
@@ -5966,6 +6024,23 @@ BEGIN
     
     --IF @Format = 'L'  -- Old Argos PPT CSV Format
     -- nothing to do for this format
+
+    IF @Format = 'M'  -- Televilt Format
+    BEGIN
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+        SELECT I.FileId, I.LineNumber, C.CollarManufacturer, C.CollarId,
+               CONVERT(datetime2, I.[FixDate] + ' ' + ISNULL(I.[FixTime],'')),
+               CONVERT(float, I.Lat), CONVERT(float, I.Lon)
+          FROM dbo.CollarDataTelevilt as I INNER JOIN CollarFiles as F 
+            ON I.FileId = F.FileId
+    INNER JOIN Collars AS C
+            ON C.CollarManufacturer = F.CollarManufacturer AND C.CollarId = F.CollarId
+         WHERE F.[Status] = 'A'
+           AND I.FileId = @FileId
+           AND I.Lat IS NOT NULL AND I.Lon IS NOT NULL
+           AND I.[FixDate] IS NOT NULL
+           AND CONVERT(datetime2, I.[FixDate]) < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+    END
     
 END
 
