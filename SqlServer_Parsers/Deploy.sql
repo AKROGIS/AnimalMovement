@@ -226,12 +226,12 @@ GO
 CREATE FUNCTION [dbo].[ParseFormatM](@fileId [int])
 RETURNS  TABLE (
 	[LineNumber] [int] NULL,
-	[FixDate] [varchar](50) NULL,
-	[FixTime] [varchar](50) NULL,
-	[Lat] [varchar](50) NULL,
-	[Lon] [varchar](50) NULL,
-	[PDOP] [varchar](50) NULL,
-	[Fix] [varchar](50) NULL
+	[FixDate] [nvarchar](50) NULL,
+	[FixTime] [nvarchar](50) NULL,
+	[Lat] [nvarchar](50) NULL,
+	[Lon] [nvarchar](50) NULL,
+	[PDOP] [nvarchar](50) NULL,
+	[Fix] [nvarchar](50) NULL
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatM]
