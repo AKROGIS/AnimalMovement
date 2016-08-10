@@ -32,6 +32,7 @@ namespace SqlServer_Parsers
         //   G - Ed Debevek's Parent File Format, not parsed (children are parsed as 'B')
         //   H - Telonics Gen4 Store On Board, not parsed (children are parsed as 'C')
         //   I - Iridium Email Download Format; (contains info needed to select parameter file for processing)
+        //   M - Televilt Format
 
         // A - Telonics Store On Board Format
 
@@ -249,6 +250,24 @@ namespace SqlServer_Parsers
         public static IEnumerable ParseFormatI(SqlInt32 fileId)
         {
             return GetLines(fileId, 'I', Default_LineSelector, null);
+        }
+
+        // M - Televilt Format
+
+        [SqlFunction(
+            DataAccess = DataAccessKind.Read,
+            FillRowMethodName = "FormatM_FillRow",
+            TableDefinition =
+                @"[LineNumber] [int],
+	            [FixDate] [nvarchar](50),
+	            [FixTime] [nvarchar](50),
+	            [Lat] [nvarchar](50),
+	            [Lon] [nvarchar](50),
+	            [PDOP] [nvarchar](50),
+	            [Fix] [nvarchar](50)")]
+        public static IEnumerable ParseFormatM(SqlInt32 fileId)
+        {
+            return GetLines(fileId, 'M', Default_LineSelector, null);
         }
 
         #endregion
@@ -879,6 +898,28 @@ namespace SqlServer_Parsers
             cepRadius = parts[8];
             messageLength = parts[9];
             messageBytes = parts[10];
+        }
+
+
+        public static void FormatM_FillRow(
+            object inputObject,
+            out SqlInt32 lineNumber,
+            out SqlString date,
+            out SqlString time,
+            out SqlString lat,
+            out SqlString lon,
+            out SqlString pdop,
+            out SqlString fix)
+        {
+            var line = (Line)inputObject;
+            string[] parts = line.LineText.Split(',');
+            lineNumber = line.LineNumber;
+            date = parts[0];
+            time = parts[1];
+            lat = parts[2];
+            lon = parts[3];
+            pdop = parts[4];
+            fix = parts[5];
         }
 
 
