@@ -1,6 +1,5 @@
 import csv
 
-
 def make_csv(in_file, out_file):
     header = ['Id', 'Date', 'LC', 'IQ', 'Lat1', 'Lon1', 'Lat2', 'Lon2', 'Nb mes', 'Nb mes>-120dB',
               'Best level', 'Pass duration', 'NOPC', 'Calcul freq', 'Altitude']
@@ -30,6 +29,37 @@ def make_csv(in_file, out_file):
                 else:
                     line0 = line1
                     continue
+
+
+def make_csv2(in_file, out_file):
+    """Convert John's XLS data into database format L (as expected by the make_aws function below"""
+    header = ['Id', 'Date', 'LC', 'IQ', 'Lat1', 'Lon1', 'Lat2', 'Lon2', 'Nb mes', 'Nb mes>-120dB',
+              'Best level', 'Pass duration', 'NOPC', 'Calcul freq', 'Altitude']
+    with open(out_file, 'wb') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(header)
+        with open(in_file, 'rb') as data:
+            data.readline() # remove old header
+            csv_reader = csv.reader(data)
+            for row in csv_reader:
+                date = fix_date2(row[4], row[8])
+                loc_class = row[9] if row[9] else 'B'
+                new_row = [row[1],date,loc_class,row[10],row[11],row[12],row[13],row[14],row[17],
+                           row[18],row[19],row[20],row[21],row[22],row[23]]
+                csv_writer.writerow(new_row)
+
+
+def fix_date2(d,t):
+    """ ('3/14/2002','05:21:43') => '14.03.02 05:21:43'"""
+    m, d, y = d.split('/')
+    m = int(m)
+    d = int(d)
+    y = int(y) - 2000
+    if len(t) == 7:
+        t = '0' + t
+    if not ':' in t:
+        t = '{0:02d}:00:00'.format(int(t))
+    return "{0:02d}.{1:02d}.{2:02d} {3}".format(d, m, y, t)
 
 
 def fix_date(d):
@@ -108,8 +138,8 @@ def make_aws(in_file, out_file):
                 new_row[15] = lon
                 new_row[20] = fix_lat(row[6])  # Lat2
                 new_row[21] = fix_lon(row[7])  # Lon2
-                new_row[9] = int(row[8])  # Nb mes
-                new_row[10] = int(row[9])  # Nb mes>-120dB
+                new_row[9] = int('0' + row[8])  # Nb mes
+                new_row[10] = int('0' + row[9])  # Nb mes>-120dB
                 new_row[11] = fix_level(row[10])  # Best level
                 new_row[8] = fix_duration(row[11])  # Pass duration
                 new_row[24] = fix_nopc(row[12])  # NOPC
@@ -118,5 +148,6 @@ def make_aws(in_file, out_file):
                 new_row[38] = "06A88"  # junk to get it to process in the DB.
                 csv_writer.writerow(new_row)
 
-# make_csv(r'DataArchiveARGOS103103.txt', r'DataArchiveARGOS103103.csv')
-make_aws(r'DataArchiveARGOS103103.csv', r'DataArchiveARGOS103103.aws')
+make_csv2(r'AllArgosDataClean2.csv', r'Johns_HandCrafted_Argos_Data.csv')
+#make_csv(r'ArgosArchiveTest.txt', r'ArgosArchiveTest.csv')
+make_aws(r'Johns_HandCrafted_Argos_Data.csv', r'Johns_HandCrafted_Argos_Data.aws')
