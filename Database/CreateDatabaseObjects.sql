@@ -38,7 +38,7 @@ CREATE USER [NPS\KLReed] FOR LOGIN [NPS\KLReed] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\mdcameron] FOR LOGIN [NPS\mdcameron] WITH DEFAULT_SCHEMA=[dbo]
 GO
-CREATE USER [NPS\MLJohnson] FOR LOGIN [NPS\MLJohnson] WITH DEFAULT_SCHEMA=[dbo]
+CREATE USER [NPS\MLJohnson] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\msorum] FOR LOGIN [NPS\msorum] WITH DEFAULT_SCHEMA=[dbo]
 GO
@@ -139,6 +139,8 @@ GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\MLJohnson]
 GO
 ALTER ROLE [Editor] ADD MEMBER [NPS\msorum]
+GO
+ALTER ROLE [Investigator] ADD MEMBER [NPS\msorum]
 GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\msorum]
 GO
@@ -5855,7 +5857,7 @@ BEGIN
             AND I.FileId = @FileId
             AND I.GpsLatitude IS NOT NULL AND I.GpsLongitude IS NOT NULL
             AND I.[AcquisitionTime] IS NOT NULL
-            AND I.[AcquisitionTime] < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+            AND I.[AcquisitionTime] < dbo.UtcTime(F.UploadDate)  -- Ignore some bogus (obviously future) fix dates
     END
     
     IF @Format = 'D'  -- Telonics Gen3 Format
