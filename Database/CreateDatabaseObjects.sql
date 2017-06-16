@@ -2741,6 +2741,42 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[HomeRangeExclusions](
+	[Creator] [nvarchar](100) NOT NULL,
+	[FixId] [int] NOT NULL,
+	[ExclusionCode] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Creator] ASC,
+	[FixId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+GRANT SELECT ON [dbo].[HomeRangeExclusions] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[HomeRangeVhfExclusions](
+	[Creator] [nvarchar](100) NOT NULL,
+	[LocationId] [int] NOT NULL,
+	[ExclusionCode] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Creator] ASC,
+	[LocationId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+GRANT SELECT ON [dbo].[HomeRangeVhfExclusions] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[Locations_In_CartoDB](
 	[fixid] [int] NOT NULL,
  CONSTRAINT [PK_Locations_In_CartoDB] PRIMARY KEY CLUSTERED 
@@ -2864,6 +2900,22 @@ GO
 SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupGender] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[LookupHomeRangeExclusionCodes](
+	[Code] [int] NOT NULL,
+	[Description] [nvarchar](2000) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Code] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+GRANT SELECT ON [dbo].[LookupHomeRangeExclusionCodes] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -3478,6 +3530,26 @@ ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_Managers] FO
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_Managers]
+GO
+ALTER TABLE [dbo].[HomeRangeExclusions]  WITH CHECK ADD  CONSTRAINT [FK_HomeRangeExclusions_CollarFixes] FOREIGN KEY([FixId])
+REFERENCES [dbo].[CollarFixes] ([FixId])
+GO
+ALTER TABLE [dbo].[HomeRangeExclusions] CHECK CONSTRAINT [FK_HomeRangeExclusions_CollarFixes]
+GO
+ALTER TABLE [dbo].[HomeRangeExclusions]  WITH CHECK ADD  CONSTRAINT [FK_HomeRangeExclusions_LookupHomeRangeExclusionCodes] FOREIGN KEY([ExclusionCode])
+REFERENCES [dbo].[LookupHomeRangeExclusionCodes] ([Code])
+GO
+ALTER TABLE [dbo].[HomeRangeExclusions] CHECK CONSTRAINT [FK_HomeRangeExclusions_LookupHomeRangeExclusionCodes]
+GO
+ALTER TABLE [dbo].[HomeRangeVhfExclusions]  WITH CHECK ADD  CONSTRAINT [FK_HomeRangeVhfExclusions_LookupHomeRangeExclusionCodes] FOREIGN KEY([ExclusionCode])
+REFERENCES [dbo].[LookupHomeRangeExclusionCodes] ([Code])
+GO
+ALTER TABLE [dbo].[HomeRangeVhfExclusions] CHECK CONSTRAINT [FK_HomeRangeVhfExclusions_LookupHomeRangeExclusionCodes]
+GO
+ALTER TABLE [dbo].[HomeRangeVhfExclusions]  WITH CHECK ADD  CONSTRAINT [FK_HomeRangeVhfExclusions_VhfLocations] FOREIGN KEY([LocationId])
+REFERENCES [dbo].[VhfLocations] ([LocationId])
+GO
+ALTER TABLE [dbo].[HomeRangeVhfExclusions] CHECK CONSTRAINT [FK_HomeRangeVhfExclusions_VhfLocations]
 GO
 ALTER TABLE [dbo].[Locations]  WITH CHECK ADD  CONSTRAINT [FK_Locations_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
