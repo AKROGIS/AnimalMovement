@@ -43,8 +43,9 @@ ORDER BY FixDate DESC
 
 def send_smtp_email(mailhost, from_addr, to_addrs, subject, text):
     smtp = smtplib.SMTP(mailhost)
-    msg = "From: {0}\r\nTo: {1}\r\nSubject: {2}\r\n\r\n{3}".format(from_addr, ','.join(to_addrs), subject, text)
-    smtp.sendmail(from_addr, to_addrs, msg)
+    msg = u"From: {0}\r\nTo: {1}\r\nSubject: {2}\r\n\r\n{3}".format(from_addr, ','.join(to_addrs), subject, text)
+    # print(msg.encode('utf8'))
+    smtp.sendmail(from_addr, to_addrs, msg.encode('utf8'))
     smtp.quit()
 
 
@@ -64,7 +65,7 @@ def main():
         locations = format_locations(rows)
         # print(locations)
         subject = 'Last known locations for {0}'.format(project)
-        send_smtp_email(mailhost, sender, [user], subject, str(locations))
+        send_smtp_email(mailhost, sender, [user], subject, locations)
 
 
 main()
