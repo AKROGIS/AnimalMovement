@@ -61,8 +61,8 @@ def main():
         # print(project)
         sql = query.format(project)
         rows = connection.cursor().execute(sql).fetchall()
-        # locations = format_locations(rows)
-        print(locations)
+        locations = format_locations(rows)
+        # print(locations)
         subject = 'Last known locations for {0}'.format(project)
         send_smtp_email(mailhost, sender, [user], subject, str(locations))
 
