@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import pyodbc
 # pip install pyodbc
 import smtplib
@@ -28,9 +31,11 @@ conn_string = "DRIVER={SQL Server Native Client 11.0};" + \
 query = """
 SELECT AnimalId
       ,FixDate AS LastFixDate_UTC
-	  ,Location.Lat AS Lat_WGS84
-      ,Location.Long AS Lon_WGS84
-FROM [Animal_Movement].[dbo].[MostRecentLocations]
+--	  ,Location.Lat AS Lat_WGS84
+--      ,Location.Long AS Lon_WGS84
+	  ,cast(cast(abs(Location.Lat) as Int) AS NVARCHAR) + N'° ' + convert(NVARCHAR, (60 * (Location.Lat - cast(Location.Lat as Int)))) + ''' ' + (case when Location.Lat < 0 then 'S' ELSE 'N' END)   AS Lat_WGS84_DM
+      ,cast(cast(abs(Location.Long) as Int) AS NVARCHAR) + N'° ' + convert(NVARCHAR, (60 * (abs(Location.Long) - cast(abs(Location.Long) as Int)))) + ''' ' + (case when Location.Long < 0 then 'W' ELSE 'E' END) AS Lon_WGS84_DM
+      FROM [Animal_Movement].[dbo].[MostRecentLocations]
 WHERE ProjectId = '{0}' AND dateadd(day, -30, getdate()) < fixDate
 ORDER BY FixDate DESC
 """
@@ -44,9 +49,9 @@ def send_smtp_email(mailhost, from_addr, to_addrs, subject, text):
 
 
 def format_locations(rows):
-    results = "{0:8}\t{1:19}\t{2:9}\t{3}\r\n".format('AnimalId', 'LastFixDate_UTC', 'Lat_WGS84', 'Lon_WGS84')
+    results = "{0:8}\t{1:19}\t{2:9}\t{3}\r\n".format('AnimalId', 'LastFixDate_UTC', 'Lat_WGS84_DM', 'Lon_WGS84_DM')
     for row in rows:
-        results += "{0:8}\t{1}\t{2:.6f}\t{3}\r\n".format(row[0],row[1],row[2],row[3])
+        results += "{0:8}\t{1}\t{2}\t{3}\r\n".format(row[0],row[1],row[2],row[3])
     return results
 
 def main():
@@ -56,8 +61,8 @@ def main():
         # print(project)
         sql = query.format(project)
         rows = connection.cursor().execute(sql).fetchall()
-        locations = format_locations(rows)
-        # print(locations)
+        # locations = format_locations(rows)
+        print(locations)
         subject = 'Last known locations for {0}'.format(project)
         send_smtp_email(mailhost, sender, [user], subject, str(locations))
 
