@@ -73,3 +73,5 @@ packages/
 #python binary files
 *.pyc
 *.pyo
+#JetBrains (PyCharm) IDE
+.idea/
