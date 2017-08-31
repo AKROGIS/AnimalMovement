@@ -13,8 +13,6 @@ import smtplib
 
 updates = {
     'regan_sarwas@nps.gov': 'DENA_Wolves',
-    'dmiller@polarnet.com': 'DENA_Wolves',
-    'bridget_borg@nps.gov': 'DENA_Wolves',
 }
 
 # hostname of the SMTP email server
