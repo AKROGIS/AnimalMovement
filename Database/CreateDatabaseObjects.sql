@@ -2614,6 +2614,36 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
+CREATE TABLE [dbo].[CollarDataLotekIridium](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[Device_ID] [varchar](500) NULL,
+	[DateTime_GMT] [varchar](500) NULL,
+	[DateTime_Local] [varchar](500) NULL,
+	[Latitude] [varchar](500) NULL,
+	[Longitude] [varchar](500) NULL,
+	[Altitude] [varchar](500) NULL,
+	[Fix_Status] [varchar](500) NULL,
+	[DOP] [varchar](500) NULL,
+	[Temp_C] [varchar](500) NULL,
+	[Main_V] [varchar](500) NULL,
+	[Back_V] [varchar](500) NULL,
+ CONSTRAINT [PK_CollarDataLotekIridium] PRIMARY KEY CLUSTERED 
+(
+	[FileId] ASC,
+	[LineNumber] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[CollarDataTelevilt](
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
@@ -5193,6 +5223,16 @@ BEGIN
         END
     END
 
+   -- IF @Format = 'N'  -- Lotek Webservice format
+   -- This is likely a one time upload, so loaded the data manually.
+   -- BEGIN
+        -- only parse the data if it is not already in the file
+   --     IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataLotekIridium] WHERE [FileId] = @FileId)
+   --     BEGIN
+   --         INSERT INTO [dbo].[CollarDataLotekIridium] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatN] (@FileId) 
+   --     END
+   -- END
+
 END
 
 
@@ -6117,7 +6157,20 @@ BEGIN
            AND I.[FixDate] IS NOT NULL
            AND CONVERT(datetime2, I.[FixDate]) < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
     END
-    
+
+    IF @Format = 'N'  -- Lotek/IridiumFormat
+    BEGIN
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+        SELECT I.FileId, I.LineNumber, 'Lotek', I.Device_ID,
+              Convert(Datetime2(0), (CONVERT(datetime, CONVERT(decimal(12,7), I.DateTime_GMT)-2))),
+               CONVERT(float, I.Latitude), CONVERT(float, I.Longitude)
+          FROM dbo.CollarDataLotekIridium as I INNER JOIN CollarFiles as F 
+            ON I.FileId = F.FileId
+         WHERE F.[Status] = 'A'
+           AND I.FileId = @FileId
+           AND I.Latitude IS NOT NULL AND I.Longitude IS NOT NULL
+           AND I.DateTime_GMT IS NOT NULL
+    END
 END
 
 
