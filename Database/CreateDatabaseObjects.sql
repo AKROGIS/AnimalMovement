@@ -5717,10 +5717,11 @@ BEGIN
           WHERE F.[Status] = 'A'
             AND I.FileId = @FileId
             AND I.GpsLatitude IS NOT NULL AND I.GpsLongitude IS NOT NULL
-            AND I.[AcquisitionTime] IS NOT NULL
+            AND I.[AcquisitionTime] IS NOT NULL -- Note: GPSFixTime is often NULL while AcquisitionTime is not
             AND I.[AcquisitionTime] < dbo.UtcTime(F.UploadDate)  -- Ignore some bogus (obviously future) fix dates
-			AND -90 <= CONVERT(float, I.GpsLatitude) AND CONVERT(float, I.GpsLatitude) <= 90
-			AND -180 <= CONVERT(float, I.GpsLongitude) AND CONVERT(float, I.GpsLongitude) <= 180
+            AND (I.[ArgosLatitude] IS NULL OR I.[ArgosLatitude] NOT LIKE '%[%]')  -- Some Iridium/Telonics records are not normal location records (they have a percent in this column)
+            AND -90 <= CONVERT(float, I.GpsLatitude) AND CONVERT(float, I.GpsLatitude) <= 90
+            AND -180 <= CONVERT(float, I.GpsLongitude) AND CONVERT(float, I.GpsLongitude) <= 180
     END
     
     IF @Format = 'D'  -- Telonics Gen3 Format
