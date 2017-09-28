@@ -1,3 +1,13 @@
+/*    ==Scripting Parameters==
+
+    Source Server Version : SQL Server 2014 (12.0.5540)
+    Source Database Engine Edition : Microsoft SQL Server Enterprise Edition
+    Source Database Engine Type : Standalone SQL Server
+
+    Target Server Version : SQL Server 2017
+    Target Database Engine Edition : Microsoft SQL Server Standard Edition
+    Target Database Engine Type : Standalone SQL Server
+*/
 USE [Animal_Movement]
 GO
 CREATE USER [INPAKROMS53AIS\repl_distribution] WITH DEFAULT_SCHEMA=[dbo]
@@ -225,7 +235,6 @@ BEGIN
 END
 
 
-
 GO
 GRANT SELECT ON [dbo].[CollarFixSummary] TO [Viewer] AS [dbo]
 GO
@@ -252,7 +261,6 @@ BEGIN
 	
 	RETURN @Result
 END
-
 
 
 
@@ -344,7 +352,6 @@ BEGIN
 END
 
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -372,7 +379,6 @@ BEGIN
 	RETURN @Result
 END
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -399,7 +405,6 @@ BEGIN
 					  AND [StartDate] = @Time);
 	RETURN @Result
 END
-
 
 GO
 SET ANSI_NULLS OFF
@@ -446,7 +451,6 @@ BEGIN
 	RETURN 0
 END
 
-
 GO
 GRANT EXECUTE ON [dbo].[FileHasGen4Data] TO [Viewer] AS [dbo]
 GO
@@ -476,7 +480,6 @@ BEGIN
 	RETURN @Result
 END
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -503,7 +506,6 @@ BEGIN
 	                  AND [EndDate] = @Time);
 	RETURN @Result
 END
-
 
 GO
 SET ANSI_NULLS ON
@@ -532,7 +534,6 @@ BEGIN
 	RETURN @Result
 END
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -560,7 +561,6 @@ BEGIN
 		 
 	RETURN @Result
 END
-
 
 
 
@@ -605,7 +605,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[IsInvestigatorEditor] TO [Viewer] AS [dbo]
 GO
@@ -644,7 +643,6 @@ BEGIN
         RETURN 1	
     RETURN 0
 END
-
 
 
 
@@ -706,7 +704,6 @@ BEGIN
 END
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[NextAnimalId] TO [Editor] AS [dbo]
 GO
@@ -737,7 +734,6 @@ BEGIN
 			     ORDER BY [FixDate]);
 	RETURN @Result
 END
-
 
 GO
 SET ANSI_NULLS OFF
@@ -1010,7 +1006,6 @@ BEGIN
 	RETURN @Result
 END
 
-
 GO
 SET ANSI_NULLS OFF
 GO
@@ -1049,7 +1044,6 @@ BEGIN
 	RETURN @Result
 END
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -1076,7 +1070,6 @@ BEGIN
 					  AND [EndDate] = @Time);
 	RETURN @Result
 END
-
 
 GO
 SET ANSI_NULLS OFF
@@ -1110,8 +1103,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[CollarFixes](
 	[FixId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[HiddenBy] [int] NULL,
@@ -1127,9 +1118,6 @@ CREATE TABLE [dbo].[CollarFixes](
 	[FixId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarFixes] TO [Viewer] AS [dbo]
 GO
@@ -1169,15 +1157,12 @@ AS
 		AND C.FixDate = D.FixDate
         AND C.FixDate > DATEADD(DAY, -@LastXdays, GETDATE())
 
-
 GO
 GRANT SELECT ON [dbo].[ConflictingFixes] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[ArgosFileProcessingIssues](
 	[IssueId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
@@ -1193,9 +1178,6 @@ CREATE TABLE [dbo].[ArgosFileProcessingIssues](
 	[IssueId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[ArgosFileProcessingIssues] TO [Viewer] AS [dbo]
 GO
@@ -1203,18 +1185,16 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[CollarFiles](
 	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[FileName] [nvarchar](255) NOT NULL,
-	[UploadDate] [datetime2](7) NOT NULL CONSTRAINT [DF_CollarFiles_UploadDate]  DEFAULT (getdate()),
+	[UploadDate] [datetime2](7) NOT NULL,
 	[ProjectId] [varchar](16) NULL,
-	[UserName] [sysname] NOT NULL CONSTRAINT [DF_CollarFiles_UserName]  DEFAULT (original_login()),
+	[UserName] [sysname] NOT NULL,
 	[CollarManufacturer] [varchar](16) NULL,
 	[CollarId] [varchar](16) NULL,
 	[Format] [char](1) NOT NULL,
-	[Status] [char](1) NOT NULL CONSTRAINT [DF_CollarFiles_Status]  DEFAULT ('I'),
+	[Status] [char](1) NOT NULL,
 	[Contents] [varbinary](max) NOT NULL,
 	[ParentFileId] [int] NULL,
 	[Owner] [nvarchar](128) NULL,
@@ -1226,9 +1206,6 @@ CREATE TABLE [dbo].[CollarFiles](
 	[FileId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarFiles] TO [Viewer] AS [dbo]
 GO
@@ -1252,15 +1229,12 @@ AS
         AND C.FileId IS NULL
         AND I.FileId IS NULL
 
-
 GO
 GRANT SELECT ON [dbo].[DataLog_NeverProcessed] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[Locations](
 	[ProjectId] [varchar](16) NOT NULL,
@@ -1276,9 +1250,6 @@ CREATE TABLE [dbo].[Locations](
 	[FixDate] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[Locations] TO [Editor] AS [dbo]
 GO
@@ -1299,7 +1270,6 @@ INNER JOIN
 		WHERE    [Status] IS NULL
 		GROUP BY ProjectId, AnimalId) AS F
 ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
-
 
 GO
 GRANT SELECT ON [dbo].[MostRecentLocations] TO [Editor] AS [dbo]
@@ -1324,13 +1294,10 @@ INNER JOIN
 ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
 
 
-
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[Animals](
 	[ProjectId] [varchar](16) NOT NULL,
@@ -1346,9 +1313,6 @@ CREATE TABLE [dbo].[Animals](
 	[AnimalId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[Animals] TO [Viewer] AS [dbo]
 GO
@@ -1369,7 +1333,6 @@ INNER JOIN
 	WHERE [Status] IS NULL
 	GROUP BY A.ProjectId, A.AnimalId) AS F
 ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId and F.FixDate = L.FixDate
-
 GO
 GRANT SELECT ON [dbo].[LastLocationOfKnownMortalities] TO [Viewer] AS [dbo]
 GO
@@ -1397,15 +1360,12 @@ BEGIN
                          @Date)
 END
 
-
 GO
 GRANT EXECUTE ON [dbo].[DateTimeToOrdinal] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[Movements](
 	[ProjectId] [varchar](16) NOT NULL,
@@ -1423,9 +1383,6 @@ CREATE TABLE [dbo].[Movements](
 	[StartDate] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[Movements] TO [Editor] AS [dbo]
 GO
@@ -1435,12 +1392,10 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[Projects](
 	[ProjectId] [varchar](16) NOT NULL,
 	[ProjectName] [nvarchar](150) NOT NULL,
-	[ProjectInvestigator] [sysname] NOT NULL CONSTRAINT [DF_Projects_PrincipalInvestigator]  DEFAULT (original_login()),
+	[ProjectInvestigator] [sysname] NOT NULL,
 	[UnitCode] [char](4) NULL,
 	[Description] [nvarchar](2000) NULL,
  CONSTRAINT [PK_Projects] PRIMARY KEY CLUSTERED 
@@ -1448,9 +1403,6 @@ CREATE TABLE [dbo].[Projects](
 	[ProjectId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[Projects] TO [Viewer] AS [dbo]
 GO
@@ -1491,7 +1443,6 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[VelocityVectors_NPS] TO [Viewer] AS [dbo]
 GO
@@ -1521,7 +1472,6 @@ AS
 		 FROM     [dbo].[Locations]
 		 WHERE    ProjectId = @ProjectId AND AnimalId = @AnimalId AND Status IS NULL
 		 GROUP BY ProjectId, AnimalId
-
 
 
 GO
@@ -1558,7 +1508,6 @@ INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
 							  AND M.AnimalId  = A.AnimalId
 INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
      WHERE M.Distance = 0
-
 
 
 
@@ -1603,15 +1552,12 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[ValidLocations_NPS] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupFileStatus](
 	[Code] [char](1) NOT NULL,
@@ -1622,9 +1568,6 @@ CREATE TABLE [dbo].[LookupFileStatus](
 	[Code] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupFileStatus] TO [Viewer] AS [dbo]
 GO
@@ -1666,7 +1609,6 @@ AS
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[CollarFixesByFile] TO [Viewer] AS [dbo]
 GO
@@ -1699,7 +1641,6 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[InvalidLocations] TO [Viewer] AS [dbo]
 GO
@@ -1707,15 +1648,13 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[CollarParameterFiles](
 	[FileId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[Owner] [sysname] NOT NULL,
 	[FileName] [nvarchar](255) NOT NULL,
 	[Format] [char](1) NOT NULL,
-	[UploadDate] [datetime2](7) NOT NULL CONSTRAINT [DF_CollarParameterFiles_UploadDate]  DEFAULT (getdate()),
-	[UploadUser] [sysname] NOT NULL CONSTRAINT [DF_CollarParameterFiles_UploadUser]  DEFAULT (original_login()),
+	[UploadDate] [datetime2](7) NOT NULL,
+	[UploadUser] [sysname] NOT NULL,
 	[Contents] [varbinary](max) NOT NULL,
 	[Status] [char](1) NOT NULL,
 	[Sha1Hash]  AS ([dbo].[Sha1Hash]([Contents])) PERSISTED,
@@ -1724,9 +1663,6 @@ CREATE TABLE [dbo].[CollarParameterFiles](
 	[FileId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarParameterFiles] TO [Viewer] AS [dbo]
 GO
@@ -1745,15 +1681,12 @@ AS
 CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
       WHERE P.Format = 'A'
 
-
 GO
 GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[ArgosDeployments](
 	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
@@ -1767,17 +1700,12 @@ CREATE TABLE [dbo].[ArgosDeployments](
 	[DeploymentId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[ArgosDeployments] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarParameters](
 	[ParameterId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
@@ -1792,9 +1720,6 @@ CREATE TABLE [dbo].[CollarParameters](
 	[ParameterId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarParameters] TO [Viewer] AS [dbo]
 GO
@@ -1802,14 +1727,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[Collars](
 	[CollarManufacturer] [varchar](16) NOT NULL,
 	[CollarId] [varchar](16) NOT NULL,
 	[CollarModel] [varchar](24) NOT NULL,
-	[Manager] [sysname] NOT NULL CONSTRAINT [DF_Collars_Manager]  DEFAULT (original_login()),
-	[Owner] [nvarchar](100) NULL CONSTRAINT [DF_Collars_Owner]  DEFAULT ('NPS'),
+	[Manager] [sysname] NOT NULL,
+	[Owner] [nvarchar](100) NULL,
 	[SerialNumber] [varchar](100) NULL,
 	[Frequency] [float] NULL,
 	[HasGps] [bit] NOT NULL,
@@ -1821,9 +1744,6 @@ CREATE TABLE [dbo].[Collars](
 	[CollarId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[Collars] TO [Viewer] AS [dbo]
 GO
@@ -1884,7 +1804,6 @@ AS
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[GetTelonicsParametersForArgosDates] TO [Viewer] AS [dbo]
 GO
@@ -1924,7 +1843,6 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[ValidLocationsWithLatLong] TO [Editor] AS [dbo]
 GO
@@ -1947,7 +1865,6 @@ AS
       FROM dbo.Locations AS L
 INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
                               AND L.AnimalId  = A.AnimalId
-
 
 GO
 GRANT SELECT ON [dbo].[AnimalLocations] TO [Editor] AS [dbo]
@@ -1982,7 +1899,6 @@ INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
 							  AND L.AnimalId  = A.AnimalId
 INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
      WHERE L.Status IS NULL
-
 
 
 
@@ -2029,7 +1945,6 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[VelocityVectors] TO [Editor] AS [dbo]
 GO
@@ -2070,15 +1985,12 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[NoMovement_NPS] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataIridiumMail](
 	[FileId] [int] NOT NULL,
@@ -2100,9 +2012,6 @@ CREATE TABLE [dbo].[CollarDataIridiumMail](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataIridiumMail] TO [Viewer] AS [dbo]
 GO
@@ -2144,7 +2053,6 @@ AS
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[CollarParametersForIridiumDownload] TO [Viewer] AS [dbo]
 GO
@@ -2173,15 +2081,12 @@ AS
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[IDF_NeverProcessed] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[ArgosFilePlatformDates](
 	[ItemId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
@@ -2195,9 +2100,6 @@ CREATE TABLE [dbo].[ArgosFilePlatformDates](
 	[ItemId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[ArgosFilePlatformDates] TO [Viewer] AS [dbo]
 GO
@@ -2223,7 +2125,6 @@ AS
       WHERE C.FileId IS NULL
         AND I.FileId IS NULL
    GROUP BY T.FileId
-
 GO
 GRANT SELECT ON [dbo].[ArgosFile_NeverProcessed] TO [Viewer] AS [dbo]
 GO
@@ -2267,15 +2168,12 @@ AS
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[ArgosFile_NeedsPartialProcessing] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDeployments](
 	[DeploymentId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
@@ -2290,17 +2188,12 @@ CREATE TABLE [dbo].[CollarDeployments](
 	[DeploymentId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDeployments] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarManufacturers](
 	[CollarManufacturer] [varchar](16) NOT NULL,
@@ -2312,9 +2205,6 @@ CREATE TABLE [dbo].[LookupCollarManufacturers](
 	[CollarManufacturer] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupCollarManufacturers] TO [Viewer] AS [dbo]
 GO
@@ -2346,15 +2236,12 @@ AS
 
 
 
-
 GO
 GRANT SELECT ON [dbo].[AnimalFixesByFile] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard](
 	[FileId] [int] NOT NULL,
@@ -2383,9 +2270,6 @@ CREATE TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataTelonicsGen3StoreOnBoard] TO [Viewer] AS [dbo]
 GO
@@ -2405,7 +2289,6 @@ FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
                       dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
                       dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
 
-
 GO
 GRANT SELECT ON [dbo].[Gen3StoreOnBoardLocations] TO [Viewer] AS [dbo]
 GO
@@ -2413,10 +2296,8 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ArgosDownloads](
-	[TimeStamp] [datetime2](7) NOT NULL CONSTRAINT [DF_ArgosDownloads_TimeStamp]  DEFAULT (getdate()),
+	[TimeStamp] [datetime2](7) NOT NULL,
 	[ProgramId] [varchar](8) NULL,
 	[PlatformId] [varchar](8) NULL,
 	[Days] [int] NULL,
@@ -2427,17 +2308,12 @@ CREATE TABLE [dbo].[ArgosDownloads](
 	[TimeStamp] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[ArgosDownloads] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[ArgosPlatforms](
 	[PlatformId] [varchar](8) NOT NULL,
@@ -2450,17 +2326,12 @@ CREATE TABLE [dbo].[ArgosPlatforms](
 	[PlatformId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[ArgosPlatforms] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[ArgosPrograms](
 	[ProgramId] [varchar](8) NOT NULL,
@@ -2477,17 +2348,12 @@ CREATE TABLE [dbo].[ArgosPrograms](
 	[ProgramId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[ArgosPrograms] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataArgosEmail](
 	[FileId] [int] NOT NULL,
@@ -2507,17 +2373,12 @@ CREATE TABLE [dbo].[CollarDataArgosEmail](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataArgosEmail] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataArgosWebService](
 	[FileId] [int] NOT NULL,
@@ -2567,17 +2428,12 @@ CREATE TABLE [dbo].[CollarDataArgosWebService](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataArgosWebService] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataDebevekFormat](
 	[FileID] [int] NOT NULL,
@@ -2602,17 +2458,12 @@ CREATE TABLE [dbo].[CollarDataDebevekFormat](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataDebevekFormat] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataLotekIridium](
 	[FileId] [int] NOT NULL,
@@ -2634,15 +2485,10 @@ CREATE TABLE [dbo].[CollarDataLotekIridium](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataTelevilt](
 	[FileId] [int] NOT NULL,
@@ -2659,17 +2505,12 @@ CREATE TABLE [dbo].[CollarDataTelevilt](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataTelevilt] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataTelonicsGen3](
 	[FileId] [int] NOT NULL,
@@ -2689,17 +2530,12 @@ CREATE TABLE [dbo].[CollarDataTelonicsGen3](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataTelonicsGen3] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CollarDataTelonicsGen4](
 	[FileId] [int] NOT NULL,
@@ -2761,9 +2597,6 @@ CREATE TABLE [dbo].[CollarDataTelonicsGen4](
 	[LineNumber] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[CollarDataTelonicsGen4] TO [Viewer] AS [dbo]
 GO
@@ -2781,7 +2614,6 @@ PRIMARY KEY CLUSTERED
 	[FixId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
 GO
 GRANT SELECT ON [dbo].[HomeRangeExclusions] TO [Viewer] AS [dbo]
 GO
@@ -2799,7 +2631,6 @@ PRIMARY KEY CLUSTERED
 	[LocationId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
 GO
 GRANT SELECT ON [dbo].[HomeRangeVhfExclusions] TO [Viewer] AS [dbo]
 GO
@@ -2814,7 +2645,6 @@ CREATE TABLE [dbo].[Locations_In_CartoDB](
 	[fixid] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
 GO
 GRANT DELETE ON [dbo].[Locations_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
 GO
@@ -2828,8 +2658,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[LookupCollarFileFormats](
 	[Code] [char](1) NOT NULL,
 	[CollarManufacturer] [varchar](16) NOT NULL,
@@ -2842,17 +2670,12 @@ CREATE TABLE [dbo].[LookupCollarFileFormats](
 	[Code] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupCollarFileFormats] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarFileHeaders](
 	[Header] [nvarchar](450) NOT NULL,
@@ -2863,17 +2686,12 @@ CREATE TABLE [dbo].[LookupCollarFileHeaders](
 	[Header] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupCollarFileHeaders] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarModels](
 	[CollarManufacturer] [varchar](16) NOT NULL,
@@ -2884,17 +2702,12 @@ CREATE TABLE [dbo].[LookupCollarModels](
 	[CollarModel] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupCollarModels] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
 	[Code] [char](1) NOT NULL,
@@ -2906,17 +2719,12 @@ CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
 	[Code] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupCollarParameterFileFormats] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupGender](
 	[Sex] [varchar](7) NOT NULL,
@@ -2925,9 +2733,6 @@ CREATE TABLE [dbo].[LookupGender](
 	[Sex] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupGender] TO [Viewer] AS [dbo]
 GO
@@ -2943,7 +2748,6 @@ PRIMARY KEY CLUSTERED
 	[Code] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
 GO
 GRANT SELECT ON [dbo].[LookupHomeRangeExclusionCodes] TO [Viewer] AS [dbo]
 GO
@@ -2960,15 +2764,12 @@ CREATE TABLE [dbo].[LookupQueryLayerServers](
 	[Location] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
 GO
 GRANT SELECT ON [dbo].[LookupQueryLayerServers] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[LookupSpecies](
 	[Species] [varchar](32) NOT NULL,
@@ -2977,17 +2778,12 @@ CREATE TABLE [dbo].[LookupSpecies](
 	[Species] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[LookupSpecies] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[Movements_In_CartoDB](
 	[ProjectId] [varchar](16) NOT NULL,
@@ -3002,9 +2798,6 @@ CREATE TABLE [dbo].[Movements_In_CartoDB](
 	[EndDate] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT DELETE ON [dbo].[Movements_In_CartoDB] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
 GO
@@ -3018,8 +2811,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ProjectEditors](
 	[ProjectId] [varchar](16) NOT NULL,
 	[Editor] [sysname] NOT NULL,
@@ -3029,9 +2820,6 @@ CREATE TABLE [dbo].[ProjectEditors](
 	[Editor] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[ProjectEditors] TO [Viewer] AS [dbo]
 GO
@@ -3043,7 +2831,6 @@ CREATE TABLE [dbo].[ProjectExportBoundaries](
 	[Project] [nvarchar](16) NULL,
 	[Shape] [geography] NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
 GO
 GRANT SELECT ON [dbo].[ProjectExportBoundaries] TO [Viewer] AS [dbo]
 GO
@@ -3060,7 +2847,6 @@ CREATE TABLE [dbo].[ProjectInvestigatorAssistants](
 	[Assistant] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
 GO
 GRANT SELECT ON [dbo].[ProjectInvestigatorAssistants] TO [Viewer] AS [dbo]
 GO
@@ -3078,7 +2864,6 @@ CREATE TABLE [dbo].[ProjectInvestigators](
 	[Login] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
 GO
 GRANT SELECT ON [dbo].[ProjectInvestigators] TO [Viewer] AS [dbo]
 GO
@@ -3096,15 +2881,12 @@ CREATE TABLE [dbo].[Settings](
 	[Key] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-
 GO
 GRANT SELECT ON [dbo].[Settings] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[VhfLocations](
 	[LocationId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
@@ -3123,14 +2905,10 @@ CREATE TABLE [dbo].[VhfLocations](
 	[LocationId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-
-GO
-SET ANSI_PADDING OFF
 GO
 GRANT SELECT ON [dbo].[VhfLocations] TO [Viewer] AS [dbo]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeployments]
 (
@@ -3139,7 +2917,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_Collars] ON [dbo].[ArgosDeploymen
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeployments]
 (
@@ -3147,7 +2924,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosDeployments_PlatformId] ON [dbo].[ArgosDeploy
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_PlatformId] ON [dbo].[ArgosDownloads]
 (
@@ -3155,7 +2931,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_PlatformId] ON [dbo].[ArgosDownload
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_ArgosDownloads_ProgamId] ON [dbo].[ArgosDownloads]
 (
@@ -3168,7 +2943,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosFilePlatformDates_FileId] ON [dbo].[ArgosFile
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_ArgosFilePlatformDates_PlatformId] ON [dbo].[ArgosFilePlatformDates]
 (
@@ -3181,7 +2955,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_CollarFiles] ON [dbo].[A
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[ArgosFileProcessingIssues]
 (
@@ -3190,7 +2963,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_Collars] ON [dbo].[Argos
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[ArgosFileProcessingIssues]
 (
@@ -3198,7 +2970,6 @@ CREATE NONCLUSTERED INDEX [IX_ArgosFileProcessingIssues_PlatformId] ON [dbo].[Ar
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_ActivityCount] ON [dbo].[CollarDataTelonicsGen4]
 (
@@ -3208,7 +2979,6 @@ INCLUDE ( 	[FileId],
 	[AcquisitionStartTime]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_FileId_AcquisitionStartTime_Temperature] ON [dbo].[CollarDataTelonicsGen4]
 (
@@ -3218,7 +2988,6 @@ CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_FileId_AcquisitionStartTime
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarDataTelonicsGen4_Temperature] ON [dbo].[CollarDataTelonicsGen4]
 (
@@ -3228,7 +2997,6 @@ INCLUDE ( 	[FileId],
 	[AcquisitionStartTime]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Animals] ON [dbo].[CollarDeployments]
 (
@@ -3237,7 +3005,6 @@ CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Animals] ON [dbo].[CollarDeploym
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Collars] ON [dbo].[CollarDeployments]
 (
@@ -3246,7 +3013,6 @@ CREATE NONCLUSTERED INDEX [IX_CollarDeployments_Collars] ON [dbo].[CollarDeploym
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarFiles_Format] ON [dbo].[CollarFiles]
 (
@@ -3261,7 +3027,6 @@ CREATE NONCLUSTERED INDEX [IX_CollarFiles_ParentFileId] ON [dbo].[CollarFiles]
 INCLUDE ( 	[FileId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarFiles_Status] ON [dbo].[CollarFiles]
 (
@@ -3273,7 +3038,6 @@ INCLUDE ( 	[FileId],
 	[CollarId]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarFixes_Collar] ON [dbo].[CollarFixes]
 (
@@ -3287,7 +3051,6 @@ CREATE NONCLUSTERED INDEX [IX_CollarFixes_FileId] ON [dbo].[CollarFixes]
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_CollarFixes_FixDate] ON [dbo].[CollarFixes]
 (
@@ -3309,7 +3072,6 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_Locations_FixId] ON [dbo].[Locations]
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE NONCLUSTERED INDEX [IX_Locations_Status] ON [dbo].[Locations]
 (
@@ -3320,7 +3082,6 @@ INCLUDE ( 	[ProjectId],
 	[FixDate]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 SET ANSI_PADDING ON
-
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Movements_EndDate] ON [dbo].[Movements]
 (
@@ -3334,6 +3095,24 @@ CREATE NONCLUSTERED INDEX [IX_Movements_StartDate_EndDate] ON [dbo].[Movements]
 	[StartDate] ASC,
 	[EndDate] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[ArgosDownloads] ADD  CONSTRAINT [DF_ArgosDownloads_TimeStamp]  DEFAULT (getdate()) FOR [TimeStamp]
+GO
+ALTER TABLE [dbo].[CollarFiles] ADD  CONSTRAINT [DF_CollarFiles_UploadDate]  DEFAULT (getdate()) FOR [UploadDate]
+GO
+ALTER TABLE [dbo].[CollarFiles] ADD  CONSTRAINT [DF_CollarFiles_UserName]  DEFAULT (original_login()) FOR [UserName]
+GO
+ALTER TABLE [dbo].[CollarFiles] ADD  CONSTRAINT [DF_CollarFiles_Status]  DEFAULT ('I') FOR [Status]
+GO
+ALTER TABLE [dbo].[CollarParameterFiles] ADD  CONSTRAINT [DF_CollarParameterFiles_UploadDate]  DEFAULT (getdate()) FOR [UploadDate]
+GO
+ALTER TABLE [dbo].[CollarParameterFiles] ADD  CONSTRAINT [DF_CollarParameterFiles_UploadUser]  DEFAULT (original_login()) FOR [UploadUser]
+GO
+ALTER TABLE [dbo].[Collars] ADD  CONSTRAINT [DF_Collars_Manager]  DEFAULT (original_login()) FOR [Manager]
+GO
+ALTER TABLE [dbo].[Collars] ADD  CONSTRAINT [DF_Collars_Owner]  DEFAULT ('NPS') FOR [Owner]
+GO
+ALTER TABLE [dbo].[Projects] ADD  CONSTRAINT [DF_Projects_PrincipalInvestigator]  DEFAULT (original_login()) FOR [ProjectInvestigator]
 GO
 ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Gender] FOREIGN KEY([Gender])
 REFERENCES [dbo].[LookupGender] ([Sex])
@@ -3685,7 +3464,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[Animal_Delete] TO [Editor] AS [dbo]
 GO
@@ -3734,7 +3512,6 @@ BEGIN
 		         @MortalityDate, nullif(@GroupName,''), nullif(@Description,''));
 
 END
-
 
 
 
@@ -3828,7 +3605,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[Animal_Update] TO [Editor] AS [dbo]
 GO
@@ -3892,7 +3668,6 @@ BEGIN
     DELETE FROM dbo.ArgosDeployments WHERE [DeploymentId] = @DeploymentId
 
 END
-
 
 
 GO
@@ -3960,7 +3735,6 @@ BEGIN
                                   VALUES (@PlatformId,  @CollarManufacturer,  @CollarId,  @StartDate,  @EndDate)
     SET @DeploymentId = SCOPE_IDENTITY()
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[ArgosDeployment_Insert] TO [Editor] AS [dbo]
@@ -4079,7 +3853,6 @@ BEGIN
                                   WHERE [DeploymentId] = @DeploymentId;
 END
 
-
 GO
 GRANT EXECUTE ON [dbo].[ArgosDeployment_Update] TO [Editor] AS [dbo]
 GO
@@ -4113,7 +3886,6 @@ BEGIN
 		 VALUES (@ProgramId, @PlatformId, @Days, @FileId, @ErrorMessage)
 
 END
-
 
 
 
@@ -4168,7 +3940,6 @@ BEGIN
     END CATCH
 
 END
-
 
 
 GO
@@ -4250,7 +4021,6 @@ BEGIN
     END CATCH
 
 END
-
 
 
 
@@ -4347,7 +4117,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[ArgosFile_ProcessPlatform] TO [ArgosProcessor] AS [dbo]
 GO
@@ -4409,7 +4178,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[ArgosFile_UnProcessPlatform] TO [ArgosProcessor] AS [dbo]
 GO
@@ -4454,7 +4222,6 @@ BEGIN
 				([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId], [FirstTransmission], [LastTransmission])
 		 VALUES (@FileId,  @Issue,  @PlatformId,  @CollarManufacturer,  @CollarId,  @FirstTransmission,  @LastTransmission)
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[ArgosFileProcessingIssues_Insert] TO [ArgosProcessor] AS [dbo]
@@ -4509,7 +4276,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[ArgosPlatform_Delete] TO [Editor] AS [dbo]
 GO
@@ -4560,7 +4326,6 @@ BEGIN
     INSERT INTO [dbo].[ArgosPlatforms] ([PlatformId], [ProgramId], [DisposalDate], [Notes], [Active])
                                 VALUES (@PlatformId, @ProgramId, @DisposalDate, @Notes, @Active)
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[ArgosPlatform_Insert] TO [Editor] AS [dbo]
@@ -4689,7 +4454,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[ArgosPlatform_Update] TO [Editor] AS [dbo]
 GO
@@ -4736,7 +4500,6 @@ BEGIN
 
     DELETE FROM dbo.ArgosPrograms WHERE [ProgramId] = @ProgramId
 END
-
 
 
 
@@ -4796,7 +4559,6 @@ BEGIN
                                VALUES (@ProgramId, @ProgramName, @UserName, @Password,
                                        @Manager, @StartDate, @EndDate, @Notes, @Active)
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[ArgosProgram_Insert] TO [Editor] AS [dbo]
@@ -4904,7 +4666,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[ArgosProgram_Update] TO [Editor] AS [dbo]
 GO
@@ -4949,7 +4710,6 @@ BEGIN
     DELETE FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
 
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[Collar_Delete] TO [Editor] AS [dbo]
@@ -5014,7 +4774,6 @@ BEGIN
                              @SerialNumber, @Frequency, @HasGps, @Notes)
 
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[Collar_Insert] TO [Editor] AS [dbo]
@@ -5109,7 +4868,6 @@ BEGIN
                      WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
 
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[Collar_Update] TO [Editor] AS [dbo]
@@ -5237,7 +4995,6 @@ END
 
 
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -5305,7 +5062,6 @@ BEGIN
     DELETE FROM dbo.CollarDeployments WHERE DeploymentId = @DeploymentId
 
 END
-
 
 
 GO
@@ -5386,7 +5142,6 @@ BEGIN
     SET @DeploymentId = SCOPE_IDENTITY()
 
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[CollarDeployment_Insert] TO [Editor] AS [dbo]
@@ -5532,7 +5287,6 @@ BEGIN
 END
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[CollarDeployment_Update] TO [Editor] AS [dbo]
 GO
@@ -5592,7 +5346,6 @@ BEGIN
     DELETE FROM [dbo].[CollarFiles] WHERE [FileId] = @FileId;
 
 END
-
 
 
 GO
@@ -5658,7 +5411,6 @@ BEGIN
      WHERE [FileId] = @FileId
 
 END
-
 
 
 
@@ -5754,7 +5506,6 @@ BEGIN
     SET @FileId = SCOPE_IDENTITY();
     SELECT @UploadDate = [UploadDate], @UserName = [UserName], @Sha1Hash = [Sha1Hash] FROM dbo.CollarFiles WHERE FileId = @FileId
 END
-
 
 
 GO
@@ -5862,7 +5613,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[CollarFile_Update] TO [Editor] AS [dbo]
 GO
@@ -5887,7 +5637,6 @@ BEGIN
 
 	DELETE FROM [dbo].[CollarFixes] WHERE [FileID] = @FileId;
 END
-
 
 GO
 SET ANSI_NULLS ON
@@ -6175,7 +5924,6 @@ END
 
 
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -6278,7 +6026,6 @@ END
 
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[CollarFixes_UpdateUnhideFix] TO [Editor] AS [dbo]
 GO
@@ -6341,7 +6088,6 @@ BEGIN
 
 END
 
-
 GO
 GRANT EXECUTE ON [dbo].[CollarParameter_Delete] TO [Editor] AS [dbo]
 GO
@@ -6402,7 +6148,6 @@ BEGIN
                               VALUES (@CollarManufacturer,  @CollarId,  @FileId,  @Gen3Period,  @StartDate,  @EndDate)
     SET @ParameterId = SCOPE_IDENTITY()
 END
-
 
 
 GO
@@ -6513,7 +6258,6 @@ BEGIN
 END
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[CollarParameter_Update] TO [Editor] AS [dbo]
 GO
@@ -6564,7 +6308,6 @@ BEGIN
     
     DELETE FROM dbo.CollarParameterFiles WHERE FileId = @FileId;
 END
-
 
 
 GO
@@ -6624,7 +6367,6 @@ BEGIN
     SELECT @UploadDate = [UploadDate], @UploadUser = [UploadUser], @Sha1Hash = [Sha1Hash] FROM dbo.CollarParameterFiles WHERE FileId = @FileId
 
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[CollarParameterFile_Insert] TO [Editor] AS [dbo]
@@ -6716,7 +6458,6 @@ BEGIN
 END
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[CollarParameterFile_Update] TO [Editor] AS [dbo]
 GO
@@ -6760,7 +6501,6 @@ BEGIN
 	EXEC [dbo].[Movement_Insert] @Project, @Animal, @Time, @NextTime; 
 END
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -6786,7 +6526,6 @@ BEGIN
 	EXEC [dbo].[Movement_Delete] @Project, @Animal, @Time, @NextTime; 
 	EXEC [dbo].[Movement_Insert] @Project, @Animal, @PrevTime, @NextTime; 
 END
-
 
 GO
 SET ANSI_NULLS ON
@@ -6826,7 +6565,6 @@ BEGIN
        AND [FixDate] = @FixDate;
 END
 
-
 GO
 GRANT EXECUTE ON [dbo].[Location_UpdateStatus] TO [Editor] AS [dbo]
 GO
@@ -6850,7 +6588,6 @@ BEGIN
 	        AND [StartDate] = @PrevTime
 	        AND [EndDate] = @NextTime;
 END
-
 
 GO
 SET ANSI_NULLS ON
@@ -6889,7 +6626,6 @@ BEGIN
 			EXEC [dbo].[Movement_Insert_Sub] @Project, @Animal, @PrevTime, @NextTime, @PrevPoint, @NextPoint;
 	END
 END
-
 
 GO
 SET ANSI_NULLS ON
@@ -6958,7 +6694,6 @@ END
 
 
 
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -7014,7 +6749,6 @@ BEGIN
 END
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[Project_Delete] TO [Editor] AS [dbo]
 GO
@@ -7067,7 +6801,6 @@ BEGIN
          VALUES              (@ProjectId,  @ProjectName,  @ProjectInvestigator,  @UnitCode,  @Description)
 
 END
-
 
 
 GO
@@ -7171,7 +6904,6 @@ BEGIN
 
 END
 
-
 GO
 GRANT EXECUTE ON [dbo].[Project_Update] TO [Editor] AS [dbo]
 GO
@@ -7216,7 +6948,6 @@ BEGIN
 	DELETE FROM [dbo].[ProjectEditors] WHERE ProjectId = @ProjectId AND Editor = @Editor
 	
 END
-
 
 GO
 GRANT EXECUTE ON [dbo].[ProjectEditor_Delete] TO [Investigator] AS [dbo]
@@ -7299,7 +7030,6 @@ BEGIN
 	END CATCH
 END
 
-
 GO
 GRANT EXECUTE ON [dbo].[ProjectEditor_Insert] TO [Investigator] AS [dbo]
 GO
@@ -7357,7 +7087,6 @@ BEGIN
 		END
 	END
 END
-
 
 GO
 SET ANSI_NULLS ON
@@ -7472,7 +7201,6 @@ BEGIN
 
 END
 
-
 GO
 GRANT EXECUTE ON [dbo].[ProjectInvestigator_Update] TO [Investigator] AS [dbo]
 GO
@@ -7518,7 +7246,6 @@ BEGIN
     DELETE FROM [dbo].[ProjectInvestigatorAssistants] WHERE ProjectInvestigator = @ProjectInvestigator AND Assistant = @Assistant
     
 END
-
 
 
 
@@ -7605,7 +7332,6 @@ BEGIN
 END
 
 
-
 GO
 GRANT EXECUTE ON [dbo].[ProjectInvestigatorAssistant_Insert] TO [Investigator] AS [dbo]
 GO
@@ -7656,7 +7382,6 @@ BEGIN
         INSERT [dbo].[Settings] ([Username], [Key], [Value]) VALUES (@Caller, @Key, @Value) 
 
 END
-
 
 
 GO
@@ -7722,7 +7447,6 @@ CREATE PROCEDURE [dbo].[Utility_RethrowError] AS
         @ErrorProcedure, -- parameter: original error procedure name.
         @ErrorLine       -- parameter: original error line number.
         );
-
 GO
 SET ANSI_NULLS ON
 GO
@@ -7813,7 +7537,8 @@ BEGIN
 	END
 END
 
-
+GO
+ALTER TABLE [dbo].[Animals] ENABLE TRIGGER [AfterAnimalUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -7853,7 +7578,8 @@ BEGIN
        AND (D.StartDate <= F.FixDate  OR D.StartDate IS NULL)
 END
 
-
+GO
+ALTER TABLE [dbo].[ArgosDeployments] ENABLE TRIGGER [AfterArgosDeploymentDelete]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8006,7 +7732,8 @@ BEGIN
 
 END
 
-
+GO
+ALTER TABLE [dbo].[ArgosDeployments] ENABLE TRIGGER [AfterArgosDeploymentInsert]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8255,7 +7982,8 @@ BEGIN
 
 END
 
-
+GO
+ALTER TABLE [dbo].[ArgosDeployments] ENABLE TRIGGER [AfterArgosDeploymentUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8303,7 +8031,8 @@ END
 
 
 
-
+GO
+ALTER TABLE [dbo].[ArgosDownloads] ENABLE TRIGGER [AfterArgosDownloadsInsert]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8381,7 +8110,8 @@ END
 
 
 
-
+GO
+ALTER TABLE [dbo].[ArgosPlatforms] ENABLE TRIGGER [AfterArgosPlatformUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8407,7 +8137,8 @@ BEGIN
 			  AND (D.RetrievalDate IS NULL OR L.FixDate <= D.RetrievalDate)
 END
 
-
+GO
+ALTER TABLE [dbo].[CollarDeployments] ENABLE TRIGGER [AfterCollarDeploymentDelete]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8508,7 +8239,8 @@ BEGIN
 			AND (C.DisposalDate IS NULL OR F.FixDate <= C.DisposalDate)
 END
 
-
+GO
+ALTER TABLE [dbo].[CollarDeployments] ENABLE TRIGGER [AfterCollarDeploymentInsert]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8678,6 +8410,8 @@ Add Location for F3, but not F1 or F2
 
 END
 GO
+ALTER TABLE [dbo].[CollarDeployments] ENABLE TRIGGER [AfterCollarDeploymentUpdate]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -8809,7 +8543,8 @@ END
 
 
 
-
+GO
+ALTER TABLE [dbo].[CollarFiles] ENABLE TRIGGER [AfterCollarFileInsert]
 GO
 SET ANSI_NULLS ON
 GO
@@ -8983,7 +8718,8 @@ BEGIN
 
 END
 
-
+GO
+ALTER TABLE [dbo].[CollarFiles] ENABLE TRIGGER [AfterCollarFileUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9046,7 +8782,8 @@ END
 
 
 
-
+GO
+ALTER TABLE [dbo].[CollarFiles] ENABLE TRIGGER [InsteadOfCollarFileDelete]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9134,7 +8871,8 @@ BEGIN
 END
 
 
-
+GO
+ALTER TABLE [dbo].[CollarFixes] ENABLE TRIGGER [InsteadOfCollarFixesDelete]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9259,7 +8997,8 @@ END
 
 
 
-
+GO
+ALTER TABLE [dbo].[CollarFixes] ENABLE TRIGGER [InsteadOfCollarFixesInsert]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9328,7 +9067,8 @@ IF UPDATE ([HiddenBy])
 
 
 
-
+GO
+ALTER TABLE [dbo].[CollarFixes] ENABLE TRIGGER [UpdateLocationAfterCollarFixesUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9395,7 +9135,8 @@ BEGIN
 
 END
 
-
+GO
+ALTER TABLE [dbo].[CollarParameterFiles] ENABLE TRIGGER [AfterCollarParameterFileUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9511,7 +9252,8 @@ BEGIN
 
 END
 
-
+GO
+ALTER TABLE [dbo].[CollarParameters] ENABLE TRIGGER [AfterCollarParameterInsert]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9717,7 +9459,8 @@ BEGIN
     END
 END
 
-
+GO
+ALTER TABLE [dbo].[CollarParameters] ENABLE TRIGGER [AfterCollarParameterUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9814,7 +9557,8 @@ BEGIN
 END
 
 
-
+GO
+ALTER TABLE [dbo].[Collars] ENABLE TRIGGER [AfterCollarUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9877,7 +9621,8 @@ END
 
 
 
-
+GO
+ALTER TABLE [dbo].[Locations] ENABLE TRIGGER [UpdateMovementAfterLocationDelete]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9923,7 +9668,8 @@ END
 
 
 
-
+GO
+ALTER TABLE [dbo].[Locations] ENABLE TRIGGER [UpdateMovementAfterLocationInsert]
 GO
 SET ANSI_NULLS ON
 GO
@@ -9978,7 +9724,8 @@ IF UPDATE ([Status])
 
 
 
-
+GO
+ALTER TABLE [dbo].[Locations] ENABLE TRIGGER [UpdateMovementAfterLocationUpdate]
 GO
 SET ANSI_NULLS ON
 GO
@@ -10046,7 +9793,8 @@ BEGIN
 END
 
 
-
+GO
+ALTER TABLE [dbo].[ProjectEditors] ENABLE TRIGGER [AfterProjectEditorDelete]
 GO
 SET ANSI_NULLS ON
 GO
@@ -10115,7 +9863,8 @@ END
 
 
 
-
+GO
+ALTER TABLE [dbo].[ProjectInvestigatorAssistants] ENABLE TRIGGER [AfterProjectInvestigatorAssistantDelete]
 GO
 SET ARITHABORT ON
 SET CONCAT_NULL_YIELDS_NULL ON
@@ -10124,7 +9873,6 @@ SET ANSI_NULLS ON
 SET ANSI_PADDING ON
 SET ANSI_WARNINGS ON
 SET NUMERIC_ROUNDABORT OFF
-
 GO
 CREATE SPATIAL INDEX [SIndex_Locations_Location] ON [dbo].[Locations]
 (
@@ -10140,7 +9888,6 @@ SET ANSI_NULLS ON
 SET ANSI_PADDING ON
 SET ANSI_WARNINGS ON
 SET NUMERIC_ROUNDABORT OFF
-
 GO
 CREATE SPATIAL INDEX [SIndex_Movements_Shape] ON [dbo].[Movements]
 (
@@ -10156,7 +9903,6 @@ SET ANSI_NULLS ON
 SET ANSI_PADDING ON
 SET ANSI_WARNINGS ON
 SET NUMERIC_ROUNDABORT OFF
-
 GO
 CREATE SPATIAL INDEX [SIndex_VHFLocations_Location] ON [dbo].[VhfLocations]
 (
