@@ -5908,19 +5908,22 @@ BEGIN
            AND CONVERT(datetime2, I.[FixDate]) < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
     END
 
-    IF @Format = 'N'  -- Lotek/IridiumFormat
-    BEGIN
-        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
-        SELECT I.FileId, I.LineNumber, 'Lotek', I.Device_ID,
-              Convert(Datetime2(0), (CONVERT(datetime, CONVERT(decimal(12,7), I.DateTime_GMT)-2))),
-               CONVERT(float, I.Latitude), CONVERT(float, I.Longitude)
-          FROM dbo.CollarDataLotekIridium as I INNER JOIN CollarFiles as F 
-            ON I.FileId = F.FileId
-         WHERE F.[Status] = 'A'
-           AND I.FileId = @FileId
-           AND I.Latitude IS NOT NULL AND I.Longitude IS NOT NULL
-           AND I.DateTime_GMT IS NOT NULL
-    END
+    --IF @Format = 'N'  -- Lotek/IridiumFormat
+	-- One Time manual processing (Lotek would not release specs on Iridium file format,
+	-- so we had to use website download and direct collar downloads and process by hand.
+	-- If we use Lotek/Iridium again (I hope not), we will need to revisit this.
+    --BEGIN
+    --    INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+    --    SELECT I.FileId, I.LineNumber, 'Lotek', I.Device_ID,
+    --          Convert(Datetime2(0), (CONVERT(datetime, CONVERT(decimal(12,7), I.DateTime_GMT)-2))),
+    --           CONVERT(float, I.Latitude), CONVERT(float, I.Longitude)
+    --      FROM dbo.CollarDataLotekIridium as I INNER JOIN CollarFiles as F 
+    --        ON I.FileId = F.FileId
+    --     WHERE F.[Status] = 'A'
+    --       AND I.FileId = @FileId
+    --       AND I.Latitude IS NOT NULL AND I.Longitude IS NOT NULL
+    --       AND I.DateTime_GMT IS NOT NULL
+    --END
 END
 
 
