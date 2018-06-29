@@ -7748,6 +7748,7 @@ GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 21, 2013
+-- Modified:    June 29, 2018 - Bug Fixes
 -- Description: Validates the business rules for an Updated ArgosDeployment
 -- =============================================
 CREATE TRIGGER [dbo].[AfterArgosDeploymentUpdate] 
@@ -7896,30 +7897,15 @@ BEGIN
     END
     ELSE BEGIN
         -- Only the dates have changed
-        -- Date range shrunk - Create a new processing issue to explain any missed data
+        -- Date range shrunk
+			-- Remove Results file, and add processing issue.  Must add issue first - If I delete first, I can't find the issue.
+		    -- Create new processing issues to explain any missing results files
             -- Start Shrunk to after first transmission
             INSERT INTO [dbo].[ArgosFileProcessingIssues]
-                        ([FileId], [Issue], [PlatformId])
+                        ([FileId], [Issue], [PlatformId], [FirstTransmission], [LastTransmission])
                  SELECT P.FileId, 'No deployment for Argos Id from ' + 
                         CONVERT(varchar(20), S.FirstTransmission, 20) + ' to ' + CONVERT(varchar(20), I.StartDate, 20),
-                        I.PlatformId
-                   FROM CollarFiles AS C
-             INNER JOIN CollarFiles AS P
-                     ON P.FileId = C.ParentFileId
-             INNER JOIN inserted AS I
-                     ON I.DeploymentId = C.CollarParameterId
-             INNER JOIN deleted AS D
-                     ON D.DeploymentId = I.DeploymentId
-             INNER JOIN ArgosFilePlatformDates AS S
-                     ON S.FileId = P.FileId
-                  WHERE (D.StartDate IS NULL AND I.StartDate IS NOT NULL) OR (D.StartDate < I.StartDate) 
-                    AND S.FirstTransmission < I.StartDate
-            -- End Shrunk before last transmission
-            INSERT INTO [dbo].[ArgosFileProcessingIssues]
-                        ([FileId], [Issue], [PlatformId])
-                 SELECT P.FileId, 'No deployment for Argos Id from ' + 
-                        CONVERT(varchar(20), I.EndDate, 20) + ' to ' + CONVERT(varchar(20), S.LastTransmission, 20),
-                        I.PlatformId
+                        I.PlatformId, FirstTransmission, LastTransmission
                    FROM CollarFiles AS C
              INNER JOIN CollarFiles AS P
                      ON P.FileId = C.ParentFileId
@@ -7927,10 +7913,47 @@ BEGIN
                      ON I.DeploymentId = C.ArgosDeploymentId
              INNER JOIN deleted AS D
                      ON D.DeploymentId = I.DeploymentId
-             INNER JOIN ArgosFilePlatformDates AS S
+             INNER JOIN (select FileId, min(FirstTransmission) as FirstTransmission, max(LastTransmission) as LastTransmission from ArgosFilePlatformDates group by FileId) AS S
                      ON S.FileId = P.FileId
-                  WHERE (D.EndDate IS NULL AND I.EndDate IS NOT NULL) OR (I.EndDate < D.EndDate) 
-                    AND I.EndDate < S.LastTransmission
+                  WHERE ((D.StartDate IS NULL AND I.StartDate IS NOT NULL) OR (D.StartDate < I.StartDate)) -- Deployment start date shrank
+                    AND S.FirstTransmission < I.StartDate                                                  -- There is a transmission after the new start date
+            -- End Shrunk before last transmission
+            INSERT INTO [dbo].[ArgosFileProcessingIssues]
+                        ([FileId], [Issue], [PlatformId], [FirstTransmission], [LastTransmission])
+                 SELECT P.FileId, 'No deployment for Argos Id from ' + 
+                        CONVERT(varchar(20), I.EndDate, 20) + ' to ' + CONVERT(varchar(20), S.LastTransmission, 20),
+                        I.PlatformId, FirstTransmission, LastTransmission
+                   FROM CollarFiles AS C
+             INNER JOIN CollarFiles AS P
+                     ON P.FileId = C.ParentFileId
+             INNER JOIN inserted AS I
+                     ON I.DeploymentId = C.ArgosDeploymentId
+             INNER JOIN deleted AS D
+                     ON D.DeploymentId = I.DeploymentId
+             INNER JOIN (select FileId, min(FirstTransmission) as FirstTransmission, max(LastTransmission) as LastTransmission from ArgosFilePlatformDates group by FileId) AS S
+                     ON S.FileId = P.FileId
+                  WHERE ((D.EndDate IS NULL AND I.EndDate IS NOT NULL) OR (I.EndDate < D.EndDate)) -- Deployment end date shrank
+                    AND I.EndDate < S.LastTransmission                                             -- There is a transmission before the new end date
+			-- Remove (unprocess) any result files that are no longer covered by deployment
+			-- Can't call the SPROC ArgosFile_UnProcessPlatform(@fileID, @platformId) in a select statement. I could use a cursor, 
+			-- but it is simpler (and faster) to rewrite the delete statement from SPROC to delete the correct fileIDs
+                 DELETE CollarFiles WHERE FileId in (
+				 SELECT DISTINCT C.FileId
+                   FROM CollarFiles AS C
+             INNER JOIN inserted AS I
+                     ON I.DeploymentId = C.ArgosDeploymentId
+             INNER JOIN deleted AS D
+                     ON D.DeploymentId = I.DeploymentId
+             INNER JOIN ArgosFilePlatformDates AS S
+                     ON S.FileId = C.ParentFileId
+                  WHERE
+					    -- Start Shrunk to after first transmission
+					    (((D.StartDate IS NULL AND I.StartDate IS NOT NULL) OR (D.StartDate < I.StartDate)) AND S.FirstTransmission < I.StartDate)
+					    OR
+					    -- End Shrunk before last transmission
+					    (((D.EndDate IS NULL AND I.EndDate IS NOT NULL) OR (I.EndDate < D.EndDate)) AND I.EndDate < S.LastTransmission)
+				  )
+
         -- Date range increased - Remove overlapping processing issue to trigger a re-process
                  DELETE P
                    FROM ArgosFileProcessingIssues AS P
@@ -7938,8 +7961,11 @@ BEGIN
                      ON I.PlatformId = P.PlatformId
              INNER JOIN deleted AS D
                      ON D.DeploymentId = I.DeploymentId
-                  WHERE dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, I.StartDate, D.StartDate) = 1
-                     OR dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, D.EndDate, I.EndDate) = 1
+                  WHERE (    ((D.StartDate IS NOT NULL AND I.StartDate IS NULL) OR D.StartDate > I.StartDate)                -- Deployment start date grew 
+						 AND dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, I.StartDate, D.StartDate) = 1) -- issue dates overlap new range at start
+					 OR
+				        (    ((D.EndDate IS NOT NULL AND I.EndDate IS NULL) OR I.EndDate > D.EndDate)                        -- Deployment end date grew
+                         AND dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, D.EndDate, I.EndDate) = 1)     -- issue dates overlap new range at end
     END
 
 
