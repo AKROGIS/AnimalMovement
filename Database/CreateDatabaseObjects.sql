@@ -1,13 +1,3 @@
-/*    ==Scripting Parameters==
-
-    Source Server Version : SQL Server 2014 (12.0.5540)
-    Source Database Engine Edition : Microsoft SQL Server Enterprise Edition
-    Source Database Engine Type : Standalone SQL Server
-
-    Target Server Version : SQL Server 2017
-    Target Database Engine Edition : Microsoft SQL Server Standard Edition
-    Target Database Engine Type : Standalone SQL Server
-*/
 USE [Animal_Movement]
 GO
 CREATE USER [INPAKROMS53AIS\repl_distribution] WITH DEFAULT_SCHEMA=[dbo]
@@ -34,6 +24,8 @@ CREATE USER [NPS\GVHilderbrand] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\JAPutera] FOR LOGIN [NPS\JAPutera] WITH DEFAULT_SCHEMA=[dbo]
 GO
+CREATE USER [NPS\JHSchmidt] FOR LOGIN [NPS\JHSchmidt] WITH DEFAULT_SCHEMA=[dbo]
+GO
 CREATE USER [NPS\JPLawler] FOR LOGIN [NPS\JPLawler] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\JSShearer] FOR LOGIN [NPS\JSShearer] WITH DEFAULT_SCHEMA=[dbo]
@@ -55,8 +47,6 @@ GO
 CREATE USER [NPS\PAOwen] FOR LOGIN [NPS\PAOwen] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\RESarwas] FOR LOGIN [NPS\RESarwas] WITH DEFAULT_SCHEMA=[dbo]
-GO
-CREATE USER [NPS\SArthur] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE USER [NPS\SDMiller] FOR LOGIN [NPS\sdmiller] WITH DEFAULT_SCHEMA=[dbo]
 GO
@@ -109,6 +99,10 @@ GO
 ALTER ROLE [Investigator] ADD MEMBER [NPS\JAPutera]
 GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\JAPutera]
+GO
+ALTER ROLE [Editor] ADD MEMBER [NPS\JHSchmidt]
+GO
+ALTER ROLE [Viewer] ADD MEMBER [NPS\JHSchmidt]
 GO
 ALTER ROLE [Editor] ADD MEMBER [NPS\JPLawler]
 GO
@@ -163,12 +157,6 @@ GO
 ALTER ROLE [Investigator] ADD MEMBER [NPS\RESarwas]
 GO
 ALTER ROLE [Viewer] ADD MEMBER [NPS\RESarwas]
-GO
-ALTER ROLE [Editor] ADD MEMBER [NPS\SArthur]
-GO
-ALTER ROLE [Investigator] ADD MEMBER [NPS\SArthur]
-GO
-ALTER ROLE [Viewer] ADD MEMBER [NPS\SArthur]
 GO
 ALTER ROLE [Editor] ADD MEMBER [NPS\SDMiller]
 GO
