@@ -2592,6 +2592,19 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[GAAR_Bear_Denning](
+	[BearNo] [int] NOT NULL,
+	[Sex] [nchar](1) NOT NULL,
+	[InYear] [int] NOT NULL,
+	[OutYear] [int] NOT NULL,
+	[DenIn] [datetime2](7) NOT NULL,
+	[DenOut] [datetime2](7) NULL
+) ON [PRIMARY]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[HomeRangeExclusions](
 	[Creator] [nvarchar](100) NOT NULL,
 	[FixId] [int] NOT NULL,
