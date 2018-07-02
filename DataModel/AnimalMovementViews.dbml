@@ -32,7 +32,8 @@
     <Type Name="AllTpfFileData">
       <Column Name="FileId" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="CTN" Type="System.String" DbType="NVarChar(16)" CanBeNull="true" />
-      <Column Name="Platform" Type="System.String" DbType="NVarChar(8)" CanBeNull="true" />
+      <Column Name="Platform" Type="System.String" DbType="NVarChar(16)" CanBeNull="true" />
+      <Column Name="PlatformId" Type="System.String" DbType="NVarChar(16)" CanBeNull="true" />
       <Column Name="Frequency" Type="System.Double" DbType="Float" CanBeNull="true" />
       <Column Name="TimeStamp" Type="System.DateTime" DbType="DateTime2" CanBeNull="true" />
       <Column Name="FileName" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />

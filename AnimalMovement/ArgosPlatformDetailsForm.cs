@@ -335,7 +335,7 @@ namespace AnimalMovement
                 return;
             var views = new AnimalMovementViews();
 
-            ParametersDataGridView.DataSource = views.AllTpfFileDatas.Where(t => t.Platform == Platform.PlatformId).Select(t => new
+            ParametersDataGridView.DataSource = views.AllTpfFileDatas.Where(t => t.PlatformId == Platform.PlatformId).Select(t => new
                                                     {
                                                         t.FileId,
                                                         t.FileName,
