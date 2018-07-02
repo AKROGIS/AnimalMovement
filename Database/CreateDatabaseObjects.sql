@@ -9294,6 +9294,7 @@ GO
 -- =============================================
 -- Author:      Regan Sarwas
 -- Create date: March 21, 2013
+-- Modified:    June 29, 2018 - Bug Fixes
 -- Description: Validates the business rules for an Updated CollarParameter
 -- =============================================
 CREATE TRIGGER [dbo].[AfterCollarParameterUpdate] 
@@ -9442,10 +9443,10 @@ BEGIN
         -- Date range shrunk - Create a new processing issue to explain any missed data
             -- Start Shrunk to after first transmission
             INSERT INTO [dbo].[ArgosFileProcessingIssues]
-                        ([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
+                        ([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId], [FirstTransmission], [LastTransmission])
                  SELECT P.FileId, 'No Collar Parameter for Collar from ' + 
-                        CONVERT(varchar(20), S.FirstTransmission, 20) + ' to ' + CONVERT(varchar(20), I.StartDate, 20),
-                        A.PlatformId, I.CollarManufacturer, I.CollarId
+                        CONVERT(varchar(20), S.FirstFix, 20) + ' to ' + CONVERT(varchar(20), I.StartDate, 20),
+                        A.PlatformId, I.CollarManufacturer, I.CollarId, FirstFix, LastFix
                    FROM CollarFiles AS C
              INNER JOIN CollarFiles AS P
                      ON P.FileId = C.ParentFileId
@@ -9455,16 +9456,16 @@ BEGIN
                      ON D.ParameterId = I.ParameterId
              INNER JOIN ArgosDeployments AS A
                      ON A.DeploymentId = C.ArgosDeploymentId
-             INNER JOIN ArgosFilePlatformDates AS S
-                     ON S.FileId = P.FileId
-                  WHERE (D.StartDate IS NULL AND I.StartDate IS NOT NULL) OR (D.StartDate < I.StartDate) 
-                    AND S.FirstTransmission < I.StartDate
+             INNER JOIN (select FileID, min(FixDate) as FirstFix, max(FixDate) as LastFix from collarfixes group by Fileid) AS S
+                     ON S.FileId = C.FileId
+                  WHERE ((D.StartDate IS NULL AND I.StartDate IS NOT NULL) OR (D.StartDate < I.StartDate)) -- Parameter start date shrank
+                    AND S.FirstFix < I.StartDate                                                  -- There is a transmission after the new start date
             -- End Shrunk before last transmission
             INSERT INTO [dbo].[ArgosFileProcessingIssues]
-                        ([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId])
+                        ([FileId], [Issue], [PlatformId], [CollarManufacturer], [CollarId], [FirstTransmission], [LastTransmission])
                  SELECT P.FileId, 'No Collar Parameter for Collar from ' + 
-                        CONVERT(varchar(20), I.EndDate, 20) + ' to ' + CONVERT(varchar(20), S.LastTransmission, 20),
-                        A.PlatformId, I.CollarManufacturer, I.CollarId
+                        CONVERT(varchar(20), I.EndDate, 20) + ' to ' + CONVERT(varchar(20), S.LastFix, 20),
+                        A.PlatformId, I.CollarManufacturer, I.CollarId, FirstFix, LastFix
                    FROM CollarFiles AS C
              INNER JOIN CollarFiles AS P
                      ON P.FileId = C.ParentFileId
@@ -9474,10 +9475,29 @@ BEGIN
                      ON D.ParameterId = I.ParameterId
              INNER JOIN ArgosDeployments AS A
                      ON A.DeploymentId = C.ArgosDeploymentId
-             INNER JOIN ArgosFilePlatformDates AS S
-                     ON S.FileId = P.FileId
-                  WHERE (D.EndDate IS NULL AND I.EndDate IS NOT NULL) OR (I.EndDate < D.EndDate) 
-                    AND I.EndDate < S.LastTransmission
+             INNER JOIN (select FileID, min(FixDate) as FirstFix, max(FixDate) as LastFix from collarfixes group by Fileid) AS S
+                     ON S.FileId = C.FileId
+                  WHERE ((D.EndDate IS NULL AND I.EndDate IS NOT NULL) OR (I.EndDate < D.EndDate)) -- Parameter end date shrank
+                    AND I.EndDate < S.LastFix                                             -- There is a transmission before the new end date
+			-- Remove (unprocess) any result files that are no longer covered by parameter
+			-- Similar to SPROC ArgosFile_UnProcessPlatform(@fileID, @platformId) and update trigger in ArgosDeployments
+                 DELETE CollarFiles WHERE FileId in (
+				 SELECT C.FileId
+                   FROM CollarFiles AS C
+             INNER JOIN inserted AS I
+                     ON I.ParameterId = C.CollarParameterId
+             INNER JOIN deleted AS D
+                     ON D.ParameterId = I.ParameterId
+             INNER JOIN (select FileID, min(FixDate) as FirstFix, max(FixDate) as LastFix from collarfixes group by Fileid) as F
+                     ON F.FileId = C.FileId
+                  WHERE
+					    -- Start Shrunk to after first Fix
+					    (((D.StartDate IS NULL AND I.StartDate IS NOT NULL) OR (D.StartDate < I.StartDate)) AND F.FirstFix < I.StartDate)
+					    OR
+					    -- End Shrunk before last Fix
+					    (((D.EndDate IS NULL AND I.EndDate IS NOT NULL) OR (I.EndDate < D.EndDate)) AND I.EndDate < F.LastFix)
+				  )
+
         -- Date range increased - Remove overlapping processing issue to trigger a re-process
                  DELETE P
                    FROM ArgosFileProcessingIssues AS P
@@ -9485,8 +9505,11 @@ BEGIN
                      ON I.CollarManufacturer = P.CollarManufacturer AND I.CollarId = P.CollarId
              INNER JOIN deleted AS D
                      ON D.ParameterId = I.ParameterId
-                  WHERE dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, I.StartDate, D.StartDate) = 1
-                     OR dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, D.EndDate, I.EndDate) = 1
+                  WHERE (    ((D.StartDate IS NOT NULL AND I.StartDate IS NULL) OR D.StartDate > I.StartDate)                -- Parameter start date grew 
+						 AND dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, I.StartDate, D.StartDate) = 1) -- issue dates overlap new range at start
+					 OR
+				        (    ((D.EndDate IS NOT NULL AND I.EndDate IS NULL) OR I.EndDate > D.EndDate)                        -- Parameter end date grew
+                         AND dbo.DoDateRangesOverlap(P.FirstTransmission, P.LastTransmission, D.EndDate, I.EndDate) = 1)     -- issue dates overlap new range at end
     END
 END
 
