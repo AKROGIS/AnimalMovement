@@ -488,12 +488,10 @@ namespace AnimalMovement
             //If this situation exists, and I correct it, I am guaranteed to be fine (the new one will exist in the space created)
             var deployment1 =
                 collar.ArgosDeployments.SingleOrDefault(d =>
-                                                        d.ArgosPlatform != platform &&
-                                                        d.StartDate < start && d.EndDate == null);
+                                                        d.ArgosPlatform != platform && (d.StartDate == null || d.StartDate < start) && d.EndDate == null);
             var deployment2 =
                 platform.ArgosDeployments.SingleOrDefault(d =>
-                                                          d.Collar != collar &&
-                                                          d.StartDate < start && d.EndDate == null);
+                                                          d.Collar != collar && (d.StartDate == null || d.StartDate < start) && d.EndDate == null);
             if (deployment1 != null)
                 deployment1.EndDate = start;
             if (deployment2 != null)
@@ -516,6 +514,7 @@ namespace AnimalMovement
 
             //now check if the new deployment is in conflict with any existing deployments
             DateTime? end = endDate;
+            //Execute the query (.ToList()); otherwise LINQ will try to run the DatesOverlap predicate on the SQL Server
             var competition = Database.ArgosDeployments.Where(d => (d.Collar == collar && d.ArgosPlatform != platform) ||
                                                                 (d.Collar != collar && d.ArgosPlatform == platform)).ToList();
             bool conflict = competition.Any(d => DatesOverlap(d.StartDate, d.EndDate, start, end));
