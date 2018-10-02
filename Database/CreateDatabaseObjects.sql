@@ -1403,6 +1403,78 @@ GO
 
 
 
+CREATE VIEW [dbo].[VelocityVectors]
+AS
+    SELECT M.[ProjectId]
+          ,M.[AnimalId]
+          ,M.[StartDate]
+          ,M.[EndDate]
+          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
+          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
+          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
+          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
+          ,M.[Duration]
+          ,M.[Distance]
+          ,M.[Speed]
+          ,P.[UnitCode]
+          ,A.[Species]
+          ,A.[Gender]
+          ,A.[GroupName]
+          ,M.[Shape]
+      FROM dbo.Movements AS M
+INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
+							  AND M.AnimalId  = A.AnimalId
+INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
+     WHERE M.Distance <> 0
+
+
+
+
+GO
+GRANT SELECT ON [dbo].[VelocityVectors] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[VelocityVectors] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[PotentialMortalities]
+AS
+SELECT V.ProjectId, V.AnimalId, max(F.FixDate) as last_date, 14 as days, count(*) as num_fixes, 
+       min(duration) as min_dur, 14 * 24 / min(v.duration) as expected_fix_count,
+	   avg(v.speed) as avg_speed
+	   --, geography::EnvelopeAggregate(v.Shape) AS Shape
+FROM dbo.VelocityVectors AS V
+INNER JOIN
+	   (SELECT   ProjectId, AnimalId, MAX(FixDate) AS FixDate
+		FROM     dbo.Locations
+		WHERE    [Status] IS NULL
+		GROUP BY ProjectId, AnimalId) AS F
+ON F.ProjectId = V.ProjectId AND F.AnimalId = V.AnimalId AND DATEDIFF(day, V.EndDate, F.FixDate) < 14
+INNER JOIN dbo.Animals as A on A.ProjectId = V.ProjectId AND A.AnimalId = V.AnimalId
+where a.MortalityDate is null  -- not already identified as a mortality
+group by V.ProjectId, V.AnimalId
+-- We are looking at the last 14 days worth of fixes for each animal
+having avg(v.speed) < 5  -- stationary; average speed is less than 3 meters per hour
+and count(*) > 7 -- we have sufficient fixes (at least one every other day) to make any conclusions (removes problems with large min duration)
+and count(*) / (14 * 24 / min(v.duration))  > .5 -- we have at least 50% of the fixes expected (assuming min duration is valid)
+
+GO
+GRANT SELECT ON [dbo].[PotentialMortalities] TO [Editor] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[PotentialMortalities] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
 CREATE VIEW [dbo].[VelocityVectors_NPS]
 AS
     SELECT M.[ProjectId]
@@ -1896,47 +1968,6 @@ GO
 GRANT SELECT ON [dbo].[ValidLocations] TO [Editor] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[ValidLocations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-
-
-
-CREATE VIEW [dbo].[VelocityVectors]
-AS
-    SELECT M.[ProjectId]
-          ,M.[AnimalId]
-          ,M.[StartDate]
-          ,M.[EndDate]
-          ,dbo.LocalTime(M.[StartDate]) as [LocalDateTime]
-          ,dbo.LocalTime(M.[EndDate]) as [EndLocalDateTime]
-          ,YEAR(dbo.LocalTime(M.[StartDate])) as [Year]
-          ,dbo.DateTimeToOrdinal(dbo.LocalTime(M.[StartDate])) as [OrdinalDate]
-          ,M.[Duration]
-          ,M.[Distance]
-          ,M.[Speed]
-          ,P.[UnitCode]
-          ,A.[Species]
-          ,A.[Gender]
-          ,A.[GroupName]
-          ,M.[Shape]
-      FROM dbo.Movements AS M
-INNER JOIN dbo.Animals   AS A  ON M.ProjectId = A.ProjectId
-							  AND M.AnimalId  = A.AnimalId
-INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
-     WHERE M.Distance <> 0
-
-
-
-
-GO
-GRANT SELECT ON [dbo].[VelocityVectors] TO [Editor] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[VelocityVectors] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
