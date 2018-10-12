@@ -54,6 +54,8 @@ CREATE USER [NPS\SMDevenny] FOR LOGIN [NPS\SMDevenny] WITH DEFAULT_SCHEMA=[dbo]
 GO
 CREATE ROLE [ArgosProcessor]
 GO
+CREATE ROLE [dog_house]
+GO
 CREATE ROLE [Editor]
 GO
 CREATE ROLE [Investigator]
@@ -1260,6 +1262,8 @@ INNER JOIN
 ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
 
 GO
+DENY SELECT ON [dbo].[MostRecentLocations] TO [dog_house] AS [dbo]
+GO
 GRANT SELECT ON [dbo].[MostRecentLocations] TO [Editor] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[MostRecentLocations] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
@@ -1282,6 +1286,8 @@ INNER JOIN
 ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId AND F.FixDate = L.FixDate
 
 
+GO
+DENY SELECT ON [dbo].[FirstKnownLocations] TO [dog_house] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -1321,6 +1327,8 @@ INNER JOIN
 	WHERE [Status] IS NULL
 	GROUP BY A.ProjectId, A.AnimalId) AS F
 ON F.ProjectId = L.ProjectId AND F.AnimalId = L.AnimalId and F.FixDate = L.FixDate
+GO
+DENY SELECT ON [dbo].[LastLocationOfKnownMortalities] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[LastLocationOfKnownMortalities] TO [Viewer] AS [dbo]
 GO
@@ -1431,6 +1439,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 GO
+DENY SELECT ON [dbo].[VelocityVectors] TO [dog_house] AS [dbo]
+GO
 GRANT SELECT ON [dbo].[VelocityVectors] TO [Editor] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[VelocityVectors] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
@@ -1461,6 +1471,8 @@ having avg(v.speed) < 5  -- stationary; average speed is less than 3 meters per 
 and count(*) > 7 -- we have sufficient fixes (at least one every other day) to make any conclusions (removes problems with large min duration)
 and count(*) / (14 * 24 / min(v.duration))  > .5 -- we have at least 50% of the fixes expected (assuming min duration is valid)
 
+GO
+DENY SELECT ON [dbo].[PotentialMortalities] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[PotentialMortalities] TO [Editor] AS [dbo]
 GO
@@ -1503,6 +1515,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
+GO
+DENY SELECT ON [dbo].[VelocityVectors_NPS] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[VelocityVectors_NPS] TO [Viewer] AS [dbo]
 GO
@@ -1572,6 +1586,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 GO
+DENY SELECT ON [dbo].[NoMovement] TO [dog_house] AS [dbo]
+GO
 GRANT SELECT ON [dbo].[NoMovement] TO [Editor] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[NoMovement] TO [INPAKROVMAIS\sql_proxy] AS [dbo]
@@ -1612,6 +1628,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
+GO
+DENY SELECT ON [dbo].[ValidLocations_NPS] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[ValidLocations_NPS] TO [Viewer] AS [dbo]
 GO
@@ -1702,6 +1720,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 GO
+DENY SELECT ON [dbo].[InvalidLocations] TO [dog_house] AS [dbo]
+GO
 GRANT SELECT ON [dbo].[InvalidLocations] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
@@ -1741,6 +1761,8 @@ AS
 CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
       WHERE P.Format = 'A'
 
+GO
+DENY SELECT ON [dbo].[AllTpfFileData] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
 GO
@@ -1904,6 +1926,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 GO
+DENY SELECT ON [dbo].[ValidLocationsWithLatLong] TO [dog_house] AS [dbo]
+GO
 GRANT SELECT ON [dbo].[ValidLocationsWithLatLong] TO [Editor] AS [dbo]
 GO
 SET ANSI_NULLS ON
@@ -1926,6 +1950,8 @@ AS
 INNER JOIN dbo.Animals   AS A  ON L.ProjectId = A.ProjectId
                               AND L.AnimalId  = A.AnimalId
 
+GO
+DENY SELECT ON [dbo].[AnimalLocations] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[AnimalLocations] TO [Editor] AS [dbo]
 GO
@@ -1964,6 +1990,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
+GO
+DENY SELECT ON [dbo].[ValidLocations] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[ValidLocations] TO [Editor] AS [dbo]
 GO
@@ -2004,6 +2032,8 @@ INNER JOIN dbo.Projects  AS P  ON A.ProjectId = P.ProjectId
 
 
 
+GO
+DENY SELECT ON [dbo].[NoMovement_NPS] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[NoMovement_NPS] TO [Viewer] AS [dbo]
 GO
@@ -2256,6 +2286,8 @@ AS
 
 
 GO
+DENY SELECT ON [dbo].[AnimalFixesByFile] TO [dog_house] AS [dbo]
+GO
 GRANT SELECT ON [dbo].[AnimalFixesByFile] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
@@ -2308,6 +2340,8 @@ FROM         dbo.CollarDataTelonicsGen3StoreOnBoard INNER JOIN
                       dbo.Animals ON dbo.Locations.ProjectId = dbo.Animals.ProjectId AND dbo.Locations.AnimalId = dbo.Animals.AnimalId INNER JOIN
                       dbo.CollarFiles ON dbo.CollarDataTelonicsGen3StoreOnBoard.FileId = dbo.CollarFiles.FileId AND dbo.CollarFixes.FileId = dbo.CollarFiles.FileId
 
+GO
+DENY SELECT ON [dbo].[Gen3StoreOnBoardLocations] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[Gen3StoreOnBoardLocations] TO [Viewer] AS [dbo]
 GO
