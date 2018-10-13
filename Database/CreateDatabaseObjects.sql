@@ -1250,9 +1250,10 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 CREATE VIEW [dbo].[MostRecentLocations]
 AS
-SELECT L.ProjectId, L.AnimalId, L.FixDate, L.Location, L.FixId
+SELECT L.ProjectId, L.AnimalId, L.FixDate, dbo.LocalTime(L.[FixDate]) as [LocalDateTime], L.Location, L.FixId
 FROM   dbo.Locations AS L
 INNER JOIN
 	   (SELECT   ProjectId, AnimalId, MAX(FixDate) AS FixDate
