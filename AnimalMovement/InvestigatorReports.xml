@@ -211,6 +211,32 @@
     </query>
   </report>
   <report>
+    <name>All Telonics Collars with Deployment and TPF Info</name>
+    <description>
+      <![CDATA[List all collar deployments with associated collar parameters.  To copy this data into Excel or another application, select the rows to copy (click the top left corner to select all rows), then press Ctrl-C, then paste into the other application.]]>
+    </description>
+    <query>
+      <![CDATA[
+         SELECT c.*,
+		            cd.AnimalId, cd.DeploymentDate, cd.RetrievalDate,
+	              case when cd.AnimalId is not null and cd.RetrievalDate is null then 'True' else 'False' end as Deployed,
+				        cp.StartDate AS TPF_Start, cp.EndDate AS TPF_Start,
+			          tpf.FileName AS TPF_File, tpf.Platform AS TPF_Platform, tpf.PlatformId AS TPF_PlatformId
+           FROM collars AS c
+      LEFT JOIN CollarDeployments as cd
+             ON cd.CollarManufacturer = c.CollarManufacturer AND cd.CollarId = c.CollarId
+      LEFT JOIN CollarParameters as cp
+             ON cp.CollarManufacturer = c.CollarManufacturer AND cp.CollarId = c.CollarId
+      LEFT JOIN AllTpfFileData AS tpf
+             ON tpf.FileId = cp.FileId AND ((tpf.CTN = c.CollarId AND LEN(c.CollarId) = 7) OR (LEFT(tpf.CTN,6) = LEFT(c.CollarId, 6) AND LEN(c.CollarId) = 6))
+          WHERE manager = 'nps\bborg'
+		        AND (cd.DeploymentDate IS NULL OR cp.EndDate IS NULL OR cd.DeploymentDate < cp.EndDate)
+			      AND (cp.StartDate IS NULL OR cd.RetrievalDate IS NULL OR cp.StartDate < cd.RetrievalDate)
+       ORDER BY Deployed DESC, c.CollarManufacturer, c.CollarId, cd.DeploymentDate, cp.StartDate, cd.RetrievalDate, cp.EndDate
+      ]]>
+    </query>
+  </report>
+  <report>
     <name>Collars without GPS</name>
     <description>
       <![CDATA[Lists all the collars that do not have an onboard GPS.  These collars collect Argos locations (if they have an Argos Id), or are used for radio (VHF) tracking.  The database will store Argos (PPT) locations, but not VHF locations.]]>
