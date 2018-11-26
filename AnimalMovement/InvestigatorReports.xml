@@ -428,6 +428,22 @@
       ]]>
     </query>
   </report>
+  <report>
+    <name>Telonics Collars Frequecy Questions</name>
+    <description>
+      <![CDATA[Collars where the reported frequency does not match the frequency in the TPF data.]]>
+    </description>
+    <query>
+      <![CDATA[
+        SELECT c.CollarManufacturer, c.CollarID, c.Frequency, tpf.Frequency AS TPF_Frequency, tpf.TimeStamp AS TPF_Date, tpf.FileName
+          FROM collars AS c
+          JOIN AllTpfFileData AS tpf
+            ON (tpf.CTN = c.CollarId AND LEN(c.CollarId) = 7) OR (LEFT(tpf.CTN,6) = LEFT(c.CollarId, 6) AND LEN(c.CollarId) = 6)
+         WHERE tpf.Frequency <> c.Frequency AND manager = @PI
+      ORDER BY  c.CollarManufacturer, c.CollarId, tpf.TimeStamp
+      ]]>
+    </query>
+  </report>
 
 
   <report>
