@@ -435,12 +435,14 @@
     </description>
     <query>
       <![CDATA[
-        SELECT c.CollarManufacturer, c.CollarID, c.Frequency, tpf.Frequency AS TPF_Frequency, tpf.TimeStamp AS TPF_Date, tpf.FileName
-          FROM collars AS c
-          JOIN AllTpfFileData AS tpf
-            ON (tpf.CTN = c.CollarId AND LEN(c.CollarId) = 7) OR (LEFT(tpf.CTN,6) = LEFT(c.CollarId, 6) AND LEN(c.CollarId) = 6)
-         WHERE tpf.Frequency <> c.Frequency AND manager = @PI
-      ORDER BY  c.CollarManufacturer, c.CollarId, tpf.TimeStamp
+         SELECT c.CollarManufacturer, c.CollarID, c.Frequency, tpf.Frequency AS TPF_Frequency, tpf.TimeStamp AS TPF_Date, tpf.FileName
+           FROM collars AS c
+      LEFT JOIN CollarParameters as cp
+             ON cp.CollarManufacturer = c.CollarManufacturer AND cp.CollarId = c.CollarId
+      LEFT JOIN AllTpfFileData AS tpf
+             ON tpf.FileId = cp.FileId AND ((tpf.CTN = c.CollarId AND LEN(c.CollarId) = 7) OR (LEFT(tpf.CTN,6) = LEFT(c.CollarId, 6) AND LEN(c.CollarId) = 6))
+          WHERE tpf.Frequency <> c.Frequency AND manager = @PI
+       ORDER BY c.CollarManufacturer, c.CollarId, tpf.TimeStamp
       ]]>
     </query>
   </report>
