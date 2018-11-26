@@ -219,8 +219,10 @@
       <![CDATA[
          SELECT c.*,
 		            cd.AnimalId, cd.DeploymentDate, cd.RetrievalDate,
-	              case when cd.AnimalId is not null and cd.RetrievalDate is null then 'True' else 'False' end as Deployed,
-				        cp.StartDate AS TPF_Start, cp.EndDate AS TPF_Start,
+	              CASE WHEN cd.AnimalId IS NOT NULL AND cd.RetrievalDate IS NULL THEN 'True'
+				             WHEN cd.AnimalId IS NULL AND cd.RetrievalDate IS NULL THEN 'Never'
+					           ELSE 'False' END AS Deployed,
+				        cp.StartDate AS TPF_Start, cp.EndDate AS TPF_End,
 			          tpf.FileName AS TPF_File, tpf.Platform AS TPF_Platform, tpf.PlatformId AS TPF_PlatformId
            FROM collars AS c
       LEFT JOIN CollarDeployments as cd
