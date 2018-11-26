@@ -1451,6 +1451,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 CREATE VIEW [dbo].[PotentialMortalities]
 AS
 SELECT V.ProjectId, V.AnimalId, max(F.FixDate) as last_date, 14 as days, count(*) as num_fixes, 
@@ -1469,8 +1470,9 @@ where a.MortalityDate is null  -- not already identified as a mortality
 group by V.ProjectId, V.AnimalId
 -- We are looking at the last 14 days worth of fixes for each animal
 having avg(v.speed) < 5  -- stationary; average speed is less than 3 meters per hour
-and count(*) > 7 -- we have sufficient fixes (at least one every other day) to make any conclusions (removes problems with large min duration)
-and count(*) / (14 * 24 / min(v.duration))  > .5 -- we have at least 50% of the fixes expected (assuming min duration is valid)
+-- The following criteria help remove false positives, but they can also hide true positives.  Remove for now, to let PI assess
+--and count(*) > 7 -- we have sufficient fixes (at least one every other day) to make any conclusions (removes problems with large min duration)
+--and count(*) / (14 * 24 / min(v.duration))  > .5 -- we have at least 50% of the fixes expected (assuming min duration is valid)
 
 GO
 DENY SELECT ON [dbo].[PotentialMortalities] TO [dog_house] AS [dbo]
