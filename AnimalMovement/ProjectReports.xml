@@ -73,7 +73,7 @@
        FROM Animals
       WHERE ProjectId = @Project
         AND MortalityDate IS NULL
-        AND AnimalId NOT IN ( 
+        AND AnimalId NOT IN (
                       SELECT AnimalId
                         FROM CollarDeployments
                        WHERE ProjectId = @Project
@@ -125,6 +125,19 @@
       WHERE A.ProjectId = @Project
         AND F.CollarId IS NULL
    ORDER BY A.AnimalId
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Potential Mortalities</name>
+    <description>
+      <![CDATA[Animals that have been moving very slowly (less than 5 meters per hour average) in the last 14 days.  This can yield false positives if the number of fixes is too low.]]>
+    </description>
+    <query>
+      <![CDATA[
+        SELECT *
+          FROM dbo.PotentialMortalities
+         WHERE ProjectId = @Project
       ]]>
     </query>
   </report>
