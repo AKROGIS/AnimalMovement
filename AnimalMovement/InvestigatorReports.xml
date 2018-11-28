@@ -231,10 +231,33 @@
              ON cp.CollarManufacturer = c.CollarManufacturer AND cp.CollarId = c.CollarId
       LEFT JOIN AllTpfFileData AS tpf
              ON tpf.FileId = cp.FileId AND ((tpf.CTN = c.CollarId AND LEN(c.CollarId) = 7) OR (LEFT(tpf.CTN,6) = LEFT(c.CollarId, 6) AND LEN(c.CollarId) = 6))
-          WHERE manager = 'nps\bborg'
+          WHERE manager = @PI
 		        AND (cd.DeploymentDate IS NULL OR cp.EndDate IS NULL OR cd.DeploymentDate < cp.EndDate)
 			      AND (cp.StartDate IS NULL OR cd.RetrievalDate IS NULL OR cp.StartDate < cd.RetrievalDate)
        ORDER BY Deployed DESC, c.CollarManufacturer, c.CollarId, cd.DeploymentDate, cp.StartDate, cd.RetrievalDate, cp.EndDate
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Collars with mortality data in the last 30 days</name>
+    <description>
+      <![CDATA[Lists all the collars that are currently deployed and have a 'Yes' or 'Yes*' in the 'Mortality' within the last 30 days.]]>
+    </description>
+    <query>
+      <![CDATA[
+           SELECT cd.Projectid, cd.AnimalId, c.collarID, d.AcquisitionTime, d.Mortality
+           FROM CollarDataTelonicsGen4 AS d
+           JOIN CollarFiles AS f
+             ON f.fileid = d.FileId
+           JOIN Collars AS c
+             ON c.CollarManufacturer = f.CollarManufacturer AND c.CollarId = f.CollarID
+           JOIN CollarDeployments AS cd
+             ON cd.CollarManufacturer = f.CollarManufacturer AND cd.CollarId = f.CollarID
+          WHERE d.Mortality IN ('Yes','Yes*')
+            AND cd.RetrievalDate IS NULL
+            AND c.Manager = @PI
+            AND DATEDIFF(DAY, d.AcquisitionTime, GETDATE()) < 30
+       ORDER BY cd.Projectid, cd.AnimalId, d.AcquisitionTime
       ]]>
     </query>
   </report>
