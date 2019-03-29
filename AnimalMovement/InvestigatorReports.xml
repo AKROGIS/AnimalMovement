@@ -96,6 +96,42 @@
     </query>
   </report>
   <report>
+    <name>Argos Platforms with Processing Issues</name>
+    <description>
+      <![CDATA[Argos Platforms that have data in files that cannot be fully processed into fixes.  This can often be fixed by assigning the platform to a collar during the time period of the transmissions.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT I.PlatformID, I.Issue, I.FileId
+       FROM ArgosFileProcessingIssues AS I
+       JOIN ArgosPlatforms AS A
+         ON A.PlatformId = I.PlatformId
+       JOIN ArgosPrograms AS P
+         ON A.ProgramId = P.ProgramId
+      WHERE CollarId IS NULL
+        AND P.Manager = @PI
+   ORDER BY I.PlatformId, I.LastTransmission DESC
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Telonics Collars with Processing Issues</name>
+    <description>
+      <![CDATA[Telonics collars that have data files that cannot be fully processed into fixes.  This can often be fixed by assigning a parameter file to the collar during the time period of the transmissions.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT I.CollarId, I.Issue, I.FileId
+       FROM ArgosFileProcessingIssues AS I
+       JOIN Collars AS C
+         ON C.CollarManufacturer = I.CollarManufacturer AND C.CollarId = I.CollarId
+      WHERE I.CollarManufacturer = 'Telonics'
+        AND C.Manager = @PI
+   ORDER BY I.CollarId, I.LastTransmission DESC
+      ]]>
+    </query>
+  </report>
+  <report>
     <name>Argos Files with Unprocessed Data</name>
     <description>
       <![CDATA[Argos files require a collar assignment and collar parameters (if GPS) in order to be processed.  The following Files have Argos Ids have unprocessed data.  This can be corrected by assigning a collar (and parameters if GPS) to the Argos Id.]]>
@@ -290,6 +326,26 @@
          ON D.CollarManufacturer = C.CollarManufacturer AND D.CollarId = C.CollarId
       WHERE D.PlatformId IS NULL
         AND C.Manager = @PI
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Duplicate Active Collars</name>
+    <description>
+      <![CDATA[A list of collars that are not disposed and have the same CTN (ignoring a suffix). This can be fixed by disposing of the non-active/older version of the collar.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT *
+       FROM Collars
+      WHERE LEFT(CollarId,6) in (
+          SELECT LEFT(CollarId,6)
+            FROM Collars
+           WHERE DisposalDate IS NULL
+             AND Manager = @PI
+        GROUP BY LEFT(CollarId,6) HAVING COUNT(*) > 1
+      )
+   ORDER BY CollarId
       ]]>
     </query>
   </report>
