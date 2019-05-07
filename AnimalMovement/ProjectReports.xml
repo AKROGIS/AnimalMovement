@@ -13,6 +13,24 @@
     </query>
   </report>
   <report>
+    <name>All Animals With Deployment Dates</name>
+    <description>
+      <![CDATA[List all animals with status and dates.]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT CASE WHEN MortalityDate IS NULL THEN 'Alive' ELSE 'Dead' END AS [Status],
+            CASE WHEN D.RetrievalDate IS NULL THEN 'Yes' ELSE 'No' END AS Deployed,
+            A.*, D.Collarid,
+            LEFT(D.DeploymentDate,10) AS DeploymentDate, LEFT(D.RetrievalDate,10) AS RetrievalDate
+       FROM Animals AS A
+  LEFT JOIN CollarDeployments AS D ON A.ProjectId = D.ProjectId AND A.AnimalId = D.AnimalId
+      WHERE A.ProjectId = @Project
+   ORDER BY [Status], Deployed DESC, A.AnimalId, D.DeploymentDate
+      ]]>
+    </query>
+  </report>
+  <report>
     <name>Time of Last Location</name>
     <description>
       <![CDATA[Last location for each living animal with a collar in a project]]>
@@ -106,6 +124,31 @@
         AND X.FixId IS NULL
         AND CF.ProjectId = @Project
    ORDER BY CF.ProjectId, CF.Format, CollarId, PF.[FileName], CF.[FileName]
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Datalog files and related collar/animal</name>
+    <description>
+      <![CDATA[All datalog (store-onboard data) with related Animals and Collars]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT d.AnimalId, c.CollarId,
+            LEFT(d.DeploymentDate,10) AS StartDeployment, LEFT(D.RetrievalDate,10) AS EndDeployment, C.[FileName], C.[Status],
+            LEFT(MIN(F.FixDate),10) AS FirstCollarFix, LEFT(MAX(F.FixDate),10) AS LastCollarFix, COUNT(F.fixdate) AS CountCollarFixes,
+            LEFT(MIN(L.FixDate),10) AS FirstAnimalFix, LEFT(MAX(L.FixDate),10) AS LastAnimalFix, COUNT(L.fixdate) AS CountAnimalFixes
+       FROM CollarFiles AS C
+  LEFT JOIN CollarDeployments AS D
+         ON C.CollarManufacturer = D.CollarManufacturer AND C.CollarId = D.CollarId
+  LEFT JOIN CollarFiles AS C2 ON C.FileId = C2.ParentFileId
+  LEFT JOIN CollarFixes AS F ON c2.FileId = F.FileId
+  LEFT JOIN Locations AS L ON F.FixId = L.FixId
+      WHERE C.ProjectId = @Project
+        AND C.[Format] = 'H'
+        AND f.hiddenby IS NULL
+   GROUP BY C.Collarid , C.[Filename], C.[Status], D.AnimalId, D.DeploymentDate, D.RetrievalDate
+   ORDER BY D.AnimalId, C.CollarId
       ]]>
     </query>
   </report>
