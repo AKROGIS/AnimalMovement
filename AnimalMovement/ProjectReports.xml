@@ -13,6 +13,20 @@
     </query>
   </report>
   <report>
+    <name>Current Deployments</name>
+    <description>
+      <![CDATA[All of a project's current deployments]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT AnimalId, CollarId, DeploymentDate
+       FROM CollarDeployments
+      WHERE ProjectId = @Project and RetrievalDate IS NULL
+   ORDER BY DeploymentDate
+      ]]>
+    </query>
+  </report>
+  <report>
     <name>All Animals With Deployment Dates</name>
     <description>
       <![CDATA[List all animals with status and dates.]]>
@@ -51,24 +65,21 @@
       ]]>
     </query>
   </report>
+
   <report>
-    <name>Deployments</name>
+    <name>-----------------------</name>
     <description>
-      <![CDATA[All of a project's current deployments]]>
+      <![CDATA[Reports for identifying and troubleshooting problems]]>
     </description>
     <query>
       <![CDATA[
-     SELECT AnimalId, CollarId, DeploymentDate
-       FROM CollarDeployments
-      WHERE ProjectId = @Project and RetrievalDate IS NULL
-   ORDER BY DeploymentDate
       ]]>
     </query>
   </report>
   <report>
-    <name>Living Animals without a collar</name>
+    <name>Animals Without a Collar</name>
     <description>
-      <![CDATA[A Project's living animals without a collar]]>
+      <![CDATA[The Project's living animals without a collar]]>
     </description>
     <query>
       <![CDATA[
@@ -82,17 +93,6 @@
                        WHERE ProjectId = @Project
                          AND RetrievalDate IS NULL
                      )
-      ]]>
-    </query>
-  </report>
-
-  <report>
-    <name>-----------------------</name>
-    <description>
-      <![CDATA[Reports for identifying and troubleshooting problems]]>
-    </description>
-    <query>
-      <![CDATA[
       ]]>
     </query>
   </report>
