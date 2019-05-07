@@ -45,23 +45,32 @@
     </query>
   </report>
   <report>
-    <name>Time of Last Location</name>
+    <name>Animal's Last Location and Frequency</name>
     <description>
-      <![CDATA[Last location for each living animal with a collar in a project]]>
+      <![CDATA[Last location (and time) for each living animal with a collar in a project]]>
     </description>
     <query>
       <![CDATA[
-     SELECT A.ProjectId, A.AnimalId, CONVERT(VARCHAR(10), MAX(FixDate), 101) AS [Date of Last Location]
+     SELECT L.AnimalId, L2.Frequency,
+            LEFT(L.FixDate,10) AS [Date],
+            L.Location.Lat As Latitude, L.Location.Long As Longitude
        FROM Locations AS L
- INNER JOIN Animals AS A
-         ON L.ProjectId = A.ProjectId AND L.AnimalId = A.AnimalId
- INNER JOIN CollarDeployments AS CD
-         ON CD.ProjectId = A.ProjectId AND CD.AnimalId = A.AnimalId
-      WHERE L.ProjectId = @Project
-        AND MortalityDate IS NULL
-        AND RetrievalDate IS NULL
-   GROUP BY A.ProjectId, A.AnimalId
-   ORDER BY MAX(FixDate) DESC
+ INNER JOIN (
+             SELECT L.ProjectId, L.AnimalId, Max(FixDate) AS FixDate, C.Frequency
+               FROM Locations as L
+         INNER JOIN Animals AS A
+                 ON L.ProjectId = A.ProjectId AND L.AnimalId = A.AnimalId
+         INNER JOIN CollarDeployments AS CD
+                 ON CD.ProjectId = L.ProjectId AND CD.AnimalId = L.AnimalId
+         INNER JOIN Collars AS C
+                 ON CD.CollarManufacturer = C.CollarManufacturer AND CD.CollarId = C.CollarId
+              WHERE L.ProjectId = @Project
+                AND CD.DeploymentDate IS NOT NULL
+                AND CD.RetrievalDate IS NULL
+                AND A.MortalityDate IS NULL
+           GROUP BY L.ProjectId, L.AnimalId, C.Frequency
+            ) AS L2
+         ON L.ProjectId = L2.ProjectId AND L.AnimalId = L2.AnimalId AND L.FixDate = L2.FixDate
       ]]>
     </query>
   </report>
