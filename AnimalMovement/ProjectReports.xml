@@ -66,21 +66,6 @@
     </query>
   </report>
   <report>
-    <name>Short Duration Movements</name>
-    <description>
-      <![CDATA[All movement vectors less than 10 minutes for all animals in the project.  One of the end point locations is probably redundant and should be hidden (use the GIS tools)]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT AnimalId, StartDate, EndDate, ROUND(Duration*60,2) AS [Duration(min)], ROUND(Distance,0) AS [Distance(meters)]
-       FROM Movements
-      WHERE Duration < (10/60.0)
-        AND ProjectId = @Project
-   ORDER BY AnimalId, StartDate
-	  ]]>
-    </query>
-  </report>
-  <report>
     <name>Living Animals without a collar</name>
     <description>
       <![CDATA[A Project's living animals without a collar]]>
@@ -97,6 +82,75 @@
                        WHERE ProjectId = @Project
                          AND RetrievalDate IS NULL
                      )
+      ]]>
+    </query>
+  </report>
+
+  <report>
+    <name>-----------------------</name>
+    <description>
+      <![CDATA[Reports for identifying and troubleshooting problems]]>
+    </description>
+    <query>
+      <![CDATA[
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Animals with no fixes</name>
+    <description>
+      <![CDATA[If a animal has had multiple deployments, and one deployment has fixes, and the other does not, this will report a false positive for the listing the animal with the collar with no fixes]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT A.AnimalId, D.CollarId
+       FROM Animals AS A
+  LEFT JOIN CollarDeployments AS D
+         ON A.ProjectId = D.ProjectId AND A.AnimalId = D.AnimalId
+  LEFT JOIN CollarFixes as F
+         ON D.CollarId = F.CollarId
+      WHERE A.ProjectId = @Project
+        AND F.CollarId IS NULL
+   ORDER BY A.AnimalId
+      ]]>
+    </query>
+  </report>
+  <report>
+    <name>Short Duration Movements</name>
+    <description>
+      <![CDATA[All movement vectors less than 10 minutes for all animals in the project.  One of the end point locations is probably redundant and should be hidden (use the GIS tools)]]>
+    </description>
+    <query>
+      <![CDATA[
+     SELECT AnimalId, StartDate, EndDate, ROUND(Duration*60,2) AS [Duration(min)], ROUND(Distance,0) AS [Distance(meters)]
+       FROM Movements
+      WHERE Duration < (10/60.0)
+        AND ProjectId = @Project
+   ORDER BY AnimalId, StartDate
+	  ]]>
+    </query>
+  </report>
+  <report>
+    <name>Potential Mortalities</name>
+    <description>
+      <![CDATA[Animals that have been moving very slowly (less than 5 meters per hour average) in the last 14 days.  This can yield false positives if the number of fixes is too low.]]>
+    </description>
+    <query>
+      <![CDATA[
+        SELECT *
+          FROM dbo.PotentialMortalities
+         WHERE ProjectId = @Project
+      ]]>
+    </query>
+  </report>
+
+  <report>
+    <name>-----------------------</name>
+    <description>
+      <![CDATA[Reports about file contents]]>
+    </description>
+    <query>
+      <![CDATA[
       ]]>
     </query>
   </report>
@@ -152,49 +206,17 @@
       ]]>
     </query>
   </report>
-  <report>
-    <name>Animals with no fixes</name>
-    <description>
-      <![CDATA[If a animal has had multiple deployments, and one deployment has fixes, and the other does not, this will report a false positive for the listing the animal with the collar with no fixes]]>
-    </description>
-    <query>
-      <![CDATA[
-     SELECT A.AnimalId, D.CollarId
-       FROM Animals AS A
-  LEFT JOIN CollarDeployments AS D
-         ON A.ProjectId = D.ProjectId AND A.AnimalId = D.AnimalId
-  LEFT JOIN CollarFixes as F
-         ON D.CollarId = F.CollarId
-      WHERE A.ProjectId = @Project
-        AND F.CollarId IS NULL
-   ORDER BY A.AnimalId
-      ]]>
-    </query>
-  </report>
-  <report>
-    <name>Potential Mortalities</name>
-    <description>
-      <![CDATA[Animals that have been moving very slowly (less than 5 meters per hour average) in the last 14 days.  This can yield false positives if the number of fixes is too low.]]>
-    </description>
-    <query>
-      <![CDATA[
-        SELECT *
-          FROM dbo.PotentialMortalities
-         WHERE ProjectId = @Project
-      ]]>
-    </query>
-  </report>
+
   <report>
     <name>-----------------------</name>
     <description>
-      <![CDATA[]]>
+      <![CDATA[Really slow reports]]>
     </description>
     <query>
       <![CDATA[
       ]]>
     </query>
   </report>
-
   <report>
     <name>All fix conflicts in the last 30 days (SLOW!!!)</name>
     <description>
