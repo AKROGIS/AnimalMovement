@@ -20,7 +20,7 @@
     <query>
       <![CDATA[
      SELECT CASE WHEN MortalityDate IS NULL THEN 'Alive' ELSE 'Dead' END AS [Status],
-            CASE WHEN D.RetrievalDate IS NULL THEN 'Yes' ELSE 'No' END AS Deployed,
+            CASE WHEN D.DeploymentDate IS NOT NULL AND D.RetrievalDate IS NULL THEN 'Yes' ELSE 'No' END AS Deployed,
             A.*, D.Collarid,
             LEFT(D.DeploymentDate,10) AS DeploymentDate, LEFT(D.RetrievalDate,10) AS RetrievalDate
        FROM Animals AS A
