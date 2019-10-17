@@ -235,8 +235,8 @@
     </description>
     <query>
       <![CDATA[
-     SELECT f.filename, c.collarid, COUNT(*) AS unASsigned_fixes, 
-            LEFT(MIN(x.FixDate), 10) AS first_fix, LEFT(MAX(x.fixdate),10) AS lASt_fix
+     SELECT f.filename AS [Datalog File], c.collarid AS [Collar Id], COUNT(*) AS [Unassigned Fixes], 
+            LEFT(MIN(x.FixDate), 10) AS [First Fix], LEFT(MAX(x.fixdate),10) AS [Last Fix]
        FROM collarfiles AS f
        JOIN collarfiles AS f2
          ON f.FileId = f2.ParentFileId
@@ -249,7 +249,7 @@
         AND c.Manager = @PI
         AND l.FixId IS NULL
    GROUP BY f.filename, c.collarid
-   ORDER BY unASsigned_fixes DESC
+   ORDER BY [Unassigned Fixes] DESC
       ]]>
     </query>
   </report>
