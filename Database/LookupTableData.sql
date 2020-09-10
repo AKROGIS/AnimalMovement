@@ -9,8 +9,10 @@ Telephone: 905-836-6680')
 INSERT [dbo].[LookupCollarManufacturers] ([CollarManufacturer], [Name], [Website], [Description]) VALUES (N'Televilt', N'Tellus GPS systems', N'http://wildlife.followit.se', N'Followit AB, Bandygatan 2, 711 34 Lindesberg; Tel: +46 (0)581-171 90; Fax: +46 (0)581-171 96; E-mail: wildlifesales@followit.se')
 INSERT [dbo].[LookupCollarManufacturers] ([CollarManufacturer], [Name], [Website], [Description]) VALUES (N'Telonics', N'Telonics, Inc.', N'http://www.telonics.com', N'932 E. Impala Avenue Mesa, AZ, 85204-6699 USA Tel: 480-892-4444 FAX: 480-892-9139')
 INSERT [dbo].[LookupCollarManufacturers] ([CollarManufacturer], [Name], [Website], [Description]) VALUES (N'VHF', N'Any VHF collar manufacturer', NULL, NULL)
+GO
 INSERT [dbo].[LookupCollarParameterFileFormats] ([Code], [CollarManufacturer], [Name], [Description]) VALUES (N'A', N'Telonics', N'Telonics Parameter File', N'Telonics Parameter File (*.tpf) for Gen4 GPS/Argos Collars')
 INSERT [dbo].[LookupCollarParameterFileFormats] ([Code], [CollarManufacturer], [Name], [Description]) VALUES (N'B', N'Telonics', N'Telonics PTT Properties File', N'Telonics PTT Properties File (*.ppf) - for Gen3 GPS/Argos Collars')
+GO
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'A', N'Telonics', N'Telonics Gen3 Store On Board', N'This is the output file from the Telonic Data Download Utility software for Gen3 collar download.', N'N', N'Y')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'B', N'Telonics', N'Ed Debevek Sub File', N'This is a portion of a ''B'' file for a single collar', N'N', N'Y')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'C', N'Telonics', N'Telonics Gen4 Output', N'This is the output file from TDC software - either condensed or complete, and transmitted either by Argos or by collar download', N'N', N'Y')
@@ -25,10 +27,12 @@ INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [D
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'L', N'Telonics', N'Old Argos Only CSV', N'Data parsed from format K and used to create format F, archive only, not processed by database, ', N'N', N'N')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'M', N'Televilt', N'Televilt Summary', N'Data provided by biologists for old collars (not a current data file format)', N'N', N'Y')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'N', N'Lotek', N'Lotek Webservice Iridium Download', N'Lotek/Iridium GPS Location data downloaded as CSV from https://webservice.lotek.com', N'N', N'N')
+GO
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Lotek', N'GPS8000')
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Televilt', N'Unknown')
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Telonics', N'Gen3')
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Telonics', N'Gen4')
+GO
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'"programNumber";"platformId";"platformType";"platformModel";"platformName";"platformHexId";"satellite";"bestMsgDate";"duration";"nbMessage";"message120";"bestLevel";"frequency";"locationDate";"latitude";"longitude";"altitude";"locationClass";"gpsSpeed";"gpsHeading";"latitude2";"longitude2";"altitude2";"index";"nopc";"errorRadius";"semiMajor";"semiMinor";"orientation";"hdop";"bestDate";"compression";"type";"alarm";"concatenated";"date";"level"', N'F', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'#fileTypeRecord,fileType', N'H', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'CollarID,', N'G', NULL)
@@ -44,18 +48,23 @@ INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES 
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'Received:  from gemini.argosinc.com', N'K', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'Telonics Data Report', N'C', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'TXDate,TXTime,PTTID,FixNum,FixQual,FixDate,FixTime,Longitude,Latitude', N'D', N'^20([0-9]{2}).[0,1][0-9].[0-3][0-9],[0-2][0-9]:[0-5][0-9]:[0-5][0-9],')
+GO
 INSERT [dbo].[LookupFileStatus] ([Code], [Name], [Description]) VALUES (N'A', N'Active', N'File is archived in the database and used to create movement vectors')
 INSERT [dbo].[LookupFileStatus] ([Code], [Name], [Description]) VALUES (N'I', N'Inactive', N'File is archived in the database, but not used in calculating movement vectors')
+GO
 INSERT [dbo].[LookupGender] ([Sex]) VALUES (N'Female')
 INSERT [dbo].[LookupGender] ([Sex]) VALUES (N'Male')
 INSERT [dbo].[LookupGender] ([Sex]) VALUES (N'Unknown')
+GO
 INSERT [dbo].[LookupHomeRangeExclusionCodes] ([Code], [Description]) VALUES (1, N'Foray')
 INSERT [dbo].[LookupHomeRangeExclusionCodes] ([Code], [Description]) VALUES (2, N'Dispersal/Pre-dispersal')
 INSERT [dbo].[LookupHomeRangeExclusionCodes] ([Code], [Description]) VALUES (3, N'Duplicate Location')
 INSERT [dbo].[LookupHomeRangeExclusionCodes] ([Code], [Description]) VALUES (4, N'Removed from Analysis')
 INSERT [dbo].[LookupHomeRangeExclusionCodes] ([Code], [Description]) VALUES (5, N'Single Wandering Wolf (not dispersing/not a pack foray)')
 INSERT [dbo].[LookupHomeRangeExclusionCodes] ([Code], [Description]) VALUES (6, N'Pack name change needed')
+GO
 INSERT [dbo].[LookupQueryLayerServers] ([Location], [Connection], [Database]) VALUES (N'AKRO', N'INPAKROVMAIS', N'Animal_Movement')
+GO
 INSERT [dbo].[LookupSpecies] ([Species]) VALUES (N'Bear')
 INSERT [dbo].[LookupSpecies] ([Species]) VALUES (N'Caribou')
 INSERT [dbo].[LookupSpecies] ([Species]) VALUES (N'Coyote')
@@ -63,3 +72,4 @@ INSERT [dbo].[LookupSpecies] ([Species]) VALUES (N'Moose')
 INSERT [dbo].[LookupSpecies] ([Species]) VALUES (N'Muskox')
 INSERT [dbo].[LookupSpecies] ([Species]) VALUES (N'Sheep')
 INSERT [dbo].[LookupSpecies] ([Species]) VALUES (N'Wolf')
+GO
