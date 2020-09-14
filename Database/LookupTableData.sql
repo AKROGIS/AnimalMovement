@@ -8,6 +8,7 @@ Canada L3Y 7B5;
 Telephone: 905-836-6680')
 INSERT [dbo].[LookupCollarManufacturers] ([CollarManufacturer], [Name], [Website], [Description]) VALUES (N'Televilt', N'Tellus GPS systems', N'http://wildlife.followit.se', N'Followit AB, Bandygatan 2, 711 34 Lindesberg; Tel: +46 (0)581-171 90; Fax: +46 (0)581-171 96; E-mail: wildlifesales@followit.se')
 INSERT [dbo].[LookupCollarManufacturers] ([CollarManufacturer], [Name], [Website], [Description]) VALUES (N'Telonics', N'Telonics, Inc.', N'http://www.telonics.com', N'932 E. Impala Avenue Mesa, AZ, 85204-6699 USA Tel: 480-892-4444 FAX: 480-892-9139')
+INSERT [dbo].[LookupCollarManufacturers] ([CollarManufacturer], [Name], [Website], [Description]) VALUES (N'Vectronic', N'Vectronic Aerospace GmbH', N'https://www.vectronic-aerospace.com/', N'Carl-Scheele-Str. 12, 12489 Berlin Germany; Tel: +49 30 6789 4990; Email: wildlife@vectronic-aerospace.com')
 INSERT [dbo].[LookupCollarManufacturers] ([CollarManufacturer], [Name], [Website], [Description]) VALUES (N'VHF', N'Any VHF collar manufacturer', NULL, NULL)
 GO
 INSERT [dbo].[LookupCollarParameterFileFormats] ([Code], [CollarManufacturer], [Name], [Description]) VALUES (N'A', N'Telonics', N'Telonics Parameter File', N'Telonics Parameter File (*.tpf) for Gen4 GPS/Argos Collars')
@@ -27,6 +28,9 @@ INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [D
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'L', N'Telonics', N'Old Argos Only CSV', N'Data parsed from format K and used to create format F, archive only, not processed by database, ', N'N', N'N')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'M', N'Televilt', N'Televilt Summary', N'Data provided by biologists for old collars (not a current data file format)', N'N', N'Y')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'N', N'Lotek', N'Lotek Webservice Iridium Download', N'Lotek/Iridium GPS Location data downloaded as CSV from https://webservice.lotek.com', N'N', N'N')
+INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'O', N'Vectronic', N'Vectronic Location Download', N'Vectronic location data downloaded via the HTTP Wildlife API v2', N'N', N'N')
+INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'P', N'Vectronic', N'Vectronic Activity Download', N'Vectronic activity data downloaded via the HTTP Wildlife API v2', N'N', N'N')
+INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'Q', N'Vectronic', N'Vectronic Mortality Download', N'Vectronic mortality data downloaded via the HTTP Wildlife API v2', N'N', N'N')
 GO
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Lotek', N'GPS8000')
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Televilt', N'Unknown')
@@ -35,6 +39,9 @@ INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (
 GO
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'"programNumber";"platformId";"platformType";"platformModel";"platformName";"platformHexId";"satellite";"bestMsgDate";"duration";"nbMessage";"message120";"bestLevel";"frequency";"locationDate";"latitude";"longitude";"altitude";"locationClass";"gpsSpeed";"gpsHeading";"latitude2";"longitude2";"altitude2";"index";"nopc";"errorRadius";"semiMajor";"semiMinor";"orientation";"hdop";"bestDate";"compression";"type";"alarm";"concatenated";"date";"level"', N'F', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'#fileTypeRecord,fileType', N'H', NULL)
+INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'[{"idActivity":', N'P', NULL)
+INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'[{"idMortality":', N'Q', NULL)
+INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'[{"idPosition":', N'O', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'CollarID,', N'G', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'DATE,TIME,LAT,LON,PDOP,FIX', N'M', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'Device ID,Date & Time [GMT],Date & Time [Local],Latitude,Longitude,Altitude,Fix Status,DOP,Temp [C],Main [V],Back [V]', N'N', NULL)
