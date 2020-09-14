@@ -14,6 +14,15 @@ GO
 INSERT [dbo].[LookupCollarParameterFileFormats] ([Code], [CollarManufacturer], [Name], [Description]) VALUES (N'A', N'Telonics', N'Telonics Parameter File', N'Telonics Parameter File (*.tpf) for Gen4 GPS/Argos Collars')
 INSERT [dbo].[LookupCollarParameterFileFormats] ([Code], [CollarManufacturer], [Name], [Description]) VALUES (N'B', N'Telonics', N'Telonics PTT Properties File', N'Telonics PTT Properties File (*.ppf) - for Gen3 GPS/Argos Collars')
 GO
+INSERT [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code], [Name], [Description]) VALUES (N'Vectronic', N'act', N'Activity', NULL)
+INSERT [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code], [Name], [Description]) VALUES (N'Vectronic', N'gps', N'Position', NULL)
+INSERT [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code], [Name], [Description]) VALUES (N'Vectronic', N'mit', N'Mortality Implant', NULL)
+INSERT [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code], [Name], [Description]) VALUES (N'Vectronic', N'mor', N'Mortality', NULL)
+INSERT [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code], [Name], [Description]) VALUES (N'Vectronic', N'prx', N'Proximity', NULL)
+INSERT [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code], [Name], [Description]) VALUES (N'Vectronic', N'sep', N'Separation', NULL)
+INSERT [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code], [Name], [Description]) VALUES (N'Vectronic', N'trap', N'Trap Event', NULL)
+INSERT [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code], [Name], [Description]) VALUES (N'Vectronic', N'vit', N' Vaginal Implant', NULL)
+GO
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'A', N'Telonics', N'Telonics Gen3 Store On Board', N'This is the output file from the Telonic Data Download Utility software for Gen3 collar download.', N'N', N'Y')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'B', N'Telonics', N'Ed Debevek Sub File', N'This is a portion of a ''B'' file for a single collar', N'N', N'Y')
 INSERT [dbo].[LookupCollarFileFormats] ([Code], [CollarManufacturer], [Name], [Description], [ArgosData], [RequiresCollar]) VALUES (N'C', N'Telonics', N'Telonics Gen4 Output', N'This is the output file from TDC software - either condensed or complete, and transmitted either by Argos or by collar download', N'N', N'Y')
@@ -36,6 +45,7 @@ INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Televilt', N'Unknown')
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Telonics', N'Gen3')
 INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Telonics', N'Gen4')
+INSERT [dbo].[LookupCollarModels] ([CollarManufacturer], [CollarModel]) VALUES (N'Vectronic', N'300')
 GO
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'"programNumber";"platformId";"platformType";"platformModel";"platformName";"platformHexId";"satellite";"bestMsgDate";"duration";"nbMessage";"message120";"bestLevel";"frequency";"locationDate";"latitude";"longitude";"altitude";"locationClass";"gpsSpeed";"gpsHeading";"latitude2";"longitude2";"altitude2";"index";"nopc";"errorRadius";"semiMajor";"semiMinor";"orientation";"hdop";"bestDate";"compression";"type";"alarm";"concatenated";"date";"level"', N'F', NULL)
 INSERT [dbo].[LookupCollarFileHeaders] ([Header], [FileFormat], [Regex]) VALUES (N'#fileTypeRecord,fileType', N'H', NULL)

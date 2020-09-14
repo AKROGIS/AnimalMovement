@@ -2632,6 +2632,44 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[CollarKeys](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[CollarKey] [varchar](512) NOT NULL,
+ CONSTRAINT [PK_CollarKeys] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC,
+	[CollarKey] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT SELECT ON [dbo].[CollarKeys] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CollarSensors](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[SensorCode] [varchar](8) NOT NULL,
+	[LastId] [int] NULL,
+	[IsActive] [bit] NOT NULL,
+ CONSTRAINT [PK_CollarSensors] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC,
+	[SensorCode] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT SELECT ON [dbo].[CollarSensors] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[GAAR_Bear_Denning](
 	[BearNo] [int] NOT NULL,
 	[Sex] [nchar](1) NOT NULL,
@@ -2762,6 +2800,24 @@ CREATE TABLE [dbo].[LookupCollarParameterFileFormats](
 ) ON [PRIMARY]
 GO
 GRANT SELECT ON [dbo].[LookupCollarParameterFileFormats] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[LookupCollarSensors](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[Code] [varchar](8) NOT NULL,
+	[Name] [nvarchar](100) NULL,
+	[Description] [nvarchar](500) NULL,
+ CONSTRAINT [PK_LookupCollarSensors] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[Code] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT SELECT ON [dbo].[LookupCollarSensors] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -3141,6 +3197,8 @@ ALTER TABLE [dbo].[Collars] ADD  CONSTRAINT [DF_Collars_Manager]  DEFAULT (origi
 GO
 ALTER TABLE [dbo].[Collars] ADD  CONSTRAINT [DF_Collars_Owner]  DEFAULT ('NPS') FOR [Owner]
 GO
+ALTER TABLE [dbo].[CollarSensors] ADD  CONSTRAINT [DF_CollarSensors_IsActive]  DEFAULT ((0)) FOR [IsActive]
+GO
 ALTER TABLE [dbo].[Projects] ADD  CONSTRAINT [DF_Projects_PrincipalInvestigator]  DEFAULT (original_login()) FOR [ProjectInvestigator]
 GO
 ALTER TABLE [dbo].[Animals]  WITH CHECK ADD  CONSTRAINT [FK_Animals_Gender] FOREIGN KEY([Gender])
@@ -3322,6 +3380,13 @@ ON UPDATE CASCADE
 GO
 ALTER TABLE [dbo].[CollarFixes] CHECK CONSTRAINT [FK_CollarFixes_Collars]
 GO
+ALTER TABLE [dbo].[CollarKeys]  WITH CHECK ADD  CONSTRAINT [FK_CollarKeys_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarKeys] CHECK CONSTRAINT [FK_CollarKeys_Collars]
+GO
 ALTER TABLE [dbo].[CollarParameterFiles]  WITH CHECK ADD  CONSTRAINT [FK_CollarParameterFiles_LookupFileStatus] FOREIGN KEY([Status])
 REFERENCES [dbo].[LookupFileStatus] ([Code])
 ON UPDATE CASCADE
@@ -3368,6 +3433,18 @@ ALTER TABLE [dbo].[Collars]  WITH CHECK ADD  CONSTRAINT [FK_Collars_Managers] FO
 REFERENCES [dbo].[ProjectInvestigators] ([Login])
 GO
 ALTER TABLE [dbo].[Collars] CHECK CONSTRAINT [FK_Collars_Managers]
+GO
+ALTER TABLE [dbo].[CollarSensors]  WITH CHECK ADD  CONSTRAINT [FK_CollarSensors_Collars] FOREIGN KEY([CollarManufacturer], [CollarId])
+REFERENCES [dbo].[Collars] ([CollarManufacturer], [CollarId])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarSensors] CHECK CONSTRAINT [FK_CollarSensors_Collars]
+GO
+ALTER TABLE [dbo].[CollarSensors]  WITH CHECK ADD  CONSTRAINT [FK_CollarSensors_LookupCollarSensors] FOREIGN KEY([CollarManufacturer], [SensorCode])
+REFERENCES [dbo].[LookupCollarSensors] ([CollarManufacturer], [Code])
+GO
+ALTER TABLE [dbo].[CollarSensors] CHECK CONSTRAINT [FK_CollarSensors_LookupCollarSensors]
 GO
 ALTER TABLE [dbo].[HomeRangeExclusions]  WITH CHECK ADD  CONSTRAINT [FK_HomeRangeExclusions_CollarFixes] FOREIGN KEY([FixId])
 REFERENCES [dbo].[CollarFixes] ([FixId])
@@ -3420,6 +3497,11 @@ ALTER TABLE [dbo].[LookupCollarParameterFileFormats]  WITH CHECK ADD  CONSTRAINT
 REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
 GO
 ALTER TABLE [dbo].[LookupCollarParameterFileFormats] CHECK CONSTRAINT [FK_LookupCollarParameterFileFormats_LookupCollarManufacturer]
+GO
+ALTER TABLE [dbo].[LookupCollarSensors]  WITH CHECK ADD  CONSTRAINT [FK_LookupCollarSensors_LookupCollarManufacturers] FOREIGN KEY([CollarManufacturer])
+REFERENCES [dbo].[LookupCollarManufacturers] ([CollarManufacturer])
+GO
+ALTER TABLE [dbo].[LookupCollarSensors] CHECK CONSTRAINT [FK_LookupCollarSensors_LookupCollarManufacturers]
 GO
 ALTER TABLE [dbo].[Movements]  WITH CHECK ADD  CONSTRAINT [FK_Movements_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
