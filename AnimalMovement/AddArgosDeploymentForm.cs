@@ -170,12 +170,10 @@ namespace AnimalMovement
 
         private string ValidateError()
         {
-            var collar = CollarComboBox.SelectedItem as Collar;
-            if (collar == null)
+            if (!(CollarComboBox.SelectedItem is Collar collar))
                 return "You must select a collar";
 
-            var platform = ArgosComboBox.SelectedItem as ArgosPlatform;
-            if (platform == null)
+            if (!(ArgosComboBox.SelectedItem is ArgosPlatform platform))
                 return "You must select an Argos Id";
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MinValue;

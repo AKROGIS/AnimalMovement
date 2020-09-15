@@ -314,8 +314,7 @@ namespace AnimalMovement
         {
             if (DeploymentDataGridView.CurrentRow == null)
                 return;
-            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
-            if (item == null)
+            if (!(DeploymentDataGridView.CurrentRow.DataBoundItem is DeploymentDataItem item))
                 return;
             var form = new CollarDeploymentDetailsForm(item.Deployment, true);
             form.DatabaseChanged += (o, x) => AnimalDataChanged();
@@ -326,8 +325,7 @@ namespace AnimalMovement
         {
             if (DeploymentDataGridView.CurrentRow == null)
                 return;
-            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
-            if (item == null)
+            if (!(DeploymentDataGridView.CurrentRow.DataBoundItem is DeploymentDataItem item))
                 return;
             var form = new AnimalDetailsForm(item.Animal);
             form.DatabaseChanged += (o, x) => AnimalDataChanged();
@@ -671,8 +669,7 @@ namespace AnimalMovement
         {
             if (FilesDataGridView.CurrentRow == null)
                 return;
-            var item = FilesDataGridView.CurrentRow.DataBoundItem as CollarFixesByFileResult;
-            if (item == null)
+            if (!(FilesDataGridView.CurrentRow.DataBoundItem is CollarFixesByFileResult item))
                 return;
             var file = Database.CollarFiles.FirstOrDefault(f => f.FileId == item.FileId);
             if (file == null)
@@ -725,8 +722,7 @@ namespace AnimalMovement
         {
             if (FixConflictsDataGridView.CurrentRow == null)
                 return false;
-            var selectedFix = FixConflictsDataGridView.CurrentRow.DataBoundItem as ConflictingFixesResult;
-            if (selectedFix == null)
+            if (!(FixConflictsDataGridView.CurrentRow.DataBoundItem is ConflictingFixesResult selectedFix))
                 return false;
             bool isEditor = DatabaseFunctions.IsFixEditor(selectedFix.FixId, CurrentUser) ?? false;
             bool isHidden = selectedFix.HiddenBy != null;
@@ -744,8 +740,7 @@ namespace AnimalMovement
         {
             if (FixConflictsDataGridView.CurrentRow == null)
                 return;
-            var selectedFix = FixConflictsDataGridView.CurrentRow.DataBoundItem as ConflictingFixesResult;
-            if (selectedFix == null)
+            if (!(FixConflictsDataGridView.CurrentRow.DataBoundItem is ConflictingFixesResult selectedFix))
                 return;
             if (ExecuteUnhideFix(selectedFix.FixId))
                 FixDataChanged();

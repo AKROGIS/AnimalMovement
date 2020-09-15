@@ -258,8 +258,7 @@ namespace AnimalMovement
 
         private void FormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var format = FormatComboBox.SelectedItem as LookupCollarParameterFileFormat;
-            if (format == null)
+            if (!(FormatComboBox.SelectedItem is LookupCollarParameterFileFormat format))
                 return;
             switch (format.Code)
             {

@@ -100,8 +100,7 @@ namespace ArcMap_Addin
             // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
             foreach (IGeoFeatureLayer layer in layers)
             {
-                var w = ((IDataset) layer).Workspace as ISqlWorkspace;
-                if (w == null)
+                if (!(((IDataset)layer).Workspace is ISqlWorkspace w))
                     continue;
                 //Debug.Print("query = {0}", w.GetQueryDescription("").Query);
                 var connectionProperties = GetProperties(((IWorkspace)w).ConnectionProperties);

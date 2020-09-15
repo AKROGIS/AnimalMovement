@@ -277,8 +277,7 @@ namespace AnimalMovement
         {
             if (DeploymentDataGridView.CurrentRow == null)
                 return;
-            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
-            if (item == null)
+            if (!(DeploymentDataGridView.CurrentRow.DataBoundItem is DeploymentDataItem item))
                 return;
             var form = new CollarDeploymentDetailsForm(item.Deployment, false, true);
             form.DatabaseChanged += (o, x) => CollarDataChanged();
@@ -289,8 +288,7 @@ namespace AnimalMovement
         {
             if (DeploymentDataGridView.CurrentRow == null)
                 return;
-            var item = DeploymentDataGridView.CurrentRow.DataBoundItem as DeploymentDataItem;
-            if (item == null)
+            if (!(DeploymentDataGridView.CurrentRow.DataBoundItem is DeploymentDataItem item))
                 return;
             var form = new CollarDetailsForm(item.Collar);
             form.DatabaseChanged += (o, x) => CollarDataChanged();

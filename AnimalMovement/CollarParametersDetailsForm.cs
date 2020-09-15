@@ -182,8 +182,7 @@ namespace AnimalMovement
         private string ValidateError()
         {
             //We must have a collar
-            var collar = CollarComboBox.SelectedItem as Collar;
-            if (collar == null)
+            if (!(CollarComboBox.SelectedItem is Collar collar))
                 return "No collar selected.";
 
             //We must have a file or a period for Gen3

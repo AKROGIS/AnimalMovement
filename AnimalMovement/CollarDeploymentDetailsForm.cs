@@ -119,13 +119,11 @@ namespace AnimalMovement
         private string ValidateError()
         {
             //We must have a collar
-            var collar = CollarComboBox.SelectedItem as Collar;
-            if (collar == null)
+            if (!(CollarComboBox.SelectedItem is Collar collar))
                 return "You must select a collar";
 
             //We must have a platform
-            var animal = AnimalComboBox.SelectedItem as Animal;
-            if (animal == null)
+            if (!(AnimalComboBox.SelectedItem is Animal animal))
                 return "You must select an animal";
 
             //Check dates

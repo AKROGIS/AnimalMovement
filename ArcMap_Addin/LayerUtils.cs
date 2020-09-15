@@ -77,8 +77,7 @@ namespace ArcMap_Addin
                 if (parent.Layer[i] == layer)
                     return layer.Name;
 
-                var compositeLayer = parent.Layer[i] as ICompositeLayer;
-                if (compositeLayer == null)
+                if (!(parent.Layer[i] is ICompositeLayer compositeLayer))
                     continue;
                 string name = GetFullName(compositeLayer, layer, separator);
                 if (name != null)
@@ -96,8 +95,7 @@ namespace ArcMap_Addin
                 if (parent.Layer[i] == layer)
                     return layer.Name;
 
-                var compositeLayer = parent.Layer[i] as ICompositeLayer;
-                if (compositeLayer == null)
+                if (!(parent.Layer[i] is ICompositeLayer compositeLayer))
                     continue;
                 string name = GetFullName(compositeLayer, layer, separator);
                 if (name != null)

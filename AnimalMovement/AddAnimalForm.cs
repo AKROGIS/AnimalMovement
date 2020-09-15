@@ -179,8 +179,7 @@ namespace AnimalMovement
 
         private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var project = ProjectComboBox.SelectedItem as Project;
-            IsEditor = project != null &&
+            IsEditor = ProjectComboBox.SelectedItem is Project project &&
                        (Functions.IsProjectEditor(project.ProjectId, CurrentUser) ?? false);
             EnableControls();
         }

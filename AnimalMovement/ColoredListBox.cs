@@ -74,9 +74,8 @@ namespace AnimalMovement
 
         private string ItemTextFromDataSource(int index)
         {
-            var list = DataSource as IList;
             var listSource = DataSource as IListSource;
-            object item = list != null
+            object item = DataSource is IList list
                               ? list[index]
                               : (listSource?.GetList()[index]);
             if (item == null)

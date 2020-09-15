@@ -229,8 +229,7 @@ namespace AnimalMovement
 
         private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var project = ProjectComboBox.SelectedItem as Project;
-            if (project != null)
+            if (ProjectComboBox.SelectedItem is Project project)
                 Settings.SetDefaultProject(project.ProjectId);
             EnableUpload();
             RefreshCollarComboBox();

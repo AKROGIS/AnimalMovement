@@ -189,8 +189,7 @@ namespace AnimalMovement
 
         private void ManagerComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var investigator = ManagerComboBox.SelectedItem as ProjectInvestigator;
-            IsEditor = investigator != null &&
+            IsEditor = ManagerComboBox.SelectedItem is ProjectInvestigator investigator &&
                        (Functions.IsInvestigatorEditor(investigator.Login, CurrentUser) ?? false);
             EnableControls();
         }
