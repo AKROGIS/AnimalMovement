@@ -182,7 +182,7 @@ namespace AnimalMovement
             EnableControls();
         }
 
-        private void cancelButton_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
             Close();
         }

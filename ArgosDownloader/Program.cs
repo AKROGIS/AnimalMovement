@@ -61,7 +61,7 @@ namespace ArgosDownloader
                 _emails = new Dictionary<string, string>();
                 _admin = Settings.GetSystemEmail();
                 if (args.Length == 0)
-                    FileDownloader.DownloadAll(exceptionHandler);
+                    FileDownloader.DownloadAll(ExceptionHandler);
                 else
                 {
                     int? days = null;
@@ -77,7 +77,7 @@ namespace ArgosDownloader
                             }
                             catch (Exception ex)
                             {
-                                exceptionHandler(ex, program, null);
+                                ExceptionHandler(ex, program, null);
                             }
                             continue;
                         }
@@ -90,7 +90,7 @@ namespace ArgosDownloader
                             }
                             catch (Exception ex)
                             {
-                                exceptionHandler(ex, null, platform);
+                                ExceptionHandler(ex, null, platform);
                             }
                             continue;
                         }
@@ -110,7 +110,7 @@ namespace ArgosDownloader
                     }
                     if ((args.Length == 1 && (days != null || pi != null)) ||
                         (args.Length == 2 && days != null && pi != null))
-                        FileDownloader.DownloadAll(exceptionHandler, pi, days);
+                        FileDownloader.DownloadAll(ExceptionHandler, pi, days);
                 }
                 SendEmails();
             }
@@ -155,7 +155,7 @@ namespace ArgosDownloader
             return database.ProjectInvestigators.FirstOrDefault(p => p.Login == pi);
         }
 
-        internal static void exceptionHandler(Exception ex, ArgosProgram program, ArgosPlatform platform)
+        internal static void ExceptionHandler(Exception ex, ArgosProgram program, ArgosPlatform platform)
         {
             if (program == null && platform == null)
             {

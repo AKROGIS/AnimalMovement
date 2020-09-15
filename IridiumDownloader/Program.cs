@@ -44,7 +44,7 @@ namespace IridiumDownloader
                         String.Format("Unexpected Exception ({0}) when loading file: {1}", ex.Message, path));
                 }
             }
-            FileProcessor.ProcessAll(exceptionHandler, defaultPi);
+            FileProcessor.ProcessAll(ExceptionHandler, defaultPi);
         }
 
         private static void DownloadAllEmailFilesTo(string downloadFolder)
@@ -189,7 +189,7 @@ namespace IridiumDownloader
             }
         }
 
-        internal static void exceptionHandler(Exception ex, CollarFile file, ArgosPlatform platform)
+        internal static void ExceptionHandler(Exception ex, CollarFile file, ArgosPlatform platform)
         {
             if (file == null)
             {
