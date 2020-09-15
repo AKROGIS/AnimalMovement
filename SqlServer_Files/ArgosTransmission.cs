@@ -15,7 +15,7 @@ namespace SqlServer_Files
     {
 
         #region Private Fields
-        
+
         private List<Byte> _message;
         private readonly List<string> _lines = new List<string>();
 
@@ -39,7 +39,7 @@ namespace SqlServer_Files
         {
             if (_message == null)
                 _message = new List<byte>();
-            _message.AddRange(SoapHexBinary.Parse(hexString).Value); 
+            _message.AddRange(SoapHexBinary.Parse(hexString).Value);
         }
 
         public void AddLine(string line)

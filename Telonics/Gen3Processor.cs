@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Telonics
 {
-    public class Gen3Processor: IProcessor
+    public class Gen3Processor : IProcessor
     {
         #region Public API
 

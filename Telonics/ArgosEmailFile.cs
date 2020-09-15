@@ -70,13 +70,13 @@ namespace Telonics
                     location = tokens.Length < 11
                                    ? null
                                    : new ArgosTransmission.ArgosLocation
-                                       {
-                                           DateTime = DateTime.Parse(tokens[6] + " " + tokens[7]),
-                                           Latitude = Single.Parse(tokens[8]),
-                                           Longitude = Single.Parse(tokens[9]),
-                                           Altitude = Single.Parse(tokens[10]),
-                                           Class = tokens[5][0]
-                                       };
+                                   {
+                                       DateTime = DateTime.Parse(tokens[6] + " " + tokens[7]),
+                                       Latitude = Single.Parse(tokens[8]),
+                                       Longitude = Single.Parse(tokens[9]),
+                                       Altitude = Single.Parse(tokens[10]),
+                                       Class = tokens[5][0]
+                                   };
                     transmission = null;
                     platformheader = line;
                 }
@@ -89,13 +89,13 @@ namespace Telonics
                         var transmissionDateTime = DateTime.Parse(tokens[0] + " " + tokens[1]);
 
                         transmission = new ArgosTransmission
-                            {
-                                LineNumber = lineNumber,
-                                ProgramId = programId,
-                                PlatformId = platformId,
-                                DateTime = transmissionDateTime,
-                                Location = location,
-                            };
+                        {
+                            LineNumber = lineNumber,
+                            ProgramId = programId,
+                            PlatformId = platformId,
+                            DateTime = transmissionDateTime,
+                            Location = location,
+                        };
                         if (platformheader != null)
                         {
                             //only the first transmission in a group gets the header

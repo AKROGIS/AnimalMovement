@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -127,7 +127,7 @@ namespace AnimalMovement
         private void CreateButton_Click(object sender, EventArgs e)
         {
             var argosId = ArgosIdTextBox.Text.NullifyIfEmpty();
-            var program = (ArgosProgram) ArgosProgramComboBox.SelectedItem;
+            var program = (ArgosProgram)ArgosProgramComboBox.SelectedItem;
 
             if (Database.ArgosPlatforms.Any(p => p.ArgosProgram == program && p.PlatformId == argosId))
             {

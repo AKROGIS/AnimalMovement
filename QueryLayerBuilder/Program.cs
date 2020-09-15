@@ -1,18 +1,18 @@
+using ESRI.ArcGIS.Carto;
+using ESRI.ArcGIS.DataSourcesGDB;
+using ESRI.ArcGIS.esriSystem;
+using ESRI.ArcGIS.Geodatabase;
+using ESRI.ArcGIS.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using ESRI.ArcGIS.Carto;
-using ESRI.ArcGIS.Geodatabase;
-using ESRI.ArcGIS.Geometry;
-using ESRI.ArcGIS.esriSystem;
-using ESRI.ArcGIS.DataSourcesGDB;
 
 namespace QueryLayerBuilder
 {
     static class Program
     {
         private static readonly LicenseInitializer LicenseInitializer = new LicenseInitializer();
-    
+
         [STAThread]
         static int Main(string[] args)
         {
@@ -22,7 +22,7 @@ namespace QueryLayerBuilder
 #else
             const esriLicenseProductCode productCode = esriLicenseProductCode.esriLicenseProductCodeAdvanced;
 #endif
-            if (!LicenseInitializer.InitializeApplication(new [] { productCode },
+            if (!LicenseInitializer.InitializeApplication(new[] { productCode },
                                                           new esriLicenseExtensionCode[] { }))
             {
                 Console.WriteLine(LicenseInitializer.LicenseMessage());
@@ -61,7 +61,7 @@ namespace QueryLayerBuilder
                         LicenseInitializer.ShutdownApplication();
                         return 3;
                     }
-                    MultipleQueryLayer(args[1], args[2], args.Length > 3 ?  args[3] : "");
+                    MultipleQueryLayer(args[1], args[2], args.Length > 3 ? args[3] : "");
                     break;
                 case 'p': //Prebuilt
                     if (args.Length < 3)
@@ -108,7 +108,7 @@ namespace QueryLayerBuilder
                                  BuildSpecialQueryLayer("No Movement Points", connection, predicate)
                              };
             var layer = BuildLayerGroup(layers);
-            layer.Name = System.IO.Path.GetFileNameWithoutExtension(layerFilePath) ;
+            layer.Name = System.IO.Path.GetFileNameWithoutExtension(layerFilePath);
             SaveLayerFile(layerFilePath, layer);
         }
 

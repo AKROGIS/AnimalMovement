@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace Telonics
 {
-    public class Gps8000Processor: IProcessor
+    public class Gps8000Processor : IProcessor
     {
         #region Public API
 
@@ -223,14 +223,14 @@ namespace Telonics
             }
 
             return (from item in data
-                where item.GpsData != null
-                select new ArgosFix
-                {
-                    ConditionCode = ArgosConditionCode.Good,
-                    Longitude = item.GpsData.Value.Lon,
-                    Latitude = item.GpsData.Value.Lat,
-                    DateTime = item.GpsData.Value.Timestamp
-                }).ToArray();
+                    where item.GpsData != null
+                    select new ArgosFix
+                    {
+                        ConditionCode = ArgosConditionCode.Good,
+                        Longitude = item.GpsData.Value.Lon,
+                        Latitude = item.GpsData.Value.Lat,
+                        DateTime = item.GpsData.Value.Timestamp
+                    }).ToArray();
         }
 
         private static LotekData MortalityOrLocationReader(IEnumerable<byte> data)
@@ -392,18 +392,18 @@ namespace Telonics
                                             0xae,0xa9,0xa0,0xa7,0xb2,0xb5,0xbc,0xbb,0x96,0x91,0x98,0x9f,0x8a,0x8d,0x84,0x83,
                                             0xde,0xd9,0xd0,0xd7,0xc2,0xc5,0xcc,0xcb,0xe6,0xe1,0xe8,0xef,0xfa,0xfd,0xf4,0xf3
                                         };
-        
+
         private static byte CalcCrc8(IEnumerable<byte> data)
         {
             byte crc = 0;
-    	    foreach (byte ele in data) 
-	        {
+            foreach (byte ele in data)
+            {
                 crc ^= ele;
                 crc = CrcTable[crc];
-	        }
+            }
             return crc;
         }
-        
+
         #endregion
     }
 

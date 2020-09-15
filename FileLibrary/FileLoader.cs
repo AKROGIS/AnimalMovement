@@ -1,11 +1,11 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using DataModel;
 using Telonics;
 
 namespace FileLibrary
@@ -38,22 +38,22 @@ namespace FileLibrary
             if (results != null)
             {
                 file = new CollarFile
-                    {
-                        Owner = program.Manager,
-                        FileName = "program_" + program.ProgramId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
-                        Status = 'A',
-                        Contents = results.ToBytes()
-                    };
+                {
+                    Owner = program.Manager,
+                    FileName = "program_" + program.ProgramId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
+                    Status = 'A',
+                    Contents = results.ToBytes()
+                };
                 database.CollarFiles.InsertOnSubmit(file);
             }
             //Linq to SQL does not return the PK (timestamp) of the new ArgosDownload object, so don't use it in this data context
             var log = new ArgosDownload
-                {
-                    ProgramId = program.ProgramId,
-                    CollarFile = file,
-                    Days = days,
-                    ErrorMessage = errors
-                };
+            {
+                ProgramId = program.ProgramId,
+                CollarFile = file,
+                Days = days,
+                ErrorMessage = errors
+            };
             database.ArgosDownloads.InsertOnSubmit(log);
             database.SubmitChanges();
             //Linq TO SQL Insert with SPROC dos not set associations, and provides not partial methods to expand
@@ -81,22 +81,22 @@ namespace FileLibrary
             if (results != null)
             {
                 file = new CollarFile
-                    {
-                        Owner = platform.ArgosProgram.Manager,
-                        FileName = "platform_" + platform.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
-                        Status = 'A',
-                        Contents = results.ToBytes()
-                    };
+                {
+                    Owner = platform.ArgosProgram.Manager,
+                    FileName = "platform_" + platform.PlatformId + "_" + DateTime.Now.ToString("yyyyMMdd") + ".aws",
+                    Status = 'A',
+                    Contents = results.ToBytes()
+                };
                 database.CollarFiles.InsertOnSubmit(file);
             }
             //Linq to SQL does not return the PK (timestamp) of the new ArgosDownload object, so don't use it in this data context
             var log = new ArgosDownload
-                {
-                    PlatformId = platform.PlatformId,
-                    CollarFile = file,
-                    Days = days,
-                    ErrorMessage = errors
-                };
+            {
+                PlatformId = platform.PlatformId,
+                CollarFile = file,
+                Days = days,
+                ErrorMessage = errors
+            };
             database.ArgosDownloads.InsertOnSubmit(log);
             database.SubmitChanges();
             //Linq TO SQL Insert with SPROC dos not set associations, and provides not partial methods to expand
@@ -244,7 +244,8 @@ namespace FileLibrary
         /// The file's collar must be in the database or null is returned.
         /// No exceptions are thrown.  Null is returned instead.
         /// </summary>
-        public Collar FileCollar {
+        public Collar FileCollar
+        {
             get { return LazyFileCollar.Value; }
         }
 
@@ -334,13 +335,13 @@ namespace FileLibrary
                                          char status, bool allowDups)
         {
             var fileLoader = new FileLoader(filePath)
-                {
-                    Project = project,
-                    Owner = owner,
-                    Collar = collar,
-                    Status = status,
-                    AllowDuplicates = allowDups
-                };
+            {
+                Project = project,
+                Owner = owner,
+                Collar = collar,
+                Status = status,
+                AllowDuplicates = allowDups
+            };
             var file = fileLoader.Load();
             if (file.LookupCollarFileFormat.ArgosData == 'Y' || file.Format == 'H')
                 FileProcessor.ProcessFile(file);
@@ -545,7 +546,7 @@ namespace FileLibrary
                     var tokens = line.Split(',');
                     return tokens[indexOfData];
                 }
-                if (line.StartsWith("#") && line.Contains(','+searchFieldName+','))
+                if (line.StartsWith("#") && line.Contains(',' + searchFieldName + ','))
                 {
                     var tokens = line.Split(',');
                     indexOfData = new List<string>(tokens).IndexOf(searchFieldName);
@@ -559,7 +560,7 @@ namespace FileLibrary
         {
             using (var stream = new MemoryStream(bytes, 0, bytes.Length))
             using (var reader = new StreamReader(stream, enc))
-                while(reader.Peek() >= 0)
+                while (reader.Peek() >= 0)
                     yield return reader.ReadLine();
         }
 

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -38,35 +38,35 @@ namespace AnimalMovement
         private void MakeLists()
         {
             _myProjects = (from p in Database.Projects
-                          where p.ProjectInvestigator == CurrentUser ||
-                                p.ProjectEditors.Any(u => u.Editor == CurrentUser)
-                          select new
-                              {
-                                  p.ProjectId,
-                                  p.ProjectName,
-                                  Lead = p.ProjectInvestigator1.Name,
-                                  p.UnitCode,
-                                  p.Description,
-                                  CanDelete =
-                                     (p.ProjectInvestigator == CurrentUser || 
-                                      p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser))
-                                     && !p.Animals.Any() && !p.CollarFiles.Any(),
-                                  Project = p
-                              }).ToList();
-            _allProjects = (from p in Database.Projects
+                           where p.ProjectInvestigator == CurrentUser ||
+                                 p.ProjectEditors.Any(u => u.Editor == CurrentUser)
                            select new
-                               {
-                                   p.ProjectId,
-                                   p.ProjectName,
-                                   Lead = p.ProjectInvestigator1.Name,
-                                   p.UnitCode,
-                                   p.Description,
-                                   CanDelete =
-                                     (p.ProjectInvestigator == CurrentUser ||
-                                      p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser))
-                                     && !p.Animals.Any() && !p.CollarFiles.Any(),
-                                   Project = p
-                               }).ToList();
+                           {
+                               p.ProjectId,
+                               p.ProjectName,
+                               Lead = p.ProjectInvestigator1.Name,
+                               p.UnitCode,
+                               p.Description,
+                               CanDelete =
+                                      (p.ProjectInvestigator == CurrentUser ||
+                                       p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser))
+                                      && !p.Animals.Any() && !p.CollarFiles.Any(),
+                               Project = p
+                           }).ToList();
+            _allProjects = (from p in Database.Projects
+                            select new
+                            {
+                                p.ProjectId,
+                                p.ProjectName,
+                                Lead = p.ProjectInvestigator1.Name,
+                                p.UnitCode,
+                                p.Description,
+                                CanDelete =
+                                      (p.ProjectInvestigator == CurrentUser ||
+                                       p.ProjectInvestigator1.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser))
+                                      && !p.Animals.Any() && !p.CollarFiles.Any(),
+                                Project = p
+                            }).ToList();
         }
 
         private void SetUpForm()
@@ -138,7 +138,7 @@ namespace AnimalMovement
         {
             foreach (Project project in
                 ProjectsGridView.SelectedRows.Cast<DataGridViewRow>()
-                                .Where(row => (bool) row.Cells["CanDelete"].Value)
+                                .Where(row => (bool)row.Cells["CanDelete"].Value)
                                 .Select(row => row.Cells["Project"].Value))
                 Database.Projects.DeleteOnSubmit(project);
             if (SubmitChanges())

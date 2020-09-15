@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 using Telonics;
 
 namespace AnimalMovement
@@ -200,7 +200,7 @@ namespace AnimalMovement
                                         : (DateTime?)null;
             Program.EndDate = EndDateTimePicker.Checked
                                   ? EndDateTimePicker.Value.ToUniversalTime()
-                                  : (DateTime?) null;
+                                  : (DateTime?)null;
             Program.Active = ActiveCheckBox.CheckState == CheckState.Indeterminate ? (bool?)null : ActiveCheckBox.Checked;
             Program.Notes = NotesTextBox.Text.NullifyIfEmpty();
         }
@@ -290,7 +290,7 @@ namespace AnimalMovement
             DeletePlatformButton.Enabled = IsEditor && !IsEditMode &&
                                            PlatformsGridView.SelectedRows.Cast<DataGridViewRow>()
                                                             .Any(row =>
-                                                                 !((ArgosPlatform) row.DataBoundItem).ArgosDeployments
+                                                                 !((ArgosPlatform)row.DataBoundItem).ArgosDeployments
                                                                                                      .Any());
             InfoPlatformButton.Enabled = !IsEditMode && PlatformsGridView.SelectedRows.Count == 1;
             AddMissingPlatformsButton.Enabled = IsEditor && !IsEditMode;

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -46,15 +46,15 @@ namespace AnimalMovement
         private void LoadDefaultFormContents()
         {
             var argosQuery = from platform in Database.ArgosPlatforms
-                             where platform.ArgosProgram.Manager == CurrentUser || 
+                             where platform.ArgosProgram.Manager == CurrentUser ||
                              platform.ArgosProgram.ProjectInvestigator.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser)
                              select platform;
             ArgosComboBox.DataSource = argosQuery.ToList();
             ArgosComboBox.SelectedItem = ArgosDeployment.ArgosPlatform;
             ArgosComboBox.DisplayMember = "PlatformId";
             var collarQuery = from collar in Database.Collars
-                             where collar.Manager == ArgosDeployment.Collar.Manager
-                             select collar;
+                              where collar.Manager == ArgosDeployment.Collar.Manager
+                              select collar;
             var collars = collarQuery.ToList();
             CollarComboBox.DataSource = collars;
             CollarComboBox.SelectedItem =
@@ -87,7 +87,7 @@ namespace AnimalMovement
                    (ArgosDeployment.StartDate != null && (!StartDateTimePicker.Checked ||
                     StartDateTimePicker.Value != ArgosDeployment.StartDate.Value.ToLocalTime())) ||
                    (ArgosDeployment.EndDate == null && EndDateTimePicker.Checked) ||
-                   (ArgosDeployment.EndDate != null &&  (!EndDateTimePicker.Checked ||
+                   (ArgosDeployment.EndDate != null && (!EndDateTimePicker.Checked ||
                     EndDateTimePicker.Value != ArgosDeployment.EndDate.Value.ToLocalTime()));
         }
 
@@ -112,7 +112,7 @@ namespace AnimalMovement
                 return "No Argos Id selected.";
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : DateTime.MinValue;
-            var end   =   EndDateTimePicker.Checked ?   EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
+            var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
                 return "The end date must be after the start date";
 
@@ -122,7 +122,7 @@ namespace AnimalMovement
                                             DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
                                                          deployment.EndDate ?? DateTime.MaxValue, start, end)))
                 return "This collar has another Argos Id during your date range.";
-            
+
             //An Argos Platform cannot be on two collars at the same time.
             //I must create a list, because LinqToSql cannot translate the second lambda to SQL
             if (platform.ArgosDeployments.Any(deployment =>
@@ -141,10 +141,10 @@ namespace AnimalMovement
 
         private bool UpdateDeployment()
         {
-            ArgosDeployment.Collar = (Collar) CollarComboBox.SelectedItem;
+            ArgosDeployment.Collar = (Collar)CollarComboBox.SelectedItem;
             ArgosDeployment.ArgosPlatform = (ArgosPlatform)ArgosComboBox.SelectedItem;
-            ArgosDeployment.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
-            ArgosDeployment.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : (DateTime?) null;
+            ArgosDeployment.StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : (DateTime?)null;
+            ArgosDeployment.EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : (DateTime?)null;
 
             return SubmitChanges();
         }

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using DataModel;
 using Telonics;
 
 namespace FileLibrary
@@ -33,8 +33,8 @@ namespace FileLibrary
                      .Concat(views.NeverProcessedIdfFiles.Select(x => x.FileId)))
             {
                 var file = database.CollarFiles.First(f => f.FileId == fileId);
-                if (pi != null && 
-                    (file.ProjectInvestigator == null || file.ProjectInvestigator.Login != pi.Login) && 
+                if (pi != null &&
+                    (file.ProjectInvestigator == null || file.ProjectInvestigator.Login != pi.Login) &&
                     (file.Project == null || file.Project.ProjectInvestigator1.Login != pi.Login))
                     continue;
                 try
@@ -140,8 +140,8 @@ namespace FileLibrary
                 return;
             }
             var collar = database.Collars.FirstOrDefault(
-                    c => c.CollarManufacturer == idfLink.CollarManufacturer && 
-                        (c.CollarId == idfLink.CollarId || c.CollarId == idfLink.CollarId.Substring(0,6)));
+                    c => c.CollarManufacturer == idfLink.CollarManufacturer &&
+                        (c.CollarId == idfLink.CollarId || c.CollarId == idfLink.CollarId.Substring(0, 6)));
             if (collar == null)
             {
                 LogGeneralMessage("No collar found.  Skipping file.");
@@ -290,17 +290,20 @@ namespace FileLibrary
             var data = Encoding.UTF8.GetBytes(String.Join(Environment.NewLine, lines) + Environment.NewLine);
             var filename = Path.GetFileNameWithoutExtension(file.FileName) + "_" + parameters.CollarId + ".csv";
             var fileLoader = new FileLoader(filename, data)
+            {
+                Project = file.Project,
+                Owner = file.ProjectInvestigator,
+                Collar = new Collar
                 {
-                    Project = file.Project,
-                    Owner = file.ProjectInvestigator,
-                    Collar = new Collar {CollarManufacturer = parameters.CollarManufacturer,
-                                         CollarId = parameters.CollarId},
-                    Status = file.Status,
-                    ParentFileId = file.FileId,
-                    ArgosDeploymentId = parameters.DeploymentId,
-                    CollarParameterId = parameters.ParameterId,
-                    AllowDuplicates = true
-                };
+                    CollarManufacturer = parameters.CollarManufacturer,
+                    CollarId = parameters.CollarId
+                },
+                Status = file.Status,
+                ParentFileId = file.FileId,
+                ArgosDeploymentId = parameters.DeploymentId,
+                CollarParameterId = parameters.ParameterId,
+                AllowDuplicates = true
+            };
             fileLoader.Load();
             var message =
                 String.Format(
@@ -463,15 +466,15 @@ namespace FileLibrary
                     Debug.Print("Unable to log to file " + ex.Message);
                 }
             var issue = new ArgosFileProcessingIssue
-                {
-                    FileId = fileid,
-                    Issue = message,
-                    PlatformId = platform,
-                    CollarManufacturer = collarMfgr,
-                    CollarId = collarId,
-                    FirstTransmission = firstTransmission,
-                    LastTransmission = lastTransmission
-                };
+            {
+                FileId = fileid,
+                Issue = message,
+                PlatformId = platform,
+                CollarManufacturer = collarMfgr,
+                CollarId = collarId,
+                FirstTransmission = firstTransmission,
+                LastTransmission = lastTransmission
+            };
             var database = new AnimalMovementDataContext();
             database.ArgosFileProcessingIssues.InsertOnSubmit(issue);
             database.SubmitChanges();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
@@ -6,7 +7,6 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 //TODO: Finish this wizard
 

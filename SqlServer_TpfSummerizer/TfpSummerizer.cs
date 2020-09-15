@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Server;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -7,7 +8,6 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Microsoft.SqlServer.Server;
 
 // See http://msdn.microsoft.com/en-us/library/ms131103.aspx
 // for more information on creating CLR Table-Valued Functions
@@ -81,7 +81,7 @@ namespace SqlServer_TpfSummerizer
                                    out SqlDouble frequency,
                                    out DateTime timeStamp)
         {
-            var row = (Row) inputObject;
+            var row = (Row)inputObject;
             fileId = row.FileId;
             ctn = row.Collar.Ctn;
             platform = row.Collar.Platform;

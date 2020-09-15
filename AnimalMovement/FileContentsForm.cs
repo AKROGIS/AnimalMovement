@@ -28,7 +28,7 @@ namespace AnimalMovement
             SaveFileDialog.FileName = Text;
             SaveFileDialog.ShowDialog(this);
             var file = File.Create(SaveFileDialog.FileName);
-            file.Write(_contents,0,_contents.Length);
+            file.Write(_contents, 0, _contents.Length);
             file.Close();
         }
     }

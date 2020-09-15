@@ -89,13 +89,13 @@ namespace SqlServer_Files
                         var transmissionDateTime = DateTime.Parse(tokens[0] + " " + tokens[1]);
 
                         transmission = new ArgosTransmission
-                            {
-                                LineNumber = lineNumber,
-                                ProgramId = programId,
-                                PlatformId = platformId,
-                                DateTime = transmissionDateTime,
-                                Location = location,
-                            };
+                        {
+                            LineNumber = lineNumber,
+                            ProgramId = programId,
+                            PlatformId = platformId,
+                            DateTime = transmissionDateTime,
+                            Location = location,
+                        };
                         if (platformheader != null)
                         {
                             //only the first transmission in a group gets the header

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
-using DataModel;
+﻿using DataModel;
 using FileLibrary;
+using System;
+using System.Linq;
 
 namespace ArgosProcessor
 {

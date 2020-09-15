@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using FileLibrary;
+using System;
 using System.IO;
 using System.Linq;
-using DataModel;
-using FileLibrary;
 
 namespace CollarFileLoader
 {

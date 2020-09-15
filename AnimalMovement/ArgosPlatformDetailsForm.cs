@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -183,9 +183,9 @@ namespace AnimalMovement
 
         private void UpdateDataSource()
         {
-            Platform.ArgosProgram = (ArgosProgram) ArgosProgramComboBox.SelectedItem;
+            Platform.ArgosProgram = (ArgosProgram)ArgosProgramComboBox.SelectedItem;
             Platform.DisposalDate = DisposalDateTimePicker.Checked
-                                        ? (DateTime?) DisposalDateTimePicker.Value.ToUniversalTime()
+                                        ? (DateTime?)DisposalDateTimePicker.Value.ToUniversalTime()
                                         : null;
             Platform.Active = ActiveCheckBox.Checked;
             Platform.Notes = NotesTextBox.Text.NullifyIfEmpty();
@@ -264,7 +264,7 @@ namespace AnimalMovement
 
         private void AddCollarButton_Click(object sender, EventArgs e)
         {
-            var form = new AddArgosDeploymentForm(null,Platform);
+            var form = new AddArgosDeploymentForm(null, Platform);
             form.DatabaseChanged += (o, x) => CollarDataChanged();
             form.Show(this);
         }
@@ -273,7 +273,7 @@ namespace AnimalMovement
         {
             var deployments =
                 CollarsDataGridView.SelectedRows.Cast<DataGridViewRow>()
-                                   .Select(row => (ArgosDeployment) row.Cells[0].Value)
+                                   .Select(row => (ArgosDeployment)row.Cells[0].Value)
                                    .ToList();
             if (deployments.Any(p => p.CollarFiles.Any()))
             {
@@ -334,14 +334,14 @@ namespace AnimalMovement
             var views = new AnimalMovementViews();
 
             ParametersDataGridView.DataSource = views.AllTpfFileDatas.Where(t => t.PlatformId == Platform.PlatformId).Select(t => new
-                                                    {
-                                                        t.FileId,
-                                                        t.FileName,
-                                                        t.Status,
-                                                        t.CTN,
-                                                        t.Frequency,
-                                                        StartDate = t.TimeStamp,
-                                                    }).ToList();
+            {
+                t.FileId,
+                t.FileName,
+                t.Status,
+                t.CTN,
+                t.Frequency,
+                StartDate = t.TimeStamp,
+            }).ToList();
             ParametersDataGridView.Columns[5].HeaderText = "Start Date (UTC)";
         }
 
@@ -377,12 +377,12 @@ namespace AnimalMovement
         private void SetUpDownloadsTab()
         {
             DownloadsDataGridView.DataSource = Platform.ArgosDownloads.Select(d => new
-                {
-                    d.TimeStamp,
-                    d.Days,
-                    d.CollarFile,
-                    d.ErrorMessage
-                }).OrderByDescending(x => x.TimeStamp).ToList();
+            {
+                d.TimeStamp,
+                d.Days,
+                d.CollarFile,
+                d.ErrorMessage
+            }).OrderByDescending(x => x.TimeStamp).ToList();
             EnableDownloadsControls();
         }
 
@@ -430,10 +430,10 @@ namespace AnimalMovement
         private void SetUpIssuesTab()
         {
             ProcessingIssuesDataGridView.DataSource = Platform.ArgosFileProcessingIssues.Select(i => new
-                {
-                    i.CollarFile,
-                    i.Issue
-                }).ToList();
+            {
+                i.CollarFile,
+                i.Issue
+            }).ToList();
         }
 
         private void IssueDataChanged()
@@ -479,11 +479,11 @@ namespace AnimalMovement
         private void SetUpTransmissionsTab()
         {
             TransmissionsDataGridView.DataSource = Platform.ArgosFilePlatformDates.Select(t => new
-                {
-                    t.CollarFile,
-                    t.FirstTransmission,
-                    t.LastTransmission
-                }).ToList();
+            {
+                t.CollarFile,
+                t.FirstTransmission,
+                t.LastTransmission
+            }).ToList();
             TransmissionsDataGridView.Columns[0].HeaderText = "Collar File";
             TransmissionsDataGridView.Columns[1].HeaderText = "First Transmission";
             TransmissionsDataGridView.Columns[2].HeaderText = "Last Transmission";
@@ -519,13 +519,13 @@ namespace AnimalMovement
         private void SetUpDerivedDataTab()
         {
             DerivedDataGridView.DataSource = Platform.ArgosDeployments.SelectMany(d => d.CollarFiles).Select(f => new
-                {
-                    f,
-                    f.LookupCollarFileFormat.Name,
-                    f.Status,
-                    f.Collar,
-                    Parent = f.ParentFile,
-                }).ToList();
+            {
+                f,
+                f.LookupCollarFileFormat.Name,
+                f.Status,
+                f.Collar,
+                Parent = f.ParentFile,
+            }).ToList();
             DerivedDataGridView.Columns[0].HeaderText = "Derived File";
             DerivedDataGridView.Columns[1].HeaderText = "Format";
             DerivedDataGridView.Columns[2].HeaderText = "Status";

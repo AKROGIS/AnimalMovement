@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -149,7 +149,7 @@ namespace AnimalMovement
         {
             if (Collar.DisposalDate == null)
             {
-                DisposalDateTimePicker.Value = DateTime.Now.Date  + TimeSpan.FromHours(12);
+                DisposalDateTimePicker.Value = DateTime.Now.Date + TimeSpan.FromHours(12);
                 DisposalDateTimePicker.CustomFormat = " ";
             }
             else
@@ -386,7 +386,7 @@ namespace AnimalMovement
         {
             var deployments =
                 ArgosDataGridView.SelectedRows.Cast<DataGridViewRow>()
-                                 .Select(row => (ArgosDeployment) row.Cells[0].Value)
+                                 .Select(row => (ArgosDeployment)row.Cells[0].Value)
                                  .ToList();
             if (deployments.Any(p => p.CollarFiles.Any()))
             {
@@ -450,23 +450,24 @@ namespace AnimalMovement
                         Collar.CollarParameters.Select(
                             p =>
                             new
-                                {
-                                    Parameter = p,
-                                    Period = p.Gen3Period == null
+                            {
+                                Parameter = p,
+                                Period = p.Gen3Period == null
                                                  ? null
-                                                 : (p.Gen3Period%60 == 0
-                                                        ? p.Gen3Period/60 + " hrs"
+                                                 : (p.Gen3Period % 60 == 0
+                                                        ? p.Gen3Period / 60 + " hrs"
                                                         : p.Gen3Period + " min"),
-                                    File = p.CollarParameterFile?.FileName,
-                                    Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
-                                    End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g"),
-                                    Data = p.CollarFiles.Any()
-                                }).ToList();
+                                File = p.CollarParameterFile?.FileName,
+                                Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
+                                End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g"),
+                                Data = p.CollarFiles.Any()
+                            }).ToList();
                     ParametersDataGridView.Columns[5].HeaderText = "Has Derived Data";
                     break;
                 case "Gen4":
                     ParametersDataGridView.DataSource =
-                        Collar.CollarParameters.Select(p => new {
+                        Collar.CollarParameters.Select(p => new
+                        {
                             Parameter = p,
                             File = p.CollarParameterFile?.FileName,
                             Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
@@ -487,7 +488,7 @@ namespace AnimalMovement
             DeleteParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count > 0;
             EditParameterButton.Enabled = !IsEditMode && IsEditor && ParametersDataGridView.SelectedRows.Count == 1;
             InfoParameterButton.Enabled = !IsEditMode && ParametersDataGridView.SelectedRows.Count == 1 && //has a file
-                                          ((CollarParameter) ParametersDataGridView.SelectedRows[0].Cells[0].Value)
+                                          ((CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[0].Value)
                                               .CollarParameterFile != null;
         }
 
@@ -515,7 +516,7 @@ namespace AnimalMovement
         {
             var parameters =
                 ParametersDataGridView.SelectedRows.Cast<DataGridViewRow>()
-                                      .Select(row => (CollarParameter) row.Cells[0].Value)
+                                      .Select(row => (CollarParameter)row.Cells[0].Value)
                                       .ToList();
             bool abort = false;
             if (parameters.Any(p => p.CollarFiles.Any()))
@@ -583,14 +584,14 @@ namespace AnimalMovement
                           ? tpfList.Where(t => t.CTN.Length >= 6 && t.CTN.Substring(0, 6) == Collar.CollarId).ToList()
                           : tpfList.Where(t => t.CTN == Collar.CollarId).ToList();
             TpfDataGridView.DataSource = tpfList.Select(t => new
-                                                    {
-                                                        t.FileId,
-                                                        t.FileName,
-                                                        t.Status,
-                                                        t.CTN,
-                                                        t.Frequency,
-                                                        StartDate = t.TimeStamp,
-                                                    }).ToList();
+            {
+                t.FileId,
+                t.FileName,
+                t.Status,
+                t.CTN,
+                t.Frequency,
+                StartDate = t.TimeStamp,
+            }).ToList();
             TpfDataGridView.Columns[5].HeaderText = "Start Date (UTC)";
         }
 

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 //TODO - Add Region Filter ?
 //TODO - Cleanup and Simplify the form
@@ -47,7 +47,7 @@ namespace AnimalMovement
             Animals = Database.Animals.ToList();
             Species = Database.LookupSpecies.ToList();
             LoadDatabaseList();
-            LoadProjectsList(); 
+            LoadProjectsList();
             LoadSpeciesList();
             LoadAnimalsList();
             LoadDefaultDates();

@@ -108,7 +108,7 @@ namespace Telonics
         /// <param name="password">The user's password</param>
         /// <param name="error">Contains any errors encountered; null with no errors</param>
         /// <returns>Returns the results from the web server.  If null check the error output parameter</returns>
-        public static IEnumerable<Tuple<string,string>> GetPlatformList(string username, string password, out string error)
+        public static IEnumerable<Tuple<string, string>> GetPlatformList(string username, string password, out string error)
         {
             error = CheckParameters(username, password, "no selector required", MinDays);
             if (error != null)
@@ -125,8 +125,8 @@ namespace Telonics
                     program.Descendants("platform")
                            .Select(
                                platform =>
-                               new Tuple<string, string>((string) program.Element("programNumber"),
-                                                         (string) platform.Element("platformId"))));
+                               new Tuple<string, string>((string)program.Element("programNumber"),
+                                                         (string)platform.Element("platformId"))));
             }
             return list;
         }

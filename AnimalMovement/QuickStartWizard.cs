@@ -1,7 +1,7 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -126,7 +126,7 @@ namespace AnimalMovement
             InstructionsRichTextBox.Text = "Create a Argos Program";
             NextButton.Click -= NextButton_Click;
             NextButton.Click += AddProgram_Click;
-       }
+        }
 
         private void AddProgram_Click(object sender, EventArgs e)
         {

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -30,7 +30,7 @@ namespace AnimalMovement
         {
             InvestigatorsGridView.DataSource = Database.ProjectInvestigators;
             InvestigatorsGridView.Columns[0].Visible = false;
-            InvestigatorsGridView.Sort(InvestigatorsGridView.Columns[1],ListSortDirection.Ascending);
+            InvestigatorsGridView.Sort(InvestigatorsGridView.Columns[1], ListSortDirection.Ascending);
             SelectInvestigatorRow(CurrentUser);
             EnableControls();
         }

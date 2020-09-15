@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -58,9 +58,9 @@ namespace AnimalMovement
             LoadDatePickers();
             Gen3TimeUnitComboBox.SelectedIndex = 1; // minutes
             Gen3PeriodTextBox.Text = CollarParameter.Gen3Period.ToString();
-            if (CollarParameter.Gen3Period != null && CollarParameter.Gen3Period%60 == 0) // use hours
+            if (CollarParameter.Gen3Period != null && CollarParameter.Gen3Period % 60 == 0) // use hours
             {
-                Gen3PeriodTextBox.Text = (CollarParameter.Gen3Period/60).ToString();
+                Gen3PeriodTextBox.Text = (CollarParameter.Gen3Period / 60).ToString();
                 Gen3TimeUnitComboBox.SelectedIndex = 0;
             }
         }
@@ -68,7 +68,7 @@ namespace AnimalMovement
         private void LoadFileComboBox()
         {
             if (LockFile)
-                FileComboBox.DataSource = new[] {CollarParameter.CollarParameterFile};
+                FileComboBox.DataSource = new[] { CollarParameter.CollarParameterFile };
             else
                 switch (CollarParameter.Collar.CollarModel)
                 {
@@ -104,7 +104,7 @@ namespace AnimalMovement
         private void LoadCollarComboBox()
         {
             if (LockCollar)
-                CollarComboBox.DataSource = new[] {CollarParameter.Collar};
+                CollarComboBox.DataSource = new[] { CollarParameter.Collar };
             else
                 CollarComboBox.DataSource = from collar in Database.Collars
                                             where (collar.Manager == CurrentUser ||
@@ -223,7 +223,7 @@ namespace AnimalMovement
 
         private string ValidateWarning()
         {
-            var collar = (Collar) CollarComboBox.SelectedItem;
+            var collar = (Collar)CollarComboBox.SelectedItem;
             if (collar.CollarModel == "Gen3" && FileComboBox.SelectedItem != null)
                 return "Warning: Argos data for collars with a PPF file cannot be automatically processed";
             return null;
@@ -234,15 +234,15 @@ namespace AnimalMovement
             CollarParameter.Collar = (Collar)CollarComboBox.SelectedItem;
             CollarParameter.CollarParameterFile = (CollarParameterFile)FileComboBox.SelectedItem;
             CollarParameter.Gen3Period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text)
-                                             ? (int?) null
-                                             : Int32.Parse(Gen3PeriodTextBox.Text)*
-                                               ((string) Gen3TimeUnitComboBox.SelectedItem == "Hours" ? 60 : 1);
+                                             ? (int?)null
+                                             : Int32.Parse(Gen3PeriodTextBox.Text) *
+                                               ((string)Gen3TimeUnitComboBox.SelectedItem == "Hours" ? 60 : 1);
             CollarParameter.StartDate = StartDateTimePicker.Checked
                                             ? StartDateTimePicker.Value.ToUniversalTime()
-                                            : (DateTime?) null;
+                                            : (DateTime?)null;
             CollarParameter.EndDate = EndDateTimePicker.Checked
                                           ? EndDateTimePicker.Value.ToUniversalTime()
-                                          : (DateTime?) null;
+                                          : (DateTime?)null;
             return SubmitChanges();
         }
 

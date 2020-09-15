@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DataModel;
+using FileLibrary;
+using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
-using FileLibrary;
 
 namespace AnimalMovement
 {
@@ -97,7 +97,7 @@ namespace AnimalMovement
             var currentCollar = CollarComboBox.SelectedItem;
             if (ProjectRadioButton.Checked)
             {
-                var project = (Project) ProjectComboBox.SelectedItem;
+                var project = (Project)ProjectComboBox.SelectedItem;
                 CollarComboBox.DataSource = from collar in Database.Collars
                                             where collar.ProjectInvestigator == project.ProjectInvestigator1
                                             select collar;
@@ -124,11 +124,11 @@ namespace AnimalMovement
             //TODO - Run FileLoader on a background thread
             //TODO - Display a progress bar updated by events from the FileLoader
             FileLoader.LoadPath(path, HandleException,
-                                ProjectRadioButton.Checked ? (Project) ProjectComboBox.SelectedItem : null,
+                                ProjectRadioButton.Checked ? (Project)ProjectComboBox.SelectedItem : null,
                                 InvestigatorRadioButton.Checked
-                                    ? (ProjectInvestigator) InvestigatorComboBox.SelectedItem
+                                    ? (ProjectInvestigator)InvestigatorComboBox.SelectedItem
                                     : null,
-                                (Collar) CollarComboBox.SelectedItem,
+                                (Collar)CollarComboBox.SelectedItem,
                                 StatusActiveRadioButton.Checked ? 'A' : 'I', AllowDuplicatesCheckBox.Checked);
 
             //TODO - OnDatabaseChanged() should be called in response to a FileLoader FinishedLoading event
@@ -171,7 +171,7 @@ namespace AnimalMovement
                 if (openFileDialog.FileNames.Length > 0)
                 {
                     var folder = Path.GetDirectoryName(openFileDialog.FileNames[0]);
-                    Properties.Settings.Default.UploadFileFolderPath = folder;                    
+                    Properties.Settings.Default.UploadFileFolderPath = folder;
                 }
                 EnableUpload();
             }

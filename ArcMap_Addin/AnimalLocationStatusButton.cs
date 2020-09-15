@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-//using System.Diagnostics;
-using System.Linq;
-using ESRI.ArcGIS.Carto;
+﻿using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.esriSystem;
 using ESRI.ArcGIS.Geodatabase;
-using System.Windows.Forms;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+//using System.Diagnostics;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace ArcMap_Addin
 {
@@ -41,8 +41,8 @@ namespace ArcMap_Addin
                 //too many valid layers with selected features
                 if (validLayersWithSelectedFeatures > 1)
                 {
-                    MessageBox.Show("There are multiple animal location query layers with selected features.\n" + 
-                    "It is not clear which set of features you want to change."+
+                    MessageBox.Show("There are multiple animal location query layers with selected features.\n" +
+                    "It is not clear which set of features you want to change." +
                     "Please clear the selections on all but one layer.", "Unable to change status of animal locations");
                     return;
                 }
@@ -106,7 +106,7 @@ namespace ArcMap_Addin
                 var connectionProperties = GetProperties(((IWorkspace)w).ConnectionProperties);
                 if (connectionProperties["DBCLIENT"].Equals("sqlserver", StringComparison.InvariantCultureIgnoreCase) &&
                     HasCorrectColumns(layer.FeatureClass))
-                    results[layer] = ((IFeatureSelection) layer).SelectionSet.Count;
+                    results[layer] = ((IFeatureSelection)layer).SelectionSet.Count;
             }
             return results;
         }
@@ -117,7 +117,7 @@ namespace ArcMap_Addin
             int i2 = featureClass.Fields.FindField("AnimalId");
             int i3 = featureClass.Fields.FindField("FixDate");
             // We do not check for status, because it may not be in the query layer even though it is in the database
-            if (i1 < 0 || i2 < 0 || i3 < 0 )
+            if (i1 < 0 || i2 < 0 || i3 < 0)
                 return false;
             if (featureClass.Fields.Field[i1].Length != 16 ||
                 featureClass.Fields.Field[i1].Type != esriFieldType.esriFieldTypeString)
@@ -158,7 +158,7 @@ namespace ArcMap_Addin
 
                     connection.Open();
 
-                    var features = ((IFeatureSelection) actionLayer).SelectionSet;
+                    var features = ((IFeatureSelection)actionLayer).SelectionSet;
                     features.Search(null, true, out ICursor cursor);
                     int projectIndex = cursor.FindField("ProjectId");
                     int animalIndex = cursor.FindField("AnimalId");
@@ -180,7 +180,7 @@ namespace ArcMap_Addin
         {
             // See http://help.arcgis.com/en/sdk/10.0/arcobjects_net/conceptualhelp/index.html#/Working_with_SQL_workspaces/0001000003z8000000/SQL 
             // for a description the connection properties: "DBCLIENT", "SERVERINSTANCE", "DATABASE", "AUTHENTICATION_MODE", "USER", "PASSWORD".
-            
+
             var connectionProperties = GetProperties(((IDataset)actionLayer).Workspace.ConnectionProperties);
 
 #if ARCGIS_10_0            
@@ -196,8 +196,8 @@ namespace ArcMap_Addin
                 connectionString += "Trusted_Connection=True;";
             else
                 connectionString += "Trusted_Connection=False;" +
-                                    string.Format("User Id={0};Password={1};", 
-                                    connectionProperties["USER"], 
+                                    string.Format("User Id={0};Password={1};",
+                                    connectionProperties["USER"],
                                     connectionProperties["PASSWORD"]);
 
             //Connect to the local server to find the master server, and change the connection string appropriately
@@ -229,9 +229,9 @@ namespace ArcMap_Addin
         {
             var results = new Dictionary<string, string>();
             propertySet.GetAllProperties(out object n, out object v);
-            var names  = (object[]) n;
-            var values = (object[]) v;
-            for (int i = 0 ; i < names.Length; i++)
+            var names = (object[])n;
+            var values = (object[])v;
+            for (int i = 0; i < names.Length; i++)
                 results[names[i].ToString()] = values[i].ToString();
             return results;
         }

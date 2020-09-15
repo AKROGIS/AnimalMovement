@@ -204,10 +204,10 @@ namespace AnimalMovement
             var query = from Principal p in searcher.FindAll()
                         orderby p.DisplayName
                         select new EditorListItem
-                                   {
-                                       DisplayName = p.Name + " (" + p.Description + ") - NPS\\" + p.SamAccountName,
-                                       DomainName = "NPS\\" + p.SamAccountName,
-                                   };
+                        {
+                            DisplayName = p.Name + " (" + p.Description + ") - NPS\\" + p.SamAccountName,
+                            DomainName = "NPS\\" + p.SamAccountName,
+                        };
             ResultsListBox.DisplayMember = "DisplayName";
             var data = query.ToList();
             ResultsListBox.DataSource = data;
@@ -238,4 +238,5 @@ namespace AnimalMovement
             Close();
         }
 
-    }}
+    }
+}

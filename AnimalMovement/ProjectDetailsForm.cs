@@ -1,12 +1,12 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using DataModel;
-using System.Linq;
 
 /*
  * I wanted the changes to the projects and collars list to occur in the main datacontext,
@@ -65,7 +65,7 @@ namespace AnimalMovement
             IsEditor = functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false;
         }
 
-        
+
         #region Form Control
 
         protected override void OnLoad(EventArgs e)
@@ -232,7 +232,7 @@ namespace AnimalMovement
             Project.Description = DescriptionTextBox.Text;
             Project.UnitCode = UnitTextBox.Text;
             Project.ProjectName = ProjectNameTextBox.Text;
-            Project.ProjectInvestigator1 = (ProjectInvestigator) InvestigatorComboBox.SelectedItem;
+            Project.ProjectInvestigator1 = (ProjectInvestigator)InvestigatorComboBox.SelectedItem;
         }
 
         #endregion
@@ -253,14 +253,14 @@ namespace AnimalMovement
         private void SetUpAnimalTab()
         {
             var query = from animal in Database.Animals
-                where animal.Project == Project
-                //orderby animal.MortalityDate , animal.AnimalId
-                select new AnimalListItem
-                {
-                    Animal = animal,
-                    Name = GetName(animal),
-                    CanDelete = CanDeleteAnimal(animal)
-                };
+                        where animal.Project == Project
+                        //orderby animal.MortalityDate , animal.AnimalId
+                        select new AnimalListItem
+                        {
+                            Animal = animal,
+                            Name = GetName(animal),
+                            CanDelete = CanDeleteAnimal(animal)
+                        };
             var sortedList = query.OrderBy(a => a.Animal.MortalityDate != null).ThenBy(a => a.Animal.AnimalId).ToList();
             AnimalsListBox.DataSource = sortedList;
             AnimalsListBox.DisplayMember = "Name";
@@ -519,7 +519,7 @@ namespace AnimalMovement
                 ReportComboBox.DataSource = null;
                 return;
             }
-            var names = new List<string>{"Pick a report"};
+            var names = new List<string> { "Pick a report" };
             names.AddRange(_queryDocument.Descendants("name").Select(i => i.Value.Trim()));
             ReportComboBox.DataSource = names;
         }

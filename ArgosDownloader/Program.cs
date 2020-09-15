@@ -1,11 +1,11 @@
-﻿using System;
+﻿using DataModel;
+using FileLibrary;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using DataModel;
-using FileLibrary;
 
 namespace ArgosDownloader
 {
@@ -273,4 +273,4 @@ namespace ArgosDownloader
         }
     }
 
-    }
+}

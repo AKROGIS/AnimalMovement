@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -95,7 +95,7 @@ namespace AnimalMovement
 
         private void SelectDefaultModel(string mfgr, string modelCode)
         {
-            if ( mfgr == null || modelCode == null)
+            if (mfgr == null || modelCode == null)
                 return;
             var model = Database.LookupCollarModels.FirstOrDefault(m => m.CollarManufacturer == mfgr && m.CollarModel == modelCode);
             if (model != null)
@@ -157,18 +157,18 @@ namespace AnimalMovement
                 return;
             }
             var collar = new Collar
-                {
-                    CollarId = CollarIdTextBox.Text.NullifyIfEmpty(),
-                    Frequency = FrequencyTextBox.Text.DoubleOrNull(),
-                    HasGps = HasGpsCheckBox.Checked,
-                    DisposalDate = DisposalDateTimePicker.Checked ? DisposalDateTimePicker.Value : (DateTime?)null,
-                    LookupCollarManufacturer = (LookupCollarManufacturer)ManufacturerComboBox.SelectedItem,
-                    LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem,
-                    Notes = NotesTextBox.Text.NullifyIfEmpty(),
-                    Owner = OwnerTextBox.Text.NullifyIfEmpty(),
-                    ProjectInvestigator = (ProjectInvestigator)ManagerComboBox.SelectedItem,
-                    SerialNumber = SerialNumberTextBox.Text.NullifyIfEmpty(),
-                };
+            {
+                CollarId = CollarIdTextBox.Text.NullifyIfEmpty(),
+                Frequency = FrequencyTextBox.Text.DoubleOrNull(),
+                HasGps = HasGpsCheckBox.Checked,
+                DisposalDate = DisposalDateTimePicker.Checked ? DisposalDateTimePicker.Value : (DateTime?)null,
+                LookupCollarManufacturer = (LookupCollarManufacturer)ManufacturerComboBox.SelectedItem,
+                LookupCollarModel = (LookupCollarModel)ModelComboBox.SelectedItem,
+                Notes = NotesTextBox.Text.NullifyIfEmpty(),
+                Owner = OwnerTextBox.Text.NullifyIfEmpty(),
+                ProjectInvestigator = (ProjectInvestigator)ManagerComboBox.SelectedItem,
+                SerialNumber = SerialNumberTextBox.Text.NullifyIfEmpty(),
+            };
             Database.Collars.InsertOnSubmit(collar);
             if (!SubmitChanges())
             {

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -54,7 +54,7 @@ namespace AnimalMovement
         {
             base.OnLoad(e);
             DoneCancelButton.Focus();
-            FileTabControl_SelectedIndexChanged(null,null);
+            FileTabControl_SelectedIndexChanged(null, null);
         }
 
 
@@ -67,13 +67,13 @@ namespace AnimalMovement
 
             FileTabControl.TabPages.Clear();
             if (File.LookupCollarFileFormat.ArgosData == 'Y')
-                FileTabControl.TabPages.AddRange(new[]{ArgosTabPage});
+                FileTabControl.TabPages.AddRange(new[] { ArgosTabPage });
 
             if (!fileHasChildren && File.Collar != null && File.Collar.HasGps)
-                FileTabControl.TabPages.AddRange(new[]{GpsFixesTabPage});
+                FileTabControl.TabPages.AddRange(new[] { GpsFixesTabPage });
 
             if (fileHasArgosFixes)
-                FileTabControl.TabPages.AddRange(new[]{ArgosFixesTabPage});
+                FileTabControl.TabPages.AddRange(new[] { ArgosFixesTabPage });
 
             if (fileCouldHaveChildren)
                 FileTabControl.TabPages.AddRange(new[] { ProcessingIssuesTabPage, DerivedFilesTabPage });
@@ -338,7 +338,7 @@ namespace AnimalMovement
             }
         }
 
-#endregion
+        #endregion
 
 
         #region Argos Tab
@@ -347,7 +347,7 @@ namespace AnimalMovement
         {
             var query = from argos in Database.ArgosFilePlatformDates
                         where argos.CollarFile == File
-                        select new {ArgosId = argos.PlatformId, argos.FirstTransmission, argos.LastTransmission};
+                        select new { ArgosId = argos.PlatformId, argos.FirstTransmission, argos.LastTransmission };
             ArgosPlatformsDataGridView.DataSource = query;
         }
 
@@ -408,7 +408,7 @@ namespace AnimalMovement
         {
             ProcessingIssuesDataGridView.DataSource =
                 Database.ArgosFileProcessingIssues.Where(i => i.CollarFile == File)
-                        .Select(i => new {i.Issue, ArgosId = i.PlatformId, i.Collar});
+                        .Select(i => new { i.Issue, ArgosId = i.PlatformId, i.Collar });
         }
 
         #endregion

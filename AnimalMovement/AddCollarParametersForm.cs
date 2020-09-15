@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -71,7 +71,7 @@ namespace AnimalMovement
         {
             CollarComboBox.Enabled = false;
             if (Collar != null)
-                CollarComboBox.DataSource = new[] {Collar};
+                CollarComboBox.DataSource = new[] { Collar };
             else
                 CollarComboBox.DataSource = from collar in Database.Collars
                                             where (collar.Manager == CurrentUser ||
@@ -221,9 +221,9 @@ namespace AnimalMovement
         private bool AddParameters()
         {
             int? period = String.IsNullOrEmpty(Gen3PeriodTextBox.Text) || Collar.CollarModel != "Gen3"
-                              ? (int?) null
-                              : Int32.Parse(Gen3PeriodTextBox.Text)*
-                                ((string) Gen3TimeUnitComboBox.SelectedItem == "Hours" ? 60 : 1);
+                              ? (int?)null
+                              : Int32.Parse(Gen3PeriodTextBox.Text) *
+                                ((string)Gen3TimeUnitComboBox.SelectedItem == "Hours" ? 60 : 1);
             var param = new CollarParameter
             {
                 Collar = Collar,
@@ -273,7 +273,7 @@ namespace AnimalMovement
         {
             if (!CollarComboBox.Enabled)  //must be a call during setup
                 return;
-            Collar = (Collar) CollarComboBox.SelectedItem;
+            Collar = (Collar)CollarComboBox.SelectedItem;
             LoadFileComboBox();
             IsEditor = CanEditCollar((Collar)CollarComboBox.SelectedItem);
             EnableFormControls();

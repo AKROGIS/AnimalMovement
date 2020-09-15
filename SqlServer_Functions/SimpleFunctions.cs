@@ -1,6 +1,6 @@
-﻿using System.Data.SqlTypes;
+﻿using Microsoft.SqlServer.Server;
+using System.Data.SqlTypes;
 using System.Security.Cryptography;
-using Microsoft.SqlServer.Server;
 
 namespace SqlServer_Functions
 {

@@ -84,7 +84,7 @@ namespace AnimalMovement
             return prop.ToString();
         }
 
-        public static object GetPropValue   (object src, string propName)
+        public static object GetPropValue(object src, string propName)
         {
             return src.GetType().GetProperty(propName).GetValue(src, null);
         }

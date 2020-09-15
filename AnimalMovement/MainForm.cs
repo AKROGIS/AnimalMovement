@@ -1,5 +1,5 @@
-﻿using System;
-using DataModel;
+﻿using DataModel;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -31,7 +31,7 @@ namespace AnimalMovement
             var db = new AnimalMovementDataContext();
             try
             {
-                _investigator = db.ProjectInvestigators.FirstOrDefault(pi => pi.Login == _currentUser);                
+                _investigator = db.ProjectInvestigators.FirstOrDefault(pi => pi.Login == _currentUser);
             }
             catch (Exception ex)
             {

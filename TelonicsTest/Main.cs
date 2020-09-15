@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Telonics;
 using System.Linq;
+using Telonics;
 
 namespace TelonicsTest
 {
@@ -43,7 +43,7 @@ namespace TelonicsTest
                 };
             ArgosFile a = new ArgosEmailFile(path);
             SummarizeFile(a);
-            foreach (var id in new[] {"77267", "87744"})
+            foreach (var id in new[] { "77267", "87744" })
             {
                 Console.WriteLine("Messages for {0} in File", id);
                 var platform = id; // to protect against AccessToForEachVariableInClosure
@@ -58,7 +58,7 @@ namespace TelonicsTest
             const string path = @"..\..\SampleFiles\53478_20130129_Gen3.aws";
             Console.WriteLine("File {0}", path);
             ArgosFile a = new ArgosAwsFile(path);
-            var processor = new Gen3Processor(TimeSpan.FromMinutes(24*60));
+            var processor = new Gen3Processor(TimeSpan.FromMinutes(24 * 60));
             SummarizeFile(a);
             Console.WriteLine("Messages in File");
             foreach (var s in processor.ProcessTransmissions(a.GetTransmissions(), a))
@@ -112,9 +112,9 @@ namespace TelonicsTest
                     var path = Path.Combine(inPath, file);
                     Console.WriteLine("  File {0}", file);
                     ArgosFile a = new ArgosEmailFile(path);
-                    var processor = new Gen3Processor(TimeSpan.FromMinutes(hours*60));
+                    var processor = new Gen3Processor(TimeSpan.FromMinutes(hours * 60));
                     //CollarFinder = (i, d) => i
-                    var lines = new string[0]; 
+                    var lines = new string[0];
                     try
                     {
                         var transmissions = a.GetTransmissions().Where(t => t.PlatformId == id);

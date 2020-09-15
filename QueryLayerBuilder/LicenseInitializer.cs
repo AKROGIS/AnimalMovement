@@ -1,5 +1,5 @@
-using System;
 using ESRI.ArcGIS;
+using System;
 
 namespace QueryLayerBuilder
 {

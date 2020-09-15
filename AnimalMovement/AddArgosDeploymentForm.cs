@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 //TODO - Add button to add new Argos Platform
 
@@ -177,7 +177,7 @@ namespace AnimalMovement
                 return "You must select an Argos Id";
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MinValue;
-            var end   =   EndDateTimePicker.Checked ?   EndDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MaxValue;
+            var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
                 return "The end date must be after the start date";
 
@@ -186,7 +186,7 @@ namespace AnimalMovement
                                             DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
                                                          deployment.EndDate ?? DateTime.MaxValue, start, end)))
                 return "This collar has another Argos Id during your date range.";
-            
+
             //A platform cannot be on two collars at the same time.
             if (platform.ArgosDeployments.Any(deployment =>
                                               DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
@@ -204,12 +204,12 @@ namespace AnimalMovement
         private bool AddDeployment()
         {
             var deployment = new ArgosDeployment
-                {
-                    Collar = (Collar)CollarComboBox.SelectedItem,
-                    ArgosPlatform = (ArgosPlatform)ArgosComboBox.SelectedItem,
-                    StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null,
-                    EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null
-                };
+            {
+                Collar = (Collar)CollarComboBox.SelectedItem,
+                ArgosPlatform = (ArgosPlatform)ArgosComboBox.SelectedItem,
+                StartDate = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null,
+                EndDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date.ToUniversalTime() : (DateTime?)null
+            };
             Database.ArgosDeployments.InsertOnSubmit(deployment);
             if (SubmitChanges())
                 return true;
@@ -300,5 +300,5 @@ namespace AnimalMovement
 
         #endregion
 
-   }
+    }
 }

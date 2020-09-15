@@ -76,7 +76,7 @@ namespace Telonics
                 if (Format == Gen4Format.WebService || fileContents.StartsWith("\"programNumber\";\"platformId\";"))
                     dataFilePath += ".aws";
                 File.WriteAllText(dataFilePath, fileContents);
-                
+
                 batchFilePath = Path.GetTempFileName();
                 logFilePath = Path.GetTempFileName();
                 outputFolder = GetNewTempDirectory();
@@ -107,12 +107,12 @@ namespace Telonics
                         throw new InvalidOperationException("Unsupported Telonics data format");
                 }
                 File.WriteAllText(batchFilePath, batchCommands);
-                
+
                 //  Run TDC with the batch file
                 var p = Process.Start(new ProcessStartInfo
-                                      {
+                {
                     FileName = TdcExecutable,
-                    Arguments = "/batch:\"" + batchFilePath +"\"",
+                    Arguments = "/batch:\"" + batchFilePath + "\"",
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardError = true
@@ -125,33 +125,33 @@ namespace Telonics
                     throw new InvalidOperationException(
                         String.Format("TDC process did not respond after {0} seconds.\n" +
                                       "Check the path in the Settings table, and be sure you have authorized TDC.",
-                                      TdcTimeout/1000));
+                                      TdcTimeout / 1000));
                 if (!String.IsNullOrEmpty(errors))
                     throw new InvalidOperationException("TDC Execution error " + errors);
-                
+
                 //Check the log file for errors
-/*
-Here is an example log file with NO error:
-                
-Batch started at: 2013.03.02 00:35:17
-Processing file: C:\...\37470.aws
-Report: "C:\...\650937A_1 Condensed.csv" created successfully.
-Batch completed at: 2013.03.02 00:35:18
+                /*
+                Here is an example log file with NO error:
 
-Here is an example log file with an error:
+                Batch started at: 2013.03.02 00:35:17
+                Processing file: C:\...\37470.aws
+                Report: "C:\...\650937A_1 Condensed.csv" created successfully.
+                Batch completed at: 2013.03.02 00:35:18
 
-Batch started at: 2012.12.17 22:04:31
-Processing file: C:\...\tmpB158.tmp
-Unable to load the the parameter file: "C:\..\23.tpf".This file may require a newer version of TDC.
-Batch completed at: 2012.12.17 22:32:27
-*/
+                Here is an example log file with an error:
+
+                Batch started at: 2012.12.17 22:04:31
+                Processing file: C:\...\tmpB158.tmp
+                Unable to load the the parameter file: "C:\..\23.tpf".This file may require a newer version of TDC.
+                Batch completed at: 2012.12.17 22:32:27
+                */
                 var logLines = File.ReadAllLines(logFilePath);
                 errors = String.Join(Environment.NewLine,
                                      logLines.Where(line => !String.IsNullOrWhiteSpace(line) &&
                                                             !line.StartsWith("Batch started at:") &&
                                                             !line.StartsWith("Processing") &&
                                                             !line.EndsWith("successfully.") &&
-                                                            !line.EndsWith( "Using default settings instead.") && //warning when run as Sql server impersonated proxy account
+                                                            !line.EndsWith("Using default settings instead.") && //warning when run as Sql server impersonated proxy account
                                                             !line.StartsWith("Batch completed at:")));
                 if (!String.IsNullOrEmpty(errors))
                     throw new InvalidOperationException("TDC Execution error " + errors);
@@ -162,7 +162,7 @@ Batch completed at: 2012.12.17 22:32:27
                     throw new InvalidOperationException("TDC Execution error - No output file");
                 //TDC breaks up the output into CSV files < ~65023 lines long; we need to merge them (with a single header)
                 //I need to force enumerate the files with ToArray() before the finally section deletes the files
-                results = File.ReadAllLines(paths[0]).Concat(FilesWithoutHeader(paths.Skip(1))).ToArray();        
+                results = File.ReadAllLines(paths[0]).Concat(FilesWithoutHeader(paths.Skip(1))).ToArray();
             }
             finally
             {
@@ -180,7 +180,7 @@ Batch completed at: 2012.12.17 22:32:27
                     foreach (var path in Directory.GetFiles(outputFolder))
                     {
                         File.SetAttributes(path, FileAttributes.Normal);
-                            // remove the readonly flag put on files created by TDC.
+                        // remove the readonly flag put on files created by TDC.
                         File.Delete(path);
                     }
                     Directory.Delete(outputFolder);

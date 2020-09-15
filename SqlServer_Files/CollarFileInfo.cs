@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Server;
+using System;
 using System.Collections;
 using System.Data;
 using System.Data.SqlClient;
@@ -7,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.SqlServer.Server;
 
 namespace SqlServer_Files
 {
@@ -128,13 +128,13 @@ namespace SqlServer_Files
             out char? locationClass,
             out Byte[] message)
         {
-            var transmission = (ArgosTransmission) inputObject;
+            var transmission = (ArgosTransmission)inputObject;
             lineNumber = transmission.LineNumber;
             programNumber = transmission.ProgramId;
             platformId = transmission.PlatformId;
             transmissionDate = transmission.DateTime;
-            locationDate = transmission.Location == null ? (DateTime?) null : transmission.Location.DateTime;
-            latitude = transmission.Location == null ? (float?) null : transmission.Location.Latitude;
+            locationDate = transmission.Location == null ? (DateTime?)null : transmission.Location.DateTime;
+            latitude = transmission.Location == null ? (float?)null : transmission.Location.Latitude;
             longitude = transmission.Location == null ? (float?)null : transmission.Location.Longitude;
             altitude = transmission.Location == null ? (float?)null : transmission.Location.Altitude;
             locationClass = transmission.Location == null ? (char?)null : transmission.Location.Class;
@@ -178,11 +178,11 @@ namespace SqlServer_Files
                                            " VALUES (@FileId, @PlatformId, @ProgramId, @FirstTransmission, @LastTransmission)";
                         using (var command = new SqlCommand(sql, connection))
                         {
-                            command.Parameters.Add(new SqlParameter("@fileId", SqlDbType.Int) {Value = fileId});
-                            command.Parameters.Add(new SqlParameter("@PlatformId", SqlDbType.NVarChar) {Value = platform});
-                            command.Parameters.Add(new SqlParameter("@ProgramId", SqlDbType.NVarChar) {Value = program});
-                            command.Parameters.Add(new SqlParameter("@FirstTransmission", SqlDbType.DateTime2) {Value = minDate});
-                            command.Parameters.Add(new SqlParameter("@LastTransmission", SqlDbType.DateTime2) {Value = maxDate});
+                            command.Parameters.Add(new SqlParameter("@fileId", SqlDbType.Int) { Value = fileId });
+                            command.Parameters.Add(new SqlParameter("@PlatformId", SqlDbType.NVarChar) { Value = platform });
+                            command.Parameters.Add(new SqlParameter("@ProgramId", SqlDbType.NVarChar) { Value = program });
+                            command.Parameters.Add(new SqlParameter("@FirstTransmission", SqlDbType.DateTime2) { Value = minDate });
+                            command.Parameters.Add(new SqlParameter("@LastTransmission", SqlDbType.DateTime2) { Value = maxDate });
                             command.ExecuteNonQuery();
                         }
                     }

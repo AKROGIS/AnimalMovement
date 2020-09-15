@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -6,7 +7,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using DataModel;
 
 /*
  * I wanted the changes to the projects and collars list to occur in the main datacontext,
@@ -74,7 +74,7 @@ namespace AnimalMovement
             ProjectInvestigatorTabs.SelectedIndex = Properties.Settings.Default.InvestigatorFormActiveTab;
             if (ProjectInvestigatorTabs.SelectedIndex == 0)
                 //if new index is zero, index changed event will not fire, so fire it manually
-                ProjectInvestigatorTabs_SelectedIndexChanged(null,null);
+                ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -311,11 +311,11 @@ namespace AnimalMovement
                 return;
             var query = from collar in Investigator.Collars
                         select new CollarListItem
-                            {
-                                Collar = collar,
-                                Name = BuildCollarText(collar),
-                                CanDelete = CanDeleteCollar(collar)
-                            };
+                        {
+                            Collar = collar,
+                            Name = BuildCollarText(collar),
+                            CanDelete = CanDeleteCollar(collar)
+                        };
             var sortedList = query.OrderBy(c => c.Collar.DisposalDate != null).ThenBy(c => c.Collar.CollarManufacturer).ThenBy(c => c.Collar.CollarId).ToList();
             CollarsListBox.DataSource = sortedList;
             CollarsListBox.DisplayMember = "Name";
@@ -423,9 +423,9 @@ namespace AnimalMovement
             InfoPlatformButton.Enabled = !IsEditMode && PlatformsListBox.SelectedItems.Count == 1;
 
             AddArgosDeploymentButton.Enabled = !IsEditMode && IsEditor && PlatformsListBox.SelectedItems.Count == 1;
-            DeleteArgosDeploymentButton.Enabled = !IsEditMode && 
+            DeleteArgosDeploymentButton.Enabled = !IsEditMode &&
                 ArgosDeploymentsGridView.SelectedRows.Cast<DataGridViewRow>()
-                                        .Any(r => (bool) r.Cells["CanDelete"].Value);
+                                        .Any(r => (bool)r.Cells["CanDelete"].Value);
             EditArgosDeploymentButton.Enabled = !IsEditMode && ArgosDeploymentsGridView.SelectedRows.Count == 1;
             InfoArgosCollarButton.Enabled = !IsEditMode && ArgosDeploymentsGridView.SelectedRows.Count == 1;
 
@@ -609,21 +609,21 @@ namespace AnimalMovement
         {
             ArgosDeploymentsGridView.DataSource =
                 platform.ArgosDeployments.Select(d => new
-                    {
-                        ArgosDeployment = d,
-                        d.Collar,
-                        ArgosId = d.PlatformId,
-                        Start = d.StartDate == null ? "Long ago" : d.StartDate.Value.ToString("g"),
-                        End = d.EndDate == null ? "Never" : d.EndDate.Value.ToString("g"),
-                        CanDelete = true
-                    }).ToList();
+                {
+                    ArgosDeployment = d,
+                    d.Collar,
+                    ArgosId = d.PlatformId,
+                    Start = d.StartDate == null ? "Long ago" : d.StartDate.Value.ToString("g"),
+                    End = d.EndDate == null ? "Never" : d.EndDate.Value.ToString("g"),
+                    CanDelete = true
+                }).ToList();
             ArgosDeploymentsGridView.Columns[0].Visible = false;
             ArgosDeploymentsGridView.Columns[5].Visible = false;
         }
 
         private void AddArgosDeploymentButton_Click(object sender, EventArgs e)
         {
-            var platform = ((PlatformListItem) PlatformsListBox.SelectedItem).Platform;
+            var platform = ((PlatformListItem)PlatformsListBox.SelectedItem).Platform;
             var form = new AddArgosDeploymentForm(null, platform);
             form.DatabaseChanged += (o, x) => ArgosDataChanged();
             form.Show(this);
@@ -633,7 +633,7 @@ namespace AnimalMovement
         {
             foreach (DataGridViewRow row in ArgosDeploymentsGridView.SelectedRows)
             {
-                var argosDeployment = (ArgosDeployment) row.Cells[0].Value;
+                var argosDeployment = (ArgosDeployment)row.Cells[0].Value;
                 if ((bool)row.Cells["CanDelete"].Value)
                     Database.ArgosDeployments.DeleteOnSubmit(argosDeployment);
             }
@@ -938,7 +938,7 @@ namespace AnimalMovement
                 ReportComboBox.DataSource = null;
                 return;
             }
-            var names = new List<string>{"Pick a report"};
+            var names = new List<string> { "Pick a report" };
             names.AddRange(_queryDocument.Descendants("name").Select(i => i.Value.Trim()));
             ReportComboBox.DataSource = names;
         }
@@ -947,8 +947,8 @@ namespace AnimalMovement
         {
             var report = _queryDocument.Descendants("report")
                                        .FirstOrDefault(
-                                           r => ((string) r.Element("name")).Trim() == (string) ReportComboBox.SelectedItem);
-            ReportDescriptionTextBox.Text = report == null ? null : (string) report.Element("description");
+                                           r => ((string)r.Element("name")).Trim() == (string)ReportComboBox.SelectedItem);
+            ReportDescriptionTextBox.Text = report == null ? null : (string)report.Element("description");
             FillDataGrid(report == null ? null : (string)report.Element("query"));
         }
 

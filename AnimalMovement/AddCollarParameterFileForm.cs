@@ -1,10 +1,10 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Windows.Forms;
-using DataModel;
 using Telonics;
 
 namespace AnimalMovement
@@ -127,7 +127,7 @@ namespace AnimalMovement
         private void EnableForm()
         {
             UploadButton.Enabled = OwnerComboBox.SelectedItem != null
-                                   && !string.IsNullOrEmpty(FileNameTextBox.Text) 
+                                   && !string.IsNullOrEmpty(FileNameTextBox.Text)
                                    && FormatComboBox.SelectedItem != null;
             CreateCollarsCheckBox.Enabled = CreateParametersCheckBox.Enabled && CreateParametersCheckBox.Checked;
             IgnoreSuffixCheckBox.Enabled = CreateParametersCheckBox.Enabled && CreateParametersCheckBox.Checked;

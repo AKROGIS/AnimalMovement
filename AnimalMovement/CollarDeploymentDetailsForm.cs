@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -36,8 +36,8 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Get a CollarDeployment in this DataContext
             if (CollarDeployment != null)
-            CollarDeployment =
-                    Database.CollarDeployments.FirstOrDefault(d => d.DeploymentId == CollarDeployment.DeploymentId);
+                CollarDeployment =
+                        Database.CollarDeployments.FirstOrDefault(d => d.DeploymentId == CollarDeployment.DeploymentId);
             if (CollarDeployment == null)
                 throw new InvalidOperationException("Collar Deployments Form not provided a valid Deployment.");
 
@@ -49,7 +49,7 @@ namespace AnimalMovement
         private void LoadDefaultFormContents()
         {
             if (LockAnimal)
-                AnimalComboBox.DataSource = new [] {CollarDeployment.Animal};
+                AnimalComboBox.DataSource = new[] { CollarDeployment.Animal };
             else
             {
                 AnimalComboBox.DataSource = from animal in Database.Animals
@@ -60,7 +60,7 @@ namespace AnimalMovement
                                             select animal;
             }
             if (LockCollar)
-                CollarComboBox.DataSource = new [] {CollarDeployment.Collar};
+                CollarComboBox.DataSource = new[] { CollarDeployment.Collar };
             else
             {
                 CollarComboBox.DataSource = from collar in Database.Collars
@@ -145,7 +145,7 @@ namespace AnimalMovement
                                              DatesOverlap(deployment.DeploymentDate,
                                                           deployment.RetrievalDate ?? DateTime.MaxValue, start, end)))
                 return "This animal has another collar during your date range.";
-            
+
             return null;
         }
 
@@ -158,7 +158,7 @@ namespace AnimalMovement
         private bool UpdateDeployment()
         {
             CollarDeployment.Collar = (Collar)CollarComboBox.SelectedItem;
-            CollarDeployment.Animal = (Animal) AnimalComboBox.SelectedItem;
+            CollarDeployment.Animal = (Animal)AnimalComboBox.SelectedItem;
             CollarDeployment.DeploymentDate = StartDateTimePicker.Value.ToUniversalTime();
             CollarDeployment.RetrievalDate = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : (DateTime?)null;
 

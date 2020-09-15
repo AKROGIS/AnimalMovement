@@ -1,10 +1,10 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 using Telonics;
 
 namespace AnimalMovement
@@ -213,13 +213,13 @@ namespace AnimalMovement
                 ParametersDataGridView.DataSource =
                     Database.CollarParameters.Where(cp => cp.CollarParameterFile == File)
                             .Select(cp => new
-                                {
-                                    cp,
-                                    cp.Collar,
-                                    cp.StartDate,
-                                    cp.EndDate,
-                                    Data = cp.CollarFiles.Any()
-                                });
+                            {
+                                cp,
+                                cp.Collar,
+                                cp.StartDate,
+                                cp.EndDate,
+                                Data = cp.CollarFiles.Any()
+                            });
             ParametersDataGridView.Columns[0].Visible = false;
             ParametersDataGridView.Columns[4].HeaderText = "Has Derived Data";
             EnableCollarFilesControls();
@@ -252,7 +252,7 @@ namespace AnimalMovement
         {
             var parameters =
                 ParametersDataGridView.SelectedRows.Cast<DataGridViewRow>()
-                                      .Select(row => (CollarParameter) row.Cells[0].Value)
+                                      .Select(row => (CollarParameter)row.Cells[0].Value)
                                       .ToList();
             bool abort = false;
             if (parameters.Any(p => p.CollarFiles.Any()))
@@ -307,7 +307,7 @@ namespace AnimalMovement
 
 
         #region Telonics Parameter File Tab
-        
+
         private void HideTpfDetailsTab()
         {
             if (File.Format != 'A' && FileTabControl.TabPages.Contains(TpfDetailsTabPage))
@@ -359,7 +359,7 @@ namespace AnimalMovement
             var collar = _collars[index];
             if (collar == null)
             {
-                var ctn = (string) TpfDataGridView.Rows[index].Cells[1].Value;
+                var ctn = (string)TpfDataGridView.Rows[index].Cells[1].Value;
                 AddFixCollarButton.Text = "Add " +
                                        (IgnoreSuffixCheckBox.Checked && ctn.Length > 6 ? ctn.Substring(0, 6) : ctn);
                 AddFixCollarButton.Enabled = true;
@@ -395,7 +395,7 @@ namespace AnimalMovement
                 var form = new AddCollarForm(File.ProjectInvestigator);
                 form.DatabaseChanged += (o, x) => CollarAdded(ctn);
                 form.SetDefaultFrequency((double)TpfDataGridView.SelectedRows[0].Cells[4].Value);
-                form.SetDefaultModel("Telonics","Gen4");
+                form.SetDefaultModel("Telonics", "Gen4");
                 form.SetDefaultId(ctn);
                 form.Show(this);
             }
@@ -414,14 +414,14 @@ namespace AnimalMovement
             if (collar == null)
                 return;
             //Add Parameter
-            var start = (DateTime) TpfDataGridView.SelectedRows[0].Cells[5].Value;
+            var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[5].Value;
             //Since this is a new collar, I don't need to worry about any parameter conflicts.
             var param = new CollarParameter
-                {
-                    Collar = collar,
-                    CollarParameterFile = File,
-                    StartDate = start
-                };
+            {
+                Collar = collar,
+                CollarParameterFile = File,
+                StartDate = start
+            };
             Database.CollarParameters.InsertOnSubmit(param);
             if (SubmitChanges())
                 TpfDataChanged();
@@ -456,11 +456,11 @@ namespace AnimalMovement
             if (platform == null)
                 return;
             var deploy = new ArgosDeployment
-                {
-                    ArgosPlatform = platform,
-                    Collar = collar,
-                    StartDate = start
-                };
+            {
+                ArgosPlatform = platform,
+                Collar = collar,
+                StartDate = start
+            };
             Database.ArgosDeployments.InsertOnSubmit(deploy);
             if (SubmitChanges())
                 TpfDataChanged();
@@ -703,7 +703,7 @@ namespace AnimalMovement
 
         private Collar[] GetCollars()
         {
-            var collarIds = TpfDataGridView.Rows.Cast<DataGridViewRow>().Select(r => (string) r.Cells[1].Value).ToArray();
+            var collarIds = TpfDataGridView.Rows.Cast<DataGridViewRow>().Select(r => (string)r.Cells[1].Value).ToArray();
             if (IgnoreSuffixCheckBox.Checked)
                 collarIds = collarIds.Select(c => c.Length > 6 ? c.Substring(0, 6) : c).ToArray();
 

@@ -1,11 +1,11 @@
-﻿using System;
+﻿using DataModel;
+using FileLibrary;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using DataModel;
-using FileLibrary;
 
 namespace IridiumDownloader
 {
@@ -68,13 +68,13 @@ namespace IridiumDownloader
                 var emailPassword = Settings.GetSystemEmailPassword();
 
                 //Create the batch file and save it to the filesystem
-                var batchCommands = String.Format(batchFileTemplate, downloadFolder, logFilePath, emailUsername, emailPassword); 
+                var batchCommands = String.Format(batchFileTemplate, downloadFolder, logFilePath, emailUsername, emailPassword);
                 File.WriteAllText(batchFilePath, batchCommands);
-                
+
                 //  Run TDC with the batch file
                 var p = Process.Start(new ProcessStartInfo
-                                      {
-                                          FileName = tdcExecutable,
+                {
+                    FileName = tdcExecutable,
                     Arguments = "/emailDownload:\"" + batchFilePath + "\"",
                     CreateNoWindow = true,
                     UseShellExecute = false,
@@ -200,7 +200,7 @@ namespace IridiumDownloader
             else
             {
                 ReportException(
-                    String.Format("Unexpected Exception ({0}) when Loading collar file (id: {1}, name:{2}", 
+                    String.Format("Unexpected Exception ({0}) when Loading collar file (id: {1}, name:{2}",
                     ex.Message, file.FileId, file.FileName));
             }
         }

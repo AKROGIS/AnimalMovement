@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Server;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -7,7 +8,6 @@ using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Microsoft.SqlServer.Server;
 
 // See http://msdn.microsoft.com/en-us/library/ms131103.aspx
 // for more information on creating CLR Table-Valued Functions
@@ -390,8 +390,8 @@ namespace SqlServer_Parsers
             {
                 // Look for the line that defines where the header actually is
                 var s = stream.ReadLine();
-                if (s != null && s.StartsWith("Headers Row",StringComparison.OrdinalIgnoreCase))
-                    _formatCHeaderLines = Int32.Parse(s.Split(new[] { '\t', ',' }, 3)[1]);      
+                if (s != null && s.StartsWith("Headers Row", StringComparison.OrdinalIgnoreCase))
+                    _formatCHeaderLines = Int32.Parse(s.Split(new[] { '\t', ',' }, 3)[1]);
             }
             string header = stream.ReadLine();
             if (header == null)
@@ -413,14 +413,14 @@ namespace SqlServer_Parsers
                                 //"Acquisition Time",
                                 //our mask is only 64 bits, and there are 65 possible columns, luckily, the first is guaranteed, so we skip it.
                                 "Acquisition Start Time", "Ctn",
-                                "Argos ID", "Argos Location Class", "Argos Latitude","Argos Longitude", "Argos Altitude", 
+                                "Argos ID", "Argos Location Class", "Argos Latitude","Argos Longitude", "Argos Altitude",
                                 "GPS Fix Time","GPS Fix Attempt", "GPS Latitude", "GPS Longitude",
                                 "GPS UTM Zone", "GPS UTM Northing", "GPS UTM Easting", "GPS Altitude", "GPS Speed", "GPS Heading",
                                 "GPS Horizontal Error", "GPS Positional Dilution", "GPS Horizontal Dilution", "GPS Satellite Bitmap",
                                 "GPS Satellite Count", "GPS Navigation Time",
                                 "Underwater Percentage", "Dive Count", "Average Dive Duration", "Maximum Dive Duration", "Layer Percentage",
                                 "Maximum Dive Depth", "Dive Start Time", "Dive Duration", "Dive Depth", "Dive Profile",
-                                "Activity Count", "Temperature", "Remote Analog", "Satellite Uplink", 
+                                "Activity Count", "Temperature", "Remote Analog", "Satellite Uplink",
                                 "Receive Time", "Satellite Name", "Repetition Count", "Low Voltage", "Mortality",
                                 "Saltwater Failsafe", "Haul out", "Digital Input", "Motion Detected", "Trap Trigger Time", "Release Time",
                                 "Start Unix Time", "Start Year", "Start Month", "Start Day", "Start Hour", "Start Minute", "Start Second",
@@ -513,7 +513,7 @@ namespace SqlServer_Parsers
             out SqlString data)
         {
             var line = (Line)inputObject;
-            string[] parts = line.LineText.Split(new[] {'\t', ','}, 18);
+            string[] parts = line.LineText.Split(new[] { '\t', ',' }, 18);
             lineNumber = line.LineNumber;
             fix = parts[0];
             date = parts[1];
@@ -556,18 +556,18 @@ namespace SqlServer_Parsers
             out SqlString data)
         {
             var line = (Line)inputObject;
-            string[] parts = line.LineText.Split(new[] {'\t', ','}, 14);
+            string[] parts = line.LineText.Split(new[] { '\t', ',' }, 14);
             UInt64 columnMask = line.ColumnMask;
             lineNumber = line.LineNumber;
             int dbColumn = 0;
             int fileColumn = 0;
-            collarId = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            animalId = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            species = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            group = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            park = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            fixDate = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            fixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            collarId = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            animalId = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            species = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            group = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            park = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            fixDate = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            fixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             fixMonth = Include(columnMask, dbColumn++) ? NullableInt(parts[fileColumn++]) : SqlInt32.Null;
             fixDay = Include(columnMask, dbColumn++) ? NullableInt(parts[fileColumn++]) : SqlInt32.Null;
             fixYear = Include(columnMask, dbColumn++) ? NullableInt(parts[fileColumn++]) : SqlInt32.Null;
@@ -651,9 +651,9 @@ namespace SqlServer_Parsers
             gpsFixAttempt = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsLatitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsLongitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            gpsUtmZone = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            gpsUtmNorthing = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            gpsUtmEasting = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            gpsUtmZone = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsUtmNorthing = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            gpsUtmEasting = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsAltitude = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsSpeed = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             gpsHeading = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
@@ -674,14 +674,14 @@ namespace SqlServer_Parsers
             diveDepth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             diveProfile = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             activityCount = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            temperature = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            temperature = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             remoteAnalog = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            satelliteUplink = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            receiveTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            satelliteName = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            repetitionCount = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            lowVoltage = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
-            mortality = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++])  : SqlString.Null;
+            satelliteUplink = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            receiveTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            satelliteName = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            repetitionCount = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            lowVoltage = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+            mortality = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             saltwaterFailsafe = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             haulOut = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             digitalInput = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
@@ -825,8 +825,8 @@ namespace SqlServer_Parsers
             out SqlString rawData)
         {
             //format: "aaa";"bbb";"ccc";
-            var line = (Line) inputObject;
-            string[] parts = line.LineText.Split(new[] {"\";\""}, StringSplitOptions.None);
+            var line = (Line)inputObject;
+            string[] parts = line.LineText.Split(new[] { "\";\"" }, StringSplitOptions.None);
             lineNumber = line.LineNumber;
             int column = 0;
             programNumber = NullableString(parts[column++].TrimStart('"'));

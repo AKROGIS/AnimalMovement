@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using ESRI.ArcGIS.ArcMapUI;
+﻿using ESRI.ArcGIS.ArcMapUI;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.esriSystem;
+using System;
+using System.Collections.Generic;
 
 namespace ArcMap_Addin
 {
     static class LayerUtils
     {
-        
+
         /// <summary>
         /// Gets all layers in a map document of a particular type 
         /// </summary>

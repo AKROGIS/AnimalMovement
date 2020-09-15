@@ -22,7 +22,7 @@ namespace AnimalMovement
         {
             if (items == null)
                 return null;
-            string result =  "(" + String.Join(",", items.Select(i => "'" + i + "'")) + ")";
+            string result = "(" + String.Join(",", items.Select(i => "'" + i + "'")) + ")";
             return result == "()" ? null : result;
         }
     }

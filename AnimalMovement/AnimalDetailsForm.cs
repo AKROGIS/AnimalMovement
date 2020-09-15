@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DataModel;
+using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Windows.Forms;
-using DataModel;
 
 namespace AnimalMovement
 {
@@ -156,7 +156,7 @@ namespace AnimalMovement
             Animal.GroupName = GroupTextBox.Text;
             Animal.Description = DescriptionTextBox.Text;
             Animal.MortalityDate = MortatlityDateTimePicker.Checked
-                                       ? (DateTime?) MortatlityDateTimePicker.Value.ToUniversalTime()
+                                       ? (DateTime?)MortatlityDateTimePicker.Value.ToUniversalTime()
                                        : null;
         }
 
@@ -322,7 +322,7 @@ namespace AnimalMovement
                 LocationsGridView.Visible = true;
                 var query = from location in views.AnimalLocations
                             where location.ProjectId == Animal.ProjectId && location.AnimalId == Animal.AnimalId
-                            select new {location.Local_DateTime, location.Lat_WGS84, location.Lon_WGS84, Hidden = location.Status};
+                            select new { location.Local_DateTime, location.Lat_WGS84, location.Lon_WGS84, Hidden = location.Status };
                 LocationsGridView.DataSource = query;
             }
         }
