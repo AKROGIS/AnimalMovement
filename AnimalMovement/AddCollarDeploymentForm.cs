@@ -183,9 +183,7 @@ namespace AnimalMovement
 
         private void OnDatabaseChanged()
         {
-            EventHandler handle = DatabaseChanged;
-            if (handle != null)
-                handle(this, EventArgs.Empty);
+            DatabaseChanged?.Invoke(this, EventArgs.Empty);
         }
 
         #region Form Control Events

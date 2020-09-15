@@ -67,8 +67,8 @@ namespace Telonics
                                                PlatformId,
                                                fixNumber,
                                                fix.ConditionCode,
-                                               fix.DateTime == default(DateTime) ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
-                                               fix.DateTime == default(DateTime) ? "Error" : fix.DateTime.ToString("HH:mm"),
+                                               fix.DateTime == default ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
+                                               fix.DateTime == default ? "Error" : fix.DateTime.ToString("HH:mm"),
                                                fix.ConditionCode == ArgosConditionCode.Unavailable
                                                    ? ""
                                                    : fix.Longitude < -180 || fix.Longitude > 180 ? "Error" : fix.Longitude.ToString("F4"),
@@ -201,7 +201,7 @@ namespace Telonics
                 //NOTE: In some cases Unavailable is reported when CRC was bad, but usually not.
 
                 DateTime relFixDate;
-                if (fixDate == default(DateTime))
+                if (fixDate == default)
                     relFixDate = new DateTime(); // use default value
                 else
                     relFixDate = fixDate - timeOffset + TimeSpan.FromMinutes(delay);
@@ -230,7 +230,7 @@ namespace Telonics
             //Check for values out of range
             //We do not know what year this is in, so we are conservative and us 366
             if (dayOfYear > 366 || hour > 23 || minute > 59)
-                return default(DateTime); //use default to indicate an error
+                return default; //use default to indicate an error
 
             //Timespans are from the first day of the year, so we subtract one from the dayOfYear
             var fixTimeSpan = new TimeSpan(dayOfYear - 1, hour, minute, 0, 0);

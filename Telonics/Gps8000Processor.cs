@@ -66,8 +66,8 @@ namespace Telonics
                                                PlatformId,
                                                fixNumber,
                                                fix.ConditionCode,
-                                               fix.DateTime == default(DateTime) ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
-                                               fix.DateTime == default(DateTime) ? "Error" : fix.DateTime.ToString("HH:mm"),
+                                               fix.DateTime == default ? "Error" : fix.DateTime.ToString("yyyy.MM.dd"),
+                                               fix.DateTime == default ? "Error" : fix.DateTime.ToString("HH:mm"),
                                                fix.ConditionCode == ArgosConditionCode.Unavailable
                                                    ? ""
                                                    : fix.Longitude < -180 || fix.Longitude > 180 ? "Error" : fix.Longitude.ToString("F7"),
