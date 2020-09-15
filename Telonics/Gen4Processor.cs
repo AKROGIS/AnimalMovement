@@ -74,7 +74,7 @@ namespace Telonics
                 dataFilePath = Path.GetTempFileName();
                 //TDC batch mode uses the aws extension to determine file type 
                 if (Format == Gen4Format.WebService || fileContents.StartsWith("\"programNumber\";\"platformId\";"))
-                    dataFilePath = dataFilePath + ".aws";
+                    dataFilePath += ".aws";
                 File.WriteAllText(dataFilePath, fileContents);
                 
                 batchFilePath = Path.GetTempFileName();

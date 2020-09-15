@@ -357,9 +357,11 @@ namespace SqlServer_Parsers
                                            "PlatformId", "varies", "Species", "varies", "Park", "FixDate", "FixTime", "FixMonth", "FixDay",
                                            "FixYear", "LatWGS84", "LonWGS84", "Temperature"
                                        };
-            var variableColumns = new Dictionary<int, List<string>>(2);
-            variableColumns[1] = new List<string> { "MooseNo", "WolfNo", "CaribouNo", "MuskoxNo" };
-            variableColumns[3] = new List<string> { "Location", "Pack" };
+            var variableColumns = new Dictionary<int, List<string>>(2)
+            {
+                [1] = new List<string> { "MooseNo", "WolfNo", "CaribouNo", "MuskoxNo" },
+                [3] = new List<string> { "Location", "Pack" }
+            };
             int fileColumn = 0;
             for (int i = 0; i < wellKnownColumns.Length; i++)
             {
@@ -369,7 +371,7 @@ namespace SqlServer_Parsers
                     (wellKnownColumns[i] != "varies" ||
                      !variableColumns[i].Contains(columns[fileColumn])))
                     continue;
-                mask = mask | 1u << i;
+                mask |= 1u << i;
                 fileColumn++;
             }
             return mask;
@@ -434,7 +436,7 @@ namespace SqlServer_Parsers
                 //If that is not true, then all remaining columns are skipped
                 if (columns[fileColumn] != wellKnownColumns[i])
                     continue;
-                mask = mask | 1ul << i;
+                mask |= 1ul << i;
                 fileColumn++;
             }
             return mask;

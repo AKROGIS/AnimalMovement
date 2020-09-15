@@ -22,8 +22,10 @@ namespace ArcMap_Addin
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            UID uid = new UIDClass();
-            uid.Value = type;
+            UID uid = new UIDClass
+            {
+                Value = type
+            };
             IMaps maps = doc.Maps;
             for (int i = 0; i < maps.Count; i++)
             {
