@@ -2269,6 +2269,191 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+CREATE TABLE [dbo].[CollarKeys](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[CollarKey] [varchar](512) NOT NULL,
+ CONSTRAINT [PK_CollarKeys] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC,
+	[CollarKey] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT SELECT ON [dbo].[CollarKeys] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CollarSensors](
+	[CollarManufacturer] [varchar](16) NOT NULL,
+	[CollarId] [varchar](16) NOT NULL,
+	[SensorCode] [varchar](8) NOT NULL,
+	[IsActive] [bit] NOT NULL,
+ CONSTRAINT [PK_CollarSensors] PRIMARY KEY CLUSTERED 
+(
+	[CollarManufacturer] ASC,
+	[CollarId] ASC,
+	[SensorCode] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT SELECT ON [dbo].[CollarSensors] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CollarDataVectronicActivity](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[idActivity] [int] NOT NULL,
+	[idCollar] [int] NOT NULL,
+	[acquisitionTime] [datetime2](7) NULL,
+	[scts] [datetime2](7) NULL,
+	[originCode] [varchar](10) NULL,
+	[activityModeCode] [int] NULL,
+	[activityModeDt] [int] NULL,
+	[activity1] [int] NULL,
+	[activity2] [int] NULL,
+	[temperature] [int] NULL,
+	[activity3] [int] NULL,
+	[insertTs] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[idCollar] ASC,
+	[idActivity] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT SELECT ON [dbo].[CollarDataVectronicActivity] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CollarDataVectronicMortality](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[idMortality] [int] NOT NULL,
+	[idCollar] [int] NOT NULL,
+	[acquisitionTime] [datetime2](7) NULL,
+	[scts] [datetime2](7) NULL,
+	[originCode] [varchar](10) NULL,
+	[idKind] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[idCollar] ASC,
+	[idMortality] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT SELECT ON [dbo].[CollarDataVectronicMortality] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CollarDataVectronicPosition](
+	[FileId] [int] NOT NULL,
+	[LineNumber] [int] NOT NULL,
+	[idPosition] [int] NOT NULL,
+	[idCollar] [int] NOT NULL,
+	[acquisitionTime] [datetime2](7) NULL,
+	[scts] [datetime2](7) NULL,
+	[originCode] [varchar](10) NULL,
+	[ecefX] [float] NULL,
+	[ecefY] [float] NULL,
+	[ecefZ] [float] NULL,
+	[latitude] [float] NULL,
+	[longitude] [float] NULL,
+	[height] [float] NULL,
+	[dop] [float] NULL,
+	[idFixType] [int] NULL,
+	[positionError] [varchar](255) NULL,
+	[satCount] [int] NULL,
+	[ch01SatId] [varchar](255) NULL,
+	[ch01SatCnr] [varchar](255) NULL,
+	[ch02SatId] [varchar](255) NULL,
+	[ch02SatCnr] [varchar](255) NULL,
+	[ch03SatId] [varchar](255) NULL,
+	[ch03SatCnr] [varchar](255) NULL,
+	[ch04SatId] [varchar](255) NULL,
+	[ch04SatCnr] [varchar](255) NULL,
+	[ch05SatId] [varchar](255) NULL,
+	[ch05SatCnr] [varchar](255) NULL,
+	[ch06SatId] [varchar](255) NULL,
+	[ch06SatCnr] [varchar](255) NULL,
+	[ch07SatId] [varchar](255) NULL,
+	[ch07SatCnr] [varchar](255) NULL,
+	[ch08SatId] [varchar](255) NULL,
+	[ch08SatCnr] [varchar](255) NULL,
+	[ch09SatId] [varchar](255) NULL,
+	[ch09SatCnr] [varchar](255) NULL,
+	[ch10SatId] [varchar](255) NULL,
+	[ch10SatCnr] [varchar](255) NULL,
+	[ch11SatId] [varchar](255) NULL,
+	[ch11SatCnr] [varchar](255) NULL,
+	[ch12SatId] [varchar](255) NULL,
+	[ch12SatCnr] [varchar](255) NULL,
+	[idMortalityStatus] [varchar](255) NULL,
+	[activity] [varchar](255) NULL,
+	[mainVoltage] [float] NULL,
+	[backupVoltage] [float] NULL,
+	[temperature] [float] NULL,
+	[transformedX] [varchar](255) NULL,
+	[transformedY] [varchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[idCollar] ASC,
+	[idPosition] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+GRANT SELECT ON [dbo].[CollarDataVectronicPosition] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE VIEW [dbo].[LatestVectronicSensorRecordIds]
+AS
+SELECT idCollar AS CollarId, 'act' AS SensorCode, MAX(idActivity) AS LastId FROM CollarDataVectronicActivity GROUP BY idCollar
+UNION ALL
+SELECT idCollar AS CollarId, 'mor' AS SensorCode, MAX(idMortality) AS LastId FROM CollarDataVectronicMortality GROUP BY idCollar
+UNION ALL
+SELECT idCollar AS CollarId, 'gps' AS SensorCode, MAX(idPosition) AS LastId FROM CollarDataVectronicPosition GROUP BY idCollar
+GO
+GRANT SELECT ON [dbo].[LatestVectronicSensorRecordIds] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[VectronicSensorsToRetrieve]
+AS
+     SELECT C.Manager, C.CollarId, K.CollarKey, S.SensorCode, I.LastId
+	   FROM Collars as C
+  LEFT JOIN CollarSensors AS S
+         ON C.CollarManufacturer = S.CollarManufacturer AND C.CollarId = S.CollarId
+  LEFT JOIN CollarKeys AS K
+         ON C.CollarManufacturer = K.CollarManufacturer AND C.collarId = K.CollarId
+  LEFT JOIN LatestVectronicSensorRecordIds AS I
+         ON C.collarId = I.CollarId AND S.SensorCode = I.SensorCode
+      WHERE C.CollarManufacturer = 'Vectronic' AND S.IsActive = 1
+
+GO
+GRANT SELECT ON [dbo].[VectronicSensorsToRetrieve] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[CollarDataTelonicsGen3StoreOnBoard](
 	[FileId] [int] NOT NULL,
 	[LineNumber] [int] NOT NULL,
@@ -2627,44 +2812,6 @@ CREATE TABLE [dbo].[CollarDataTelonicsGen4](
 ) ON [PRIMARY]
 GO
 GRANT SELECT ON [dbo].[CollarDataTelonicsGen4] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[CollarKeys](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[CollarKey] [varchar](512) NOT NULL,
- CONSTRAINT [PK_CollarKeys] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC,
-	[CollarKey] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-GRANT SELECT ON [dbo].[CollarKeys] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[CollarSensors](
-	[CollarManufacturer] [varchar](16) NOT NULL,
-	[CollarId] [varchar](16) NOT NULL,
-	[SensorCode] [varchar](8) NOT NULL,
-	[LastId] [int] NULL,
-	[IsActive] [bit] NOT NULL,
- CONSTRAINT [PK_CollarSensors] PRIMARY KEY CLUSTERED 
-(
-	[CollarManufacturer] ASC,
-	[CollarId] ASC,
-	[SensorCode] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-GRANT SELECT ON [dbo].[CollarSensors] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO
@@ -3313,6 +3460,24 @@ REFERENCES [dbo].[CollarFiles] ([FileId])
 ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[CollarDataTelonicsGen4] CHECK CONSTRAINT [FK_CollarDataTelonicsGen4_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataVectronicActivity]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataVectronicActivity_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataVectronicActivity] CHECK CONSTRAINT [FK_CollarDataVectronicActivity_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataVectronicMortality]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataVectronicMortality_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataVectronicMortality] CHECK CONSTRAINT [FK_CollarDataVectronicMortality_CollarFiles]
+GO
+ALTER TABLE [dbo].[CollarDataVectronicPosition]  WITH CHECK ADD  CONSTRAINT [FK_CollarDataVectronicPosition_CollarFiles] FOREIGN KEY([FileId])
+REFERENCES [dbo].[CollarFiles] ([FileId])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CollarDataVectronicPosition] CHECK CONSTRAINT [FK_CollarDataVectronicPosition_CollarFiles]
 GO
 ALTER TABLE [dbo].[CollarDeployments]  WITH CHECK ADD  CONSTRAINT [FK_CollarDeployments_Animals] FOREIGN KEY([ProjectId], [AnimalId])
 REFERENCES [dbo].[Animals] ([ProjectId], [AnimalId])
@@ -6149,6 +6314,154 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Sept 14, 2020
+-- Description: Delete a collar Key
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarKey_Delete] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    DECLARE @Manager SYSNAME
+    SELECT @Manager = Manager FROM Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF @Manager IS NULL
+        RETURN -- Collar was not found, so it must have been deleted already
+
+    -- Validate permission for this operation
+
+    -- The caller must be the Manager or assistant of the collar
+    IF @Manager != @Caller
+        AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manager (or assistant) of this collar ('+@CollarManufacturer+'/'+@CollarId+') to delete it.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    DELETE FROM dbo.CollarKeys WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+
+END
+
+GO
+GRANT EXECUTE ON [dbo].[CollarKey_Delete] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Sept 14, 2020
+-- Description: Adds a new Collar Key.
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarKey_Insert] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255), 
+    @CollarKey          NVARCHAR(512)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    DECLARE @Manager SYSNAME
+    SELECT @Manager = Manager FROM Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF @Manager IS NULL
+     BEGIN
+        DECLARE @message1 nvarchar(200) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+	
+    -- Validate permission for this operation
+    -- If the caller is not the owner or assistant then error and return
+    IF @Manager != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You ('+@Caller+') must be the manager (or assistant) of the collar to add this key.'
+        RAISERROR(@message2, 18, 0)
+        RETURN 1
+    END
+
+    INSERT INTO dbo.CollarKeys ([CollarManufacturer], [CollarId], [CollarKey])
+                     VALUES (@CollarManufacturer, @CollarId, @CollarKey)
+
+END
+
+GO
+GRANT EXECUTE ON [dbo].[CollarKey_Insert] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Sept 14, 2020
+-- Description: Updates a Collar Key
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarKey_Update] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255), 
+    @CollarKey          NVARCHAR(512) 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    -- Verify this is an existing collar by getting the manager (needed for permissions check)
+    DECLARE @Manager SYSNAME
+    SELECT @Manager = Manager FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF @Manager IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+    -- Validate permission for this operation
+    -- The caller must be the manager or assistant of the collar
+    IF @Manager != @Caller
+       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the manager (or assistant) of this collar.';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+    UPDATE dbo.CollarKeys SET [CollarKey] = @CollarKey
+                     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId;
+
+END
+
+GO
+GRANT EXECUTE ON [dbo].[CollarKey_Update] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 -- =============================================
 -- Author:		Regan Sarwas
 -- Create date: November 9, 2012
@@ -6575,6 +6888,162 @@ END
 
 GO
 GRANT EXECUTE ON [dbo].[CollarParameterFile_Update] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Sept 14, 2020
+-- Description: Delete a collar Sensor
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarSensor_Delete] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255),
+    @SensorCode         NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    DECLARE @Manager SYSNAME
+    SELECT @Manager = Manager FROM Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF @Manager IS NULL
+        RETURN -- Collar was not found, so it must have been deleted already
+
+    -- Validate permission for this operation
+
+    -- The caller must be the Manager or assistant of the collar
+    IF @Manager != @Caller
+        AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                         WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message1 nvarchar(200) = 'You ('+@Caller+') must be the manager (or assistant) of this collar ('+@CollarManufacturer+'/'+@CollarId+') to delete it.';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+
+    DELETE FROM dbo.CollarSensors WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND SensorCode = @SensorCode
+
+END
+
+GO
+GRANT EXECUTE ON [dbo].[CollarSensor_Delete] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Sept 14, 2020
+-- Description: Adds a new Collar Sensor.
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarSensor_Insert] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255), 
+    @SensorCode         NVARCHAR(255),
+	@IsActive           BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller sysname = ORIGINAL_LOGIN();
+
+    DECLARE @Manager SYSNAME
+    SELECT @Manager = Manager FROM Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF @Manager IS NULL
+     BEGIN
+        DECLARE @message1 nvarchar(200) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+	
+    -- Validate permission for this operation
+    -- If the caller is not the owner or assistant then error and return
+    IF @Manager != @Caller
+       AND NOT EXISTS (SELECT 1
+                         FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message2 nvarchar(100) = 'You ('+@Caller+') must be the manager (or assistant) of the collar to add this sensor.'
+        RAISERROR(@message2, 18, 0)
+        RETURN 1
+    END
+
+    INSERT INTO dbo.CollarSensors ([CollarManufacturer], [CollarId], [SensorCode], [IsActive])
+                     VALUES (@CollarManufacturer, @CollarId, @SensorCode, @IsActive)
+
+END
+
+GO
+GRANT EXECUTE ON [dbo].[CollarSensor_Insert] TO [Editor] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:      Regan Sarwas
+-- Create date: Sept 14, 2020
+-- Description: Updates a Collar Sensor
+-- =============================================
+CREATE PROCEDURE [dbo].[CollarSensor_Update] 
+    @CollarManufacturer NVARCHAR(255),
+    @CollarId           NVARCHAR(255), 
+    @SensorCode         NVARCHAR(255),
+	@IsActive           BIT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get the name of the caller
+    DECLARE @Caller SYSNAME = ORIGINAL_LOGIN();
+
+    -- Verify this is an existing collar by getting the manager (needed for permissions check)
+    DECLARE @Manager SYSNAME
+    SELECT @Manager = Manager FROM dbo.Collars WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId
+    IF @Manager IS NULL
+    BEGIN
+        DECLARE @message1 nvarchar(100) = 'There is no such collar ('+@CollarManufacturer+'/'+@CollarId+').';
+        RAISERROR(@message1, 18, 0)
+        RETURN 1
+    END
+
+	--Fix Defaults
+    -- I use NULL to indicate "don't change value" only on non-null fields.
+    -- The defaults for nullable field should match the insert SP.
+    -- If the client does not want to change a nullable field they must provide the original value.
+    IF @IsActive IS NULL
+        SELECT @IsActive = [IsActive] FROM dbo.CollarSensors WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND SensorCode = @SensorCode;
+
+    -- Validate permission for this operation
+    -- The caller must be the manager or assistant of the collar
+    IF @Manager != @Caller
+       AND NOT EXISTS (SELECT 1 FROM ProjectInvestigatorAssistants
+                        WHERE Assistant = @Caller AND ProjectInvestigator = @Manager)
+    BEGIN
+        DECLARE @message2 nvarchar(200) = 'You ('+@Caller+') must be the manager (or assistant) of this collar.';
+        RAISERROR(@message2, 18, 0)
+        RETURN 2
+    END
+
+    UPDATE dbo.CollarSensor SET IsActive = @IsActive
+                     WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND SensorCode = @SensorCode;
+
+END
+
 GO
 SET ANSI_NULLS ON
 GO
