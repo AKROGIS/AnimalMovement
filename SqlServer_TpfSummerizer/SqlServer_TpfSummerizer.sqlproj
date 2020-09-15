@@ -10,6 +10,7 @@
     <PostConversionAddToScc>
     </PostConversionAddToScc>
     <TargetDatabaseSet>True</TargetDatabaseSet>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -20,13 +21,13 @@
     <OutputType>Database</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>SqlServer_TpfSummerizer</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <ConnectionString>
     </ConnectionString>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\resarwas\Documents\GitHub\AnimalMovement\Backup\SqlServer_TpfSummerizer\</UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider</DSP>
     <Name>SqlServer_TpfSummerizer</Name>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{c7eaf442-905c-4fb9-a614-69c784e8b8ff}</ProjectGuid>

@@ -10,6 +10,7 @@
     <PostConversionAddToScc>
     </PostConversionAddToScc>
     <TargetDatabaseSet>True</TargetDatabaseSet>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -20,14 +21,14 @@
     <OutputType>Database</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>SqlServer_Parsers</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <ConnectionString>
     </ConnectionString>
     <PermissionSet>SAFE</PermissionSet>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\resarwas\Documents\GitHub\AnimalMovement\Backup\SqlServer_Parsers\</UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider</DSP>
     <Name>SqlServer_Parsers</Name>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{c2ac3cfd-fb01-40aa-8c48-2e3bb42f5bee}</ProjectGuid>

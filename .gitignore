@@ -75,3 +75,4 @@ packages/
 *.pyo
 #JetBrains (PyCharm) IDE
 .idea/
+*.jfm

@@ -10,6 +10,7 @@
     <PostConversionAddToScc>
     </PostConversionAddToScc>
     <TargetDatabaseSet>True</TargetDatabaseSet>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -20,13 +21,13 @@
     <OutputType>Database</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>SqlServer_Files</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <ConnectionString>
     </ConnectionString>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\resarwas\Documents\GitHub\AnimalMovement\Backup\SqlServer_Files\</UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql120DatabaseSchemaProvider</DSP>
     <Name>SqlServer_Files</Name>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{69768b2e-d5e7-4084-9cac-a0197b24188a}</ProjectGuid>
