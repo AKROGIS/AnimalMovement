@@ -22,8 +22,7 @@ namespace TelonicsTest
 
         public static void TestGetPlatformList()
         {
-            string error;
-            var result = ArgosWebSite.GetPlatformList("xxx", "xxx", out error);
+            var result = ArgosWebSite.GetPlatformList("xxx", "xxx", out string error);
             if (error != null)
                 Console.WriteLine(error);
             else

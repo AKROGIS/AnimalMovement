@@ -150,16 +150,14 @@ namespace Telonics
 
         private Double GetFrequency(string s)
         {
-            int f;
-            if (Int32.TryParse(s, out f))
+            if (Int32.TryParse(s, out int f))
                 return f / 1000000.0;
             throw new FormatException("Frequency (" + s + ") in " + Name + " is not in the expected format");
         }
 
         private DateTime GetTimeStamp(string s)
         {
-            DateTime t;
-            if (DateTime.TryParse(s, out t))
+            if (DateTime.TryParse(s, out DateTime t))
                 return new DateTime(t.Ticks, DateTimeKind.Utc);
             throw new FormatException("TimeStamp (" + s + ") in " + Name + " is not in the expected format");
         }

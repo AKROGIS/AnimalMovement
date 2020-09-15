@@ -13,8 +13,7 @@ namespace AnimalMovement
 
         internal static double? DoubleOrNull(this string s)
         {
-            double result;
-            if (Double.TryParse(s, out result))
+            if (Double.TryParse(s, out double result))
                 return result;
             return null;
         }

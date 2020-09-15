@@ -138,10 +138,9 @@ namespace ArgosDownloader
 
         private static int? GetDays(string arg)
         {
-            int days;
             if (arg == "/nodays")
                 return Int32.MinValue;
-            if (arg.StartsWith("/d:") && Int32.TryParse(arg.Substring(3), out days))
+            if (arg.StartsWith("/d:") && Int32.TryParse(arg.Substring(3), out int days))
                 return days;
             if (arg.StartsWith("/days:") && Int32.TryParse(arg.Substring(6), out days))
                 return days;

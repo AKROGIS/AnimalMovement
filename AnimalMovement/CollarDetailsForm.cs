@@ -178,9 +178,8 @@ namespace AnimalMovement
 
         private void ValidateFrequency(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            double frequency;
             bool ok = String.IsNullOrEmpty(FrequencyTextBox.Text) ||
-                      (Double.TryParse(FrequencyTextBox.Text, out frequency) && frequency > 0);
+                      (Double.TryParse(FrequencyTextBox.Text, out double frequency) && frequency > 0);
             var msg = ok ? "" : "Frequency must be a null or a positive number";
             CollarErrorProvider.SetError(FrequencyTextBox, msg);
             e.Cancel = !ok;
@@ -462,7 +461,7 @@ namespace AnimalMovement
                                                  : (p.Gen3Period%60 == 0
                                                         ? p.Gen3Period/60 + " hrs"
                                                         : p.Gen3Period + " min"),
-                                    File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
+                                    File = p.CollarParameterFile?.FileName,
                                     Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
                                     End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g"),
                                     Data = p.CollarFiles.Any()
@@ -473,7 +472,7 @@ namespace AnimalMovement
                     ParametersDataGridView.DataSource =
                         Collar.CollarParameters.Select(p => new {
                             Parameter = p,
-                            File = p.CollarParameterFile == null ? null : p.CollarParameterFile.FileName,
+                            File = p.CollarParameterFile?.FileName,
                             Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),
                             End = p.EndDate == null ? "Never" : p.EndDate.Value.ToLocalTime().ToString("g"),
                             Data = p.CollarFiles.Any()

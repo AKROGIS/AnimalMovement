@@ -84,9 +84,8 @@ namespace FileLibrary
             var days = Math.Min(ArgosWebSite.MaxDays, daysSinceLastDownload);
             if (days < ArgosWebSite.MinDays)
                 return;
-            string errors;
             var results = ArgosWebSite.GetProgram(program.UserName, program.Password, program.ProgramId, days,
-                                                 out errors);
+                                                 out string errors);
             CollarFile file = FileLoader.LoadProgram(program, days, results, errors);
             if (file == null)
                 return;
@@ -117,9 +116,8 @@ namespace FileLibrary
             if (days < ArgosWebSite.MinDays)
                 return;
             var program = platform.ArgosProgram;
-            string errors;
             var results = ArgosWebSite.GetCollar(program.UserName, program.Password, platform.PlatformId, days,
-                                                 out errors);
+                                                 out string errors);
             CollarFile file = FileLoader.LoadPlatfrom(platform, days, results, errors);
             if (file == null)
                 return;

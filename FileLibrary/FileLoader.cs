@@ -305,11 +305,11 @@ namespace FileLibrary
             // entities with a new entity in this datacontext.
             var file = new CollarFile
             {
-                ProjectId = Project == null ? null : Project.ProjectId,
+                ProjectId = Project?.ProjectId,
                 FileName = Path.GetFileName(FilePath),
-                CollarManufacturer = Collar == null ? null : Collar.CollarManufacturer,
-                CollarId = Collar == null ? null : Collar.CollarId,
-                Owner = Owner == null ? null : Owner.Login,
+                CollarManufacturer = Collar?.CollarManufacturer,
+                CollarId = Collar?.CollarId,
+                Owner = Owner?.Login,
                 Status = Status,
                 Contents = Contents,
                 ParentFileId = ParentFileId,
@@ -525,7 +525,7 @@ namespace FileLibrary
             //In the C format, the 7th or 8th line is 'CTN,649024A'
             var line = ReadLines(Contents, Encoding.UTF8)
                 .Skip(5).Take(4).FirstOrDefault(l => l.Normalize().StartsWith("CTN,", StringComparison.OrdinalIgnoreCase));
-            return line == null ? null : line.Substring(4);
+            return line?.Substring(4);
         }
 
 

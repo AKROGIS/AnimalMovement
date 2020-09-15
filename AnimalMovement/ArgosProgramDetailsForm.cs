@@ -351,8 +351,7 @@ namespace AnimalMovement
             Application.DoEvents();
             try
             {
-                string error;
-                var programPlatforms = ArgosWebSite.GetPlatformList(Program.UserName, Program.Password, out error);
+                var programPlatforms = ArgosWebSite.GetPlatformList(Program.UserName, Program.Password, out string error);
                 var addedNewPlatform = false;
                 if (error != null)
                 {

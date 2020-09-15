@@ -128,7 +128,7 @@ namespace ArgosProcessor
                 return;
             }
             var db = new AnimalMovementDataContext();
-            db.ArgosFileProcessingIssues_Insert(file.FileId, ex.Message, platform == null ? null : platform.PlatformId,
+            db.ArgosFileProcessingIssues_Insert(file.FileId, ex.Message, platform?.PlatformId,
                                                 null, null, null, null);
         }
 
@@ -155,8 +155,7 @@ namespace ArgosProcessor
                 fileId = fileId.Substring(3);
             if (fileId.StartsWith("/file:", StringComparison.OrdinalIgnoreCase))
                 fileId = fileId.Substring(6);
-            int id;
-            if (!Int32.TryParse(fileId, out id) || id < 1)
+            if (!Int32.TryParse(fileId, out int id) || id < 1)
                 return null;
             var database = new AnimalMovementDataContext();
             return (from collar in database.CollarFiles

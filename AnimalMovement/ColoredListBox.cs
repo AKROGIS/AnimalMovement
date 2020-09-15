@@ -78,7 +78,7 @@ namespace AnimalMovement
             var listSource = DataSource as IListSource;
             object item = list != null
                               ? list[index]
-                              : (listSource == null ? null  : listSource.GetList()[index]);
+                              : (listSource?.GetList()[index]);
             if (item == null)
                 return string.Empty;
             object prop = GetPropValue(item, DisplayMember);

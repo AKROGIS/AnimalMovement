@@ -198,10 +198,9 @@ namespace AnimalMovement
                 return "This collar has another set of parameters during your date range.";
 
             //Check Gen3 Period
-            int period;
             if (Collar.CollarModel == "Gen3" &&
                 !String.IsNullOrEmpty(Gen3PeriodTextBox.Text) &&
-                !Int32.TryParse(Gen3PeriodTextBox.Text, out period))
+                !Int32.TryParse(Gen3PeriodTextBox.Text, out int period))
                 return "The time period must be a whole number";
             return null;
         }

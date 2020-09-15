@@ -160,8 +160,7 @@ namespace ArcMap_Addin
                     connection.Open();
 
                     var features = ((IFeatureSelection) actionLayer).SelectionSet;
-                    ICursor cursor;
-                    features.Search(null, true, out cursor);
+                    features.Search(null, true, out ICursor cursor);
                     int projectIndex = cursor.FindField("ProjectId");
                     int animalIndex = cursor.FindField("AnimalId");
                     int dateIndex = cursor.FindField("FixDate");
@@ -230,9 +229,7 @@ namespace ArcMap_Addin
         private static Dictionary<string, string> GetProperties(IPropertySet propertySet)
         {
             var results = new Dictionary<string, string>();
-            object n;
-            object v;
-            propertySet.GetAllProperties(out n, out v);
+            propertySet.GetAllProperties(out object n, out object v);
             var names  = (object[]) n;
             var values = (object[]) v;
             for (int i = 0 ; i < names.Length; i++)

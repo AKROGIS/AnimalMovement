@@ -44,7 +44,7 @@ namespace DataModel
         {
             var db = new SettingsDataContext();
             Setting setting = db.Settings.FirstOrDefault(s => s.Username == SystemUsername && s.Key == key);
-            return setting == null ? null : setting.Value;
+            return setting?.Value;
         }
 
         public static string GetDefaultProject()
@@ -156,7 +156,7 @@ namespace DataModel
             var db = new SettingsDataContext();
             var user = GetUserName();
             Setting setting = db.Settings.FirstOrDefault(s => s.Username == user && s.Key == key);
-            return setting == null ? null : setting.Value;
+            return setting?.Value;
         }
 
         private static void SetUsersDefault(string key, string value)
