@@ -36,7 +36,10 @@ namespace FileLibrary
                 if (pi != null &&
                     (file.ProjectInvestigator == null || file.ProjectInvestigator.Login != pi.Login) &&
                     (file.Project == null || file.Project.ProjectInvestigator1.Login != pi.Login))
+                {
                     continue;
+                }
+
                 try
                 {
                     ProcessFile(file);
@@ -44,7 +47,10 @@ namespace FileLibrary
                 catch (Exception ex)
                 {
                     if (handler == null)
+                    {
                         throw;
+                    }
+
                     handler(ex, file, null);
                 }
             }
@@ -54,7 +60,10 @@ namespace FileLibrary
                 var platform = database.ArgosPlatforms.First(p => p.PlatformId == item.PlatformId);
                 if (pi != null && file.ProjectInvestigator != pi && (file.Project == null ||
                                                                      file.Project.ProjectInvestigator1 != pi))
+                {
                     continue;
+                }
+
                 try
                 {
                     ProcessFile(file, platform);
@@ -62,7 +71,10 @@ namespace FileLibrary
                 catch (Exception ex)
                 {
                     if (handler == null)
+                    {
                         throw;
+                    }
+
                     handler(ex, file, platform);
                 }
             }
@@ -78,14 +90,25 @@ namespace FileLibrary
         public static void ProcessFile(CollarFile file, ArgosPlatform platform = null)
         {
             if (file == null)
+            {
                 throw new ArgumentNullException("file", "No collar file was provided to process.");
+            }
+
             if (!ProcessOnServer(file, platform))
+            {
                 if (file.Format == 'H')
+                {
                     ProcessDataLogFile(file);
+                }
                 else if (file.Format == 'I')
+                {
                     ProcessIdfFile(file);
+                }
                 else
+                {
                     ProcessFile(file, GetArgosFile(file), platform);
+                }
+            }
         }
 
         #endregion
@@ -179,8 +202,10 @@ namespace FileLibrary
             {
                 databaseFunctions.ArgosFile_ClearProcessingResults(file.FileId);
                 if (IsArgosAwsFileIncomplete(argos as ArgosAwsFile) ?? false)
+                {
                     LogIssueForFile(file.FileId,
                                     "The Argos server could not return all the data requested and this file is incomplete.");
+                }
             }
             else
             {
@@ -194,6 +219,7 @@ namespace FileLibrary
                                           select transmissions;
 
             foreach (var transmissionSet in transmissionsByPlatform)
+            {
                 try
                 {
                     ProcessTransmissions(file, argos, transmissionSet);
@@ -204,6 +230,8 @@ namespace FileLibrary
                                                 ex.Message, transmissionSet.Key);
                     LogIssueForFile(file.FileId, message, transmissionSet.Key);
                 }
+            }
+
             LogGeneralMessage("Finished local processing of file");
         }
 
@@ -280,10 +308,16 @@ namespace FileLibrary
                                             parameters.CollarId));
             var start = parameters.StartDate ?? DateTime.MinValue;
             if (start < first)
+            {
                 start = first;
+            }
+
             var end = parameters.EndDate ?? DateTime.MaxValue;
             if (last < end)
+            {
                 end = last;
+            }
+
             var processor = GetProcessor(file, parameters);
             var transmissionSubset = transmissions.Where(t => start <= t.DateTime && t.DateTime <= end);
             var lines = processor.ProcessTransmissions(transmissionSubset, argos);
@@ -345,17 +379,26 @@ namespace FileLibrary
         private static IProcessor GetGen3Processor(GetTelonicsParametersForArgosDatesResult parameters)
         {
             if (parameters.Gen3Period == null)
+            {
                 throw new InvalidOperationException("Unknown period for Gen3 collar");
+            }
+
             if (parameters.Format == 'B')
+            {
                 throw new InvalidOperationException(
                     "GPS Fixes for Gen3 collars with PTT parameter files (*.ppf) must be processed with Telonics ADC-T03.");
+            }
+
             return new Gen3Processor(TimeSpan.FromMinutes(parameters.Gen3Period.Value));
         }
 
         private static IProcessor GetGen4Processor(GetTelonicsParametersForArgosDatesResult parameters)
         {
             if (parameters.Format != 'A' || parameters.Contents == null)
+            {
                 throw new InvalidOperationException("Invalid parameter file format or contents for Gen4 processor");
+            }
+
             return new Gen4Processor(parameters.Contents.ToArray());
         }
 
@@ -377,7 +420,10 @@ namespace FileLibrary
             if (NeedTelonicsSoftware(file) && !HaveAccessToTelonicsSoftware())
             {
                 if (OnDatabaseServer())
+                {
                     throw new InvalidOperationException("No access to Telonics software to process files.");
+                }
+
                 LogGeneralMessage(String.Format("Start processing file {0} on database", file.FileId));
                 var database = new AnimalMovementFunctions();
                 //FIXME: ProcessOnServer may be called with H and I (Teloncs files which need processing, but are not ArgosFiles)
@@ -386,9 +432,14 @@ namespace FileLibrary
                 // database.TelonicsData_Process(file.FileId);
                 // if not telonics or not Argos then fail with warning
                 if (platform == null)
+                {
                     database.ArgosFile_Process(file.FileId);
+                }
                 else
+                {
                     database.ArgosFile_ProcessPlatform(file.FileId, platform.PlatformId);
+                }
+
                 LogGeneralMessage("Finished processing file on database");
                 return true;
             }
@@ -438,9 +489,15 @@ namespace FileLibrary
         private static bool? IsArgosAwsFileIncomplete(ArgosAwsFile awsFile)
         {
             if (awsFile == null)
+            {
                 return null;
+            }
+
             if (!awsFile.MaxResponseReached.HasValue)
+            {
                 awsFile.GetTransmissions();
+            }
+
             return awsFile.MaxResponseReached;
         }
 
@@ -454,8 +511,12 @@ namespace FileLibrary
                                             DateTime? lastTransmission = null)
         {
             if (Properties.Settings.Default.LogErrorsToConsole)
+            {
                 Console.WriteLine(message);
+            }
+
             if (Properties.Settings.Default.LogErrorsToLogFile)
+            {
                 try
                 {
                     File.AppendAllText(Properties.Settings.Default.FileProcessorLogFilePath,
@@ -465,6 +526,8 @@ namespace FileLibrary
                 {
                     Debug.Print("Unable to log to file " + ex.Message);
                 }
+            }
+
             var issue = new ArgosFileProcessingIssue
             {
                 FileId = fileid,
@@ -483,8 +546,12 @@ namespace FileLibrary
         private static void LogGeneralMessage(string message)
         {
             if (Properties.Settings.Default.LogMessagesToConsole)
+            {
                 Console.WriteLine(message);
+            }
+
             if (Properties.Settings.Default.LogMessagesToLogFile)
+            {
                 try
                 {
                     File.AppendAllText(Properties.Settings.Default.FileProcessorLogFilePath,
@@ -494,6 +561,7 @@ namespace FileLibrary
                 {
                     Debug.Print("Unable to log to file " + ex.Message);
                 }
+            }
         }
 
         #endregion

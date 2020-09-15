@@ -306,7 +306,10 @@ namespace SqlServer_Parsers
                 while ((line = reader.ReadLine()) != null)
                 {
                     if (lineSelector(lineNumber, line))
+                    {
                         resultCollection.Add(new Line(lineNumber, line, columnMask));
+                    }
+
                     lineNumber++;
                 }
             }
@@ -345,10 +348,16 @@ namespace SqlServer_Parsers
         {
             UInt64 mask = UInt64.MinValue;
             if (stream == null)
+            {
                 return mask;
+            }
+
             string header = stream.ReadLine();
             if (header == null)
+            {
                 return mask;
+            }
+
             string[] columns = header.Split(new[] { '\t', ',' }, 14);
             // Column 14+ is not well known and is for any and all other data that may be included
             // See Section 2.5 of Argos/Telonics Online Data Conversion, April 2010, Edward M. Debevec
@@ -366,11 +375,17 @@ namespace SqlServer_Parsers
             for (int i = 0; i < wellKnownColumns.Length; i++)
             {
                 if (columns.Length <= fileColumn)
+                {
                     break;
+                }
+
                 if (columns[fileColumn] != wellKnownColumns[i] &&
                     (wellKnownColumns[i] != "varies" ||
                      !variableColumns[i].Contains(columns[fileColumn])))
+                {
                     continue;
+                }
+
                 mask |= 1u << i;
                 fileColumn++;
             }
@@ -381,7 +396,9 @@ namespace SqlServer_Parsers
         {
             UInt64 mask = UInt64.MinValue;
             if (stream == null)
+            {
                 return mask;
+            }
 
             // Read lines from header until the last header row
             // The last header row has the column names for the data in the file
@@ -391,21 +408,35 @@ namespace SqlServer_Parsers
                 // Look for the line that defines where the header actually is
                 var s = stream.ReadLine();
                 if (s != null && s.StartsWith("Headers Row", StringComparison.OrdinalIgnoreCase))
+                {
                     _formatCHeaderLines = Int32.Parse(s.Split(new[] { '\t', ',' }, 3)[1]);
+                }
             }
             string header = stream.ReadLine();
             if (header == null)
+            {
                 return mask;
+            }
+
             string[] columns = header.Split(new[] { '\t', ',' }, 65);
             //Fix Iridium Column Header
             columns = columns.Select(x =>
             {
                 if (x == "Iridium CEP Radius")
+                {
                     return "Argos Location Class";
+                }
+
                 if (x == "Iridium Latitude")
+                {
                     return "Argos Latitude";
+                }
+
                 if (x == "Iridium Longitude")
+                {
                     return "Argos Longitude";
+                }
+
                 return x;
             }).ToArray();
             var wellKnownColumns = new[]
@@ -431,11 +462,16 @@ namespace SqlServer_Parsers
             for (int i = 0; i < wellKnownColumns.Length; i++)
             {
                 if (columns.Length <= fileColumn)
+                {
                     break;
+                }
                 //Assumes that all file columns are in well known columns, and in the same order
                 //If that is not true, then all remaining columns are skipped
                 if (columns[fileColumn] != wellKnownColumns[i])
+                {
                     continue;
+                }
+
                 mask |= 1ul << i;
                 fileColumn++;
             }
@@ -449,18 +485,30 @@ namespace SqlServer_Parsers
         internal static bool Default_LineSelector(int lineNumber, string lineText)
         {
             if (lineNumber == 1)
+            {
                 return false;
+            }
+
             if (string.IsNullOrEmpty(lineText.Replace(',', ' ').Trim()))
+            {
                 return false;
+            }
+
             return true;
         }
 
         internal static bool FormatC_LineSelector(int lineNumber, string lineText)
         {
             if (lineNumber <= _formatCHeaderLines)
+            {
                 return false;
+            }
+
             if (string.IsNullOrEmpty(lineText.Trim()))
+            {
                 return false;
+            }
+
             return true;
         }
 
@@ -468,9 +516,15 @@ namespace SqlServer_Parsers
         {
             //The header in this format is optional 
             if (lineNumber == 1 && lineText.Trim().StartsWith("TXDate,", StringComparison.OrdinalIgnoreCase))
+            {
                 return false;
+            }
+
             if (string.IsNullOrEmpty(lineText.Trim()))
+            {
                 return false;
+            }
+
             return true;
         }
 
@@ -478,11 +532,20 @@ namespace SqlServer_Parsers
         {
             //The header in this format is optional 
             if (lineNumber == 1 && lineText.Trim().StartsWith("\"programNumber\";", StringComparison.OrdinalIgnoreCase))
+            {
                 return false;
+            }
+
             if (lineText.Trim().Equals("MAX_RESPONSE_REACHED", StringComparison.OrdinalIgnoreCase))
+            {
                 return false;
+            }
+
             if (string.IsNullOrEmpty(lineText.Trim()))
+            {
                 return false;
+            }
+
             return true;
         }
 
@@ -689,24 +752,28 @@ namespace SqlServer_Parsers
             trapTriggerTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             releaseTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             for (int i = 0; i < 14; i++)
+            {
                 if (Include(columnMask, dbColumn++))
+                {
                     fileColumn++;
+                }
+            }
             /*
-            startUnixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            startYear = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            startMonth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            startDay = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            startHour = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            startMinute = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            startSecond = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            stopUnixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            stopYear = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            stopMonth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            stopDay = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            stopHour = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            stopMinute = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            stopSecond = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
-            */
+startUnixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+startYear = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+startMonth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+startDay = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+startHour = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+startMinute = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+startSecond = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+stopUnixTime = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+stopYear = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+stopMonth = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+stopDay = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+stopHour = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+stopMinute = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+stopSecond = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
+*/
             predeploymentData = Include(columnMask, dbColumn++) ? NullableString(parts[fileColumn++]) : SqlString.Null;
             error = Include(columnMask, dbColumn) ? NullableString(parts[fileColumn]) : SqlString.Null;
         }

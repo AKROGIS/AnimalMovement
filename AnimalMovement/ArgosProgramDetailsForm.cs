@@ -32,9 +32,14 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Platform is in a different DataContext, get one in this DataContext
             if (Program != null)
+            {
                 Program = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == Program.ProgramId);
+            }
+
             if (Program == null)
+            {
                 throw new InvalidOperationException("Argos Platform Details Form not provided a valid Platform.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsInvestigatorEditor(Program.Manager, CurrentUser) ?? false;
@@ -54,7 +59,9 @@ namespace AnimalMovement
             base.OnLoad(e);
             ArgosProgramTabControl.SelectedIndex = Properties.Settings.Default.ArgosProgramDetailsFormActiveTab;
             if (ArgosProgramTabControl.SelectedIndex == 0)
+            {
                 ArgosTabControl_SelectedIndexChanged(ArgosProgramTabControl, null);
+            }
         }
 
         protected override void OnClosed(EventArgs e)
@@ -99,9 +106,14 @@ namespace AnimalMovement
             ConfigureDateTimePicker(StartDateTimePicker, Program.StartDate);
             ConfigureDateTimePicker(EndDateTimePicker, Program.EndDate);
             if (Program.Active.HasValue)
+            {
                 ActiveCheckBox.Checked = Program.Active.Value;
+            }
             else
+            {
                 ActiveCheckBox.CheckState = CheckState.Indeterminate;
+            }
+
             NotesTextBox.Text = Program.Notes;
             EnableGeneralControls();
         }
@@ -111,7 +123,9 @@ namespace AnimalMovement
             //If I am not an editor, then set the current program (we will lock it later).
             //else, set list to all projects I can edit (which must include this one)
             if (!IsEditor)
+            {
                 OwnerComboBox.Items.Add(Program.ProjectInvestigator);
+            }
             else
             {
                 OwnerComboBox.DataSource =
@@ -279,9 +293,14 @@ namespace AnimalMovement
         {
             PlatformsGridView.DataSource = Program.ArgosPlatforms;
             if (PlatformsGridView.Columns["ProgramId"] != null)
+            {
                 PlatformsGridView.Columns["ProgramId"].Visible = false;
+            }
+
             if (PlatformsGridView.Columns["ArgosProgram"] != null)
+            {
                 PlatformsGridView.Columns["ArgosProgram"].Visible = false;
+            }
         }
 
         private void EnablePlatformControls()
@@ -316,10 +335,14 @@ namespace AnimalMovement
             {
                 var platform = (ArgosPlatform)row.DataBoundItem;
                 if (!platform.ArgosDeployments.Any())
+                {
                     Database.ArgosPlatforms.DeleteOnSubmit(platform);
+                }
             }
             if (SubmitChanges())
+            {
                 PlatformDataChanged();
+            }
         }
 
         private void InfoPlatformButton_Click(object sender, EventArgs e)
@@ -338,7 +361,9 @@ namespace AnimalMovement
         private void PlatformsGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoPlatformButton.Enabled)
+            {
                 InfoPlatformButton_Click(sender, e);
+            }
         }
 
         private void AddMissingPlatformsButton_Click(object sender, EventArgs e)
@@ -375,7 +400,9 @@ namespace AnimalMovement
                     }
                 }
                 if (addedNewPlatform && SubmitChanges())
+                {
                     PlatformDataChanged();
+                }
             }
             finally
             {
@@ -412,7 +439,10 @@ namespace AnimalMovement
         {
             var file = (CollarFile)DownloadsDataGridView.SelectedRows[0].Cells[2].Value;
             if (file == null)
+            {
                 return;
+            }
+
             var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, x) => DownloadsChanged();
             form.Show(this);
@@ -421,7 +451,9 @@ namespace AnimalMovement
         private void DownloadsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
+            {
                 DownloadsDetails();
+            }
         }
 
         #endregion

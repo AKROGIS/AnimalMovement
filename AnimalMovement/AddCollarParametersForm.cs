@@ -32,11 +32,16 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Collar and File are in a different DataContext, get them in this DataContext
             if (Collar != null)
+            {
                 Collar =
                     Database.Collars.FirstOrDefault(
                         c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
+            }
+
             if (File != null)
+            {
                 File = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == File.FileId);
+            }
             //Both Collar and File can be null or non-null.  if either is non-null, then it is locked.
 
             IsEditor = CanEditCollar(Collar);
@@ -45,9 +50,12 @@ namespace AnimalMovement
         private bool CanEditCollar(Collar collar)
         {
             if (collar == null)
+            {
                 return Database.ProjectInvestigators.Any(
                         pi =>
                         pi.Login == CurrentUser || pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
+            }
+
             var functions = new AnimalMovementFunctions();
             return functions.IsInvestigatorEditor(collar.Manager, CurrentUser) ?? false;
         }
@@ -71,8 +79,11 @@ namespace AnimalMovement
         {
             CollarComboBox.Enabled = false;
             if (Collar != null)
+            {
                 CollarComboBox.DataSource = new[] { Collar };
+            }
             else
+            {
                 CollarComboBox.DataSource = from collar in Database.Collars
                                             where (collar.Manager == CurrentUser ||
                                                    collar.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
@@ -81,6 +92,8 @@ namespace AnimalMovement
                                                    (collar.CollarModel == "Gen3" && File.Format == 'B') ||
                                                    (collar.CollarModel != "Gen3" && collar.CollarModel != "Gen4"))
                                             select collar;
+            }
+
             CollarComboBox.SelectedItem = Collar;
             CollarComboBox.Enabled = Collar == null;
         }
@@ -88,10 +101,13 @@ namespace AnimalMovement
         private void LoadFileComboBox()
         {
             if (File != null)
+            {
                 FileComboBox.DataSource = new[] { File };
+            }
             else
             {
                 if (Collar == null)
+                {
                     FileComboBox.DataSource = from file in Database.CollarParameterFiles
                                               where file.Status == 'A' &&
                                                     (file.Owner == CurrentUser ||
@@ -99,6 +115,7 @@ namespace AnimalMovement
                                                          .ProjectInvestigatorAssistants.Any(
                                                              a => a.Assistant == CurrentUser))
                                               select file;
+                }
                 else
                 {
                     switch (Collar.CollarModel)
@@ -157,16 +174,25 @@ namespace AnimalMovement
         {
             var error = ValidateError();
             if (error != null)
+            {
                 ValidationTextBox.Text = error;
+            }
+
             ValidationTextBox.Visible = error != null;
             ValidationTextBox.ForeColor = Color.Red;
             CreateButton.Enabled = error == null;
             FixItButton.Visible = error != null;
             if (error != null)
+            {
                 return;
+            }
+
             var warning = ValidateWarning();
             if (warning != null)
+            {
                 ValidationTextBox.Text = warning;
+            }
+
             ValidationTextBox.Visible = warning != null;
             ValidationTextBox.ForeColor = Color.DodgerBlue;
         }
@@ -175,33 +201,49 @@ namespace AnimalMovement
         {
             //We must have a collar
             if (Collar == null)
+            {
                 return "You must select a collar";
+            }
             //We must have a file or a period for Gen3
             var hasFile = FileComboBox.SelectedItem != null;
             if (Collar.CollarModel == "Gen3" && !hasFile && String.IsNullOrEmpty(Gen3PeriodTextBox.Text))
+            {
                 return "You must provide a file or a time period";
+            }
+
             if (Collar.CollarModel == "Gen3" && hasFile && !String.IsNullOrEmpty(Gen3PeriodTextBox.Text))
+            {
                 return "You must provide a file OR a time period, not both";
+            }
             //We must have a file or all others
             if (Collar.CollarModel != "Gen3" && !hasFile)
+            {
                 return "You must provide a file for this collar";
+            }
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MinValue;
             var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
+            {
                 return "The end date must be after the start date";
+            }
 
             //A collar cannot have multiple Parameters at the same time
             if (Collar.CollarParameters.Any(param =>
                                             DatesOverlap(param.StartDate ?? DateTime.MinValue,
                                                          param.EndDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "This collar has another set of parameters during your date range.";
+            }
 
             //Check Gen3 Period
             if (Collar.CollarModel == "Gen3" &&
                 !String.IsNullOrEmpty(Gen3PeriodTextBox.Text) &&
                 !Int32.TryParse(Gen3PeriodTextBox.Text, out int period))
+            {
                 return "The time period must be a whole number";
+            }
+
             return null;
         }
 
@@ -214,7 +256,10 @@ namespace AnimalMovement
         private string ValidateWarning()
         {
             if (Collar.CollarModel == "Gen3" && FileComboBox.SelectedItem != null)
+            {
                 return "Warning: Argos data for collars with a PPF file cannot be automatically processed";
+            }
+
             return null;
         }
 
@@ -234,7 +279,9 @@ namespace AnimalMovement
             };
             Database.CollarParameters.InsertOnSubmit(param);
             if (SubmitChanges())
+            {
                 return true;
+            }
             // The collar now thinks it has a parameter, deleteOnSubmit does not clear it
             LoadDataContext();
             return false;
@@ -272,7 +319,10 @@ namespace AnimalMovement
         private void CollarComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!CollarComboBox.Enabled)  //must be a call during setup
+            {
                 return;
+            }
+
             Collar = (Collar)CollarComboBox.SelectedItem;
             LoadFileComboBox();
             IsEditor = CanEditCollar((Collar)CollarComboBox.SelectedItem);
@@ -287,7 +337,10 @@ namespace AnimalMovement
         private void FileComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!FileComboBox.Enabled)  //must be a call during setup
+            {
                 return;
+            }
+
             File = (CollarParameterFile)FileComboBox.SelectedItem;
             LoadCollarComboBox();
             EnableFormControls();
@@ -331,7 +384,9 @@ namespace AnimalMovement
         private void CreateButton_Click(object sender, EventArgs e)
         {
             if (AddParameters())
+            {
                 Close();
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

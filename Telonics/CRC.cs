@@ -15,7 +15,9 @@ namespace Telonics
 
             // Left justify the input value
             for (int i = numberOfBits; i < 32; i++)
+            {
                 value <<= 1;
+            }
 
             // Update CRC
             for (int i = 0; i < numberOfBits; i++, value <<= 1)
@@ -23,7 +25,10 @@ namespace Telonics
                 bool bit1 = (_crc & maxtap) != 0; // ? 1: 0;			// Get bit from CRC
                 bool bit2 = (value & 0x80000000L) != 0; //? 1: 0;	// Get bit from input value
                 if (bit1 ^ bit2)
+                {
                     _crc ^= feedback;
+                }
+
                 _crc <<= 1;
             }
         }

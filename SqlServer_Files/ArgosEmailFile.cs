@@ -112,7 +112,9 @@ namespace SqlServer_Files
                     transmission.AddLine(line);
                     var tokens = Regex.Split(line.Trim(), @"\s+");
                     if (tokens.Length == 3 || tokens.Length == 4)
+                    {
                         transmission.AddRawBytes(tokens);
+                    }
                 }
                 else
                 {

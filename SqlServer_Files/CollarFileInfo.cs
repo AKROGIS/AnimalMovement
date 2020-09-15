@@ -43,8 +43,11 @@ namespace SqlServer_Files
                 }
             }
             if (code == '?' && new ArgosEmailFile(data.Buffer).GetPrograms().Any())
+            {
                 // We already checked for ArgosAwsFile with the header
                 code = 'E';
+            }
+
             return code;
         }
 
@@ -53,7 +56,9 @@ namespace SqlServer_Files
             var length = Math.Min(bytes.Length, maxLength);
             using (var stream = new MemoryStream(bytes, 0, length))
             using (var reader = new StreamReader(stream, enc))
+            {
                 return reader.ReadLine();
+            }
         }
 
         [SqlProcedure]
@@ -79,7 +84,10 @@ namespace SqlServer_Files
                 }
             }
             if (bytes == null)
+            {
                 throw new InvalidOperationException("File not found: " + fileId);
+            }
+
             SummerizeFile(fileId, bytes, format);
         }
 
@@ -108,8 +116,12 @@ namespace SqlServer_Files
                 {
                     command.Parameters.Add(new SqlParameter("@fileId", SqlDbType.Int) { Value = fileId });
                     using (SqlDataReader results = command.ExecuteReader())
+                    {
                         while (results.Read())
+                        {
                             bytes = results.GetSqlBytes(0).Buffer;
+                        }
+                    }
                 }
             }
             return new ArgosEmailFile(bytes).GetTransmissions();

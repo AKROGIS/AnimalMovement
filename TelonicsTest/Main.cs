@@ -24,10 +24,16 @@ namespace TelonicsTest
         {
             var result = ArgosWebSite.GetPlatformList("xxx", "xxx", out string error);
             if (error != null)
+            {
                 Console.WriteLine(error);
+            }
             else
+            {
                 foreach (var tuple in result)
+                {
                     Console.WriteLine("Program: {0}, Platform: {1}", tuple.Item1, tuple.Item2);
+                }
+            }
         }
 
         public static void TestArgosEmailFile()
@@ -49,7 +55,9 @@ namespace TelonicsTest
                 var platform = id; // to protect against AccessToForEachVariableInClosure
                 var transmissions = a.GetTransmissions().Where(t => t.PlatformId == platform);
                 foreach (var s in processorDict[id].ProcessTransmissions(transmissions, a))
+                {
                     Console.WriteLine(s);
+                }
             }
         }
 
@@ -62,7 +70,9 @@ namespace TelonicsTest
             SummarizeFile(a);
             Console.WriteLine("Messages in File");
             foreach (var s in processor.ProcessTransmissions(a.GetTransmissions(), a))
+            {
                 Console.WriteLine(s);
+            }
         }
 
 
@@ -76,20 +86,30 @@ namespace TelonicsTest
             SummarizeFile(a);
             Console.WriteLine("Messages in File");
             foreach (var s in processor.ProcessTransmissions(a.GetTransmissions(), a))
+            {
                 Console.WriteLine(s);
+            }
         }
 
         private static void SummarizeFile(ArgosFile a)
         {
             Console.WriteLine("Transmissions in File");
             foreach (var t in a.GetTransmissions())
+            {
                 Console.WriteLine(t.ToFormatedString());
+            }
+
             Console.WriteLine("Programs in File");
             foreach (var p in a.GetPrograms())
+            {
                 Console.WriteLine("  {0}", p);
+            }
+
             Console.WriteLine("Collars in File");
             foreach (var p in a.GetPlatforms())
+            {
                 Console.WriteLine("  {0} Start {1} End {2}", p, a.FirstTransmission(p), a.LastTransmission(p));
+            }
         }
 
         public static void TestArgosFolder()
@@ -125,7 +145,9 @@ namespace TelonicsTest
                         Console.WriteLine("ERROR: InTelonicsToData(): {0}", ex.Message);
                     }
                     foreach (var l in lines)
+                    {
                         f.WriteLine(l);
+                    }
                 }
             }
         }
@@ -170,7 +192,9 @@ namespace TelonicsTest
             // Calculate CRC value
             var crc = new Crc();
             for (int i = 0; i < 8; i++)
+            {
                 crc.Update(testCase[i].Value, testCase[i].Length);
+            }
 
             // Display CRC value
             int a = crc.Value; 	// Get final CRC value

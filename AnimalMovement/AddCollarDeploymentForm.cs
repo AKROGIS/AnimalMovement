@@ -33,15 +33,24 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Collar and Animal are in a different DataContext, get them in this DataContext
             if (Collar != null)
+            {
                 Collar =
                     Database.Collars.FirstOrDefault(
                         c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
+            }
+
             if (Animal != null)
+            {
                 Animal =
                     Database.Animals.FirstOrDefault(
                         a => a.ProjectId == Animal.ProjectId && a.AnimalId == Animal.AnimalId);
+            }
+
             if (Collar == null && Animal == null)
+            {
                 throw new InvalidOperationException("Add Collar Deployment Form not provided a valid Collar or a valid Animal.");
+            }
+
             LockCollar = Collar != null;
             LockAnimal = Animal != null;
 
@@ -53,7 +62,9 @@ namespace AnimalMovement
         private void LoadDefaultFormContents()
         {
             if (LockAnimal)
+            {
                 AnimalComboBox.DataSource = new[] { Animal };
+            }
             else
             {
                 AnimalComboBox.DataSource = from animal in Database.Animals
@@ -63,7 +74,9 @@ namespace AnimalMovement
                                             select animal;
             }
             if (LockCollar)
+            {
                 CollarComboBox.DataSource = new[] { Collar };
+            }
             else
             {
                 CollarComboBox.DataSource = from collar in Database.Collars
@@ -99,7 +112,10 @@ namespace AnimalMovement
         {
             var error = ValidateError();
             if (error != null)
+            {
                 ValidationTextBox.Text = error;
+            }
+
             ValidationTextBox.Visible = error != null;
             CreateButton.Enabled = error == null;
             FixItButton.Visible = error != null;
@@ -109,29 +125,39 @@ namespace AnimalMovement
         {
             //We must have a collar
             if (!(CollarComboBox.SelectedItem is Collar collar))
+            {
                 return "You must select a collar";
+            }
 
             //We must have a platform
             if (!(AnimalComboBox.SelectedItem is Animal animal))
+            {
                 return "You must select an animal";
+            }
 
             //Check dates
             var start = StartDateTimePicker.Value.ToUniversalTime();
             var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
+            {
                 return "The end date must be after the start date";
+            }
 
             //A collar cannot be deployed on multiple animals at the same time
             if (collar.CollarDeployments.Any(deployment =>
                                              DatesOverlap(deployment.DeploymentDate,
                                                           deployment.RetrievalDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "This collar is deployed on another animal during your date range.";
+            }
 
             //An Animal cannot have two collars at the same time.
             if (animal.CollarDeployments.Any(deployment =>
                                              DatesOverlap(deployment.DeploymentDate,
                                                           deployment.RetrievalDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "This animal has another collar during your date range.";
+            }
 
             return null;
         }
@@ -153,7 +179,9 @@ namespace AnimalMovement
             };
             Database.CollarDeployments.InsertOnSubmit(deployment);
             if (SubmitChanges())
+            {
                 return true;
+            }
             // The collar now thinks it has a deployment, deleteOnSubmit does not clear it, reloading the context will reset the form
             LoadDataContext();
             return false;
@@ -223,7 +251,9 @@ namespace AnimalMovement
         private void CreateButton_Click(object sender, EventArgs e)
         {
             if (AddDeployment())
+            {
                 Close();
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

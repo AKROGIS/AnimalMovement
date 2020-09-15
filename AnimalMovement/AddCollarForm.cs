@@ -33,12 +33,18 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //ProjectInvestigator is in a different DataContext, get one in this DataContext
             if (ProjectInvestigator != null)
+            {
                 ProjectInvestigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == ProjectInvestigator.Login);
+            }
             //If Project Investigator is not provided, Current user must be a PI or an assistant
             if (ProjectInvestigator == null)
+            {
                 if (!Database.ProjectInvestigators.Any(pi => pi.Login == CurrentUser) &&
                     !Database.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser))
+                {
                     throw new InvalidOperationException("Add Collar Form not provided a valid Project Investigator or you are not a PI or an assistant.");
+                }
+            }
 
             Functions = new AnimalMovementFunctions();
             IsEditor = ProjectInvestigator != null && (Functions.IsInvestigatorEditor(ProjectInvestigator.Login, CurrentUser) ?? false);
@@ -72,7 +78,9 @@ namespace AnimalMovement
             //If given a PI, set that and lock it.
             //else, set list to me, if I am a PI, plus all PI's I can assist, and select null per the constructor request
             if (ProjectInvestigator != null)
+            {
                 ManagerComboBox.Items.Add(ProjectInvestigator);
+            }
             else
             {
                 ManagerComboBox.DataSource =
@@ -96,19 +104,29 @@ namespace AnimalMovement
         private void SelectDefaultModel(string mfgr, string modelCode)
         {
             if (mfgr == null || modelCode == null)
+            {
                 return;
+            }
+
             var model = Database.LookupCollarModels.FirstOrDefault(m => m.CollarManufacturer == mfgr && m.CollarModel == modelCode);
             if (model != null)
+            {
                 ModelComboBox.SelectedItem = model;
+            }
         }
 
         private void SelectDefaultManufacturer(string manufacturerId)
         {
             if (manufacturerId == null)
+            {
                 return;
+            }
+
             var manufacturer = Database.LookupCollarManufacturers.FirstOrDefault(m => m.CollarManufacturer == manufacturerId);
             if (manufacturer != null)
+            {
                 ManufacturerComboBox.SelectedItem = manufacturer;
+            }
         }
 
         private bool SubmitChanges()
@@ -206,7 +224,9 @@ namespace AnimalMovement
         {
             var model = (LookupCollarModel)ModelComboBox.SelectedItem;
             if (model != null)
+            {
                 Settings.SetDefaultCollarModel(model.CollarManufacturer, model.CollarModel);
+            }
         }
 
         private void DisposalDateTimePicker_ValueChanged(object sender, EventArgs e)

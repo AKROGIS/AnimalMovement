@@ -56,9 +56,14 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Investigator is in a different DataContext, get one in this DataContext
             if (Investigator != null)
+            {
                 Investigator = Database.ProjectInvestigators.First(pi => pi.Login == Investigator.Login);
+            }
+
             if (Investigator == null)
+            {
                 throw new InvalidOperationException("Investigator Form not provided a valid investigator.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsInvestigator = Investigator == Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
@@ -73,8 +78,10 @@ namespace AnimalMovement
         {
             ProjectInvestigatorTabs.SelectedIndex = Properties.Settings.Default.InvestigatorFormActiveTab;
             if (ProjectInvestigatorTabs.SelectedIndex == 0)
+            {
                 //if new index is zero, index changed event will not fire, so fire it manually
                 ProjectInvestigatorTabs_SelectedIndexChanged(null, null);
+            }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -271,9 +278,14 @@ namespace AnimalMovement
         private void DeleteProjectsButton_Click(object sender, EventArgs e)
         {
             foreach (ProjectListItem item in ProjectsListBox.SelectedItems.Cast<ProjectListItem>().Where(item => item.CanDelete))
+            {
                 Database.Projects.DeleteOnSubmit(item.Project);
+            }
+
             if (SubmitChanges())
+            {
                 ProjectDataChanged();
+            }
         }
 
         private void InfoProjectButton_Click(object sender, EventArgs e)
@@ -308,7 +320,10 @@ namespace AnimalMovement
         private void SetUpCollarsTab()
         {
             if (CollarsListBox.DataSource != null)
+            {
                 return;
+            }
+
             var query = from collar in Investigator.Collars
                         select new CollarListItem
                         {
@@ -323,7 +338,9 @@ namespace AnimalMovement
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (sortedList[i].Collar.DisposalDate != null)
+                {
                     CollarsListBox.SetItemColor(i, Color.DarkGray);
+                }
             }
             CollarsTab.Text = sortedList.Count < 5 ? "Collars" : String.Format("Collars ({0})", sortedList.Count);
             EnableCollarControls();
@@ -355,9 +372,15 @@ namespace AnimalMovement
                           select deployment.Animal;
             var animal = animals.FirstOrDefault();
             if (animal != null)
+            {
                 name += " on " + animal;
+            }
+
             if (collar.DisposalDate != null)
+            {
                 name = String.Format("{0} (disp:{1:M/d/yy})", name, collar.DisposalDate.Value.ToLocalTime());
+            }
+
             return name;
         }
 
@@ -378,9 +401,14 @@ namespace AnimalMovement
         private void DeleteCollarsButton_Click(object sender, EventArgs e)
         {
             foreach (CollarListItem item in CollarsListBox.SelectedItems.Cast<CollarListItem>().Where(item => item.CanDelete))
+            {
                 Database.Collars.DeleteOnSubmit(item.Collar);
+            }
+
             if (SubmitChanges())
+            {
                 CollarDataChanged();
+            }
         }
 
         private void InfoCollarButton_Click(object sender, EventArgs e)
@@ -407,9 +435,13 @@ namespace AnimalMovement
             //The other lists will be populated when a program is selected
             EnableArgosControls();
             if (IsInvestigator)
+            {
                 EmailCheckBox.Checked = Settings.GetWantsEmail();
+            }
             else
+            {
                 EmailCheckBox.CheckState = CheckState.Indeterminate;
+            }
         }
 
         private void EnableArgosControls()
@@ -477,9 +509,14 @@ namespace AnimalMovement
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (!sortedList[i].Program.Active.HasValue)
+                {
                     ProgramsListBox.SetItemColor(i, Color.DimGray);
+                }
+
                 if (sortedList[i].Program.Active.HasValue && !sortedList[i].Program.Active.Value)
+                {
                     ProgramsListBox.SetItemColor(i, Color.DarkGray);
+                }
             }
         }
 
@@ -502,10 +539,17 @@ namespace AnimalMovement
         private void DeleteProgramButton_Click(object sender, EventArgs e)
         {
             foreach (ProgramListItem item in ProgramsListBox.SelectedItems)
+            {
                 if (item.CanDelete)
+                {
                     Database.ArgosPrograms.DeleteOnSubmit(item.Program);
+                }
+            }
+
             if (SubmitChanges())
+            {
                 ArgosDataChanged();
+            }
         }
 
         private void InfoProgramButton_Click(object sender, EventArgs e)
@@ -557,7 +601,9 @@ namespace AnimalMovement
                 var programStatus = sortedList[i].Platform.ArgosProgram.Active;
                 var platformStatus = sortedList[i].Platform.Active;
                 if ((programStatus.HasValue && !programStatus.Value) || (!programStatus.HasValue && !platformStatus))
+                {
                     PlatformsListBox.SetItemColor(i, Color.DarkGray);
+                }
             }
         }
 
@@ -580,10 +626,17 @@ namespace AnimalMovement
         private void DeletePlatformButton_Click(object sender, EventArgs e)
         {
             foreach (PlatformListItem item in PlatformsListBox.SelectedItems)
+            {
                 if (item.CanDelete)
+                {
                     Database.ArgosPlatforms.DeleteOnSubmit(item.Platform);
+                }
+            }
+
             if (SubmitChanges())
+            {
                 ArgosDataChanged();
+            }
         }
 
         private void InfoPlatformButton_Click(object sender, EventArgs e)
@@ -635,10 +688,14 @@ namespace AnimalMovement
             {
                 var argosDeployment = (ArgosDeployment)row.Cells[0].Value;
                 if ((bool)row.Cells["CanDelete"].Value)
+                {
                     Database.ArgosDeployments.DeleteOnSubmit(argosDeployment);
+                }
             }
             if (SubmitChanges())
+            {
                 ArgosDataChanged();
+            }
         }
 
         private void EditArgosDeploymentButton_Click(object sender, EventArgs e)
@@ -660,7 +717,9 @@ namespace AnimalMovement
         private void ArgosDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoArgosCollarButton.Enabled)
+            {
                 InfoArgosCollarButton_Click(sender, e);
+            }
         }
 
         private void ArgosDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -708,11 +767,20 @@ namespace AnimalMovement
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (sortedList[i].File.ParentFileId != null)
+                {
                     CollarFilesListBox.SetItemColor(i, Color.Brown);
+                }
+
                 if (sortedList[i].File.Format == 'E')
+                {
                     CollarFilesListBox.SetItemColor(i, Color.MediumBlue);
+                }
+
                 if (sortedList[i].File.Format == 'F')
+                {
                     CollarFilesListBox.SetItemColor(i, Color.DarkMagenta);
+                }
+
                 if (sortedList[i].File.Status == 'I')
                 {
                     //Dim color of inactive files
@@ -751,9 +819,14 @@ namespace AnimalMovement
         private void DeleteCollarFilesButton_Click(object sender, EventArgs e)
         {
             foreach (CollarFileListItem item in CollarFilesListBox.SelectedItems.Cast<CollarFileListItem>().Where(item => item.CanDelete))
+            {
                 Database.CollarFiles.DeleteOnSubmit(item.File);
+            }
+
             if (SubmitChanges())
+            {
                 CollarFileDataChanged();
+            }
         }
 
         private void InfoCollarFileButton_Click(object sender, EventArgs e)
@@ -772,7 +845,9 @@ namespace AnimalMovement
         private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (Visible)
+            {
                 SetUpCollarFilesTab();
+            }
         }
 
         #endregion
@@ -807,7 +882,9 @@ namespace AnimalMovement
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (sortedList[i].File.Status == 'I')
+                {
                     ParameterFilesListBox.SetItemColor(i, Color.DarkGray);
+                }
             }
             ParameterFilesTab.Text = sortedList.Count < 5 ? "Parameter Files" : String.Format("Parameter Files ({0})", sortedList.Count);
             EnableParameterFilesControls();
@@ -840,9 +917,14 @@ namespace AnimalMovement
         private void DeleteParameterFilesButton_Click(object sender, EventArgs e)
         {
             foreach (ParameterFileListItem item in ParameterFilesListBox.SelectedItems.Cast<ParameterFileListItem>().Where(item => item.CanDelete))
+            {
                 Database.CollarParameterFiles.DeleteOnSubmit(item.File);
+            }
+
             if (SubmitChanges())
+            {
                 ParameterFileDataChanged();
+            }
         }
 
         private void InfoParameterFileButton_Click(object sender, EventArgs e)
@@ -899,9 +981,14 @@ namespace AnimalMovement
         private void DeleteAssistantButton_Click(object sender, EventArgs e)
         {
             foreach (var item in AssistantsListBox.SelectedItems)
+            {
                 Database.ProjectInvestigatorAssistants.DeleteOnSubmit((ProjectInvestigatorAssistant)item);
+            }
+
             if (SubmitChanges())
+            {
                 AssistantDataChanged();
+            }
         }
 
         private void AssistantsListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -919,7 +1006,10 @@ namespace AnimalMovement
         private void SetUpReportsTab()
         {
             if (_queryDocument != null)
+            {
                 return;
+            }
+
             var xmlFilePath = Properties.Settings.Default.InvestigatorReportsXml;
             string error = null;
             try

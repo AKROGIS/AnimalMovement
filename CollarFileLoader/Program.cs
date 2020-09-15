@@ -50,12 +50,18 @@ namespace CollarFileLoader
                 string caller = Environment.UserDomainName + @"\" + Environment.UserName;
                 ProjectInvestigator owner = GetOwner(caller);
                 if (args.Length == 0)
+                {
                     if (owner != null)
+                    {
                         FileLoader.LoadPath(Environment.CurrentDirectory, HandleException, null, owner);
+                    }
                     else
+                    {
                         Console.WriteLine(
                             "Since you ({0}) are not a project investigator, you must specify a project or an owner to load files",
                             caller);
+                    }
+                }
                 else
                 {
                     Project project = null;
@@ -79,11 +85,16 @@ namespace CollarFileLoader
                         if (path != null)
                         {
                             if (project == null && owner == null)
+                            {
                                 Console.WriteLine(
                                     "Since you ({0}) are not a project investigator, you must specify a project or an owner before a path",
                                     caller);
+                            }
                             else
+                            {
                                 FileLoader.LoadPath(path, HandleException, project, owner);
+                            }
+
                             continue;
                         }
                         Console.WriteLine("argument: {0} is not a known project, project investigator or path", arg);
@@ -106,9 +117,15 @@ namespace CollarFileLoader
         {
             projectId = projectId.Normalize();
             if (projectId.StartsWith("/p:", StringComparison.OrdinalIgnoreCase))
+            {
                 projectId = projectId.Substring(3);
+            }
+
             if (projectId.StartsWith("/project:", StringComparison.OrdinalIgnoreCase))
+            {
                 projectId = projectId.Substring(9);
+            }
+
             var database = new AnimalMovementDataContext();
             return database.Projects.FirstOrDefault(p => p.ProjectId == projectId);
         }
@@ -117,13 +134,25 @@ namespace CollarFileLoader
         {
             owner = owner.Normalize();
             if (owner.StartsWith("/m:", StringComparison.OrdinalIgnoreCase))
+            {
                 owner = owner.Substring(3);
+            }
+
             if (owner.StartsWith("/manager:", StringComparison.OrdinalIgnoreCase))
+            {
                 owner = owner.Substring(9);
+            }
+
             if (owner.StartsWith("/o:", StringComparison.OrdinalIgnoreCase))
+            {
                 owner = owner.Substring(3);
+            }
+
             if (owner.StartsWith("/owner:", StringComparison.OrdinalIgnoreCase))
+            {
                 owner = owner.Substring(7);
+            }
+
             var database = new AnimalMovementDataContext();
             return database.ProjectInvestigators.FirstOrDefault(p => p.Login == owner);
         }
@@ -131,14 +160,22 @@ namespace CollarFileLoader
         private static string GetFullPath(string potentialPath)
         {
             if (File.Exists(potentialPath) || Directory.Exists(potentialPath))
+            {
                 return potentialPath;
+            }
+
             try
             {
                 if (Path.IsPathRooted(potentialPath))
+                {
                     return null;
+                }
+
                 var fullPath = Path.Combine(Environment.CurrentDirectory, potentialPath);
                 if (File.Exists(fullPath) || Directory.Exists(fullPath))
+                {
                     return potentialPath;
+                }
             }
             catch (ArgumentException)
             {

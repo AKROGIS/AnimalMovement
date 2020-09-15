@@ -33,9 +33,14 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //File is in a different DataContext, get one in this DataContext
             if (File != null)
+            {
                 File = Database.CollarFiles.FirstOrDefault(f => f.FileId == File.FileId);
+            }
+
             if (File == null)
+            {
                 throw new InvalidOperationException("File Details Form not provided a valid File.");
+            }
 
             DatabaseViews = new AnimalMovementViews();
             var functions = new AnimalMovementFunctions();
@@ -67,16 +72,24 @@ namespace AnimalMovement
 
             FileTabControl.TabPages.Clear();
             if (File.LookupCollarFileFormat.ArgosData == 'Y')
+            {
                 FileTabControl.TabPages.AddRange(new[] { ArgosTabPage });
+            }
 
             if (!fileHasChildren && File.Collar != null && File.Collar.HasGps)
+            {
                 FileTabControl.TabPages.AddRange(new[] { GpsFixesTabPage });
+            }
 
             if (fileHasArgosFixes)
+            {
                 FileTabControl.TabPages.AddRange(new[] { ArgosFixesTabPage });
+            }
 
             if (fileCouldHaveChildren)
+            {
                 FileTabControl.TabPages.AddRange(new[] { ProcessingIssuesTabPage, DerivedFilesTabPage });
+            }
         }
 
         private void EnableControls()
@@ -129,7 +142,9 @@ namespace AnimalMovement
         private void FileTabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (FileTabControl.TabCount == 0)
+            {
                 return;
+            }
 
             switch ((string)FileTabControl.SelectedTab.Tag)
             {
@@ -223,15 +238,26 @@ namespace AnimalMovement
         {
             string error = null;
             if (OwnerComboBox.SelectedItem == null && ProjectComboBox.SelectedItem == null)
+            {
                 error = "One of Owner or Project must be set";
+            }
             else if (OwnerComboBox.SelectedItem != null && ProjectComboBox.SelectedItem != null)
+            {
                 error = "One of Owner or Project must be empty";
+            }
             else if (CollarComboBox.SelectedItem != File.Collar && File.Status != 'I')
+            {
                 error = "You cannot change the collar of an active file";
+            }
             else if (CollarComboBox.SelectedItem != File.Collar && StatusComboBox.SelectedItem != File.LookupFileStatus)
+            {
                 error = "You cannot change the collar and the status at the same time";
+            }
             else if (CollarComboBox.SelectedItem == null && File.LookupCollarFileFormat.RequiresCollar == 'Y')
+            {
                 error = "This kind of file must have a collar assignment";
+            }
+
             ValidationTextBox.Text = error;
             ValidationTextBox.Visible = error != null;
             return error == null;
@@ -248,14 +274,20 @@ namespace AnimalMovement
         private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ProjectComboBox.SelectedItem != null)
+            {
                 OwnerComboBox.SelectedItem = null;
+            }
+
             EnableControls();
         }
 
         private void OwnerComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (OwnerComboBox.SelectedItem != null)
+            {
                 ProjectComboBox.SelectedItem = null;
+            }
+
             EnableControls();
         }
 
@@ -280,7 +312,10 @@ namespace AnimalMovement
         private void SourceFileButton_Click(object sender, EventArgs e)
         {
             if (File.ParentFileId == null)
+            {
                 return;
+            }
+
             var form = new FileDetailsForm(File.ParentFile);
             form.DatabaseChanged += (o, args) => FileDataChanged();
             form.Show(this);
@@ -290,7 +325,9 @@ namespace AnimalMovement
         {
             //Do not open (and potentially edit) a child file if we are editing the parent
             if (IsEditMode)
+            {
                 return;
+            }
             //I can't use the DataSource here, because it is an anoymous type.
             var file = (CollarFile)DerivedFilesDataGridView.SelectedRows[0].Cells[0].Value;
             var form = new FileDetailsForm(file);

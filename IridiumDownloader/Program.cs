@@ -52,7 +52,9 @@ namespace IridiumDownloader
             var tdcExecutable = Properties.Settings.Default.TdcPathToExecutable;
 
             if (!File.Exists(tdcExecutable))
+            {
                 throw new InvalidOperationException("TDC Execution error - TDC not found at " + tdcExecutable);
+            }
 
             var batchFileTemplate = Properties.Settings.Default.TdcBatchFileTemplate;
             var tdcTimeout = Properties.Settings.Default.TdcMillisecondTimeout;
@@ -81,28 +83,43 @@ namespace IridiumDownloader
                     RedirectStandardError = true
                 });
                 if (p == null)
+                {
                     throw new InvalidOperationException("TDC process already running, Please wait and try again.");
+                }
+
                 string errors = p.StandardError.ReadToEnd();
                 bool exitedNormally = p.WaitForExit(tdcTimeout);
                 if (!exitedNormally)
+                {
                     throw new InvalidOperationException(
                         String.Format("TDC process did not respond after {0} seconds.\n" +
                                       "Check the path in the Settings table, and be sure you have authorized TDC.",
                                       tdcTimeout / 1000));
+                }
+
                 if (!String.IsNullOrEmpty(errors))
+                {
                     throw new InvalidOperationException("TDC Execution error " + errors);
+                }
 
                 errors = CheckLogFileForErrors(logFilePath, downloadFolder);
                 if (!String.IsNullOrEmpty(errors))
+                {
                     throw new InvalidOperationException("TDC Execution error " + errors);
+                }
             }
             finally
             {
                 //cleanup temp files/folders
                 if (batchFilePath != null && File.Exists(batchFilePath))
+                {
                     File.Delete(batchFilePath);
+                }
+
                 if (logFilePath != null && File.Exists(logFilePath))
+                {
                     File.Delete(logFilePath);
+                }
             }
         }
 

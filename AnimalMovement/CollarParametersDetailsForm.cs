@@ -35,10 +35,15 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //CollarParameter is in a different DataContext, get one in this DataContext
             if (CollarParameter != null)
+            {
                 CollarParameter =
                     Database.CollarParameters.FirstOrDefault(p => p.ParameterId == CollarParameter.ParameterId);
+            }
+
             if (CollarParameter == null)
+            {
                 throw new InvalidOperationException("Collar Parameters Form not provided a valid Collar Parameter Id.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsInvestigatorEditor(CollarParameter.Collar.Manager, CurrentUser) ?? false;
@@ -68,8 +73,11 @@ namespace AnimalMovement
         private void LoadFileComboBox()
         {
             if (LockFile)
+            {
                 FileComboBox.DataSource = new[] { CollarParameter.CollarParameterFile };
+            }
             else
+            {
                 switch (CollarParameter.Collar.CollarModel)
                 {
                     case "Gen3":
@@ -98,14 +106,19 @@ namespace AnimalMovement
                                                   select file;
                         break;
                 }
+            }
+
             FileComboBox.SelectedItem = CollarParameter.CollarParameterFile;
         }
 
         private void LoadCollarComboBox()
         {
             if (LockCollar)
+            {
                 CollarComboBox.DataSource = new[] { CollarParameter.Collar };
+            }
             else
+            {
                 CollarComboBox.DataSource = from collar in Database.Collars
                                             where (collar.Manager == CurrentUser ||
                                                    collar.ProjectInvestigator.ProjectInvestigatorAssistants.Any(
@@ -117,6 +130,8 @@ namespace AnimalMovement
                                                     CollarParameter.CollarParameterFile.Format == 'B') ||
                                                    (collar.CollarModel != "Gen3" && collar.CollarModel != "Gen4"))
                                             select collar;
+            }
+
             CollarComboBox.SelectedItem = CollarParameter.Collar;
         }
 
@@ -153,16 +168,25 @@ namespace AnimalMovement
         {
             var error = ValidateError();
             if (error != null)
+            {
                 ValidationTextBox.Text = error;
+            }
+
             ValidationTextBox.Visible = error != null;
             ValidationTextBox.ForeColor = Color.Red;
             FixItButton.Visible = error != null;
             SaveButton.Enabled = IsEditor && error == null && ParameterChanged();
             if (error != null)
+            {
                 return;
+            }
+
             var warning = ValidateWarning();
             if (warning != null)
+            {
                 ValidationTextBox.Text = warning;
+            }
+
             ValidationTextBox.Visible = warning != null;
             ValidationTextBox.ForeColor = Color.DodgerBlue;
         }
@@ -183,35 +207,51 @@ namespace AnimalMovement
         {
             //We must have a collar
             if (!(CollarComboBox.SelectedItem is Collar collar))
+            {
                 return "No collar selected.";
+            }
 
             //We must have a file or a period for Gen3
             var hasFile = FileComboBox.SelectedItem != null;
             if (collar.CollarModel == "Gen3" && !hasFile && String.IsNullOrEmpty(Gen3PeriodTextBox.Text))
+            {
                 return "You must provide a file or a time period";
+            }
+
             if (collar.CollarModel == "Gen3" && hasFile && !String.IsNullOrEmpty(Gen3PeriodTextBox.Text))
+            {
                 return "You must provide a file OR a time period, not both";
+            }
             //We must have a file or all others
             if (collar.CollarModel != "Gen3" && !hasFile)
+            {
                 return "You must provide a file for this collar";
+            }
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : DateTime.MinValue;
             var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
+            {
                 return "The end date must be after the start date";
+            }
 
             //A collar cannot have multiple Parameters at the same time
             if (collar.CollarParameters.Any(param =>
                                             param.ParameterId != CollarParameter.ParameterId &&
                                             DatesOverlap(param.StartDate ?? DateTime.MinValue,
                                                          param.EndDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "This collar has another set of parameters during your date range.";
+            }
 
             //Check Gen3 Period
             if (CollarParameter.Collar.CollarModel == "Gen3" &&
                 !String.IsNullOrEmpty(Gen3PeriodTextBox.Text) &&
                 !Int32.TryParse(Gen3PeriodTextBox.Text, out int period))
+            {
                 return "The time period must be a whole number";
+            }
+
             return null;
         }
 
@@ -225,7 +265,10 @@ namespace AnimalMovement
         {
             var collar = (Collar)CollarComboBox.SelectedItem;
             if (collar.CollarModel == "Gen3" && FileComboBox.SelectedItem != null)
+            {
                 return "Warning: Argos data for collars with a PPF file cannot be automatically processed";
+            }
+
             return null;
         }
 
@@ -333,7 +376,9 @@ namespace AnimalMovement
         private void SaveButton_Click(object sender, EventArgs e)
         {
             if (UpdateParameters())
+            {
                 Close();
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

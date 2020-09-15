@@ -61,7 +61,9 @@ namespace ArgosDownloader
                 _emails = new Dictionary<string, string>();
                 _admin = Settings.GetSystemEmail();
                 if (args.Length == 0)
+                {
                     FileDownloader.DownloadAll(ExceptionHandler);
+                }
                 else
                 {
                     int? days = null;
@@ -110,7 +112,9 @@ namespace ArgosDownloader
                     }
                     if ((args.Length == 1 && (days != null || pi != null)) ||
                         (args.Length == 2 && days != null && pi != null))
+                    {
                         FileDownloader.DownloadAll(ExceptionHandler, pi, days);
+                    }
                 }
                 SendEmails();
             }
@@ -123,7 +127,10 @@ namespace ArgosDownloader
         private static ArgosProgram GetProgram(string programId)
         {
             if (programId.StartsWith("/program:"))
+            {
                 programId = programId.Substring(9);
+            }
+
             var database = new AnimalMovementDataContext();
             return database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == programId);
         }
@@ -131,7 +138,10 @@ namespace ArgosDownloader
         private static ArgosPlatform GetPlatform(string platformId)
         {
             if (platformId.StartsWith("/platform:"))
+            {
                 platformId = platformId.Substring(10);
+            }
+
             var database = new AnimalMovementDataContext();
             return database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == platformId);
         }
@@ -139,13 +149,25 @@ namespace ArgosDownloader
         private static int? GetDays(string arg)
         {
             if (arg == "/nodays")
+            {
                 return Int32.MinValue;
+            }
+
             if (arg.StartsWith("/d:") && Int32.TryParse(arg.Substring(3), out int days))
+            {
                 return days;
+            }
+
             if (arg.StartsWith("/days:") && Int32.TryParse(arg.Substring(6), out days))
+            {
                 return days;
+            }
+
             if (Int32.TryParse(arg, out days) && 0 < days && days < 100)
+            {
                 return days;
+            }
+
             return null;
         }
 
@@ -208,9 +230,14 @@ namespace ArgosDownloader
         private static void AddErrorToEmail(string address, string userName, string argosId, string errors)
         {
             if (string.IsNullOrEmpty(errors))
+            {
                 return;
+            }
+
             if (errors.StartsWith("No data"))
+            {
                 return;
+            }
 
             var msg =
                 String.Format(
@@ -222,14 +249,23 @@ namespace ArgosDownloader
         static void AddEmail(string address, string message)
         {
             if (String.IsNullOrEmpty(address))
+            {
                 address = _admin;
+            }
+
             if (String.IsNullOrEmpty(address))
+            {
                 throw new InvalidOperationException(
                     "Unable to obtain an email address for the system administrator when trying to send " +
                     "a message to a user without an email.  Original message is: " +
                     message);
+            }
+
             if (!_emails.ContainsKey(address))
+            {
                 _emails[address] = "";
+            }
+
             _emails[address] += message + Environment.NewLine;
         }
 
@@ -241,7 +277,9 @@ namespace ArgosDownloader
                 var address = item.Key;
                 var message = item.Value;
                 if (address == _admin || Settings.PiWantsEmails(address))
+                {
                     SendEmail(address, subject, message);
+                }
             }
         }
 
@@ -250,7 +288,10 @@ namespace ArgosDownloader
         static void SendEmail(string email, string subject, string body)
         {
             if (_password == null)
+            {
                 _password = Settings.GetSystemEmailPassword();
+            }
+
             var fromAddress = new MailAddress(_admin, "Animal Movements Admin");
             var toAddress = new MailAddress(email, "Animal Movements User");
             var smtp = new SmtpClient

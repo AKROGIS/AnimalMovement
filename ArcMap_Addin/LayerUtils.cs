@@ -18,9 +18,14 @@ namespace ArcMap_Addin
         public static IEnumerable<ILayer> GetAllLayers(IMxDocument doc, string type)
         {
             if (doc == null)
+            {
                 throw new ArgumentNullException("doc");
+            }
+
             if (type == null)
+            {
                 throw new ArgumentNullException("type");
+            }
 
             UID uid = new UIDClass
             {
@@ -35,7 +40,10 @@ namespace ArcMap_Addin
                 while (layer != null)
                 {
                     if (layer.Valid)
+                    {
                         yield return layer;
+                    }
+
                     layer = elayers.Next();
                 }
             }
@@ -77,10 +85,15 @@ namespace ArcMap_Addin
             for (int i = 0; i < parent.LayerCount; i++)
             {
                 if (parent.Layer[i] == layer)
+                {
                     return layer.Name;
+                }
 
                 if (!(parent.Layer[i] is ICompositeLayer compositeLayer))
+                {
                     continue;
+                }
+
                 string name = GetFullName(compositeLayer, layer, separator);
                 if (name != null)
                 {
@@ -95,10 +108,15 @@ namespace ArcMap_Addin
             for (int i = 0; i < parent.Count; i++)
             {
                 if (parent.Layer[i] == layer)
+                {
                     return layer.Name;
+                }
 
                 if (!(parent.Layer[i] is ICompositeLayer compositeLayer))
+                {
                     continue;
+                }
+
                 string name = GetFullName(compositeLayer, layer, separator);
                 if (name != null)
                 {

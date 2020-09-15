@@ -117,13 +117,18 @@ namespace AnimalMovement
         private static void SetAllCheckedListItems(CheckedListBox listBox, CheckState state)
         {
             for (int index = 0; index < listBox.Items.Count; index++)
+            {
                 listBox.SetItemCheckState(index, state);
+            }
         }
 
         private void FilterByProjectCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (!FilterByProjectsCheckBox.Checked)
+            {
                 ClearProjectsButton.PerformClick();
+            }
+
             ProjectsCheckedListBox.Enabled = FilterByProjectsCheckBox.Checked;
             AllProjectsButton.Enabled = FilterByProjectsCheckBox.Checked;
             ClearProjectsButton.Enabled = FilterByProjectsCheckBox.Checked;
@@ -132,7 +137,10 @@ namespace AnimalMovement
         private void FilterBySpeciesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (!FilterBySpeciesCheckBox.Checked)
+            {
                 ClearSpeciesButton.PerformClick();
+            }
+
             SpeciesCheckedListBox.Enabled = FilterBySpeciesCheckBox.Checked;
             AllSpeciesButton.Enabled = FilterBySpeciesCheckBox.Checked;
             ClearSpeciesButton.Enabled = FilterBySpeciesCheckBox.Checked;
@@ -141,7 +149,10 @@ namespace AnimalMovement
         private void FilterByAnimalCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (!FilterByAnimalsCheckBox.Checked)
+            {
                 ClearAnimalsButton.PerformClick();
+            }
+
             AnimalsCheckedListBox.Enabled = FilterByAnimalsCheckBox.Checked;
             AllAnimalsButton.Enabled = FilterByAnimalsCheckBox.Checked;
             ClearAnimalsButton.Enabled = FilterByAnimalsCheckBox.Checked;
@@ -176,7 +187,9 @@ namespace AnimalMovement
                         var result = MessageBox.Show(this, "There are no locations in the database that meet your criteria.  Are you sure you want to create this layer file?",
                                         "No Results", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
                         if (result != DialogResult.Yes)
+                        {
                             return;
+                        }
                     }
                 }
             }
@@ -192,7 +205,9 @@ namespace AnimalMovement
             saveFileDialog1.Title = "ArcMap Query Layer";
             saveFileDialog1.DefaultExt = ".lyr";
             if (saveFileDialog1.ShowDialog(this) == DialogResult.OK)
+            {
                 SaveQueryLayer(saveFileDialog1.FileName, connection, predicate);
+            }
         }
 
         private static void SaveQueryLayer(string path, string connection, string query)
@@ -213,7 +228,10 @@ namespace AnimalMovement
             string error = process.StandardError.ReadToEnd();
             process.WaitForExit();
             if (process.ExitCode == 0)
+            {
                 return;
+            }
+
             var message = "File:{0}\nConnection:{1}\nQuery:{2}\nError:{3}";
             message = String.Format(message, path, connection, query, error);
             MessageBox.Show(message, "Error Creating Map File", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -233,7 +251,10 @@ namespace AnimalMovement
             for (int i = predList.Length - 1; i >= 0; i--)
             {
                 if (string.IsNullOrEmpty(predList[i]))
+                {
                     continue;
+                }
+
                 var p = notList[i] + predList[i];
                 sqlEnd = sqlEnd == String.Empty ? p : p + opList[i] + sqlEnd;
             }
@@ -243,10 +264,16 @@ namespace AnimalMovement
         private string BuildAnimalPredicate()
         {
             if (!FilterByAnimalsCheckBox.Checked)
+            {
                 return null;
+            }
+
             if (AnimalsCheckedListBox.CheckedItems.Count == 0 ||
                 AnimalsCheckedListBox.CheckedItems.Count == AnimalsCheckedListBox.Items.Count)
+            {
                 return null;
+            }
+
             var animalSelectors = AnimalsCheckedListBox.CheckedItems.Cast<Animal>().Select(a => "({0} = '" + a.ProjectId + "' AND {1} = '" + a.AnimalId + "')");
             var sqlList = "(" + String.Join(" OR ", animalSelectors) + ")";
             return sqlList == "()" ? null : sqlList;
@@ -255,39 +282,69 @@ namespace AnimalMovement
         private string BuildProjectPredicate()
         {
             if (!FilterByProjectsCheckBox.Checked)
+            {
                 return null;
+            }
+
             if (ProjectsCheckedListBox.CheckedItems.Count == 0 ||
                 ProjectsCheckedListBox.CheckedItems.Count == ProjectsCheckedListBox.Items.Count)
+            {
                 return null;
+            }
+
             var sqlList = ProjectsCheckedListBox.CheckedItems.Cast<Project>().Select(p => p.ProjectId).BuildSqlList();
             if (sqlList == null)
+            {
                 return null;
+            }
+
             return "{0} IN " + sqlList;
         }
 
         private string BuildSpeciesPredicate()
         {
             if (!FilterBySpeciesCheckBox.Checked)
+            {
                 return null;
+            }
+
             if (SpeciesCheckedListBox.CheckedItems.Count == 0 ||
                 SpeciesCheckedListBox.CheckedItems.Count == SpeciesCheckedListBox.Items.Count)
+            {
                 return null;
+            }
+
             var sqlList = SpeciesCheckedListBox.CheckedItems.Cast<LookupSpecies>().Select(s => s.Species).BuildSqlList();
             if (sqlList == null)
+            {
                 return null;
+            }
+
             return "{0} IN " + sqlList;
         }
 
         private string BuildDatePredicate()
         {
             if (!FilterByDatesCheckBox.Checked)
+            {
                 return null;
+            }
+
             if (UseEarliestDateCheckBox.Checked && UseLatestDateCheckBox.Checked)
+            {
                 return null;
+            }
+
             if (UseLatestDateCheckBox.Checked)
+            {
                 return "'" + StartDateTimePicker.Value.ToString("yyyy-MM-dd HH:mm") + "' <= {0}";
+            }
+
             if (UseEarliestDateCheckBox.Checked)
+            {
                 return "{1} <= '" + EndDateTimePicker.Value.ToString("yyyy-MM-dd HH:mm") + "'";
+            }
+
             return "'" + StartDateTimePicker.Value.ToString("yyyy-MM-dd HH:mm") + "' <= {0} AND {1} <= '" + EndDateTimePicker.Value.ToString("yyyy-MM-dd HH:mm") + "'";
         }
     }

@@ -60,7 +60,9 @@ namespace ArgosProcessor
             try
             {
                 if (args.Length == 0)
+                {
                     FileProcessor.ProcessAll(HandleException);
+                }
                 else
                 {
                     ArgosPlatform platform = null;
@@ -69,35 +71,51 @@ namespace ArgosProcessor
                     foreach (var arg in args)
                     {
                         if (ClearPlatform(arg))
+                        {
                             platform = null;
+                        }
                         else
                         {
                             if (ClearCollarFile(arg))
+                            {
                                 file = null;
+                            }
                             else
                             {
                                 var fileArg = GetCollarFile(arg);
                                 if (fileArg != null)
+                                {
                                     file = fileArg;
+                                }
                                 else
                                 {
                                     var platformArg = GetPlatform(arg);
                                     if (platformArg != null)
+                                    {
                                         platform = platformArg;
+                                    }
                                     else
                                     {
                                         var piArg = GetProjectInvestigator(arg);
                                         if (piArg != null)
+                                        {
                                             pi = piArg;
+                                        }
                                         else
+                                        {
                                             Console.WriteLine("Unhandled argument: {0}", arg);
+                                        }
                                     }
                                 }
                             }
                         }
                         if (args.Length == 1 && pi != null)
+                        {
                             FileProcessor.ProcessAll(HandleException, pi);
+                        }
+
                         if (file != null)
+                        {
                             try
                             {
                                 FileProcessor.ProcessFile(file, platform);
@@ -106,6 +124,7 @@ namespace ArgosProcessor
                             {
                                 HandleException(ex, file, platform);
                             }
+                        }
                     }
                 }
             }
@@ -152,11 +171,20 @@ namespace ArgosProcessor
         {
             fileId = fileId.Normalize();
             if (fileId.StartsWith("/f:", StringComparison.OrdinalIgnoreCase))
+            {
                 fileId = fileId.Substring(3);
+            }
+
             if (fileId.StartsWith("/file:", StringComparison.OrdinalIgnoreCase))
+            {
                 fileId = fileId.Substring(6);
+            }
+
             if (!Int32.TryParse(fileId, out int id) || id < 1)
+            {
                 return null;
+            }
+
             var database = new AnimalMovementDataContext();
             return (from collar in database.CollarFiles
                     where (collar.LookupCollarFileFormat.Code == 'H' || collar.LookupCollarFileFormat.ArgosData == 'Y') && collar.FileId == id
@@ -167,13 +195,25 @@ namespace ArgosProcessor
         {
             platformId = platformId.Normalize();
             if (platformId.StartsWith("/a:", StringComparison.OrdinalIgnoreCase))
+            {
                 platformId = platformId.Substring(3);
+            }
+
             if (platformId.StartsWith("/argos:", StringComparison.OrdinalIgnoreCase))
+            {
                 platformId = platformId.Substring(7);
+            }
+
             if (platformId.StartsWith("/p:", StringComparison.OrdinalIgnoreCase))
+            {
                 platformId = platformId.Substring(3);
+            }
+
             if (platformId.StartsWith("/platform:", StringComparison.OrdinalIgnoreCase))
+            {
                 platformId = platformId.Substring(10);
+            }
+
             var database = new AnimalMovementDataContext();
             return database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == platformId);
         }

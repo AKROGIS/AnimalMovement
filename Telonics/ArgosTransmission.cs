@@ -30,15 +30,23 @@ namespace Telonics
         internal void AddRawBytes(IEnumerable<string> byteStrings)
         {
             if (_message == null)
+            {
                 _message = new List<byte>();
+            }
+
             foreach (var item in byteStrings)
+            {
                 _message.Add(Byte.Parse(item));
+            }
         }
 
         internal void AddHexString(string hexString)
         {
             if (_message == null)
+            {
                 _message = new List<byte>();
+            }
+
             _message.AddRange(SoapHexBinary.Parse(hexString).Value);
         }
 

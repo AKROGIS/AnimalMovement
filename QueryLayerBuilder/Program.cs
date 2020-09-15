@@ -168,7 +168,10 @@ namespace QueryLayerBuilder
             var sqlWorkspace = (ISqlWorkspace)workspace;
             var queryDescription = sqlWorkspace.GetQueryDescription(query);
             if (!String.IsNullOrEmpty(oidFields))
+            {
                 queryDescription.OIDFields = oidFields;
+            }
+
             if (srid.HasValue)
             {
                 queryDescription.Srid = srid.Value.ToString(CultureInfo.InvariantCulture);
@@ -176,7 +179,10 @@ namespace QueryLayerBuilder
                 queryDescription.SpatialReference = srEnv.CreateSpatialReference(srid.Value);
             }
             if (geometryType.HasValue)
+            {
                 queryDescription.GeometryType = geometryType.Value;
+            }
+
             sqlWorkspace.CheckDatasetName(name, queryDescription, out name);
             var queryClass = sqlWorkspace.OpenQueryClass(name, queryDescription);
             var featureClass = (IFeatureClass)queryClass;

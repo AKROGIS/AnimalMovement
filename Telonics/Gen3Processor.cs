@@ -12,7 +12,10 @@ namespace Telonics
         public Gen3Processor(TimeSpan period)
         {
             if (period <= new TimeSpan())
+            {
                 throw new ArgumentException("Period for a Gen3 Processor must be greater than zero");
+            }
+
             Period = period;
         }
 
@@ -52,15 +55,21 @@ namespace Telonics
                 const string format = "{0},{1},{2},{3},{4},{5},{6},{7},{8}";
                 int fixNumber = 0;
                 if (Fixes.Length == 0)
+                {
                     yield return String.Format("{0},{1},{2},{3},{4},,,,",
                                                 TransmissionDateTime.ToString("yyyy.MM.dd"),
                                                 TransmissionDateTime.ToString("HH:mm:ss"),
                                                 PlatformId, fixNumber, "Invalid");
+                }
+
                 foreach (var fix in Fixes)
                 {
                     fixNumber++;
                     if (fix.ConditionCode == ArgosConditionCode.Invalid)
+                    {
                         continue;
+                    }
+
                     yield return String.Format(format,
                                                TransmissionDateTime.ToString("yyyy.MM.dd"),
                                                TransmissionDateTime.ToString("HH:mm:ss"),
@@ -110,15 +119,22 @@ namespace Telonics
         private ArgosFix[] GetFixes(DateTime transmissionDateTime, ICollection<byte> message)
         {
             if (message == null)
+            {
                 return new ArgosFix[0];
+            }
 
             //Get the message header
             bool messageHasSensorData = message.BooleanAt(0);
             //ignore sensor or error messages
             if (messageHasSensorData)
+            {
                 return new ArgosFix[0];
+            }
+
             if (message.Count < 9) //72 bits (9 bytes) required for a full absolute fix
+            {
                 return new[] { new ArgosFix { ConditionCode = ArgosConditionCode.Invalid } };
+            }
 
             //Get the absolute Fix
             byte reportedCrc = message.ByteAt(1, 6);
@@ -156,7 +172,10 @@ namespace Telonics
 
             //Setup for the relative fixes
             if (fixBufferType > 3)
+            {
                 throw new InvalidDataException("Argos Message has invalid Fix Buffer Type.");
+            }
+
             int numberOfRelativeFixes = new[] { 0, 3, 4, 5 }[fixBufferType];
             int doubleLength = new[] { 0, 17, 12, 9 }[fixBufferType];
             int relativeFixLength = new[] { 0, 46, 36, 30 }[fixBufferType];
@@ -167,7 +186,10 @@ namespace Telonics
                 int firstBit = 72 + i * relativeFixLength;
                 int bytesRequired = (firstBit + relativeFixLength + 7) / 8; //+7 to round up
                 if (message.Count < bytesRequired)
+                {
                     break;
+                }
+
                 reportedCrc = message.ByteAt(firstBit, 6);
                 firstBit += 6;
                 longitudeBits = message.UInt32At(firstBit, doubleLength);
@@ -194,17 +216,25 @@ namespace Telonics
                 {
                     //if the 6 bits of delay are all ones the fix could not be acquired
                     if ((delay & 0x3F) == 0x3F)
+                    {
                         cCode = ArgosConditionCode.Unavailable;
+                    }
                 }
                 if (delay > 59) //59 min is max delay
+                {
                     delay = 0;
+                }
                 //NOTE: In some cases Unavailable is reported when CRC was bad, but usually not.
 
                 DateTime relFixDate;
                 if (fixDate == default)
+                {
                     relFixDate = new DateTime(); // use default value
+                }
                 else
+                {
                     relFixDate = fixDate - timeOffset + TimeSpan.FromMinutes(delay);
+                }
 
                 fixes.Add(
                     new ArgosFix
@@ -230,7 +260,9 @@ namespace Telonics
             //Check for values out of range
             //We do not know what year this is in, so we are conservative and us 366
             if (dayOfYear > 366 || hour > 23 || minute > 59)
+            {
                 return default; //use default to indicate an error
+            }
 
             //Timespans are from the first day of the year, so we subtract one from the dayOfYear
             var fixTimeSpan = new TimeSpan(dayOfYear - 1, hour, minute, 0, 0);
@@ -239,9 +271,14 @@ namespace Telonics
             int fixYear;
             //The fix must occur before the transmission
             if (fixTimeSpan < transmissionTimeSpan)
+            {
                 fixYear = transYear;
+            }
             else
+            {
                 fixYear = transYear - 1;
+            }
+
             DateTime fixDateTime = new DateTime(fixYear, 1, 1, 0, 0, 0) + fixTimeSpan;
             return fixDateTime;
         }

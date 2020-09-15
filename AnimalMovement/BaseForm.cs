@@ -34,7 +34,9 @@ namespace AnimalMovement
 
             var location = (Point)Properties.Settings.Default[Name + "Location"];
             if (location.X == 0 && location.Y == 0)
+            {
                 StartPosition = FormStartPosition.WindowsDefaultLocation;
+            }
             else
             {
                 StartPosition = FormStartPosition.Manual;
@@ -43,7 +45,10 @@ namespace AnimalMovement
 
             var size = (Size)Properties.Settings.Default[Name + "Size"];
             if (Size.Height == 0 || Size.Width == 0)
+            {
                 return;
+            }
+
             Size = size;
         }
     }

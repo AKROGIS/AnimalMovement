@@ -58,7 +58,10 @@ namespace FileLibrary
             database.SubmitChanges();
             //Linq TO SQL Insert with SPROC dos not set associations, and provides not partial methods to expand
             if (file != null)
+            {
                 file.LookupCollarFileFormat = database.LookupCollarFileFormats.First(l => l.Code == file.Format);
+            }
+
             return file;
         }
 
@@ -101,7 +104,10 @@ namespace FileLibrary
             database.SubmitChanges();
             //Linq TO SQL Insert with SPROC dos not set associations, and provides not partial methods to expand
             if (file != null)
+            {
                 file.LookupCollarFileFormat = database.LookupCollarFileFormats.First(l => l.Code == file.Format);
+            }
+
             return file;
         }
 
@@ -126,11 +132,16 @@ namespace FileLibrary
                                     char status = 'A', bool allowDups = false)
         {
             if (path == null)
+            {
                 throw new ArgumentNullException("path", "A path must be provided");
+            }
+
             if (project != null && manager != null)
+            {
                 throw new InvalidOperationException(
                     String.Format("Project: {0} and Manager: {1} cannot both be non-null.", project.ProjectId,
                                   manager.Login));
+            }
 
             if (File.Exists(path))
             {
@@ -141,7 +152,10 @@ namespace FileLibrary
                 catch (Exception ex)
                 {
                     if (handler == null)
+                    {
                         throw;
+                    }
+
                     handler(ex, path, project, manager);
                 }
             }
@@ -150,6 +164,7 @@ namespace FileLibrary
                 if (Directory.Exists(path))
                 {
                     foreach (var file in Directory.EnumerateFiles(path))
+                    {
                         try
                         {
                             LoadAndProcessFilePath(file, project, manager, collar, status, allowDups);
@@ -157,9 +172,13 @@ namespace FileLibrary
                         catch (Exception ex)
                         {
                             if (handler == null)
+                            {
                                 throw;
+                            }
+
                             handler(ex, file, project, manager);
                         }
+                    }
                 }
                 else
                 {
@@ -279,7 +298,10 @@ namespace FileLibrary
         internal FileLoader(string filePath, Byte[] contents)
         {
             if (contents == null || contents.Length == 0)
+            {
                 throw new ArgumentException("File contents is empty or unavailable", "contents");
+            }
+
             Contents = contents;
             Database = new AnimalMovementDataContext();
             FilePath = filePath;
@@ -300,7 +322,9 @@ namespace FileLibrary
         {
             Validate();
             if (FileFormatRequiresCollar && Collar == null)
+            {
                 Collar = FileCollar;
+            }
             // The entity objects I got from the callers (i.e. Project, Owner, Collar)
             // came from a foreign DataContext, so they cannot be used as associated
             // entities with a new entity in this datacontext.
@@ -344,7 +368,9 @@ namespace FileLibrary
             };
             var file = fileLoader.Load();
             if (file.LookupCollarFileFormat.ArgosData == 'Y' || file.Format == 'H')
+            {
                 FileProcessor.ProcessFile(file);
+            }
         }
 
 
@@ -355,29 +381,40 @@ namespace FileLibrary
 
             // one and only one of Project and Owner must be specified
             if (Owner == null && Project == null)
+            {
                 throw new InvalidOperationException("One of project or owner must be specified.");
+            }
+
             if (Owner != null && Project != null)
+            {
                 throw new InvalidOperationException("Both project and owner cannot be specified simultaneously.");
+            }
 
             //Check Status
             if (Status != 'A' && Status != 'I')
+            {
                 throw new InvalidOperationException(
                     String.Format("A status of '{0}' is not acceptable.  Acceptable values are 'A' and 'I'.", Status));
+            }
 
             //Deny duplicates
             if (!AllowDuplicates)
             {
                 var duplicate = GetDuplicate();
                 if (duplicate != null)
+                {
                     throw new InvalidOperationException(
                         String.Format("The contents have already been loaded as file '{0}' {1} '{2}'.",
                                       duplicate.FileName, duplicate.Project == null ? "for manager" : "in project",
                                       duplicate.Project == null ? duplicate.Owner : duplicate.Project.ProjectName));
+                }
             }
 
             //Unknown format
             if (Format == null)
+            {
                 throw new InvalidOperationException("The contents are not in a recognizable format.");
+            }
 
             //Are we missing a collar when one is required
             if (CollarIsRequired)
@@ -408,34 +445,57 @@ namespace FileLibrary
         private Collar GetFileCollar()
         {
             if (Format == null)
+            {
                 return null;
+            }
 
             try
             {
                 string argosId = null;
                 if (Format.Code == 'B')
+                {
                     argosId = GetArgosFromFormatB();
+                }
+
                 if (Format.Code == 'D')
+                {
                     argosId = GetArgosFromFormatD();
+                }
 
                 //If we have an ArgosId and it maps to one and only one collar, then use it.
                 if (argosId != null)
+                {
                     return Database.ArgosDeployments.Single(d => d.PlatformId == argosId).Collar;
+                }
 
                 string ctn = null;
                 if (Format.Code == 'C')
+                {
                     ctn = GetCtnFromFormatC();
+                }
+
                 if (Format.Code == 'H')
+                {
                     ctn = GetCtnFromFormatH();
+                }
+
                 if (ctn == null)
+                {
                     return null;
+                }
+
                 var collar =
                     Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
                 if (collar != null)
+                {
                     return collar;
+                }
                 //Try without the Alpha suffix
                 if (ctn.Length != 7 && !Char.IsUpper(ctn[6]))
+                {
                     return null;
+                }
+
                 ctn = ctn.Substring(0, 6);
                 return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
             }
@@ -465,7 +525,10 @@ namespace FileLibrary
                     }
                     //skip empty/blank lines
                     if (string.IsNullOrEmpty(line.Replace(',', ' ').Trim()))
+                    {
                         continue;
+                    }
+
                     var newArgosId = line.Substring(0, line.IndexOf(",", StringComparison.OrdinalIgnoreCase));
                     if (argosId == null)
                     {
@@ -473,7 +536,9 @@ namespace FileLibrary
                         checkForHeader = false;
                     }
                     if (newArgosId != argosId)
+                    {
                         return null;
+                    }
                 }
                 return argosId;
             }
@@ -502,7 +567,10 @@ namespace FileLibrary
                     }
                     //skip empty/blank lines
                     if (string.IsNullOrEmpty(line.Replace(',', ' ').Trim()))
+                    {
                         continue;
+                    }
+
                     var newArgosId = line.Split('\t', ',')[2];
                     if (argosId == null)
                     {
@@ -510,7 +578,9 @@ namespace FileLibrary
                         checkForHeader = false;
                     }
                     if (newArgosId != argosId)
+                    {
                         return null;
+                    }
                 }
                 return argosId;
             }
@@ -560,8 +630,12 @@ namespace FileLibrary
         {
             using (var stream = new MemoryStream(bytes, 0, bytes.Length))
             using (var reader = new StreamReader(stream, enc))
+            {
                 while (reader.Peek() >= 0)
+                {
                     yield return reader.ReadLine();
+                }
+            }
         }
 
         #endregion
@@ -592,8 +666,11 @@ namespace FileLibrary
                     }
                 }
                 if (code == '?' && new ArgosEmailFile(Contents).GetPrograms().Any())
+                {
                     // We already checked for ArgosAwsFile with the header
                     code = 'E';
+                }
+
                 return Database.LookupCollarFileFormats.FirstOrDefault(f => f.Code == code);
             }
             catch (Exception)
@@ -607,7 +684,9 @@ namespace FileLibrary
             var length = Math.Min(bytes.Length, maxLength);
             using (var stream = new MemoryStream(bytes, 0, length))
             using (var reader = new StreamReader(stream, enc))
+            {
                 return reader.ReadLine();
+            }
         }
 
         #endregion

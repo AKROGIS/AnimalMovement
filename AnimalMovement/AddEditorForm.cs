@@ -38,13 +38,24 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Project and Investigator are in a different DataContext, get them in this DataContext
             if (Project != null)
+            {
                 Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+            }
+
             if (Investigator != null)
+            {
                 Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+            }
+
             if (Project == null && Investigator == null)
+            {
                 throw new InvalidOperationException("Add Editor Form not provided a valid Project or Project Investigator.");
+            }
+
             if (Project != null && Investigator != null)
+            {
                 throw new InvalidOperationException("Add Editor Form cannot have both a valid Project AND Project Investigator.");
+            }
 
             //Only project investigators can add editors/assistants
             IsProjectInvestigator = Database.ProjectInvestigators.Any(pi => pi.Login == CurrentUser);
@@ -66,9 +77,14 @@ namespace AnimalMovement
             if (Project != null)
             {
                 if (LockSelector)
+                {
                     SelectorComboBox.Items.Add(Project);
+                }
                 else
+                {
                     SelectorComboBox.DataSource = Database.Projects.Where(p => p.ProjectInvestigator == CurrentUser);
+                }
+
                 SelectorComboBox.SelectedItem = Project;
                 SelectorComboBox.DisplayMember = "ProjectName";
                 SelectorComboBox.Enabled = !LockSelector;
@@ -86,9 +102,14 @@ namespace AnimalMovement
         {
             string domainName = ((EditorListItem)ResultsListBox.SelectedItem).DomainName;
             if (Investigator != null)
+            {
                 CreateAssistant(domainName);
+            }
+
             if (Project != null)
+            {
                 CreateEditor(domainName);
+            }
         }
 
         private void CreateEditor(string domainName)
@@ -213,7 +234,9 @@ namespace AnimalMovement
             ResultsListBox.DataSource = data;
             EnableControls(); //If the Datasource is empty, then SelectedIndexChanged is not called.
             if (data.Count > 0)
+            {
                 ResultsListBox.Focus();
+            }
             else
             {
                 MessageBox.Show("Nobody found with that name.", "Try again", MessageBoxButtons.OK,
@@ -227,7 +250,10 @@ namespace AnimalMovement
         {
             AcceptButton = null;
             if (e.KeyCode != Keys.Enter)
+            {
                 return;
+            }
+
             e.Handled = true;
             FindButton.PerformClick();
             AcceptButton = CreateButton;

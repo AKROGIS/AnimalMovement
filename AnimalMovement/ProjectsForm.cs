@@ -140,16 +140,23 @@ namespace AnimalMovement
                 ProjectsGridView.SelectedRows.Cast<DataGridViewRow>()
                                 .Where(row => (bool)row.Cells["CanDelete"].Value)
                                 .Select(row => row.Cells["Project"].Value))
+            {
                 Database.Projects.DeleteOnSubmit(project);
-            if (SubmitChanges())
-                ProjectDataChanged();
+            }
 
+            if (SubmitChanges())
+            {
+                ProjectDataChanged();
+            }
         }
 
         private void InfoProjectButton_Click(object sender, EventArgs e)
         {
             if (ProjectsGridView.CurrentRow == null)
+            {
                 return; //This buttton is only enabled when Current Row is not not null
+            }
+
             var project = (Project)ProjectsGridView.CurrentRow.Cells["Project"].Value;
             var form = new ProjectDetailsForm(project);
             form.DatabaseChanged += (o, args) =>
@@ -163,8 +170,12 @@ namespace AnimalMovement
         private void SelectProjectRow(string projectId)
         {
             foreach (DataGridViewRow row in ProjectsGridView.Rows)
+            {
                 if ((string)row.Cells["ProjectId"].Value == projectId)
+                {
                     ProjectsGridView.CurrentCell = row.Cells["ProjectId"];
+                }
+            }
         }
 
         private void ProjectsGridView_SelectionChanged(object sender, EventArgs e)
@@ -176,7 +187,9 @@ namespace AnimalMovement
         private void ProjectsGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoProjectButton.Enabled)
+            {
                 InfoProjectButton_Click(sender, e);
+            }
         }
     }
 }

@@ -60,7 +60,9 @@ namespace Telonics
             try
             {
                 if (!File.Exists(TdcExecutable))
+                {
                     throw new InvalidOperationException("TDC Execution error - TDC not found at " + TdcExecutable);
+                }
 
                 //The datalog format has the tpf file embeded
                 if (Format != Gen4Format.Datalog)
@@ -74,7 +76,10 @@ namespace Telonics
                 dataFilePath = Path.GetTempFileName();
                 //TDC batch mode uses the aws extension to determine file type 
                 if (Format == Gen4Format.WebService || fileContents.StartsWith("\"programNumber\";\"platformId\";"))
+                {
                     dataFilePath += ".aws";
+                }
+
                 File.WriteAllText(dataFilePath, fileContents);
 
                 batchFilePath = Path.GetTempFileName();
@@ -87,19 +92,28 @@ namespace Telonics
                 {
                     case Gen4Format.Datalog:
                         if (BatchFileTemplate == null)
+                        {
                             BatchFileTemplate = Properties.Settings.Default.TdcDatalogBatchFileFormat;
+                        }
+
                         batchCommands = String.Format(BatchFileTemplate, dataFilePath, outputFolder, logFilePath);
                         break;
                     case Gen4Format.Email:
                     case Gen4Format.WebService:
                         if (BatchFileTemplate == null)
+                        {
                             BatchFileTemplate = Properties.Settings.Default.TdcArgosBatchFileFormat;
+                        }
+
                         batchCommands = String.Format(BatchFileTemplate, dataFilePath, tpfPath, outputFolder,
                                                       logFilePath);
                         break;
                     case Gen4Format.Iridium:
                         if (BatchFileTemplate == null)
+                        {
                             BatchFileTemplate = Properties.Settings.Default.TdcIridiumBatchFileFormat;
+                        }
+
                         batchCommands = String.Format(BatchFileTemplate, dataFilePath, tpfPath, outputFolder,
                                                       logFilePath);
                         break;
@@ -118,16 +132,24 @@ namespace Telonics
                     RedirectStandardError = true
                 });
                 if (p == null)
+                {
                     throw new InvalidOperationException("TDC process already running, Please wait and try again.");
+                }
+
                 string errors = p.StandardError.ReadToEnd();
                 bool exitedNormally = p.WaitForExit(TdcTimeout);
                 if (!exitedNormally)
+                {
                     throw new InvalidOperationException(
                         String.Format("TDC process did not respond after {0} seconds.\n" +
                                       "Check the path in the Settings table, and be sure you have authorized TDC.",
                                       TdcTimeout / 1000));
+                }
+
                 if (!String.IsNullOrEmpty(errors))
+                {
                     throw new InvalidOperationException("TDC Execution error " + errors);
+                }
 
                 //Check the log file for errors
                 /*
@@ -154,12 +176,16 @@ namespace Telonics
                                                             !line.EndsWith("Using default settings instead.") && //warning when run as Sql server impersonated proxy account
                                                             !line.StartsWith("Batch completed at:")));
                 if (!String.IsNullOrEmpty(errors))
+                {
                     throw new InvalidOperationException("TDC Execution error " + errors);
+                }
 
                 // for each output file created by TDC, send the file to the database
                 string[] paths = Directory.GetFiles(outputFolder);
                 if (paths.Length < 1)
+                {
                     throw new InvalidOperationException("TDC Execution error - No output file");
+                }
                 //TDC breaks up the output into CSV files < ~65023 lines long; we need to merge them (with a single header)
                 //I need to force enumerate the files with ToArray() before the finally section deletes the files
                 results = File.ReadAllLines(paths[0]).Concat(FilesWithoutHeader(paths.Skip(1))).ToArray();
@@ -168,13 +194,25 @@ namespace Telonics
             {
                 //cleanup temp files/folders
                 if (tpfPath != null && File.Exists(tpfPath))
+                {
                     File.Delete(tpfPath);
+                }
+
                 if (dataFilePath != null && File.Exists(dataFilePath))
+                {
                     File.Delete(dataFilePath);
+                }
+
                 if (batchFilePath != null && File.Exists(batchFilePath))
+                {
                     File.Delete(batchFilePath);
+                }
+
                 if (logFilePath != null && File.Exists(logFilePath))
+                {
                     File.Delete(logFilePath);
+                }
+
                 if (outputFolder != null && Directory.Exists(outputFolder))
                 {
                     foreach (var path in Directory.GetFiles(outputFolder))

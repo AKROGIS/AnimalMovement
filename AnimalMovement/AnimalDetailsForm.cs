@@ -30,9 +30,14 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Animal is in a different DataContext, get one in this DataContext
             if (Animal != null)
+            {
                 Animal = Database.Animals.FirstOrDefault(a => a.ProjectId == Animal.ProjectId && a.AnimalId == Animal.AnimalId);
+            }
+
             if (Animal == null)
+            {
                 throw new InvalidOperationException("Animal Details Form not provided a valid Animal.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsProjectEditor(Animal.ProjectId, CurrentUser) ?? false;
@@ -52,8 +57,10 @@ namespace AnimalMovement
             base.OnLoad(e);
             AnimalTabControl.SelectedIndex = Properties.Settings.Default.AnimalDetailsFormActiveTab;
             if (AnimalTabControl.SelectedIndex == 0)
+            {
                 //if new index is zero, index changed event will not fire, so fire it manually
                 AnimalTabControl_SelectedIndexChanged(null, null);
+            }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -268,15 +275,23 @@ namespace AnimalMovement
                 Database.CollarDeployments.DeleteOnSubmit(deployment.Deployment);
             }
             if (SubmitChanges())
+            {
                 CollarDataChanged();
+            }
         }
 
         private void EditDeploymentButton_Click(object sender, EventArgs e)
         {
             if (DeploymentDataGridView.CurrentRow == null)
+            {
                 return;
+            }
+
             if (!(DeploymentDataGridView.CurrentRow.DataBoundItem is DeploymentDataItem item))
+            {
                 return;
+            }
+
             var form = new CollarDeploymentDetailsForm(item.Deployment, false, true);
             form.DatabaseChanged += (o, x) => CollarDataChanged();
             form.Show(this);
@@ -285,9 +300,15 @@ namespace AnimalMovement
         private void InfoCollarButton_Click(object sender, EventArgs e)
         {
             if (DeploymentDataGridView.CurrentRow == null)
+            {
                 return;
+            }
+
             if (!(DeploymentDataGridView.CurrentRow.DataBoundItem is DeploymentDataItem item))
+            {
                 return;
+            }
+
             var form = new CollarDetailsForm(item.Collar);
             form.DatabaseChanged += (o, x) => CollarDataChanged();
             form.Show(this);
@@ -308,7 +329,10 @@ namespace AnimalMovement
         private void SetupLocationsTab()
         {
             if (Animal == null)
+            {
                 return;
+            }
+
             var views = new AnimalMovementViews();
             var summary = views.AnimalLocationSummary(Animal.ProjectId, Animal.AnimalId).FirstOrDefault();
             if (summary == null)

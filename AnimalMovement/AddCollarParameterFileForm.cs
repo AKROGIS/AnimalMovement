@@ -35,7 +35,9 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Investigator is in a different DataContext, get one in this DataContext
             if (Investigator != null)
+            {
                 Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+            }
         }
 
         #region SetUp Form
@@ -64,7 +66,9 @@ namespace AnimalMovement
             //If given a Investigator, set that and lock it.
             //else, set list to all investigator I can edit, and select null per the constructor request
             if (Investigator != null)
+            {
                 OwnerComboBox.Items.Add(Investigator);
+            }
             else
             {
                 OwnerComboBox.DataSource =
@@ -84,10 +88,15 @@ namespace AnimalMovement
             FormatComboBox.DataSource = formats;
             FormatComboBox.DisplayMember = "Description";
             if (!formatCode.HasValue)
+            {
                 return;
+            }
+
             var format = formats.FirstOrDefault(f => f.Code == formatCode.Value);
             if (format != null)
+            {
                 FormatComboBox.SelectedItem = format;
+            }
         }
 
         private void SetupStatusList()
@@ -99,7 +108,9 @@ namespace AnimalMovement
             StatusComboBox.DisplayMember = "Name";
             var status = statuses.FirstOrDefault(s => s.Code == statusCode.Value);
             if (status != null)
+            {
                 StatusComboBox.SelectedItem = status;
+            }
         }
 
         private void SetupForTpfFile()
@@ -169,15 +180,19 @@ namespace AnimalMovement
                 var functions = new AnimalMovementFunctions();
                 IsEditor = functions.IsInvestigatorEditor(Investigator.Login, CurrentUser) ?? false;
                 if (!IsEditor)
+                {
                     MessageBox.Show("You do not have permission to add a file for this investigator", "Permission Error",
                                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
                 IsEditor = OwnerComboBox.Items.Count > 0;
                 if (!IsEditor)
+                {
                     MessageBox.Show("You do not have permission to add a file", "Permission Error",
                                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -257,7 +272,10 @@ namespace AnimalMovement
         private void FormatComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!(FormatComboBox.SelectedItem is LookupCollarParameterFileFormat format))
+            {
                 return;
+            }
+
             switch (format.Code)
             {
                 // Keep this current with changes to LookupCollarParameterFileFormats table
@@ -295,11 +313,16 @@ namespace AnimalMovement
             var format = (LookupCollarParameterFileFormat)FormatComboBox.SelectedItem;
             CollarParameterFile paramFile = UploadParameterFile(owner, format, filePath);
             if (paramFile == null)
+            {
                 return false;
+            }
             //paramfile has been successfully committed to the database.
             // CreateParameters is optional, so it should be a separate tranaction (and are not concerned with success or failure)
             if (CreateParametersCheckBox.Checked)
+            {
                 CreateParameters(owner, paramFile);
+            }
+
             return true;
         }
 
@@ -315,7 +338,10 @@ namespace AnimalMovement
             var format = (LookupCollarParameterFileFormat)FormatComboBox.SelectedItem;
             CollarParameterFile paramFile = UploadParameterFile(owner, format, file);
             if (paramFile == null)
+            {
                 return false;
+            }
+
             return true;
         }
 
@@ -323,9 +349,14 @@ namespace AnimalMovement
         {
             LoadAndHashFile(filename);
             if (_fileContents == null)
+            {
                 return null;
+            }
+
             if (AbortBecauseDuplicate())
+            {
                 return null;
+            }
 
             var file = new CollarParameterFile
             {
@@ -337,7 +368,10 @@ namespace AnimalMovement
             };
             Database.CollarParameterFiles.InsertOnSubmit(file);
             if (SubmitChanges())
+            {
                 return file;
+            }
+
             return null;
         }
 
@@ -361,7 +395,10 @@ namespace AnimalMovement
         {
             var duplicate = Database.CollarParameterFiles.FirstOrDefault(f => f.Sha1Hash == _fileHash);
             if (duplicate == null)
+            {
                 return false;
+            }
+
             var msg = "The contents of this file have already been loaded as" + Environment.NewLine +
                 String.Format("file '{0}' for {1}.", duplicate.FileName, duplicate.ProjectInvestigator.Name) + Environment.NewLine +
                 "Loading a file multiple times is not a problem for the database," + Environment.NewLine +
@@ -384,17 +421,24 @@ namespace AnimalMovement
             foreach (TpfCollar tpfCollar in tpfFile.GetCollars())
             {
                 if (IgnoreSuffixCheckBox.Checked && tpfCollar.Ctn.Length > 6)
+                {
                     tpfCollar.Ctn = tpfCollar.Ctn.Substring(0, 6);
+                }
                 //Does this collar exist?
                 var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" &&
                                                                   c.CollarId == tpfCollar.Ctn);
                 if (collar == null && !CreateCollarsCheckBox.Checked)
+                {
                     continue;
+                }
+
                 if (collar == null)
                 {
                     collar = CreateTpfCollar(owner, tpfCollar.Ctn, tpfCollar.Frequency);
                     if (collar == null)
+                    {
                         continue;
+                    }
                 }
                 //Does this Argos platform exist?
                 var fileHasArgos = !String.IsNullOrEmpty(tpfCollar.PlatformId) && tpfCollar.Platform == "Argos" &&
@@ -403,11 +447,18 @@ namespace AnimalMovement
                 {
                     var platform = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == tpfCollar.PlatformId && tpfCollar.Platform == "Argos");
                     if (platform == null && CreateCollarsCheckBox.Checked)
+                    {
                         platform = CreatePlatform(tpfCollar.PlatformId);
+                    }
+
                     if (platform != null)
+                    {
                         //If not paired, then try to parit the collar and platform.  If it fails, or the the dates are wrong, they can correct that later
                         if (!Database.ArgosDeployments.Any(d => d.Collar == collar && d.ArgosPlatform == platform))
+                        {
                             CreateDeployment(collar, platform, tpfCollar.TimeStamp);
+                        }
+                    }
                 }
                 CreateParameter(collar, paramFile, tpfCollar.TimeStamp);
             }
@@ -423,7 +474,10 @@ namespace AnimalMovement
             form.SetDefaultId(collarId);
             form.ShowDialog(this); //Blocks until form closed
             if (!collarAdded)
+            {
                 return null;
+            }
+
             return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" &&
                                                                   c.CollarId == collarId);
         }
@@ -436,7 +490,10 @@ namespace AnimalMovement
             form.SetDefaultPlatform(argosId);
             form.ShowDialog(this);
             if (!platformAdded)
+            {
                 return null;
+            }
+
             return Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == argosId);
         }
 
@@ -444,8 +501,13 @@ namespace AnimalMovement
         {
             DateTime? endDateTime = null;
             if (platform.ArgosDeployments.Count > 0 || collar.ArgosDeployments.Count > 0)
+            {
                 if (!FixOtherDeployments(collar, platform, startDateTime, ref endDateTime))
+                {
                     return;
+                }
+            }
+
             var deploy = new ArgosDeployment
             {
                 ArgosPlatform = platform,
@@ -456,15 +518,22 @@ namespace AnimalMovement
             Database.ArgosDeployments.InsertOnSubmit(deploy);
             //Creating a deployment is optional, so we submit now, so a failure will not stop other transactions.
             if (!SubmitChanges())
+            {
                 Database.ArgosDeployments.DeleteOnSubmit(deploy);
+            }
         }
 
         private void CreateParameter(Collar collar, CollarParameterFile file, DateTime startDateTime)
         {
             DateTime? endDateTime = null;
             if (collar.CollarParameters.Count > 0)
+            {
                 if (!FixOtherParameters(collar, file, startDateTime, ref endDateTime))
+                {
                     return;
+                }
+            }
+
             var param = new CollarParameter
             {
                 Collar = collar,
@@ -475,7 +544,9 @@ namespace AnimalMovement
             Database.CollarParameters.InsertOnSubmit(param);
             //Creating a parameter is optional, so we submit now, so a failure will not stop other transactions.
             if (!SubmitChanges())
+            {
                 Database.CollarParameters.DeleteOnSubmit(param);
+            }
         }
 
         private bool FixOtherDeployments(Collar collar, ArgosPlatform platform, DateTime start, ref DateTime? endDate)
@@ -490,22 +561,34 @@ namespace AnimalMovement
                 platform.ArgosDeployments.SingleOrDefault(d =>
                                                           d.Collar != collar && (d.StartDate == null || d.StartDate < start) && d.EndDate == null);
             if (deployment1 != null)
+            {
                 deployment1.EndDate = start;
+            }
+
             if (deployment2 != null)
+            {
                 deployment2.EndDate = start;
+            }
+
             if (deployment1 != null || deployment2 != null)
+            {
                 if (!SubmitChanges())
+                {
                     return false;
+                }
+            }
 
             //If my enddate is null, I should set my end to the earliest start time of the others that are larger than my start but smaller than my end (infinity, so all).
             //I don't try to fix a non-null end date, because that was explicitly set by the user, and be should explicitly changed.
             if (endDate == null)
+            {
                 endDate =
                     Database.ArgosDeployments.Where(d =>
                                                     ((d.Collar == collar && d.ArgosPlatform != platform) ||
                                                      (d.Collar != collar && d.ArgosPlatform == platform)) &&
                                                     start < d.StartDate)
                             .Select(d => d.StartDate).Min(); //If min gets an empty enumerable, it will return null, which in this case is no change.
+            }
 
             //Since my startdate is non-null, there is no situation where I would need to change an existing null start date.
 
@@ -535,15 +618,19 @@ namespace AnimalMovement
             {
                 parameter.EndDate = start;
                 if (!SubmitChanges())
+                {
                     return false;
+                }
             }
 
             //If my enddate is null (when fixing existng, or adding new), I should set my end to the earliest start time of the others that are larger than my start but smaller than my end (infinity, so all).
             //This could only happen on a fix if there was an existing integrity violation.
             //I don't try to fix a non-null end date, because that was explicitly set by the user, and should explicitly changed.
             if (end == null)
+            {
                 end = collar.CollarParameters.Where(p => p.CollarParameterFile != file && start < p.StartDate)
                             .Select(p => p.StartDate).Min(); //If there is no min gets an empty enumerable, it will return null, which in this case is no change.
+            }
 
             //There is no situation where I would need to change an existing null start date.
 

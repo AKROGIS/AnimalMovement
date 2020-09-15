@@ -75,7 +75,10 @@ namespace AnimalMovement
                                                     pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
             InvestigatorComboBox.DisplayMember = "Name";
             if (Investigator == null && InvestigatorComboBox.Items.Count == 1)
+            {
                 Investigator = (ProjectInvestigator)InvestigatorComboBox.Items[0];
+            }
+
             InvestigatorComboBox.SelectedItem = Investigator;
 
             if (Investigator == null && InvestigatorComboBox.Items.Count == 0)
@@ -259,7 +262,9 @@ namespace AnimalMovement
         private void NextButton_Click(object sender, EventArgs e)
         {
             if (NextButton.Text == "Finish")
+            {
                 Close();
+            }
             else
             {
                 PageNumber++;
@@ -275,7 +280,10 @@ namespace AnimalMovement
         private void InvestigatorComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (Visible)
+            {
                 Investigator = InvestigatorComboBox.SelectedItem as ProjectInvestigator;
+            }
+
             NextButton.Enabled = Investigator != null;
         }
     }

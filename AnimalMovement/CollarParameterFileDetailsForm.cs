@@ -35,9 +35,14 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //File is in a different DataContext, get one in this DataContext
             if (File != null)
+            {
                 File = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == File.FileId);
+            }
+
             if (File == null)
+            {
                 throw new InvalidOperationException("Collar Parameter File Details Form not provided a valid Parameter File.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsInvestigatorEditor(File.Owner, CurrentUser) ?? false;
@@ -53,8 +58,10 @@ namespace AnimalMovement
             IgnoreSuffixCheckBox.Checked = Settings.GetIgnoreCtnSuffix();
             FileTabControl.SelectedIndex = Properties.Settings.Default.CollarParameterFileDetailsFormActiveTab;
             if (FileTabControl.SelectedIndex == 0)
+            {
                 //if new index is zero, index changed event will not fire, so fire it manually
                 FileTabControl_SelectedIndexChanged(null, null);
+            }
         }
 
         protected override void OnClosed(EventArgs e)
@@ -210,6 +217,7 @@ namespace AnimalMovement
         private void SetUpParametersTab()
         {
             if (ParametersDataGridView.DataSource == null)
+            {
                 ParametersDataGridView.DataSource =
                     Database.CollarParameters.Where(cp => cp.CollarParameterFile == File)
                             .Select(cp => new
@@ -220,6 +228,8 @@ namespace AnimalMovement
                                 cp.EndDate,
                                 Data = cp.CollarFiles.Any()
                             });
+            }
+
             ParametersDataGridView.Columns[0].Visible = false;
             ParametersDataGridView.Columns[4].HeaderText = "Has Derived Data";
             EnableCollarFilesControls();
@@ -265,15 +275,23 @@ namespace AnimalMovement
                     DialogResult.Yes;
             }
             if (abort)
+            {
                 return;
+            }
+
             foreach (var parameter in parameters)
             {
                 foreach (var collarFile in parameter.CollarFiles)
+                {
                     Database.CollarFiles.DeleteOnSubmit(collarFile);
+                }
+
                 Database.CollarParameters.DeleteOnSubmit(parameter);
             }
             if (SubmitChanges())
+            {
                 ParametersDataChanged();
+            }
         }
 
         private void EditParameterButton_Click(object sender, EventArgs e)
@@ -295,7 +313,9 @@ namespace AnimalMovement
         private void ParametersDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoParameterButton.Enabled)
+            {
                 InfoParameterButton_Click(sender, e);
+            }
         }
 
         private void ParametersDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -311,13 +331,18 @@ namespace AnimalMovement
         private void HideTpfDetailsTab()
         {
             if (File.Format != 'A' && FileTabControl.TabPages.Contains(TpfDetailsTabPage))
+            {
                 FileTabControl.TabPages.Remove(TpfDetailsTabPage);
+            }
         }
 
         private void SetUpTpfDetailsTab()
         {
             if (TpfDataGridView.DataSource != null)
+            {
                 return;
+            }
+
             TpfDataGridView.DataSource =
                 new TpfFile(File.Contents.ToArray()).GetCollars()
                                                     .Select(t => new
@@ -335,7 +360,10 @@ namespace AnimalMovement
         private void IgnoreSuffixCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (_collars == null)
+            {
                 return;
+            }
+
             _collars = null;
             TpfDataGridView.DataSource = null;
             SetUpTpfDetailsTab();
@@ -354,7 +382,10 @@ namespace AnimalMovement
             AddPlatformButton.Visible = _collars != null;
             AddFixParameterButton.Visible = _collars != null;
             if (_collars == null || TpfDataGridView.SelectedRows.Count != 1)
+            {
                 return;
+            }
+
             var index = TpfDataGridView.SelectedRows[0].Index;
             var collar = _collars[index];
             if (collar == null)
@@ -404,7 +435,9 @@ namespace AnimalMovement
                 //Fix the frequency
                 collar.Frequency = (double)TpfDataGridView.SelectedRows[0].Cells[4].Value;
                 if (SubmitChanges())
+                {
                     TpfDataChanged();
+                }
             }
         }
 
@@ -412,7 +445,9 @@ namespace AnimalMovement
         {
             var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == id);
             if (collar == null)
+            {
                 return;
+            }
             //Add Parameter
             var start = (DateTime)TpfDataGridView.SelectedRows[0].Cells[5].Value;
             //Since this is a new collar, I don't need to worry about any parameter conflicts.
@@ -424,7 +459,9 @@ namespace AnimalMovement
             };
             Database.CollarParameters.InsertOnSubmit(param);
             if (SubmitChanges())
+            {
                 TpfDataChanged();
+            }
 
             //Add PlatformDeployment
             var platformType = (string)TpfDataGridView.SelectedRows[0].Cells[2].Value;
@@ -454,7 +491,10 @@ namespace AnimalMovement
         {
             var platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);
             if (platform == null)
+            {
                 return;
+            }
+
             var deploy = new ArgosDeployment
             {
                 ArgosPlatform = platform,
@@ -463,7 +503,9 @@ namespace AnimalMovement
             };
             Database.ArgosDeployments.InsertOnSubmit(deploy);
             if (SubmitChanges())
+            {
                 TpfDataChanged();
+            }
         }
 
         private void AddPlatformButton_Click(object sender, EventArgs e)
@@ -476,7 +518,9 @@ namespace AnimalMovement
             if (platform == "Argos")
             {
                 if (Database.ArgosPlatforms.Any(a => a.PlatformId == platformId))
+                {
                     AddArgosDeployment(platformId, collar, start);
+                }
                 else
                 {
                     //First add the Argosplatform
@@ -496,11 +540,19 @@ namespace AnimalMovement
         {
             var platform = Database.ArgosPlatforms.FirstOrDefault(a => a.PlatformId == argosId);
             if (platform == null)
+            {
                 return;
+            }
+
             DateTime? endDate = null;
             if (platform.ArgosDeployments.Count > 0 || collar.ArgosDeployments.Count > 0)
+            {
                 if (!FixOtherArgosDeployments(collar, platform, start, ref endDate))
+                {
                     return;
+                }
+            }
+
             var deploy = new ArgosDeployment
             {
                 ArgosPlatform = platform,
@@ -510,7 +562,9 @@ namespace AnimalMovement
             };
             Database.ArgosDeployments.InsertOnSubmit(deploy);
             if (SubmitChanges())
+            {
                 TpfDataChanged();
+            }
         }
 
         private bool FixOtherArgosDeployments(Collar collar, ArgosPlatform platform, DateTime start, ref DateTime? endDate)
@@ -525,22 +579,34 @@ namespace AnimalMovement
                 platform.ArgosDeployments.SingleOrDefault(d =>
                                                           d.Collar != collar && (d.StartDate == null || d.StartDate < start) && d.EndDate == null);
             if (deployment1 != null)
+            {
                 deployment1.EndDate = start;
+            }
+
             if (deployment2 != null)
+            {
                 deployment2.EndDate = start;
+            }
+
             if (deployment1 != null || deployment2 != null)
+            {
                 if (!SubmitChanges())
+                {
                     return false;
+                }
+            }
 
             //If my enddate is null, I should set my end to the earliest start time of the others that are larger than my start but smaller than my end (infinity, so all).
             //I don't try to fix a non-null end date, because that was explicitly set by the user, and be should explicitly changed.
             if (endDate == null)
+            {
                 endDate =
                     Database.ArgosDeployments.Where(d =>
                                                     ((d.Collar == collar && d.ArgosPlatform != platform) ||
                                                      (d.Collar != collar && d.ArgosPlatform == platform)) &&
                                                     start < d.StartDate)
                             .Select(d => d.StartDate).Min(); //If min gets an empty enumerable, it will return null, which in this case is no change.
+            }
 
             //Since my startdate is non-null, there is no situation where I would need to change an existing null start date.
 
@@ -581,7 +647,9 @@ namespace AnimalMovement
                     }
                     endDate = collar.CollarParameters.First(p => p.CollarParameterFile == File).EndDate;
                     if (!FixOtherParameters(collar, start, ref endDate))
+                    {
                         return;
+                    }
                 }
                 var param = collar.CollarParameters.First(p => p.CollarParameterFile == File);
                 param.StartDate = start;
@@ -592,8 +660,13 @@ namespace AnimalMovement
                 // If we are here, then this file is not on this collar, but the collar may have other files.
                 // If there are no other parameters, then no problems, otherwise, try to fix the other one(s) first
                 if (collar.CollarParameters.Count > 0)
+                {
                     if (!FixOtherParameters(collar, start, ref endDate))
+                    {
                         return;
+                    }
+                }
+
                 var param = new CollarParameter
                 {
                     Collar = collar,
@@ -604,7 +677,9 @@ namespace AnimalMovement
                 Database.CollarParameters.InsertOnSubmit(param);
             }
             if (SubmitChanges())
+            {
                 TpfDataChanged();
+            }
         }
 
         private void TpfDataChanged()
@@ -626,15 +701,19 @@ namespace AnimalMovement
             {
                 parameter.EndDate = start;
                 if (!SubmitChanges())
+                {
                     return false;
+                }
             }
 
             //If my enddate is null (when fixing existng, or adding new), I should set my end to the earliest start time of the others that are larger than my start but smaller than my end (infinity, so all).
             //This could only happen on a fix if there was an existing integrity violation.
             //I don't try to fix a non-null end date, because that was explicitly set by the user, and should explicitly changed.
             if (end == null)
+            {
                 end = collar.CollarParameters.Where(p => p.CollarParameterFile != File && start < p.StartDate)
                             .Select(p => p.StartDate).Min(); //If there is no min gets an empty enumerable, it will return null, which in this case is no change.
+            }
 
             //There is no situation where I would need to change an existing null start date.
 
@@ -664,7 +743,10 @@ namespace AnimalMovement
         private void CheckTpfData()
         {
             if (_collars == null)
+            {
                 _collars = GetCollars();
+            }
+
             foreach (DataGridViewRow row in TpfDataGridView.Rows)
             {
                 var collar = _collars[row.Index];
@@ -686,17 +768,27 @@ namespace AnimalMovement
                 }
                 //TODO: Add Iridium platform
                 if (platform == "Argos" && MissingArgosDeployment(collar, platformId))
+                {
                     row.Cells[3].Style.ForeColor = Color.Red;
+                }
+
                 if (FrequencyMismatch(collar, frequency))
+                {
                     row.Cells[4].Style.ForeColor = Color.Red;
+                }
+
                 if (FileNotOnCollar(collar))
+                {
                     row.Cells[5].Style.ForeColor = Color.Red;
+                }
                 else
                 {
                     //File is on collar (possibly more than once)
                     if (!ParameterExistsWithDate(collar, paramaterStart))
+                    {
                         //There is no parameter on this collar with this date (figure out which one to fix later)
                         row.Cells[5].Style.ForeColor = Color.Fuchsia;
+                    }
                 }
             }
         }
@@ -705,7 +797,9 @@ namespace AnimalMovement
         {
             var collarIds = TpfDataGridView.Rows.Cast<DataGridViewRow>().Select(r => (string)r.Cells[1].Value).ToArray();
             if (IgnoreSuffixCheckBox.Checked)
+            {
                 collarIds = collarIds.Select(c => c.Length > 6 ? c.Substring(0, 6) : c).ToArray();
+            }
 
             var unsortedCollars =
                 Database.Collars.Where(

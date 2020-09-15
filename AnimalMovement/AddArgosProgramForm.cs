@@ -30,7 +30,9 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Investigator is in a different DataContext, get one in this DataContext
             if (Investigator != null)
+            {
                 Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+            }
 
             //Validate Program and Editor on load, so we can show a messagebox.
         }
@@ -46,7 +48,9 @@ namespace AnimalMovement
             //If given a Investigator, set that and lock it.
             //else, set list to all projects I can edit, and select null per the constructor request
             if (Investigator != null)
+            {
                 OwnerComboBox.Items.Add(Investigator);
+            }
             else
             {
                 OwnerComboBox.DataSource =

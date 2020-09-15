@@ -13,7 +13,9 @@ namespace QueryLayerBuilder
         static void BindingArcGisRuntime(object sender, EventArgs e)
         {
             if (RuntimeManager.Bind(ProductCode.Desktop))
+            {
                 return;
+            }
             // Failed to bind, announce and force exit
             Console.WriteLine("Invalid ArcGIS runtime binding. Application will shut down.");
             Environment.Exit(1);

@@ -59,6 +59,7 @@ namespace ArcMap_Addin
                     , "What Do you want to do?", MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question);
                 if (action == DialogResult.Yes)
+                {
                     try
                     {
                         HideSelectedFeatures(actionLayer);
@@ -67,7 +68,10 @@ namespace ArcMap_Addin
                     {
                         MessageBox.Show(ex.Message, "Unable to hide features", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                }
+
                 if (action == DialogResult.No)
+                {
                     try
                     {
                         UnHideSelectedFeatures(actionLayer);
@@ -76,8 +80,12 @@ namespace ArcMap_Addin
                     {
                         MessageBox.Show(ex.Message, "Unable to unhide features", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                }
+
                 if (action != DialogResult.Cancel)
+                {
                     ArcMap.Document.ActiveView.Refresh();
+                }
             }
             catch (Exception ex)
             {
@@ -101,12 +109,16 @@ namespace ArcMap_Addin
             foreach (IGeoFeatureLayer layer in layers)
             {
                 if (!(((IDataset)layer).Workspace is ISqlWorkspace w))
+                {
                     continue;
+                }
                 //Debug.Print("query = {0}", w.GetQueryDescription("").Query);
                 var connectionProperties = GetProperties(((IWorkspace)w).ConnectionProperties);
                 if (connectionProperties["DBCLIENT"].Equals("sqlserver", StringComparison.InvariantCultureIgnoreCase) &&
                     HasCorrectColumns(layer.FeatureClass))
+                {
                     results[layer] = ((IFeatureSelection)layer).SelectionSet.Count;
+                }
             }
             return results;
         }
@@ -118,15 +130,27 @@ namespace ArcMap_Addin
             int i3 = featureClass.Fields.FindField("FixDate");
             // We do not check for status, because it may not be in the query layer even though it is in the database
             if (i1 < 0 || i2 < 0 || i3 < 0)
+            {
                 return false;
+            }
+
             if (featureClass.Fields.Field[i1].Length != 16 ||
                 featureClass.Fields.Field[i1].Type != esriFieldType.esriFieldTypeString)
+            {
                 return false;
+            }
+
             if (featureClass.Fields.Field[i2].Length != 16 ||
                 featureClass.Fields.Field[i2].Type != esriFieldType.esriFieldTypeString)
+            {
                 return false;
+            }
+
             if (featureClass.Fields.Field[i3].Type != esriFieldType.esriFieldTypeDate)
+            {
                 return false;
+            }
+
             return true;
         }
 
@@ -193,12 +217,16 @@ namespace ArcMap_Addin
                                                     localServer,
                                                     localDatabase);
             if (connectionProperties["AUTHENTICATION_MODE"] == "OSA")
+            {
                 connectionString += "Trusted_Connection=True;";
+            }
             else
+            {
                 connectionString += "Trusted_Connection=False;" +
                                     string.Format("User Id={0};Password={1};",
                                     connectionProperties["USER"],
                                     connectionProperties["PASSWORD"]);
+            }
 
             //Connect to the local server to find the master server, and change the connection string appropriately
             using (var connection = new SqlConnection(connectionString))
@@ -232,7 +260,10 @@ namespace ArcMap_Addin
             var names = (object[])n;
             var values = (object[])v;
             for (int i = 0; i < names.Length; i++)
+            {
                 results[names[i].ToString()] = values[i].ToString();
+            }
+
             return results;
         }
     }

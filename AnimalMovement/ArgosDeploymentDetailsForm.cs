@@ -36,7 +36,9 @@ namespace AnimalMovement
             ArgosDeployment =
                     Database.ArgosDeployments.FirstOrDefault(d => d.DeploymentId == DeploymentId);
             if (ArgosDeployment == null)
+            {
                 throw new InvalidOperationException("Argos Deployments Form not provided a valid Argos Deployment Id.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsEditor = (functions.IsInvestigatorEditor(ArgosDeployment.Collar.Manager, CurrentUser) ?? false) ||
@@ -95,7 +97,10 @@ namespace AnimalMovement
         {
             var error = ValidateError();
             if (error != null)
+            {
                 ValidationTextBox.Text = error;
+            }
+
             ValidationTextBox.Visible = error != null;
             FixItButton.Visible = error != null;
             SaveButton.Enabled = IsEditor && error == null && DeploymentChanged();
@@ -105,23 +110,31 @@ namespace AnimalMovement
         {
             //We must have a collar
             if (!(CollarComboBox.SelectedItem is Collar collar))
+            {
                 return "No collar selected.";
+            }
 
             //We must have a platform
             if (!(ArgosComboBox.SelectedItem is ArgosPlatform platform))
+            {
                 return "No Argos Id selected.";
+            }
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.ToUniversalTime() : DateTime.MinValue;
             var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
+            {
                 return "The end date must be after the start date";
+            }
 
             //A collar cannot have multiple Argos Platforms at the same time
             if (collar.ArgosDeployments.Any(deployment =>
                                             deployment.DeploymentId != ArgosDeployment.DeploymentId &&
                                             DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
                                                          deployment.EndDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "This collar has another Argos Id during your date range.";
+            }
 
             //An Argos Platform cannot be on two collars at the same time.
             //I must create a list, because LinqToSql cannot translate the second lambda to SQL
@@ -129,7 +142,10 @@ namespace AnimalMovement
                                               deployment.DeploymentId != ArgosDeployment.DeploymentId &&
                                               DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
                                                            deployment.EndDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "Another collar is using this Argos Id during your date range.";
+            }
+
             return null;
         }
 
@@ -214,7 +230,9 @@ namespace AnimalMovement
         private void SaveButton_Click(object sender, EventArgs e)
         {
             if (UpdateDeployment())
+            {
                 Close();
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

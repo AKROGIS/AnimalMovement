@@ -31,9 +31,14 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Platform is in a different DataContext, get one in this DataContext
             if (Platform != null)
+            {
                 Platform = Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == Platform.PlatformId);
+            }
+
             if (Platform == null)
+            {
                 throw new InvalidOperationException("Argos Platform Details Form not provided a valid Platform.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsEditor = functions.IsInvestigatorEditor(Platform.ArgosProgram.Manager, CurrentUser) ?? false;
@@ -52,7 +57,9 @@ namespace AnimalMovement
             base.OnLoad(e);
             ArgosTabControl.SelectedIndex = Properties.Settings.Default.ArgosPlatformDetailsFormActiveTab;
             if (ArgosTabControl.SelectedIndex == 0)
+            {
                 ArgosTabControl_SelectedIndexChanged(ArgosTabControl, null);
+            }
         }
 
         protected override void OnClosed(EventArgs e)
@@ -113,7 +120,9 @@ namespace AnimalMovement
             //If I am not an editor, then set the current program (we will lock it later).
             //else, set list to all projects I can edit (which must include this one)
             if (!IsEditor)
+            {
                 ArgosProgramComboBox.Items.Add(Platform.ArgosProgram);
+            }
             else
             {
                 ArgosProgramComboBox.DataSource =
@@ -283,16 +292,23 @@ namespace AnimalMovement
                 var response = MessageBox.Show(message, "Deleting derived data", MessageBoxButtons.YesNo,
                                                MessageBoxIcon.Question);
                 if (response != DialogResult.Yes)
+                {
                     return;
+                }
             }
             foreach (var deployment in deployments)
             {
                 foreach (var collarFile in deployment.CollarFiles)
+                {
                     Database.CollarFiles.DeleteOnSubmit(collarFile);
+                }
+
                 Database.ArgosDeployments.DeleteOnSubmit(deployment);
             }
             if (SubmitChanges())
+            {
                 CollarDataChanged();
+            }
         }
 
         private void EditCollarButton_Click(object sender, EventArgs e)
@@ -314,7 +330,9 @@ namespace AnimalMovement
         private void CollarDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoCollarButton.Enabled)
+            {
                 InfoCollarButton_Click(sender, e);
+            }
         }
 
         private void CollarDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -330,7 +348,10 @@ namespace AnimalMovement
         private void SetUpParameterFilesTab()
         {
             if (ParametersDataGridView.DataSource != null)
+            {
                 return;
+            }
+
             var views = new AnimalMovementViews();
 
             ParametersDataGridView.DataSource = views.AllTpfFileDatas.Where(t => t.PlatformId == Platform.PlatformId).Select(t => new
@@ -357,7 +378,10 @@ namespace AnimalMovement
             var fileId = (int)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
             var file = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == fileId);
             if (file == null)
+            {
                 return;
+            }
+
             var form = new CollarParameterFileDetailsForm(file);
             form.DatabaseChanged += (o, x) => ParameterFileChanged();
             form.Show(this);
@@ -366,7 +390,9 @@ namespace AnimalMovement
         private void ParametersDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
+            {
                 ShowParameterFileDetails();
+            }
         }
 
         #endregion
@@ -402,7 +428,10 @@ namespace AnimalMovement
         {
             var file = (CollarFile)DownloadsDataGridView.SelectedRows[0].Cells[2].Value;
             if (file == null)
+            {
                 return;
+            }
+
             var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, x) => DownloadsChanged();
             form.Show(this);
@@ -411,7 +440,9 @@ namespace AnimalMovement
         private void DownloadsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
+            {
                 DownloadsDetails();
+            }
         }
 
         private void ProgramDownloadsButton_Click(object sender, EventArgs e)
@@ -455,7 +486,10 @@ namespace AnimalMovement
         {
             var collar = (Collar)ProcessingIssuesDataGridView.SelectedRows[0].Cells[1].Value;
             if (collar == null)
+            {
                 return;
+            }
+
             var form = new CollarDetailsForm(collar);
             form.DatabaseChanged += (o, x) => IssueDataChanged();
             form.Show(this);
@@ -464,10 +498,16 @@ namespace AnimalMovement
         private void ProcessingIssuesDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
+            {
                 if (e.ColumnIndex == 1)
+                {
                     IssueCollarDetails();
+                }
                 else
+                {
                     IssueFileDetails();
+                }
+            }
         }
 
 
@@ -507,7 +547,9 @@ namespace AnimalMovement
         private void TransmissionsDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
+            {
                 TransmissionDetails();
+            }
         }
 
 
@@ -550,7 +592,9 @@ namespace AnimalMovement
         private void DerivedDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
+            {
                 DerivedDataDetails();
+            }
         }
 
         #endregion

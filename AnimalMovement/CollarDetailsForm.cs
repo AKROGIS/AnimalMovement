@@ -34,9 +34,14 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Collar is in a different DataContext, get one in this DataContext
             if (Collar != null)
+            {
                 Collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
+            }
+
             if (Collar == null)
+            {
                 throw new InvalidOperationException("Collar Details Form not provided a valid Collar.");
+            }
 
             DatabaseFunctions = new AnimalMovementFunctions();
             DatabaseViews = new AnimalMovementViews();
@@ -57,8 +62,10 @@ namespace AnimalMovement
             IgnoreSuffixCheckBox.Checked = Settings.GetIgnoreCtnSuffix();
             CollarTabControl.SelectedIndex = Properties.Settings.Default.CollarDetailsFormActiveTab;
             if (CollarTabControl.SelectedIndex == 0)
+            {
                 //if new index is zero, index changed event will not fire, so fire it manually
                 CollarTabControl_SelectedIndexChanged(null, null);
+            }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -305,15 +312,23 @@ namespace AnimalMovement
                 Database.CollarDeployments.DeleteOnSubmit(deployment.Deployment);
             }
             if (SubmitChanges())
+            {
                 AnimalDataChanged();
+            }
         }
 
         private void EditDeploymentButton_Click(object sender, EventArgs e)
         {
             if (DeploymentDataGridView.CurrentRow == null)
+            {
                 return;
+            }
+
             if (!(DeploymentDataGridView.CurrentRow.DataBoundItem is DeploymentDataItem item))
+            {
                 return;
+            }
+
             var form = new CollarDeploymentDetailsForm(item.Deployment, true);
             form.DatabaseChanged += (o, x) => AnimalDataChanged();
             form.Show(this);
@@ -322,9 +337,15 @@ namespace AnimalMovement
         private void InfoAnimalButton_Click(object sender, EventArgs e)
         {
             if (DeploymentDataGridView.CurrentRow == null)
+            {
                 return;
+            }
+
             if (!(DeploymentDataGridView.CurrentRow.DataBoundItem is DeploymentDataItem item))
+            {
                 return;
+            }
+
             var form = new AnimalDetailsForm(item.Animal);
             form.DatabaseChanged += (o, x) => AnimalDataChanged();
             form.Show(this);
@@ -333,7 +354,9 @@ namespace AnimalMovement
         private void DeploymentDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoAnimalButton.Enabled)
+            {
                 InfoAnimalButton_Click(sender, e);
+            }
         }
 
         private void DeploymentDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -396,16 +419,23 @@ namespace AnimalMovement
                 var response = MessageBox.Show(message, "Deleting derived data", MessageBoxButtons.YesNo,
                                                MessageBoxIcon.Question);
                 if (response != DialogResult.Yes)
+                {
                     return;
+                }
             }
             foreach (var deployment in deployments)
             {
                 foreach (var collarFile in deployment.CollarFiles)
+                {
                     Database.CollarFiles.DeleteOnSubmit(collarFile);
+                }
+
                 Database.ArgosDeployments.DeleteOnSubmit(deployment);
             }
             if (SubmitChanges())
+            {
                 ArgosDataChanged();
+            }
         }
 
         private void EditArgosButton_Click(object sender, EventArgs e)
@@ -427,7 +457,9 @@ namespace AnimalMovement
         private void ArgosDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoArgosButton.Enabled)
+            {
                 InfoArgosButton_Click(sender, e);
+            }
         }
 
         private void ArgosDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -529,15 +561,23 @@ namespace AnimalMovement
                     DialogResult.Yes;
             }
             if (abort)
+            {
                 return;
+            }
+
             foreach (var parameter in parameters)
             {
                 foreach (var collarFile in parameter.CollarFiles)
+                {
                     Database.CollarFiles.DeleteOnSubmit(collarFile);
+                }
+
                 Database.CollarParameters.DeleteOnSubmit(parameter);
             }
             if (SubmitChanges())
+            {
                 ParametersDataChanged();
+            }
         }
 
         private void EditParameterButton_Click(object sender, EventArgs e)
@@ -552,7 +592,10 @@ namespace AnimalMovement
         {
             var parameter = (CollarParameter)ParametersDataGridView.SelectedRows[0].Cells[0].Value;
             if (parameter.CollarParameterFile == null)
+            {
                 return;
+            }
+
             var form = new CollarParameterFileDetailsForm(parameter.CollarParameterFile);
             form.DatabaseChanged += (o, x) => ParametersDataChanged();
             form.Show(this);
@@ -561,7 +604,9 @@ namespace AnimalMovement
         private void ParametersDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoParameterButton.Enabled)
+            {
                 InfoParameterButton_Click(sender, e);
+            }
         }
 
         private void ParametersDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -574,9 +619,15 @@ namespace AnimalMovement
         private void SetUpTpfTab()
         {
             if (TpfDataGridView.DataSource != null)
+            {
                 return;
+            }
+
             if (Collar.CollarManufacturer != "Telonics" || Collar.CollarModel != "Gen4")
+            {
                 return;
+            }
+
             var views = new AnimalMovementViews();
             var ignoreSuffix = IgnoreSuffixCheckBox.Checked;
             var tpfList = views.AllTpfFileDatas.ToList();
@@ -600,7 +651,10 @@ namespace AnimalMovement
             var fileId = (int)TpfDataGridView.SelectedRows[0].Cells[0].Value;
             var file = Database.CollarParameterFiles.FirstOrDefault(f => f.FileId == fileId);
             if (file == null)
+            {
                 return;
+            }
+
             var form = new CollarParameterFileDetailsForm(file);
             form.DatabaseChanged += (o, x) => ParametersDataChanged();
             form.Show(this);
@@ -609,7 +663,9 @@ namespace AnimalMovement
         private void TpfDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
+            {
                 ShowTpfFileDetails();
+            }
         }
 
         #endregion
@@ -622,7 +678,10 @@ namespace AnimalMovement
         private void SetupFilesTab()
         {
             if (Collar == null)
+            {
                 return;
+            }
+
             FilesDataGridView.DataSource = DatabaseViews.CollarFixesByFile(Collar.CollarManufacturer, Collar.CollarId);
             EnableFileControls();
         }
@@ -637,7 +696,9 @@ namespace AnimalMovement
                 ChangeFileStatusButton.Text = firstRowStatus != "Active" ? "Activate" : "Deactivate";
                 if (FilesDataGridView.SelectedRows.Cast<DataGridViewRow>()
                                      .Any(row => (string)row.Cells["Status"].Value != firstRowStatus))
+                {
                     ChangeFileStatusButton.Enabled = false;
+                }
             }
         }
 
@@ -653,26 +714,42 @@ namespace AnimalMovement
             //If the button is labeled/enabled correctly, then the user wants to change the status of all the selected files
             var newStatus = Database.LookupFileStatus.First(s => s.Code == 'A');
             if (ChangeFileStatusButton.Text == "Deactivate")
+            {
                 newStatus = Database.LookupFileStatus.First(s => s.Code == 'I');
+            }
 
             var fileIds = FilesDataGridView.SelectedRows.Cast<DataGridViewRow>()
                                            .Select(row => (int)row.Cells["FileId"].Value).ToList();
             var files = Database.CollarFiles.Where(f => fileIds.Contains(f.FileId));
             foreach (var collarFile in files)
+            {
                 collarFile.LookupFileStatus = newStatus;
+            }
+
             if (SubmitChanges())
+            {
                 FileDataChanged();
+            }
         }
 
         private void FileInfoButton_Click(object sender, EventArgs e)
         {
             if (FilesDataGridView.CurrentRow == null)
+            {
                 return;
+            }
+
             if (!(FilesDataGridView.CurrentRow.DataBoundItem is CollarFixesByFileResult item))
+            {
                 return;
+            }
+
             var file = Database.CollarFiles.FirstOrDefault(f => f.FileId == item.FileId);
             if (file == null)
+            {
                 return;
+            }
+
             var form = new FileDetailsForm(file);
             form.DatabaseChanged += (o, x) => FileDataChanged();
             form.Show(this);
@@ -681,7 +758,9 @@ namespace AnimalMovement
         private void FilesDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && FileInfoButton.Enabled)
+            {
                 FileInfoButton_Click(sender, e);
+            }
         }
 
         private void FilesDataGridView_SelectionChanged(object sender, EventArgs e)
@@ -697,7 +776,10 @@ namespace AnimalMovement
         private void SetupFixesTab()
         {
             if (Collar == null)
+            {
                 return;
+            }
+
             FixConflictsDataGridView.DataSource = DatabaseViews.ConflictingFixes(Collar.CollarManufacturer, Collar.CollarId, 36500); //last 100 years
             var summary = DatabaseViews.CollarFixSummary(Collar.CollarManufacturer, Collar.CollarId).FirstOrDefault();
             SummaryLabel.Text = summary == null
@@ -720,9 +802,15 @@ namespace AnimalMovement
         private bool IsUnhideFixButtonEnabled()
         {
             if (FixConflictsDataGridView.CurrentRow == null)
+            {
                 return false;
+            }
+
             if (!(FixConflictsDataGridView.CurrentRow.DataBoundItem is ConflictingFixesResult selectedFix))
+            {
                 return false;
+            }
+
             bool isEditor = DatabaseFunctions.IsFixEditor(selectedFix.FixId, CurrentUser) ?? false;
             bool isHidden = selectedFix.HiddenBy != null;
             return isEditor && isHidden;
@@ -738,11 +826,19 @@ namespace AnimalMovement
         private void UnhideFixButton_Click(object sender, EventArgs e)
         {
             if (FixConflictsDataGridView.CurrentRow == null)
+            {
                 return;
+            }
+
             if (!(FixConflictsDataGridView.CurrentRow.DataBoundItem is ConflictingFixesResult selectedFix))
+            {
                 return;
+            }
+
             if (ExecuteUnhideFix(selectedFix.FixId))
+            {
                 FixDataChanged();
+            }
         }
 
         private bool ExecuteUnhideFix(int fixId)
@@ -804,7 +900,10 @@ namespace AnimalMovement
         {
             var collar = (Collar)ProcessingIssuesDataGridView.SelectedRows[0].Cells[1].Value;
             if (collar == null)
+            {
                 return;
+            }
+
             var form = new CollarDetailsForm(collar);
             form.DatabaseChanged += (o, x) => IssueDataChanged();
             form.Show(this);
@@ -813,10 +912,16 @@ namespace AnimalMovement
         private void ProcessingIssuesDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && !IsEditMode)
+            {
                 if (e.ColumnIndex == 1)
+                {
                     IssueCollarDetails();
+                }
                 else
+                {
                     IssueFileDetails();
+                }
+            }
         }
 
         #endregion

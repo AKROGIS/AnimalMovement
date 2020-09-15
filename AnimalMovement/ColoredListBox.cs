@@ -23,10 +23,14 @@ namespace AnimalMovement
         protected override void OnDrawItem(DrawItemEventArgs e)
         {
             if (Font.Height < 0)
+            {
                 Font = DefaultFont;
+            }
 
             if (e.Index < 0)
+            {
                 return;
+            }
 
             if (DataSource == null && Items.Count == 0)
             {
@@ -63,7 +67,10 @@ namespace AnimalMovement
         public void SetItemColor(int index, Color color)
         {
             if (_colorList.ContainsKey(index))
+            {
                 _colorList.Remove(index);
+            }
+
             _colorList.Add(index, color);
         }
 
@@ -79,7 +86,10 @@ namespace AnimalMovement
                               ? list[index]
                               : (listSource?.GetList()[index]);
             if (item == null)
+            {
                 return string.Empty;
+            }
+
             object prop = GetPropValue(item, DisplayMember);
             return prop.ToString();
         }

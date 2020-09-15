@@ -186,7 +186,10 @@ namespace DataModel
             var database = new AnimalMovementDataContext();
             var pi = database.ProjectInvestigators.FirstOrDefault(p => p.Email == address);
             if (pi == null)
+            {
                 return false;
+            }
+
             var db = new SettingsDataContext();
             var setting = db.Settings.FirstOrDefault(s => s.Username == pi.Login && s.Key == WantsEmailKey);
             //default is to get email, unless explicitly and correctly denied

@@ -33,12 +33,17 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Collar and Platform are in a different DataContext, get them in this DataContext
             if (Collar != null)
+            {
                 Collar =
                     Database.Collars.FirstOrDefault(
                         c => c.CollarManufacturer == Collar.CollarManufacturer && c.CollarId == Collar.CollarId);
+            }
+
             if (Platform != null)
+            {
                 Platform =
                     Database.ArgosPlatforms.FirstOrDefault(p => p.PlatformId == Platform.PlatformId);
+            }
         }
 
         private void SetUpControls()
@@ -54,7 +59,9 @@ namespace AnimalMovement
             //If given a Collar, set that and lock it.
             //else, set list to all collars I can edit, and select null per the constructor request
             if (Collar != null)
+            {
                 CollarComboBox.Items.Add(Collar);
+            }
             else
             {
                 CollarComboBox.DataSource =
@@ -69,7 +76,9 @@ namespace AnimalMovement
             //If given a Collar, set that and lock it.
             //else, set list to all collars I can edit, and select null per the constructor request
             if (Platform != null)
+            {
                 ArgosComboBox.Items.Add(Platform);
+            }
             else
             {
                 ArgosComboBox.DataSource =
@@ -162,7 +171,10 @@ namespace AnimalMovement
         {
             var error = ValidateError();
             if (error != null)
+            {
                 ValidationTextBox.Text = error;
+            }
+
             ValidationTextBox.Visible = error != null;
             CreateButton.Enabled = error == null;
             FixItButton.Visible = error != null;
@@ -171,27 +183,38 @@ namespace AnimalMovement
         private string ValidateError()
         {
             if (!(CollarComboBox.SelectedItem is Collar collar))
+            {
                 return "You must select a collar";
+            }
 
             if (!(ArgosComboBox.SelectedItem is ArgosPlatform platform))
+            {
                 return "You must select an Argos Id";
+            }
 
             var start = StartDateTimePicker.Checked ? StartDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MinValue;
             var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.Date.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
+            {
                 return "The end date must be after the start date";
+            }
 
             //A collar cannot have multiple Argos Platforms at the same time
             if (collar.ArgosDeployments.Any(deployment =>
                                             DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
                                                          deployment.EndDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "This collar has another Argos Id during your date range.";
+            }
 
             //A platform cannot be on two collars at the same time.
             if (platform.ArgosDeployments.Any(deployment =>
                                               DatesOverlap(deployment.StartDate ?? DateTime.MinValue,
                                                            deployment.EndDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "Another collar is using this Argos Id during your date range.";
+            }
+
             return null;
         }
 
@@ -212,7 +235,9 @@ namespace AnimalMovement
             };
             Database.ArgosDeployments.InsertOnSubmit(deployment);
             if (SubmitChanges())
+            {
                 return true;
+            }
             // The collar now thinks it has a deployment, deleteOnSubmit does not clear it
             LoadDataContext();
             return false;
@@ -290,7 +315,9 @@ namespace AnimalMovement
         private void CreateButton_Click(object sender, EventArgs e)
         {
             if (AddDeployment())
+            {
                 Close();
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

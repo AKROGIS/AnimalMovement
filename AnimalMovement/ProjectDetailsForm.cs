@@ -56,9 +56,14 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Project is in a different DataContext, get one in this DataContext
             if (Project != null)
+            {
                 Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+            }
+
             if (Project == null)
+            {
                 throw new InvalidOperationException("Project Details Form not provided a valid project.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsInvestigator = Project.ProjectInvestigator.Normalize().Equals(CurrentUser.Normalize(), StringComparison.OrdinalIgnoreCase);
@@ -72,8 +77,10 @@ namespace AnimalMovement
         {
             ProjectTabs.SelectedIndex = Properties.Settings.Default.ProjectDetailsFormActiveTab;
             if (ProjectTabs.SelectedIndex == 0)
+            {
                 //if new index is zero, index changed event will not fire, so fire it manually
                 ProjectTabs_SelectedIndexChanged(null, null);
+            }
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -153,8 +160,11 @@ namespace AnimalMovement
                     pi => pi.Login == CurrentUser ||
                           pi.ProjectInvestigatorAssistants.Any(a => a.Assistant == CurrentUser));
             if (!InvestigatorComboBox.Items.Contains(Project.ProjectInvestigator1))
+            {
                 //user does not have permission to edit the owning PI
                 InvestigatorComboBox.DataSource = new[] { Project.ProjectInvestigator1 };
+            }
+
             InvestigatorComboBox.DisplayMember = "Name";
             InvestigatorComboBox.SelectedItem = Project.ProjectInvestigator1;
         }
@@ -268,7 +278,9 @@ namespace AnimalMovement
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (sortedList[i].Animal.MortalityDate != null)
+                {
                     AnimalsListBox.SetItemColor(i, Color.DarkGray);
+                }
             }
             AnimalsTabPage.Text = sortedList.Count < 5 ? "Animals" : String.Format("Animals ({0})", sortedList.Count);
             EnableAnimalControls();
@@ -281,7 +293,10 @@ namespace AnimalMovement
                        ? animal.AnimalId
                        : animal.AnimalId + " (" + currentCollar.Collar + ")";
             if (animal.MortalityDate != null)
+            {
                 name = String.Format("{0} (mort:{1:M/d/yy})", name, animal.MortalityDate.Value.ToLocalTime());
+            }
+
             return name;
         }
 
@@ -318,9 +333,14 @@ namespace AnimalMovement
         private void DeleteAnimalsButton_Click(object sender, EventArgs e)
         {
             foreach (AnimalListItem item in AnimalsListBox.SelectedItems.Cast<AnimalListItem>().Where(item => item.CanDelete))
+            {
                 Database.Animals.DeleteOnSubmit(item.Animal);
+            }
+
             if (SubmitChanges())
+            {
                 AnimalDataChanged();
+            }
         }
 
         private void InfoAnimalButton_Click(object sender, EventArgs e)
@@ -374,11 +394,20 @@ namespace AnimalMovement
             for (int i = 0; i < sortedList.Count; i++)
             {
                 if (sortedList[i].File.ParentFileId != null)
+                {
                     FilesListBox.SetItemColor(i, Color.Brown);
+                }
+
                 if (sortedList[i].File.Format == 'E')
+                {
                     FilesListBox.SetItemColor(i, Color.MediumBlue);
+                }
+
                 if (sortedList[i].File.Format == 'F')
+                {
                     FilesListBox.SetItemColor(i, Color.DarkMagenta);
+                }
+
                 if (sortedList[i].File.Status == 'I')
                 {
                     //Dim color of inactive files
@@ -417,9 +446,14 @@ namespace AnimalMovement
         private void DeleteFilesButton_Click(object sender, EventArgs e)
         {
             foreach (FileListItem item in FilesListBox.SelectedItems.Cast<FileListItem>().Where(item => item.CanDelete))
+            {
                 Database.CollarFiles.DeleteOnSubmit(item.File);
+            }
+
             if (SubmitChanges())
+            {
                 FileDataChanged();
+            }
         }
 
         private void InfoFileButton_Click(object sender, EventArgs e)
@@ -438,7 +472,9 @@ namespace AnimalMovement
         private void ShowFilesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (Visible)
+            {
                 SetUpFileTab();
+            }
         }
 
         #endregion
@@ -482,9 +518,14 @@ namespace AnimalMovement
         private void DeleteEditorButton_Click(object sender, EventArgs e)
         {
             foreach (var item in EditorsListBox.SelectedItems)
+            {
                 Database.ProjectEditors.DeleteOnSubmit((ProjectEditor)item);
+            }
+
             if (SubmitChanges())
+            {
                 EditorDataChanged();
+            }
         }
 
         private void EditorsListBox_SelectedIndexChanged(object sender, EventArgs e)

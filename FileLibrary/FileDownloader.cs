@@ -32,7 +32,10 @@ namespace FileLibrary
                 catch (Exception ex)
                 {
                     if (handler == null)
+                    {
                         throw;
+                    }
+
                     handler(ex, program, null);
                 }
             }
@@ -45,7 +48,10 @@ namespace FileLibrary
                 catch (Exception ex)
                 {
                     if (handler == null)
+                    {
                         throw;
+                    }
+
                     handler(ex, null, platform);
                 }
             }
@@ -61,7 +67,9 @@ namespace FileLibrary
         {
             int daysSinceLastDownload;
             if (daysToRetrieve.HasValue)
+            {
                 daysSinceLastDownload = daysToRetrieve.Value;
+            }
             else
             {
                 var database = new AnimalMovementDataContext();
@@ -83,12 +91,18 @@ namespace FileLibrary
             }
             var days = Math.Min(ArgosWebSite.MaxDays, daysSinceLastDownload);
             if (days < ArgosWebSite.MinDays)
+            {
                 return;
+            }
+
             var results = ArgosWebSite.GetProgram(program.UserName, program.Password, program.ProgramId, days,
                                                  out string errors);
             CollarFile file = FileLoader.LoadProgram(program, days, results, errors);
             if (file == null)
+            {
                 return;
+            }
+
             FileProcessor.ProcessFile(file);
         }
 
@@ -102,7 +116,9 @@ namespace FileLibrary
         {
             int daysSinceLastDownload;
             if (daysToRetrieve.HasValue)
+            {
                 daysSinceLastDownload = daysToRetrieve.Value;
+            }
             else
             {
                 var database = new AnimalMovementDataContext();
@@ -114,13 +130,19 @@ namespace FileLibrary
             }
             var days = Math.Min(ArgosWebSite.MaxDays, daysSinceLastDownload);
             if (days < ArgosWebSite.MinDays)
+            {
                 return;
+            }
+
             var program = platform.ArgosProgram;
             var results = ArgosWebSite.GetCollar(program.UserName, program.Password, platform.PlatformId, days,
                                                  out string errors);
             CollarFile file = FileLoader.LoadPlatfrom(platform, days, results, errors);
             if (file == null)
+            {
                 return;
+            }
+
             FileProcessor.ProcessFile(file);
         }
     }

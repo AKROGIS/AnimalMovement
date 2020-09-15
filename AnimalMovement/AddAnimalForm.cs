@@ -31,13 +31,19 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Project is in a different DataContext, get one in this DataContext
             if (Project != null)
+            {
                 Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+            }
 
             //If Project is not provided, Current user must be a PI or an project editor
             if (Project == null)
+            {
                 if (!Database.Projects.Any(p => p.ProjectInvestigator == CurrentUser) &&
                     !Database.ProjectEditors.Any(e => e.Editor == CurrentUser))
+                {
                     throw new InvalidOperationException("Add Animal Form not provided a valid Project or you are not a PI or editor on any projects.");
+                }
+            }
 
             Functions = new AnimalMovementFunctions();
             IsEditor = Project != null && (Functions.IsProjectEditor(Project.ProjectId, CurrentUser) ?? false);
@@ -69,7 +75,9 @@ namespace AnimalMovement
             //If given a Project, set that and lock it.
             //else, set list to all projects I can edit, and select null per the constructor request
             if (Project != null)
+            {
                 ProjectComboBox.Items.Add(Project);
+            }
             else
             {
                 ProjectComboBox.DataSource =
@@ -88,7 +96,10 @@ namespace AnimalMovement
             {
                 var species = Database.LookupSpecies.FirstOrDefault(s => s.Species == speciesCode);
                 if (species != null)
+                {
                     SpeciesComboBox.SelectedItem = species;
+                }
+
                 return;
             }
             SpeciesComboBox.SelectedIndex = 0;
@@ -167,7 +178,9 @@ namespace AnimalMovement
         {
             var species = (LookupSpecies)SpeciesComboBox.SelectedItem;
             if (species != null)
+            {
                 Settings.SetDefaultSpecies(species.Species);
+            }
         }
 
         private void MortatlityDateTimePicker_ValueChanged(object sender, EventArgs e)

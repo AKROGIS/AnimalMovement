@@ -55,7 +55,10 @@ namespace AnimalMovement
         private void InfoInvestigatorButton_Click(object sender, EventArgs e)
         {
             if (InvestigatorsGridView.CurrentRow == null)
+            {
                 return; //This buttton is only enabled when Current Row is not not null
+            }
+
             var pi = (ProjectInvestigator)InvestigatorsGridView.CurrentRow.DataBoundItem;
             var form = new InvestigatorDetailsForm(pi);
             form.DatabaseChanged += (o, args) =>
@@ -69,8 +72,12 @@ namespace AnimalMovement
         private void SelectInvestigatorRow(string login)
         {
             foreach (DataGridViewRow row in InvestigatorsGridView.Rows)
+            {
                 if (((ProjectInvestigator)row.DataBoundItem).Login == login)
+                {
                     InvestigatorsGridView.CurrentCell = row.Cells[1];
+                }
+            }
         }
 
         private void InvestigatorsGridView_SelectionChanged(object sender, EventArgs e)
@@ -81,7 +88,9 @@ namespace AnimalMovement
         private void InvestigatorsGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex > -1 && InfoInvestigatorButton.Enabled)
+            {
                 InfoInvestigatorButton_Click(sender, e);
+            }
         }
     }
 }

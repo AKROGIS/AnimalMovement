@@ -98,7 +98,10 @@ namespace AnimalMovement
         {
             var project = GetValidProject();
             if (project == null)
+            {
                 return;
+            }
+
             Database.Projects.InsertOnSubmit(project);
             if (SubmitChanges())
             {

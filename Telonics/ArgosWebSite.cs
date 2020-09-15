@@ -30,7 +30,10 @@ namespace Telonics
             internal ArgosWebResult(string text)
             {
                 if (String.IsNullOrEmpty(text))
+                {
                     throw new ArgumentNullException("text");
+                }
+
                 _text = text;
             }
 
@@ -78,7 +81,10 @@ namespace Telonics
         {
             error = CheckParameters(username, password, collar, days);
             if (error != null)
+            {
                 return null;
+            }
+
             var request = String.Format(ArgosPlatformSoapRequest, username, password, collar, days);
             return GetArgosWebResult(request, out error);
         }
@@ -96,7 +102,10 @@ namespace Telonics
         {
             error = CheckParameters(username, password, program, days);
             if (error != null)
+            {
                 return null;
+            }
+
             var request = String.Format(ArgosProgramSoapRequest, username, password, program, days);
             return GetArgosWebResult(request, out error);
         }
@@ -112,11 +121,17 @@ namespace Telonics
         {
             error = CheckParameters(username, password, "no selector required", MinDays);
             if (error != null)
+            {
                 return null;
+            }
+
             var request = String.Format(ArgosPlatformListSoapRequest, username, password);
             var response = GetArgosWebResult(request, out error);
             if (error != null)
+            {
                 return new Tuple<string, string>[0];
+            }
+
             var xml = XDocument.Load(new StringReader(response.ToString()));
             var list = new List<Tuple<string, string>>();
             foreach (var program in xml.Descendants("program"))
@@ -136,30 +151,45 @@ namespace Telonics
         {
             string error = null;
             if (String.IsNullOrEmpty(username))
+            {
                 error = "No username provided";
+            }
+
             if (String.IsNullOrEmpty(password))
             {
                 const string msg = "No password provided";
                 if (error == null)
+                {
                     error = msg;
+                }
                 else
+                {
                     error += "; " + msg;
+                }
             }
             if (String.IsNullOrEmpty(selector))
             {
                 const string msg = "No selector (collar or program) was provided";
                 if (error == null)
+                {
                     error = msg;
+                }
                 else
+                {
                     error += "; " + msg;
+                }
             }
             if (days < MinDays || MaxDays < days)
             {
                 var msg = String.Format("Days out of range ({0}..{1})", MinDays, MaxDays);
                 if (error == null)
+                {
                     error = msg;
+                }
                 else
+                {
                     error += "; " + msg;
+                }
             }
             return error;
         }
@@ -172,15 +202,27 @@ namespace Telonics
                 HttpWebRequest req = GetRequest(request);
                 string response = GetResponse(req);
                 if (String.IsNullOrEmpty(response))
+                {
                     error = "No response";
+                }
                 else if (response.Contains("<errors><error code=\"4\">no data</error></errors>"))
+                {
                     error = "No data or unknown id";
+                }
                 else if (response.Contains("<errors><error code=\"3\">authentification error</error></errors>"))
+                {
                     error = "Authentication Error: bad username or password";
+                }
                 else if (response.Contains("<errors>"))
+                {
                     error = "Unknown error: " + response;
+                }
+
                 if (error != null)
+                {
                     return null;
+                }
+
                 return new ArgosWebResult(response);
             }
             catch (Exception ex)
@@ -208,7 +250,10 @@ namespace Telonics
             var resp = (HttpWebResponse)request.GetResponse();
             var respStream = resp.GetResponseStream();
             if (respStream == null)
+            {
                 throw new ApplicationException("Null response from Web Service");
+            }
+
             string response;
             using (var stream = new StreamReader(respStream))
             {

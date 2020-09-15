@@ -35,15 +35,25 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Project and Investigator are in a different DataContext, get them in this DataContext
             if (Project != null)
+            {
                 Project = Database.Projects.FirstOrDefault(p => p.ProjectId == Project.ProjectId);
+            }
+
             if (Investigator != null)
+            {
                 Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+            }
+
             if (Project == null && Investigator == null)
+            {
                 // Try the current user as the PI
                 Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == CurrentUser);
+            }
             // legal to open the form without a project or PI, but cannot upload unless one is specified
             if (Project != null && Investigator != null)
+            {
                 throw new InvalidOperationException("Upload Files Form cannot have both a valid Project AND Project Investigator.");
+            }
 
             //Permission to upload a file is dependent on the project or PI that this fill will upload to.
             //The picklist will only show the allowable.  IF there are no allowable the upload button will be disabled.
@@ -202,10 +212,16 @@ namespace AnimalMovement
                 return;
             }
             if (FolderRadioButton.Checked)
+            {
                 UploadPath(FolderNameTextBox.Text);
+            }
             else
+            {
                 foreach (var path in FileNameTextBox.Text.Split(';'))
+                {
                     UploadPath(path);
+                }
+            }
         }
 
         private void FileRadioButton_CheckedChanged(object sender, EventArgs e)
@@ -228,7 +244,10 @@ namespace AnimalMovement
         private void ProjectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ProjectComboBox.SelectedItem is Project project)
+            {
                 Settings.SetDefaultProject(project.ProjectId);
+            }
+
             EnableUpload();
             RefreshCollarComboBox();
         }

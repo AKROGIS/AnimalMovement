@@ -51,15 +51,21 @@ namespace Telonics
                 const string format = "{0},{1},{2},{3},{4},{5},{6},{7},{8}";
                 int fixNumber = 0;
                 if (Fixes.Length == 0)
+                {
                     yield return String.Format("{0},{1},{2},{3},{4},,,,",
                                                 TransmissionDateTime.ToString("yyyy.MM.dd"),
                                                 TransmissionDateTime.ToString("HH:mm:ss"),
                                                 PlatformId, fixNumber, "Invalid");
+                }
+
                 foreach (var fix in Fixes)
                 {
                     fixNumber++;
                     if (fix.ConditionCode == ArgosConditionCode.Invalid)
+                    {
                         continue;
+                    }
+
                     yield return String.Format(format,
                                                TransmissionDateTime.ToString("yyyy.MM.dd"),
                                                TransmissionDateTime.ToString("HH:mm:ss"),
@@ -189,7 +195,9 @@ namespace Telonics
         private ArgosFix[] GetFixes(ICollection<byte> message)
         {
             if (message == null)
+            {
                 return new ArgosFix[0];
+            }
 
             var bytes = message.ToArray();
             List<LotekData> data = new List<LotekData>();

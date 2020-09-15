@@ -36,10 +36,15 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Get a CollarDeployment in this DataContext
             if (CollarDeployment != null)
+            {
                 CollarDeployment =
                         Database.CollarDeployments.FirstOrDefault(d => d.DeploymentId == CollarDeployment.DeploymentId);
+            }
+
             if (CollarDeployment == null)
+            {
                 throw new InvalidOperationException("Collar Deployments Form not provided a valid Deployment.");
+            }
 
             var functions = new AnimalMovementFunctions();
             IsEditor = (functions.IsProjectEditor(CollarDeployment.Animal.ProjectId, CurrentUser) ?? false) ||
@@ -49,7 +54,9 @@ namespace AnimalMovement
         private void LoadDefaultFormContents()
         {
             if (LockAnimal)
+            {
                 AnimalComboBox.DataSource = new[] { CollarDeployment.Animal };
+            }
             else
             {
                 AnimalComboBox.DataSource = from animal in Database.Animals
@@ -60,7 +67,9 @@ namespace AnimalMovement
                                             select animal;
             }
             if (LockCollar)
+            {
                 CollarComboBox.DataSource = new[] { CollarDeployment.Collar };
+            }
             else
             {
                 CollarComboBox.DataSource = from collar in Database.Collars
@@ -100,7 +109,10 @@ namespace AnimalMovement
         {
             var error = ValidateError();
             if (error != null)
+            {
                 ValidationTextBox.Text = error;
+            }
+
             ValidationTextBox.Visible = error != null;
             FixItButton.Visible = error != null;
             SaveButton.Enabled = IsEditor && error == null && DeploymentChanged();
@@ -120,31 +132,41 @@ namespace AnimalMovement
         {
             //We must have a collar
             if (!(CollarComboBox.SelectedItem is Collar collar))
+            {
                 return "You must select a collar";
+            }
 
             //We must have a platform
             if (!(AnimalComboBox.SelectedItem is Animal animal))
+            {
                 return "You must select an animal";
+            }
 
             //Check dates
             var start = StartDateTimePicker.Value.ToUniversalTime();
             var end = EndDateTimePicker.Checked ? EndDateTimePicker.Value.ToUniversalTime() : DateTime.MaxValue;
             if (end < start)
+            {
                 return "The end date must be after the start date";
+            }
 
             //A collar cannot be deployed on multiple animals at the same time
             if (collar.CollarDeployments.Any(deployment =>
                                              deployment.DeploymentId != CollarDeployment.DeploymentId &&
                                              DatesOverlap(deployment.DeploymentDate,
                                                           deployment.RetrievalDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "This collar is deployed on another animal during your date range.";
+            }
 
             //An Animal cannot have two collars at the same time.
             if (animal.CollarDeployments.Any(deployment =>
                                              deployment.DeploymentId != CollarDeployment.DeploymentId &&
                                              DatesOverlap(deployment.DeploymentDate,
                                                           deployment.RetrievalDate ?? DateTime.MaxValue, start, end)))
+            {
                 return "This animal has another collar during your date range.";
+            }
 
             return null;
         }
@@ -230,7 +252,9 @@ namespace AnimalMovement
         private void SaveButton_Click(object sender, EventArgs e)
         {
             if (UpdateDeployment())
+            {
                 Close();
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

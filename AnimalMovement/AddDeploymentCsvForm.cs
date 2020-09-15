@@ -36,7 +36,9 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Investigator is in a different DataContext, get one in this DataContext
             if (Investigator != null)
+            {
                 Investigator = Database.ProjectInvestigators.FirstOrDefault(pi => pi.Login == Investigator.Login);
+            }
 
             //Validate Program and Editor on load, so we can show a messagebox.
         }
@@ -52,7 +54,9 @@ namespace AnimalMovement
             //If given a Investigator, set that and lock it.
             //else, set list to all projects I can edit, and select null per the constructor request
             if (Investigator != null)
+            {
                 InvestigatorComboBox.Items.Add(Investigator);
+            }
             else
             {
                 InvestigatorComboBox.DataSource =
@@ -164,7 +168,10 @@ namespace AnimalMovement
                 if (!gotHeader)
                 {
                     foreach (string column in line.Split(delimeter))
+                    {
                         dataTable.Columns.Add(column);
+                    }
+
                     gotHeader = true;
                     continue;
                 }
@@ -205,7 +212,10 @@ namespace AnimalMovement
                 MessageBox.Show("Unable to parse the CSV file." + Environment.NewLine + ex1.Message);
             }
             if (dataTable == null)
+            {
                 return;
+            }
+
             ExcelDataGridView.DataSource = dataTable;
             //TODO: save data to the database
         }
@@ -213,7 +223,9 @@ namespace AnimalMovement
         private void BrowseButton_Click(object sender, EventArgs e)
         {
             if (OpenFileDialog.ShowDialog() != DialogResult.Cancel)
+            {
                 FileNameTextBox.Text = OpenFileDialog.FileName;
+            }
         }
 
         private void InvestigatorComboBox_SelectedIndexChanged(object sender, EventArgs e)

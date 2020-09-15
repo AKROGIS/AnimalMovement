@@ -35,7 +35,9 @@ namespace AnimalMovement
             //Database.Log = Console.Out;
             //Program is in a different DataContext, get one in this DataContext
             if (Program != null)
+            {
                 Program = Database.ArgosPrograms.FirstOrDefault(p => p.ProgramId == Program.ProgramId);
+            }
 
             //Validate Program and Editor on load, so we can show a messagebox.
         }
@@ -51,7 +53,9 @@ namespace AnimalMovement
             //If given a Project, set that and lock it.
             //else, set list to all projects I can edit, and select null per the constructor request
             if (Program != null)
+            {
                 ArgosProgramComboBox.Items.Add(Program);
+            }
             else
             {
                 ArgosProgramComboBox.DataSource =

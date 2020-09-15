@@ -41,9 +41,15 @@ namespace Telonics
                 lineNumber++;
                 var cleanLine = line.Trim();
                 if (cleanLine == String.Empty)
+                {
                     continue;
+                }
+
                 if (string.IsNullOrEmpty(cleanLine.Replace(',', ' ').Trim())) //empty except for commas
+                {
                     continue;
+                }
+
                 if (_header == String.Empty)
                 {
                     _header = cleanLine;
@@ -52,25 +58,45 @@ namespace Telonics
                     {
                         var column = columns[i];
                         if (String.Equals(column, "CollarID", StringComparison.InvariantCultureIgnoreCase))
+                        {
                             platformIndex = i;
+                        }
+
                         if (String.Equals(column, "FixDate", StringComparison.InvariantCultureIgnoreCase))
+                        {
                             dateIndex = i;
+                        }
+
                         if (String.Equals(column, "FixTime", StringComparison.InvariantCultureIgnoreCase))
+                        {
                             timeIndex = i;
+                        }
+
                         if (String.Equals(column, "LatWGS84", StringComparison.InvariantCultureIgnoreCase))
+                        {
                             latIndex = i;
+                        }
+
                         if (String.Equals(column, "LonWGS84", StringComparison.InvariantCultureIgnoreCase))
+                        {
                             lonIndex = i;
+                        }
                     }
                     if (platformIndex == -1 || dateIndex == -1 || latIndex == -1 || lonIndex == -1)  //FixTime is optional
+                    {
                         yield break;
+                    }
+
                     continue;
                 }
 
                 var tokens = cleanLine.Split('\t', ',');
                 var timeString = "12:00";
                 if (timeIndex != -1)
+                {
                     timeString = tokens[timeIndex];
+                }
+
                 var dateTime = DateTime.Parse(tokens[dateIndex] + " " + timeString, CultureInfo.InvariantCulture,
                                               DateTimeStyles.RoundtripKind);
                 var transmission = new ArgosTransmission
