@@ -487,7 +487,7 @@ namespace AnimalMovement
                                 Period = p.Gen3Period == null
                                                  ? null
                                                  : (p.Gen3Period % 60 == 0
-                                                        ? p.Gen3Period / 60 + " hrs"
+                                                        ? (p.Gen3Period / 60) + " hrs"
                                                         : p.Gen3Period + " min"),
                                 File = p.CollarParameterFile?.FileName,
                                 Start = p.StartDate == null ? "Long ago" : p.StartDate.Value.ToLocalTime().ToString("g"),

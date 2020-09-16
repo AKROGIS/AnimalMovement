@@ -193,8 +193,8 @@ namespace AnimalMovement
 
         private bool ParameterChanged()
         {
-            return CollarComboBox.SelectedItem as Collar != CollarParameter.Collar ||
-                   FileComboBox.SelectedItem as CollarParameterFile != CollarParameter.CollarParameterFile ||
+            return (CollarComboBox.SelectedItem as Collar) != CollarParameter.Collar ||
+                   (FileComboBox.SelectedItem as CollarParameterFile) != CollarParameter.CollarParameterFile ||
                    (CollarParameter.StartDate == null && StartDateTimePicker.Checked) ||
                    (CollarParameter.StartDate != null && (!StartDateTimePicker.Checked ||
                     StartDateTimePicker.Value != CollarParameter.StartDate.Value.ToLocalTime())) ||

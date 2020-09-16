@@ -183,7 +183,7 @@ namespace Telonics
             //Get the relative fixes
             for (var i = 0; i < numberOfRelativeFixes; i++)
             {
-                int firstBit = 72 + i * relativeFixLength;
+                int firstBit = 72 + (i * relativeFixLength);
                 int bytesRequired = (firstBit + relativeFixLength + 7) / 8; //+7 to round up
                 if (message.Count < bytesRequired)
                 {

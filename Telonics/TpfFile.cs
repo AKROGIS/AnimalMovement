@@ -105,7 +105,7 @@ namespace Telonics
                 Platform = platformType,
                 PlatformId = platformIds[index],
                 Frequency = GetFrequency(frequencies[index]),
-                TimeStamp = GetTimeStamp(timeStamps[3 * index] + " " + timeStamps[3 * index + 1]),
+                TimeStamp = GetTimeStamp(timeStamps[3 * index] + " " + timeStamps[(3 * index) + 1]),
                 Owner = owner,
                 TpfFile = this
             });

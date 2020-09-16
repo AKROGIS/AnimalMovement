@@ -419,7 +419,7 @@ namespace Telonics
     {
         public static DateTime Round(this DateTime date, TimeSpan span)
         {
-            long ticks = (date.Ticks + span.Ticks / 2 + 1) / span.Ticks;
+            long ticks = (date.Ticks + (span.Ticks / 2) + 1) / span.Ticks;
             return new DateTime(ticks * span.Ticks);
         }
     }

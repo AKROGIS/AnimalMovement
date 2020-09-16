@@ -120,8 +120,8 @@ namespace AnimalMovement
 
         private bool DeploymentChanged()
         {
-            return CollarComboBox.SelectedItem as Collar != CollarDeployment.Collar ||
-                   AnimalComboBox.SelectedItem as Animal != CollarDeployment.Animal ||
+            return (CollarComboBox.SelectedItem as Collar) != CollarDeployment.Collar ||
+                   (AnimalComboBox.SelectedItem as Animal) != CollarDeployment.Animal ||
                    StartDateTimePicker.Value != CollarDeployment.DeploymentDate.ToLocalTime() ||
                    (CollarDeployment.RetrievalDate == null && EndDateTimePicker.Checked) ||
                    (CollarDeployment.RetrievalDate != null && (!EndDateTimePicker.Checked ||

@@ -83,8 +83,8 @@ namespace AnimalMovement
 
         private bool DeploymentChanged()
         {
-            return CollarComboBox.SelectedItem as Collar != ArgosDeployment.Collar ||
-                   ArgosComboBox.SelectedItem as ArgosPlatform != ArgosDeployment.ArgosPlatform ||
+            return (CollarComboBox.SelectedItem as Collar) != ArgosDeployment.Collar ||
+                   (ArgosComboBox.SelectedItem as ArgosPlatform) != ArgosDeployment.ArgosPlatform ||
                    (ArgosDeployment.StartDate == null && StartDateTimePicker.Checked) ||
                    (ArgosDeployment.StartDate != null && (!StartDateTimePicker.Checked ||
                     StartDateTimePicker.Value != ArgosDeployment.StartDate.Value.ToLocalTime())) ||

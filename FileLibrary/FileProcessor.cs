@@ -174,7 +174,7 @@ namespace FileLibrary
             var databaseFunctions = new AnimalMovementFunctions();
             //FIXME: check that this is generic to all telonics processing and not just Argos files
             databaseFunctions.ArgosFile_ClearProcessingResults(file.FileId);
-            databaseFunctions.CollarFile_FixOwnerOfIdfFile((file.FileId));
+            databaseFunctions.CollarFile_FixOwnerOfIdfFile(file.FileId);
 
             var processor = new Gen4Processor(tpfFile.Contents.ToArray());
             var lines = processor.ProcessIdf(file.Contents.ToArray());

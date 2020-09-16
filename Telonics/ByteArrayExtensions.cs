@@ -90,7 +90,7 @@ namespace Telonics
                 throw new IndexOutOfRangeException("Sign bit count for a 32bit integer must be less than 33");
             }
 
-            int signMask = 1 << signBit - 1;
+            int signMask = 1 << (signBit - 1);
             int sign = (number & signMask) == 0 ? 1 : -1;
             uint numberMask = (uint)Math.Pow(2, signBit - 1) - 1;
             uint numberWithoutSign = number & numberMask;
@@ -111,7 +111,7 @@ namespace Telonics
                 throw new IndexOutOfRangeException("Length for a 32bit integer must be less than 33");
             }
 
-            int max = 1 << length - 1;
+            int max = 1 << (length - 1);
             int offset = 1 << length;
             double decimalShift = Math.Pow(10, decimals);
             if (number >= max)
