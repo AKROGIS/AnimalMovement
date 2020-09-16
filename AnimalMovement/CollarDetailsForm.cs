@@ -16,6 +16,7 @@ namespace AnimalMovement
         private Collar Collar { get; set; }
         private bool IsEditor { get; set; }
         private bool IsEditMode { get; set; }
+        private bool IsKeyEditMode { get; set; }
         internal event EventHandler DatabaseChanged;
 
         internal CollarDetailsForm(Collar collar)
@@ -89,15 +90,18 @@ namespace AnimalMovement
                     SetupArgosTab();
                     break;
                 case 3:
-                    SetupParametersTab();
+                    SetupVectronicTab();
                     break;
                 case 4:
-                    SetupFilesTab();
+                    SetupParametersTab();
                     break;
                 case 5:
-                    SetupFixesTab();
+                    SetupFilesTab();
                     break;
                 case 6:
+                    SetupFixesTab();
+                    break;
+                case 7:
                     SetUpIssuesTab();
                     break;
             }
@@ -671,6 +675,105 @@ namespace AnimalMovement
         }
 
         #endregion
+
+        #endregion
+
+
+        #region Vectronic Tab
+
+        private void SetupVectronicTab()
+        {
+            //TODO: Get the List of sensors and the Vectronic Key
+            //VectronicSensorDataGridView.DataSource = VectronicSensors
+            VectronicSensorDataGridView.Columns[0].Visible = false;
+            //VectronicKeyTextBox.Text = Vectonic.Key;
+            EnableVectronicControls();
+        }
+
+        private void EnableVectronicControls()
+        {
+            AddVectronicSensorButton.Enabled = !IsEditMode && IsEditor;
+            DeleteVectronicSensorButton.Enabled = !IsEditMode && IsEditor && VectronicSensorDataGridView.SelectedRows.Count > 0;
+            EditVectronicSensorButton.Enabled = !IsEditMode && VectronicSensorDataGridView.SelectedRows.Count == 1;
+            VectronicKeyEditSaveButton.Enabled = IsEditor;
+            IsKeyEditMode = EditSaveButton.Text == "Save";
+            VectronicKeyTextBox.Enabled = IsKeyEditMode;
+            VectronicKeyEditCancelButton.Visible = IsKeyEditMode;
+        }
+
+        private void VectronicDataChanged()
+        {
+            OnDatabaseChanged();
+            LoadDataContext();
+            SetupVectronicTab();
+        }
+
+        private void AddVectronicSensorButton_Click(object sender, EventArgs e)
+        {
+            //TODO: Create Add Form
+            //var form = new AddVectronicSensorForm(Collar);
+            var form = new AddArgosDeploymentForm(Collar);
+            form.DatabaseChanged += (o, x) => VectronicDataChanged();
+            form.Show(this);
+        }
+
+        private void DeleteVectronicSensorButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void EditVectronicSensorButton_Click(object sender, EventArgs e)
+        {
+            //TODO: Get Sensor Record Type and VectronicSensor Edit Form
+            //var sensor = (VectronicSensor)VectronicSensorDataGridView.SelectedRows[0].Cells[0].Value;
+            //var form = new VectronicSensorDetailsForm(sensor.SensorCode, true);
+            //form.DatabaseChanged += (o, x) => VectronicDataChanged();
+            //form.Show(this);
+        }
+
+        private void VectronicKeyEditSaveButton_Click(object sender, EventArgs e)
+        {
+            //This button is not enabled unless editing is permitted 
+            if (VectronicKeyEditSaveButton.Text == "Edit")
+            {
+                // The user wants to edit, Enable form
+                VectronicKeyEditSaveButton.Text = "Save";
+                EnableVectronicControls();
+            }
+            else
+            {
+                //User is saving
+                UpdateDataSource();
+                if (SubmitChanges())
+                {
+                    OnDatabaseChanged();
+                    EditSaveButton.Text = "Edit";
+                    EnableVectronicControls();
+                }
+            }
+        }
+
+        private void VectronicKeyEditCancelButton_Click(object sender, EventArgs e)
+        {
+            VectronicKeyEditSaveButton.Text = "Edit";
+            EnableVectronicControls();
+            //Reset state from database
+            LoadDataContext();
+            SetupVectronicTab();
+        }
+
+        private void VectronicSensorDataGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1 && EditVectronicSensorButton.Enabled)
+            {
+                EditVectronicSensorButton_Click(sender, e);
+            }
+        }
+
+        private void VectronicSensorDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            EnableVectronicControls();
+        }
 
         #endregion
 

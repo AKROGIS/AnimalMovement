@@ -75,6 +75,16 @@
             this.AddParameterButton = new System.Windows.Forms.Button();
             this.DeleteParameterButton = new System.Windows.Forms.Button();
             this.InfoParameterButton = new System.Windows.Forms.Button();
+            this.VectronicTabPage = new System.Windows.Forms.TabPage();
+            this.VectronicKeyTextBox = new System.Windows.Forms.TextBox();
+            this.VectronicKeyEditCancelButton = new System.Windows.Forms.Button();
+            this.VectronicKeyEditSaveButton = new System.Windows.Forms.Button();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.EditVectronicSensorButton = new System.Windows.Forms.Button();
+            this.VectronicSensorDataGridView = new System.Windows.Forms.DataGridView();
+            this.AddVectronicSensorButton = new System.Windows.Forms.Button();
+            this.DeleteVectronicSensorButton = new System.Windows.Forms.Button();
             this.FilesTabPage = new System.Windows.Forms.TabPage();
             this.ChangeFileStatusButton = new System.Windows.Forms.Button();
             this.FileInfoButton = new System.Windows.Forms.Button();
@@ -102,6 +112,8 @@
             this.ParametersTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).BeginInit();
+            this.VectronicTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.VectronicSensorDataGridView)).BeginInit();
             this.FilesTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FilesDataGridView)).BeginInit();
             this.FixesTabPage.SuspendLayout();
@@ -299,6 +311,7 @@
             this.CollarTabControl.Controls.Add(this.AnimalsTabPage);
             this.CollarTabControl.Controls.Add(this.ArgosTabPage);
             this.CollarTabControl.Controls.Add(this.ParametersTabPage);
+            this.CollarTabControl.Controls.Add(this.VectronicTabPage);
             this.CollarTabControl.Controls.Add(this.FilesTabPage);
             this.CollarTabControl.Controls.Add(this.FixesTabPage);
             this.CollarTabControl.Controls.Add(this.tabPage2);
@@ -707,6 +720,140 @@
             this.InfoParameterButton.UseVisualStyleBackColor = true;
             this.InfoParameterButton.Click += new System.EventHandler(this.InfoParameterButton_Click);
             // 
+            // VectronicTabPage
+            // 
+            this.VectronicTabPage.Controls.Add(this.VectronicKeyTextBox);
+            this.VectronicTabPage.Controls.Add(this.VectronicKeyEditCancelButton);
+            this.VectronicTabPage.Controls.Add(this.VectronicKeyEditSaveButton);
+            this.VectronicTabPage.Controls.Add(this.label15);
+            this.VectronicTabPage.Controls.Add(this.label14);
+            this.VectronicTabPage.Controls.Add(this.EditVectronicSensorButton);
+            this.VectronicTabPage.Controls.Add(this.VectronicSensorDataGridView);
+            this.VectronicTabPage.Controls.Add(this.AddVectronicSensorButton);
+            this.VectronicTabPage.Controls.Add(this.DeleteVectronicSensorButton);
+            this.VectronicTabPage.Location = new System.Drawing.Point(4, 22);
+            this.VectronicTabPage.Name = "VectronicTabPage";
+            this.VectronicTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.VectronicTabPage.Size = new System.Drawing.Size(451, 336);
+            this.VectronicTabPage.TabIndex = 8;
+            this.VectronicTabPage.Text = "Vectronic";
+            this.VectronicTabPage.UseVisualStyleBackColor = true;
+            // 
+            // VectronicKeyTextBox
+            // 
+            this.VectronicKeyTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.VectronicKeyTextBox.Location = new System.Drawing.Point(42, 6);
+            this.VectronicKeyTextBox.Multiline = true;
+            this.VectronicKeyTextBox.Name = "VectronicKeyTextBox";
+            this.VectronicKeyTextBox.Size = new System.Drawing.Size(401, 95);
+            this.VectronicKeyTextBox.TabIndex = 72;
+            // 
+            // VectronicKeyEditCancelButton
+            // 
+            this.VectronicKeyEditCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.VectronicKeyEditCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.VectronicKeyEditCancelButton.Location = new System.Drawing.Point(287, 107);
+            this.VectronicKeyEditCancelButton.Name = "VectronicKeyEditCancelButton";
+            this.VectronicKeyEditCancelButton.Size = new System.Drawing.Size(75, 23);
+            this.VectronicKeyEditCancelButton.TabIndex = 70;
+            this.VectronicKeyEditCancelButton.Text = "Cancel";
+            this.VectronicKeyEditCancelButton.UseVisualStyleBackColor = true;
+            this.VectronicKeyEditCancelButton.Visible = false;
+            this.VectronicKeyEditCancelButton.Click += new System.EventHandler(this.VectronicKeyEditCancelButton_Click);
+            // 
+            // VectronicKeyEditSaveButton
+            // 
+            this.VectronicKeyEditSaveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.VectronicKeyEditSaveButton.BackColor = System.Drawing.SystemColors.Control;
+            this.VectronicKeyEditSaveButton.Enabled = false;
+            this.VectronicKeyEditSaveButton.Location = new System.Drawing.Point(368, 107);
+            this.VectronicKeyEditSaveButton.Name = "VectronicKeyEditSaveButton";
+            this.VectronicKeyEditSaveButton.Size = new System.Drawing.Size(75, 23);
+            this.VectronicKeyEditSaveButton.TabIndex = 71;
+            this.VectronicKeyEditSaveButton.Text = "Edit";
+            this.VectronicKeyEditSaveButton.UseVisualStyleBackColor = true;
+            this.VectronicKeyEditSaveButton.Click += new System.EventHandler(this.VectronicKeyEditSaveButton_Click);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(8, 6);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(28, 13);
+            this.label15.TabIndex = 73;
+            this.label15.Text = "Key:";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(6, 136);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(106, 13);
+            this.label14.TabIndex = 69;
+            this.label14.Text = "Sensors to download";
+            // 
+            // EditVectronicSensorButton
+            // 
+            this.EditVectronicSensorButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditVectronicSensorButton.FlatAppearance.BorderSize = 0;
+            this.EditVectronicSensorButton.Image = global::AnimalMovement.Properties.Resources.GenericPencil16;
+            this.EditVectronicSensorButton.Location = new System.Drawing.Point(60, 306);
+            this.EditVectronicSensorButton.Name = "EditVectronicSensorButton";
+            this.EditVectronicSensorButton.Size = new System.Drawing.Size(24, 24);
+            this.EditVectronicSensorButton.TabIndex = 8;
+            this.EditVectronicSensorButton.UseVisualStyleBackColor = true;
+            this.EditVectronicSensorButton.Click += new System.EventHandler(this.EditVectronicSensorButton_Click);
+            // 
+            // VectronicSensorDataGridView
+            // 
+            this.VectronicSensorDataGridView.AllowUserToAddRows = false;
+            this.VectronicSensorDataGridView.AllowUserToDeleteRows = false;
+            this.VectronicSensorDataGridView.AllowUserToOrderColumns = true;
+            this.VectronicSensorDataGridView.AllowUserToResizeRows = false;
+            this.VectronicSensorDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.VectronicSensorDataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.VectronicSensorDataGridView.CausesValidation = false;
+            this.VectronicSensorDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.VectronicSensorDataGridView.Location = new System.Drawing.Point(6, 152);
+            this.VectronicSensorDataGridView.Name = "VectronicSensorDataGridView";
+            this.VectronicSensorDataGridView.ReadOnly = true;
+            this.VectronicSensorDataGridView.RowHeadersVisible = false;
+            this.VectronicSensorDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.VectronicSensorDataGridView.ShowCellErrors = false;
+            this.VectronicSensorDataGridView.ShowEditingIcon = false;
+            this.VectronicSensorDataGridView.ShowRowErrors = false;
+            this.VectronicSensorDataGridView.Size = new System.Drawing.Size(439, 148);
+            this.VectronicSensorDataGridView.TabIndex = 5;
+            this.VectronicSensorDataGridView.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.VectronicSensorDataGridView_CellDoubleClick);
+            this.VectronicSensorDataGridView.SelectionChanged += new System.EventHandler(this.VectronicSensorDataGridView_SelectionChanged);
+            // 
+            // AddVectronicSensorButton
+            // 
+            this.AddVectronicSensorButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddVectronicSensorButton.Enabled = false;
+            this.AddVectronicSensorButton.Image = global::AnimalMovement.Properties.Resources.GenericAddGreen16;
+            this.AddVectronicSensorButton.Location = new System.Drawing.Point(6, 306);
+            this.AddVectronicSensorButton.Name = "AddVectronicSensorButton";
+            this.AddVectronicSensorButton.Size = new System.Drawing.Size(24, 24);
+            this.AddVectronicSensorButton.TabIndex = 6;
+            this.AddVectronicSensorButton.UseVisualStyleBackColor = true;
+            this.AddVectronicSensorButton.Click += new System.EventHandler(this.AddVectronicSensorButton_Click);
+            // 
+            // DeleteVectronicSensorButton
+            // 
+            this.DeleteVectronicSensorButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteVectronicSensorButton.Enabled = false;
+            this.DeleteVectronicSensorButton.Image = global::AnimalMovement.Properties.Resources.GenericDeleteRed16;
+            this.DeleteVectronicSensorButton.Location = new System.Drawing.Point(33, 306);
+            this.DeleteVectronicSensorButton.Name = "DeleteVectronicSensorButton";
+            this.DeleteVectronicSensorButton.Size = new System.Drawing.Size(24, 24);
+            this.DeleteVectronicSensorButton.TabIndex = 7;
+            this.DeleteVectronicSensorButton.UseVisualStyleBackColor = true;
+            this.DeleteVectronicSensorButton.Click += new System.EventHandler(this.DeleteVectronicSensorButton_Click);
+            // 
             // FilesTabPage
             // 
             this.FilesTabPage.Controls.Add(this.ChangeFileStatusButton);
@@ -953,6 +1100,9 @@
             this.ParametersTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.TpfDataGridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ParametersDataGridView)).EndInit();
+            this.VectronicTabPage.ResumeLayout(false);
+            this.VectronicTabPage.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.VectronicSensorDataGridView)).EndInit();
             this.FilesTabPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.FilesDataGridView)).EndInit();
             this.FixesTabPage.ResumeLayout(false);
@@ -1034,5 +1184,15 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.CheckBox IgnoreSuffixCheckBox;
         private System.Windows.Forms.DataGridView FixesGridView;
+        private System.Windows.Forms.TabPage VectronicTabPage;
+        private System.Windows.Forms.TextBox VectronicKeyTextBox;
+        private System.Windows.Forms.Button VectronicKeyEditCancelButton;
+        private System.Windows.Forms.Button VectronicKeyEditSaveButton;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Button EditVectronicSensorButton;
+        private System.Windows.Forms.DataGridView VectronicSensorDataGridView;
+        private System.Windows.Forms.Button AddVectronicSensorButton;
+        private System.Windows.Forms.Button DeleteVectronicSensorButton;
     }
 }
