@@ -363,7 +363,7 @@ namespace FileLibrary
                         case "Gen4":
                             return GetGen4Processor(parameters);
                         case "GPS8000":
-                            return GetGps8000Processor(parameters);
+                            return GetGps8000Processor();
                         default:
                             throw new InvalidOperationException("Unsupported collar model '" + parameters.CollarModel +
                                                                 "'. (supported models are Gen3, and Gen4)");
@@ -402,11 +402,8 @@ namespace FileLibrary
             return new Gen4Processor(parameters.Contents.ToArray());
         }
 
-        // ReSharper disable once UnusedParameter.Local
-        private static IProcessor GetGps8000Processor(GetTelonicsParametersForArgosDatesResult parameters)
+        private static IProcessor GetGps8000Processor()
         {
-            //if (parameters.Format != 'A' || parameters.Contents == null)
-            //    throw new InvalidOperationException("Invalid parameter file format or contents for Gen4 processor");
             return new Gps8000Processor();
         }
 
