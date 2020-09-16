@@ -64,6 +64,8 @@ namespace AnimalMovement
                 case 7:  //Finished
                     SetUpDonePage();
                     break;
+                default:
+                    break;
             }
         }
 

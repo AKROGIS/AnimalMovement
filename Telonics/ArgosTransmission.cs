@@ -66,15 +66,9 @@ namespace Telonics
         public ArgosLocation Location { get; internal set; }
 
 
-        public IEnumerable<string> Lines
-        {
-            get { return _lines.ToArray(); }
-        }
+        public IEnumerable<string> Lines => _lines.ToArray();
 
-        internal Byte[] Message
-        {
-            get { return _message.ToArray(); }
-        }
+        internal Byte[] Message => _message.ToArray();
 
         public string ToFormatedString()
         {

@@ -68,10 +68,7 @@ namespace Telonics
 
         public string FilePath { get; private set; }
 
-        public string Name
-        {
-            get { return Path.GetFileNameWithoutExtension(FilePath); }
-        }
+        public string Name => Path.GetFileNameWithoutExtension(FilePath);
 
         #endregion
 

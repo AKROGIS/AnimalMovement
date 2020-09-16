@@ -253,29 +253,20 @@ namespace FileLibrary
         /// The Format that the file thinks it is.
         /// No exceptions are thrown.  Null is returned if unknown or undeterminable.
         /// </summary>
-        public LookupCollarFileFormat Format
-        {
-            get { return LazyFormat.Value; }
-        }
+        public LookupCollarFileFormat Format => LazyFormat.Value;
 
         /// <summary>
         /// The collar that the file thinks it belongs to.
         /// The file's collar must be in the database or null is returned.
         /// No exceptions are thrown.  Null is returned instead.
         /// </summary>
-        public Collar FileCollar
-        {
-            get { return LazyFileCollar.Value; }
-        }
+        public Collar FileCollar => LazyFileCollar.Value;
 
         /// <summary>
         /// True if the client is required to provide a collar specification for this file.
         /// No exceptions are thrown. If Format is null (unknown or undeterminable), then return false.
         /// </summary>
-        public bool CollarIsRequired
-        {
-            get { return FileFormatRequiresCollar && Collar == null && FileCollar == null; }
-        }
+        public bool CollarIsRequired => FileFormatRequiresCollar && Collar == null && FileCollar == null;
 
         #endregion
 
@@ -435,10 +426,7 @@ namespace FileLibrary
 
         #region Collar from file
 
-        private bool FileFormatRequiresCollar
-        {
-            get { return Format != null && Format.RequiresCollar == 'Y'; }
-        }
+        private bool FileFormatRequiresCollar => Format != null && Format.RequiresCollar == 'Y';
 
         private Lazy<Collar> LazyFileCollar { get; set; }
 

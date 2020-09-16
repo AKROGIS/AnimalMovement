@@ -108,6 +108,8 @@ namespace AnimalMovement
                 case 3:
                     SetUpReportsTab();
                     break;
+                default:
+                    break;
             }
         }
 

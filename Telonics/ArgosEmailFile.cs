@@ -14,10 +14,7 @@ namespace Telonics
         public ArgosEmailFile(Byte[] bytes) : base(bytes) { }
         public ArgosEmailFile(Stream stream) : base(stream) { }
 
-        internal override string Header
-        {
-            get { return String.Empty; }
-        }
+        internal override string Header => String.Empty;
 
         //We Fail completely if there is a parse or index error anywhere in the file
         //We could skip lines with parse errors, but we have no way to alert the user

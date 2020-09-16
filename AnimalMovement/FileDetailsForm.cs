@@ -163,6 +163,8 @@ namespace AnimalMovement
                 case "ProcessingIssues":
                     SetUpProcessingIssuesTab();
                     break;
+                default:
+                    break;
             }
         }
 

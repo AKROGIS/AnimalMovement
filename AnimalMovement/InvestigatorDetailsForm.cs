@@ -118,6 +118,8 @@ namespace AnimalMovement
                 case 6:
                     SetUpReportsTab();
                     break;
+                default:
+                    break;
             }
         }
 

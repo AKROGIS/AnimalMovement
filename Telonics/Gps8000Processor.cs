@@ -148,14 +148,8 @@ namespace Telonics
             public bool Is3D { get; private set; }
 
             // ReSharper disable once UnusedMember.Local
-            public string Csv
-            {
-                get
-                {
-                    return String.Format("{0:d},{1:c},{2:f7},{3:f7},0.00,N/A,{4},No,0.00,0.00,00,", Timestamp.Date,
+            public string Csv => String.Format("{0:d},{1:c},{2:f7},{3:f7},0.00,N/A,{4},No,0.00,0.00,00,", Timestamp.Date,
                         Timestamp.TimeOfDay, Lat, Lon, Is3D ? "3D" : "2D");
-                }
-            }
         }
 
         [SuppressMessage("ReSharper", "MemberCanBePrivate.Local")]

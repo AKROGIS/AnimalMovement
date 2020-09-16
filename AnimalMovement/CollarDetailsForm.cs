@@ -509,6 +509,8 @@ namespace AnimalMovement
                               .ToList();
                     ParametersDataGridView.Columns[4].HeaderText = "Has Derived Data";
                     break;
+                default:
+                    break;
             }
             ParametersDataGridView.Columns[0].Visible = false;
             EnableParametersControls();

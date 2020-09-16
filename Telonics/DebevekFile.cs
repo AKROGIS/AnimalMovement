@@ -17,10 +17,7 @@ namespace Telonics
 
         private string _header = String.Empty;
 
-        internal override string Header
-        {
-            get { return _header; }
-        }
+        internal override string Header => _header;
 
         //We return no transmissions if first non-blank line is not recognized as the header
         //Fail with Format Exception if there is a parse error anywhere in the file
