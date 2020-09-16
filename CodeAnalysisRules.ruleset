@@ -58,24 +58,14 @@
     <Rule Id="IDE0038WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0039" Action="Info" />
     <Rule Id="IDE0039WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0040" Action="Info" />
-    <Rule Id="IDE0040WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0041" Action="Info" />
     <Rule Id="IDE0041WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0042" Action="Info" />
     <Rule Id="IDE0042WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0043" Action="Info" />
-    <Rule Id="IDE0045" Action="Info" />
-    <Rule Id="IDE0045WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0046" Action="Info" />
-    <Rule Id="IDE0046WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0047" Action="Info" />
     <Rule Id="IDE0048" Action="Info" />
     <Rule Id="IDE0048WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0049" Action="Info" />
-    <Rule Id="IDE0049WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0050" Action="Info" />
-    <Rule Id="IDE0050WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0053" Action="Info" />
     <Rule Id="IDE0053WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0054" Action="Info" />
@@ -84,7 +74,6 @@
     <Rule Id="IDE0056WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0057" Action="Info" />
     <Rule Id="IDE0057WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0058" Action="Info" />
     <Rule Id="IDE0059" Action="Info" />
     <Rule Id="IDE0060" Action="Info" />
     <Rule Id="IDE0061" Action="Info" />
@@ -117,7 +106,7 @@
     <Rule Id="IDE0044WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0055" Action="Info" />
     <Rule Id="IDE0055WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0067" Action="Info" />
+    <Rule Id="IDE0067" Action="Hidden" />
     <Rule Id="IDE0068" Action="Info" />
     <Rule Id="IDE0069" Action="Info" />
     <Rule Id="IDE0070" Action="Info" />
