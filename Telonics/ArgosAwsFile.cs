@@ -18,12 +18,10 @@ namespace Telonics
 
         internal override string Header => "\"programNumber\";\"platformId\";\"platformType\";\"platformModel\";\"platformName\";\"platformHexId\";\"satellite\";\"bestMsgDate\";\"duration\";\"nbMessage\";\"message120\";\"bestLevel\";\"frequency\";\"locationDate\";\"latitude\";\"longitude\";\"altitude\";\"locationClass\";\"gpsSpeed\";\"gpsHeading\";\"latitude2\";\"longitude2\";\"altitude2\";\"index\";\"nopc\";\"errorRadius\";\"semiMajor\";\"semiMinor\";\"orientation\";\"hdop\";\"bestDate\";\"compression\";\"type\";\"alarm\";\"concatenated\";\"date\";\"level\";\"doppler\";\"rawData\"\n";
 
-        private bool? _maxResponseReached;
-
         /// <summary>
         /// AWS files may be too large for the server to return all records.
         /// </summary>
-        public bool? MaxResponseReached => _maxResponseReached;
+        public bool? MaxResponseReached { get; private set; }
 
         //We Fail completely if there is a parse or index error anywhere in the file
         //We could skip lines with parse errors, but we have no way to alert the user
@@ -36,7 +34,7 @@ namespace Telonics
                 lineNumber++;
                 if (String.Equals(line.Trim(), "MAX_RESPONSE_REACHED", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _maxResponseReached = true;
+                    MaxResponseReached = true;
                     yield break;
                 }
                 var tokens = line.Substring(1, line.Length - 3).Split(new[] { "\";\"" }, StringSplitOptions.None);
@@ -59,7 +57,7 @@ namespace Telonics
                 transmission.AddLine(line);
                 yield return transmission;
             }
-            _maxResponseReached = false;
+            MaxResponseReached = false;
         }
     }
 }
