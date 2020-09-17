@@ -683,20 +683,26 @@ namespace AnimalMovement
 
         private void SetupVectronicTab()
         {
-            //TODO: Get the List of sensors and the Vectronic Key
-            //VectronicSensorDataGridView.DataSource = VectronicSensors
+            VectronicSensorDataGridView.DataSource =
+            Collar.CollarSensors.Select(s => new
+            {
+                s,
+                s.LookupCollarSensor.Name,
+                // TODO: Add date of last download
+                s.IsActive
+            }).ToList();
             VectronicSensorDataGridView.Columns[0].Visible = false;
-            //VectronicKeyTextBox.Text = Vectonic.Key;
+            VectronicKeyTextBox.Text = Collar.CollarKeys.FirstOrDefault(k => true)?.Key;
             EnableVectronicControls();
         }
 
         private void EnableVectronicControls()
         {
-            AddVectronicSensorButton.Enabled = !IsEditMode && IsEditor;
-            DeleteVectronicSensorButton.Enabled = !IsEditMode && IsEditor && VectronicSensorDataGridView.SelectedRows.Count > 0;
-            EditVectronicSensorButton.Enabled = !IsEditMode && VectronicSensorDataGridView.SelectedRows.Count == 1;
+            AddVectronicSensorButton.Enabled = !IsKeyEditMode && IsEditor;
+            DeleteVectronicSensorButton.Enabled = !IsKeyEditMode && IsEditor && VectronicSensorDataGridView.SelectedRows.Count > 0;
+            EditVectronicSensorButton.Enabled = !IsKeyEditMode && VectronicSensorDataGridView.SelectedRows.Count == 1;
             VectronicKeyEditSaveButton.Enabled = IsEditor;
-            IsKeyEditMode = EditSaveButton.Text == "Save";
+            IsKeyEditMode = VectronicKeyEditSaveButton.Text == "Save";
             VectronicKeyTextBox.Enabled = IsKeyEditMode;
             VectronicKeyEditCancelButton.Visible = IsKeyEditMode;
         }
@@ -708,27 +714,47 @@ namespace AnimalMovement
             SetupVectronicTab();
         }
 
+        private void UpdateKeyDataSource()
+        {
+            if (!String.IsNullOrEmpty(VectronicKeyTextBox.Text))
+            {
+                var key = Collar.CollarKeys.FirstOrDefault(k => true) ?? new CollarKey
+                {
+                    CollarManufacturer = Collar.CollarManufacturer,
+                    CollarId = Collar.CollarId
+                };
+                key.Key = VectronicKeyTextBox.Text;
+            }
+        }
+
         private void AddVectronicSensorButton_Click(object sender, EventArgs e)
         {
-            //TODO: Create Add Form
-            //var form = new AddVectronicSensorForm(Collar);
-            var form = new AddArgosDeploymentForm(Collar);
+            var form = new AddCollarSensorForm(Collar);
             form.DatabaseChanged += (o, x) => VectronicDataChanged();
             form.Show(this);
         }
 
         private void DeleteVectronicSensorButton_Click(object sender, EventArgs e)
         {
-
+            var sensors = VectronicSensorDataGridView.SelectedRows.Cast<DataGridViewRow>()
+                                 .Select(row => (CollarSensor)row.Cells[0].Value)
+                                 .ToList();
+            foreach (var sensor in sensors)
+            {
+                Database.CollarSensors.DeleteOnSubmit(sensor);
+            }
+            if (SubmitChanges())
+            {
+                ArgosDataChanged();
+            }
         }
 
         private void EditVectronicSensorButton_Click(object sender, EventArgs e)
         {
-            //TODO: Get Sensor Record Type and VectronicSensor Edit Form
-            //var sensor = (VectronicSensor)VectronicSensorDataGridView.SelectedRows[0].Cells[0].Value;
-            //var form = new VectronicSensorDetailsForm(sensor.SensorCode, true);
-            //form.DatabaseChanged += (o, x) => VectronicDataChanged();
-            //form.Show(this);
+            var sensor = (CollarSensor)VectronicSensorDataGridView.SelectedRows[0].Cells[0].Value;
+            var form = new CollarSensorDetailsForm(sensor);
+            form.DatabaseChanged += (o, x) => VectronicDataChanged();
+            form.Show(this);
         }
 
         private void VectronicKeyEditSaveButton_Click(object sender, EventArgs e)
@@ -743,7 +769,7 @@ namespace AnimalMovement
             else
             {
                 //User is saving
-                UpdateDataSource();
+                UpdateKeyDataSource();
                 if (SubmitChanges())
                 {
                     OnDatabaseChanged();
