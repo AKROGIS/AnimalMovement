@@ -783,7 +783,7 @@ namespace AnimalMovement
                 if (SubmitChanges())
                 {
                     OnDatabaseChanged();
-                    EditSaveButton.Text = "Edit";
+                    VectronicKeyEditSaveButton.Text = "Edit";
                     EnableVectronicControls();
                 }
             }
