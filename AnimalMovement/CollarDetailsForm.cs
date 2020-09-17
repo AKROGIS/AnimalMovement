@@ -721,9 +721,15 @@ namespace AnimalMovement
 
         private void UpdateKeyDataSource()
         {
-            if (!String.IsNullOrEmpty(VectronicKeyTextBox.Text))
+            var key = Collar.CollarKeys.FirstOrDefault(k => true);
+            if (String.IsNullOrEmpty(VectronicKeyTextBox.Text))
             {
-                var key = Collar.CollarKeys.FirstOrDefault(k => true);
+                if (key != null)
+                {
+                    Database.CollarKeys.DeleteOnSubmit(key);
+                }
+            }
+            else {
                 if (key == null)
                 {
                     key = new CollarKey
