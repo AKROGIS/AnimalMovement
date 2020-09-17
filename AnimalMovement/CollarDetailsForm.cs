@@ -90,10 +90,10 @@ namespace AnimalMovement
                     SetupArgosTab();
                     break;
                 case 3:
-                    SetupVectronicTab();
+                    SetupParametersTab();
                     break;
                 case 4:
-                    SetupParametersTab();
+                    SetupVectronicTab();
                     break;
                 case 5:
                     SetupFilesTab();
@@ -114,7 +114,7 @@ namespace AnimalMovement
             {
                 Database.SubmitChanges();
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
                 string msg = "Unable to submit changes to the database.\n" +
                              "Error message:\n" + ex.Message;
@@ -499,6 +499,7 @@ namespace AnimalMovement
                                 Data = p.CollarFiles.Any()
                             }).ToList();
                     ParametersDataGridView.Columns[5].HeaderText = "Has Derived Data";
+                    ParametersDataGridView.Columns[0].Visible = false;
                     break;
                 case "Gen4":
                     ParametersDataGridView.DataSource =
@@ -512,11 +513,11 @@ namespace AnimalMovement
                         })
                               .ToList();
                     ParametersDataGridView.Columns[4].HeaderText = "Has Derived Data";
+                    ParametersDataGridView.Columns[0].Visible = false;
                     break;
                 default:
                     break;
             }
-            ParametersDataGridView.Columns[0].Visible = false;
             EnableParametersControls();
         }
 
@@ -718,11 +719,16 @@ namespace AnimalMovement
         {
             if (!String.IsNullOrEmpty(VectronicKeyTextBox.Text))
             {
-                var key = Collar.CollarKeys.FirstOrDefault(k => true) ?? new CollarKey
+                var key = Collar.CollarKeys.FirstOrDefault(k => true);
+                if (key == null)
                 {
-                    CollarManufacturer = Collar.CollarManufacturer,
-                    CollarId = Collar.CollarId
-                };
+                    key = new CollarKey
+                    {
+                        CollarManufacturer = Collar.CollarManufacturer,
+                        CollarId = Collar.CollarId
+                    };
+                    Database.CollarKeys.InsertOnSubmit(key);
+                }
                 key.Key = VectronicKeyTextBox.Text;
             }
         }

@@ -63,7 +63,7 @@ namespace AnimalMovement
             // Set to All Sensors in the Lookup table, except ones already assigne to this collar
             var collarSensorsCodes = Collar.CollarSensors.Select(s => s.SensorCode).ToList();
             var allSensors = Database.LookupCollarSensors.Where(s => !collarSensorsCodes.Contains(s.Code)).ToList();
-            SensorComboBox.DataSource = allSensors[0];
+            SensorComboBox.DataSource = allSensors;
             SensorComboBox.DisplayMember = "Name";
         }
 
