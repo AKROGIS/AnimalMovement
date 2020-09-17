@@ -236,5 +236,17 @@
     <Setting Name="AddCollarParameterFileFolderPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="AddCollarSensorFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="AddCollarSensorFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">260, 200</Value>
+    </Setting>
+    <Setting Name="CollarSensorDetailsFormLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="CollarSensorDetailsFormSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">260, 200</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -958,5 +958,53 @@ namespace AnimalMovement.Properties {
                 this["AddCollarParameterFileFolderPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point AddCollarSensorFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["AddCollarSensorFormLocation"]));
+            }
+            set {
+                this["AddCollarSensorFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("260, 200")]
+        public global::System.Drawing.Size AddCollarSensorFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["AddCollarSensorFormSize"]));
+            }
+            set {
+                this["AddCollarSensorFormSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point CollarSensorDetailsFormLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["CollarSensorDetailsFormLocation"]));
+            }
+            set {
+                this["CollarSensorDetailsFormLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("260, 200")]
+        public global::System.Drawing.Size CollarSensorDetailsFormSize {
+            get {
+                return ((global::System.Drawing.Size)(this["CollarSensorDetailsFormSize"]));
+            }
+            set {
+                this["CollarSensorDetailsFormSize"] = value;
+            }
+        }
     }
 }
