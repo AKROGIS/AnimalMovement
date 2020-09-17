@@ -77,6 +77,7 @@
       <Association Name="LookupCollarManufacturer_LookupCollarModel" Member="LookupCollarModels" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarModel" />
       <Association Name="LookupCollarManufacturer_LookupCollarFileFormat" Member="LookupCollarFileFormats" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarFileFormat" />
       <Association Name="LookupCollarManufacturer_Collar" Member="Collars" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="Collar" />
+      <Association Name="LookupCollarManufacturer_LookupCollarSensor" Member="LookupCollarSensors" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarSensor" />
     </Type>
   </Table>
   <Table Name="dbo.LookupGender" Member="LookupGenders">
@@ -492,6 +493,8 @@
       <Association Name="Collar_ArgosDeployment" Member="ArgosDeployments" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosDeployment" />
       <Association Name="Collar_CollarFile" Member="CollarFiles" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarFile" />
       <Association Name="Collar_ArgosFileProcessingIssue" Member="ArgosFileProcessingIssues" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="ArgosFileProcessingIssue" />
+      <Association Name="Collar_CollarKey" Member="CollarKeys" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarKey" />
+      <Association Name="Collar_CollarSensor" Member="CollarSensors" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="CollarSensor" />
       <Association Name="LookupCollarManufacturer_Collar" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
       <Association Name="LookupCollarModel_Collar" Member="LookupCollarModel" ThisKey="CollarManufacturer,CollarModel" OtherKey="CollarManufacturer,CollarModel" Type="LookupCollarModel" IsForeignKey="true" />
       <Association Name="ProjectInvestigator_Collar" Member="ProjectInvestigator" ThisKey="Manager" OtherKey="Login" Type="ProjectInvestigator" IsForeignKey="true" />
@@ -574,6 +577,65 @@
       <Column Name="LastTransmission" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
       <Association Name="CollarFile_ArgosFilePlatformDate" Member="CollarFile" ThisKey="FileId" OtherKey="FileId" Type="CollarFile" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
       <Association Name="ArgosPlatform_ArgosFilePlatformDate" Member="ArgosPlatform" ThisKey="PlatformId" OtherKey="PlatformId" Type="ArgosPlatform" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CollarKeys" Member="CollarKeys">
+    <Type Name="CollarKey">
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="CollarKey" Member="Key" Type="System.String" DbType="VarChar(512) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="Collar_CollarKey" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+    <InsertFunction FunctionId="FunctionId38">
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+      <Argument Parameter="collarKey" Member="Key" />
+    </InsertFunction>
+    <UpdateFunction FunctionId="FunctionId39">
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+      <Argument Parameter="collarKey" Member="Key" />
+    </UpdateFunction>
+    <DeleteFunction FunctionId="FunctionId40">
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+    </DeleteFunction>
+  </Table>
+  <Table Name="dbo.CollarSensors" Member="CollarSensors">
+    <Type Name="CollarSensor">
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="SensorCode" Type="System.String" DbType="VarChar(8) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="IsActive" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="Collar_CollarSensor" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="LookupCollarSensor_CollarSensor" Member="LookupCollarSensor" ThisKey="CollarManufacturer,SensorCode" OtherKey="CollarManufacturer,Code" Type="LookupCollarSensor" IsForeignKey="true" />
+    </Type>
+    <InsertFunction FunctionId="FunctionId41">
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+      <Argument Parameter="sensorCode" Member="SensorCode" />
+      <Argument Parameter="isActive" Member="IsActive" />
+    </InsertFunction>
+    <UpdateFunction FunctionId="FunctionId42">
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+      <Argument Parameter="sensorCode" Member="SensorCode" />
+      <Argument Parameter="isActive" Member="IsActive" />
+    </UpdateFunction>
+    <DeleteFunction FunctionId="FunctionId43">
+      <Argument Parameter="collarManufacturer" Member="CollarManufacturer" />
+      <Argument Parameter="collarId" Member="CollarId" />
+      <Argument Parameter="sensorCode" Member="SensorCode" />
+    </DeleteFunction>
+  </Table>
+  <Table Name="dbo.LookupCollarSensors" Member="LookupCollarSensors">
+    <Type Name="LookupCollarSensor">
+      <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Code" Type="System.String" DbType="VarChar(8) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
+      <Association Name="LookupCollarSensor_CollarSensor" Member="CollarSensors" ThisKey="CollarManufacturer,Code" OtherKey="CollarManufacturer,SensorCode" Type="CollarSensor" />
+      <Association Name="LookupCollarManufacturer_LookupCollarSensor" Member="LookupCollarManufacturer" ThisKey="CollarManufacturer" OtherKey="CollarManufacturer" Type="LookupCollarManufacturer" IsForeignKey="true" />
     </Type>
   </Table>
   <Function Id="FunctionId3" Name="dbo.Animal_Delete" Method="Animal_Delete">
@@ -888,5 +950,41 @@
     <Parameter Name="FirstTransmission" Parameter="firstTransmission" Type="System.DateTime" DbType="DateTime2" />
     <Parameter Name="LastTransmission" Parameter="lastTransmission" Type="System.DateTime" DbType="DateTime2" />
     <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId40" Name="dbo.CollarKey_Delete" Method="CollarKey_Delete">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId38" Name="dbo.CollarKey_Insert" Method="CollarKey_Insert">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarKey" Parameter="collarKey" Type="System.String" DbType="NVarChar(512)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId39" Name="dbo.CollarKey_Update" Method="CollarKey_Update">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarKey" Parameter="collarKey" Type="System.String" DbType="NVarChar(512)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId43" Name="dbo.CollarSensor_Delete" Method="CollarSensor_Delete">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="SensorCode" Parameter="sensorCode" Type="System.String" DbType="NVarChar(255)" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId41" Name="dbo.CollarSensor_Insert" Method="CollarSensor_Insert">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="SensorCode" Parameter="sensorCode" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="IsActive" Parameter="isActive" Type="System.Boolean" DbType="Bit" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Id="FunctionId42" Name="dbo.CollarSensor_Update" Method="CollarSensor_Update">
+    <Parameter Name="CollarManufacturer" Parameter="collarManufacturer" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="SensorCode" Parameter="sensorCode" Type="System.String" DbType="NVarChar(255)" />
+    <Parameter Name="IsActive" Parameter="isActive" Type="System.Boolean" DbType="Bit" />
   </Function>
 </Database>

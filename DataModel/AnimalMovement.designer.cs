@@ -65,6 +65,9 @@ namespace DataModel
     partial void InsertArgosFilePlatformDate(ArgosFilePlatformDate instance);
     partial void UpdateArgosFilePlatformDate(ArgosFilePlatformDate instance);
     partial void DeleteArgosFilePlatformDate(ArgosFilePlatformDate instance);
+    partial void InsertLookupCollarSensor(LookupCollarSensor instance);
+    partial void UpdateLookupCollarSensor(LookupCollarSensor instance);
+    partial void DeleteLookupCollarSensor(LookupCollarSensor instance);
     #endregion
 		
 		public AnimalMovementDataContext() : 
@@ -286,6 +289,30 @@ namespace DataModel
 			get
 			{
 				return this.GetTable<ArgosFilePlatformDate>();
+			}
+		}
+		
+		public System.Data.Linq.Table<CollarKey> CollarKeys
+		{
+			get
+			{
+				return this.GetTable<CollarKey>();
+			}
+		}
+		
+		public System.Data.Linq.Table<CollarSensor> CollarSensors
+		{
+			get
+			{
+				return this.GetTable<CollarSensor>();
+			}
+		}
+		
+		public System.Data.Linq.Table<LookupCollarSensor> LookupCollarSensors
+		{
+			get
+			{
+				return this.GetTable<LookupCollarSensor>();
 			}
 		}
 		
@@ -517,6 +544,36 @@ namespace DataModel
 		private void InsertArgosFileProcessingIssue(ArgosFileProcessingIssue obj)
 		{
 			this.ArgosFileProcessingIssues_Insert(((System.Nullable<int>)(obj.FileId)), obj.Issue, obj.PlatformId, obj.CollarManufacturer, obj.CollarId, ((System.Nullable<System.DateTime>)(obj.FirstTransmission)), ((System.Nullable<System.DateTime>)(obj.LastTransmission)));
+		}
+		
+		private void InsertCollarKey(CollarKey obj)
+		{
+			this.CollarKey_Insert(obj.CollarManufacturer, obj.CollarId, obj.Key);
+		}
+		
+		private void UpdateCollarKey(CollarKey obj)
+		{
+			this.CollarKey_Update(obj.CollarManufacturer, obj.CollarId, obj.Key);
+		}
+		
+		private void DeleteCollarKey(CollarKey obj)
+		{
+			this.CollarKey_Delete(obj.CollarManufacturer, obj.CollarId);
+		}
+		
+		private void InsertCollarSensor(CollarSensor obj)
+		{
+			this.CollarSensor_Insert(obj.CollarManufacturer, obj.CollarId, obj.SensorCode, ((System.Nullable<bool>)(obj.IsActive)));
+		}
+		
+		private void UpdateCollarSensor(CollarSensor obj)
+		{
+			this.CollarSensor_Update(obj.CollarManufacturer, obj.CollarId, obj.SensorCode, ((System.Nullable<bool>)(obj.IsActive)));
+		}
+		
+		private void DeleteCollarSensor(CollarSensor obj)
+		{
+			this.CollarSensor_Delete(obj.CollarManufacturer, obj.CollarId, obj.SensorCode);
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.Animal_Delete")]
@@ -809,6 +866,47 @@ namespace DataModel
 		{
 			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), fileId, issue, platformId, collarManufacturer, collarId, firstTransmission, lastTransmission);
 			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarKey_Delete")]
+		public int CollarKey_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarKey_Insert")]
+		public int CollarKey_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarKey", DbType="NVarChar(512)")] string collarKey)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, collarKey);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarKey_Update")]
+		public int CollarKey_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarKey", DbType="NVarChar(512)")] string collarKey)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, collarKey);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarSensor_Delete")]
+		public int CollarSensor_Delete([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SensorCode", DbType="NVarChar(255)")] string sensorCode)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, sensorCode);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarSensor_Insert")]
+		public int CollarSensor_Insert([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SensorCode", DbType="NVarChar(255)")] string sensorCode, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="IsActive", DbType="Bit")] System.Nullable<bool> isActive)
+		{
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, sensorCode, isActive);
+			return ((int)(result.ReturnValue));
+		}
+		
+		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarSensor_Update")]
+		public void CollarSensor_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SensorCode", DbType="NVarChar(255)")] string sensorCode, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="IsActive", DbType="Bit")] System.Nullable<bool> isActive)
+		{
+			this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, sensorCode, isActive);
 		}
 	}
 	
@@ -1474,6 +1572,8 @@ namespace DataModel
 		
 		private EntitySet<Collar> _Collars;
 		
+		private EntitySet<LookupCollarSensor> _LookupCollarSensors;
+		
     #region Extensibility Method Definitions
     partial void OnLoaded();
     partial void OnValidate(System.Data.Linq.ChangeAction action);
@@ -1494,6 +1594,7 @@ namespace DataModel
 			this._LookupCollarModels = new EntitySet<LookupCollarModel>(new Action<LookupCollarModel>(this.attach_LookupCollarModels), new Action<LookupCollarModel>(this.detach_LookupCollarModels));
 			this._LookupCollarFileFormats = new EntitySet<LookupCollarFileFormat>(new Action<LookupCollarFileFormat>(this.attach_LookupCollarFileFormats), new Action<LookupCollarFileFormat>(this.detach_LookupCollarFileFormats));
 			this._Collars = new EntitySet<Collar>(new Action<Collar>(this.attach_Collars), new Action<Collar>(this.detach_Collars));
+			this._LookupCollarSensors = new EntitySet<LookupCollarSensor>(new Action<LookupCollarSensor>(this.attach_LookupCollarSensors), new Action<LookupCollarSensor>(this.detach_LookupCollarSensors));
 			OnCreated();
 		}
 		
@@ -1629,6 +1730,19 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarManufacturer_LookupCollarSensor", Storage="_LookupCollarSensors", ThisKey="CollarManufacturer", OtherKey="CollarManufacturer")]
+		public EntitySet<LookupCollarSensor> LookupCollarSensors
+		{
+			get
+			{
+				return this._LookupCollarSensors;
+			}
+			set
+			{
+				this._LookupCollarSensors.Assign(value);
+			}
+		}
+		
 		public event PropertyChangingEventHandler PropertyChanging;
 		
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -1692,6 +1806,18 @@ namespace DataModel
 		}
 		
 		private void detach_Collars(Collar entity)
+		{
+			this.SendPropertyChanging();
+			entity.LookupCollarManufacturer = null;
+		}
+		
+		private void attach_LookupCollarSensors(LookupCollarSensor entity)
+		{
+			this.SendPropertyChanging();
+			entity.LookupCollarManufacturer = this;
+		}
+		
+		private void detach_LookupCollarSensors(LookupCollarSensor entity)
 		{
 			this.SendPropertyChanging();
 			entity.LookupCollarManufacturer = null;
@@ -3544,7 +3670,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", CanBeNull=true, IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.Always, DbType="VarBinary(8000)", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Sha1Hash
 		{
 			get
@@ -6100,7 +6226,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.OnInsert, DbType="VarBinary(8000)", CanBeNull=true, IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Sha1Hash", AutoSync=AutoSync.OnInsert, DbType="VarBinary(8000)", IsDbGenerated=true, UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Sha1Hash
 		{
 			get
@@ -6626,6 +6752,10 @@ namespace DataModel
 		
 		private EntitySet<ArgosFileProcessingIssue> _ArgosFileProcessingIssues;
 		
+		private EntitySet<CollarKey> _CollarKeys;
+		
+		private EntitySet<CollarSensor> _CollarSensors;
+		
 		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
 		
 		private EntityRef<LookupCollarModel> _LookupCollarModel;
@@ -6666,6 +6796,8 @@ namespace DataModel
 			this._ArgosDeployments = new EntitySet<ArgosDeployment>(new Action<ArgosDeployment>(this.attach_ArgosDeployments), new Action<ArgosDeployment>(this.detach_ArgosDeployments));
 			this._CollarFiles = new EntitySet<CollarFile>(new Action<CollarFile>(this.attach_CollarFiles), new Action<CollarFile>(this.detach_CollarFiles));
 			this._ArgosFileProcessingIssues = new EntitySet<ArgosFileProcessingIssue>(new Action<ArgosFileProcessingIssue>(this.attach_ArgosFileProcessingIssues), new Action<ArgosFileProcessingIssue>(this.detach_ArgosFileProcessingIssues));
+			this._CollarKeys = new EntitySet<CollarKey>(new Action<CollarKey>(this.attach_CollarKeys), new Action<CollarKey>(this.detach_CollarKeys));
+			this._CollarSensors = new EntitySet<CollarSensor>(new Action<CollarSensor>(this.attach_CollarSensors), new Action<CollarSensor>(this.detach_CollarSensors));
 			this._LookupCollarManufacturer = default(EntityRef<LookupCollarManufacturer>);
 			this._LookupCollarModel = default(EntityRef<LookupCollarModel>);
 			this._ProjectInvestigator = default(EntityRef<ProjectInvestigator>);
@@ -6962,6 +7094,32 @@ namespace DataModel
 			}
 		}
 		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarKey", Storage="_CollarKeys", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
+		public EntitySet<CollarKey> CollarKeys
+		{
+			get
+			{
+				return this._CollarKeys;
+			}
+			set
+			{
+				this._CollarKeys.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarSensor", Storage="_CollarSensors", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId")]
+		public EntitySet<CollarSensor> CollarSensors
+		{
+			get
+			{
+				return this._CollarSensors;
+			}
+			set
+			{
+				this._CollarSensors.Assign(value);
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarManufacturer_Collar", Storage="_LookupCollarManufacturer", ThisKey="CollarManufacturer", OtherKey="CollarManufacturer", IsForeignKey=true)]
 		public LookupCollarManufacturer LookupCollarManufacturer
 		{
@@ -7153,6 +7311,30 @@ namespace DataModel
 		}
 		
 		private void detach_ArgosFileProcessingIssues(ArgosFileProcessingIssue entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = null;
+		}
+		
+		private void attach_CollarKeys(CollarKey entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = this;
+		}
+		
+		private void detach_CollarKeys(CollarKey entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = null;
+		}
+		
+		private void attach_CollarSensors(CollarSensor entity)
+		{
+			this.SendPropertyChanging();
+			entity.Collar = this;
+		}
+		
+		private void detach_CollarSensors(CollarSensor entity)
 		{
 			this.SendPropertyChanging();
 			entity.Collar = null;
@@ -7906,6 +8088,590 @@ namespace DataModel
 			{
 				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarKeys")]
+	public partial class CollarKey : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarId;
+		
+		private string _Key;
+		
+		private EntityRef<Collar> _Collar;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnCollarManufacturerChanging(string value);
+    partial void OnCollarManufacturerChanged();
+    partial void OnCollarIdChanging(string value);
+    partial void OnCollarIdChanged();
+    partial void OnKeyChanging(string value);
+    partial void OnKeyChanged();
+    #endregion
+		
+		public CollarKey()
+		{
+			this._Collar = default(EntityRef<Collar>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarManufacturerChanging(value);
+					this.SendPropertyChanging();
+					this._CollarManufacturer = value;
+					this.SendPropertyChanged("CollarManufacturer");
+					this.OnCollarManufacturerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarIdChanging(value);
+					this.SendPropertyChanging();
+					this._CollarId = value;
+					this.SendPropertyChanged("CollarId");
+					this.OnCollarIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Name="CollarKey", Storage="_Key", DbType="VarChar(512) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string Key
+		{
+			get
+			{
+				return this._Key;
+			}
+			set
+			{
+				if ((this._Key != value))
+				{
+					this.OnKeyChanging(value);
+					this.SendPropertyChanging();
+					this._Key = value;
+					this.SendPropertyChanged("Key");
+					this.OnKeyChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarKey", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
+		public Collar Collar
+		{
+			get
+			{
+				return this._Collar.Entity;
+			}
+			set
+			{
+				Collar previousValue = this._Collar.Entity;
+				if (((previousValue != value) 
+							|| (this._Collar.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Collar.Entity = null;
+						previousValue.CollarKeys.Remove(this);
+					}
+					this._Collar.Entity = value;
+					if ((value != null))
+					{
+						value.CollarKeys.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+						this._CollarId = value.CollarId;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+						this._CollarId = default(string);
+					}
+					this.SendPropertyChanged("Collar");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.CollarSensors")]
+	public partial class CollarSensor : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _CollarManufacturer;
+		
+		private string _CollarId;
+		
+		private string _SensorCode;
+		
+		private bool _IsActive;
+		
+		private EntityRef<Collar> _Collar;
+		
+		private EntityRef<LookupCollarSensor> _LookupCollarSensor;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnCollarManufacturerChanging(string value);
+    partial void OnCollarManufacturerChanged();
+    partial void OnCollarIdChanging(string value);
+    partial void OnCollarIdChanged();
+    partial void OnSensorCodeChanging(string value);
+    partial void OnSensorCodeChanged();
+    partial void OnIsActiveChanging(bool value);
+    partial void OnIsActiveChanged();
+    #endregion
+		
+		public CollarSensor()
+		{
+			this._Collar = default(EntityRef<Collar>);
+			this._LookupCollarSensor = default(EntityRef<LookupCollarSensor>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					if ((this._Collar.HasLoadedOrAssignedValue || this._LookupCollarSensor.HasLoadedOrAssignedValue))
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarManufacturerChanging(value);
+					this.SendPropertyChanging();
+					this._CollarManufacturer = value;
+					this.SendPropertyChanged("CollarManufacturer");
+					this.OnCollarManufacturerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					if (this._Collar.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarIdChanging(value);
+					this.SendPropertyChanging();
+					this._CollarId = value;
+					this.SendPropertyChanged("CollarId");
+					this.OnCollarIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SensorCode", DbType="VarChar(8) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string SensorCode
+		{
+			get
+			{
+				return this._SensorCode;
+			}
+			set
+			{
+				if ((this._SensorCode != value))
+				{
+					if (this._LookupCollarSensor.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnSensorCodeChanging(value);
+					this.SendPropertyChanging();
+					this._SensorCode = value;
+					this.SendPropertyChanged("SensorCode");
+					this.OnSensorCodeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_IsActive", DbType="Bit NOT NULL")]
+		public bool IsActive
+		{
+			get
+			{
+				return this._IsActive;
+			}
+			set
+			{
+				if ((this._IsActive != value))
+				{
+					this.OnIsActiveChanging(value);
+					this.SendPropertyChanging();
+					this._IsActive = value;
+					this.SendPropertyChanged("IsActive");
+					this.OnIsActiveChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="Collar_CollarSensor", Storage="_Collar", ThisKey="CollarManufacturer,CollarId", OtherKey="CollarManufacturer,CollarId", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
+		public Collar Collar
+		{
+			get
+			{
+				return this._Collar.Entity;
+			}
+			set
+			{
+				Collar previousValue = this._Collar.Entity;
+				if (((previousValue != value) 
+							|| (this._Collar.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._Collar.Entity = null;
+						previousValue.CollarSensors.Remove(this);
+					}
+					this._Collar.Entity = value;
+					if ((value != null))
+					{
+						value.CollarSensors.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+						this._CollarId = value.CollarId;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+						this._CollarId = default(string);
+					}
+					this.SendPropertyChanged("Collar");
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarSensor_CollarSensor", Storage="_LookupCollarSensor", ThisKey="CollarManufacturer,SensorCode", OtherKey="CollarManufacturer,Code", IsForeignKey=true)]
+		public LookupCollarSensor LookupCollarSensor
+		{
+			get
+			{
+				return this._LookupCollarSensor.Entity;
+			}
+			set
+			{
+				LookupCollarSensor previousValue = this._LookupCollarSensor.Entity;
+				if (((previousValue != value) 
+							|| (this._LookupCollarSensor.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._LookupCollarSensor.Entity = null;
+						previousValue.CollarSensors.Remove(this);
+					}
+					this._LookupCollarSensor.Entity = value;
+					if ((value != null))
+					{
+						value.CollarSensors.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+						this._SensorCode = value.Code;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+						this._SensorCode = default(string);
+					}
+					this.SendPropertyChanged("LookupCollarSensor");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.LookupCollarSensors")]
+	public partial class LookupCollarSensor : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private string _CollarManufacturer;
+		
+		private string _Code;
+		
+		private string _Name;
+		
+		private string _Description;
+		
+		private EntitySet<CollarSensor> _CollarSensors;
+		
+		private EntityRef<LookupCollarManufacturer> _LookupCollarManufacturer;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnCollarManufacturerChanging(string value);
+    partial void OnCollarManufacturerChanged();
+    partial void OnCodeChanging(string value);
+    partial void OnCodeChanged();
+    partial void OnNameChanging(string value);
+    partial void OnNameChanged();
+    partial void OnDescriptionChanging(string value);
+    partial void OnDescriptionChanged();
+    #endregion
+		
+		public LookupCollarSensor()
+		{
+			this._CollarSensors = new EntitySet<CollarSensor>(new Action<CollarSensor>(this.attach_CollarSensors), new Action<CollarSensor>(this.detach_CollarSensors));
+			this._LookupCollarManufacturer = default(EntityRef<LookupCollarManufacturer>);
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarManufacturer", DbType="VarChar(16) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string CollarManufacturer
+		{
+			get
+			{
+				return this._CollarManufacturer;
+			}
+			set
+			{
+				if ((this._CollarManufacturer != value))
+				{
+					if (this._LookupCollarManufacturer.HasLoadedOrAssignedValue)
+					{
+						throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+					}
+					this.OnCollarManufacturerChanging(value);
+					this.SendPropertyChanging();
+					this._CollarManufacturer = value;
+					this.SendPropertyChanged("CollarManufacturer");
+					this.OnCollarManufacturerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Code", DbType="VarChar(8) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		public string Code
+		{
+			get
+			{
+				return this._Code;
+			}
+			set
+			{
+				if ((this._Code != value))
+				{
+					this.OnCodeChanging(value);
+					this.SendPropertyChanging();
+					this._Code = value;
+					this.SendPropertyChanged("Code");
+					this.OnCodeChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Name", DbType="NVarChar(100)")]
+		public string Name
+		{
+			get
+			{
+				return this._Name;
+			}
+			set
+			{
+				if ((this._Name != value))
+				{
+					this.OnNameChanging(value);
+					this.SendPropertyChanging();
+					this._Name = value;
+					this.SendPropertyChanged("Name");
+					this.OnNameChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Description", DbType="NVarChar(500)")]
+		public string Description
+		{
+			get
+			{
+				return this._Description;
+			}
+			set
+			{
+				if ((this._Description != value))
+				{
+					this.OnDescriptionChanging(value);
+					this.SendPropertyChanging();
+					this._Description = value;
+					this.SendPropertyChanged("Description");
+					this.OnDescriptionChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarSensor_CollarSensor", Storage="_CollarSensors", ThisKey="CollarManufacturer,Code", OtherKey="CollarManufacturer,SensorCode")]
+		public EntitySet<CollarSensor> CollarSensors
+		{
+			get
+			{
+				return this._CollarSensors;
+			}
+			set
+			{
+				this._CollarSensors.Assign(value);
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.AssociationAttribute(Name="LookupCollarManufacturer_LookupCollarSensor", Storage="_LookupCollarManufacturer", ThisKey="CollarManufacturer", OtherKey="CollarManufacturer", IsForeignKey=true)]
+		public LookupCollarManufacturer LookupCollarManufacturer
+		{
+			get
+			{
+				return this._LookupCollarManufacturer.Entity;
+			}
+			set
+			{
+				LookupCollarManufacturer previousValue = this._LookupCollarManufacturer.Entity;
+				if (((previousValue != value) 
+							|| (this._LookupCollarManufacturer.HasLoadedOrAssignedValue == false)))
+				{
+					this.SendPropertyChanging();
+					if ((previousValue != null))
+					{
+						this._LookupCollarManufacturer.Entity = null;
+						previousValue.LookupCollarSensors.Remove(this);
+					}
+					this._LookupCollarManufacturer.Entity = value;
+					if ((value != null))
+					{
+						value.LookupCollarSensors.Add(this);
+						this._CollarManufacturer = value.CollarManufacturer;
+					}
+					else
+					{
+						this._CollarManufacturer = default(string);
+					}
+					this.SendPropertyChanged("LookupCollarManufacturer");
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+		
+		private void attach_CollarSensors(CollarSensor entity)
+		{
+			this.SendPropertyChanging();
+			entity.LookupCollarSensor = this;
+		}
+		
+		private void detach_CollarSensors(CollarSensor entity)
+		{
+			this.SendPropertyChanging();
+			entity.LookupCollarSensor = null;
 		}
 	}
 }
