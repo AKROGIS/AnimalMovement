@@ -703,11 +703,11 @@ namespace AnimalMovement
 
         private void EnableVectronicControls()
         {
+            IsKeyEditMode = VectronicKeyEditSaveButton.Text == "Save";
             AddVectronicSensorButton.Enabled = !IsKeyEditMode && IsEditor;
             DeleteVectronicSensorButton.Enabled = !IsKeyEditMode && IsEditor && VectronicSensorDataGridView.SelectedRows.Count > 0;
             EditVectronicSensorButton.Enabled = !IsKeyEditMode && VectronicSensorDataGridView.SelectedRows.Count == 1;
             VectronicKeyEditSaveButton.Enabled = IsEditor;
-            IsKeyEditMode = VectronicKeyEditSaveButton.Text == "Save";
             VectronicKeyTextBox.Enabled = IsKeyEditMode;
             VectronicKeyEditCancelButton.Visible = IsKeyEditMode;
         }
