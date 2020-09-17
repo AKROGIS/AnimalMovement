@@ -684,6 +684,10 @@ namespace AnimalMovement
 
         private void SetupVectronicTab()
         {
+            if (Collar.CollarManufacturer != "Vectronic")
+            {
+                return;
+            }
             VectronicSensorDataGridView.DataSource =
             Collar.CollarSensors.Select(s => new
             {

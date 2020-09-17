@@ -743,6 +743,7 @@
             // 
             this.VectronicKeyTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.VectronicKeyTextBox.Enabled = false;
             this.VectronicKeyTextBox.Location = new System.Drawing.Point(42, 6);
             this.VectronicKeyTextBox.Multiline = true;
             this.VectronicKeyTextBox.Name = "VectronicKeyTextBox";
