@@ -751,7 +751,7 @@ namespace AnimalMovement
             }
             if (SubmitChanges())
             {
-                ArgosDataChanged();
+                VectronicDataChanged();
             }
         }
 
