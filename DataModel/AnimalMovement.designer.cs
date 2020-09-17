@@ -8171,7 +8171,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Name="CollarKey", Storage="_Key", DbType="VarChar(512) NOT NULL", CanBeNull=false, IsPrimaryKey=true)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Name="CollarKey", Storage="_Key", DbType="VarChar(512)", CanBeNull=false)]
 		public string Key
 		{
 			get

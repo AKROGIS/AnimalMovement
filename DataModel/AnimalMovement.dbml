@@ -583,7 +583,7 @@
     <Type Name="CollarKey">
       <Column Name="CollarManufacturer" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
       <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
-      <Column Name="CollarKey" Member="Key" Type="System.String" DbType="VarChar(512) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="CollarKey" Member="Key" Type="System.String" DbType="VarChar(512)" CanBeNull="false" />
       <Association Name="Collar_CollarKey" Member="Collar" ThisKey="CollarManufacturer,CollarId" OtherKey="CollarManufacturer,CollarId" Type="Collar" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
     </Type>
     <InsertFunction FunctionId="FunctionId38">
