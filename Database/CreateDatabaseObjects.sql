@@ -7038,7 +7038,7 @@ BEGIN
         RETURN 2
     END
 
-    UPDATE dbo.CollarSensor SET IsActive = @IsActive
+    UPDATE dbo.CollarSensors SET IsActive = @IsActive
                      WHERE CollarManufacturer = @CollarManufacturer AND CollarId = @CollarId AND SensorCode = @SensorCode;
 
 END

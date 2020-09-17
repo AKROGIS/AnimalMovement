@@ -904,9 +904,10 @@ namespace DataModel
 		}
 		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.CollarSensor_Update")]
-		public void CollarSensor_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SensorCode", DbType="NVarChar(255)")] string sensorCode, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="IsActive", DbType="Bit")] System.Nullable<bool> isActive)
+		public int CollarSensor_Update([global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarManufacturer", DbType="NVarChar(255)")] string collarManufacturer, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="CollarId", DbType="NVarChar(255)")] string collarId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SensorCode", DbType="NVarChar(255)")] string sensorCode, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="IsActive", DbType="Bit")] System.Nullable<bool> isActive)
 		{
-			this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, sensorCode, isActive);
+			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), collarManufacturer, collarId, sensorCode, isActive);
+			return ((int)(result.ReturnValue));
 		}
 	}
 	

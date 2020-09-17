@@ -986,5 +986,6 @@
     <Parameter Name="CollarId" Parameter="collarId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="SensorCode" Parameter="sensorCode" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="IsActive" Parameter="isActive" Type="System.Boolean" DbType="Bit" />
+    <Return Type="System.Int32" />
   </Function>
 </Database>
