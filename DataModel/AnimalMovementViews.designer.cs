@@ -118,6 +118,14 @@ namespace DataModel
 			}
 		}
 		
+		public System.Data.Linq.Table<VectronicSensorsToRetrieve> VectronicSensorsToRetrieves
+		{
+			get
+			{
+				return this.GetTable<VectronicSensorsToRetrieve>();
+			}
+		}
+		
 		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.AnimalLocationSummary", IsComposable=true)]
 		public IQueryable<AnimalLocationSummaryResult> AnimalLocationSummary([global::System.Data.Linq.Mapping.ParameterAttribute(Name="ProjectId", DbType="NVarChar(255)")] string projectId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="AnimalId", DbType="NVarChar(255)")] string animalId)
 		{
@@ -770,6 +778,105 @@ namespace DataModel
 		}
 	}
 	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.VectronicSensorsToRetrieve")]
+	public partial class VectronicSensorsToRetrieve
+	{
+		
+		private string _Manager;
+		
+		private string _CollarId;
+		
+		private string _CollarKey;
+		
+		private string _SensorCode;
+		
+		private System.Nullable<int> _LastId;
+		
+		public VectronicSensorsToRetrieve()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Manager", DbType="NVarChar(128) NOT NULL", CanBeNull=false)]
+		public string Manager
+		{
+			get
+			{
+				return this._Manager;
+			}
+			set
+			{
+				if ((this._Manager != value))
+				{
+					this._Manager = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarId", DbType="VarChar(16) NOT NULL", CanBeNull=false)]
+		public string CollarId
+		{
+			get
+			{
+				return this._CollarId;
+			}
+			set
+			{
+				if ((this._CollarId != value))
+				{
+					this._CollarId = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CollarKey", DbType="VarChar(512)")]
+		public string CollarKey
+		{
+			get
+			{
+				return this._CollarKey;
+			}
+			set
+			{
+				if ((this._CollarKey != value))
+				{
+					this._CollarKey = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SensorCode", DbType="VarChar(8)")]
+		public string SensorCode
+		{
+			get
+			{
+				return this._SensorCode;
+			}
+			set
+			{
+				if ((this._SensorCode != value))
+				{
+					this._SensorCode = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_LastId", DbType="Int")]
+		public System.Nullable<int> LastId
+		{
+			get
+			{
+				return this._LastId;
+			}
+			set
+			{
+				if ((this._LastId != value))
+				{
+					this._LastId = value;
+				}
+			}
+		}
+	}
+	
 	public partial class AnimalLocationSummaryResult
 	{
 		
@@ -1409,7 +1516,7 @@ namespace DataModel
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Contents", DbType="VarBinary(MAX)", CanBeNull=true, UpdateCheck=UpdateCheck.Never)]
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Contents", DbType="VarBinary(MAX)", UpdateCheck=UpdateCheck.Never)]
 		public System.Data.Linq.Binary Contents
 		{
 			get

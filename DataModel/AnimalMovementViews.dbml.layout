@@ -44,5 +44,11 @@
         <elementListCompartment Id="aa9bbf1e-b174-4d07-bf20-fef81d976bf1" absoluteBounds="3.7649999999999997, 5.835, 1.9700000000000002, 0.44169108072916669" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
+    <classShape Id="8bc1fc57-732d-40e4-8369-bf90ab40355e" absoluteBounds="8.375, 2.875, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/AnimalMovementViews/VectronicSensorsToRetrieve" />
+      <nestedChildShapes>
+        <elementListCompartment Id="acdd55d8-3634-4150-b80e-8cc2be58dbed" absoluteBounds="8.39, 3.335, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
   </nestedChildShapes>
 </ordesignerObjectsDiagram>

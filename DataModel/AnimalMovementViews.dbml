@@ -58,6 +58,15 @@
       <Column Name="FileId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
     </Type>
   </Table>
+  <Table Name="dbo.VectronicSensorsToRetrieve" Member="VectronicSensorsToRetrieves">
+    <Type Name="VectronicSensorsToRetrieve">
+      <Column Name="Manager" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="CollarId" Type="System.String" DbType="VarChar(16) NOT NULL" CanBeNull="false" />
+      <Column Name="CollarKey" Type="System.String" DbType="VarChar(512)" CanBeNull="true" />
+      <Column Name="SensorCode" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
+      <Column Name="LastId" Type="System.Int32" DbType="Int" CanBeNull="true" />
+    </Type>
+  </Table>
   <Function Name="dbo.AnimalLocationSummary" Method="AnimalLocationSummary" IsComposable="true">
     <Parameter Name="ProjectId" Parameter="projectId" Type="System.String" DbType="NVarChar(255)" />
     <Parameter Name="AnimalId" Parameter="animalId" Type="System.String" DbType="NVarChar(255)" />

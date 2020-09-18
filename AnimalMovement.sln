@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataModel", "DataModel\DataModel.csproj", "{4B8A418A-482D-4631-A605-938D52BDF8BC}"
 EndProject
@@ -34,6 +34,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollarFileLoader", "CollarFileLoader\CollarFileLoader.csproj", "{AE0F7910-911F-47E8-AF3D-D2A16804121D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IridiumDownloader", "IridiumDownloader\IridiumDownloader.csproj", "{F5694639-1693-4A09-989F-FFDA43846518}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VectronicDownloader", "VectronicDownloader\VectronicDownloader.csproj", "{C93251F3-43DD-4B0C-8986-367ACA7C410B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -224,9 +226,24 @@ Global
 		{F5694639-1693-4A09-989F-FFDA43846518}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{F5694639-1693-4A09-989F-FFDA43846518}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{F5694639-1693-4A09-989F-FFDA43846518}.Release|x86.ActiveCfg = Release|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Debug|x86.Build.0 = Debug|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|x86.ActiveCfg = Release|Any CPU
+		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4333B144-BD38-441A-A8E7-CA4E9085A981}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = DataModel\DataModel.csproj
