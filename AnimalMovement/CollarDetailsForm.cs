@@ -703,11 +703,11 @@ namespace AnimalMovement
 
         private void EnableVectronicControls()
         {
+            IsKeyEditMode = VectronicKeyEditSaveButton.Text == "Save";
             AddVectronicSensorButton.Enabled = !IsKeyEditMode && IsEditor;
             DeleteVectronicSensorButton.Enabled = !IsKeyEditMode && IsEditor && VectronicSensorDataGridView.SelectedRows.Count > 0;
             EditVectronicSensorButton.Enabled = !IsKeyEditMode && VectronicSensorDataGridView.SelectedRows.Count == 1;
             VectronicKeyEditSaveButton.Enabled = IsEditor;
-            IsKeyEditMode = VectronicKeyEditSaveButton.Text == "Save";
             VectronicKeyTextBox.Enabled = IsKeyEditMode;
             VectronicKeyEditCancelButton.Visible = IsKeyEditMode;
         }
@@ -721,9 +721,15 @@ namespace AnimalMovement
 
         private void UpdateKeyDataSource()
         {
-            if (!String.IsNullOrEmpty(VectronicKeyTextBox.Text))
+            var key = Collar.CollarKeys.FirstOrDefault(k => true);
+            if (String.IsNullOrEmpty(VectronicKeyTextBox.Text))
             {
-                var key = Collar.CollarKeys.FirstOrDefault(k => true);
+                if (key != null)
+                {
+                    Database.CollarKeys.DeleteOnSubmit(key);
+                }
+            }
+            else {
                 if (key == null)
                 {
                     key = new CollarKey
