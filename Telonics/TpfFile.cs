@@ -88,10 +88,10 @@ namespace Telonics
             string[] argosIds = GetArgosIds();
             string[] iridiumIds = GetIridiumIds();
             string[] platformIds = argosIds.Length == 0 ? iridiumIds : argosIds;
-            string platformType = argosIds.Length == 0 ? "Iridium" : "Argos";
-            if (ids.Length != frequencies.Length ||
-                ids.Length != platformIds.Length ||
-                frequencies.Length != platformIds.Length)
+            string platformType = argosIds.Length == 0 ? (iridiumIds.Length == 0 ? "VHF" : "Iridium") : "Argos";
+            if ((ids.Length != frequencies.Length && frequencies.Length != 0) ||
+                (ids.Length != platformIds.Length && platformIds.Length != 0) ||
+                (frequencies.Length != platformIds.Length && frequencies.Length != 0 && platformIds.Length != 0))
             {
                 throw new InvalidOperationException("Indeterminant number of collars in file " + Name);
             }
@@ -100,8 +100,8 @@ namespace Telonics
             {
                 Ctn = id,
                 Platform = platformType,
-                PlatformId = platformIds[index],
-                Frequency = GetFrequency(frequencies[index]),
+                PlatformId = platformIds.Length == 0 ? null : platformIds[index],
+                Frequency = frequencies.Length == 0 ? 0 : GetFrequency(frequencies[index]),
                 TimeStamp = GetTimeStamp(timeStamps[3 * index] + " " + timeStamps[(3 * index) + 1]),
                 Owner = owner,
                 TpfFile = this
