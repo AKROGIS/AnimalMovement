@@ -88,24 +88,34 @@ if `~\AnimalMovement\Database\CreateDatabaseObjects.sql` is newer than `~\Animal
 	
 	# That this is missing may be a bug that gets fixed in an update of SSMS
 
-SqlServer_CLR.sql
-~~~~~~~~~~~~~~~~~
+Sql Server Assemblies
+~~~~~~~~~~~~~~~~~~~~~
 
-This file adds new functions to the SQL Server database.  It is built from the C# code
-in various library projects in the solution.  The dlls are built when the project is compliled
-This dll code needs to be put into a SQL script that can be run in the SQL Server.
+This project requires custom functionality be added to the SQL Server database as "Assemblies"
+This requires copying selected libraries (dlls) to the server and then running a SQL deployment
+script to "unhook" and delete the old assembly and then install and and "hook up" the new assembly.
+See the individual deploy.sql scripts for where to put the the dlls on the server before running
+the script.  IMPORTANT: the deploy.sql scripts will need to be manually edited if additional functions
+are added or the input parameters or return values of any function are changed.  DEWARE: changing
+the input or return value of an existing function will likely break other aspects of the database,
+so test before deploying.
 
-The following instructions were valid for VS2010 (after a deployment was done) and SQL Server 2008R2.
+## File Functions
+ - dll: ..\SqlServer_Files\bin\Release\SqlServer_Files.dll
+ - script: ..\SqlServer_Files\Deploy.sql
 
- * if ..\SqlServer_Files\bin\Release\SqlServer_Files.sql is newer than .\Database\SqlServer_CLR.sql
-   * then copy the CREATE ASSEMBLY and ALTER ASSEMBLY commands from the source to the correct section in the destination
- * repeat if ..\SqlServer_Functions\bin\Release\SqlServer_Functions.sql is newer than Database\SqlServer_CLR.sql
- * repeat if ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.sql is newer than Database\SqlServer_CLR.sql
- * repeat if ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.sql is newer than Database\SqlServer_CLR.sql
+## File Parsers 
+ - dll: ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.dll
+ - script:  ..\SqlServer_Parsers\Deploy.sql
 
-The most reliable method now is to use the command line or Visual Studio deployment feature
-to deploy the dll to a test database.  Then you can use the generate script tool in SSMS
-in the test database that to created this script. Instruction are at `http://msdn.microsoft.com/en-us/library/ms345099(v=sql.105).aspx`
+## Miscellaneous functions
+ - dll: ..\SqlServer_Functions\bin\Release\SqlServer_Functions.dll
+ - script: ..\SqlServer_Functions\Deploy.sql
+
+## TFP File Summerizer
+ - dll: ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.dll
+ - script: ..\SqlServer_TpfSummerizer\Deploy.sql
+
 
 Distributing
 ------------

@@ -12,8 +12,9 @@ DROP ASSEMBLY [SqlServer_TpfSummerizer]
 GO
 
 CREATE ASSEMBLY [SqlServer_TpfSummerizer]
-FROM 'C:\Users\resarwas\Documents\GitHub\AnimalMovement\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.dll'
---FROM 'E:\sqlsde\repldata\SqlServer_TpfSummerizer.dll'
+-- Path is from the SQL Server perspective not the SSMS client, or user prespective
+-- FROM 'C:\Users\resarwas\Documents\GitHub\AnimalMovement\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.dll'
+FROM 'E:\transfer\assemblies\SqlServer_TpfSummerizer.dll'
 WITH PERMISSION_SET = SAFE
 
 GO
@@ -48,7 +49,7 @@ AS
      SELECT T.*, P.[FileName], P.[Status]
        FROM CollarParameterFiles AS P
 CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
-      WHERE P.Format = 'A'
+      WHERE P.Format = 'A' AND P.[Status] = 'A'
 
 GO
 

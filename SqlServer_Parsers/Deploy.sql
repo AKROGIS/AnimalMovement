@@ -15,8 +15,9 @@ DROP ASSEMBLY [SqlServer_Parsers]
 GO
 
 CREATE ASSEMBLY [SqlServer_Parsers]
+-- Path is from the SQL Server perspective not the SSMS client, or user prespective
 --FROM 'C:\Users\resarwas\Documents\GitHub\AnimalMovement\SqlServer_Parsers\bin\Release\SqlServer_Parsers.dll'
-FROM 'E:\sqlsde\repldata\SqlServer_Parsers.dll'
+FROM 'E:\transfer\assemblies\SqlServer_Parsers.dll'
 WITH PERMISSION_SET = SAFE
 
 GO

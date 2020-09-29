@@ -14,8 +14,9 @@ DROP ASSEMBLY [SqlServer_Files]
 GO
 
 CREATE ASSEMBLY [SqlServer_Files]
+-- Path is from the SQL Server perspective not the SSMS client, or user prespective
 --FROM 'C:\Users\resarwas\Documents\GitHub\AnimalMovement\SqlServer_TpfSummerizer\bin\Release\SqlServer_Files.dll'
-FROM 'E:\sqlsde\repldata\SqlServer_Files.dll'
+FROM 'E:\transfer\assemblies\SqlServer_Files.dll'
 WITH PERMISSION_SET = SAFE
 
 GO
