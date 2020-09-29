@@ -12,6 +12,10 @@ using System.Text;
 // See http://msdn.microsoft.com/en-us/library/ms131103.aspx
 // for more information on creating CLR Table-Valued Functions
 
+// DUPLICATE CODE
+// This code is duplicate of code in the Telonics Library (to avoid dependent assemblies in SQL Server)
+// Be sure to make changes in both places!
+
 namespace SqlServer_TpfSummerizer
 {
     public class TfpSummerizer
@@ -198,10 +202,10 @@ namespace SqlServer_TpfSummerizer
                 string[] argosIds = GetArgosIds();
                 string[] iridiumIds = GetIridiumIds();
                 string[] platformIds = argosIds.Length == 0 ? iridiumIds : argosIds;
-                string platformType = argosIds.Length == 0 ? "Iridium" : "Argos";
-                if (ids.Length != frequencies.Length ||
-                    ids.Length != platformIds.Length ||
-                    frequencies.Length != platformIds.Length)
+                string platformType = argosIds.Length == 0 ? (iridiumIds.Length == 0 ? "VHF" : "Iridium") : "Argos";
+                if ((ids.Length != frequencies.Length && frequencies.Length != 0) ||
+                    (ids.Length != platformIds.Length && platformIds.Length != 0) ||
+                    (frequencies.Length != platformIds.Length && frequencies.Length != 0 && platformIds.Length != 0))
                 {
                     throw new InvalidOperationException("Indeterminant number of collars in file " + Name);
                 }
@@ -210,8 +214,8 @@ namespace SqlServer_TpfSummerizer
                 {
                     Ctn = id,
                     Platform = platformType,
-                    PlatformId = platformIds[index],
-                    Frequency = GetFrequency(frequencies[index]),
+                    PlatformId = platformIds.Length == 0 ? null : platformIds[index],
+                    Frequency = frequencies.Length == 0 ? 0 : GetFrequency(frequencies[index]),
                     TimeStamp = GetTimeStamp(timeStamps[3 * index] + " " + timeStamps[3 * index + 1]),
                     Owner = owner,
                     TpfFile = this
