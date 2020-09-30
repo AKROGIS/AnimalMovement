@@ -1089,6 +1089,23 @@ SET QUOTED_IDENTIFIER OFF
 GO
 
 
+CREATE VIEW [dbo].[AllTpfFileData]
+AS
+
+-- All TPF Data
+     SELECT T.*, P.[FileName], P.[Status]
+       FROM CollarParameterFiles AS P
+CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
+      WHERE P.Format = 'A' AND P.[Status] = 'A'
+GO
+DENY SELECT ON [dbo].[AllTpfFileData] TO [dog_house] AS [dbo]
+GO
+GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE TABLE [dbo].[CollarFixes](
 	[FixId] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[HiddenBy] [int] NULL,
@@ -1722,24 +1739,6 @@ GO
 DENY SELECT ON [dbo].[InvalidLocations] TO [dog_house] AS [dbo]
 GO
 GRANT SELECT ON [dbo].[InvalidLocations] TO [Viewer] AS [dbo]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[AllTpfFileData]
-AS
-
--- All TPF Data
-     SELECT T.*, P.[FileName], P.[Status]
-       FROM CollarParameterFiles AS P
-CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
-      WHERE P.Format = 'A'
-
-GO
-DENY SELECT ON [dbo].[AllTpfFileData] TO [dog_house] AS [dbo]
-GO
-GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
 GO
 SET ANSI_NULLS ON
 GO

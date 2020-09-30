@@ -53,6 +53,9 @@ CROSS APPLY (SELECT * FROM SummarizeTpfFile(P.FileId)) AS T
 
 GO
 
+DENY SELECT ON [dbo].[AllTpfFileData] TO [dog_house] AS [dbo]
+GO
+
 GRANT SELECT ON [dbo].[AllTpfFileData] TO [Viewer] AS [dbo]
 GO
 
