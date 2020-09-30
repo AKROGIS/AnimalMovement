@@ -33,6 +33,9 @@ namespace SqlServer_Parsers
         //   H - Telonics Gen4 Store On Board, not parsed (children are parsed as 'C')
         //   I - Iridium Email Download Format; (contains info needed to select parameter file for processing)
         //   M - Televilt Format
+        //   N - Lotek/Iridium GPS Location data downloaded as CSV from https://webservice.lotek.com  (No Parser)
+        //   O-Q - See VectronicParsers.cs
+
 
         // A - Telonics Store On Board Format
 
@@ -316,7 +319,7 @@ namespace SqlServer_Parsers
             return resultCollection;
         }
 
-        private static Byte[] GetFileContents(string table, SqlInt32 fileId, char format)
+        internal static Byte[] GetFileContents(string table, SqlInt32 fileId, char format)
         {
             Byte[] bytes = null;
 
