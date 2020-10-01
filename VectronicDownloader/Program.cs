@@ -52,9 +52,10 @@ namespace VectronicDownloader
                 // Load
 
                 var pi = GetProjectInvestagator(sensor.Manager);
+                var collar = GetCollar(sensor.CollarId);
                 try
                 {
-                    FileLoader.LoadPath(path, manager: pi);
+                    FileLoader.LoadPath(path, manager: pi, collar: collar);
                     // File was successfully Loaded, so delete it.
                     File.Delete(path);
                 }
@@ -151,6 +152,13 @@ namespace VectronicDownloader
             var database = new AnimalMovementDataContext();
             var projectInvestigator = database.ProjectInvestigators.First(p => p.Login == login);
             return projectInvestigator;
+        }
+
+        private static Collar GetCollar(string vectronicId)
+        {
+            var database = new AnimalMovementDataContext();
+            var collar = database.Collars.First(c => c.CollarManufacturer == "Vectronic" && c.CollarId == vectronicId);
+            return collar;
         }
 
         private static void ReportException(string error)

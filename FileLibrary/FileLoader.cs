@@ -312,7 +312,7 @@ namespace FileLibrary
         public CollarFile Load()
         {
             Validate();
-            if (FileFormatRequiresCollar && Collar == null)
+            if (Collar == null)
             {
                 Collar = FileCollar;
             }
@@ -467,25 +467,42 @@ namespace FileLibrary
                     ctn = GetCtnFromFormatH();
                 }
 
-                if (ctn == null)
+                if (ctn != null)
                 {
-                    return null;
+                    var collar =
+                        Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+                    if (collar != null)
+                    {
+                        return collar;
+                    }
+                    //Try without the Alpha suffix
+                    if (ctn.Length == 7 && Char.IsUpper(ctn[6]))
+                    {
+                        ctn = ctn.Substring(0, 6);
+                        collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+                        if (collar != null)
+                        {
+                            return collar;
+                        }
+                    }
                 }
 
-                var collar =
-                    Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
-                if (collar != null)
+                // Vectronic Collars
+                if (Format.Code == 'O' || Format.Code == 'P' || Format.Code == 'Q')
                 {
-                    return collar;
-                }
-                //Try without the Alpha suffix
-                if (ctn.Length != 7 && !Char.IsUpper(ctn[6]))
-                {
-                    return null;
+                    var collarId = GetCollarIdFromVectronicFormat();
+                    if (collarId != null)
+                    {
+                        var collar = Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Vectronic" && c.CollarId == collarId);
+                        if (collar != null)
+                        {
+                            return collar;
+                        }
+                    }
                 }
 
-                ctn = ctn.Substring(0, 6);
-                return Database.Collars.FirstOrDefault(c => c.CollarManufacturer == "Telonics" && c.CollarId == ctn);
+                return null;
+
             }
             catch (Exception)
             {
@@ -613,6 +630,18 @@ namespace FileLibrary
             return null;
         }
 
+        private string GetCollarIdFromVectronicFormat()
+        {
+            //Vectronic Files are JSON files, and there should be a "idCollar":xxxxx, in the first line
+            var line = ReadLines(Contents, Encoding.UTF8).FirstOrDefault();
+            if (String.IsNullOrWhiteSpace(line))
+            {
+                return null;
+            }
+            var index1 = line.IndexOf("\"idCollar\":") + 11;
+            var index2 = line.IndexOf(",", index1);
+            return line.Substring(index1, index2-index1);
+        }
 
         private static IEnumerable<string> ReadLines(Byte[] bytes, Encoding enc)
         {
