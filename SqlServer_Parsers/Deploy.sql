@@ -8,6 +8,9 @@ DROP FUNCTION [dbo].[ParseFormatD]
 DROP FUNCTION [dbo].[ParseFormatF]
 DROP FUNCTION [dbo].[ParseFormatI]
 DROP FUNCTION [dbo].[ParseFormatM]
+DROP FUNCTION [dbo].[ParseFormatO]
+DROP FUNCTION [dbo].[ParseFormatP]
+DROP FUNCTION [dbo].[ParseFormatQ]
 GO
 
 DROP ASSEMBLY [SqlServer_Parsers]
@@ -236,4 +239,91 @@ RETURNS  TABLE (
 ) WITH EXECUTE AS CALLER
 AS 
 EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatM]
+GO
+
+CREATE FUNCTION [dbo].[ParseFormatO](@fileId [int])
+RETURNS  TABLE (
+    [LineNumber] [int],
+	[idPosition] [nvarchar](50),
+	[idCollar] [nvarchar](50),
+	[acquisitionTime] [nvarchar](50),
+	[scts] [nvarchar](50),
+	[originCode] [nvarchar](50),
+	[ecefX] [nvarchar](50),
+	[ecefY] [nvarchar](50),
+	[ecefZ] [nvarchar](50),
+	[latitude] [nvarchar](50),
+	[longitude] [nvarchar](50),
+	[height] [nvarchar](50),
+	[dop] [nvarchar](50),
+	[idFixType] [nvarchar](50),
+	[positionError] [nvarchar](50),
+	[satCount] [nvarchar](50),
+	[ch01SatId] [nvarchar](50),
+	[ch01SatCnr] [nvarchar](50),
+	[ch02SatId] [nvarchar](50),
+	[ch02SatCnr] [nvarchar](50),
+	[ch03SatId] [nvarchar](50),
+	[ch03SatCnr] [nvarchar](50),
+	[ch04SatId] [nvarchar](50),
+	[ch04SatCnr] [nvarchar](50),
+	[ch05SatId] [nvarchar](50),
+	[ch05SatCnr] [nvarchar](50),
+	[ch06SatId] [nvarchar](50),
+	[ch06SatCnr] [nvarchar](50),
+	[ch07SatId] [nvarchar](50),
+	[ch07SatCnr] [nvarchar](50),
+	[ch08SatId] [nvarchar](50),
+	[ch08SatCnr] [nvarchar](50),
+	[ch09SatId] [nvarchar](50),
+	[ch09SatCnr] [nvarchar](50),
+	[ch10SatId] [nvarchar](50),
+	[ch10SatCnr] [nvarchar](50),
+	[ch11SatId] [nvarchar](50),
+	[ch11SatCnr] [nvarchar](50),
+	[ch12SatId] [nvarchar](50),
+	[ch12SatCnr] [nvarchar](50),
+	[idMortalityStatus] [nvarchar](50),
+	[activity] [nvarchar](50),
+	[mainVoltage] [nvarchar](50),
+	[backupVoltage] [nvarchar](50),
+	[temperature] [nvarchar](50),
+	[transformedX] [nvarchar](50),
+	[transformedY] [nvarchar](50)
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.VectronicParsers].[ParseFormatO]
+GO
+
+CREATE FUNCTION [dbo].[ParseFormatP](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int],
+	[idMortality] [nvarchar](50),
+	[idCollar] [nvarchar](50),
+	[acquisitionTime] [nvarchar](50),
+	[scts] [nvarchar](50),
+	[originCode] [nvarchar](50),
+	[activityModeCode] [nvarchar](50),
+	[activityModeDt] [nvarchar](50),
+	[activity1] [nvarchar](50),
+	[activity2] [nvarchar](50),
+	[temperature] [nvarchar](50),
+	[activity3] [nvarchar](50)
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.VectronicParsers].[ParseFormatP]
+GO
+
+CREATE FUNCTION [dbo].[ParseFormatQ](@fileId [int])
+RETURNS  TABLE (
+    [LineNumber] [int],
+    [idMortality] [nvarchar](50),
+    [idCollar] [nvarchar](50),
+    [acquisitionTime] [nvarchar](50),
+    [scts] [nvarchar](50),
+    [originCode] [nvarchar](50),
+    [idKind] [nvarchar](50)
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.VectronicParsers].[ParseFormatQ]
 GO

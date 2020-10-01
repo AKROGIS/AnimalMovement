@@ -15,7 +15,7 @@ namespace SqlServer_Parsers
     // See http://msdn.microsoft.com/en-us/library/ms131103.aspx
     // for more information on creating CLR Table-Valued Functions
 
-    class VectronicParsers
+    public class VectronicParsers
     {
         #region SQL Server Table Value Functions
         //Code - Format
@@ -40,8 +40,8 @@ namespace SqlServer_Parsers
 	            [ecefX] [nvarchar](50),
 	            [ecefY] [nvarchar](50),
 	            [ecefZ] [nvarchar](50),
-	            [Latitude] [nvarchar](50),
-	            [Longitude] [nvarchar](50),
+	            [latitude] [nvarchar](50),
+	            [longitude] [nvarchar](50),
 	            [height] [nvarchar](50),
 	            [dop] [nvarchar](50),
 	            [idFixType] [nvarchar](50),
