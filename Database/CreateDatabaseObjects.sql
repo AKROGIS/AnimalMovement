@@ -2513,13 +2513,14 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
 CREATE VIEW [dbo].[LatestVectronicSensorRecordIds]
 AS
-SELECT idCollar AS CollarId, 'act' AS SensorCode, MAX(idActivity) AS LastId FROM CollarDataVectronicActivity GROUP BY idCollar
+SELECT idCollar AS CollarId, 'act' AS SensorCode, MAX(TRY_CAST(idActivity as int)) AS LastId FROM CollarDataVectronicActivity GROUP BY idCollar
 UNION ALL
-SELECT idCollar AS CollarId, 'mor' AS SensorCode, MAX(idMortality) AS LastId FROM CollarDataVectronicMortality GROUP BY idCollar
+SELECT idCollar AS CollarId, 'mor' AS SensorCode, MAX(TRY_CAST(idMortality as int)) AS LastId FROM CollarDataVectronicMortality GROUP BY idCollar
 UNION ALL
-SELECT idCollar AS CollarId, 'gps' AS SensorCode, MAX(idPosition) AS LastId FROM CollarDataVectronicPosition GROUP BY idCollar
+SELECT idCollar AS CollarId, 'gps' AS SensorCode, MAX(TRY_CAST(idPosition as int)) AS LastId FROM CollarDataVectronicPosition GROUP BY idCollar
 GO
 GRANT SELECT ON [dbo].[LatestVectronicSensorRecordIds] TO [Viewer] AS [dbo]
 GO
@@ -2527,6 +2528,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 CREATE VIEW [dbo].[VectronicSensorsToRetrieve]
 AS
