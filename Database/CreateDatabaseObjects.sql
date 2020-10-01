@@ -6335,7 +6335,7 @@ BEGIN
            AND I.FileId = @FileId
            AND I.[latitude] IS NOT NULL AND I.[longitude] IS NOT NULL
            AND I.[acquisitionTime] IS NOT NULL
-           AND CONVERT(datetime2, I.[acquisitionTime]) < F.UploadDate  -- Ignore some bogus (obviously future) fix dates
+           AND CONVERT(datetime2, I.[acquisitionTime]) < dbo.utctime(UploadDate)  -- Ignore some bogus (obviously future) fix dates;  upload is local, acqTime is UTC
     END
 
 END
