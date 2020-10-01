@@ -943,6 +943,102 @@ RETURNS  TABLE (
 AS 
 EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.Parsers].[ParseFormatM]
 GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatO](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[idPosition] [nvarchar](50) NULL,
+	[idCollar] [nvarchar](50) NULL,
+	[acquisitionTime] [nvarchar](50) NULL,
+	[scts] [nvarchar](50) NULL,
+	[originCode] [nvarchar](50) NULL,
+	[ecefX] [nvarchar](50) NULL,
+	[ecefY] [nvarchar](50) NULL,
+	[ecefZ] [nvarchar](50) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[height] [nvarchar](50) NULL,
+	[dop] [nvarchar](50) NULL,
+	[idFixType] [nvarchar](50) NULL,
+	[positionError] [nvarchar](50) NULL,
+	[satCount] [nvarchar](50) NULL,
+	[ch01SatId] [nvarchar](50) NULL,
+	[ch01SatCnr] [nvarchar](50) NULL,
+	[ch02SatId] [nvarchar](50) NULL,
+	[ch02SatCnr] [nvarchar](50) NULL,
+	[ch03SatId] [nvarchar](50) NULL,
+	[ch03SatCnr] [nvarchar](50) NULL,
+	[ch04SatId] [nvarchar](50) NULL,
+	[ch04SatCnr] [nvarchar](50) NULL,
+	[ch05SatId] [nvarchar](50) NULL,
+	[ch05SatCnr] [nvarchar](50) NULL,
+	[ch06SatId] [nvarchar](50) NULL,
+	[ch06SatCnr] [nvarchar](50) NULL,
+	[ch07SatId] [nvarchar](50) NULL,
+	[ch07SatCnr] [nvarchar](50) NULL,
+	[ch08SatId] [nvarchar](50) NULL,
+	[ch08SatCnr] [nvarchar](50) NULL,
+	[ch09SatId] [nvarchar](50) NULL,
+	[ch09SatCnr] [nvarchar](50) NULL,
+	[ch10SatId] [nvarchar](50) NULL,
+	[ch10SatCnr] [nvarchar](50) NULL,
+	[ch11SatId] [nvarchar](50) NULL,
+	[ch11SatCnr] [nvarchar](50) NULL,
+	[ch12SatId] [nvarchar](50) NULL,
+	[ch12SatCnr] [nvarchar](50) NULL,
+	[idMortalityStatus] [nvarchar](50) NULL,
+	[activity] [nvarchar](50) NULL,
+	[mainVoltage] [nvarchar](50) NULL,
+	[backupVoltage] [nvarchar](50) NULL,
+	[temperature] [nvarchar](50) NULL,
+	[transformedX] [nvarchar](50) NULL,
+	[transformedY] [nvarchar](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.VectronicParsers].[ParseFormatO]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatP](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[idMortality] [nvarchar](50) NULL,
+	[idCollar] [nvarchar](50) NULL,
+	[acquisitionTime] [nvarchar](50) NULL,
+	[scts] [nvarchar](50) NULL,
+	[originCode] [nvarchar](50) NULL,
+	[activityModeCode] [nvarchar](50) NULL,
+	[activityModeDt] [nvarchar](50) NULL,
+	[activity1] [nvarchar](50) NULL,
+	[activity2] [nvarchar](50) NULL,
+	[temperature] [nvarchar](50) NULL,
+	[activity3] [nvarchar](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.VectronicParsers].[ParseFormatP]
+GO
+SET ANSI_NULLS OFF
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+CREATE FUNCTION [dbo].[ParseFormatQ](@fileId [int])
+RETURNS  TABLE (
+	[LineNumber] [int] NULL,
+	[idMortality] [nvarchar](50) NULL,
+	[idCollar] [nvarchar](50) NULL,
+	[acquisitionTime] [nvarchar](50) NULL,
+	[scts] [nvarchar](50) NULL,
+	[originCode] [nvarchar](50) NULL,
+	[idKind] [nvarchar](50) NULL
+) WITH EXECUTE AS CALLER
+AS 
+EXTERNAL NAME [SqlServer_Parsers].[SqlServer_Parsers.VectronicParsers].[ParseFormatQ]
+GO
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -5264,6 +5360,33 @@ BEGIN
    --     END
    -- END
 
+    IF @Format = 'O'  -- Vectronic location data downloaded via the HTTP Wildlife API v2
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataVectronicPosition] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataVectronicPosition] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatO] (@FileId) 
+        END
+    END
+
+    IF @Format = 'P'  -- Vectronic activity data downloaded via the HTTP Wildlife API v2
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataVectronicActivity] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataVectronicActivity] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatP] (@FileId) 
+        END
+    END
+
+    IF @Format = 'Q'  -- Vectronic mortality data downloaded via the HTTP Wildlife API v2
+    BEGIN
+        -- only parse the data if it is not already in the file
+        IF NOT EXISTS (SELECT 1 FROM [dbo].[CollarDataVectronicMortality] WHERE [FileId] = @FileId)
+        BEGIN
+            INSERT INTO [dbo].[CollarDataVectronicMortality] SELECT @FileId as FileId, * FROM [dbo].[ParseFormatQ] (@FileId) 
+        END
+    END
+
 END
 
 
@@ -6197,6 +6320,21 @@ BEGIN
     --       AND I.Latitude IS NOT NULL AND I.Longitude IS NOT NULL
     --       AND I.DateTime_GMT IS NOT NULL
     --END
+
+	IF @Format = 'O'  -- Vectronic location data downloaded via the HTTP Wildlife API v2
+    BEGIN
+        INSERT INTO dbo.CollarFixes (FileId, LineNumber, CollarManufacturer, CollarId, FixDate, Lat, Lon)
+        SELECT I.FileId, I.LineNumber, 'Vectronic', I.[idCollar],
+               CONVERT(datetime2, I.[acquisitionTime]),
+               CONVERT(float, I.[latitude]), CONVERT(float, I.[longitude])
+          FROM dbo.CollarDataVectronicPosition as I INNER JOIN CollarFiles as F 
+            ON I.FileId = F.FileId
+         WHERE F.[Status] = 'A'
+           AND I.FileId = @FileId
+           AND I.[latitude] IS NOT NULL AND I.[longitude] IS NOT NULL
+           AND I.[acquisitionTime] IS NOT NULL
+    END
+
 END
 
 
