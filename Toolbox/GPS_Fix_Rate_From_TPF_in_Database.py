@@ -1,5 +1,7 @@
 '''
-DESCRIBE ME
+Reads the ParameterFiles in Animal Movements database and prints
+(or saves to a csv file) the GPS schedule found in the file
+The generated list can be filtered by the owner of the file.
 
 This script was written for python 2.7 and has an external dependency on
 the **pyodbc** python module. It can be installed with **pip install pyodbc**
@@ -32,72 +34,182 @@ def get_connection_or_die(pyodbc, server, db):
     sys.exit()
 
 
-def read(connection, pi):
-    data = []
-    sql = "SELECT FileName, Contents FROM CollarParameterFiles WHERE Owner = ?;" # and FileName = '643101.tpf';"
+def print_gps_lines(connection, pi):
+    data = set()
+    if pi is None:
+        sql = "SELECT Contents FROM CollarParameterFiles;"
+    else:
+        sql = "SELECT Contents FROM CollarParameterFiles WHERE Owner = ?;"
     try:
-        rows = connection.cursor().execute(sql, pi).fetchall()
+        if pi is None:
+            rows = connection.cursor().execute(sql).fetchall()
+        else:
+            rows = connection.cursor().execute(sql, pi).fetchall()
     except Exception as de:
         err = "Database error:\n" + str(sql) + '\n' + str(de)
         print(err)
         rows = []
     for row in rows:
-        schedule = []
-        in_schedule = False
-        have_schedule = False
         for line in [str(l) for l in row.Contents.split('\n')]:
-            # line = line.replace('\r','')
-            #print(line)
-            if line.startswith('}'):
-                in_schedule = False
-                #if schedule:
-                #    break
-                #else:
-                #    continue
-            if in_schedule:
-                if line and not (line.startswith('   season {') or line.startswith('   }')):
-                    schedule.append(line.strip())
-                continue
-            if line.startswith('sections.gpsSchedule.parameters.schedule') or \
-               line.startswith('sections.gps.parameters.gpsScheduleAdvancedSchedule'): # or \
-               #line.startswith('sections.gps.parameters.qfpScheduleAdvancedSchedule'):
-                in_schedule = True
-                continue
-        # print((row.FileName, schedule))
-        sched = '|'.join(schedule)
-        data.append((row.FileName, sched))
+            if ' ' in line:
+                line_title = line.split(' ')[0]
+                if 'gps' in line_title.lower():
+                    # data.add(line)
+                    data.add(line_title)
+    for line in sorted(list(data)):
+        print(line)
+
+"""
+As of 2020-11-13:
+
+sections.argossatellite.parameters.turnOffGPSPredictionAfterNDays
+sections.auxiliary1ScheduleSet.parameters.gpsScheduleAdvancedSchedule
+sections.auxiliary1ScheduleSet.parameters.gpsScheduleType
+sections.auxiliary1ScheduleSet.parameters.gpsScheduleUpdatePeriod
+sections.auxiliary2ScheduleSet.parameters.gpsScheduleAdvancedSchedule
+sections.auxiliary2ScheduleSet.parameters.gpsScheduleType
+sections.auxiliary2ScheduleSet.parameters.gpsScheduleUpdatePeriod
+sections.auxiliary3ScheduleSet.parameters.gpsScheduleAdvancedSchedule
+sections.auxiliary3ScheduleSet.parameters.gpsScheduleType
+sections.auxiliary3ScheduleSet.parameters.gpsScheduleUpdatePeriod
+sections.collarWriteup.parameters.optionTreeGpsCommonParts
+sections.factoryRoofScheduleSet.parameters.gpsScheduleAdvancedSchedule
+sections.factoryRoofScheduleSet.parameters.gpsScheduleType
+sections.factoryRoofScheduleSet.parameters.gpsScheduleUpdatePeriod
+sections.geofence.parameters.insideGpsScheduleAdvancedSchedule
+sections.geofence.parameters.insideGpsScheduleType
+sections.geofence.parameters.insideGpsScheduleUpdatePeriod
+sections.gps.parameters.allowVhfWhileNavigating
+sections.gps.parameters.continuousNavigationMode
+sections.gps.parameters.fixTimeout
+sections.gps.parameters.gpsScheduleAdvancedSchedule
+sections.gps.parameters.gpsScheduleType
+sections.gps.parameters.gpsScheduleUpdatePeriod
+sections.gps.parameters.nmeaBaudRate
+sections.gps.parameters.nmeaSentences
+sections.gps.parameters.passiveAntennaFlag
+sections.gps.parameters.qfpScheduleAdvancedSchedule
+sections.gps.parameters.qfpScheduleType
+sections.gps.parameters.qfpScheduleUpdatePeriod
+sections.gps.parameters.qfpTimeout
+sections.gps.parameters.qfpWithoutGpsTolerance
+sections.gps.parameters.strategy
+sections.gpsSchedule.parameters.schedule
+sections.hardware.parameters.gpsSleepThreshold
+sections.hardware.parameters.gpsSleepThresholdBoosted
+sections.hardware.parameters.gpsSleepThresholdUnboosted
+sections.underwater.parameters.useGpsInHaulout
+sections.units.parameters.gpsFirmwareVersionList
+sections.vhf.parameters.gpsVhfBeaconControl
+"""
+
+def read(connection, pi):
+    data = []
+    if pi is None:
+        sql = "SELECT FileId, FileName, Contents FROM CollarParameterFiles;"
+    else:
+        sql = "SELECT FileId, FileName, Contents FROM CollarParameterFiles WHERE Owner = ?;"
+    try:
+        if pi is None:
+            rows = connection.cursor().execute(sql).fetchall()
+        else:
+            rows = connection.cursor().execute(sql, pi).fetchall()
+    except Exception as de:
+        err = "Database error:\n" + str(sql) + '\n' + str(de)
+        print(err)
+        rows = []
+    for row in rows:
+        for schedule in read_simple(row.Contents):
+            data.append(('simple', row.FileId, row.FileName, '', '', '', schedule))
+        for schedule in read_advanced(row.Contents):
+            data.append((['advanced', row.FileId, row.FileName] + schedule))
     return data
 
 
-def main(pi, csvfile=None, server='inpakrovmais', db='Animal_Movement'):
+def read_advanced(file_contents):
+    data = []
+    schedule = []
+    in_schedule = False
+    in_season = False
+    for line in [str(l) for l in file_contents.split('\n')]:
+        if in_schedule:
+            # print(line)
+            if in_season:
+                if line.startswith('   }'):
+                    if schedule:
+                        data.append(schedule)
+                        schedule = []
+                    in_season = False
+                else:
+                    if '{' in line:
+                        value = line.replace('onPeriod','').replace('{','').replace('}','').strip()
+                    else:
+                        value = line.strip()
+                    schedule.append(value)                    
+            elif line.startswith('}'):
+                in_schedule = False
+            elif line.startswith('   season {'):
+                in_season = True
+        elif line.startswith('sections.gps.parameters.gpsScheduleAdvancedSchedule') or \
+             line.startswith('sections.gpsSchedule.parameters.schedule'):
+            # print(line)
+            in_schedule = True
+    return data
+
+
+def read_simple(file_contents):
+    data = []
+    for line in [str(l) for l in file_contents.split('\n')]:
+        interval = None
+        if line.startswith('sections.gps.parameters.gpsScheduleUpdatePeriod'):
+            # print(line)
+            try :
+                interval = line.replace('sections.gps.parameters.gpsScheduleUpdatePeriod', '')
+                interval = interval.replace('{', '').replace('}', '')
+                interval = interval.strip()
+            except:
+                print("Error in", line)
+            if interval and interval != "0":
+                data.append(interval)
+    return data
+
+
+def main(pi=None, csvfile=None, server='inpakrovmais', db='Animal_Movement'):
     conn = None
     try:
         import pyodbc
     except ImportError:
+        import os
         pyodbc = None
         pydir = os.path.dirname(sys.executable)
-        print 'pyodbc module not found, make sure it is installed with'
-        print pydir + r'\Scripts\pip.exe install pyodbc'
-        print 'Don''t have pip?'
-        print 'Download <https://bootstrap.pypa.io/get-pip.py> to ' + pydir + r'\Scripts\get-pip.py'
-        print 'Then run'
-        print sys.executable + ' ' + pydir + r'\Scripts\get-pip.py'
+        print('pyodbc module not found, make sure it is installed with')
+        print(pydir + r'\Scripts\pip.exe install pyodbc')
+        print('Don''t have pip?')
+        print('Download <https://bootstrap.pypa.io/get-pip.py> to ' + pydir + r'\Scripts\get-pip.py')
+        print('Then run')
+        print(sys.executable + ' ' + pydir + r'\Scripts\get-pip.py')
         sys.exit()
     conn = get_connection_or_die(pyodbc, server, db)
 
-    gps_data = read(conn, pi)
+    # Only need to do once, to verify search parameters for other functions
+    # print_gps_lines(conn, pi)
+
     if csvfile is None:
-        print("{0:<45}{1}".format("File", "Schedule"))
-        for item in gps_data:
-            print("{0:<45}{1}".format(item[0], item[1]))
+        fmt = "{1:<5}{0:<10}{3:<12}{4:<12}{5:<10}{6:<30}{2:<50}"
+        print(fmt.format("Type", "Id", "Name", "Start", "Stop", "Interval", "Period"))
+        for item in read(conn, pi):
+            print(fmt.format(*item))
     else:
         import csv
         with open(csvfile, 'wb') as f:
             out = csv.writer(f)
-            out.writerow(["TPF_File", "Schedule"])
-            for item in gps_data:
+            out.writerow(["Type", "TPF_FileId", "TPF_Filename", "Start", "Stop", "Interval", "Period"])
+            for item in read(conn, pi):
                 out.writerow(item)
 
 
 if __name__ == '__main__':
-    main(r'nps\bborg', r'C:\tmp\list.csv')
+    #main(None, r'C:\tmp\list.csv')
+    #main(r'nps\bborg', r'C:\tmp\list.csv')
+    main(r'nps\msorum', None)
+    #main(r'nps\bborg', None)
