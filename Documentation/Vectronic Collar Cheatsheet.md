@@ -6,11 +6,11 @@ Adding a Vectronic Collar to Animal Movements
      Investigator.
 * Click on the Collars tab.
 
-![Project Investigator Details Screenshot](images/Vectronic/PIDetails.png)
+![Project Investigator Details Screenshot](Images/Vectronic/PIDetails.png)
 
 * Click the green add (+) button to Create a new Collar
 
-![Add Collar Screenshot](images/Vectronic/CreateCollar.png)
+![Add Collar Screenshot](Images/Vectronic/CreateCollar.png)
 
 * Selct Vectronics in the Manufacturer Picklist
 * Enter the Collar ID (usually a 5 digit number)
@@ -21,7 +21,7 @@ Adding a Vectronic Collar to Animal Movements
 * Find the new collar in the Collar list and either double click on it or
   select it and click the info (i) button.
 
-![Collar Details Screenshot](images/Vectronic/CollarDetails.png)
+![Collar Details Screenshot](Images/Vectronic/CollarDetails.png)
 
 * In the Collar Details dialog click on the Vectronic tab.
 * Click on the Edit button and insert the collar key.  The key is 256
@@ -32,7 +32,7 @@ Adding a Vectronic Collar to Animal Movements
 * Add Sensors that you have deployed on your collar by clicking the
   add(+) button at the bottom left of the form.
 
-![Add Sensor Screenshot](images/Vectronic/AddSensor.png)
+![Add Sensor Screenshot](Images/Vectronic/AddSensor.png)
 
 * In the Add Sensor button, select one of the sensor types in the Sensor
   picklist and make sure the Active checkbox is checked.  Click Create button.
