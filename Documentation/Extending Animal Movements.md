@@ -13,7 +13,7 @@ Adding New Collar Manufacturers
   - Stored procedures to Insert/Update/Delete from the metadata tables
   - Queries that produce a list of collars to retrieve and/or process
   - Forms for the user to be able to add the metadata
-  - For an example, See the [Git commits on Sept 14, 2020](https://github.com/regan-sarwas/AnimalMovement/commits/master)
+  - For an example, See the [Git commits on Sept 14, 2020](https://github.com/AKROGIS/AnimalMovement/commits/master)
     for the additional tables/views/store procedures for the Vectronic collars
 
 
