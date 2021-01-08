@@ -9,7 +9,7 @@ mkdir %dest_root%\Database
 mkdir %dest_root%\Documentation
 
 SET docs=%src_root%\Documentation
-copy /Y %docs%\Documentation.pdf  %dest_root%\Documentation
+copy /Y %docs%\UserGuide.pdf  %dest_root%\Documentation
 copy /Y "%docs%\Installation Instructions.pdf"  %dest_root%\Documentation
 
 SET client=%src_root%\AnimalMovement\bin\Release
