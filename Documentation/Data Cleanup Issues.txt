@@ -8,8 +8,8 @@ Get missing Gen4 TPF files for Bridget's collars 618575B, 618576B (not in databa
 Check and send message to users about Argos no data and inactive collars
 Verify John's Deployment data for direct download wolves
 Upload John's Historic Emails
-Remove John/Bridgets Debevek Files
- - If not removed, fix issues with Bridgets debevek files (see querys)
+Remove John/Bridget's Debevek Files
+ - If not removed, fix issues with Bridget's Debevek files (see queries)
 Upload Missing Emails for Kyle
 Replace Kyles data with Historic Emails
 Add Kyles PTT data from Historic emails
@@ -26,7 +26,7 @@ Add Buck's other non-GPS collars to the database
 Code Cleanup
 ============
 Implement FIXMEs
-Prioritze TODOs
+Prioritize TODOs
 Implement high priority TODOs
 
 

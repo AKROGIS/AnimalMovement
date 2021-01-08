@@ -22,7 +22,7 @@ Adding New Collar File
 
 Collar files may be uploaded manually, or automatically, and the system must be enhanced to support both
 modes.  Collar files may be derived from another collar file.
-Collar files should eventually be processed into tablular data that will add to the CollarFixes table.
+Collar files should eventually be processed into tabular data that will add to the CollarFixes table.
 There may be multiple file types that need to be supported for a given collar manufacturer.
 The format of a collar file (and hence the necessary processing) is determined by the contents, not an
 extension, or the opinion of the operator.  Therefore the database needs information necessary to

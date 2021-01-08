@@ -196,9 +196,9 @@ the application (the file with the paw icon) ``AnimalMovement.exe`` will appear 
 ``AnimalMovement``. Edit, *with a text editor like notepad, not MS word*, the
 connection string in this file (line 15). The line should look like::
 
-  connectionString="Data Source=INPAKROms53ais;Initial Catalog=Animal_Movement;Integrated Security=True"
+  connectionString="Data Source=INPAKROVMAIS;Initial Catalog=Animal_Movement;Integrated Security=True"
 
-Change ``INPAKROms53ais`` to reflect the name of the SqlServer instance where the database
+Change ``INPAKROVMAIS`` to reflect the name of the SqlServer instance where the database
 is installed.  By default this is the server name of the machine where SqlServer is
 installed.  Change ``Animal_Movement`` to reflect the name of the database if you have
 changed it.
@@ -219,7 +219,7 @@ up the automation account), or left unprocessed (i.e. there will be no fixes/loc
 derived from those files).
 
 Animal Movements was developed and tested with TDC version 2.02, with default settings for
-formating dates and lat/long.  It is possible that different versions and/or different
+formatting dates and lat/long.  It is possible that different versions and/or different
 settings may result in unexpected behavior.
 
 There are numerous other options in the `Configuration Files`_ which can be edited,
@@ -257,7 +257,7 @@ Create External Services
 
 The database relies on a OS account to run some external processes.
 In particular, the Telonics Data Converters are required to convert
-the Argos emails (and webservice downloads) into csv-like files
+the Argos emails (and web service downloads) into csv-like files
 that can be processed by the database.  An OS Account can also
 query the Argos Web Server at regularly scheduled intervals to check
 for new data.
@@ -322,7 +322,7 @@ Download Telonics Software
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
    
 TDC:
-  * Telonics Data Converter - for Gen 4 Argos files (email/web) and datalog (.tdf)
+  * Telonics Data Converter - for Gen 4 Argos files (email/web) and Datalog (.tdf)
   
   * http://www.telonics.com/software/tdc.php
   
@@ -464,7 +464,7 @@ The set up is the same as the Argos Downloader, except:
 Optional Email Notifications
 ============================
 
-Create Gmail Account
+Create GMail Account
 --------------------
 
 Add Account Information to Database
@@ -478,7 +478,7 @@ Configuring Replication
 =======================
 
 The database design is based on a single master database that all clients can connect to
-add and edit thier animal movement data.  The visualization of this data in GIS will
+add and edit their animal movement data.  The visualization of this data in GIS will
 require significant bandwidth to transfer the requested locations to a remote
 client.  In cases where the network does not provide a acceptable experience for GIS,
 the database can be replicated to a server closer to the GIS client.
@@ -486,14 +486,14 @@ the database can be replicated to a server closer to the GIS client.
 The replication strategy is  `Transactional Replication`_ in which a snapshot of the
 database is copied from master (publisher) to client (subscriber).  The publisher then
 sends a copy of each transaction that occurs on the publisher to the each subscriber,
-so that the subscriber dtabases can be kept in sync with the publisher in near real time.
+so that the subscriber databases can be kept in sync with the publisher in near real time.
 It is not necessary to publish the entire database, in fact we will only publish the table
 necessary for GIS visualization.  Other database information must be obtained by
 connecting to the master database.
 
 Setting up the publisher and subscriber databases for transactional replication is
 clearly described in the `Microsoft Replication Tutorial`_.  The documentation that
-is provided here is mearly a summary for those who are already familar with the process.
+is provided here is merely a summary for those who are already familiar with the process.
 
 Any version os SQL Server except Express or Compact 3.5 SP2 can be a publisher.
 Any version of SQL Server except SQL Server Compact 3.5 SP2 can be a subscriber.
@@ -537,7 +537,7 @@ Configure the Master (Publisher)
 2. Configure the Distribution
 
 	a. In SqlServer, expand Replication and click Configure Distribution
-	b. select the server as it's own distributor (this will create a distribtuion database
+	b. select the server as it's own distributor (this will create a distribution database
 	   on the publisher.
 	   
 	c. enter \\<publisher machine name>\repldata (as created above) as the snapshot folder
@@ -585,7 +585,7 @@ Configure the Client (Subscriber)
 ---------------------------------
 
 1. Connect to the subscriber instance/database, and add repl_distribution as a db user
-   and memeber of *db_owner*
+   and member of *db_owner*
 
 2. Add any other users ie. domain users who need read access to the database.
 
@@ -635,11 +635,11 @@ The default connection sting configuration settings look like::
 
   <connectionStrings>
     <add name="DataModel.Properties.Settings.Animal_MovementConnectionString"
-        connectionString="Data Source=INPAKROMS53AIS;Initial Catalog=Animal_Movement;Integrated Security=True"
+        connectionString="Data Source=INPAKROVMAIS;Initial Catalog=Animal_Movement;Integrated Security=True"
         providerName="System.Data.SqlClient" />
   </connectionStrings>
 
-The text ``INPAKROMS53AIS`` must be replaced with the SqlServer Instance name (typically
+The text ``INPAKROVMAIS`` must be replaced with the SqlServer Instance name (typically
 the name of the machine where a default instance of Sql Server is installed).  If more
 than one instance of SqlServer is installed on a machine, then the text must include the
 machine and instance name.

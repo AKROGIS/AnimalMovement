@@ -20,7 +20,7 @@ Publicly editable tables
   this is necessary to maintain the project level permissions
   without creating project level users
 
-Stored procudures vs. Triggers
+Stored procedures vs. Triggers
 ==============================
 A public stored procedure standardizes the insert/update/delete operations on
 the underlying tables for clients.  It can do any of the following
@@ -64,12 +64,12 @@ Problems & known limitations
 * Animals Group Name is constant
 
     - We can change it, but we cannot capture that it was once something, and is now something else.
-    - (e.g. when a juvenial wolf leaves his birth pack to join another)
+    - (e.g. when a juvenile wolf leaves his birth pack to join another)
 	
-* When bulk loading a debevek file, it will fail unless all the collar Ids
+* When bulk loading a Debevek file, it will fail unless all the collar Ids
   already exist.  If I relaxed this requirement, I would need to add a trigger to the Collars
   table to scan file data and create new fixes/locations whenever a new collar/animal was added
-  to the database.  Calling code should scan the debevek file, and help the user create the 
+  to the database.  Calling code should scan the Debevek file, and help the user create the 
   collar/animal/deployment records before loading the file
 * Adding Other Agency Data???
 
@@ -84,14 +84,14 @@ data that pertains to this project/animal.  However, the collar animal relations
 the CollarDeployments table, so monitoring that is all that is required.
 
 
-Triggers on Mfgr/Collar Tables?
+Triggers on Manufacturer/Collar Tables?
 ===============================
-A Mfgr/Collar is needed to create fixes from collar data files.  By referential integrity constraints, a Mfgr/Collar
+A Manufacturer/Collar is needed to create fixes from collar data files.  By referential integrity constraints, a Manufacturer/Collar
 cannot be deleted if it is used by a related table.  Similarly, the primary keys cannot be changed
 in such as way as to break a relationship.
-Adding a Mfgr/Collar, may warrant the creation of new fixes/locations, if there is existing collar file
-data that pertains to this Mfgr/Collar.  This can be managed by failing to add a file that relates
-to a mfgr/collar that does not exist (currently the default), or by adding triggers to mfgr and collar tables
+Adding a Manufacturer/Collar, may warrant the creation of new fixes/locations, if there is existing collar file
+data that pertains to this Manufacturer/Collar.  This can be managed by failing to add a file that relates
+to a Manufacturer/Collar that does not exist (currently the default), or by adding triggers to Manufacturer and Collar tables
 which scan all data files for related fix data.
 
 
@@ -100,7 +100,7 @@ Constraints to CollarData{Format} Tables?
 I decided no.  Each file must have a FileId and LineNumber column to act as the primary key, beyond that
 the data is what the data is.  This may cause some some records to be skipped if the data is bad, or
 it may abort the transaction (i.e. referencing a collar that does not exist).
-Exact semanitics for bad data need to be further developed.
+Exact semantics for bad data need to be further developed.
 
 
 Adding a new file format
@@ -119,7 +119,7 @@ Adding a new file format
   AnimalMovements Solution
 
   - The other file formats should provide a good template for creating a
-    table-valued funtion.
+    table-valued function.
 
 * Build/Deploy this project - the domain user doing the deployment must be a sa on
   the target database

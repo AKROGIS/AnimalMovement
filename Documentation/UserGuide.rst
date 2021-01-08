@@ -42,11 +42,11 @@ These instructions assume you have purchased the Argos service from CLS America,
 they have allocated Argos ID numbers to you.  Furthermore you will need the Program
 number, username, and password that they provide.
 
-An **Argos Platform** is a unique Argos ID cooresponding to the hardware installed on a
+An **Argos Platform** is a unique Argos ID corresponding to the hardware installed on a
 animal tracking collar.  An Argos Platform may be re-used on different collars, but will
 only be on one collar at a time.  A refurbished collar may be given a new Argos ID.  Once
 again, a collar can only have zero or one single Argos Platform at a given point in time.
-The Argos Platform is often refered to as the Argos Id of a collar.  Argos Platforms are
+The Argos Platform is often referred to as the Argos Id of a collar.  Argos Platforms are
 organized into an Argos Project.  A project investigator is given a username and password
 to manage the Argos Program on the Argos website (https://argos-system.clsamerica.com).
 
@@ -63,7 +63,7 @@ loaded into the database.
 2. Click on the **Project Investigator Details** button.  If you do not see this button,
    then you are not a PI, and cannot create you own Argos program.  If you should be a PI,
    please contact the database administrator (regan_sarwas@nps.gov).  If you want to create a
-   project for another PI, then click on the **Project List**, select one of thier projects,
+   project for another PI, then click on the **Project List**, select one of their projects,
    and then click the PI info button on the project details page.
 
 3. Click the **Argos** tab on the Project Investigator Details** page.
@@ -110,7 +110,7 @@ Deploying Collars On Animals
 Uploading Store on Board Data
 ====================================
 
-Gen4 datalog files (\*.tdf) files can be uploaded directly to the database. The database
+Gen4 Datalog files (\*.tdf) files can be uploaded directly to the database. The database
 will archive this file and use Telonics Data Convertor (TDC) software in the background
 to create a \*.csv file that is used to create the collar fixes. Because of the binary
 format for the Gen3 download
@@ -209,7 +209,7 @@ will create and upload the \*.csv file, and link it to the \*.tdf file.  I recom
 that you upload the \*.tdf files for several reasons
 
 1. The \*.tdf file will be archived in the database.
-#. The \*.tdf file includes the collar paramters in effect while deployed.
+#. The \*.tdf file includes the collar parameters in effect while deployed.
 #. The \*.tdf file could be re-processed in the future if there is some concern that it
    may have been processed incorrectly.
 
@@ -248,7 +248,7 @@ Step-by-step instructions for loading multiple Gen4 store-on-board data files.
 
 .. image:: Images/sob-file-open.png
 
-8.  Select the desired files.  You can select multiple files by draging your mouse across
+8.  Select the desired files.  You can select multiple files by dragging your mouse across
     the file names, or use control-click or shift-click to select multiple files.
 #.  Click the **Open** button to close the dialog box, and proceed.
 #.  The **Upload** button on the on the **Upload Collar Location Data**

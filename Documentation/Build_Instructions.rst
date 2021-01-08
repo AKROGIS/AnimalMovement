@@ -3,7 +3,7 @@ Build Instructions
 
 These instructions document how to build the project to create the files necessary for the
 installation instructions.  This document are my notes that I hope will be helpful when I
-need to refere to it in the future.  It may even be helpful for somebody else who might
+need to refer to it in the future.  It may even be helpful for somebody else who might
 need it.  I can only hope.
 
 First,  The project is now set up to build with Visual Studio 2013 pro.
@@ -52,7 +52,7 @@ Creating Installation Files
 ---------------------------
 
 There is a very simple DOS batch file in the Distribution directory called make_dist.bat.
-This file will copy files from the various locatations in the project to subfolders in
+This file will copy files from the various locations in the project to sub-folders in
 the Distribution directory.  The batch file does not have any error checking, so if
 things do not work, just take a look at the file and do things manually.
 
@@ -96,7 +96,7 @@ This requires copying selected libraries (dlls) to the server and then running a
 script to "unhook" and delete the old assembly and then install and and "hook up" the new assembly.
 See the individual deploy.sql scripts for where to put the the dlls on the server before running
 the script.  IMPORTANT: the deploy.sql scripts will need to be manually edited if additional functions
-are added or the input parameters or return values of any function are changed.  DEWARE: changing
+are added or the input parameters or return values of any function are changed.  BEWARE: changing
 the input or return value of an existing function will likely break other aspects of the database,
 so test before deploying.
 
@@ -121,5 +121,5 @@ Distributing
 ------------
 
 Zip up the Distribution folder (without the make_dist.bat file) and provide to the
-User.   Thuser can then use the installation Instructions in the Documentation folder
+User.   The user can then use the installation Instructions in the Documentation folder
 to build and configure the SQL Server database.

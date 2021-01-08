@@ -12,7 +12,7 @@ Adding a Vectronic Collar to Animal Movements
 
 ![Add Collar Screenshot](Images/Vectronic/CreateCollar.png)
 
-* Select Vectronics in the Manufacturer Picklist
+* Select Vectronic in the Manufacturer pick list
 * Enter the Collar ID (usually a 5 digit number)
   - usually in the file name of the `*registration.keyx` file, or look in the
     registration file for a line like `<collar ID="30032">`
@@ -35,7 +35,7 @@ Adding a Vectronic Collar to Animal Movements
 ![Add Sensor Screenshot](Images/Vectronic/AddSensor.png)
 
 * In the Add Sensor button, select one of the sensor types in the Sensor
-  picklist and make sure the Active checkbox is checked.  Click Create button.
+  pick list and make sure the Active checkbox is checked.  Click Create button.
 * Position is a key sensor and is required to get location data.  Mortality and
   Activity are also supported by Animal Movements -- they are saved in a data
   table but have not elements in the UI.  The other sensors are
