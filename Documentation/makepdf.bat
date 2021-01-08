@@ -1,3 +1,3 @@
-"C:\Python27\ArcGIS10.2\Scripts\rst2pdf.exe" --default-dpi=100 "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Documentation.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Documentation.pdf"
+"C:\Python27\ArcGIS10.2\Scripts\rst2pdf.exe" --default-dpi=100 "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\UserGuide.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Documentation.pdf"
 "C:\Python27\ArcGIS10.2\Scripts\rst2pdf.exe" --default-dpi=100 "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Installation Instructions.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Installation Instructions.pdf"
 "C:\Python27\ArcGIS10.2\Scripts\rst2pdf.exe" --default-dpi=100 "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Build_Instructions.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Build_Instructions.pdf"
