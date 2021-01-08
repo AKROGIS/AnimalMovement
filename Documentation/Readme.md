@@ -21,4 +21,24 @@ To embed images in the pdf documents, you will also need the Python Image Librar
    C:\Python27\ArcGIS10.1\Scripts\easy_install.exe pil
 
 
+## Make HTML
 
+```bat
+c:\Python27\ArcGIS10.2\python.exe "C:\Users\resarwas\My Apps\docutils\tools\rst2html.py" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\UserGuide.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Documentation.html"
+c:\Python27\ArcGIS10.2\python.exe "C:\Users\resarwas\My Apps\docutils\tools\rst2html.py" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Installation Instructions.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Installation Instructions.html"
+c:\Python27\ArcGIS10.2\python.exe "C:\Users\resarwas\My Apps\docutils\tools\rst2html.py" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Build_Instructions.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Build_Instructions.html"
+```
+
+## Make PDF
+
+```bat
+"C:\Python27\ArcGIS10.2\Scripts\rst2pdf.exe" --default-dpi=100 "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\UserGuide.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Documentation.pdf"
+"C:\Python27\ArcGIS10.2\Scripts\rst2pdf.exe" --default-dpi=100 "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Installation Instructions.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Installation Instructions.pdf"
+"C:\Python27\ArcGIS10.2\Scripts\rst2pdf.exe" --default-dpi=100 "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Build_Instructions.rst" "C:\Users\resarwas\Documents\GitHub\AnimalMovement\Documentation\Build_Instructions.pdf"
+```
+
+[Quick reStructuredText](http://docutils.sourceforge.net/docs/user/rst/quickref.html)
+
+[reStructuredText Tool Support](http://stackoverflow.com/questions/2746692/restructuredtext-tool-support)
+
+[rst2pdf Manual](http://lateral.netmanagers.com.ar/static/manual.pdf)
