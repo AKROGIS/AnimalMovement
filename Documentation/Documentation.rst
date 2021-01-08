@@ -154,17 +154,17 @@ To retrieve collars and deactivate old files, use this step-by-step procedure
     If you are not a project
     investigator you will not see this button and you cannot perform this task.
     
-.. image:: images/sob-mainmenu.png
+.. image:: Images/sob-mainmenu.png
 
 3.  Click on the **Collars** tab in the **Project Investigator Details** form.
 
-.. image:: images/sob-pi-details.png
+.. image:: Images/sob-pi-details.png
 
 4.  Double click on deployed collar that was recently retrieved.
     Deployed collars will list the animal it is deployed on.
 #.  Click on the **Animals** tab in the **Collar Details** form.
 
-.. image:: images/sob-collar-details.png
+.. image:: Images/sob-collar-details.png
 
 6.  Click on the **Retrieve** button.
 #.  Enter the date and time the collar was removed from the animal. The time should be
@@ -172,12 +172,12 @@ To retrieve collars and deactivate old files, use this step-by-step procedure
     noon), but is recommended, as it will ensure that fixes on that day before retrieval
     are retained, while those after the retrieval are hidden.
 
-.. image:: images/sob-retrieve-collar.png
+.. image:: Images/sob-retrieve-collar.png
 
 8.  Press the **Retrieve** button 
 #.  Click on the **Files** tab in the **Collar Details** form.
 
-.. image:: images/sob-collar-details-files.png
+.. image:: Images/sob-collar-details-files.png
 
 10. Select all the files that were from the deployment that was just retrieved.  If this
     collar has only been deployed on this one animal, and if have not loaded your
@@ -224,15 +224,15 @@ Step-by-step instructions for loading multiple Gen4 store-on-board data files.
 1.  Start the Animal Movements application.
 #.  Click on the **Project List** button in the main menu.
 
-.. image:: images/sob-mainmenu-project.png
+.. image:: Images/sob-mainmenu-project.png
 
 3.  Double click on the project that the new collar data is for.
 
-.. image:: images/sob-project-list.png
+.. image:: Images/sob-project-list.png
 
 4.  Click on the **Files** tab in the **Project Details** form.
 
-.. image:: images/sob-project-details.png
+.. image:: Images/sob-project-details.png
 
 5.  Click the green plus sign at the bottom of the file list.  If this
     button is greyed-out, then you cannot add files to this project.
@@ -242,11 +242,11 @@ Step-by-step instructions for loading multiple Gen4 store-on-board data files.
 6.  Click the **Browse** button for **File(s)** on the **Upload Collar Location Data**
     form.
 
-.. image:: images/sob-upload-collar.png
+.. image:: Images/sob-upload-collar.png
 
 7.  In the **Open** dialog box, change the file type to **Telonics Datalog (\*.tdf)**
 
-.. image:: images/sob-file-open.png
+.. image:: Images/sob-file-open.png
 
 8.  Select the desired files.  You can select multiple files by draging your mouse across
     the file names, or use control-click or shift-click to select multiple files.
@@ -271,7 +271,7 @@ Step-by-step instructions for loading multiple Gen4 store-on-board data files.
     later.  At NPS, batch processing occurs every 10 minutes, if it was unable to be
     performed immediately for some reason.
     
-.. image:: images/sob-project-details-2.png
+.. image:: Images/sob-project-details-2.png
 
 
 
@@ -342,7 +342,7 @@ There are primarily two was to identify bad locations in ArcMap.
 1. Visual Review.  Some bad fixes are visually obvious when reviewing the movement vectors.
    These will show up as a spike from and immediately returning to a cluster of locations.
 
-.. image:: images/ArcMapTools_HideLocations.png
+.. image:: Images/ArcMapTools_HideLocations.png
 
 2. By reviewing the attributes (speed, duration, and distance) in the movement vectors table to identify
    suspect locations.  this is easiest to do if you first define a definition query on the locations and movement
@@ -371,7 +371,7 @@ Hiding Location
 
 2. Click the paw print icon (Edit Location Status tool).
 
-.. image:: images/ArcMapTools_HideLocations.png
+.. image:: Images/ArcMapTools_HideLocations.png
 
 3. Click the Yes to hide the selected locations.
 
@@ -403,23 +403,23 @@ Correcting for Mortalities
 
 1. Click on Project List
 
-.. image:: images/Mortalities_MainMenu.png
+.. image:: Images/Mortalities_MainMenu.png
 
 2. Double click your project
 
-.. image:: images/Mortalities_ProjectList.png
+.. image:: Images/Mortalities_ProjectList.png
 
 3. In the middle list, double click the animal that died
 
-.. image:: images/Mortalities_AnimalDetails1.png
+.. image:: Images/Mortalities_AnimalDetails1.png
 
 4. In the Animal Details window, click edit, then check the box next to Date of Death
 
-.. image:: images/Mortalities_AnimalDetails1.png
+.. image:: Images/Mortalities_AnimalDetails1.png
 
 5. Correct the date, then click Save.
 
-.. image:: images/Mortalities_AnimalDetails2.png
+.. image:: Images/Mortalities_AnimalDetails2.png
 
 If you refresh the view in ArcMap, it should draw with the corrected data.
 
@@ -434,7 +434,7 @@ ArcMap Tools
 1. Open ArcMap, and make sure that the Animal Movements Add-In is loaded.
    If you select *Customize->Add-In Manager...* from the ArcMap menu, you should see the following:
 
-.. image:: images/ArcMapTools_Add-In-Manager.png
+.. image:: Images/ArcMapTools_Add-In-Manager.png
 
 If not, make sure that you have *X:\GIS\Addins\10.1* specified as the Add-Ins folder in the Options tab.
 
@@ -446,7 +446,7 @@ If not, make sure that you have *X:\GIS\Addins\10.1* specified as the Add-Ins fo
 
 5. Find the *Edit Location Status* Command (paw print icon)
 
-.. image:: images/ArcMapTools_Customize.png
+.. image:: Images/ArcMapTools_Customize.png
 
 6. Click on the paw icon, and drag it over an existing toolbar (I like to use the Alaska Pak toolbar), and drop it.
    The icon should now be on the toolbar.
