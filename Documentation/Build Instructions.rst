@@ -19,28 +19,30 @@ This SDK is an optional install if you have a license to ArcMap Desktop.
 
 The projects are not required, and you can disable them if you want.
 
-  * QueryLayerBuilder
-  
-  Provides a query builder to allow the user to create an ArcMap
-  query layer to display a subset of the Animal Movements database in ArcMap.  This tool
-  is fairly limited. If you are familiar with SQL and the structure of the database
-  you will have better luck building the query layers by hand, if not, you should find
-  someone who is.
+QueryLayerBuilder
+~~~~~~~~~~~~~~~~~
 
-  * ArcMap_Addin
-  
-  This ArcMap add-in provides a convenient method of hiding (or 
-  un-hiding) locations, by selecting them in ArcMap. Bad locations are often very
-  obvious when looking at the movement vectors in ArcMap.
+Provides a query builder to allow the user to create an ArcMap
+query layer to display a subset of the Animal Movements database in ArcMap.  This tool
+is fairly limited. If you are familiar with SQL and the structure of the database
+you will have better luck building the query layers by hand, if not, you should find
+someone who is.
+
+ArcMap_Addin
+~~~~~~~~~~~~
+
+This ArcMap add-in provides a convenient method of hiding (or 
+un-hiding) locations, by selecting them in ArcMap. Bad locations are often very
+obvious when looking at the movement vectors in ArcMap.
 
 The ESRI dependent code works only with ArcMap 10.x.  It will not work with ArcMap 9.x,
 nor with the new ArcGIS Pro (at least as of the Beta release).  The build for ArcMap 10.0
 is different than 10.1 and 10.2.  The projects are currently set up to build with 10.2.
 If you need to build with 10.0, then make the following changes:
 
-  * In QueryLayerBuilder properties add a Conditional Compilation Symbol of ARCGIS_10_0 on the build tab
-  * In ArcMap_Addin properties add a Conditional Compilation Symbol of ARCGIS_10_0 on the build tab
-  * In ArcMap_Addin/Config.esri.addinx, change <Target name="Desktop" version="10.2" /> to 10.0
+* In QueryLayerBuilder properties add a Conditional Compilation Symbol of ARCGIS_10_0 on the build tab
+* In ArcMap_Addin properties add a Conditional Compilation Symbol of ARCGIS_10_0 on the build tab
+* In ArcMap_Addin/Config.esri.addinx, change <Target name="Desktop" version="10.2" /> to 10.0
   
 Building
 --------
@@ -62,31 +64,28 @@ copied with the previous batch file:
 CreateDatabase.sql
 ~~~~~~~~~~~~~~~~~~
 
-if `~\AnimalMovement\Database\CreateDatabase.sql` is newer than `~\AnimalMovement\Distribution\Database\CreateDatabase.sql` then
+if ``~\\AnimalMovement\\Database\\CreateDatabase.sql`` is newer than ``~\\AnimalMovement\\Distribution\\Database\\CreateDatabase.sql`` then
 
- 1. Copy and replace
- 2. Remove all the GRANT commands at the end of the script
- 3. Edit the 5th and 7th lines to change the size of the files to 10240KB and 10240KB respectively
+1. Copy and replace
+2. Remove all the GRANT commands at the end of the script
+3. Edit the 5th and 7th lines to change the size of the files to 10240KB and 10240KB respectively
 
 CreateDatabaseObjects.sql
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-if `~\AnimalMovement\Database\CreateDatabaseObjects.sql` is newer than `~\AnimalMovement\Distribution\Database\\CreateDatabaseObjects.sql` then
+if ``~\AnimalMovement\Database\CreateDatabaseObjects.sql`` is newer than ``~\\AnimalMovement\\Distribution\\Database\\CreateDatabaseObjects.sql`` then
 
- 1. Copy and replace
- 2. Do a global search and replace removing all SET ANSI_PADDING OFF
- 
-	# This setting causes creation of spatial indices to fail.  The setting is deprecated (see http://msdn.microsoft.com/en-us/library/ms187403(v=sql.90).aspx)
+1. Copy and replace
+2. Do a global search and replace removing all SET ANSI_PADDING OFF
+   * This setting causes creation of spatial indices to fail.  The setting is deprecated (see http://msdn.microsoft.com/en-us/library/ms187403(v=sql.90).aspx)
+   * SSMS incorrectly inserts it in the script (see https://connect.microsoft.com/SQLServer/feedback/details/127167/trailing-set-ansi-padding-off-when-scripting-tables#details)
 
-	# SSMS incorrectly inserts it in the script (see https://connect.microsoft.com/SQLServer/feedback/details/127167/trailing-set-ansi-padding-off-when-scripting-tables#details)
-
- 3. Remove all the CREATE USER commands at the start of the script
- 4. Remove the CREATE ROLE commands for the replication roles
- 5. Remove all the EXEC dbo.sp_addrolemember commands from the end of the script
- 6. Search for "CREATE PROCEDURE [dbo].[Summerize]", and add "WITH EXECUTE AS OWNER" on a
-    new line before the line with only "AS".
-	
-	# That this is missing may be a bug that gets fixed in an update of SSMS
+3. Remove all the CREATE USER commands at the start of the script
+4. Remove the CREATE ROLE commands for the replication roles
+5. Remove all the EXEC dbo.sp_addrolemember commands from the end of the script
+6. Search for "CREATE PROCEDURE [dbo].[Summerize]", and add "WITH EXECUTE AS OWNER" on a
+   new line before the line with only "AS".
+   * That this is missing may be a bug that gets fixed in an update of SSMS
 
 Sql Server Assemblies
 ~~~~~~~~~~~~~~~~~~~~~
@@ -100,21 +99,21 @@ are added or the input parameters or return values of any function are changed. 
 the input or return value of an existing function will likely break other aspects of the database,
 so test before deploying.
 
-## File Functions
- - dll: ..\SqlServer_Files\bin\Release\SqlServer_Files.dll
- - script: ..\SqlServer_Files\Deploy.sql
+* File Functions
+  * dll: ..\SqlServer_Files\bin\Release\SqlServer_Files.dll
+  * script: ..\SqlServer_Files\Deploy.sql
 
-## File Parsers 
- - dll: ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.dll
- - script:  ..\SqlServer_Parsers\Deploy.sql
+* File Parsers 
+  * dll: ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.dll
+  * script:  ..\SqlServer_Parsers\Deploy.sql
 
-## Miscellaneous functions
- - dll: ..\SqlServer_Functions\bin\Release\SqlServer_Functions.dll
- - script: ..\SqlServer_Functions\Deploy.sql
+* Miscellaneous functions
+  * dll: ..\SqlServer_Functions\bin\Release\SqlServer_Functions.dll
+  * script: ..\SqlServer_Functions\Deploy.sql
 
-## TFP File Summerizer
- - dll: ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.dll
- - script: ..\SqlServer_TpfSummerizer\Deploy.sql
+* TFP File Summerizer
+  * dll: ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.dll
+  * script: ..\SqlServer_TpfSummerizer\Deploy.sql
 
 
 Distributing
