@@ -40,9 +40,9 @@ nor with the new ArcGIS Pro (at least as of the Beta release).  The build for Ar
 is different than 10.1 and 10.2.  The projects are currently set up to build with 10.2.
 If you need to build with 10.0, then make the following changes:
 
-* In QueryLayerBuilder properties add a Conditional Compilation Symbol of ARCGIS_10_0 on the build tab
-* In ArcMap_Addin properties add a Conditional Compilation Symbol of ARCGIS_10_0 on the build tab
-* In ArcMap_Addin/Config.esri.addinx, change <Target name="Desktop" version="10.2" /> to 10.0
+* In ``QueryLayerBuilder`` properties add a Conditional Compilation Symbol of ``ARCGIS_10_0`` on the build tab
+* In ``ArcMap_Addin`` properties add a Conditional Compilation Symbol of ``ARCGIS_10_0`` on the build tab
+* In ``ArcMap_Addin/Config.esri.addinx``, change <Target name="Desktop" version="10.2" /> to 10.0
   
 Building
 --------
@@ -67,7 +67,7 @@ CreateDatabase.sql
 if ``~\AnimalMovement\Database\CreateDatabase.sql`` is newer than ``~\AnimalMovement\Distribution\Database\CreateDatabase.sql`` then
 
 1. Copy and replace
-2. Remove all the GRANT commands at the end of the script
+2. Remove all the ``GRANT`` commands at the end of the script
 3. Edit the 5th and 7th lines to change the size of the files to 10240KB and 10240KB respectively
 
 CreateDatabaseObjects.sql
@@ -76,15 +76,15 @@ CreateDatabaseObjects.sql
 if ``~\AnimalMovement\Database\CreateDatabaseObjects.sql`` is newer than ``~\AnimalMovement\Distribution\Database\CreateDatabaseObjects.sql`` then
 
 1. Copy and replace
-2. Do a global search and replace removing all SET ANSI_PADDING OFF
+2. Do a global search and replace removing all ``SET ANSI_PADDING OFF``
 
    * This setting causes creation of spatial indices to fail.  The setting is deprecated (see http://msdn.microsoft.com/en-us/library/ms187403(v=sql.90).aspx)
    * SSMS incorrectly inserts it in the script (see https://connect.microsoft.com/SQLServer/feedback/details/127167/trailing-set-ansi-padding-off-when-scripting-tables#details)
 
-3. Remove all the CREATE USER commands at the start of the script
-4. Remove the CREATE ROLE commands for the replication roles
-5. Remove all the EXEC dbo.sp_addrolemember commands from the end of the script
-6. Search for "CREATE PROCEDURE [dbo].[Summerize]", and add "WITH EXECUTE AS OWNER" on a
+3. Remove all the ``CREATE USER`` commands at the start of the script
+4. Remove the ``CREATE ROLE`` commands for the replication roles
+5. Remove all the ``EXEC dbo.sp_addrolemember`` commands from the end of the script
+6. Search for ``CREATE PROCEDURE [dbo].[Summerize]``, and add ``WITH EXECUTE AS OWNER`` on a
    new line before the line with only "AS".
 
    * That this is missing may be a bug that gets fixed in an update of SSMS
@@ -103,28 +103,28 @@ so test before deploying.
 
 * File Functions
 
-  * dll: ..\SqlServer_Files\bin\Release\SqlServer_Files.dll
-  * script: ..\SqlServer_Files\Deploy.sql
+  * dll: ``..\SqlServer_Files\bin\Release\SqlServer_Files.dll``
+  * script: ``..\SqlServer_Files\Deploy.sql``
 
 * File Parsers
 
-  * dll: ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.dll
-  * script:  ..\SqlServer_Parsers\Deploy.sql
+  * dll: ``..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.dll``
+  * script:  ``..\SqlServer_Parsers\Deploy.sql``
 
 * Miscellaneous functions
 
-  * dll: ..\SqlServer_Functions\bin\Release\SqlServer_Functions.dll
-  * script: ..\SqlServer_Functions\Deploy.sql
+  * dll: ``..\SqlServer_Functions\bin\Release\SqlServer_Functions.dll``
+  * script: ``..\SqlServer_Functions\Deploy.sql``
 
 * TFP File Summerizer
 
-  * dll: ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.dll
-  * script: ..\SqlServer_TpfSummerizer\Deploy.sql
+  * dll: ``..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.dll``
+  * script: ``..\SqlServer_TpfSummerizer\Deploy.sql``
 
 
 Distributing
 ------------
 
-Zip up the Distribution folder (without the make_dist.bat file) and provide to the
-User.   The user can then use the installation Instructions in the Documentation folder
+Zip up the Distribution folder (without the ``make_dist.bat`` file) and provide to the
+User.  The user can then use the ``Installation Instructions`` in the ``Documentation`` folder
 to build and configure the SQL Server database.
