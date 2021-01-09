@@ -24,9 +24,8 @@ This document describes in details most of the tables in the database, as
 well as how they relate to each other ([link](./Data%20Dependencies.md)).
 It also describes the various stored procedures, triggers, functions and
 external applications and how they impact the state of the database.  This
-document is quite long, but it is neither complete not up to date.
+document is quite long, but it is neither complete nor up to date.
 Nevertheless, it has a lot of very useful information on how the database works.
-.
 
 ## `Database Export Instructions`
 
@@ -34,7 +33,7 @@ How to use SQL Server Management Studio to create the database definition files
 ([link](./Database%20Export%20Instructions.md)).  The files
 [../Database/CreateDatabaseObjects.sql](../Database/CreateDatabaseObjects.sql)
 and [../Database/LookupTableData.sql](../Database/LookupTableData.sql) should
-be committed to the repository updated whenever the database schema changes.
+be committed to the repository whenever the database schema changes.
 
 ## `Extending Animal Movements`
 
@@ -118,7 +117,7 @@ C:\> \path\to\rst2pdf.exe --default-dpi=100 UserGuide.rst UserGuide.pdf
 ## Markdown
 
 These documents, usually for developer reference, do not need to be convert
-to PDF or HTMl.  Visual Studio code (and other editors) have a preview mode
+to PDF or HTML.  Visual Studio Code (and other editors) have a preview mode
 and the Github website displays the formatted documents to make them easier
 to read.
 
