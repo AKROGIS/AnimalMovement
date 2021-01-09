@@ -101,11 +101,17 @@ loaded into the database.
 Loading Collars Into the Database
 ====================================
 
+*Not written yet*
+
 Loading Animals Into the Database
 ====================================
 
+*Not written yet*
+
 Deploying Collars On Animals
 ====================================
+
+*Not written yet*
 
 Uploading Store on Board Data
 ====================================
@@ -122,7 +128,6 @@ then follow the remaining instructions.
 
 Tell the database that you have retrieved the collar
 ------------------------------------------------------------------------------------------
-
 
 This not required to see your data, but it is good bookkeeping.  By doing this, the
 database is able to hide any fixes that occur after the retrieval date/time.  It also
@@ -285,7 +290,7 @@ The source location data in the database is never deleted or altered.
 Resolving Conflicting Fixes
 ---------------------------
 
-Coming soon.
+*Not written yet*
 
 
 Hiding Bogus Fixes
@@ -384,7 +389,7 @@ and then select No to un-hide these locations.
 Un-Hiding Locations
 --------------------
 
-coming soon.
+*Not written yet*
 
 
 

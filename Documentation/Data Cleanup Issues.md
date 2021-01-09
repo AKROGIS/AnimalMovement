@@ -1,38 +1,41 @@
 
-Data cleanup
-============
-Add Gen4 TPF files for Bridget Bears: 643132A, 643133A
-Get missing Gen4 TPF files for Bridget's collars 618575B, 618576B (not in database)
+# Data cleanup
+
+* Add Gen4 TPF files for Bridget Bears: 643132A, 643133A
+* Get missing Gen4 TPF files for Bridget's collars 618575B, 618576B
+  (not in database)
   - Bridget uploaded data files (processed by TDC) for the 'B' collars.
-  - Data for the 'B' collars is currently applied to the 'A' version of the collars
-Check and send message to users about Argos no data and inactive collars
-Verify John's Deployment data for direct download wolves
-Upload John's Historic Emails
-Remove John/Bridget's Debevek Files
- - If not removed, fix issues with Bridget's Debevek files (see queries)
-Upload Missing Emails for Kyle
-Replace Kyles data with Historic Emails
-Add Kyles PTT data from Historic emails
-Get SOB data for MuskOx
-Get SOB data from Kyle
-Add Buck's data for collar 606976 (A:40420)
-Load Buck's TPF files
-Add Buck's other non-GPS collars to the database
-	platforms 40832, 40420, 105424 are not in database, and there is data (PTT?) in his emails
-	CTN 606990, and 606970 have PTT data in the emails (not GPS)
-	Email 12_29_12_raw_complete.txt (already in database) only has data for argos 105424, so appears not processed
+  - Data for the 'B' collars is currently applied to the 'A' version of the
+	  collars
+* Check and send message to users about Argos no data and inactive collars
+* Verify John's Deployment data for direct download wolves
+* Upload John's Historic Emails
+* Remove John/Bridget's Debevek Files
+  - If not removed, fix issues with Bridget's Debevek files (see queries)
+* Upload Missing Emails for Kyle
+* Replace Kyles data with Historic Emails
+* Add Kyles PTT data from Historic emails
+* Get SOB data for MuskOx
+* Get SOB data from Kyle
+* Add Buck's data for collar 606976 (A:40420)
+* Load Buck's TPF files
+* Add Buck's other non-GPS collars to the database
+	- platforms 40832, 40420, 105424 are not in database, and there is data
+	  (PTT?) in his emails
+	- CTN 606990, and 606970 have PTT data in the emails (not GPS)
+	- Email 12_29_12_raw_complete.txt (already in database) only has data for
+	  argos 105424, so appears not processed
 
 
-Code Cleanup
-============
-Implement FIXMEs
-Prioritize TODOs
-Implement high priority TODOs
+# Code Cleanup
+
+* Implement FIXMEs
+* Prioritize TODOs
+* Implement high priority TODOs
 
 
-Deployment
-==========
-Build database and tools from scratch and deploy on virgin server
-Document the process
-Document the user tools
+# Deployment
 
+* Build database and tools from scratch and deploy on clean server
+* Document the process
+* Document the user tools

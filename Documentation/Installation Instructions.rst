@@ -464,14 +464,22 @@ The set up is the same as the Argos Downloader, except:
 Optional Email Notifications
 ============================
 
+*Not written yet*
+
 Create GMail Account
 --------------------
+
+*Not written yet*
 
 Add Account Information to Database
 -----------------------------------
 
+*Not written yet*
+
 Set Argos Downloader Configuration
 ----------------------------------
+
+*Not written yet*
 
 
 Configuring Replication
