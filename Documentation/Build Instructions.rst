@@ -64,7 +64,7 @@ copied with the previous batch file:
 CreateDatabase.sql
 ~~~~~~~~~~~~~~~~~~
 
-if ``~\\AnimalMovement\\Database\\CreateDatabase.sql`` is newer than ``~\\AnimalMovement\\Distribution\\Database\\CreateDatabase.sql`` then
+if ``~\AnimalMovement\Database\CreateDatabase.sql`` is newer than ``~\AnimalMovement\Distribution\Database\CreateDatabase.sql`` then
 
 1. Copy and replace
 2. Remove all the GRANT commands at the end of the script
@@ -73,10 +73,11 @@ if ``~\\AnimalMovement\\Database\\CreateDatabase.sql`` is newer than ``~\\Animal
 CreateDatabaseObjects.sql
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-if ``~\AnimalMovement\Database\CreateDatabaseObjects.sql`` is newer than ``~\\AnimalMovement\\Distribution\\Database\\CreateDatabaseObjects.sql`` then
+if ``~\AnimalMovement\Database\CreateDatabaseObjects.sql`` is newer than ``~\AnimalMovement\Distribution\Database\CreateDatabaseObjects.sql`` then
 
 1. Copy and replace
 2. Do a global search and replace removing all SET ANSI_PADDING OFF
+
    * This setting causes creation of spatial indices to fail.  The setting is deprecated (see http://msdn.microsoft.com/en-us/library/ms187403(v=sql.90).aspx)
    * SSMS incorrectly inserts it in the script (see https://connect.microsoft.com/SQLServer/feedback/details/127167/trailing-set-ansi-padding-off-when-scripting-tables#details)
 
@@ -85,6 +86,7 @@ if ``~\AnimalMovement\Database\CreateDatabaseObjects.sql`` is newer than ``~\\An
 5. Remove all the EXEC dbo.sp_addrolemember commands from the end of the script
 6. Search for "CREATE PROCEDURE [dbo].[Summerize]", and add "WITH EXECUTE AS OWNER" on a
    new line before the line with only "AS".
+
    * That this is missing may be a bug that gets fixed in an update of SSMS
 
 Sql Server Assemblies
@@ -100,18 +102,22 @@ the input or return value of an existing function will likely break other aspect
 so test before deploying.
 
 * File Functions
+
   * dll: ..\SqlServer_Files\bin\Release\SqlServer_Files.dll
   * script: ..\SqlServer_Files\Deploy.sql
 
-* File Parsers 
+* File Parsers
+
   * dll: ..\SqlServer_Parsers\bin\Release\SqlServer_Parsers.dll
   * script:  ..\SqlServer_Parsers\Deploy.sql
 
 * Miscellaneous functions
+
   * dll: ..\SqlServer_Functions\bin\Release\SqlServer_Functions.dll
   * script: ..\SqlServer_Functions\Deploy.sql
 
 * TFP File Summerizer
+
   * dll: ..\SqlServer_TpfSummerizer\bin\Release\SqlServer_TpfSummerizer.dll
   * script: ..\SqlServer_TpfSummerizer\Deploy.sql
 
