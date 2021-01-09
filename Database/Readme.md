@@ -4,7 +4,9 @@
 This folder contains SQL queries for building, testing and querying the
 database.
 
-The queries in this folder are:
+## Building
+
+The queries in this folder are for building the database:
 
 * `CreateAutomationUser.sql` -  Creates the user that will run the scheduled
   tasks for automatically downloading, uploading and processing collar files.
@@ -17,10 +19,6 @@ The queries in this folder are:
 * `LookupTableData.sql` - Populates look up tables (domains) with well known
   values.
 * `Settings.sql` - Populates the Settings table with expected system settings.
-* `Project Investigator Summary Queries.sql` - A list of queries that are
-  provided to project investigators in the Animal Movements application.
-* `Project Summary Queries.sql` - A list of queries that are provided to check
-  the status of projects in the Animal Movements application.
 
 ## Reports
 
@@ -47,6 +45,12 @@ are retained here as examples in case there is a similar need in the future.
 * `PTT Locations for Kyle.sql` - Locations of collars using the Argos
   based location method (not GPS)
 * `Processing Issues Queries.sql` - 
+* `Project Investigator Summary Queries.sql` - A list of queries that are
+  provided to project investigators in the Animal Movements application.
+  **This file is deployed with the Animal Movements application.**
+* `Project Summary Queries.sql` - A list of queries that are provided to check
+  the status of projects in the Animal Movements application.
+  **This file is deployed with the Animal Movements application.**
 * `Spatial Queries.sql` - A collection of queries suitable for ArcMap.
 * `SpatialQueries - ShortDurationVectorsAndEndPoints.sql` - An ArcMap
   query that displays the end points and line of a unusual short duration
