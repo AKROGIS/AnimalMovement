@@ -1,14 +1,18 @@
-'''
+# -*- coding: utf-8 -*-
+"""
 Reads the ParameterFiles in Animal Movements database and prints
 (or saves to a csv file) the GPS schedule found in the file
 The generated list can be filtered by the owner of the file.
 
 This script was written for python 2.7 and has an external dependency on
 the **pyodbc** python module. It can be installed with **pip install pyodbc**
-'''
+"""
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import csv
+import os
 import sys
-
 
 def get_connection_or_die(pyodbc, server, db):
     # See https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows
@@ -174,20 +178,36 @@ def read_simple(file_contents):
     return data
 
 
+def open_csv_write(filename):
+    """Open a file for CSV writing in a Python 2 and 3 compatible way."""
+    if sys.version_info[0] < 3:
+        return open(filename, "wb")
+    return open(filename, "w", encoding="utf8", newline="")
+
+
+def write_csv_row(writer, row):
+    """writer is a csv.writer, and row is a list of unicode or number objects."""
+    if sys.version_info[0] < 3:
+        # Ignore the pylint error that unicode is undefined in Python 3
+        # pylint: disable=undefined-variable
+        writer.writerow(
+            [
+                item.encode("utf-8") if isinstance(item, unicode) else item
+                for item in row
+            ]
+        )
+    else:
+        writer.writerow(row)
+
 def main(pi=None, csvfile=None, server='inpakrovmais', db='Animal_Movement'):
     conn = None
     try:
         import pyodbc
     except ImportError:
-        import os
         pyodbc = None
         pydir = os.path.dirname(sys.executable)
         print('pyodbc module not found, make sure it is installed with')
         print(pydir + r'\Scripts\pip.exe install pyodbc')
-        print('Don''t have pip?')
-        print('Download <https://bootstrap.pypa.io/get-pip.py> to ' + pydir + r'\Scripts\get-pip.py')
-        print('Then run')
-        print(sys.executable + ' ' + pydir + r'\Scripts\get-pip.py')
         sys.exit()
     conn = get_connection_or_die(pyodbc, server, db)
 
@@ -200,12 +220,12 @@ def main(pi=None, csvfile=None, server='inpakrovmais', db='Animal_Movement'):
         for item in read(conn, pi):
             print(fmt.format(*item))
     else:
-        import csv
-        with open(csvfile, 'wb') as f:
+        with open_csv_write(csvfile) as f:
             out = csv.writer(f)
-            out.writerow(["Type", "TPF_FileId", "TPF_Filename", "Start", "Stop", "Interval", "Period"])
+            row = ["Type", "TPF_FileId", "TPF_Filename", "Start", "Stop", "Interval", "Period"]
+            write_csv_row(out, row)
             for item in read(conn, pi):
-                out.writerow(item)
+                write_csv_row(out, item)
 
 
 if __name__ == '__main__':
