@@ -60,6 +60,8 @@ import sys
 
 import pyodbc
 
+import csv23
+
 
 class Config(object):
     """Namespace for configuration parameters. Edit as needed."""
@@ -232,47 +234,23 @@ def read_simple(file_contents):
     return data
 
 
-def open_csv_write(filename):
-    """Open a file for CSV writing in a Python 2 and 3 compatible way."""
-
-    if sys.version_info[0] < 3:
-        return open(filename, "wb")
-    return open(filename, "w", encoding="utf8", newline="")
-
-
-def write_csv_row(writer, row):
-    """writer is a csv.writer, and row is a list of unicode or number objects."""
-
-    if sys.version_info[0] < 3:
-        # Ignore the pylint error that unicode is undefined in Python 3
-        # pylint: disable=undefined-variable
-        writer.writerow(
-            [
-                item.encode("utf-8") if isinstance(item, unicode) else item
-                for item in row
-            ]
-        )
-    else:
-        writer.writerow(row)
-
-
-def main(connection, investigator=None, csvfile=None):
+def main(connection, investigator=None, csv_path=None):
     """Print or save the GPS schedules for investigator from the database connection."""
 
     header = ["Type", "TPF_FileId", "TPF_Filename", "Start", "Stop", "Interval", "Period"]
     schedules = read(connection, investigator)
 
-    if csvfile is None:
+    if csv_path is None:
         fmt = "{1:<5}{0:<10}{3:<12}{4:<12}{5:<10}{6:<30}{2:<50}"
         print(fmt.format(*header))
         for item in schedules:
             print(fmt.format(*item))
     else:
-        with open_csv_write(csvfile) as in_file:
-            out = csv.writer(in_file)
-            write_csv_row(out, header)
+        with csv23.open(csv_path, "w") as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv23.write(csv_writer, header)
             for item in schedules:
-                write_csv_row(out, item)
+                csv23.write(csv_writer, item)
 
 
 if __name__ == "__main__":

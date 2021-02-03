@@ -9,40 +9,16 @@ import csv
 from io import open
 import sys
 
-
-def open_csv(filename, mode="r"):
-    """
-    Open a file for CSV mode in a Python 2 and 3 compatible way.
-
-    mode must be one of "r" for reading or "w" for writing.
-    """
-    if sys.version_info[0] < 3:
-        return open(filename, mode + "b")
-    return open(filename, mode, encoding="utf8", newline="")
-
-
-def write_csv_row(writer, row):
-    """writer is a csv.writer, and row is a list of unicode or number objects."""
-    if sys.version_info[0] < 3:
-        # Ignore the pylint error that unicode is undefined in Python 3
-        # pylint: disable=undefined-variable
-        writer.writerow(
-            [
-                item.encode("utf-8") if isinstance(item, unicode) else item
-                for item in row
-            ]
-        )
-    else:
-        writer.writerow(row)
+import csv23
 
 
 def make_csv(in_file, out_file):
     header = ['Id', 'Date', 'LC', 'IQ', 'Lat1', 'Lon1', 'Lat2', 'Lon2', 'Nb mes', 'Nb mes>-120dB',
               'Best level', 'Pass duration', 'NOPC', 'Calcul freq', 'Altitude']
     separators = ['  ' + item + ' : ' for item in header[1:]]
-    with open_csv(out_file, 'w') as csv_file:
+    with csv23.open(out_file, 'w') as csv_file:
         csv_writer = csv.writer(csv_file)
-        write_csv_row(csv_writer, header)
+        csv23.write(csv_writer, header)
         with open(in_file, "r", encoding="utf-8") as data:
             line0 = ''
             while True:
@@ -59,7 +35,7 @@ def make_csv(in_file, out_file):
                     for separator in separators:
                         line = line.replace(separator, '|')
                     row = [item.strip() for item in line.split('|')]
-                    write_csv_row(csv_writer, row)
+                    csv23.write(csv_writer, row)
                     line0 = line4
                     continue
                 else:
@@ -71,20 +47,19 @@ def make_csv2(in_file, out_file):
     """Convert John's XLS data into database format L (as expected by the make_aws function below"""
     header = ['Id', 'Date', 'LC', 'IQ', 'Lat1', 'Lon1', 'Lat2', 'Lon2', 'Nb mes', 'Nb mes>-120dB',
               'Best level', 'Pass duration', 'NOPC', 'Calcul freq', 'Altitude']
-    with open_csv(out_file, 'w') as csv_file:
+    with csv23.open(out_file, 'w') as csv_file:
         csv_writer = csv.writer(csv_file)
-        write_csv_row(csv_writer, header)
-        with open_csv(in_file, 'r') as data:
-            data.readline() # remove old header
+        csv23.write(csv_writer, header)
+        with csv23.open(in_file, 'r') as data:
             csv_reader = csv.reader(data)
+            next(csv_reader) # remove old header
             for row in csv_reader:
-                if sys.version_info[0] < 3:
-                    row=[item.decode('utf-8') for item in row]
+                row = csv23.fix(row)
                 date = fix_date2(row[4], row[8])
                 loc_class = row[9] if row[9] else 'B'
                 new_row = [row[1],date,loc_class,row[10],row[11],row[12],row[13],row[14],row[17],
                            row[18],row[19],row[20],row[21],row[22],row[23]]
-                write_csv_row(csv_writer, new_row)
+                csv23.write(csv_writer, new_row)
 
 
 def fix_date2(d,t):
@@ -153,15 +128,14 @@ def make_aws(in_file, out_file):
               '"orientation";"hdop";"bestDate";"compression";"type";"alarm";"concatenated";"date";"level";' +
               '"doppler";"rawData"').replace('"', '').split(';')
     empty_row = ['']*len(header)
-    with open_csv(in_file, 'r') as csv_file:
+    with csv23.open(in_file, 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
-        with open_csv(out_file, 'w') as csv_file2:
+        with csv23.open(out_file, 'w') as csv_file2:
             csv_writer = csv.writer(csv_file2, delimiter=';', quoting=csv.QUOTE_ALL)
-            write_csv_row(csv_writer, header)
+            csv23.write(csv_writer, header)
             next(csv_reader)  # throw away the header
             for row in csv_reader:
-                if sys.version_info[0] < 3:
-                    row=[item.decode('utf-8') for item in row]
+                row = csv23.fix(row)
                 date = fix_date(row[1])
                 lat = fix_lat(row[4])
                 lon = fix_lon(row[5])
@@ -186,7 +160,7 @@ def make_aws(in_file, out_file):
                 new_row[12] = fix_freq(row[13])  # Calcul freq
                 new_row[16] = fix_alt(row[14])  # Altitude
                 new_row[38] = "06A88"  # junk to get it to process in the DB.
-                write_csv_row(csv_writer, new_row)
+                csv23.write(csv_writer, new_row)
 
 make_csv2(r'AllArgosDataClean2.csv', r'Johns_HandCrafted_Argos_Data.csv')
 #make_csv(r'ArgosArchiveTest.txt', r'ArgosArchiveTest.csv')
