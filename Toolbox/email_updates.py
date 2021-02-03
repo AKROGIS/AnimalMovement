@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
+"""
+The account running this script must have editor or better permissions on the DB
+
+updates maps the user's email to a project.  If a user wants multiple projects,
+then include them multiple times, once for each project.
+The project is the ProjectID in the Projects table in the Animal_Movement DB
+
+Third party requirements:
+* pyodbc - https://pypi.python.org/pypi/pyodbc
+"""
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import pyodbc
-# pip install pyodbc
 import smtplib
+import sys
 
-# The account running this script must have editor or better permissions on the DB
-
-# updates maps the user's email to a project.  If a user wants multiple projects, then include them
-# multiple times, once for each project.
-# The project is the ProjectID in the Projects table in the Animal_Movement DB
+import pyodbc
 
 updates = {
     'regan_sarwas@nps.gov': 'DENA_Wolves',
@@ -21,9 +27,9 @@ mailhost = 'mailer.itc.nps.gov'
 # email account that will send the email
 sender = 'regan_sarwas@nps.gov'
 
-# Connection string to database
-conn_string = "DRIVER={SQL Server Native Client 11.0};" + \
-              "SERVER=INPAKROVMAIS;DATABASE=Animal_Movement;Trusted_Connection=Yes;"
+server = "inpakrovmais"
+
+database = "Animal_Movement"
 
 # Query to get project locations from the database
 query = """
@@ -37,6 +43,38 @@ SELECT AnimalId
 WHERE ProjectId = '{0}' AND dateadd(day, -30, getdate()) < fixDate
 ORDER BY FixDate DESC
 """
+
+
+def get_connection_or_die(server, database):
+    """
+    Get a Trusted pyodbc connection to the SQL Server database on server.
+
+    Try several connection strings.
+    See https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows
+
+    Exit with an error message if there is no successful connection.
+    """
+    drivers = [
+        "{ODBC Driver 17 for SQL Server}",  # supports SQL Server 2008 through 2017
+        "{ODBC Driver 13.1 for SQL Server}",  # supports SQL Server 2008 through 2016
+        "{ODBC Driver 13 for SQL Server}",  # supports SQL Server 2005 through 2016
+        "{ODBC Driver 11 for SQL Server}",  # supports SQL Server 2005 through 2014
+        "{SQL Server Native Client 11.0}",  # DEPRECATED: released with SQL Server 2012
+        # '{SQL Server Native Client 10.0}',    # DEPRECATED: released with SQL Server 2008
+    ]
+    conn_template = "DRIVER={0};SERVER={1};DATABASE={2};Trusted_Connection=Yes;"
+    for driver in drivers:
+        conn_string = conn_template.format(driver, server, database)
+        try:
+            connection = pyodbc.connect(conn_string)
+            return connection
+        except pyodbc.Error:
+            pass
+    print("Rats!! Unable to connect to the database.")
+    print("Make sure you have an ODBC driver installed for SQL Server")
+    print("and your AD account has the proper DB permissions.")
+    print("Contact akro_gis_helpdesk@nps.gov for assistance.")
+    sys.exit()
 
 
 def send_smtp_email(mailhost, from_addr, to_addrs, subject, text):
@@ -54,7 +92,7 @@ def format_locations(rows):
     return results
 
 def main():
-    connection = pyodbc.connect(conn_string)
+    connection = get_connection_or_die(server, database)
     for user, project in updates.items():
         # print(user)
         # print(project)
