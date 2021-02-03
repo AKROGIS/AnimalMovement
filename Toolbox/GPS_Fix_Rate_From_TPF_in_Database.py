@@ -62,11 +62,13 @@ def print_gps_lines(connection, pi):
         else:
             rows = connection.cursor().execute(sql, pi).fetchall()
     except pyodbc.Error as ex:
-        err = "Database error:\n" + str(sql) + "\n" + str(ex)
+        err = "Database error:\n{0}\n{1}".format(sql, ex)
         print(err)
         rows = []
     for row in rows:
-        for line in [str(l) for l in row.Contents.split("\n")]:
+        # Row contents is a binary blob of the file contents.
+        file_contents = row.Contents.decode("utf-8")
+        for line in file_contents.split("\n"):
             if " " in line:
                 line_title = line.split(" ")[0]
                 if "gps" in line_title.lower():
@@ -133,23 +135,28 @@ def read(connection, pi):
         else:
             rows = connection.cursor().execute(sql, pi).fetchall()
     except pyodbc.Error as ex:
-        err = "Database error:\n" + str(sql) + "\n" + str(ex)
+        err = "Database error:\n{0}\n{1}".format(sql, ex)
         print(err)
         rows = []
     for row in rows:
-        for schedule in read_simple(row.Contents):
+        # row contents is a binary blob of the file contents.
+        file_contents = row.Contents.decode("utf-8")
+        for schedule in read_simple(file_contents):
             data.append(("simple", row.FileId, row.FileName, "", "", "", schedule))
-        for schedule in read_advanced(row.Contents):
+        for schedule in read_advanced(file_contents):
             data.append((["advanced", row.FileId, row.FileName] + schedule))
     return data
 
 
 def read_advanced(file_contents):
+    """Read advanced GPS schedules from the unicode file_contents."""
+
     data = []
     schedule = []
     in_schedule = False
     in_season = False
-    for line in [str(l) for l in file_contents.split("\n")]:
+    # A line may have on
+    for line in file_contents.split("\n"):
         if in_schedule:
             # print(line)
             if in_season:
@@ -182,8 +189,10 @@ def read_advanced(file_contents):
 
 
 def read_simple(file_contents):
+    """Read simple GPS schedules from the unicode file_contents."""
+
     data = []
-    for line in [str(l) for l in file_contents.split("\n")]:
+    for line in file_contents.split("\n"):
         interval = None
         if line.startswith("sections.gps.parameters.gpsScheduleUpdatePeriod"):
             # print(line)
