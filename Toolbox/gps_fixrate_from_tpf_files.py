@@ -61,6 +61,30 @@ import sys
 import pyodbc
 
 
+class Config(object):
+    """Namespace for configuration parameters. Edit as needed."""
+
+    # pylint: disable=useless-object-inheritance,too-few-public-methods
+
+    # Name of the database server
+    server="inpakrovmais"
+
+    # Name of database with TPF files
+    database="Animal_Movement"
+
+    # Name of the project investigator to check (None implies all)
+    investigator = None
+
+    # location (file system path) to create a CSV of of results
+    # None implies print results to standard output.
+    csv_path = None
+
+    # If scan_only is true it will scan the database for all TPF parameters
+    # with the text `gps`.  Honors investigator; sets csv_path = None.
+    # Only need to do once, to verify search parameters for other functions
+    scan_only = False
+
+
 def get_connection_or_die(server, database):
     """
     Get a Trusted pyodbc connection to the SQL Server database on server.
@@ -235,18 +259,13 @@ def write_csv_row(writer, row):
         writer.writerow(row)
 
 
-def main(investigator=None, csvfile=None, server="inpakrovmais", database="Animal_Movement"):
+def main(connection, investigator=None, csvfile=None):
     """Print or save the GPS schedules for investigator from the database connection."""
-
-    conn = get_connection_or_die(server, database)
-
-    # Only need to do once, to verify search parameters for other functions
-    # print_gps_lines(conn, investigator)
 
     if csvfile is None:
         fmt = "{1:<5}{0:<10}{3:<12}{4:<12}{5:<10}{6:<30}{2:<50}"
         print(fmt.format("Type", "Id", "Name", "Start", "Stop", "Interval", "Period"))
-        for item in read(conn, investigator):
+        for item in read(connection, investigator):
             print(fmt.format(*item))
     else:
         with open_csv_write(csvfile) as in_file:
@@ -261,12 +280,13 @@ def main(investigator=None, csvfile=None, server="inpakrovmais", database="Anima
                 "Period",
             ]
             write_csv_row(out, row)
-            for item in read(conn, investigator):
+            for item in read(connection, investigator):
                 write_csv_row(out, item)
 
 
 if __name__ == "__main__":
-    # main(None, r'C:\tmp\list.csv')
-    # main(r'nps\bborg', r'C:\tmp\list.csv')
-    main(r"nps\msorum", None)
-    # main(r'nps\bborg', None)
+    conn = get_connection_or_die(Config.server, Config.database)
+    if Config.scan_only:
+        print_gps_lines(conn, Config.investigator)
+    else:
+        main(conn, Config.investigator, Config.csv_path)
