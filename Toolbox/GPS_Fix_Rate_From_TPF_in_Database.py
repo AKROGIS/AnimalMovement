@@ -4,6 +4,49 @@ Reads the ParameterFiles in Animal Movements database and prints
 (or saves to a csv file) the GPS schedule found in the file
 The generated list can be filtered by the owner of the file.
 
+All parameters containing `gps` in all Telonics Parameter File in the
+database as of 2020-11-13:
+
+    sections.argossatellite.parameters.turnOffGPSPredictionAfterNDays
+    sections.auxiliary1ScheduleSet.parameters.gpsScheduleAdvancedSchedule
+    sections.auxiliary1ScheduleSet.parameters.gpsScheduleType
+    sections.auxiliary1ScheduleSet.parameters.gpsScheduleUpdatePeriod
+    sections.auxiliary2ScheduleSet.parameters.gpsScheduleAdvancedSchedule
+    sections.auxiliary2ScheduleSet.parameters.gpsScheduleType
+    sections.auxiliary2ScheduleSet.parameters.gpsScheduleUpdatePeriod
+    sections.auxiliary3ScheduleSet.parameters.gpsScheduleAdvancedSchedule
+    sections.auxiliary3ScheduleSet.parameters.gpsScheduleType
+    sections.auxiliary3ScheduleSet.parameters.gpsScheduleUpdatePeriod
+    sections.collarWriteup.parameters.optionTreeGpsCommonParts
+    sections.factoryRoofScheduleSet.parameters.gpsScheduleAdvancedSchedule
+    sections.factoryRoofScheduleSet.parameters.gpsScheduleType
+    sections.factoryRoofScheduleSet.parameters.gpsScheduleUpdatePeriod
+    sections.geofence.parameters.insideGpsScheduleAdvancedSchedule
+    sections.geofence.parameters.insideGpsScheduleType
+    sections.geofence.parameters.insideGpsScheduleUpdatePeriod
+    sections.gps.parameters.allowVhfWhileNavigating
+    sections.gps.parameters.continuousNavigationMode
+    sections.gps.parameters.fixTimeout
+    sections.gps.parameters.gpsScheduleAdvancedSchedule
+    sections.gps.parameters.gpsScheduleType
+    sections.gps.parameters.gpsScheduleUpdatePeriod
+    sections.gps.parameters.nmeaBaudRate
+    sections.gps.parameters.nmeaSentences
+    sections.gps.parameters.passiveAntennaFlag
+    sections.gps.parameters.qfpScheduleAdvancedSchedule
+    sections.gps.parameters.qfpScheduleType
+    sections.gps.parameters.qfpScheduleUpdatePeriod
+    sections.gps.parameters.qfpTimeout
+    sections.gps.parameters.qfpWithoutGpsTolerance
+    sections.gps.parameters.strategy
+    sections.gpsSchedule.parameters.schedule
+    sections.hardware.parameters.gpsSleepThreshold
+    sections.hardware.parameters.gpsSleepThresholdBoosted
+    sections.hardware.parameters.gpsSleepThresholdUnboosted
+    sections.underwater.parameters.useGpsInHaulout
+    sections.units.parameters.gpsFirmwareVersionList
+    sections.vhf.parameters.gpsVhfBeaconControl
+
 This script was written for python 2.7 and may work for 3.x
 
 Third party requirements:
@@ -51,6 +94,8 @@ def get_connection_or_die(server, database):
 
 
 def print_gps_lines(connection, investigator):
+    """Print lines with `gps` in the TPF files for investigator from connection."""
+
     data = set()
     if investigator is None:
         sql = "SELECT Contents FROM CollarParameterFiles;"
@@ -78,52 +123,9 @@ def print_gps_lines(connection, investigator):
         print(line)
 
 
-"""
-As of 2020-11-13:
-
-sections.argossatellite.parameters.turnOffGPSPredictionAfterNDays
-sections.auxiliary1ScheduleSet.parameters.gpsScheduleAdvancedSchedule
-sections.auxiliary1ScheduleSet.parameters.gpsScheduleType
-sections.auxiliary1ScheduleSet.parameters.gpsScheduleUpdatePeriod
-sections.auxiliary2ScheduleSet.parameters.gpsScheduleAdvancedSchedule
-sections.auxiliary2ScheduleSet.parameters.gpsScheduleType
-sections.auxiliary2ScheduleSet.parameters.gpsScheduleUpdatePeriod
-sections.auxiliary3ScheduleSet.parameters.gpsScheduleAdvancedSchedule
-sections.auxiliary3ScheduleSet.parameters.gpsScheduleType
-sections.auxiliary3ScheduleSet.parameters.gpsScheduleUpdatePeriod
-sections.collarWriteup.parameters.optionTreeGpsCommonParts
-sections.factoryRoofScheduleSet.parameters.gpsScheduleAdvancedSchedule
-sections.factoryRoofScheduleSet.parameters.gpsScheduleType
-sections.factoryRoofScheduleSet.parameters.gpsScheduleUpdatePeriod
-sections.geofence.parameters.insideGpsScheduleAdvancedSchedule
-sections.geofence.parameters.insideGpsScheduleType
-sections.geofence.parameters.insideGpsScheduleUpdatePeriod
-sections.gps.parameters.allowVhfWhileNavigating
-sections.gps.parameters.continuousNavigationMode
-sections.gps.parameters.fixTimeout
-sections.gps.parameters.gpsScheduleAdvancedSchedule
-sections.gps.parameters.gpsScheduleType
-sections.gps.parameters.gpsScheduleUpdatePeriod
-sections.gps.parameters.nmeaBaudRate
-sections.gps.parameters.nmeaSentences
-sections.gps.parameters.passiveAntennaFlag
-sections.gps.parameters.qfpScheduleAdvancedSchedule
-sections.gps.parameters.qfpScheduleType
-sections.gps.parameters.qfpScheduleUpdatePeriod
-sections.gps.parameters.qfpTimeout
-sections.gps.parameters.qfpWithoutGpsTolerance
-sections.gps.parameters.strategy
-sections.gpsSchedule.parameters.schedule
-sections.hardware.parameters.gpsSleepThreshold
-sections.hardware.parameters.gpsSleepThresholdBoosted
-sections.hardware.parameters.gpsSleepThresholdUnboosted
-sections.underwater.parameters.useGpsInHaulout
-sections.units.parameters.gpsFirmwareVersionList
-sections.vhf.parameters.gpsVhfBeaconControl
-"""
-
-
 def read(connection, investigator):
+    """Read the TPF files for investigator from the database connection."""
+
     data = []
     if investigator is None:
         sql = "SELECT FileId, FileName, Contents FROM CollarParameterFiles;"
@@ -211,6 +213,7 @@ def read_simple(file_contents):
 
 def open_csv_write(filename):
     """Open a file for CSV writing in a Python 2 and 3 compatible way."""
+
     if sys.version_info[0] < 3:
         return open(filename, "wb")
     return open(filename, "w", encoding="utf8", newline="")
@@ -218,6 +221,7 @@ def open_csv_write(filename):
 
 def write_csv_row(writer, row):
     """writer is a csv.writer, and row is a list of unicode or number objects."""
+
     if sys.version_info[0] < 3:
         # Ignore the pylint error that unicode is undefined in Python 3
         # pylint: disable=undefined-variable
@@ -232,6 +236,7 @@ def write_csv_row(writer, row):
 
 
 def main(investigator=None, csvfile=None, server="inpakrovmais", database="Animal_Movement"):
+    """Print or save the GPS schedules for investigator from the database connection."""
 
     conn = get_connection_or_die(server, database)
 
