@@ -262,25 +262,19 @@ def write_csv_row(writer, row):
 def main(connection, investigator=None, csvfile=None):
     """Print or save the GPS schedules for investigator from the database connection."""
 
+    header = ["Type", "TPF_FileId", "TPF_Filename", "Start", "Stop", "Interval", "Period"]
+    schedules = read(connection, investigator)
+
     if csvfile is None:
         fmt = "{1:<5}{0:<10}{3:<12}{4:<12}{5:<10}{6:<30}{2:<50}"
-        print(fmt.format("Type", "Id", "Name", "Start", "Stop", "Interval", "Period"))
-        for item in read(connection, investigator):
+        print(fmt.format(*header))
+        for item in schedules:
             print(fmt.format(*item))
     else:
         with open_csv_write(csvfile) as in_file:
             out = csv.writer(in_file)
-            row = [
-                "Type",
-                "TPF_FileId",
-                "TPF_Filename",
-                "Start",
-                "Stop",
-                "Interval",
-                "Period",
-            ]
-            write_csv_row(out, row)
-            for item in read(connection, investigator):
+            write_csv_row(out, header)
+            for item in schedules:
                 write_csv_row(out, item)
 
 
