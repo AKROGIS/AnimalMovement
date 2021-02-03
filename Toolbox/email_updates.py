@@ -30,14 +30,14 @@ class Config(object):
     # A list of (email address, Project ID) tuples
     # the email address will be send the database report for that project.
     reports = [
-        ('regan_sarwas@nps.gov', 'DENA_Wolves'),
+        ("regan_sarwas@nps.gov", "DENA_Wolves"),
     ]
 
     # hostname of the SMTP email server
-    mailhost = 'mailer.itc.nps.gov'
+    mailhost = "mailer.itc.nps.gov"
 
     # email account that will send the email
-    sender = 'regan_sarwas@nps.gov'
+    sender = "regan_sarwas@nps.gov"
 
     server = "inpakrovmais"
 
@@ -91,17 +91,22 @@ def get_connection_or_die(server, database):
 
 def send_smtp_email(mailhost, from_addr, to_addr, subject, text):
     smtp = smtplib.SMTP(mailhost)
-    msg = "From: {0}\r\nTo: {1}\r\nSubject: {2}\r\n\r\n{3}".format(from_addr, to_addr, subject, text)
+    msg = "From: {0}\r\nTo: {1}\r\nSubject: {2}\r\n\r\n{3}".format(
+        from_addr, to_addr, subject, text
+    )
     # print(msg.encode('utf-8'))
-    smtp.sendmail(from_addr, [to_addr], msg.encode('utf-8'))
+    smtp.sendmail(from_addr, [to_addr], msg.encode("utf-8"))
     smtp.quit()
 
 
 def format_locations(rows):
-    results = "{0:8}\t{1:19}\t{2:9}\t{3}\r\n".format('AnimalId', 'LastFixDate_UTC', 'Lat_WGS84_DM', 'Lon_WGS84_DM')
+    results = "{0:8}\t{1:19}\t{2:9}\t{3}\r\n".format(
+        "AnimalId", "LastFixDate_UTC", "Lat_WGS84_DM", "Lon_WGS84_DM"
+    )
     for row in rows:
-        results += "{0:8}\t{1}\t{2}\t{3}\r\n".format(row[0],row[1],row[2],row[3])
+        results += "{0:8}\t{1}\t{2}\t{3}\r\n".format(row[0], row[1], row[2], row[3])
     return results
+
 
 def main():
     connection = get_connection_or_die(Config.server, Config.database)
@@ -112,7 +117,7 @@ def main():
         rows = connection.cursor().execute(sql).fetchall()
         locations = format_locations(rows)
         # print(locations)
-        subject = 'Last known locations for {0}'.format(project)
+        subject = "Last known locations for {0}".format(project)
         send_smtp_email(Config.mailhost, Config.sender, user, subject, locations)
 
 
