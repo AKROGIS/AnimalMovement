@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 """
+Send an email with a database report to a list of users.
+
+Typically run as a scheduled task to send a daily report.
+
 The account running this script must have editor or better permissions on the DB
 
 updates maps the user's email to a project.  If a user wants multiple projects,
@@ -17,32 +21,40 @@ import sys
 
 import pyodbc
 
-updates = {
-    'regan_sarwas@nps.gov': 'DENA_Wolves',
-}
 
-# hostname of the SMTP email server
-mailhost = 'mailer.itc.nps.gov'
+class Config(object):
+    """Namespace for configuration parameters. Edit as needed."""
 
-# email account that will send the email
-sender = 'regan_sarwas@nps.gov'
+    # pylint: disable=useless-object-inheritance,too-few-public-methods
 
-server = "inpakrovmais"
+    # A list of (email address, Project ID) tuples
+    # the email address will be send the database report for that project.
+    reports = [
+        ('regan_sarwas@nps.gov', 'DENA_Wolves'),
+    ]
 
-database = "Animal_Movement"
+    # hostname of the SMTP email server
+    mailhost = 'mailer.itc.nps.gov'
 
-# Query to get project locations from the database
-query = """
-SELECT AnimalId
-      ,FixDate AS LastFixDate_UTC
---	  ,Location.Lat AS Lat_WGS84
---      ,Location.Long AS Lon_WGS84
-	  ,cast(cast(abs(Location.Lat) as Int) AS NVARCHAR) + N'° ' + convert(NVARCHAR, (60 * (Location.Lat - cast(Location.Lat as Int)))) + ''' ' + (case when Location.Lat < 0 then 'S' ELSE 'N' END)   AS Lat_WGS84_DM
-      ,cast(cast(abs(Location.Long) as Int) AS NVARCHAR) + N'° ' + convert(NVARCHAR, (60 * (abs(Location.Long) - cast(abs(Location.Long) as Int)))) + ''' ' + (case when Location.Long < 0 then 'W' ELSE 'E' END) AS Lon_WGS84_DM
-      FROM [Animal_Movement].[dbo].[MostRecentLocations]
-WHERE ProjectId = '{0}' AND dateadd(day, -30, getdate()) < fixDate
-ORDER BY FixDate DESC
-"""
+    # email account that will send the email
+    sender = 'regan_sarwas@nps.gov'
+
+    server = "inpakrovmais"
+
+    database = "Animal_Movement"
+
+    # Query to get project locations from the database
+    query = """
+    SELECT AnimalId
+        ,FixDate AS LastFixDate_UTC
+    --	  ,Location.Lat AS Lat_WGS84
+    --      ,Location.Long AS Lon_WGS84
+        ,cast(cast(abs(Location.Lat) as Int) AS NVARCHAR) + N'° ' + convert(NVARCHAR, (60 * (Location.Lat - cast(Location.Lat as Int)))) + ''' ' + (case when Location.Lat < 0 then 'S' ELSE 'N' END)   AS Lat_WGS84_DM
+        ,cast(cast(abs(Location.Long) as Int) AS NVARCHAR) + N'° ' + convert(NVARCHAR, (60 * (abs(Location.Long) - cast(abs(Location.Long) as Int)))) + ''' ' + (case when Location.Long < 0 then 'W' ELSE 'E' END) AS Lon_WGS84_DM
+        FROM [Animal_Movement].[dbo].[MostRecentLocations]
+    WHERE ProjectId = '{0}' AND dateadd(day, -30, getdate()) < fixDate
+    ORDER BY FixDate DESC
+    """
 
 
 def get_connection_or_die(server, database):
@@ -77,11 +89,11 @@ def get_connection_or_die(server, database):
     sys.exit()
 
 
-def send_smtp_email(mailhost, from_addr, to_addrs, subject, text):
+def send_smtp_email(mailhost, from_addr, to_addr, subject, text):
     smtp = smtplib.SMTP(mailhost)
-    msg = u"From: {0}\r\nTo: {1}\r\nSubject: {2}\r\n\r\n{3}".format(from_addr, ','.join(to_addrs), subject, text)
-    # print(msg.encode('utf8'))
-    smtp.sendmail(from_addr, to_addrs, msg.encode('utf8'))
+    msg = "From: {0}\r\nTo: {1}\r\nSubject: {2}\r\n\r\n{3}".format(from_addr, to_addr, subject, text)
+    # print(msg.encode('utf-8'))
+    smtp.sendmail(from_addr, [to_addr], msg.encode('utf-8'))
     smtp.quit()
 
 
@@ -92,16 +104,16 @@ def format_locations(rows):
     return results
 
 def main():
-    connection = get_connection_or_die(server, database)
-    for user, project in updates.items():
+    connection = get_connection_or_die(Config.server, Config.database)
+    for user, project in Config.reports:
         # print(user)
         # print(project)
-        sql = query.format(project)
+        sql = Config.query.format(project)
         rows = connection.cursor().execute(sql).fetchall()
         locations = format_locations(rows)
         # print(locations)
         subject = 'Last known locations for {0}'.format(project)
-        send_smtp_email(mailhost, sender, [user], subject, locations)
+        send_smtp_email(Config.mailhost, Config.sender, user, subject, locations)
 
 
 main()
