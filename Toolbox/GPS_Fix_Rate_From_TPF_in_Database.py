@@ -11,10 +11,12 @@ the **pyodbc** python module. It can be installed with **pip install pyodbc**
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import csv
-import os
 import sys
 
-def get_connection_or_die(pyodbc, server, db):
+import pyodbc
+
+
+def get_connection_or_die(server, db):
     # See https://github.com/mkleehammer/pyodbc/wiki/Connecting-to-SQL-Server-from-Windows
     drivers = [ '{ODBC Driver 17 for SQL Server}',    # supports SQL Server 2008 through 2017
                 '{ODBC Driver 13.1 for SQL Server}',  # supports SQL Server 2008 through 2016
@@ -49,8 +51,8 @@ def print_gps_lines(connection, pi):
             rows = connection.cursor().execute(sql).fetchall()
         else:
             rows = connection.cursor().execute(sql, pi).fetchall()
-    except Exception as de:
-        err = "Database error:\n" + str(sql) + '\n' + str(de)
+    except pyodbc.Error as ex:
+        err = "Database error:\n" + str(sql) + '\n' + str(ex)
         print(err)
         rows = []
     for row in rows:
@@ -118,8 +120,8 @@ def read(connection, pi):
             rows = connection.cursor().execute(sql).fetchall()
         else:
             rows = connection.cursor().execute(sql, pi).fetchall()
-    except Exception as de:
-        err = "Database error:\n" + str(sql) + '\n' + str(de)
+    except pyodbc.Error as ex:
+        err = "Database error:\n" + str(sql) + '\n' + str(ex)
         print(err)
         rows = []
     for row in rows:
@@ -149,7 +151,7 @@ def read_advanced(file_contents):
                         value = line.replace('onPeriod','').replace('{','').replace('}','').strip()
                     else:
                         value = line.strip()
-                    schedule.append(value)                    
+                    schedule.append(value)
             elif line.startswith('}'):
                 in_schedule = False
             elif line.startswith('   season {'):
@@ -200,16 +202,8 @@ def write_csv_row(writer, row):
         writer.writerow(row)
 
 def main(pi=None, csvfile=None, server='inpakrovmais', db='Animal_Movement'):
-    conn = None
-    try:
-        import pyodbc
-    except ImportError:
-        pyodbc = None
-        pydir = os.path.dirname(sys.executable)
-        print('pyodbc module not found, make sure it is installed with')
-        print(pydir + r'\Scripts\pip.exe install pyodbc')
-        sys.exit()
-    conn = get_connection_or_die(pyodbc, server, db)
+
+    conn = get_connection_or_die(server, db)
 
     # Only need to do once, to verify search parameters for other functions
     # print_gps_lines(conn, pi)
