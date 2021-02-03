@@ -50,17 +50,17 @@ def get_connection_or_die(server, database):
     sys.exit()
 
 
-def print_gps_lines(connection, pi):
+def print_gps_lines(connection, investigator):
     data = set()
-    if pi is None:
+    if investigator is None:
         sql = "SELECT Contents FROM CollarParameterFiles;"
     else:
         sql = "SELECT Contents FROM CollarParameterFiles WHERE Owner = ?;"
     try:
-        if pi is None:
+        if investigator is None:
             rows = connection.cursor().execute(sql).fetchall()
         else:
-            rows = connection.cursor().execute(sql, pi).fetchall()
+            rows = connection.cursor().execute(sql, investigator).fetchall()
     except pyodbc.Error as ex:
         err = "Database error:\n{0}\n{1}".format(sql, ex)
         print(err)
@@ -123,17 +123,17 @@ sections.vhf.parameters.gpsVhfBeaconControl
 """
 
 
-def read(connection, pi):
+def read(connection, investigator):
     data = []
-    if pi is None:
+    if investigator is None:
         sql = "SELECT FileId, FileName, Contents FROM CollarParameterFiles;"
     else:
         sql = "SELECT FileId, FileName, Contents FROM CollarParameterFiles WHERE Owner = ?;"
     try:
-        if pi is None:
+        if investigator is None:
             rows = connection.cursor().execute(sql).fetchall()
         else:
-            rows = connection.cursor().execute(sql, pi).fetchall()
+            rows = connection.cursor().execute(sql, investigator).fetchall()
     except pyodbc.Error as ex:
         err = "Database error:\n{0}\n{1}".format(sql, ex)
         print(err)
@@ -231,21 +231,21 @@ def write_csv_row(writer, row):
         writer.writerow(row)
 
 
-def main(pi=None, csvfile=None, server="inpakrovmais", db="Animal_Movement"):
+def main(investigator=None, csvfile=None, server="inpakrovmais", database="Animal_Movement"):
 
-    conn = get_connection_or_die(server, db)
+    conn = get_connection_or_die(server, database)
 
     # Only need to do once, to verify search parameters for other functions
-    # print_gps_lines(conn, pi)
+    # print_gps_lines(conn, investigator)
 
     if csvfile is None:
         fmt = "{1:<5}{0:<10}{3:<12}{4:<12}{5:<10}{6:<30}{2:<50}"
         print(fmt.format("Type", "Id", "Name", "Start", "Stop", "Interval", "Period"))
-        for item in read(conn, pi):
+        for item in read(conn, investigator):
             print(fmt.format(*item))
     else:
-        with open_csv_write(csvfile) as f:
-            out = csv.writer(f)
+        with open_csv_write(csvfile) as in_file:
+            out = csv.writer(in_file)
             row = [
                 "Type",
                 "TPF_FileId",
@@ -256,7 +256,7 @@ def main(pi=None, csvfile=None, server="inpakrovmais", db="Animal_Movement"):
                 "Period",
             ]
             write_csv_row(out, row)
-            for item in read(conn, pi):
+            for item in read(conn, investigator):
                 write_csv_row(out, item)
 
 
