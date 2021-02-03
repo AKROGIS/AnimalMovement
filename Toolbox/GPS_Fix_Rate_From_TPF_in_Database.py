@@ -62,18 +62,19 @@ def print_gps_lines(connection, pi):
         else:
             rows = connection.cursor().execute(sql, pi).fetchall()
     except pyodbc.Error as ex:
-        err = "Database error:\n" + str(sql) + '\n' + str(ex)
+        err = "Database error:\n" + str(sql) + "\n" + str(ex)
         print(err)
         rows = []
     for row in rows:
-        for line in [str(l) for l in row.Contents.split('\n')]:
-            if ' ' in line:
-                line_title = line.split(' ')[0]
-                if 'gps' in line_title.lower():
+        for line in [str(l) for l in row.Contents.split("\n")]:
+            if " " in line:
+                line_title = line.split(" ")[0]
+                if "gps" in line_title.lower():
                     # data.add(line)
                     data.add(line_title)
     for line in sorted(list(data)):
         print(line)
+
 
 """
 As of 2020-11-13:
@@ -119,6 +120,7 @@ sections.units.parameters.gpsFirmwareVersionList
 sections.vhf.parameters.gpsVhfBeaconControl
 """
 
+
 def read(connection, pi):
     data = []
     if pi is None:
@@ -131,14 +133,14 @@ def read(connection, pi):
         else:
             rows = connection.cursor().execute(sql, pi).fetchall()
     except pyodbc.Error as ex:
-        err = "Database error:\n" + str(sql) + '\n' + str(ex)
+        err = "Database error:\n" + str(sql) + "\n" + str(ex)
         print(err)
         rows = []
     for row in rows:
         for schedule in read_simple(row.Contents):
-            data.append(('simple', row.FileId, row.FileName, '', '', '', schedule))
+            data.append(("simple", row.FileId, row.FileName, "", "", "", schedule))
         for schedule in read_advanced(row.Contents):
-            data.append((['advanced', row.FileId, row.FileName] + schedule))
+            data.append((["advanced", row.FileId, row.FileName] + schedule))
     return data
 
 
@@ -147,27 +149,33 @@ def read_advanced(file_contents):
     schedule = []
     in_schedule = False
     in_season = False
-    for line in [str(l) for l in file_contents.split('\n')]:
+    for line in [str(l) for l in file_contents.split("\n")]:
         if in_schedule:
             # print(line)
             if in_season:
-                if line.startswith('   }'):
+                if line.startswith("   }"):
                     if schedule:
                         data.append(schedule)
                         schedule = []
                     in_season = False
                 else:
-                    if '{' in line:
-                        value = line.replace('onPeriod','').replace('{','').replace('}','').strip()
+                    if "{" in line:
+                        value = (
+                            line.replace("onPeriod", "")
+                            .replace("{", "")
+                            .replace("}", "")
+                            .strip()
+                        )
                     else:
                         value = line.strip()
                     schedule.append(value)
-            elif line.startswith('}'):
+            elif line.startswith("}"):
                 in_schedule = False
-            elif line.startswith('   season {'):
+            elif line.startswith("   season {"):
                 in_season = True
-        elif line.startswith('sections.gps.parameters.gpsScheduleAdvancedSchedule') or \
-             line.startswith('sections.gpsSchedule.parameters.schedule'):
+        elif line.startswith(
+            "sections.gps.parameters.gpsScheduleAdvancedSchedule"
+        ) or line.startswith("sections.gpsSchedule.parameters.schedule"):
             # print(line)
             in_schedule = True
     return data
@@ -175,13 +183,15 @@ def read_advanced(file_contents):
 
 def read_simple(file_contents):
     data = []
-    for line in [str(l) for l in file_contents.split('\n')]:
+    for line in [str(l) for l in file_contents.split("\n")]:
         interval = None
-        if line.startswith('sections.gps.parameters.gpsScheduleUpdatePeriod'):
+        if line.startswith("sections.gps.parameters.gpsScheduleUpdatePeriod"):
             # print(line)
-            try :
-                interval = line.replace('sections.gps.parameters.gpsScheduleUpdatePeriod', '')
-                interval = interval.replace('{', '').replace('}', '')
+            try:
+                interval = line.replace(
+                    "sections.gps.parameters.gpsScheduleUpdatePeriod", ""
+                )
+                interval = interval.replace("{", "").replace("}", "")
                 interval = interval.strip()
             except:
                 print("Error in", line)
@@ -211,7 +221,8 @@ def write_csv_row(writer, row):
     else:
         writer.writerow(row)
 
-def main(pi=None, csvfile=None, server='inpakrovmais', db='Animal_Movement'):
+
+def main(pi=None, csvfile=None, server="inpakrovmais", db="Animal_Movement"):
 
     conn = get_connection_or_die(server, db)
 
@@ -226,14 +237,22 @@ def main(pi=None, csvfile=None, server='inpakrovmais', db='Animal_Movement'):
     else:
         with open_csv_write(csvfile) as f:
             out = csv.writer(f)
-            row = ["Type", "TPF_FileId", "TPF_Filename", "Start", "Stop", "Interval", "Period"]
+            row = [
+                "Type",
+                "TPF_FileId",
+                "TPF_Filename",
+                "Start",
+                "Stop",
+                "Interval",
+                "Period",
+            ]
             write_csv_row(out, row)
             for item in read(conn, pi):
                 write_csv_row(out, item)
 
 
-if __name__ == '__main__':
-    #main(None, r'C:\tmp\list.csv')
-    #main(r'nps\bborg', r'C:\tmp\list.csv')
-    main(r'nps\msorum', None)
-    #main(r'nps\bborg', None)
+if __name__ == "__main__":
+    # main(None, r'C:\tmp\list.csv')
+    # main(r'nps\bborg', r'C:\tmp\list.csv')
+    main(r"nps\msorum", None)
+    # main(r'nps\bborg', None)
