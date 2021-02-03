@@ -90,6 +90,8 @@ def get_connection_or_die(server, database):
 
 
 def send_smtp_email(mailhost, from_addr, to_addr, subject, text):
+    """Send an email from_addr to_addr, using the mailhost server."""
+
     smtp = smtplib.SMTP(mailhost)
     msg = "From: {0}\r\nTo: {1}\r\nSubject: {2}\r\n\r\n{3}".format(
         from_addr, to_addr, subject, text
@@ -100,6 +102,8 @@ def send_smtp_email(mailhost, from_addr, to_addr, subject, text):
 
 
 def format_locations(rows):
+    """Returns the rows as a single formatted text."""
+
     results = "{0:8}\t{1:19}\t{2:9}\t{3}\r\n".format(
         "AnimalId", "LastFixDate_UTC", "Lat_WGS84_DM", "Lon_WGS84_DM"
     )
@@ -109,6 +113,8 @@ def format_locations(rows):
 
 
 def main():
+    """Connect to the server, get the report and send the email."""
+
     connection = get_connection_or_die(Config.server, Config.database)
     for user, project in Config.reports:
         # print(user)
@@ -121,4 +127,5 @@ def main():
         send_smtp_email(Config.mailhost, Config.sender, user, subject, locations)
 
 
-main()
+if __name__ == "__main__":
+    main()
