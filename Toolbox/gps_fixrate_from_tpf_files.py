@@ -222,14 +222,11 @@ def read_simple(file_contents):
         interval = None
         if line.startswith("sections.gps.parameters.gpsScheduleUpdatePeriod"):
             # print(line)
-            try:
-                interval = line.replace(
-                    "sections.gps.parameters.gpsScheduleUpdatePeriod", ""
-                )
-                interval = interval.replace("{", "").replace("}", "")
-                interval = interval.strip()
-            except:
-                print("Error in", line)
+            interval = line.replace(
+                "sections.gps.parameters.gpsScheduleUpdatePeriod", ""
+            )
+            interval = interval.replace("{", "").replace("}", "")
+            interval = interval.strip()
             if interval and interval != "0":
                 data.append(interval)
     return data
