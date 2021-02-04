@@ -89,55 +89,64 @@ import arcpy
 import utils
 
 
-def GetUDRaster(features, smoothingFactor, sr = None, cellSize = None):
-    savedState, searchRadius = SetRasterEnvironment(features, smoothingFactor, sr, cellSize)
+def GetUDRaster(features, smoothingFactor, sr=None, cellSize=None):
+    savedState, searchRadius = SetRasterEnvironment(
+        features, smoothingFactor, sr, cellSize
+    )
     try:
         return GetNormalizedKernelRaster(features, searchRadius)
     finally:
         RestoreRasterEnvironment(savedState)
 
 
-def SetupRaster(features, smoothingFactor, sr = None, cellSize = None):
-    #Describe() will get the envelope in the feature's Spatial Reference
-    #extent = arcpy.Describe(features).extent
-    #This will return the extent in the environment's Output Spatial Reference
-    mcpList = arcpy.MinimumBoundingGeometry_management(features, arcpy.Geometry(), "ENVELOPE", "ALL")
+def SetupRaster(features, smoothingFactor, sr=None, cellSize=None):
+    # Describe() will get the envelope in the feature's Spatial Reference
+    # extent = arcpy.Describe(features).extent
+    # This will return the extent in the environment's Output Spatial Reference
+    mcpList = arcpy.MinimumBoundingGeometry_management(
+        features, arcpy.Geometry(), "ENVELOPE", "ALL"
+    )
     extent = mcpList[0].extent
     if utils.IsFloat(cellSize):
-        cellSize = float(cellSize) # all parameters from ArcToolbox are text
+        cellSize = float(cellSize)  # all parameters from ArcToolbox are text
     else:
-        cellSize =  DefaultCellSize(extent)
+        cellSize = DefaultCellSize(extent)
     # FIXME explain why r=2*h
     searchRadius = 2 * smoothingFactor
     return extent, cellSize, searchRadius
 
 
 def DefaultCellSize(extent):
-    return max(extent.XMax-extent.XMin,
-               extent.YMax-extent.YMin) / 2000.0
+    return max(extent.XMax - extent.XMin, extent.YMax - extent.YMin) / 2000.0
 
 
 class SavedState:
-    pass # used as a namespace for saving multiple state values
+    pass  # used as a namespace for saving multiple state values
 
-def SetRasterEnvironment(features, smoothingFactor, sr = None, cellSize = None):
-    #Save Existing State
+
+def SetRasterEnvironment(features, smoothingFactor, sr=None, cellSize=None):
+    # Save Existing State
     savedState = SavedState()
     savedState.cellSize = arcpy.env.cellSize
     savedState.extent = arcpy.env.extent
     savedState.sr = arcpy.env.outputCoordinateSystem
-    #Set New State
+    # Set New State
     arcpy.env.outputCoordinateSystem = sr
-    #SetupRaster() depends on arcpy.env.outputCoordinateSystem
-    extent, cellSize, searchRadius = SetupRaster(features, smoothingFactor, sr, cellSize)
-    print(extent.XMin,extent.YMin, extent.XMax, extent.YMax, cellSize, searchRadius)
+    # SetupRaster() depends on arcpy.env.outputCoordinateSystem
+    extent, cellSize, searchRadius = SetupRaster(
+        features, smoothingFactor, sr, cellSize
+    )
+    print(extent.XMin, extent.YMin, extent.XMax, extent.YMax, cellSize, searchRadius)
     arcpy.env.cellSize = cellSize
     buffer = searchRadius + cellSize
-    arcpy.env.extent = arcpy.Extent(extent.XMin-buffer,
-                                    extent.YMin-buffer,
-                                    extent.XMax+buffer,
-                                    extent.YMax+buffer)
+    arcpy.env.extent = arcpy.Extent(
+        extent.XMin - buffer,
+        extent.YMin - buffer,
+        extent.XMax + buffer,
+        extent.YMax + buffer,
+    )
     return savedState, searchRadius
+
 
 def RestoreRasterEnvironment(savedState):
     arcpy.env.outputCoordinateSystem = savedState.sr
@@ -157,12 +166,14 @@ def GetKernelRaster(features, searchRadius):
         # ESRI uses a quartic approximation to the bivariate normal distribution.
         # the search radius for quartic does not map to the bandwidth for a normal distribution
         populationField = "NONE"
-        cellSize = None #use value set in environment
-        scaleFactor = None #SQUARE_MAP_UNITS, SQUARE_MILES, SQUARE_KILOMETERS, ...
+        cellSize = None  # use value set in environment
+        scaleFactor = None  # SQUARE_MAP_UNITS, SQUARE_MILES, SQUARE_KILOMETERS, ...
         # scaling factor should be large to avoid floating point errors.
         # if map units are meters or feet, output units are per sq_km or sq_miles, respectively; therefore default scaling factor > 1,000,000
 
-        kernel = arcpy.sa.KernelDensity(features, populationField, cellSize, searchRadius, scaleFactor)
+        kernel = arcpy.sa.KernelDensity(
+            features, populationField, cellSize, searchRadius, scaleFactor
+        )
 
         return True, kernel
     except:
@@ -170,13 +181,12 @@ def GetKernelRaster(features, searchRadius):
 
 
 def NormalizeRaster(raster, bins):
-    #classify the results into bins equal interval bins, and invert (0..bins -> bins..1)
+    # classify the results into bins equal interval bins, and invert (0..bins -> bins..1)
     try:
         raster = (1 + bins) - arcpy.sa.Slice(raster, bins, "EQUAL_INTERVAL")
         return True, raster
     except:
         return False, str(sys.exc_info()[1])
-
 
 
 if __name__ == "__main__":
@@ -192,16 +202,18 @@ if __name__ == "__main__":
 
     test = False
     if test:
-        #locationLayer = r"C:\tmp\test.gdb\fix_ll"
+        # locationLayer = r"C:\tmp\test.gdb\fix_ll"
         locationLayer = r"C:\tmp\test.gdb\fix_a_c96"
         rasterName = r"C:\tmp\test.gdb\kde_4"
         smoothingFactor = "8000"
         cellSize = "700"
         spatialReference = arcpy.SpatialReference()
-        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
-        #arcpy.env.outputCoordinateSystem = spatialReference
+        spatialReference.loadFromString(
+            "PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision"
+        )
+        # arcpy.env.outputCoordinateSystem = spatialReference
         arcpy.env.outputCoordinateSystem = None
-        #spatialReference = None
+        # spatialReference = None
 
     #
     # Input validation
@@ -220,7 +232,7 @@ if __name__ == "__main__":
     if not arcpy.Exists(locationLayer):
         utils.die("Location layer cannot be found. Quitting.")
 
-    desc = arcpy.Describe(locationLayer) #Describe() is expensive, so do it only once
+    desc = arcpy.Describe(locationLayer)  # Describe() is expensive, so do it only once
     shapeName = desc.shapeFieldName
     inputSR = desc.spatialReference
     usingInputSR = False
@@ -233,18 +245,30 @@ if __name__ == "__main__":
         spatialReference = inputSR
 
     if not spatialReference or not spatialReference.name:
-        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
+        utils.die(
+            "The fixes layer does not have a coordinate system, and you have not provided one. Quitting."
+        )
 
-    if spatialReference.type != 'Projected':
-        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+    if spatialReference.type != "Projected":
+        utils.die(
+            "The output projection is '"
+            + spatialReference.type
+            + "'.  It must be a projected coordinate system. Quitting."
+        )
 
-    if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
+    if usingInputSR or (
+        inputSR
+        and spatialReference
+        and spatialReference.factoryCode == inputSR.factoryCode
+    ):
         spatialReference = None
 
     #
     # Create density raster(s)
     #
-    gotRaster, raster = GetUDRaster(locationLayer, smoothingFactor, spatialReference, cellSize)
+    gotRaster, raster = GetUDRaster(
+        locationLayer, smoothingFactor, spatialReference, cellSize
+    )
     if gotRaster and rasterName:
         raster.save(rasterName)
     else:

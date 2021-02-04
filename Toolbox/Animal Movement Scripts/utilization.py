@@ -140,22 +140,24 @@ if __name__ == "__main__":
     isoplethLines = arcpy.GetParameterAsText(6)
     isoplethPolys = arcpy.GetParameterAsText(7)
     isoplethDonuts = arcpy.GetParameterAsText(8)
-    spatialReference =  arcpy.GetParameter(9)
+    spatialReference = arcpy.GetParameter(9)
     cellSize = arcpy.GetParameterAsText(10)
 
     test = False
     if test:
         locationLayer = r"C:\tmp\test2.gdb\w2011a0901"
-        hRefmethod = "WORTON" #Worton,Tufto,Silverman,Gaussian,Fixed
+        hRefmethod = "WORTON"  # Worton,Tufto,Silverman,Gaussian,Fixed
         fixedHRef = "4000"
-        modifier = "NONE" #PROPORTION,LSCV,BCV2, none/null
+        modifier = "NONE"  # PROPORTION,LSCV,BCV2, none/null
         proportionAmount = "0.7"
         isoplethInput = "50,65,90,95"
         isoplethLines = r"C:\tmp\test2.gdb\clines4a"
         isoplethPolys = r"C:\tmp\test2.gdb\cpolys4a"
         isoplethDonuts = r"C:\tmp\test2.gdb\cdonut4a"
         spatialReference = arcpy.SpatialReference()
-        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
+        spatialReference.loadFromString(
+            "PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision"
+        )
         cellSize = ""
 
     #
@@ -186,7 +188,7 @@ if __name__ == "__main__":
     if not isoplethList:
         utils.die("List of valid isopleths is empty. Quitting.")
 
-    desc = arcpy.Describe(locationLayer) #Describe() is expensive, so do it only once
+    desc = arcpy.Describe(locationLayer)  # Describe() is expensive, so do it only once
     shapeName = desc.shapeFieldName
     inputSR = desc.spatialReference
     usingInputSR = False
@@ -199,12 +201,22 @@ if __name__ == "__main__":
         spatialReference = inputSR
 
     if not spatialReference or not spatialReference.name:
-        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
+        utils.die(
+            "The fixes layer does not have a coordinate system, and you have not provided one. Quitting."
+        )
 
-    if spatialReference.type != 'Projected':
-        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+    if spatialReference.type != "Projected":
+        utils.die(
+            "The output projection is '"
+            + spatialReference.type
+            + "'.  It must be a projected coordinate system. Quitting."
+        )
 
-    if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
+    if usingInputSR or (
+        inputSR
+        and spatialReference
+        and spatialReference.factoryCode == inputSR.factoryCode
+    ):
         spatialReference = None
 
     #
@@ -214,11 +226,15 @@ if __name__ == "__main__":
         h = fixedHRef
     else:
         points = utils.GetPoints(locationLayer, spatialReference)
-        h = utilization_smoothing.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
+        h = utilization_smoothing.GetSmoothingFactor(
+            points, hRefmethod, modifier, proportionAmount
+        )
     #
     # Create density raster
     #
-    gotRaster, raster = utilization_raster.GetUDRaster(locationLayer, h, spatialReference, cellSize)
+    gotRaster, raster = utilization_raster.GetUDRaster(
+        locationLayer, h, spatialReference, cellSize
+    )
     if gotRaster:
         utils.info("Created the temporary KDE raster")
     else:
@@ -226,4 +242,6 @@ if __name__ == "__main__":
     #
     # Create isopleths
     #
-    utilization_isopleth.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)
+    utilization_isopleth.CreateIsopleths(
+        isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts
+    )

@@ -103,7 +103,7 @@ def CreateIsopleths(isopleths, raster1, lineFc, polyFc, donutFc):
     Assumes one of the last three parameters is non null,
     otherwise cycles may be wasted generating unused intermediate results."""
 
-    #raster = 101 - arcpy.sa.Slice(raster1,100,"EQUAL_INTERVAL")
+    # raster = 101 - arcpy.sa.Slice(raster1,100,"EQUAL_INTERVAL")
     if lineFc:
         arcpy.sa.ContourList(raster1, lineFc, isopleths)
         if polyFc:
@@ -133,19 +133,20 @@ def GetIsoplethList(isoplethInput):
     test input: '100,0,   4.65e1, 45,   +5:10.1, 65,90,5 10;-4;;'
     test output: [5.0, 10.0, 10.1, 45.0, 46.5, 65.0, 90.0]"""
 
-    isoplethInput = isoplethInput.replace(',',' ').replace(';',' ').replace(':',' ')
+    isoplethInput = isoplethInput.replace(",", " ").replace(";", " ").replace(":", " ")
     try:
         isoplethList = [float(c) for c in isoplethInput.split()]
     except ValueError:
         utils.die("Un-recognized character in the isopleth list")
 
     isoplethList = [f for f in isoplethList if f > 0 and f < 100]
-    isoplethList = list(set(isoplethList)) #remove duplicates
+    isoplethList = list(set(isoplethList))  # remove duplicates
     isoplethList.sort()
     return isoplethList
 
+
 def TestGetIsopleth():
-    a = '100,0,   4.65e1, 45,   +5:10.1, 65,90,5 10;-4;;'
+    a = "100,0,   4.65e1, 45,   +5:10.1, 65,90,5 10;-4;;"
     print(a)
     print(GetIsoplethList(a))
 
@@ -160,16 +161,22 @@ def IsoplethLinesToPolygons(lineFC, polyFC, fieldname="contour"):
     but it does not copy attributes, doesn't guarantee order, and
     doesn't merge polygons with the same value."""
 
-    uniqueValues = GetUniqueValues(lineFC,fieldname)
+    uniqueValues = GetUniqueValues(lineFC, fieldname)
 
     if not uniqueValues:
-        utils.warn("No field named '"+fieldname+"' in "+lineFC)
+        utils.warn("No field named '" + fieldname + "' in " + lineFC)
         return
 
-    workspace,featureClass = os.path.split(polyFC)
-    arcpy.CreateFeatureclass_management(workspace,featureClass,
-                                        "Polygon", lineFC, "SAME_AS_TEMPLATE",
-                                        "SAME_AS_TEMPLATE", lineFC)
+    workspace, featureClass = os.path.split(polyFC)
+    arcpy.CreateFeatureclass_management(
+        workspace,
+        featureClass,
+        "Polygon",
+        lineFC,
+        "SAME_AS_TEMPLATE",
+        "SAME_AS_TEMPLATE",
+        lineFC,
+    )
     # I use lineFC as a template for polyFC, even though I don't need all fields
     # (typically there is only the 'contour' field, besides the standard fields)
     # I do this to avoid adding a field (schema lock bug with PGDB)
@@ -180,12 +187,12 @@ def IsoplethLinesToPolygons(lineFC, polyFC, fieldname="contour"):
 
     uniqueValues = list(uniqueValues)
     uniqueValues.sort()
-    uniqueValues.reverse() #builds biggest to smallest
-    fields = ['SHAPE@', fieldname]
+    uniqueValues.reverse()  # builds biggest to smallest
+    fields = ["SHAPE@", fieldname]
     cursor = arcpy.da.InsertCursor(polyFC, fields)
     for value in uniqueValues:
-        query = BuildQuery(lineFC,fieldname,value)
-        with arcpy.da.SearchCursor(lineFC, ['SHAPE@'], where_clause=query) as lines:
+        query = BuildQuery(lineFC, fieldname, value)
+        with arcpy.da.SearchCursor(lineFC, ["SHAPE@"], where_clause=query) as lines:
             array = arcpy.Array()
             for line in lines:
                 shape = line[0]
@@ -210,16 +217,22 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     but it does not copy attributes, and doesn't merge polygons with
     the same value."""
 
-    uniqueValues = GetUniqueValues(lineFC,fieldname)
+    uniqueValues = GetUniqueValues(lineFC, fieldname)
 
     if not uniqueValues:
-        utils.warn("No field named '"+fieldname+"' in "+lineFC)
+        utils.warn("No field named '" + fieldname + "' in " + lineFC)
         return
 
-    workspace,featureClass = os.path.split(polyFC)
-    arcpy.CreateFeatureclass_management(workspace,featureClass,
-                                        "Polygon", lineFC, "SAME_AS_TEMPLATE",
-                                        "SAME_AS_TEMPLATE", lineFC)
+    workspace, featureClass = os.path.split(polyFC)
+    arcpy.CreateFeatureclass_management(
+        workspace,
+        featureClass,
+        "Polygon",
+        lineFC,
+        "SAME_AS_TEMPLATE",
+        "SAME_AS_TEMPLATE",
+        lineFC,
+    )
     # I use lineFC as a template for polyFC, even though I don't need all fields
     # (typically there is only the 'contour' field, besides the standard fields)
     # I do this to avoid adding a field (schema lock bug with PGDB)
@@ -228,14 +241,14 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     lineDescription = arcpy.Describe(lineFC)
     polyDescription = arcpy.Describe(polyFC)
 
-    #we will build polygon n and then subtract polygon n+1
-    #to do this we need to sort biggest to smallest
-    #the last polygon has nothing subtracted from it.
-    #polygons with holes are created as an array of polygons
+    # we will build polygon n and then subtract polygon n+1
+    # to do this we need to sort biggest to smallest
+    # the last polygon has nothing subtracted from it.
+    # polygons with holes are created as an array of polygons
     uniqueValues = list(uniqueValues)
     uniqueValues.sort()
-    uniqueValues.reverse() #sort biggest to smallest
-    fields = ['SHAPE@', fieldname]
+    uniqueValues.reverse()  # sort biggest to smallest
+    fields = ["SHAPE@", fieldname]
     # InsertCursors do not support the with statement.
     cursor = arcpy.da.InsertCursor(polyFC, fields)
     lines2 = []
@@ -245,21 +258,21 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
         # this the brute force way.  It's a little slower, but
         # not noticably
         value1 = uniqueValues[i]
-        query1 = BuildQuery(lineFC,fieldname,value1)
+        query1 = BuildQuery(lineFC, fieldname, value1)
         # TODO: Restructure to use with statement on two search cursors.
-        lines1 = arcpy.da.SearchCursor(lineFC, ['SHAPE@'], where_clause=query1)
-        if i == len(uniqueValues) - 1: #last one
+        lines1 = arcpy.da.SearchCursor(lineFC, ["SHAPE@"], where_clause=query1)
+        if i == len(uniqueValues) - 1:  # last one
             lines2 = []
         else:
-            value2 = uniqueValues[i+1]
-            query2 = BuildQuery(lineFC,fieldname,value2)
-            lines2 = arcpy.da.SearchCursor(lineFC, ['SHAPE@'], where_clause=query2)
+            value2 = uniqueValues[i + 1]
+            query2 = BuildQuery(lineFC, fieldname, value2)
+            lines2 = arcpy.da.SearchCursor(lineFC, ["SHAPE@"], where_clause=query2)
         array = arcpy.Array()
         for line in lines1:
             shape = line[0]
             for j in range(shape.partCount):
                 array.add(shape.getPart(j))
-        #lines1/2 are arcpy.Cursors, and cannot be added, so we iterate each separately
+        # lines1/2 are arcpy.Cursors, and cannot be added, so we iterate each separately
         for line in lines2:
             shape = line[0]
             for j in range(shape.partCount):
@@ -271,7 +284,7 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     del cursor
 
 
-def GetUniqueValues(featureClass,whereField):
+def GetUniqueValues(featureClass, whereField):
     """Make a list of all values in the whereField of
     featureClass.  Each value in the returned list is unique.
     That is multiple identical values are only reported once."""
@@ -285,7 +298,7 @@ def GetUniqueValues(featureClass,whereField):
     return values
 
 
-def BuildQuery(featureClass,whereField,value):
+def BuildQuery(featureClass, whereField, value):
     """Builds a valid query string for finding all records in
     featureclass that have value in whereField.
     Building a valid query is a pain. We need to correctly
@@ -342,5 +355,7 @@ if __name__ == "__main__":
     #
     # Create isopleths
     #
-    raster = arcpy.sa.Raster(rasterLayer) #create a raster object from the text in rasterLayer
+    raster = arcpy.sa.Raster(
+        rasterLayer
+    )  # create a raster object from the text in rasterLayer
     CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)

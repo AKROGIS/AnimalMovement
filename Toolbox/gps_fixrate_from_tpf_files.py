@@ -69,10 +69,10 @@ class Config(object):
     # pylint: disable=useless-object-inheritance,too-few-public-methods
 
     # Name of the database server
-    server="inpakrovmais"
+    server = "inpakrovmais"
 
     # Name of database with TPF files
-    database="Animal_Movement"
+    database = "Animal_Movement"
 
     # Name of the project investigator to check (None implies all)
     investigator = None
@@ -120,7 +120,7 @@ def get_connection_or_die(server, database):
 
 
 def print_gps_lines(connection, investigator):
-    """print(lines with `gps` in the TPF files for investigator from connection.""")
+    """print(lines with `gps` in the TPF files for investigator from connection."""
 
     data = set()
     if investigator is None:
@@ -235,9 +235,17 @@ def read_simple(file_contents):
 
 
 def main(connection, investigator=None, csv_path=None):
-    """print(or save the GPS schedules for investigator from the database connection.""")
+    """print(or save the GPS schedules for investigator from the database connection."""
 
-    header = ["Type", "TPF_FileId", "TPF_Filename", "Start", "Stop", "Interval", "Period"]
+    header = [
+        "Type",
+        "TPF_FileId",
+        "TPF_Filename",
+        "Start",
+        "Stop",
+        "Interval",
+        "Period",
+    ]
     schedules = read(connection, investigator)
 
     if csv_path is None:

@@ -152,11 +152,20 @@ import utilization_isopleth
 import utils
 
 
-def GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmethod, modifier, proportionAmount, sr = None, shapeName = None):
+def GetSmoothingFactors(
+    subsetIdentifier,
+    uniqueValues,
+    locationLayer,
+    hRefmethod,
+    modifier,
+    proportionAmount,
+    sr=None,
+    shapeName=None,
+):
     layer = "subsetForSmoothingFactor"
     hList = []
     for value in uniqueValues:
-        query = utilization_isopleth.BuildQuery(locationLayer,subsetIdentifier,value)
+        query = utilization_isopleth.BuildQuery(locationLayer, subsetIdentifier, value)
         utils.info("Calculating h for " + query)
         if arcpy.Exists(layer):
             arcpy.Delete_management(layer)
@@ -164,13 +173,18 @@ def GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmetho
         try:
             points = utils.GetPoints(layer, sr)
             if len(points) < 3:
-                utils.warn("Insufficient locations ("+str(len(points))+") for "+value)
+                utils.warn(
+                    "Insufficient locations (" + str(len(points)) + ") for " + value
+                )
             else:
-                h = utilization_smoothing.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
+                h = utilization_smoothing.GetSmoothingFactor(
+                    points, hRefmethod, modifier, proportionAmount
+                )
                 hList.append(h)
         finally:
             arcpy.Delete_management(layer)
     return hList
+
 
 def ChooseSmoothingFactor(hList, hRefToUse):
     if hRefToUse.lower() == "minimum":
@@ -179,23 +193,40 @@ def ChooseSmoothingFactor(hList, hRefToUse):
         return max(hList)
     return numpy.average(hList)
 
-def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, sr = None, cellSize = None, save_isopleths=False):
+
+def BuildNormalizedRaster(
+    subsetIdentifier,
+    uniqueValues,
+    locationLayer,
+    hList,
+    saveRasters,
+    rasterFolder,
+    sr=None,
+    cellSize=None,
+    save_isopleths=False,
+):
     n = 0
     layer = "subsetSelectionForRaster"
-    savedState, searchRadius = utilization_raster.SetRasterEnvironment(locationLayer, max(hList), sr, cellSize)
+    savedState, searchRadius = utilization_raster.SetRasterEnvironment(
+        locationLayer, max(hList), sr, cellSize
+    )
     try:
         hDict = {}
-        for k,v in zip(uniqueValues,hList):
-            hDict[k]=v
+        for k, v in zip(uniqueValues, hList):
+            hDict[k] = v
         for value in uniqueValues:
-            query = utilization_isopleth.BuildQuery(locationLayer,subsetIdentifier,value)
+            query = utilization_isopleth.BuildQuery(
+                locationLayer, subsetIdentifier, value
+            )
             utils.info("Creating KDE raster for " + query)
             if arcpy.Exists(layer):
                 arcpy.Delete_management(layer)
             arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
             try:
                 searchRadius = 2 * hDict[value]
-                gotRaster, probRaster = utilization_raster.GetNormalizedKernelRaster(layer, searchRadius)
+                gotRaster, probRaster = utilization_raster.GetNormalizedKernelRaster(
+                    layer, searchRadius
+                )
                 if gotRaster:
                     if save_isopleths:
                         lines, polys, donuts = None, None, None
@@ -205,10 +236,14 @@ def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, 
                             polys = isoplethPolys + "_" + str(value)
                         if isoplethDonuts:
                             donuts = isoplethDonuts + "_" + str(value)
-                        utilization_isopleth.CreateIsopleths(isoplethList, probRaster, lines, polys, donuts)
+                        utilization_isopleth.CreateIsopleths(
+                            isoplethList, probRaster, lines, polys, donuts
+                        )
                     if saveRasters:
                         # Save individual probability rasters
-                        name = os.path.join(rasterFolder,"praster_"+str(value)+".tif")
+                        name = os.path.join(
+                            rasterFolder, "praster_" + str(value) + ".tif"
+                        )
                         probRaster.save(name)
                     if n:
                         raster = raster + probRaster
@@ -217,8 +252,10 @@ def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, 
                         raster = probRaster
                         n = 1
                 else:
-                    errorMsg = str(probRaster) # only if gotRaster is False
-                    utils.warn("  Raster creation failed, not included in total. " + errorMsg)
+                    errorMsg = str(probRaster)  # only if gotRaster is False
+                    utils.warn(
+                        "  Raster creation failed, not included in total. " + errorMsg
+                    )
             finally:
                 arcpy.Delete_management(layer)
     finally:
@@ -226,13 +263,12 @@ def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, 
 
     if n == 0:
         return False, None
-    #renormalize from 1 to 100
-    raster = arcpy.sa.Slice(raster,100,"EQUAL_INTERVAL")
+    # renormalize from 1 to 100
+    raster = arcpy.sa.Slice(raster, 100, "EQUAL_INTERVAL")
     if saveRasters:
-        name = os.path.join(rasterFolder,"_praster_TOTAL.tif")
+        name = os.path.join(rasterFolder, "_praster_TOTAL.tif")
         raster.save(name)
     return True, raster
-
 
 
 if __name__ == "__main__":
@@ -261,9 +297,9 @@ if __name__ == "__main__":
     if test:
         locationLayer = r"C:\tmp\test.gdb\fix2_ll"
         subsetIdentifier = "AnimalId"
-        hRefmethod = "FIXED" #Fixed,Worton,Tufto,Silverman,Gaussian
+        hRefmethod = "FIXED"  # Fixed,Worton,Tufto,Silverman,Gaussian
         fixedHRef = "4000"
-        modifier = "NONE" #NONE,PROPORTIONAL,LSCV,BCV2
+        modifier = "NONE"  # NONE,PROPORTIONAL,LSCV,BCV2
         proportionAmount = "0.7"
         hRefToUse = "Average"
         saveRasters = "True"
@@ -273,10 +309,12 @@ if __name__ == "__main__":
         isoplethPolys = r"C:\tmp\test.gdb\cpolys4a"
         isoplethDonuts = r"C:\tmp\test.gdb\cdonut4a"
         spatialReference = arcpy.SpatialReference()
-        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
-        #arcpy.env.outputCoordinateSystem = spatialReference
+        spatialReference.loadFromString(
+            "PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision"
+        )
+        # arcpy.env.outputCoordinateSystem = spatialReference
         arcpy.env.outputCoordinateSystem = None
-        cellSize =  "#"
+        cellSize = "#"
         save_isopleths = "True"
 
     #
@@ -307,7 +345,7 @@ if __name__ == "__main__":
     if not isoplethList:
         utils.die("List of valid isopleths is empty. Quitting.")
 
-    desc = arcpy.Describe(locationLayer) #Describe() is expensive, so do it only once
+    desc = arcpy.Describe(locationLayer)  # Describe() is expensive, so do it only once
     shapeName = desc.shapeFieldName
     inputSR = desc.spatialReference
     usingInputSR = False
@@ -320,27 +358,43 @@ if __name__ == "__main__":
         spatialReference = inputSR
 
     if not spatialReference or not spatialReference.name:
-        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
+        utils.die(
+            "The fixes layer does not have a coordinate system, and you have not provided one. Quitting."
+        )
 
-    if spatialReference.type != 'Projected':
-        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+    if spatialReference.type != "Projected":
+        utils.die(
+            "The output projection is '"
+            + spatialReference.type
+            + "'.  It must be a projected coordinate system. Quitting."
+        )
 
-    if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
+    if usingInputSR or (
+        inputSR
+        and spatialReference
+        and spatialReference.factoryCode == inputSR.factoryCode
+    ):
         spatialReference = None
 
-    saveRasters = (saveRasters.lower() == "true")
+    saveRasters = saveRasters.lower() == "true"
     if saveRasters:
         if not os.path.exists(rasterFolder):
-            os.mkdir(rasterFolder) #may throw an exception (thats ok)
+            os.mkdir(rasterFolder)  # may throw an exception (thats ok)
         else:
             if not os.path.isdir(rasterFolder):
                 utils.die(rasterFolder + " is not a folder. Quitting.")
 
     uniqueValues = None
     if subsetIdentifier in [field.name for field in arcpy.ListFields(locationLayer)]:
-        uniqueValues = utilization_isopleth.GetUniqueValues(locationLayer,subsetIdentifier)
+        uniqueValues = utilization_isopleth.GetUniqueValues(
+            locationLayer, subsetIdentifier
+        )
     if not uniqueValues:
-        utils.die("Could not generate a list of unique values for "+subsetIdentifier+". Quitting.")
+        utils.die(
+            "Could not generate a list of unique values for "
+            + subsetIdentifier
+            + ". Quitting."
+        )
 
     #
     # Calculate smoothing factor(s)
@@ -348,15 +402,34 @@ if __name__ == "__main__":
     if hRefmethod.lower() == "fixed":
         hList = [fixedHRef for eachItem in uniqueValues]
     else:
-        hList = GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmethod, modifier, proportionAmount, spatialReference, shapeName)
+        hList = GetSmoothingFactors(
+            subsetIdentifier,
+            uniqueValues,
+            locationLayer,
+            hRefmethod,
+            modifier,
+            proportionAmount,
+            spatialReference,
+            shapeName,
+        )
         if hRefToUse.lower() != "bydataset":
             h = ChooseSmoothingFactor(hList, hRefToUse)
-            utils.info("Using h = " + str(h) +" ("+hRefToUse+")")
+            utils.info("Using h = " + str(h) + " (" + hRefToUse + ")")
             hList = [h for eachItem in uniqueValues]
     #
     # Create density raster(s)
     #
-    gotRaster, raster = BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, spatialReference, cellSize, save_isopleths)
+    gotRaster, raster = BuildNormalizedRaster(
+        subsetIdentifier,
+        uniqueValues,
+        locationLayer,
+        hList,
+        saveRasters,
+        rasterFolder,
+        spatialReference,
+        cellSize,
+        save_isopleths,
+    )
     if gotRaster:
         utils.info("Created the temporary KDE raster")
     else:
@@ -364,5 +437,6 @@ if __name__ == "__main__":
     #
     # Create isopleths (for total raster only)
     #
-    utilization_isopleth.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)
-
+    utilization_isopleth.CreateIsopleths(
+        isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts
+    )

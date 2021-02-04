@@ -102,18 +102,22 @@ def DistancesSquared(points):
     allSquaredDistances = []
     n = len(points)
     for i in range(n):
-        #for j in range(i+1, n):  #unique set of distances dij = dji is faster; however produces different LSCV
+        # for j in range(i+1, n):  #unique set of distances dij = dji is faster; however produces different LSCV
         for j in range(n):
             if i == j:
                 continue
             dx = points[j][0] - points[i][0]
             dy = points[j][1] - points[i][1]
-            d2 = dx*dx + dy*dy
+            d2 = dx * dx + dy * dy
             if d2 < small:
-                utils.warn("Distance from %d to %d is too small (%g).  Using %g" % (i,j,d2, small))
+                utils.warn(
+                    "Distance from %d to %d is too small (%g).  Using %g"
+                    % (i, j, d2, small)
+                )
                 d2 = small
             allSquaredDistances.append(d2)
     return allSquaredDistances
+
 
 # Cross Validation function for h.
 # approximates(?) the mean integrated square error (MISE) between the true density function and the kde
@@ -124,8 +128,8 @@ def LSCV(allDistancesSquared, n, h):
     term2b = -1.0 / (4.0 * h * h)
     term3a = 1.0 / math.pi
     term3b = -1.0 / (2.0 * h * h)
-    term4 = n*n*h*h
-    #print("term1",term1,"term2a",term2a,"term3a",term3a,"term2b",term2b,"term3b",term3b,"term4",term4)
+    term4 = n * n * h * h
+    # print("term1",term1,"term2a",term2a,"term3a",term3a,"term2b",term2b,"term3b",term3b,"term4",term4)
     total = 0.0
     for d in allDistancesSquared:
         if d == 0:
@@ -134,32 +138,33 @@ def LSCV(allDistancesSquared, n, h):
             d = 1
         term2 = term2a * math.exp(d * term2b)
         term3 = term3a * math.exp(d * term3b)
-        term5 = (term2 - term3)/term4
+        term5 = (term2 - term3) / term4
         total = total + term5
-        #print("d",d,"term2",term2,"term3",term3,"term5",term5, "total", total)
+        # print("d",d,"term2",term2,"term3",term3,"term5",term5, "total", total)
     result = term1 + total
-    #print("CV", h, result)
+    # print("CV", h, result)
     return result
 
 
 def BCV2(allDistancesSquared, n, h):
     term1 = 1.0 / (4 * math.pi * h * h * (n - 1))
-    term2 = 8*(n-1)*(n-2)*h*h*math.pi
-    #print("h",h,"n",n,"term1",term1,"term2",term2)
+    term2 = 8 * (n - 1) * (n - 2) * h * h * math.pi
+    # print("h",h,"n",n,"term1",term1,"term2",term2)
     total = 0.0
     for d in allDistancesSquared:
         if d == 0.0:
             utils.warn("Warning duplicate locations found, results may be invalid.")
             utils.warn("        Separating the locations by 1 unit.")
             d = 1
-        D = d/(h*h)
+        D = d / (h * h)
         D2 = D * D
-        term3 = (D2 -8*D + 8) * math.exp(-D2/2) / term2
+        term3 = (D2 - 8 * D + 8) * math.exp(-D2 / 2) / term2
         total = total + term3
-        #print("d",d,"D",D,"D2",D2,"term3",term3,"total", total)
+        # print("d",d,"D",D,"D2",D2,"term3",term3,"total", total)
     result = term1 + total
-    #print("BCV2", h, result)
+    # print("BCV2", h, result)
     return result
+
 
 def Search(func, allSquaredDistances, n, h_ref, min_percent, max_percent, step_percent):
 
@@ -172,18 +177,19 @@ def Search(func, allSquaredDistances, n, h_ref, min_percent, max_percent, step_p
 
     for h_test in utils.frange(h_min, h_max, h_step):
         err = func(allSquaredDistances, n, h_test)
-        if (err < minErr):
+        if err < minErr:
             minErr = err
             h_res = h_test
     return h_res
 
+
 def Minimize(func, h, points):
     n = len(points)
     if n > 2000:
-        #raise ValueError("Too many points for Cross Validation, limit is 2000")
+        # raise ValueError("Too many points for Cross Validation, limit is 2000")
         msg = "Too many points for Cross Validation, limit is 2000, using 0.7 * hRef."
         utils.warn(msg)
-        return 0.7*h
+        return 0.7 * h
 
     allSquaredDistances = DistancesSquared(points)
 
@@ -193,35 +199,42 @@ def Minimize(func, h, points):
     h1 = Search(func, allSquaredDistances, n, h, min_percent, max_percent, step_percent)
     if h1 <= min_percent * h or h1 >= max_percent * h:
         # then it is the min or max value checked
-        msg = "Cross Validation using "+func.__name__+" failed to minimize, using 0.7 * hRef."
+        msg = (
+            "Cross Validation using "
+            + func.__name__
+            + " failed to minimize, using 0.7 * hRef."
+        )
         utils.warn(msg)
-        return 0.7*h
-#    return h1
-    #print(h1)
+        return 0.7 * h
+    #    return h1
+    # print(h1)
     h2 = Search(func, allSquaredDistances, n, h1, 0.89, 1.11, 0.01)
-    #print(h2)
+    # print(h2)
     h3 = Search(func, allSquaredDistances, n, h2, 0.989, 1.011, 0.001)
     return h3
+
 
 def HrefWorton(points):
     n = len(points)
     x = [point[0] for point in points]
     y = [point[1] for point in points]
-    varx = numpy.var(x) * n/(n-2.0) #remove sampling bias
-    vary = numpy.var(y) * n/(n-2.0)
-    #print("varx", varx, "vary", vary)
+    varx = numpy.var(x) * n / (n - 2.0)  # remove sampling bias
+    vary = numpy.var(y) * n / (n - 2.0)
+    # print("varx", varx, "vary", vary)
     std = math.sqrt(0.5 * (varx + vary))
-    return std / math.pow(n, 1/6.0)
+    return std / math.pow(n, 1 / 6.0)
+
 
 def HrefTufto(points):
     n = len(points)
     x = [point[0] for point in points]
     y = [point[1] for point in points]
-    varx = numpy.var(x) * n/(n-2.0) #remove sampling bias
-    vary = numpy.var(y) * n/(n-2.0)
-    #print("varx", varx, "vary", vary)
+    varx = numpy.var(x) * n / (n - 2.0)  # remove sampling bias
+    vary = numpy.var(y) * n / (n - 2.0)
+    # print("varx", varx, "vary", vary)
     std = 0.5 * math.sqrt(varx + vary)
-    return std / math.pow(n, 1/6.0)
+    return std / math.pow(n, 1 / 6.0)
+
 
 def HrefGaussianApproximation(points):
     # for univariate normally distributed data
@@ -229,18 +242,20 @@ def HrefGaussianApproximation(points):
     n = len(points)
     x = [point[0] for point in points]
     y = [point[1] for point in points]
-    stdx = numpy.std(x) * n/(n-1.0) #remove sampling v. population bias
-    stdy = numpy.std(y) * n/(n-1.0) #remove sampling v. population bias
-    #print("stdx", stdx, "stdy", stdy)
-    #This is regan's guess as to how to combine stdx and stdy
-    #std = 0.5 *(stdx + stdy) #average
-    std = math.sqrt(stdx*stdx + stdy*stdy) #distance
-    g = std * math.pow(4.0/(3.0*n),0.2)
+    stdx = numpy.std(x) * n / (n - 1.0)  # remove sampling v. population bias
+    stdy = numpy.std(y) * n / (n - 1.0)  # remove sampling v. population bias
+    # print("stdx", stdx, "stdy", stdy)
+    # This is regan's guess as to how to combine stdx and stdy
+    # std = 0.5 *(stdx + stdy) #average
+    std = math.sqrt(stdx * stdx + stdy * stdy)  # distance
+    g = std * math.pow(4.0 / (3.0 * n), 0.2)
     return g
 
+
 def HrefSilverman(points):
-    #FIXME
+    # FIXME
     return HrefWorton(points)
+
 
 def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
     hRef = 0
@@ -268,9 +283,8 @@ def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
         h = hRef
 
     utils.info("hRef (" + hRefmethod + ") = " + str(hRef))
-    utils.info("Using h = " +  str(h))
+    utils.info("Using h = " + str(h))
     return h
-
 
 
 if __name__ == "__main__":
@@ -287,14 +301,16 @@ if __name__ == "__main__":
     test = False
     if test:
         locationLayer = r"C:\tmp\test.gdb\fix_ll"
-        hRefmethod = "WORTON" #Worton,Tufto,Silverman,Gaussian
-        modifier = "NONE" #NONE,PROPORTIONAL,LSCV,BCV2
+        hRefmethod = "WORTON"  # Worton,Tufto,Silverman,Gaussian
+        modifier = "NONE"  # NONE,PROPORTIONAL,LSCV,BCV2
         proportionAmount = "0.7"
         spatialReference = arcpy.SpatialReference()
-        spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
-        #arcpy.env.outputCoordinateSystem = spatialReference
+        spatialReference.loadFromString(
+            "PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision"
+        )
+        # arcpy.env.outputCoordinateSystem = spatialReference
         arcpy.env.outputCoordinateSystem = None
-        #spatialReference = None
+        # spatialReference = None
 
     if modifier.lower() == "proportion":
         try:
@@ -308,7 +324,7 @@ if __name__ == "__main__":
     if not arcpy.Exists(locationLayer):
         utils.die("Location layer cannot be found. Quitting.")
 
-    desc = arcpy.Describe(locationLayer) #Describe() is expensive, so do it only once
+    desc = arcpy.Describe(locationLayer)  # Describe() is expensive, so do it only once
     shapeName = desc.shapeFieldName
     inputSR = desc.spatialReference
     usingInputSR = False
@@ -321,12 +337,22 @@ if __name__ == "__main__":
         spatialReference = inputSR
 
     if not spatialReference or not spatialReference.name:
-        utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
+        utils.die(
+            "The fixes layer does not have a coordinate system, and you have not provided one. Quitting."
+        )
 
-    if spatialReference.type != 'Projected':
-        utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
+    if spatialReference.type != "Projected":
+        utils.die(
+            "The output projection is '"
+            + spatialReference.type
+            + "'.  It must be a projected coordinate system. Quitting."
+        )
 
-    if usingInputSR or (inputSR and spatialReference and spatialReference.factoryCode == inputSR.factoryCode):
+    if usingInputSR or (
+        inputSR
+        and spatialReference
+        and spatialReference.factoryCode == inputSR.factoryCode
+    ):
         spatialReference = None
 
     points = utils.GetPoints(locationLayer, spatialReference, shapeName)

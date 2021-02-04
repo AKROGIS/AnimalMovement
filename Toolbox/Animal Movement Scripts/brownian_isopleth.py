@@ -122,7 +122,11 @@ if __name__ == "__main__":
     try:
         bbRaster = arcpy.sa.Raster(rasterLayer)
     except:
-        utils.die("Brownian Bridge Raster cannot be loaded.\n" + sys.exc_info()[1] + "\n Quitting.")
+        utils.die(
+            "Brownian Bridge Raster cannot be loaded.\n"
+            + sys.exc_info()[1]
+            + "\n Quitting."
+        )
 
     if not (isoplethLines or isoplethPolys or isoplethDonuts):
         utils.die("No output requested. Quitting.")
@@ -130,15 +134,20 @@ if __name__ == "__main__":
     try:
         isoplethList = utilization_isopleth.GetIsoplethList(isoplethInput)
     except:
-        utils.die("Unable to interpret the list of isopleths.\n" + sys.exc_info()[1] + "\n Quitting.")
+        utils.die(
+            "Unable to interpret the list of isopleths.\n"
+            + sys.exc_info()[1]
+            + "\n Quitting."
+        )
 
     if not isoplethList:
         utils.die("List of valid isopleths is empty. Quitting.")
 
-
     #
     # Create isopleth from "normalized" raster
     #
-    #classify the results into 100 equal interval bins, and invert (0..100 -> 100..0)
-    raster = 101 - arcpy.sa.Slice(bbRaster,100,"EQUAL_INTERVAL")
-    utilization_isopleth.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)
+    # classify the results into 100 equal interval bins, and invert (0..100 -> 100..0)
+    raster = 101 - arcpy.sa.Slice(bbRaster, 100, "EQUAL_INTERVAL")
+    utilization_isopleth.CreateIsopleths(
+        isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts
+    )

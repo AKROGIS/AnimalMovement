@@ -38,38 +38,129 @@ import arcpy
 import utils
 
 
-def CreateSchema(outputFeature, animalField, startFieldName, endFieldName,
-                 durationFieldName, velocityFieldName, directionFieldName, spatialReference):
+def CreateSchema(
+    outputFeature,
+    animalField,
+    startFieldName,
+    endFieldName,
+    durationFieldName,
+    velocityFieldName,
+    directionFieldName,
+    spatialReference,
+):
     # Create Feature Class...
     workspace, feature = os.path.split(outputFeature)
-    arcpy.CreateFeatureclass_management(workspace, feature, "POLYLINE", "",
-                                        "DISABLED", "DISABLED",
-                                        spatialReference, "", "0", "0", "0")
+    arcpy.CreateFeatureclass_management(
+        workspace,
+        feature,
+        "POLYLINE",
+        "",
+        "DISABLED",
+        "DISABLED",
+        spatialReference,
+        "",
+        "0",
+        "0",
+        "0",
+    )
     # Add Fields...
     if animalField:
-        arcpy.AddField_management(outputFeature, animalField.name,
-                                  animalField.type, "", "", "", "",
-                                  "NON_NULLABLE", "REQUIRED", "")
-    arcpy.AddField_management(outputFeature, startFieldName, "DATE", "", "",
-                              "", "", "NON_NULLABLE", "REQUIRED", "")
-    arcpy.AddField_management(outputFeature, endFieldName, "DATE", "", "",
-                              "", "", "NON_NULLABLE", "REQUIRED", "")
-    arcpy.AddField_management(outputFeature, durationFieldName, "DOUBLE", "",
-                              "", "", "", "NULLABLE", "NON_REQUIRED", "")
-    arcpy.AddField_management(outputFeature, velocityFieldName, "DOUBLE", "",
-                              "", "", "", "NULLABLE", "NON_REQUIRED", "")
-    arcpy.AddField_management(outputFeature, directionFieldName, "DOUBLE", "",
-                              "", "", "", "NULLABLE", "NON_REQUIRED", "")
+        arcpy.AddField_management(
+            outputFeature,
+            animalField.name,
+            animalField.type,
+            "",
+            "",
+            "",
+            "",
+            "NON_NULLABLE",
+            "REQUIRED",
+            "",
+        )
+    arcpy.AddField_management(
+        outputFeature,
+        startFieldName,
+        "DATE",
+        "",
+        "",
+        "",
+        "",
+        "NON_NULLABLE",
+        "REQUIRED",
+        "",
+    )
+    arcpy.AddField_management(
+        outputFeature,
+        endFieldName,
+        "DATE",
+        "",
+        "",
+        "",
+        "",
+        "NON_NULLABLE",
+        "REQUIRED",
+        "",
+    )
+    arcpy.AddField_management(
+        outputFeature,
+        durationFieldName,
+        "DOUBLE",
+        "",
+        "",
+        "",
+        "",
+        "NULLABLE",
+        "NON_REQUIRED",
+        "",
+    )
+    arcpy.AddField_management(
+        outputFeature,
+        velocityFieldName,
+        "DOUBLE",
+        "",
+        "",
+        "",
+        "",
+        "NULLABLE",
+        "NON_REQUIRED",
+        "",
+    )
+    arcpy.AddField_management(
+        outputFeature,
+        directionFieldName,
+        "DOUBLE",
+        "",
+        "",
+        "",
+        "",
+        "NULLABLE",
+        "NON_REQUIRED",
+        "",
+    )
 
 
-def CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
-                          dateFieldName, startFieldName, endFieldName,
-                          durationFieldName, velocityFieldName, directionFieldName,
-                          spatialReference):
+def CreateMovementVectors(
+    telemetryLayer,
+    outputFeature,
+    animalFieldName,
+    dateFieldName,
+    startFieldName,
+    endFieldName,
+    durationFieldName,
+    velocityFieldName,
+    directionFieldName,
+    spatialReference,
+):
 
-    searchFields = [dateFieldName, 'SHAPE@XY']
-    insertFields = [startFieldName, endFieldName, durationFieldName,
-                    velocityFieldName, directionFieldName, 'SHAPE@WKT']
+    searchFields = [dateFieldName, "SHAPE@XY"]
+    insertFields = [
+        startFieldName,
+        endFieldName,
+        durationFieldName,
+        velocityFieldName,
+        directionFieldName,
+        "SHAPE@WKT",
+    ]
     if animalFieldName:
         hasAnimal = True
         animalField = arcpy.ListFields(telemetryLayer, animalFieldName)[0]
@@ -78,16 +169,26 @@ def CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
     else:
         hasAnimal = False
         animalField = None
-    CreateSchema(outputFeature, animalField, startFieldName, endFieldName,
-                 durationFieldName, velocityFieldName, directionFieldName, spatialReference)
+    CreateSchema(
+        outputFeature,
+        animalField,
+        startFieldName,
+        endFieldName,
+        durationFieldName,
+        velocityFieldName,
+        directionFieldName,
+        spatialReference,
+    )
 
     insert_cursor = arcpy.da.InsertCursor(outputFeature, insertFields)
-    with arcpy.da.SearchCursor(telemetryLayer, searchFields, spatial_reference=spatialReference) as searchCursor:
+    with arcpy.da.SearchCursor(
+        telemetryLayer, searchFields, spatial_reference=spatialReference
+    ) as searchCursor:
         # searchCursor does not support orderby for all datasources
         # particularly shapefiles, so I will do the sorting in python
         # the cursor returns each row as a comparable tuple
         rows = [row for row in searchCursor]
-        #sort() is stable, so if a multiple rows have the same animal and
+        # sort() is stable, so if a multiple rows have the same animal and
         # date, the points will be connected in data source order
         if hasAnimal:
             rows.sort(key=itemgetter(0, 1))
@@ -114,21 +215,21 @@ def BuildVelocityVector(fix1, fix2, hasAnimal):
     else:
         offset = 0
 
-    date1 = fix1[offset+0]
-    date2 = fix2[offset+0]
+    date1 = fix1[offset + 0]
+    date2 = fix2[offset + 0]
     days = (date2 - date1).days
     seconds = (date2 - date1).seconds
     hours = days * 24 + seconds / 3600.0
-    x1, y1 = fix1[offset+1]
-    x2, y2 = fix2[offset+1]
-    length = math.sqrt((x2-x1)**2 + (y2-y1)**2)
-    direction = 90 - math.atan2(y2-y1, x2-x1) * 180 / math.pi
+    x1, y1 = fix1[offset + 1]
+    x2, y2 = fix2[offset + 1]
+    length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    direction = 90 - math.atan2(y2 - y1, x2 - x1) * 180 / math.pi
     if direction < 0:
         direction += 360
     if days == 0 and seconds == 0:
         speed = -1
     else:
-        speed = length/hours
+        speed = length / hours
     shape = "LINESTRING ({x1} {y1}, {x2} {y2})".format(x1=x1, y1=y1, x2=x2, y2=y2)
     if hasAnimal:
         return animal, date1, date2, hours, speed, direction, shape
@@ -152,10 +253,10 @@ if __name__ == "__main__":
     test = False
     if test:
         telemetryLayer = r"C:\tmp\test.gdb\fix_ll"
-        #telemetryLayer = r"C:\tmp\test.gdb\fix_a_c96"
+        # telemetryLayer = r"C:\tmp\test.gdb\fix_a_c96"
         telemetryLayer = r"C:\tmp\vvtest.shp"
         outputFeature = r"C:\tmp\vv08.test.shp"
-        #outputFeature = r"C:\tmp\test.gdb\vv09"
+        # outputFeature = r"C:\tmp\test.gdb\vv09"
         animalFieldName = ""  # "AnimalId"
         dateFieldName = "FixDate"
         startFieldName = "StartTime"
@@ -163,8 +264,8 @@ if __name__ == "__main__":
         durationFieldName = "Duration_Hour"
         velocityFieldName = "Speed_PerHour"
         directionFieldName = "Direction_Degrees"
-        #spatialReference = arcpy.SpatialReference()
-        #spatialReference.loadFromString("Projected Coordinate Systems/State Systems/NAD 1927 Alaska Albers (US Feet)")
+        # spatialReference = arcpy.SpatialReference()
+        # spatialReference.loadFromString("Projected Coordinate Systems/State Systems/NAD 1927 Alaska Albers (US Feet)")
         spatialReference = None
 
     #
@@ -203,14 +304,20 @@ if __name__ == "__main__":
     if animalFieldName:
         allFieldNames = [f.name for f in arcpy.ListFields(telemetryLayer)]
         if animalFieldName not in allFieldNames:
-            utils.info("Telemetry layer does not have a field named '" +
-                       animalFieldName + "'. Using nothing.")
+            utils.info(
+                "Telemetry layer does not have a field named '"
+                + animalFieldName
+                + "'. Using nothing."
+            )
             animalFieldName = None
 
     dateNames = [f.name for f in arcpy.ListFields(telemetryLayer, "", "Date")]
     if dateFieldName not in dateNames:
-        utils.die("Telemetry layer does not have a date field named '" +
-                  dateFieldName + "'. Quitting.")
+        utils.die(
+            "Telemetry layer does not have a date field named '"
+            + dateFieldName
+            + "'. Quitting."
+        )
 
     workspace, table = os.path.split(outputFeature)
     if not arcpy.Exists(workspace):
@@ -226,37 +333,65 @@ if __name__ == "__main__":
         if ext.lower() == ".shp":
             newTableName = newTableName + ext
         outputFeature = os.path.join(workspace, newTableName)
-        utils.info("Feature class was renamed to " + newTableName +
-                   " to meet workspace requirements.")
+        utils.info(
+            "Feature class was renamed to "
+            + newTableName
+            + " to meet workspace requirements."
+        )
 
     newFieldName = arcpy.ValidateFieldName(startFieldName, workspace)
     if newFieldName != startFieldName:
-        utils.info("Renamed field from  `" + startFieldName + "` to `" +
-                   newFieldName + "` to meet workspace requirements.")
+        utils.info(
+            "Renamed field from  `"
+            + startFieldName
+            + "` to `"
+            + newFieldName
+            + "` to meet workspace requirements."
+        )
         startFieldName = newFieldName
 
     newFieldName = arcpy.ValidateFieldName(endFieldName, workspace)
     if newFieldName != endFieldName:
-        utils.info("Renamed field from  `" + endFieldName + "` to `" +
-                   newFieldName + "` to meet workspace requirements.")
+        utils.info(
+            "Renamed field from  `"
+            + endFieldName
+            + "` to `"
+            + newFieldName
+            + "` to meet workspace requirements."
+        )
         endFieldName = newFieldName
 
     newFieldName = arcpy.ValidateFieldName(durationFieldName, workspace)
     if newFieldName != durationFieldName:
-        utils.info("Renamed field from  `" + durationFieldName + "` to `" +
-                   newFieldName + "` to meet workspace requirements.")
+        utils.info(
+            "Renamed field from  `"
+            + durationFieldName
+            + "` to `"
+            + newFieldName
+            + "` to meet workspace requirements."
+        )
         durationFieldName = newFieldName
 
     newFieldName = arcpy.ValidateFieldName(velocityFieldName, workspace)
     if newFieldName != velocityFieldName:
-        utils.info("Renamed field from  `" + velocityFieldName + "` to `" +
-                   newFieldName + "` to meet workspace requirements.")
+        utils.info(
+            "Renamed field from  `"
+            + velocityFieldName
+            + "` to `"
+            + newFieldName
+            + "` to meet workspace requirements."
+        )
         velocityFieldName = newFieldName
 
     newFieldName = arcpy.ValidateFieldName(directionFieldName, workspace)
     if newFieldName != directionFieldName:
-        utils.info("Renamed field from  `" + directionFieldName + "` to `" +
-                   newFieldName + "` to meet workspace requirements.")
+        utils.info(
+            "Renamed field from  `"
+            + directionFieldName
+            + "` to `"
+            + newFieldName
+            + "` to meet workspace requirements."
+        )
         directionFieldName = newFieldName
 
     #
@@ -269,17 +404,30 @@ if __name__ == "__main__":
         spatialReference = arcpy.Describe(telemetryLayer).spatialReference
 
     if not spatialReference or not spatialReference.name:
-        utils.die("The telemetry layer does not have a coordinate system," +
-                  " and you have not provided one. Quitting.")
+        utils.die(
+            "The telemetry layer does not have a coordinate system,"
+            + " and you have not provided one. Quitting."
+        )
 
-    if spatialReference.type != 'Projected':
-        utils.die("The output projection is '" + spatialReference.type +
-                  "'.  It must be a projected coordinate system. Quitting.")
+    if spatialReference.type != "Projected":
+        utils.die(
+            "The output projection is '"
+            + spatialReference.type
+            + "'.  It must be a projected coordinate system. Quitting."
+        )
 
     #
     # Create Movement Vectors
     #
-    CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
-                          dateFieldName, startFieldName, endFieldName,
-                          durationFieldName, velocityFieldName, directionFieldName,
-                          spatialReference)
+    CreateMovementVectors(
+        telemetryLayer,
+        outputFeature,
+        animalFieldName,
+        dateFieldName,
+        startFieldName,
+        endFieldName,
+        durationFieldName,
+        velocityFieldName,
+        directionFieldName,
+        spatialReference,
+    )
