@@ -1,97 +1,102 @@
-# ------------------------------------------------------------------------------
-# HomeRange_MinimumConvexPolygon.py
-# Created: 2011-11-08
-#
-# Title:
-# Minimum Convex Polygon
-#
-# Tags:
-# home, range, animal, movement, area, ecology, location, telemetry, mcp
-#
-# Summary:
-# This tool calculates the minimum convex polygon (MCP) for a data set or a percentage of a data set.  The MCP is the boundary of all the points in the data set such that the boundary is convex, not concave (i.e. every internal angle is less than or equal to 180 degrees).
-#
-# Usage:
-# The input locations must be points
-# The input locations must be in a projected coordinate system
-# The MCP will be in the input coordinate system
-#
-# Parameter 1:
-# Location_Points
-# The set of points to use to develop the MCP.
-# This can be a feature class, or a layer in a map document.  If there is an active selection set on a map layer, then only the selected features will be used.  You can drag and drop from the maps table of contents, or from the file explorer.
-#
-# Parameter 2:
-# Output_Features
-# The new feature class for the calculated minimum convex polygon.
-#
-# Parameter 3:
-# Percentage_of_Points
-# This is the percentage of the points to use when calculating the MCP. Specify 100 percent if you want to use all the location points.  If this is less than 100 percent, then points will be removed based on the removal method until the specified percentage is reached.
-# The input data set is not altered.  Points are not actually removed from Location Points, they are simply excluded from consideration when building the MCP.
-# Default is 100%
-#
-# Parameter 4:
-# Removal_Method
-# The removal method only applies if the percentage of points is less than 100.
-# Fixed Mean: Removes points furthest from the mean of all location points.
-# Fixed Median: Removes points furthest from the median of all location points.
-# Floating Mean: Removes points furthest from the mean of the remaining location points. The mean is recalculated after each point is removed.
-# Floating Median: Removes points furthest from the median of the remaining location points. The median is recalculated after each point is removed.
-# User Point: Removes points furthest from the point provided.
-# Area Added: The area of the MCP of all remaining points is calculated, then each point on the MCP boundary is considered in turn by calculating the area of the MCP without that point.  The boundary point that contributes the largest increase in area is removed.  This process continues until a sufficient number of points are removed.  This method can be slow if a large number of points are going to be removed.
-#
-# Parameter 5:
-# User_Point
-# The user point is required and used only if the removal method is 'User Point'.
-# Locations closest to this point are used to calculate the MCP.
-#
-# Parameter 6:
-# Output_Projection
-# Calculations and output must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
-#
-# Scripting Syntax:
-# MinimumConvexPolygon (Location_Points, Output_Features, Percentage_of_Points, Removal_Method, User_Point, Output_Projection) 
-#
-# Example1:
-# Scripting Example
-# The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
-# It creates the MCP without the 3% of the points furthest from a floating median.
-#  fixes = r"C:\tmp\test.gdb\fixes"
-#  mcp = r"C:\tmp\test.gdb\mcp97"
-#  MinimumConvexPolygon (fixes, mcp, "97" "Floating Median", "", "")
-#
-# Example2:
-# Command Line Example
-# The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
-# It creates the MCP without the 5% of the points furthest from a fixed mean.
-#  C:\folder> MinimumConvexPolygon.py test.gdb\fixes test.gdb\mcp95 95
-#
-# Credits:
-# Regan Sarwas, Alaska Region GIS Team, National Park Service
-#
-# Limitations:
-# Public Domain
-#
-# Requirements
-# arcpy module - requires ArcGIS v10+ and a valid license
-# arcpy.sa module - requires a valid license to Spatial Analyst Extension
-#
-# Disclaimer:
-# This software is provide "as is" and the National Park Service gives
-# no warranty, expressed or implied, as to the accuracy, reliability,
-# or completeness of this software. Although this software has been
-# processed successfully on a computer system at the National Park
-# Service, no warranty expressed or implied is made regarding the
-# functioning of the software on another system or for general or
-# scientific purposes, nor shall the act of distribution constitute any
-# such warranty. This disclaimer applies both to individual use of the
-# software and aggregate use with other software.
-# ------------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+"""
+HomeRange_MinimumConvexPolygon.py
+Created: 2011-11-08
+
+Title:
+Minimum Convex Polygon
+
+Tags:
+home, range, animal, movement, area, ecology, location, telemetry, mcp
+
+Summary:
+This tool calculates the minimum convex polygon (MCP) for a data set or a percentage of a data set.  The MCP is the boundary of all the points in the data set such that the boundary is convex, not concave (i.e. every internal angle is less than or equal to 180 degrees).
+
+Usage:
+The input locations must be points
+The input locations must be in a projected coordinate system
+The MCP will be in the input coordinate system
+
+Parameter 1:
+Location_Points
+The set of points to use to develop the MCP.
+This can be a feature class, or a layer in a map document.  If there is an active selection set on a map layer, then only the selected features will be used.  You can drag and drop from the maps table of contents, or from the file explorer.
+
+Parameter 2:
+Output_Features
+The new feature class for the calculated minimum convex polygon.
+
+Parameter 3:
+Percentage_of_Points
+This is the percentage of the points to use when calculating the MCP. Specify 100 percent if you want to use all the location points.  If this is less than 100 percent, then points will be removed based on the removal method until the specified percentage is reached.
+The input data set is not altered.  Points are not actually removed from Location Points, they are simply excluded from consideration when building the MCP.
+Default is 100%
+
+Parameter 4:
+Removal_Method
+The removal method only applies if the percentage of points is less than 100.
+Fixed Mean: Removes points furthest from the mean of all location points.
+Fixed Median: Removes points furthest from the median of all location points.
+Floating Mean: Removes points furthest from the mean of the remaining location points. The mean is recalculated after each point is removed.
+Floating Median: Removes points furthest from the median of the remaining location points. The median is recalculated after each point is removed.
+User Point: Removes points furthest from the point provided.
+Area Added: The area of the MCP of all remaining points is calculated, then each point on the MCP boundary is considered in turn by calculating the area of the MCP without that point.  The boundary point that contributes the largest increase in area is removed.  This process continues until a sufficient number of points are removed.  This method can be slow if a large number of points are going to be removed.
+
+Parameter 5:
+User_Point
+The user point is required and used only if the removal method is 'User Point'.
+Locations closest to this point are used to calculate the MCP.
+
+Parameter 6:
+Output_Projection
+Calculations and output must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
+
+Scripting Syntax:
+MinimumConvexPolygon (Location_Points, Output_Features, Percentage_of_Points, Removal_Method, User_Point, Output_Projection)
+
+Example1:
+Scripting Example
+The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
+It creates the MCP without the 3% of the points furthest from a floating median.
+ fixes = r"C:\tmp\test.gdb\fixes"
+ mcp = r"C:\tmp\test.gdb\mcp97"
+ MinimumConvexPolygon (fixes, mcp, "97" "Floating Median", "", "")
+
+Example2:
+Command Line Example
+The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
+It creates the MCP without the 5% of the points furthest from a fixed mean.
+ C:\folder> MinimumConvexPolygon.py test.gdb\fixes test.gdb\mcp95 95
+
+Credits:
+Regan Sarwas, Alaska Region GIS Team, National Park Service
+
+Limitations:
+Public Domain
+
+Requirements
+arcpy module - requires ArcGIS v10+ and a valid license
+arcpy.sa module - requires a valid license to Spatial Analyst Extension
+
+Disclaimer:
+This software is provide "as is" and the National Park Service gives
+no warranty, expressed or implied, as to the accuracy, reliability,
+or completeness of this software. Although this software has been
+processed successfully on a computer system at the National Park
+Service, no warranty expressed or implied is made regarding the
+functioning of the software on another system or for general or
+scientific purposes, nor shall the act of distribution constitute any
+such warranty. This disclaimer applies both to individual use of the
+software and aggregate use with other software.
+"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import math
 
 import arcpy
 import numpy
-import math
+
 import utils
 
 # We support lists of arcpy.Points(), and lists of (x,y) tuples
@@ -140,14 +145,14 @@ def MedianPoint(points):
         medianY = numpy.median([point[1] for point in points])
         return (medianX, medianY)
 
-    
+
 def SamePoint(point1, point2, eps):
     if type(point1) == arcpyPointType:
         return abs(point1.X - point2.X) < eps and abs(point1.Y - point2.Y) < eps
     else:
         return abs(point1[0] - point2[0]) < eps and abs(point1[1] - point2[1]) < eps
 
-        
+
 def RemovePoint(points, point, eps):
     newPoints = []
     for pt in points:
@@ -184,7 +189,7 @@ def Mcp(pointList):
     mcpList = arcpy.MinimumBoundingGeometry_management(points, empty, "CONVEX_HULL", "ALL")
     return mcpList[0]
 
-    
+
 def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr = None, shapeName = None):
     points = utils.GetPoints(locationLayer, sr, shapeName)
     countOfPointsToRemove = int((1.0 - percentUsed/100.0) * len(points))
@@ -202,7 +207,7 @@ def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr
     mcp = Mcp(points)
     arcpy.CopyFeatures_management(mcp, mcpFeatureClass)
 
-    
+
 def FixedCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr = None, shapeName = None):
     points = utils.GetArcpyPoints(locationLayer, sr, shapeName)
     countOfPointsToRemove = int((1.0 - percentUsed/100.0) * len(points))
@@ -232,7 +237,7 @@ def RemovePointWithMostArea(allPoints):
     mcp = Mcp(allPoints)
     area = mcp.area
     if not area:
-        raise ValueError("Insufficient points to calculate an MCP") 
+        raise ValueError("Insufficient points to calculate an MCP")
     #Assume only 1 part, and only one polygon per part,
     #Assume each polygon has sufficient vertices to remove 1 and still have an area (i.e. 4 or more)
     #The definition of a Minimum Convex Polygon guarantees this so long as there are sufficient points.
@@ -255,7 +260,7 @@ def RemovePointWithMostArea(allPoints):
 def CreateMCP(locationLayer, mcpFeatureClass, percentUsed, removalMethod, userPoint, sr = None, shapeName = None):
     if percentUsed == 100:
         #correct results are dependent on having arcpy.env.outputCoordinateSystem set
-        arcpy.MinimumBoundingGeometry_management(locationLayer, mcpFeatureClass, 
+        arcpy.MinimumBoundingGeometry_management(locationLayer, mcpFeatureClass,
                                          "CONVEX_HULL", "ALL")
     else:
         if removalMethod == "Area_Added":
@@ -278,7 +283,7 @@ def CreateMCP(locationLayer, mcpFeatureClass, percentUsed, removalMethod, userPo
 
 
 
-                
+
 if __name__ == "__main__":
 
     status = arcpy.CheckProduct("ArcInfo")
@@ -298,14 +303,14 @@ if __name__ == "__main__":
         locationLayer = r"C:\tmp\test.gdb\fix_a_c96"
         mcpFeatureClass = r"C:\tmp\test.gdb\mcp_100"
         percentUsed = "100"
-        removalMethod = "Fixed_Mean" #Fixed_Mean, Fixed_Median, Floating_Mean, Floating_Median, User_Point, Area_Added 
+        removalMethod = "Fixed_Mean" #Fixed_Mean, Fixed_Median, Floating_Mean, Floating_Median, User_Point, Area_Added
         userPoint = "-123000 1122000"
         spatialReference = arcpy.SpatialReference()
         spatialReference.loadFromString("PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;0.001;0.001;0.001;IsHighPrecision")
         #arcpy.env.outputCoordinateSystem = spatialReference
         arcpy.env.outputCoordinateSystem = None
         spatialReference = None
-        
+
     #
     # Input validation
     #
@@ -315,7 +320,7 @@ if __name__ == "__main__":
         utils.die("Percentage of Points was not a valid number. Quitting.")
     if percentUsed <= 0 or 100 < percentUsed:
         utils.warn("Percentage of Points was outside the range (0,100]. Input truncated to fit.")
-    
+
     if removalMethod == "User_Point":
         if not userPoint:
             utils.die("User Point was not provided. Quitting.")
@@ -327,10 +332,10 @@ if __name__ == "__main__":
                 #User_Point uses FixedCenter(), so it must be an arcpy.Point() not (x,y)
             except ValueError:
                 utils.die("User Point was not valid. Quitting.")
-                
+
     if not locationLayer:
         utils.die("No location layer was provided. Quitting.")
-        
+
     if not arcpy.Exists(locationLayer):
         utils.die("Location layer cannot be found. Quitting.")
 
@@ -341,20 +346,20 @@ if __name__ == "__main__":
     shapeName = desc.shapeFieldName
     inputSR = desc.spatialReference
     usingInputSR = False
-    
+
     if not spatialReference or not spatialReference.name:
         spatialReference = arcpy.env.outputCoordinateSystem
-        
+
     if not spatialReference or not spatialReference.name:
         usingInputSR = True
-        spatialReference = inputSR 
+        spatialReference = inputSR
 
     if not spatialReference or not spatialReference.name:
         utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
-        
+
     if spatialReference.type != 'Projected':
         utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
-    
+
     #I need to set the output Coordinate System, otherwise the geometry creation doesn't get an SR
     saveSR = arcpy.env.outputCoordinateSystem
     arcpy.env.outputCoordinateSystem = spatialReference
@@ -372,5 +377,5 @@ if __name__ == "__main__":
     finally:
         #restore the previous output Coordinate System no matter what happens
         arcpy.env.outputCoordinateSystem = saveSR
-    
-    
+
+

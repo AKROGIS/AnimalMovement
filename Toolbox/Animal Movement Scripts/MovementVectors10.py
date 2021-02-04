@@ -1,35 +1,40 @@
-# ---------------------------------------------------------------------------
-# MovementVectors.py
-# Created on: Fri Sep 28 2013
-# Created by: Regan Sarwas, GIS Team, Alaska Region, National Park Service
-#  A re-write of 9.3 version of tool for 10.1sp1 or greater.
-#     requires arcgis 10.1 for new data access cursors.
-#     requires arcgis 10.1sp1 for shape@wkt.
-#  Vectors are drawn connecting points in order of the datetime attribute
-#    if two features have the same datetime, then the ordering of the
-#    features will retain the database ordering (usually this is by feature
-#    creation, but it may be random), and they will get a speed of -1.
-#    If the animal id is provided, then the points are first sorted by
-#    animal, and the points for different animals are not connected.
-#  Notes:
-#   1) A projected coordinate system for the output is required
-#        The first of the following will be used:
-#          1) the spatialReference parameter for this tool,
-#          2) the output spatial reference specified in the environment
-#          3) the spatial reference of the input feature class
-#   2) Duration will always be in hours
-#   3) Speed will always be in projected units per hour
-#   4) The input feature must have an ArcGIS date field.  The shapefile date
-#      field does not have a time component, so you are limited to one point
-#      per day, and duration/speed will always be on 24 hour intervals
-#   5) Works with Animal Movements database
-#   6) Honors the definition query and selection set in ArcMap
-# ---------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+"""
+MovementVectors.py
+Created on: Fri Sep 28 2013
+Created by: Regan Sarwas, GIS Team, Alaska Region, National Park Service
+ A re-write of 9.3 version of tool for 10.1sp1 or greater.
+    requires arcgis 10.1 for new data access cursors.
+    requires arcgis 10.1sp1 for shape@wkt.
+ Vectors are drawn connecting points in order of the datetime attribute
+   if two features have the same datetime, then the ordering of the
+   features will retain the database ordering (usually this is by feature
+   creation, but it may be random), and they will get a speed of -1.
+   If the animal id is provided, then the points are first sorted by
+   animal, and the points for different animals are not connected.
+ Notes:
+  1) A projected coordinate system for the output is required
+       The first of the following will be used:
+         1) the spatialReference parameter for this tool,
+         2) the output spatial reference specified in the environment
+         3) the spatial reference of the input feature class
+  2) Duration will always be in hours
+  3) Speed will always be in projected units per hour
+  4) The input feature must have an ArcGIS date field.  The shapefile date
+     field does not have a time component, so you are limited to one point
+     per day, and duration/speed will always be on 24 hour intervals
+  5) Works with Animal Movements database
+  6) Honors the definition query and selection set in ArcMap
+"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 import math
 from operator import itemgetter
+
 import arcpy
+
 import utils
 
 
@@ -80,7 +85,7 @@ def CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
             arcpy.da.SearchCursor(telemetryLayer, searchFields, spatial_reference=spatialReference) as searchCursor:
         # searchCursor does not support orderby for all datasources
         # particularly shapefiles, so I will do the sorting in python
-        # the cursor returns each row as a comparable tuple 
+        # the cursor returns each row as a comparable tuple
         rows = [row for row in searchCursor]
         #sort() is stable, so if a multiple rows have the same animal and
         # date, the points will be connected in data source order
@@ -160,7 +165,7 @@ if __name__ == "__main__":
         #spatialReference = arcpy.SpatialReference()
         #spatialReference.loadFromString("Projected Coordinate Systems/State Systems/NAD 1927 Alaska Albers (US Feet)")
         spatialReference = None
-        
+
     #
     # Default Values
     #
@@ -187,7 +192,7 @@ if __name__ == "__main__":
         isPointFeature = False
     if not isPointFeature:
         utils.die("Telemetry layer is not a point feature. Quitting.")
-    
+
     if not outputFeature:
         utils.die("No output requested. Quitting.")
 
@@ -228,25 +233,25 @@ if __name__ == "__main__":
         utils.info("Renamed field from  `" + startFieldName + "` to `" +
                    newFieldName + "` to meet workspace requirements.")
         startFieldName = newFieldName
-    
+
     newFieldName = arcpy.ValidateFieldName(endFieldName, workspace)
     if newFieldName != endFieldName:
         utils.info("Renamed field from  `" + endFieldName + "` to `" +
                    newFieldName + "` to meet workspace requirements.")
         endFieldName = newFieldName
-    
+
     newFieldName = arcpy.ValidateFieldName(durationFieldName, workspace)
     if newFieldName != durationFieldName:
         utils.info("Renamed field from  `" + durationFieldName + "` to `" +
                    newFieldName + "` to meet workspace requirements.")
         durationFieldName = newFieldName
-    
+
     newFieldName = arcpy.ValidateFieldName(velocityFieldName, workspace)
-    if newFieldName != velocityFieldName: 
+    if newFieldName != velocityFieldName:
         utils.info("Renamed field from  `" + velocityFieldName + "` to `" +
                    newFieldName + "` to meet workspace requirements.")
         velocityFieldName = newFieldName
-    
+
     newFieldName = arcpy.ValidateFieldName(directionFieldName, workspace)
     if newFieldName != directionFieldName:
         utils.info("Renamed field from  `" + directionFieldName + "` to `" +
@@ -258,18 +263,18 @@ if __name__ == "__main__":
     #
     if not spatialReference or not spatialReference.name:
         spatialReference = arcpy.env.outputCoordinateSystem
-        
+
     if not spatialReference or not spatialReference.name:
         spatialReference = arcpy.Describe(telemetryLayer).spatialReference
 
     if not spatialReference or not spatialReference.name:
         utils.die("The telemetry layer does not have a coordinate system," +
                   " and you have not provided one. Quitting.")
-        
+
     if spatialReference.type != 'Projected':
         utils.die("The output projection is '" + spatialReference.type +
                   "'.  It must be a projected coordinate system. Quitting.")
-    
+
     #
     # Create Movement Vectors
     #

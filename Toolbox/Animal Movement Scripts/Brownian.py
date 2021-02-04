@@ -1,22 +1,32 @@
-### Brownian Bridge Functions
-###
-### From Analyzing Animal Movements Using Brownian Bridges
-### Jon S. Horne Et Al, Ecology, Vol 88, No. 9
-### The code for adehabitat (http://cran.r-project.org/web/packages/adehabitat/index.html)
-### was also used to develop this code.
-###
-### Python version written by Regan Sarwas, regan_sarwas@nps.gov,
-### National Park Service, Alaska Region GIS Team, 2011
-###
-### This code is public domain 
+# -*- coding: utf-8 -*-
+"""
+Brownian Bridge Functions
 
+From Analyzing Animal Movements Using Brownian Bridges
+Jon S. Horne Et Al, Ecology, Vol 88, No. 9
+The code for adehabitat (http://cran.r-project.org/web/packages/adehabitat/index.html)
+was also used to develop this code.
+
+Python version written by Regan Sarwas, regan_sarwas@nps.gov,
+National Park Service, Alaska Region GIS Team, 2011
+
+This code is public domain
+"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import datetime
 import math
+
+import arcpy
+
 import utils
-            
+
+
 def Normal(x, mu, v):
     """Probability function for x for a Normal (Gaussian) distribution.
     mu is the mean value of x, and v is the variance of x."""
-    
+
     prefix = 1 / math.sqrt(2.0 * math.pi * v)
     distanceSquared = (x - mu)**2
     y = prefix * math.exp((-distanceSquared / (2.0 * v)))
@@ -35,13 +45,13 @@ def Horne2dNormal(x1, x2, mu1, mu2, v):
     # the total area at +/- 1 sigma is 46.6076%
     # the total area at +/- 2 sigma is 91.1097%
     # the total area at +/- 3 sigma is 99.5354%
-    
+
     #prefix = 1 / math.sqrt(2.0 * math.pi * v)
     #prefix = 1 / (2.0 * math.pi * v)
     #distanceSquared = ((x1 - mu1)**2 + (x2 - mu2)**2)
     #return prefix * math.exp( (-distanceSquared / (2.0 * v)))
 
-    # I used timeit(), and this is the fastest version of the code above    
+    # I used timeit(), and this is the fastest version of the code above
     return 0.15915494309189535 * math.exp( ((x1 - mu1)**2 + (x2 - mu2)**2) / (-2.0*v)) / v
 
 
@@ -54,7 +64,7 @@ def IntegratePath(gridX, gridY, startX, startY, startV, endX, endY, endV, T, Vm,
     (usually gps error) of the start and end points respectively.
 
     """
-    
+
     #Create a list of median value for each interval
     values = []
     unitWidth = T / intervals
@@ -76,7 +86,7 @@ def IntegratePath(gridX, gridY, startX, startY, startV, endX, endY, endV, T, Vm,
     #    height = values[i]
     #    total += height * width
     #return total
-    
+
 def IntegratePathFast(gridX, gridY, startX, startY, startV, endX, endY, endV, T, Vm, intervals, a):
     """
     Return the value of the probability density function at (gridX, gridY), by step-wise
@@ -86,7 +96,7 @@ def IntegratePathFast(gridX, gridY, startX, startY, startV, endX, endY, endV, T,
     (usually gps error) of the start and end points respectively.
 
     """
-    
+
     #Create a list of median value for each interval
     values = []
     width = 1.0 / intervals
@@ -98,7 +108,7 @@ def IntegratePathFast(gridX, gridY, startX, startY, startV, endX, endY, endV, T,
         v = T*a[i][1]*Vm + a[i][2]*endV + a[i][3]*startV #variance at (x,y)
         r = Horne2dNormal(gridX, gridY, x, y, v)  #value of the normal distribution for (x,y,v) at the grid point
         values.append(r)
-        
+
     #Add up the area under the curve
     total = 0
     for i in range(intervals):
@@ -135,7 +145,7 @@ def EvaluateGridPoint(gridX, gridY, fixes, intervals):
         #mobility Variance
         thisVm = fixes[i][4]
         nextVm = fixes[i1][4]
-        
+
         T = nextTime - thisTime
         Vm = (thisVm + nextVm)/2.0
         r = IntegratePath(gridX, gridY, thisX, thisY, thisVl, nextX, nextY, nextVl, T, Vm, intervals)
@@ -150,12 +160,12 @@ def CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, searchArea=
     row is a list of cell value.  Each row is built left to right, and the
     rows are built top to bottom.  See the EvaluateGridPoint() for details
     on the remaining parameters."""
-    
+
     if progressor is not None:
         rowCount = 1 + int((yMax - yMin) / cellSize)
         if progressor == True:
             rowIndex = 0
-            print "Start Building Grid", rowCount
+            print("Start Building Grid {0}".format(rowCount))
         else:
             progressor.SetProgressor("step", "Building Grid...", 0, rowCount, 1)
 
@@ -183,7 +193,7 @@ def CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, searchArea=
         if progressor is not None:
             if progressor == True:
                 rowIndex += 1
-                print "Finished row", rowIndex, "of", rowCount
+                print("Finished row {0} of {1}".format(rowIndex, rowCount))
             else:
                 progressor.SetProgressorPosition()
 
@@ -194,16 +204,16 @@ def CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, searchArea=
 ###
 ### Routines for estimating the mobility variance
 ###
-    
+
 def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
     """Return a list (with step number of items).  Each item is a tuple of
     (variance, likelihood).  Variances in the list are equally distributed between
     lowerBound to upperBound. The likelihood is based on Equation 7 in Horne, et al
-    and I beleive it is a likelihood cross validation.   
+    and I beleive it is a likelihood cross validation.
     fixes is a list of fixes where each fix is (time, x, y, locational_variance).
     fixes are assumed to be in chronological order, and time is a number.  The units
     of time are unimportant, as the mobility variance varies with the units chosen.
-    
+
     The algorithm is as follows: Assume a mobility variance, vm.  For the first three fixes,
     pretend that fix2 is missing, and calculate the normal distribution at the observed
     location of fix2 based on the predicted (part way between fix1 and fix3) mean location of
@@ -214,13 +224,13 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
     In Horne, et al (2007), only odd numbered fixes are considered independent.
     in the adehabitat code, each group of three is considered.  This code uses
     the second approach."""
-    
-    #print "In CVL(); len(fixes) =", len(fixes), "lowerBound =",lowerBound, "upperBound =",upperBound, "step =", step, "scaleFactor =", scaleFactor   
+
+    #print "In CVL(); len(fixes) =", len(fixes), "lowerBound =",lowerBound, "upperBound =",upperBound, "step =", step, "scaleFactor =", scaleFactor
 
     if len(fixes) < 3:
         raise ValueError, "Not enough fixes provided"
 
-    results = []    
+    results = []
     for vm in utils.frange(lowerBound, (upperBound + step), step):
         #print "vm = ",vm
         likelihood = 1
@@ -239,10 +249,10 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
             #locational Variance
             prevV = fixes[i-1][3]
             nextV = fixes[i+1][3]
-            
+
             T = nextTime - prevTime
             #a = alphai = percent of path
-            a = float(thisTime - prevTime) / T 
+            a = float(thisTime - prevTime) / T
 
             # (meanX, meanY) = mui(ti) = mean predicted location at time i
             meanX = prevX + a * (nextX - prevX)
@@ -250,7 +260,7 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
 
             # v = sigmai^2(ti) = total assumed brownian motion variance at time i
             v = T * a * (1 - a) * vm  +  (1-a)**2 * prevV  +  a**2 * nextV
-            
+
             #distanceSquared = ((thisX - meanX)**2 + (thisY - meanY)**2)
             #print "thisX =",thisX,"thisY =",thisY,"meanX =",meanX,"meanY =",meanY, "v =", v
             #print "distanceSquared =",distanceSquared, "T =", T, "a =", a, "vm =", vm, "prevV =", prevV, "nextV =", nextV,
@@ -258,7 +268,7 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
             # (thisX, thisY) = Zi = location at which to get value of PDF
             normal = Horne2dNormal(thisX, thisY, meanX, meanY, v)
             #print "normal =",normal
-            
+
             # The normal is typically very small (the total area under the normal curve = 1.0)
             # the scale factor keeps the product from decaying to zero with a
             # large number of fixes.  Since the likelihoods are relative, the
@@ -294,14 +304,14 @@ def BestV(fixes, minV, maxV, steps, scaleFactor):
     #print "total =", total
     if total == 0:
         return False, -1
-    
+
     #if any of the likelihoods are infinity, then the scaleFactor is too large
     anyInfinities = filter(math.isinf, [v[1] for v in likelihoods])
     #print "anyInfinities =", anyInfinities
     if anyInfinities:
         return False, 1
-    
-    #print "scale factor is good" 
+
+    #print "scale factor is good"
     result = (0,0)
     for pair in likelihoods:
         #print "v", pair[0], "likelihood", pair[1]
@@ -323,7 +333,7 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps = 10, error = 0.00
     if there is no upper bound on the variance.  The graph of liklihood at suitable
     resolution should be reviewed to correctly identify the true solution."""
 
-    #print "In MobilityVariance(), len(fixes) =",len(fixes),"maxGuess =",maxGuess,"steps =", "scaleFactorGuess =", scaleFactorGuess, steps,"error =",error 
+    #print "In MobilityVariance(), len(fixes) =",len(fixes),"maxGuess =",maxGuess,"steps =", "scaleFactorGuess =", scaleFactorGuess, steps,"error =",error
 
     ### FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME ###
     ###
@@ -334,7 +344,7 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps = 10, error = 0.00
     ###    i.e. refining or increasing the maxV requires a rework of the scalefactor
     ###
     ### FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME ###
-    
+
     maxV = maxGuess
     #Make a first guess
     scaleFactor = scaleFactorGuess
@@ -350,14 +360,14 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps = 10, error = 0.00
             else:
                 scaleFactor = scaleFactor / 10.0
         ###FIXME - check previous results, and make sure we are not oscillating
-    
+
     print "success =",success, "scaleFactorUnknown =",scaleFactorUnknown, "scaleFactor =", scaleFactor
-    
+
     gap = float(maxV - 0)/steps
 
 #    print result, "+/-", gap, "scaleFactor =", scaleFactor
 #    sys.exit()
-    
+
     #make sure the guess was big enough.  keep doubling until we get it
     #FIXME - we may keep doubling until we throw a math exception.  Check and bail.
     while result > maxV - gap:
@@ -368,7 +378,7 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps = 10, error = 0.00
             ###FIXME, check success and adjust scalefactor
         gap = float(maxV - 0)/steps
         #print result, "+/-", gap
-    
+
     #keep zeroing in on the previous result until we have good resolution
     while gap > error:
         success,result = BestV(fixes, max (0,result-gap), result+gap, steps, scaleFactor)
@@ -406,9 +416,7 @@ def test2():
     v1 = MobilityVariance(fix, 10000)
     v2 = MobilityVariance(fix, 1)
     print v1,v2
-   
-import arcpy
-import datetime
+
 
 def test3():
     fixes = [
@@ -426,13 +434,13 @@ def test3():
     for fix in fixes:
         fix[4] = vm
     intervals = 20
-    
-    nx = int((xMax-xMin)/cellSize)  
+
+    nx = int((xMax-xMin)/cellSize)
     ny = int((yMax-yMin)/cellSize)
     nf = len(fixes)
     ni = intervals
     n = nx*ny*nf*ni
-    
+
     print "cols",nx,"rows",ny,"fixes",nf,"intervals",ni
     print "Estimated running time",0.000002*n,"seconds"
     print "CreateBBGrid", xMin, xMax, yMin, yMax, cellSize, intervals

@@ -1,125 +1,131 @@
-# ------------------------------------------------------------------------------
-# BB_Raster.py
-# Created: 2011-12-06
-#
-# Title:
-# Create Brownian Bridge Probability Raster
-#
-# Tags:
-# home, range, animal, tracking, telemetry, ecology, probability, utilization, density, mobility, random, walk, location, variance 
-#
-# Summary:
-# Creates a probablity distribution raster depicting the probability of an animal having been in a cell, based on some locations in time.
-# 
-# Usage:
-# The probability distribution raster is created using the Brownian Bridge method described in  Analyzing Animal Movements Using Brownian Bridges by Jon S. Horne Et Al, Ecology, Vol 88, No. 9.
-# In brief, the Brownian Bridge method adds the locational variance (GPS error) at the fix locations and the mobility variance (deviation from the straight line path between temporally adjacent fixes using a random walk) to get a probability distribution for the animal's location.
-# If the mobility variance is not provided, it is calclulated as follows: Assume a mobility variance, vm.  For the first three fixes. pretend that fix2 is missing, and calculate the normal distribution at the observed location of fix2 based on the predicted (part way between fix1 and fix3) mean location of fix2.  Do this again for fixes 2,3,4 then 3,4,5 etc until the last 3 fixes.  The product of the normal distributions is the indicator of the likelihood of the assumed mobility variance.
-# This algorithm is computationally expensive.  The time required to process a data set is proportional to the number of cells times the number of locations times the number of integration intervals.  The number of cells is based on the extents of the raster (fixed by the spatial distribution of the locations), and the cell size.  Increasing the integration intervals or decreasing the cell size will increase the time required to obtain a solution, but will also increase the resolution (or detail) available in the results.  In most cases, there is no benefit from adjusting the default value of the integration interval.  If the cell size is omitted, a cell size is chosen that should result in a the ability to deliver a solution in less than a minute.  The program will output the cellsize used.  Future runs can specify a cell size depending on the resolution desired, and the amount of time you are willing to wait to obtain a result.  The processing time increases as the square of the reduction in cell size.  For example, if a cell size of 10000 meters takes 1 minute to run, a cellsize of 5000 meters will takes 4 minutes, a cell size of 1000 meters will take 100 minutes, and a cellsize of 100 meters will take 10,000 minutes (almost 7 days).  Choose your cell size carefully.
-# This tool tried to eliminate unecessary processing by creating a buffer around the animal's straight line path, and assigning a value of zero to cells outside the buffer.  The size of the buffer is based on the variance values, and it will include all likely locations. However, if the data is tightly clustered, the accumulation of overlapping low probabilities at the perifery may appear cropped by this buffer.  Contact the author if you think this is a problem for your analysis. 
-# Issues:
-#    Output raster has no spatial reference
-#    If we are calculating a number of rasters that we want to add or compare we will need to use a standard extents/cellsize - make this user definable
-#    Grouping does not work (use per group or per dataset extents/cellsize?)
-#    Does not support line feature classes
-#    May not find mobility variance - product may overflow or underflow (to 0)
-#    Optimizing technique may clip the results (I only calculate cells within a buffer distance of the path)#
-#
-# Parameter 1:
-# Fixes
-# Fixes can be points or lines, but only points are supported at this time.
-#
-# Parameter 2:
-# Raster
-# The results raster.  A probability distribution raster with values in the range from 0 to 1 indicating the probability of finding the animal in this cell compared with the other cells.  The total of all cells in the raster will equal one.
-#
-# Parameter 3:
-# Date_Field
-# Field for ordering the fixes for the walk through time.  This is a temporary (in memory only) sort.  The data on disk is not changed.
-#
-# Parameter 4:
-# Grouping_Fields
-# Grouping is not yet implemented.
-# The input dataset must represent only one animal
-# Each unique value (set of values) in the grouping fields will be used to create a separate raster.  These rasters will then be normalized and added to create combined raster. 
-#
-# Parameter 5:
-# Cell_Size_Constant
-# Default cell size will be calculated based on a maximum running time of about 1 minute. You will probably want to run this again with a smaller cell size.
-# The program will provide some guidance on selecting a cell size based on your data.
-# Note: halving the cell size will quadruple the running time.
-#
-# Parameter 6:
-# Integration_Intervals
-# Each segment is divided into this many intervals, for integrating the results along the path. Increasing this number will increase the processing time, but will provide more fine grained results.
-#
-# Parameter 7:
-# Location_Variance_Constant
-# This is the GPS error. A default of 832m is used based on experimental results from Horne, et al (2007) based on Lotex 3300L collars at 48 test sites in Idaho
-#
-# Parameter 8:
-# Location_Variance_Field
-# A field in the database that provides locational variance for each fix
-#
-# Parameter 9:
-# Mobility_Variance_Constant
-# A constant mobility variance value to use for all location points.
-# If this is not provided, a value is estimated based on Horne, et all (2007)
-#
-# Parameter 10:
-# Mobility_Variance_Field
-# A field the provides the mobility variance at each fix
-#
-# Parameter 11:
-# Output_Spatial_Reference
-# Calculations and output must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
-#
-# Scripting Syntax:
-# BrownianBridgesRaster (Fixes, Raster, Date_Field, Grouping_Fields, Cell_Size_Constant, Integration_Intervals, Location_Variance_Constant, Location_Variance_Field, Mobility_Variance_Constant, Mobility_Variance_Field, Output_Spatial_Reference)
-#
-# Example1:
-# Scripting Example
-# The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
-# It creates a brownian probability raster with the default parameters
-#  fixes = r"C:\tmp\test.gdb\fixes"
-#  raster = r"C:\tmp\test.gdb\bb1"
-#  BrownianBridgesRaster (fixes, raster, "FixDate")
-#
-# Example2:
-# Command Line Example
-# The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
-# It creates a brownian probability raster with the default parameters and a cell size of 100
-#  C:\folder> BrownianBridgesRaster.py "test.gdb\fixes" "test.gdb\bb1" FixDate # 100
-#
-# Credits:
-# Regan Sarwas, Alaska Region GIS Team, National Park Service
-#
-# Limitations:
-# Public Domain
-#
-# Requirements
-# arcpy module - requires ArcGIS v10+ and a valid license
-# arcpy.sa module - requires a valid license to Spatial Analyst Extension
-#
-# Disclaimer:
-# This software is provide "as is" and the National Park Service gives
-# no warranty, expressed or implied, as to the accuracy, reliability,
-# or completeness of this software. Although this software has been
-# processed successfully on a computer system at the National Park
-# Service, no warranty expressed or implied is made regarding the
-# functioning of the software on another system or for general or
-# scientific purposes, nor shall the act of distribution constitute any
-# such warranty. This disclaimer applies both to individual use of the
-# software and aggregate use with other software.
-# ------------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+"""
+BB_Raster.py
+Created: 2011-12-06
 
-import sys
+Title:
+Create Brownian Bridge Probability Raster
+
+Tags:
+home, range, animal, tracking, telemetry, ecology, probability, utilization, density, mobility, random, walk, location, variance
+
+Summary:
+Creates a probablity distribution raster depicting the probability of an animal having been in a cell, based on some locations in time.
+
+Usage:
+The probability distribution raster is created using the Brownian Bridge method described in  Analyzing Animal Movements Using Brownian Bridges by Jon S. Horne Et Al, Ecology, Vol 88, No. 9.
+In brief, the Brownian Bridge method adds the locational variance (GPS error) at the fix locations and the mobility variance (deviation from the straight line path between temporally adjacent fixes using a random walk) to get a probability distribution for the animal's location.
+If the mobility variance is not provided, it is calclulated as follows: Assume a mobility variance, vm.  For the first three fixes. pretend that fix2 is missing, and calculate the normal distribution at the observed location of fix2 based on the predicted (part way between fix1 and fix3) mean location of fix2.  Do this again for fixes 2,3,4 then 3,4,5 etc until the last 3 fixes.  The product of the normal distributions is the indicator of the likelihood of the assumed mobility variance.
+This algorithm is computationally expensive.  The time required to process a data set is proportional to the number of cells times the number of locations times the number of integration intervals.  The number of cells is based on the extents of the raster (fixed by the spatial distribution of the locations), and the cell size.  Increasing the integration intervals or decreasing the cell size will increase the time required to obtain a solution, but will also increase the resolution (or detail) available in the results.  In most cases, there is no benefit from adjusting the default value of the integration interval.  If the cell size is omitted, a cell size is chosen that should result in a the ability to deliver a solution in less than a minute.  The program will output the cellsize used.  Future runs can specify a cell size depending on the resolution desired, and the amount of time you are willing to wait to obtain a result.  The processing time increases as the square of the reduction in cell size.  For example, if a cell size of 10000 meters takes 1 minute to run, a cellsize of 5000 meters will takes 4 minutes, a cell size of 1000 meters will take 100 minutes, and a cellsize of 100 meters will take 10,000 minutes (almost 7 days).  Choose your cell size carefully.
+This tool tried to eliminate unecessary processing by creating a buffer around the animal's straight line path, and assigning a value of zero to cells outside the buffer.  The size of the buffer is based on the variance values, and it will include all likely locations. However, if the data is tightly clustered, the accumulation of overlapping low probabilities at the perifery may appear cropped by this buffer.  Contact the author if you think this is a problem for your analysis.
+Issues:
+   Output raster has no spatial reference
+   If we are calculating a number of rasters that we want to add or compare we will need to use a standard extents/cellsize - make this user definable
+   Grouping does not work (use per group or per dataset extents/cellsize?)
+   Does not support line feature classes
+   May not find mobility variance - product may overflow or underflow (to 0)
+   Optimizing technique may clip the results (I only calculate cells within a buffer distance of the path)#
+
+Parameter 1:
+Fixes
+Fixes can be points or lines, but only points are supported at this time.
+
+Parameter 2:
+Raster
+The results raster.  A probability distribution raster with values in the range from 0 to 1 indicating the probability of finding the animal in this cell compared with the other cells.  The total of all cells in the raster will equal one.
+
+Parameter 3:
+Date_Field
+Field for ordering the fixes for the walk through time.  This is a temporary (in memory only) sort.  The data on disk is not changed.
+
+Parameter 4:
+Grouping_Fields
+Grouping is not yet implemented.
+The input dataset must represent only one animal
+Each unique value (set of values) in the grouping fields will be used to create a separate raster.  These rasters will then be normalized and added to create combined raster.
+
+Parameter 5:
+Cell_Size_Constant
+Default cell size will be calculated based on a maximum running time of about 1 minute. You will probably want to run this again with a smaller cell size.
+The program will provide some guidance on selecting a cell size based on your data.
+Note: halving the cell size will quadruple the running time.
+
+Parameter 6:
+Integration_Intervals
+Each segment is divided into this many intervals, for integrating the results along the path. Increasing this number will increase the processing time, but will provide more fine grained results.
+
+Parameter 7:
+Location_Variance_Constant
+This is the GPS error. A default of 832m is used based on experimental results from Horne, et al (2007) based on Lotex 3300L collars at 48 test sites in Idaho
+
+Parameter 8:
+Location_Variance_Field
+A field in the database that provides locational variance for each fix
+
+Parameter 9:
+Mobility_Variance_Constant
+A constant mobility variance value to use for all location points.
+If this is not provided, a value is estimated based on Horne, et all (2007)
+
+Parameter 10:
+Mobility_Variance_Field
+A field the provides the mobility variance at each fix
+
+Parameter 11:
+Output_Spatial_Reference
+Calculations and output must be done in a projected coordinate system (i..e not geographic - lat/long).  The projected coordinate system to use can be specified in three ways, 1) with this parameter, 2) with the output coordinate system in the environment, or 3) with the coordinate system of the input.  These options are listed in priority order, that is this paraeter will trump the environment, and the environment will trump the input data. if a projected coordinate system is not found then the program will abort.
+
+Scripting Syntax:
+BrownianBridgesRaster (Fixes, Raster, Date_Field, Grouping_Fields, Cell_Size_Constant, Integration_Intervals, Location_Variance_Constant, Location_Variance_Field, Mobility_Variance_Constant, Mobility_Variance_Field, Output_Spatial_Reference)
+
+Example1:
+Scripting Example
+The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
+It creates a brownian probability raster with the default parameters
+ fixes = r"C:\tmp\test.gdb\fixes"
+ raster = r"C:\tmp\test.gdb\bb1"
+ BrownianBridgesRaster (fixes, raster, "FixDate")
+
+Example2:
+Command Line Example
+The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
+It creates a brownian probability raster with the default parameters and a cell size of 100
+ C:\folder> BrownianBridgesRaster.py "test.gdb\fixes" "test.gdb\bb1" FixDate # 100
+
+Credits:
+Regan Sarwas, Alaska Region GIS Team, National Park Service
+
+Limitations:
+Public Domain
+
+Requirements
+arcpy module - requires ArcGIS v10+ and a valid license
+arcpy.sa module - requires a valid license to Spatial Analyst Extension
+
+Disclaimer:
+This software is provide "as is" and the National Park Service gives
+no warranty, expressed or implied, as to the accuracy, reliability,
+or completeness of this software. Although this software has been
+processed successfully on a computer system at the National Park
+Service, no warranty expressed or implied is made regarding the
+functioning of the software on another system or for general or
+scientific purposes, nor shall the act of distribution constitute any
+such warranty. This disclaimer applies both to individual use of the
+software and aggregate use with other software.
+"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import datetime
 import math
+import sys
+
 import arcpy
 import numpy
-import datetime
+
 import Brownian
 import utils
+
 
 def GetGridExtents(featureExtents, varianceLocation, varianceMobility):
     #variance = sigma^2; 3sigma = 99% probability
@@ -141,7 +147,7 @@ def CalcCellSize(extents, countOfFixes, countOfIntervals, timePerUnit, totalTime
     The user specifies the time they are willing to spend, which will determine
     The number of cells, from which the cellSize can be determined.
 
-    """    
+    """
     timePerCell = countOfFixes * countOfIntervals * timePerUnit
     numberOfCells = totalTime / timePerCell
     gridRatio = (extents.XMax - extents.XMin) / (extents.YMax - extents.YMin) # X/Y = cols/rows
@@ -177,8 +183,8 @@ def GetFixedRasterName(rasterName, groupName):
         return rasterName
     else:
         raise NameError, "GetFixRasterName Function not complete"
-    
-    
+
+
 def BuildFixesFromLines(features, shapeFieldName, dateField, groupingFields,
                         locationVarianceField, mobilityVarianceConstant, spatialReference):
     pass
@@ -186,12 +192,12 @@ def BuildFixesFromLines(features, shapeFieldName, dateField, groupingFields,
 
 def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
                          locationVarianceField, mobilityVarianceField, spatialReference):
-    
+
     fieldNames = [f.name for f in arcpy.ListFields(features)]
     if not dateField or dateField not in fieldNames:
         raise ValueError, "date field is not found in the dataset"
 
-    #FIXME - verify field types   
+    #FIXME - verify field types
     dateFieldDelimited = arcpy.AddFieldDelimiters(features, dateField)
     sort = dateField  + " A"
     fields = shapeFieldName + ";" + dateField
@@ -212,7 +218,7 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
         msg += "must be correctly pre-sorted by date or you will get incorrect results. "
         msg += "If you can't guarantee pre-sorted data, then reproject your data first."
         utils.warn(msg)
-    
+
     results = {}
     #print groupingFields, dateFieldDelimited
     for groupName, whereClaus in GetGroupings(groupingFields, dateFieldDelimited).iteritems():
@@ -237,11 +243,11 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
             if mobilityVarianceField:
                 fix[4] = point.getValue(mobilityVarianceField)
             fixes.append(fix)
-            
+
         results[groupName] = fixes
         utils.info("fixes "+ str(len(fixes)) +" first fix: " + str(fixes[0]))
     return results
-    
+
 
 def EstimateLocationVariance():
     #Estimating locational variance.
@@ -264,7 +270,7 @@ def EstimateLocationVariance():
 #  it does to calculate it.  Most problems will be much larger and the time to check will be a
 #  small percent to the time to fully analyze.
 #  if x is the time to check to see if a grid point should be analyzed,
-#  and m is the path size (number of segments * the number of intervals/segment) 
+#  and m is the path size (number of segments * the number of intervals/segment)
 #  and y is the time to analyze a grid point (y=m*c)
 #  and n is the number of grid points.
 #  and p is the percentage of points that can be skipped (i.e. outside buffer)
@@ -348,7 +354,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
             intervals = int(intervalsConstant)
         else:
             intervals = 10
-                
+
         #get a collection of fixes, one for each grouping.
         desc = arcpy.Describe(features)
         shapeFieldName = desc.shapeFieldName
@@ -398,7 +404,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
             extents = arcpy.Extent(xmin, ymin, xmax, ymax)
 
             #print "Got extents",xmin, ymin, xmax, ymax
-           
+
             #Get LocationalVariance
             if not locationVarianceField:
                 if utils.IsFloat(locationVarianceConstant):
@@ -417,7 +423,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                         maxLocationVariance = fix[3]
 
             #print "maxLocationVariance",maxLocationVariance
-            
+
             #Get MobilityVariance
             if not mobilityVarianceField:
                 if utils.IsFloat(mobilityVarianceConstant):
@@ -446,9 +452,9 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
             print "  Got Variances: Vl", maxLocationVariance, "Vm", maxMobilityVariance, datetime.datetime.now() - start
             start = datetime.datetime.now()
 
-            #Buffer the extents to include the variance            
+            #Buffer the extents to include the variance
             extents = GetGridExtents(extents, maxLocationVariance, maxMobilityVariance * maxTime)
-            
+
             #Get cellSize
             overhead = 0.000000429  #per gridpoint
             secondsPerCheck = 0.00051443 #per gridpoint (includes overhead)
@@ -503,7 +509,7 @@ def PrintCellSizeEvaluation(cellSize, varianceLocation, varianceMobility):
         n = int(cellSize/upperMinimum)
         n = n*n
         utils.info("  Processing will take %d times as long if cell size is %.2f"%(n,upperMinimum))
-        
+
 
 def PrintRunTime(extents, cellSize, searchArea, nFixes, intervals, secondsPerCheck, secondsPerCalculation):
     gridArea = (extents.XMax - extents.XMin) * (extents.YMax -extents.YMin)
@@ -516,7 +522,7 @@ def PrintRunTime(extents, cellSize, searchArea, nFixes, intervals, secondsPerChe
     cols = int( 1 + (extents.XMax - extents.XMin) / cellSize)
     segments = nFixes-1
     n = cols * rows * segments * intervals
-    
+
     msg =  "  cols %d, rows %d, segments %d, intervals %d, total %d" %(cols,rows,segments,intervals,n)
     utils.info(msg)
     seconds = cols * rows * (secondsPerCheck + searchPercent * (segments*intervals) * secondsPerCalculation)
@@ -530,14 +536,14 @@ def PrintRunTime(extents, cellSize, searchArea, nFixes, intervals, secondsPerChe
             if hours > 24:
                 days = hours / 24
                 hours = hours - days * 24
-                time = "%d days and %d hours" % (days, hours) 
+                time = "%d days and %d hours" % (days, hours)
             else:
                 time = "%d hours and %d minutes" % (hours, minutes)
         else:
             time = "%d minutes and %d seconds" % (minutes, seconds)
     else:
         time = "%d seconds" % (seconds)
-            
+
     utils.info("  Estimated running time %s"%time)
 
 if __name__ == "__main__":
@@ -597,28 +603,28 @@ if __name__ == "__main__":
     if groupingFieldNames == "#": groupingFieldNames = None
     if locationVarianceFieldName == "#": locationVarianceFieldName = None
     if mobilityVarianceFieldName == "#": mobilityVarianceFieldName = None
-    
+
     if not rasterName:
         utils.die("No output requested. Quitting.")
 
     if not fixesLayer:
         utils.die("No fixes layer was provided. Quitting.")
-        
+
     if not arcpy.Exists(fixesLayer):
         utils.die("Location layer cannot be found. Quitting.")
 
     if not spatialReference or not spatialReference.name:
         spatialReference = arcpy.env.outputCoordinateSystem
-        
+
     if not spatialReference or not spatialReference.name:
         spatialReference = arcpy.Describe(fixesLayer).spatialReference
 
     if not spatialReference or not spatialReference.name:
         utils.die("The fixes layer does not have a coordinate system, and you have not provided one. Quitting.")
-        
+
     if spatialReference.type != 'Projected':
         utils.die("The output projection is '" + spatialReference.type + "'.  It must be a projected coordinate system. Quitting.")
-    
+
     #
     # Create brownian bridge raster(s)
     #

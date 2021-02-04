@@ -1,13 +1,15 @@
-# ------------------------------------------------------------------------------
-# Utils101.py
-# Created: 2013-10-24
-#
-# Utility functions for use with ArcGIS 10.1
-# ------------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+"""
+Utility functions for use with ArcGIS 10.1
+Created: 2013-10-24
+"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
+
 import arcpy
-import arcpy.da
+
 
 def die(msg):
         arcpy.AddError(msg)

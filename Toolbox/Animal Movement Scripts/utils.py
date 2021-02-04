@@ -1,12 +1,14 @@
-# ------------------------------------------------------------------------------
-# UD_SmoothingFactor.py
-# Created: 2012-12-05
-#
-# Utility functions for use with ArcGIS
-# ------------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+"""
+Utility functions for use with ArcGIS < 10.1
+"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
+
 import arcpy
+
 
 def die(msg):
         arcpy.AddError(msg)
