@@ -17,8 +17,9 @@ import random
 import datetime
 
 import arcpy
-import numpy
 
+
+# pylint: disable=invalid-name, missing-function-docstring
 
 def GetPoints(pointsFeature, shapeName, idName):
     # return a tuple (x,y,m) for each oid, m will be calculated later
@@ -40,14 +41,15 @@ def GetPoints(pointsFeature, shapeName, idName):
 
 def HarmonicMeanDistance(points):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
+    n = len(points)
     for k1 in points:
-        x1, y1, m1 = points[k1]
+        x1, y1, _ = points[k1]
         # print(k1,x1,y1,m1)
         z = 0
         for k2 in points:
             if k1 == k2:
                 continue
-            x2, y2, m2 = points[k2]
+            x2, y2, _ = points[k2]
             x = x2 - x1
             y = y2 - y1
             d = math.sqrt(x * x + y * y)
@@ -73,6 +75,7 @@ def HarmonicMeanDistance(points):
 
 def HarmonicMeanDistance_a(xs, ys):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
+    n = len(xs)
     h = []
     for i in range(n):
         z = 0
@@ -95,6 +98,7 @@ def HarmonicMeanDistance_a(xs, ys):
 
 def HarmonicMeanDistance2(xs, ys):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
+    n = len(xs)
     h = []
     for i in range(n):
         z = 0
@@ -117,6 +121,7 @@ def HarmonicMeanDistance2(xs, ys):
 
 def MeanDistance(xs, ys):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
+    n = len(xs)
     h = []
     for i in range(n):
         z = 0
@@ -139,6 +144,7 @@ def MeanDistance(xs, ys):
 
 def MeanDistance2(xs, ys):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
+    n = len(xs)
     h = []
     for i in range(n):
         z = 0
@@ -184,8 +190,8 @@ def test(n):
         "us/point^2",
     )
 
-    for i in range(len(data)):
-        h = data[i][2]
+    for i, item in enumerate(data):
+        h = item[2]
         if i == 0:
             hmin = h
             hmax = h
