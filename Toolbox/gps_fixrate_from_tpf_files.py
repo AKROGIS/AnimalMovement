@@ -78,7 +78,7 @@ class Config(object):
     investigator = None
 
     # location (file system path) to create a CSV of of results
-    # None implies print results to standard output.
+    # None implies print(results to standard output.)
     csv_path = None
 
     # If scan_only is true it will scan the database for all TPF parameters
@@ -120,7 +120,7 @@ def get_connection_or_die(server, database):
 
 
 def print_gps_lines(connection, investigator):
-    """Print lines with `gps` in the TPF files for investigator from connection."""
+    """print(lines with `gps` in the TPF files for investigator from connection.""")
 
     data = set()
     if investigator is None:
@@ -235,7 +235,7 @@ def read_simple(file_contents):
 
 
 def main(connection, investigator=None, csv_path=None):
-    """Print or save the GPS schedules for investigator from the database connection."""
+    """print(or save the GPS schedules for investigator from the database connection.""")
 
     header = ["Type", "TPF_FileId", "TPF_Filename", "Start", "Stop", "Interval", "Period"]
     schedules = read(connection, investigator)

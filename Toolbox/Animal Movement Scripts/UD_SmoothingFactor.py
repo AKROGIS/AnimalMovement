@@ -125,7 +125,7 @@ def LSCV(allDistancesSquared, n, h):
     term3a = 1.0 / math.pi
     term3b = -1.0 / (2.0 * h * h)
     term4 = n*n*h*h
-    #print "term1",term1,"term2a",term2a,"term3a",term3a,"term2b",term2b,"term3b",term3b,"term4",term4
+    #print("term1",term1,"term2a",term2a,"term3a",term3a,"term2b",term2b,"term3b",term3b,"term4",term4)
     total = 0.0
     for d in allDistancesSquared:
         if d == 0:
@@ -136,16 +136,16 @@ def LSCV(allDistancesSquared, n, h):
         term3 = term3a * math.exp(d * term3b)
         term5 = (term2 - term3)/term4
         total = total + term5
-        #print "d",d,"term2",term2,"term3",term3,"term5",term5, "total", total
+        #print("d",d,"term2",term2,"term3",term3,"term5",term5, "total", total)
     result = term1 + total
-    #print "CV", h, result
+    #print("CV", h, result)
     return result
 
 
 def BCV2(allDistancesSquared, n, h):
     term1 = 1.0 / (4 * math.pi * h * h * (n - 1))
     term2 = 8*(n-1)*(n-2)*h*h*math.pi
-    #print "h",h,"n",n,"term1",term1,"term2",term2
+    #print("h",h,"n",n,"term1",term1,"term2",term2)
     total = 0.0
     for d in allDistancesSquared:
         if d == 0.0:
@@ -156,9 +156,9 @@ def BCV2(allDistancesSquared, n, h):
         D2 = D * D
         term3 = (D2 -8*D + 8) * math.exp(-D2/2) / term2
         total = total + term3
-        #print "d",d,"D",D,"D2",D2,"term3",term3,"total", total
+        #print("d",d,"D",D,"D2",D2,"term3",term3,"total", total)
     result = term1 + total
-    #print "BCV2", h, result
+    #print("BCV2", h, result)
     return result
 
 def Search(func, allSquaredDistances, n, h_ref, min_percent, max_percent, step_percent):
@@ -197,9 +197,9 @@ def Minimize(func, h, points):
         utils.warn(msg)
         return 0.7*h
 #    return h1
-    #print h1
+    #print(h1)
     h2 = Search(func, allSquaredDistances, n, h1, 0.89, 1.11, 0.01)
-    #print h2
+    #print(h2)
     h3 = Search(func, allSquaredDistances, n, h2, 0.989, 1.011, 0.001)
     return h3
 
@@ -209,7 +209,7 @@ def HrefWorton(points):
     y = [point[1] for point in points]
     varx = numpy.var(x) * n/(n-2.0) #remove sampling bias
     vary = numpy.var(y) * n/(n-2.0)
-    #print "varx", varx, "vary", vary
+    #print("varx", varx, "vary", vary)
     std = math.sqrt(0.5 * (varx + vary))
     return std / math.pow(n, 1/6.0)
 
@@ -219,7 +219,7 @@ def HrefTufto(points):
     y = [point[1] for point in points]
     varx = numpy.var(x) * n/(n-2.0) #remove sampling bias
     vary = numpy.var(y) * n/(n-2.0)
-    #print "varx", varx, "vary", vary
+    #print("varx", varx, "vary", vary)
     std = 0.5 * math.sqrt(varx + vary)
     return std / math.pow(n, 1/6.0)
 
@@ -231,7 +231,7 @@ def HrefGaussianApproximation(points):
     y = [point[1] for point in points]
     stdx = numpy.std(x) * n/(n-1.0) #remove sampling v. population bias
     stdy = numpy.std(y) * n/(n-1.0) #remove sampling v. population bias
-    #print "stdx", stdx, "stdy", stdy
+    #print("stdx", stdx, "stdy", stdy)
     #This is regan's guess as to how to combine stdx and stdy
     #std = 0.5 *(stdx + stdy) #average
     std = math.sqrt(stdx*stdx + stdy*stdy) #distance

@@ -130,7 +130,7 @@ def SetRasterEnvironment(features, smoothingFactor, sr = None, cellSize = None):
     arcpy.env.outputCoordinateSystem = sr
     #SetupRaster() depends on arcpy.env.outputCoordinateSystem
     extent, cellSize, searchRadius = SetupRaster(features, smoothingFactor, sr, cellSize)
-    print extent.XMin,extent.YMin, extent.XMax, extent.YMax, cellSize, searchRadius
+    print(extent.XMin,extent.YMin, extent.XMax, extent.YMax, cellSize, searchRadius)
     arcpy.env.cellSize = cellSize
     buffer = searchRadius + cellSize
     arcpy.env.extent = arcpy.Extent(extent.XMin-buffer,

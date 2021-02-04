@@ -15,7 +15,7 @@ def GetPoints(pointsFeature, shapeName, idName):
         shapeName = arcpy.Describe(pointsFeature).shapeFieldName
     if not idName:
         idName = arcpy.Describe(pointsFeature).OIDFieldName
-        
+
     for row in arcpy.SearchCursor(pointsFeature):
         id = row.getValue(idName)
         shape = row.getValue(shapeName)
@@ -26,7 +26,7 @@ def HarmonicMeanDistance(points):
     #Low memory solution; takes twice as long, because distance ab and ba are both calculated
     for k1 in points:
         x1,y1,m1 = points[k1]
-        #print k1,x1,y1,m1
+        #print(k1,x1,y1,m1)
         z = 0
         for k2 in points:
             if k1 == k2:
@@ -35,14 +35,14 @@ def HarmonicMeanDistance(points):
             x = x2 - x1
             y = y2 - y1
             d = math.sqrt(x*x + y*y)
-            #print i,j,d
+            #print(i,j,d)
             if d == 0:
-                print "OID",k1,"and",k2,"are at the same location ("+str(x1)+","+str(y1)+") using distance of 1"
+                print("OID",k1,"and",k2,"are at the same location ("+str(x1)+","+str(y1)+") using distance of 1")
                 d = 1
             z = z + 1.0/d
         hm = (n-1.0)/z #with n points there are n-1 distances (skip i = j)
-        #print z, hm
-        points[k1] = (x1,y1,hm) 
+        #print(z, hm)
+        points[k1] = (x1,y1,hm)
 
 def HarmonicMeanDistance_a(xs,ys):
     #Low memory solution; takes twice as long, because distance ab and ba are both calculated
@@ -55,14 +55,14 @@ def HarmonicMeanDistance_a(xs,ys):
             x = xs[j] - xs[i]
             y = ys[j] - ys[i]
             d = math.sqrt(x*x + y*y)
-            print i,j,d
+            print(i,j,d)
             if d == 0:
-                print "distance is zero at", i, j ,xs[i],ys[i],xs[j],ys[j]
+                print("distance is zero at", i, j ,xs[i],ys[i],xs[j],ys[j])
                 d = 1
             z = z + 1.0/d
         hm = (n-1.0)/z #with n points there are n-1 distances (skip i = j)
-        print z, hm
-        h.append(hm)  
+        print(z, hm)
+        h.append(hm)
     return h
 
 def HarmonicMeanDistance2(xs,ys):
@@ -76,14 +76,14 @@ def HarmonicMeanDistance2(xs,ys):
             x = xs[j] - xs[i]
             y = ys[j] - ys[i]
             d = x*x + y*y
-            #print i,j,d
+            #print(i,j,d)
             if d == 0:
-                print "distance is zero at", i, j ,xs[i],ys[i],xs[j],ys[j]
+                print("distance is zero at", i, j ,xs[i],ys[i],xs[j],ys[j])
                 d = 1
             z = z + 1.0/d
         hm = (n-1.0)/z #with n points there are n-1 distances (skip i = j)
-        #print z, hm
-        h.append(hm)  
+        #print(z, hm)
+        h.append(hm)
     return h
 
 def MeanDistance(xs,ys):
@@ -97,14 +97,14 @@ def MeanDistance(xs,ys):
             x = xs[j] - xs[i]
             y = ys[j] - ys[i]
             d = math.sqrt(x*x + y*y)
-            #print i,j,d
+            #print(i,j,d)
             if d == 0:
-                print "distance is zero at", i, j ,xs[i],ys[i],xs[j],ys[j]
+                print("distance is zero at", i, j ,xs[i],ys[i],xs[j],ys[j])
                 d = 1
             z = z + d
         m = z/(n-1.0) #with n points there are n-1 distances (skip i = j)
-        #print z, m
-        h.append(m)  
+        #print(z, m)
+        h.append(m)
     return h
 
 def MeanDistance2(xs,ys):
@@ -118,14 +118,14 @@ def MeanDistance2(xs,ys):
             x = xs[j] - xs[i]
             y = ys[j] - ys[i]
             d = x*x + y*y
-            #print i,j,d
+            #print(i,j,d)
             if d == 0:
-                print "distance is zero at", i, j ,xs[i],ys[i],xs[j],ys[j]
+                print("distance is zero at", i, j ,xs[i],ys[i],xs[j],ys[j])
                 d = 1
             z = z + d
         m = z/(n-1.0) #with n points there are n-1 distances (skip i = j)
-        #print z, m
-        h.append(m)  
+        #print(z, m)
+        h.append(m)
     return h
 
 def test(n):
@@ -134,7 +134,7 @@ def test(n):
         x = random.uniform(0,1)
         y = random.uniform(0,1)
         data[i] = (x,y,0)
-    #print data
+    #print(data)
     start = datetime.datetime.now()
     HarmonicMeanDistance(data)
     #hm = HarmonicMeanDistance(x,y)
@@ -143,7 +143,7 @@ def test(n):
     #md2 = MeanDistance2(x,y)
     diff = datetime.datetime.now() - start
     ms = diff.microseconds
-    print "Harmonic mean took ", ms, n, (ms * 1.0)/n, "ms/point", (1000.0* ms)/n/n, "us/point^2"
+    print("Harmonic mean took ", ms, n, (ms * 1.0)/n, "ms/point", (1000.0* ms)/n/n, "us/point^2")
 
     for i in range(len(data)):
         h = data[i][2]
@@ -160,18 +160,18 @@ def test(n):
                 hmax = h
                 max_index = i
 
-    #print "Min Index",min_index, "Max Index",max_index
-    #print "Average (x,y)", numpy.average(x), numpy.average(y)
-    print "Harmonic Mean",min_index, data[min_index]
-    print "Furthest point",max_index, data[max_index]  
+    #print("Min Index",min_index, "Max Index",max_index)
+    #print("Average (x,y)", numpy.average(x), numpy.average(y))
+    print("Harmonic Mean",min_index, data[min_index])
+    print("Furthest point",max_index, data[max_index]  )
     if n < 21:
-        print data
-        #print [int(e*1000) for e in x]
-        #print [int(e*1000) for e in y]
-        #print [int(e*1000) for e in hm]
-        #print [int(e*1000) for e in hm2]
-        #print [int(e*1000) for e in md]
-        #print [int(e*1000) for e in md2]
+        print(data)
+        #print([int(e*1000) for e in x])
+        #print([int(e*1000) for e in y])
+        #print([int(e*1000) for e in hm])
+        #print([int(e*1000) for e in hm2])
+        #print([int(e*1000) for e in md])
+        #print([int(e*1000) for e in md2])
 
 def FieldExists(fc, fieldName, fieldType):
     for f in arcpy.ListFields(fc):
@@ -191,11 +191,11 @@ def test2():
     idName = description.OIDFieldName
     data = GetPoints(feature,shapeName,idName)
     HarmonicMeanDistance(data)
-    
+
     if not FieldExists(feature, fieldName, "Double"):
         arcpy.AddField_management(feature, fieldName, "Double", "", "", "", "",
                                   "NULLABLE", "NON_REQUIRED", "")
-    
+
     rows = arcpy.UpdateCursor(feature)
     for row in rows:
         id =  row.getValue(idName)

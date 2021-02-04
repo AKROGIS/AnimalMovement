@@ -220,15 +220,15 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
         utils.warn(msg)
 
     results = {}
-    #print groupingFields, dateFieldDelimited
+    #print(groupingFields, dateFieldDelimited)
     for groupName, whereClaus in GetGroupings(groupingFields, dateFieldDelimited).iteritems():
-        #print groupName, whereClaus
+        #print(groupName, whereClaus)
         #utils.info("Where = " + where + " Fields = " + fields + " Sort = " + sort)
         #FIXME - ESRI BUG - reprojection does not work if the data is in a FGDB and a sort order is given.
         #utils.info("Spatial Ref = " + spatialRef.Name)
         fixes = []
         firstTime = None
-        #print whereClaus, spatialRef, fields, sort
+        #print(whereClaus, spatialRef, fields, sort)
         points = arcpy.SearchCursor(features, whereClaus, spatialReference, fields, sort)
         for point in points:
             fix = [0,0,0,0,0]
@@ -346,7 +346,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
     try:
 
         start = datetime.datetime.now()
-        print "Begin processing Brownian Bridge", start
+        print("Begin processing Brownian Bridge", start)
         utils.info("Reading features...")
 
         #Get Intervals
@@ -372,9 +372,9 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
         start = datetime.datetime.now()
 
         for groupName,fixes in fixSets.iteritems():
-            #print "groupName",groupName, "len(fixes)",len(fixes)
-            #print fixes[0]
-            #print fixes[1]
+            #print("groupName",groupName, "len(fixes)",len(fixes))
+            #print(fixes[0])
+            #print(fixes[1])
             if len(fixes) < 2:
                 if name == '':
                     raise ValueError, "The feature class does not have two or more fix locations."
@@ -403,7 +403,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                         maxTime = delta
             extents = arcpy.Extent(xmin, ymin, xmax, ymax)
 
-            #print "Got extents",xmin, ymin, xmax, ymax
+            #print("Got extents",xmin, ymin, xmax, ymax)
 
             #Get LocationalVariance
             if not locationVarianceField:
@@ -422,7 +422,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                     if fix[3] > maxLocationVariance:
                         maxLocationVariance = fix[3]
 
-            #print "maxLocationVariance",maxLocationVariance
+            #print("maxLocationVariance",maxLocationVariance)
 
             #Get MobilityVariance
             if not mobilityVarianceField:
@@ -449,7 +449,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                     if fix[4] > maxMobilityVariance:
                         maxMobilityVariance = fix[4]
 
-            print "  Got Variances: Vl", maxLocationVariance, "Vm", maxMobilityVariance, datetime.datetime.now() - start
+            print("  Got Variances: Vl", maxLocationVariance, "Vm", maxMobilityVariance, datetime.datetime.now() - start)
             start = datetime.datetime.now()
 
             #Buffer the extents to include the variance
@@ -466,7 +466,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                 totalTime = 60 #seconds
                 cellSize = CalcCellSize(extents, len(fixes), intervals, secondsPerCalculation, totalTime)
 
-            print "  Got extents and cellsize", cellSize, datetime.datetime.now() - start
+            print("  Got extents and cellsize", cellSize, datetime.datetime.now() - start)
             start = datetime.datetime.now()
 
             searchArea = GetBufferForPath(extents, cellSize, fixes, maxTime)
@@ -502,8 +502,8 @@ def PrintCellSizeEvaluation(cellSize, varianceLocation, varianceMobility):
     utils.info("  Calculated cell size %.2f" % cellSize)
     upperMinimum = min(sigmaLocation*2, sigmaMobility/2)
     lowerMinimum = min(sigmaLocation/2.5, sigmaMobility/10)
-    #print "  To capture detail of location variance, cell size should be between", sigmaLocation/10, sigmaLocation
-    #print "  To capture detail of mobility variance, cell size should be between", sigmaMobility/10, sigmaMobility
+    #print("  To capture detail of location variance, cell size should be between", sigmaLocation/10, sigmaLocation)
+    #print("  To capture detail of mobility variance, cell size should be between", sigmaMobility/10, sigmaMobility)
     utils.info("  Prefered cell size is between %.2f and %.2f"%(lowerMinimum,upperMinimum))
     if cellSize > upperMinimum:
         n = int(cellSize/upperMinimum)
@@ -590,7 +590,7 @@ if __name__ == "__main__":
             [ 0.0,   0, 0, 8.32, 6.42],
             [ 20.0, 280, 0, 8.32, 6.42],
         ]
-        print "Horne Test", extents, cellSize, searchArea, fixes, intervals
+        print("Horne Test", extents, cellSize, searchArea, fixes, intervals)
         raster = CreateBBRaster(extents, cellSize, searchArea, fixes, intervals)
         #arcpy.Delete_management(rasterName)
         raster.save(rasterName)
@@ -634,5 +634,3 @@ if __name__ == "__main__":
                        mobilityVarianceFieldName, mobilityVarianceConstant,
                        spatialReference
                    )
-
-

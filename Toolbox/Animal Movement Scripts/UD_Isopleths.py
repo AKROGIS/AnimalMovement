@@ -146,8 +146,8 @@ def GetIsoplethList(isoplethInput):
 
 def TestGetIsopleth():
     a = '100,0,   4.65e1, 45,   +5:10.1, 65,90,5 10;-4;;'
-    print a
-    print GetIsoplethList(a)
+    print(a)
+    print(GetIsoplethList(a))
 
 
 def IsoplethLinesToPolygons(lineFC, polyFC, fieldname="contour"):

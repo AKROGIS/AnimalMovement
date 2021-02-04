@@ -58,22 +58,22 @@ def func2p(r,a):
 
 if __name__ == '__main__':
     #test2()
-    #print Normal(2,0,1)
-    #print Normal2D(0,2,0,0,1)
-    #print HorneNormal2D(0,2,0,0,1)
-    #print Horne2dNormal(2,2,0,0,1)
+    #print(Normal(2,0,1))
+    #print(Normal2D(0,2,0,0,1))
+    #print(HorneNormal2D(0,2,0,0,1))
+    #print(Horne2dNormal(2,2,0,0,1))
     if False:
-        print Integrate1D(func,0,1,10)*2
-        print Integrate1D(func,1,2,10)
-        print Integrate1D(func,2,3,10)
-        print Integrate1D(func,-3,3,10)
-        print Integrate1D(func,-8,8,10)
+        print(Integrate1D(func,0,1,10)*2)
+        print(Integrate1D(func,1,2,10))
+        print(Integrate1D(func,2,3,10))
+        print(Integrate1D(func,-3,3,10))
+        print(Integrate1D(func,-8,8,10))
     if False:
-        print Integrate2D(func2,-1,1,-1,1,100)
-        print Integrate2D(func2,-2,2,-2,2,100)
-        print Integrate2D(func2,2,3,2,3,10)
-        print Integrate2D(func2,-3,3,-3,3,100)
+        print(Integrate2D(func2,-1,1,-1,1,100))
+        print(Integrate2D(func2,-2,2,-2,2,100))
+        print(Integrate2D(func2,2,3,2,3,10))
+        print(Integrate2D(func2,-3,3,-3,3,100))
     if True:
-        print Integrate2D(func2p,0,1,0,math.pi/2,100)*4
-        print Integrate2D(func2p,0,2,0,math.pi/2,100)*4
-        print Integrate2D(func2p,0,3,0,math.pi/2,100)*4
+        print(Integrate2D(func2p,0,1,0,math.pi/2,100)*4)
+        print(Integrate2D(func2p,0,2,0,math.pi/2,100)*4)
+        print(Integrate2D(func2p,0,3,0,math.pi/2,100)*4)

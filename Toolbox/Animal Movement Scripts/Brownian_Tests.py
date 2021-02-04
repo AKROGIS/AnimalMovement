@@ -38,17 +38,17 @@ def test1():
     ]
 
     #grid = CreateBBGrid(extents, cellSize, fix, vm, intervals)
-    #print grid
+    #print(grid)
     nx = int((maxx-minx)/cellSize)
     ny = int((maxy-miny)/cellSize)
     nf = len(fix)
     ni = intervals
     n = nx*ny*nf*ni
-    print "Estimated running time",0.000002*n,"seconds"
+    print("Estimated running time",0.000002*n,"seconds")
     start = datetime.datetime.now()
     raster = CreateBBRaster(extents, cellSize, fix, intervals)
     time = datetime.datetime.now()-start
-    print "time",time, n, time/n
+    print("time",time, n, time/n)
     raster.save(r"C:\tmp\kd_test\bb1sq.tif")
 
 def test2():
@@ -67,17 +67,17 @@ def test2():
     ]
 
     #grid = CreateBBGrid(extents, cellSize, fix, vm, intervals)
-    #print grid
+    #print(grid)
     nx = int((maxx-minx)/cellSize)
     ny = int((maxy-miny)/cellSize)
     nf = len(fix)
     ni = intervals
     n = nx*ny*nf*ni
-    print "Estimated running time",0.000002*n,"seconds"
+    print("Estimated running time",0.000002*n,"seconds")
     start = datetime.datetime.now()
     raster = CreateBBRaster(extents, cellSize, fix, intervals)
     time = datetime.datetime.now()-start
-    print "time",time, n, time/n
+    print("time",time, n, time/n)
     raster.save(r"C:\tmp\kd_test\bb1b.tif")
 
 if __name__ == "__main__":
