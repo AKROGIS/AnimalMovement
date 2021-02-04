@@ -146,18 +146,17 @@ import os
 import arcpy
 import numpy
 
+import utilization_smoothing
+import utilization_raster
+import utilization_isopleth
 import utils
-#import utils101 as utils
-import UD_SmoothingFactor
-import UD_Raster
-import UD_Isopleths
 
 
 def GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmethod, modifier, proportionAmount, sr = None, shapeName = None):
     layer = "subsetForSmoothingFactor"
     hList = []
     for value in uniqueValues:
-        query = UD_Isopleths.BuildQuery(locationLayer,subsetIdentifier,value)
+        query = utilization_isopleth.BuildQuery(locationLayer,subsetIdentifier,value)
         utils.info("Calculating h for " + query)
         if arcpy.Exists(layer):
             arcpy.Delete_management(layer)
@@ -168,7 +167,7 @@ def GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmetho
             if len(points) < 3:
               utils.warn("Insufficient locations ("+str(len(points))+") for "+value)
             else:
-              h = UD_SmoothingFactor.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
+              h = utilization_smoothing.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
               hList.append(h)
         finally:
             arcpy.Delete_management(layer)
@@ -184,20 +183,20 @@ def ChooseSmoothingFactor(hList, hRefToUse):
 def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, sr = None, cellSize = None):
     n = 0
     layer = "subsetSelectionForRaster"
-    savedState, searchRadius = UD_Raster.SetRasterEnvironment(locationLayer, max(hList), sr, cellSize)
+    savedState, searchRadius = utilization_raster.SetRasterEnvironment(locationLayer, max(hList), sr, cellSize)
     try:
         hDict = {}
         for k,v in zip(uniqueValues,hList):
             hDict[k]=v
         for value in uniqueValues:
-            query = UD_Isopleths.BuildQuery(locationLayer,subsetIdentifier,value)
+            query = utilization_isopleth.BuildQuery(locationLayer,subsetIdentifier,value)
             utils.info("Creating KDE raster for " + query)
             if arcpy.Exists(layer):
                 arcpy.Delete_management(layer)
             arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
             try:
                 searchRadius = 2 * hDict[value]
-                gotRaster, probRaster = UD_Raster.GetNormalizedKernelRaster(layer, searchRadius)
+                gotRaster, probRaster = utilization_raster.GetNormalizedKernelRaster(layer, searchRadius)
                 if gotRaster:
                     if saveRasters:
                         # Save individual probability rasters
@@ -215,7 +214,7 @@ def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, 
             finally:
                 arcpy.Delete_management(layer)
     finally:
-        UD_Raster.RestoreRasterEnvironment(savedState)
+        utilization_raster.RestoreRasterEnvironment(savedState)
 
     if n == 0:
         return False, None
@@ -294,7 +293,7 @@ if __name__ == "__main__":
     if not (isoplethLines or isoplethPolys or isoplethDonuts):
         utils.die("No output requested. Quitting.")
 
-    isoplethList = UD_Isopleths.GetIsoplethList(isoplethInput)
+    isoplethList = utilization_isopleth.GetIsoplethList(isoplethInput)
     if not isoplethList:
         utils.die("List of valid isopleths is empty. Quitting.")
 
@@ -329,7 +328,7 @@ if __name__ == "__main__":
 
     uniqueValues = None
     if subsetIdentifier in [field.name for field in arcpy.ListFields(locationLayer)]:
-        uniqueValues = UD_Isopleths.GetUniqueValues(locationLayer,subsetIdentifier)
+        uniqueValues = utilization_isopleth.GetUniqueValues(locationLayer,subsetIdentifier)
     if not uniqueValues:
         utils.die("Could not generate a list of unique values for "+subsetIdentifier+". Quitting.")
 
@@ -355,5 +354,5 @@ if __name__ == "__main__":
     #
     # Create isopleths (for total raster only)
     #
-    UD_Isopleths.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)
+    utilization_isopleth.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)
 

@@ -67,7 +67,7 @@ Public Domain
 Requirements
 arcpy module - requires ArcGIS v10+ and a valid license
 arcpy.sa module - requires a valid license to Spatial Analyst Extension
-UD_Isopleths.py module - See this module for additional requirements
+utilization_isopleth.py module - See this module for additional requirements
 
 Disclaimer:
 This software is provide "as is" and the National Park Service gives
@@ -88,7 +88,7 @@ import sys
 import arcpy
 
 import utils
-import UD_Isopleths
+import utilization_isopleth
 
 
 if __name__ == "__main__":
@@ -128,7 +128,7 @@ if __name__ == "__main__":
         utils.die("No output requested. Quitting.")
 
     try:
-        isoplethList = UD_Isopleths.GetIsoplethList(isoplethInput)
+        isoplethList = utilization_isopleth.GetIsoplethList(isoplethInput)
     except:
         utils.die("Unable to interpret the list of isopleths.\n" + sys.exc_info()[1] + "\n Quitting.")
 
@@ -141,4 +141,4 @@ if __name__ == "__main__":
     #
     #classify the results into 100 equal interval bins, and invert (0..100 -> 100..0)
     raster = 101 - arcpy.sa.Slice(bbRaster,100,"EQUAL_INTERVAL")
-    UD_Isopleths.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)
+    utilization_isopleth.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)

@@ -123,7 +123,7 @@ import sys
 import arcpy
 import numpy
 
-import Brownian
+import brownian
 import utils
 
 
@@ -317,8 +317,8 @@ def CreateBBRaster(extents, cellSize, searchArea, fixes, intervals, spatialRefer
 
     start = datetime.datetime.now()
 
-    #grid = Brownian.CreateBBGrid(extents.XMin, extents.XMax, extents.YMin, extents.YMax, cellSize, fixes, intervals, None, None)
-    grid = Brownian.CreateBBGrid(extents.XMin, extents.XMax, extents.YMin, extents.YMax, cellSize, fixes, intervals, searchArea, arcpy)
+    #grid = brownian.CreateBBGrid(extents.XMin, extents.XMax, extents.YMin, extents.YMax, cellSize, fixes, intervals, None, None)
+    grid = brownian.CreateBBGrid(extents.XMin, extents.XMax, extents.YMin, extents.YMax, cellSize, fixes, intervals, searchArea, arcpy)
 
     utils.info("Got Grid " + str(datetime.datetime.now() - start))
     start = datetime.datetime.now()
@@ -432,11 +432,11 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                     utils.info("  Calculating most likely mobility variance...")
                     #FIXME, guess and scalefactor should depend on fix data,
                     # i.e number of fixes, estimate of Vm, max velocity or such.
-                    # The method Brownian.MobilityVariance() will validate and adjust
+                    # The method brownian.MobilityVariance() will validate and adjust
                     # as necessary, but using good estimates reduces computation.
                     guess = 1000000.0
                     scaleFactor = 1e10
-                    mobilityVariance = Brownian.MobilityVariance(fixes, guess, scaleFactor)
+                    mobilityVariance = brownian.MobilityVariance(fixes, guess, scaleFactor)
                     utils.info("  Got mobility variance of %.2f" % mobilityVariance)
                 for fix in fixes:
                     fix[4] = mobilityVariance

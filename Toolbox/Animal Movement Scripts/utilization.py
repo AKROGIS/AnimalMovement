@@ -13,7 +13,7 @@ Summary:
 Create the utilization polygons for a single animal
 
 Usage:
-This tool is the simplified way to call UD_smoothing Factor, UD_Raster, and UD_Isopleths in order.  It does nothing more and nothing less.
+This tool is the simplified way to call utilization_smoothing, utilization_raster, and utilization_isopleth in order.  It does nothing more and nothing less.
 See those tools for additional information.
 
 Parameter 1:
@@ -121,10 +121,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import arcpy
 import numpy
 
+import utilization_smoothing
+import utilization_raster
+import utilization_isopleth
 import utils
-import UD_SmoothingFactor
-import UD_Raster
-import UD_Isopleths
 
 
 if __name__ == "__main__":
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     if not (isoplethLines or isoplethPolys or isoplethDonuts):
         utils.die("No output requested. Quitting.")
 
-    isoplethList = UD_Isopleths.GetIsoplethList(isoplethInput)
+    isoplethList = utilization_isopleth.GetIsoplethList(isoplethInput)
     if not isoplethList:
         utils.die("List of valid isopleths is empty. Quitting.")
 
@@ -215,11 +215,11 @@ if __name__ == "__main__":
         h = fixedHRef
     else:
         points = utils.GetPoints(locationLayer, spatialReference, shapeName)
-        h = UD_SmoothingFactor.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
+        h = utilization_smoothing.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
     #
     # Create density raster
     #
-    gotRaster, raster = UD_Raster.GetUDRaster(locationLayer, h, spatialReference, cellSize)
+    gotRaster, raster = utilization_raster.GetUDRaster(locationLayer, h, spatialReference, cellSize)
     if gotRaster:
         utils.info("Created the temporary KDE raster")
     else:
@@ -227,4 +227,4 @@ if __name__ == "__main__":
     #
     # Create isopleths
     #
-    UD_Isopleths.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)
+    utilization_isopleth.CreateIsopleths(isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts)
