@@ -151,6 +151,9 @@ import utilization_raster
 import utilization_isopleth
 import utils
 
+# pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 
 def GetSmoothingFactors(
     subsetIdentifier,

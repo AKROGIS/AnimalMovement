@@ -99,6 +99,9 @@ import numpy
 
 import utils
 
+# pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 # We support lists of arcpy.Points(), and lists of (x,y) tuples
 # The arcpy.Points are ~20% faster to load, and create MCPs,
 # but the lists of (x,y) are ~500% faster at the remaining calculations

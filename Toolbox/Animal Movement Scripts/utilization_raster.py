@@ -88,6 +88,9 @@ import arcpy
 
 import utils
 
+# pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 
 def GetUDRaster(features, smoothingFactor, sr=None, cellSize=None):
     savedState, searchRadius = SetRasterEnvironment(

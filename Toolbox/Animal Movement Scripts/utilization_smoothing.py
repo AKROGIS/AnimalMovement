@@ -96,6 +96,9 @@ import numpy
 
 import utils
 
+# pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 
 def DistancesSquared(points):
     small = 1e-3

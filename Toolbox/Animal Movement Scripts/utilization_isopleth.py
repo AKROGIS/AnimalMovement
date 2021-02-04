@@ -88,6 +88,9 @@ import arcpy
 
 import utils
 
+# pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 
 def CreateIsopleths(isopleths, raster1, lineFc, polyFc, donutFc):
     """Creates a set of Isopleths as polylines, polygons (entire area of

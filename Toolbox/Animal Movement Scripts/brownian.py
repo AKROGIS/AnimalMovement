@@ -22,6 +22,9 @@ import arcpy
 
 import utils
 
+# pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 
 def Normal(x, mu, v):
     """Probability function for x for a Normal (Gaussian) distribution.

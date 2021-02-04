@@ -126,6 +126,9 @@ import numpy
 import brownian
 import utils
 
+# pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 
 def GetGridExtents(featureExtents, varianceLocation, varianceMobility):
     # variance = sigma^2; 3sigma = 99% probability

@@ -37,6 +37,9 @@ import arcpy
 
 import utils
 
+# pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 
 def CreateSchema(
     outputFeature,
