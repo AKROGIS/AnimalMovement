@@ -10,7 +10,8 @@ import datetime
 import arcpy
 import numpy
 
-import Brownian
+import brownian
+import utils
 
 
 def CreateBBRaster(extents, cellSize, fixes, intervals):
@@ -18,7 +19,7 @@ def CreateBBRaster(extents, cellSize, fixes, intervals):
     and converting that to a numpy.array then to a arcpy.raster.
     See CreateBBGrid() for details on building the grid."""
 
-    grid = Brownian.CreateBBGrid(
+    grid = brownian.CreateBBGrid(
         extents.XMin,
         extents.XMax,
         extents.YMin,
@@ -91,5 +92,64 @@ def test2():
     raster.save(r"C:\tmp\kd_test\bb1b.tif")
 
 
+def test3():
+    for f in utils.frange(1, 2, 0.16):
+        print(f)
+    for f in utils.frange(3, 2, -0.16):
+        print(f)
+
+
+def test4():
+    fix = [
+        # time, x, y, locational_variance
+        (0.0, 1236.4, 3456.3, 4),
+        (20.0, 1286.4, 3456.3, 5),
+        (40.0, 1256.4, 3486.3, 3),
+        (60.0, 1236.4, 3476.3, 4),
+        (80.0, 1206.4, 3446.3, 5),
+    ]
+
+    # print(fix)
+
+    v1 = brownian.MobilityVariance(fix, 10000)
+    v2 = brownian.MobilityVariance(fix, 1)
+    print(v1, v2)
+
+
+def test5():
+    fixes = [
+        # time, x, y, locational_variance, mobility_variance
+        [0.0, 1236.4, 3456.3, 4, 0],
+        [20.0, 1286.4, 3456.3, 5, 0],
+        [40.0, 1256.4, 3486.3, 3, 0],
+        [60.0, 1236.4, 3476.3, 4, 0],
+        [80.0, 1206.4, 3446.3, 5, 0],
+    ]
+    xMin, xMax = 1190.0, 1300.0
+    yMin, yMax = 3430.0, 3500.0
+    cellSize = 8.5
+    vm = brownian.MobilityVariance(fixes, 10)
+    for fix in fixes:
+        fix[4] = vm
+    intervals = 20
+
+    nx = int((xMax - xMin) / cellSize)
+    ny = int((yMax - yMin) / cellSize)
+    nf = len(fixes)
+    ni = intervals
+    n = nx * ny * nf * ni
+
+    print("cols", nx, "rows", ny, "fixes", nf, "intervals", ni)
+    print("Estimated running time", 0.000002 * n, "seconds")
+    print("CreateBBGrid", xMin, xMax, yMin, yMax, cellSize, intervals)
+    start = datetime.datetime.now()
+    grid = brownian.CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, None, True)
+    time = datetime.datetime.now() - start
+    print(
+        "len(grid)", len(grid), "len(row)", len(grid[0]), "grid[20][20]", grid[20][20]
+    )
+    print("time", time, n, time / n)
+
+
 if __name__ == "__main__":
-    test1()
+    test4()
