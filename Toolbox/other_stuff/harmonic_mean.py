@@ -20,6 +20,8 @@ import arcpy
 
 
 # pylint: disable=invalid-name, missing-function-docstring
+# TODO: Fix names and add doc strings
+
 
 def GetPoints(pointsFeature, shapeName, idName):
     # return a tuple (x,y,m) for each oid, m will be calculated later
@@ -224,10 +226,9 @@ def FieldExists(fc, fieldName, fieldType):
         if f.name == fieldName:
             if f.type == fieldType:
                 return True
-            else:
-                raise TypeError(
-                    "FieldName '" + fieldName + "' exists, but is of the wrong type"
-                )
+            raise TypeError(
+                "FieldName '" + fieldName + "' exists, but is of the wrong type"
+            )
     return False
 
 
