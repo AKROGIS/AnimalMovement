@@ -162,7 +162,7 @@ def CalcCellSize(extents, countOfFixes, countOfIntervals, timePerUnit, totalTime
 
 def GetGroupings(groupingFields, dateFieldDelimited):
     results = {}
-    results[""] = dateFieldDelimited + " is not null"
+    results[""] = "{0} is not null".format(dateFieldDelimited)
     return results
 
 
@@ -217,7 +217,7 @@ def BuildFixesFromPoints(
 
     # FIXME - verify field types
     dateFieldDelimited = arcpy.AddFieldDelimiters(features, dateField)
-    sort = "ORDER BY " + dateField
+    sort = "ORDER BY {0}".format(dateField)
     fields = ["SHAPE@XY", dateField]
     if locationVarianceField and locationVarianceField in fieldNames:
         fields += [locationVarianceField]
@@ -250,9 +250,9 @@ def BuildFixesFromPoints(
         groupingFields, dateFieldDelimited
     ).iteritems():
         # print(groupName, whereClaus)
-        # utils.info("Where = " + where + " Fields = " + fields + " Sort = " + sort)
+        # utils.info("Where = {0}; Fields = {1}; Sort = {1}".format(where, fields, sort))
         # FIXME - ESRI BUG - reprojection does not work if the data is in a FGDB and a sort order is given.
-        # utils.info("Spatial Ref = " + spatialRef.Name)
+        # utils.info("Spatial Ref = {0}".format(spatialRef.Name))
         fixes = []
         firstTime = None
         # print(whereClaus, spatialRef, fields, sort)
@@ -449,11 +449,8 @@ def BrownianBridge(
                         "The feature class does not have two or more fix locations."
                     )
                 else:
-                    utils.warn(
-                        "The group named "
-                        + groupName
-                        + "does not have enough fix locations.  Skipping"
-                    )
+                    msg = "The group named {0} does not have enough fix locations. Skipping"
+                    utils.warn(msg.format(groupName))
                     continue
 
             # Get Extents - based on selection of fixes, not feature class.
@@ -780,15 +777,16 @@ if __name__ == "__main__":
 
     if not spatialReference or not spatialReference.name:
         utils.die(
-            "The fixes layer does not have a coordinate system, and you have not provided one. Quitting."
+            "The fixes layer does not have a coordinate system, "
+            "and you have not provided one. Quitting."
         )
 
     if spatialReference.type != "Projected":
-        utils.die(
-            "The output projection is '"
-            + spatialReference.type
-            + "'.  It must be a projected coordinate system. Quitting."
+        msg = (
+            "The output projection is '{0}'. "
+            "It must be a projected coordinate system. Quitting."
         )
+        utils.die(msg.format(spatialReference.type))
 
     #
     # Create brownian bridge raster(s)

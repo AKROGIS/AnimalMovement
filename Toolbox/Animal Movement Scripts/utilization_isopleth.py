@@ -164,7 +164,7 @@ def IsoplethLinesToPolygons(lineFC, polyFC, fieldname="contour"):
     uniqueValues = GetUniqueValues(lineFC, fieldname)
 
     if not uniqueValues:
-        utils.warn("No field named '" + fieldname + "' in " + lineFC)
+        utils.warn("No field named '{0}' in {1}".format(fieldname, lineFC))
         return
 
     workspace, featureClass = os.path.split(polyFC)
@@ -220,7 +220,7 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     uniqueValues = GetUniqueValues(lineFC, fieldname)
 
     if not uniqueValues:
-        utils.warn("No field named '" + fieldname + "' in " + lineFC)
+        utils.warn("No field named '{0}' in {1}".format(fieldname, lineFC))
         return
 
     workspace, featureClass = os.path.split(polyFC)

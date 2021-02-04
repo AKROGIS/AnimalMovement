@@ -29,7 +29,8 @@ def make_csv(in_file, out_file):
         "Calcul freq",
         "Altitude",
     ]
-    separators = ["  " + item + " : " for item in header[1:]]
+    separators = ["  {0} : ".format(item) for item in header[1:]]
+    template = "{0}  {1}  {2}  {3}  {4}"
     with csv23.open(out_file, "w") as csv_file:
         csv_writer = csv.writer(csv_file)
         csv23.write(csv_writer, header)
@@ -44,18 +45,7 @@ def make_csv(in_file, out_file):
                     line2 = data.readline().strip()
                     line3 = data.readline().strip()
                     line4 = data.readline().strip()
-                    line = (
-                        line0
-                        + "  "
-                        + line1
-                        + "  "
-                        + line2
-                        + "  "
-                        + line3
-                        + "  "
-                        + line4
-                    )
-
+                    line = template.format(line0, line1, line2, line3, line4)
                     for separator in separators:
                         line = line.replace(separator, "|")
                     row = [item.strip() for item in line.split("|")]
@@ -123,7 +113,8 @@ def fix_date2(d, t):
     d = int(d)
     y = int(y) - 2000
     if len(t) == 7:
-        t = "0" + t
+        # pad "1:23:45" to "01:23:45"
+        t = "0{0}".format(t)
     if not ":" in t:
         t = "{0:02d}:00:00".format(int(t))
     return "{0:02d}.{1:02d}.{2:02d} {3}".format(d, m, y, t)
@@ -154,15 +145,18 @@ def fix_lon(l):
 
 
 def fix_duration(d):
-    return int("0" + d.replace("?", "").replace("s", "").strip())
+    """Returns 0 if d is empty string."""
+    return int("0{0}".format(d.replace("?", "").replace("s", "").strip()))
 
 
 def fix_alt(a):
-    return int("0" + a.replace("?", "").replace("m", "").strip())
+    """Returns 0 if a is empty string."""
+    return int("0{0}".format(a.replace("?", "").replace("m", "").strip()))
 
 
 def fix_freq(a):
-    f = float("0" + a.replace("?", "").replace("Hz", "").replace(" ", ""))
+    """Returns 0 if a is empty string."""
+    f = float("0{0}".format(a.replace("?", "").replace("Hz", "").replace(" ", "")))
     return "{:E}".format(f).replace("E+0", "E")
 
 
@@ -177,12 +171,14 @@ def fix_level(l):
 def make_aws(in_file, out_file):
     header = (
         (
-            '"programNumber";"platformId";"platformType";"platformModel";"platformName";"platformHexId";'
-            + '"satellite";"bestMsgDate";"duration";"nbMessage";"message120";"bestLevel";"frequency";'
-            + '"locationDate";"latitude";"longitude";"altitude";"locationClass";"gpsSpeed";"gpsHeading";'
-            + '"latitude2";"longitude2";"altitude2";"index";"nopc";"errorRadius";"semiMajor";"semiMinor";'
-            + '"orientation";"hdop";"bestDate";"compression";"type";"alarm";"concatenated";"date";"level";'
-            + '"doppler";"rawData"'
+            '"programNumber";"platformId";"platformType";"platformModel";'
+            '"platformName";"platformHexId";"satellite";"bestMsgDate";"duration";'
+            '"nbMessage";"message120";"bestLevel";"frequency";"locationDate";'
+            '"latitude";"longitude";"altitude";"locationClass";"gpsSpeed";'
+            '"gpsHeading";"latitude2";"longitude2";"altitude2";"index";"nopc";'
+            '"errorRadius";"semiMajor";"semiMinor";"orientation";"hdop";'
+            '"bestDate";"compression";"type";"alarm";"concatenated";"date";'
+            '"level";"doppler";"rawData"'
         )
         .replace('"', "")
         .split(";")
@@ -212,8 +208,8 @@ def make_aws(in_file, out_file):
                 new_row[15] = lon
                 new_row[20] = fix_lat(row[6])  # Lat2
                 new_row[21] = fix_lon(row[7])  # Lon2
-                new_row[9] = int("0" + row[8])  # Nb mes
-                new_row[10] = int("0" + row[9])  # Nb mes>-120dB
+                new_row[9] = int("0{0}".format(row[8]))  # Nb mes
+                new_row[10] = int("0{0}".format(row[9]))  # Nb mes>-120dB
                 new_row[11] = fix_level(row[10])  # Best level
                 new_row[8] = fix_duration(row[11])  # Pass duration
                 new_row[24] = fix_nopc(row[12])  # NOPC

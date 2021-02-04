@@ -42,8 +42,13 @@ def quote(item):
 
 
 def make_sql():
-    header = "FileId,LineNumber,ProjectID,AnimalId,Species,GroupName,Description,LocalFixDate,Location"
-    sql = "INSERT INTO [VHFLocations] (" + header + ") VALUES ({0})\n"
+    # print following sql statement as a single line of text.
+    sql = (
+        "INSERT INTO [VHFLocations] ("
+            "FileId, LineNumber, ProjectID, AnimalId, Species, "
+            "GroupName, Description, LocalFixDate, Location"
+        ") VALUES ({0})\n"
+    )
     with csv23.open(csv_path, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
         with open(r"VHFLocations.sql", "w", encoding="utf-8") as sql_file:

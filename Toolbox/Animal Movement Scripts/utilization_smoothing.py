@@ -199,12 +199,8 @@ def Minimize(func, h, points):
     h1 = Search(func, allSquaredDistances, n, h, min_percent, max_percent, step_percent)
     if h1 <= min_percent * h or h1 >= max_percent * h:
         # then it is the min or max value checked
-        msg = (
-            "Cross Validation using "
-            + func.__name__
-            + " failed to minimize, using 0.7 * hRef."
-        )
-        utils.warn(msg)
+        msg = "Cross Validation using '{0}' failed to minimize, using 0.7 * hRef."
+        utils.warn(msg.format(func.__name__))
         return 0.7 * h
     #    return h1
     # print(h1)
@@ -342,11 +338,11 @@ if __name__ == "__main__":
         )
 
     if spatialReference.type != "Projected":
-        utils.die(
-            "The output projection is '"
-            + spatialReference.type
-            + "'.  It must be a projected coordinate system. Quitting."
+        msg = (
+            "The output projection is '{0}'. "
+            "It must be a projected coordinate system. Quitting."
         )
+        utils.die(msg.format(spatialReference.type))
 
     if usingInputSR or (
         inputSR

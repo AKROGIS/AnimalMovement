@@ -304,20 +304,14 @@ if __name__ == "__main__":
     if animalFieldName:
         allFieldNames = [f.name for f in arcpy.ListFields(telemetryLayer)]
         if animalFieldName not in allFieldNames:
-            utils.info(
-                "Telemetry layer does not have a field named '"
-                + animalFieldName
-                + "'. Using nothing."
-            )
+            msg = "Telemetry layer does not have a field named '{0}'. Using nothing."
+            utils.info(msg.format(animalFieldName))
             animalFieldName = None
 
     dateNames = [f.name for f in arcpy.ListFields(telemetryLayer, "", "Date")]
     if dateFieldName not in dateNames:
-        utils.die(
-            "Telemetry layer does not have a date field named '"
-            + dateFieldName
-            + "'. Quitting."
-        )
+        msg = "Telemetry layer does not have a date field named '{0}'. Quitting.."
+        utils.die(msg.format(dateFieldName))
 
     workspace, table = os.path.split(outputFeature)
     if not arcpy.Exists(workspace):
@@ -333,65 +327,33 @@ if __name__ == "__main__":
         if ext.lower() == ".shp":
             newTableName = newTableName + ext
         outputFeature = os.path.join(workspace, newTableName)
-        utils.info(
-            "Feature class was renamed to "
-            + newTableName
-            + " to meet workspace requirements."
-        )
+        msg = "Feature class was renamed to {0} to meet workspace requirements."
+        utils.info(msg.format(newTableName))
 
+    rename_msg = "Renamed field from '{0}' to '{1}' to meet workspace requirements."
     newFieldName = arcpy.ValidateFieldName(startFieldName, workspace)
     if newFieldName != startFieldName:
-        utils.info(
-            "Renamed field from  `"
-            + startFieldName
-            + "` to `"
-            + newFieldName
-            + "` to meet workspace requirements."
-        )
+        utils.info(rename_msg.format(startFieldName, newFieldName))
         startFieldName = newFieldName
 
     newFieldName = arcpy.ValidateFieldName(endFieldName, workspace)
     if newFieldName != endFieldName:
-        utils.info(
-            "Renamed field from  `"
-            + endFieldName
-            + "` to `"
-            + newFieldName
-            + "` to meet workspace requirements."
-        )
+        utils.info(rename_msg.format(endFieldName, newFieldName))
         endFieldName = newFieldName
 
     newFieldName = arcpy.ValidateFieldName(durationFieldName, workspace)
     if newFieldName != durationFieldName:
-        utils.info(
-            "Renamed field from  `"
-            + durationFieldName
-            + "` to `"
-            + newFieldName
-            + "` to meet workspace requirements."
-        )
+        utils.info(rename_msg.format(durationFieldName, newFieldName))
         durationFieldName = newFieldName
 
     newFieldName = arcpy.ValidateFieldName(velocityFieldName, workspace)
     if newFieldName != velocityFieldName:
-        utils.info(
-            "Renamed field from  `"
-            + velocityFieldName
-            + "` to `"
-            + newFieldName
-            + "` to meet workspace requirements."
-        )
+        utils.info(rename_msg.format(velocityFieldName, newFieldName))
         velocityFieldName = newFieldName
 
     newFieldName = arcpy.ValidateFieldName(directionFieldName, workspace)
     if newFieldName != directionFieldName:
-        utils.info(
-            "Renamed field from  `"
-            + directionFieldName
-            + "` to `"
-            + newFieldName
-            + "` to meet workspace requirements."
-        )
+        utils.info(rename_msg.format(directionFieldName, newFieldName))
         directionFieldName = newFieldName
 
     #
@@ -405,16 +367,16 @@ if __name__ == "__main__":
 
     if not spatialReference or not spatialReference.name:
         utils.die(
-            "The telemetry layer does not have a coordinate system,"
-            + " and you have not provided one. Quitting."
+            "The telemetry layer does not have a coordinate system, "
+            "and you have not provided one. Quitting."
         )
 
     if spatialReference.type != "Projected":
-        utils.die(
-            "The output projection is '"
-            + spatialReference.type
-            + "'.  It must be a projected coordinate system. Quitting."
+        msg = (
+            "The output projection is '{0}'. "
+            "It must be a projected coordinate system. Quitting."
         )
+        utils.die(msg.format(spatialReference.type))
 
     #
     # Create Movement Vectors

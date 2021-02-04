@@ -121,23 +121,18 @@ if __name__ == "__main__":
 
     try:
         bbRaster = arcpy.sa.Raster(rasterLayer)
-    except:
+    except Exception ex:
         utils.die(
-            "Brownian Bridge Raster cannot be loaded.\n"
-            + sys.exc_info()[1]
-            + "\n Quitting."
+            "Brownian Bridge Raster cannot be loaded.\n{0}\n Quitting.".format(ex)
         )
-
     if not (isoplethLines or isoplethPolys or isoplethDonuts):
         utils.die("No output requested. Quitting.")
 
     try:
         isoplethList = utilization_isopleth.GetIsoplethList(isoplethInput)
-    except:
+    except Exception ex:
         utils.die(
-            "Unable to interpret the list of isopleths.\n"
-            + sys.exc_info()[1]
-            + "\n Quitting."
+            "Unable to interpret the list of isopleths.\n{0}\n Quitting.".format(ex)
         )
 
     if not isoplethList:

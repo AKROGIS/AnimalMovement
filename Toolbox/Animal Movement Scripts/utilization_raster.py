@@ -250,11 +250,11 @@ if __name__ == "__main__":
         )
 
     if spatialReference.type != "Projected":
-        utils.die(
-            "The output projection is '"
-            + spatialReference.type
-            + "'.  It must be a projected coordinate system. Quitting."
+        msg = (
+            "The output projection is '{0}'. "
+            "It must be a projected coordinate system. Quitting."
         )
+        utils.die(msg.format(spatialReference.type))
 
     if usingInputSR or (
         inputSR
@@ -272,4 +272,4 @@ if __name__ == "__main__":
     if gotRaster and rasterName:
         raster.save(rasterName)
     else:
-        utils.die("Unable to create raster: " + raster)
+        utils.die("Unable to create raster: {0}".format(raster))

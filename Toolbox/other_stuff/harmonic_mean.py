@@ -2,11 +2,11 @@
 """
 Calculate the Harmonic mean of all distances between n points.
 
-With n points there are approx n*n/2 distances, so this can become a
+With n points there are approx n²/2 distances, so this can become a
 very time consuming problem for large numbers of points.
 
-CAUTION this is an O(n^2) algorithm.  Avoid large datasets. On my 3 GHz Xeon,
-it takes about 0.6e-6*n*n seconds, where n is the number of points in your dataset.
+CAUTION this is an O(n²) algorithm.  Avoid large datasets. On my 3 GHz Xeon,
+it takes about 0.6e-6*n² seconds, where n is the number of points in your dataset.
 1000 points ~ .6 seconds, 10,000 points ~ 1 minute, 100,000 points ~ 1hour 40minutes.
 """
 
@@ -70,6 +70,7 @@ def HarmonicMeanDistance_a(xs, ys):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
     n = len(xs)
     h = []
+    msg = "distance is zero at {0} = ({2}, {3}) and {1} = ({4}, {5})"
     for i in range(n):
         z = 0
         for j in range(n):
@@ -80,7 +81,7 @@ def HarmonicMeanDistance_a(xs, ys):
             d = math.sqrt(x * x + y * y)
             print(i, j, d)
             if d == 0:
-                print("distance is zero at", i, j, xs[i], ys[i], xs[j], ys[j])
+                print(msg.format(i, j, xs[i], ys[i], xs[j], ys[j]))
                 d = 1
             z = z + 1.0 / d
         hm = (n - 1.0) / z  # with n points there are n-1 distances (skip i = j)
@@ -93,6 +94,7 @@ def HarmonicMeanDistance2(xs, ys):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
     n = len(xs)
     h = []
+    msg = "distance is zero at {0} = ({2}, {3}) and {1} = ({4}, {5})"
     for i in range(n):
         z = 0
         for j in range(n):
@@ -103,7 +105,7 @@ def HarmonicMeanDistance2(xs, ys):
             d = x * x + y * y
             # print(i,j,d)
             if d == 0:
-                print("distance is zero at", i, j, xs[i], ys[i], xs[j], ys[j])
+                print(msg.format(i, j, xs[i], ys[i], xs[j], ys[j]))
                 d = 1
             z = z + 1.0 / d
         hm = (n - 1.0) / z  # with n points there are n-1 distances (skip i = j)
@@ -116,6 +118,7 @@ def MeanDistance(xs, ys):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
     n = len(xs)
     h = []
+    msg = "distance is zero at {0} = ({2}, {3}) and {1} = ({4}, {5})"
     for i in range(n):
         z = 0
         for j in range(n):
@@ -126,7 +129,7 @@ def MeanDistance(xs, ys):
             d = math.sqrt(x * x + y * y)
             # print(i,j,d)
             if d == 0:
-                print("distance is zero at", i, j, xs[i], ys[i], xs[j], ys[j])
+                print(msg.format(i, j, xs[i], ys[i], xs[j], ys[j]))
                 d = 1
             z = z + d
         m = z / (n - 1.0)  # with n points there are n-1 distances (skip i = j)
@@ -139,6 +142,7 @@ def MeanDistance2(xs, ys):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
     n = len(xs)
     h = []
+    msg = "distance is zero at {0} = ({2}, {3}) and {1} = ({4}, {5})"
     for i in range(n):
         z = 0
         for j in range(n):
@@ -149,7 +153,7 @@ def MeanDistance2(xs, ys):
             d = x * x + y * y
             # print(i,j,d)
             if d == 0:
-                print("distance is zero at", i, j, xs[i], ys[i], xs[j], ys[j])
+                print(msg.format(i, j, xs[i], ys[i], xs[j], ys[j]))
                 d = 1
             z = z + d
         m = z / (n - 1.0)  # with n points there are n-1 distances (skip i = j)
@@ -173,15 +177,8 @@ def test(n):
     # md2 = MeanDistance2(x,y)
     diff = datetime.datetime.now() - start
     ms = diff.microseconds
-    print(
-        "Harmonic mean took ",
-        ms,
-        n,
-        (ms * 1.0) / n,
-        "ms/point",
-        (1000.0 * ms) / n / n,
-        "us/point^2",
-    )
+    msg = "Harmonic Mean (n={1}) took {0}ms ({2}ms/point or {3}µs/point²)"
+    print(msg.format(ms, n, (ms * 1.0) / n, (1000.0 * ms) / n / n))
 
     for i, item in enumerate(data):
         h = item[2]
@@ -200,8 +197,8 @@ def test(n):
 
     # print("Min Index",min_index, "Max Index",max_index)
     # print("Average (x,y)", numpy.average(x), numpy.average(y))
-    print("Harmonic Mean", min_index, data[min_index])
-    print("Furthest point", max_index, data[max_index])
+    print("Harmonic Mean {0} {1}".format(min_index, data[min_index]))
+    print("Furthest point {0} {1}".format(max_index, data[max_index]))
     if n < 21:
         print(data)
         # print([int(e*1000) for e in x])
@@ -218,7 +215,7 @@ def FieldExists(fc, fieldName, fieldType):
             if f.type == fieldType:
                 return True
             raise TypeError(
-                "FieldName '" + fieldName + "' exists, but is of the wrong type"
+                "FieldName '{0}' exists, but is of the wrong type".format(fieldName)
             )
     return False
 

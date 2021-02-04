@@ -166,7 +166,7 @@ def GetSmoothingFactors(
     hList = []
     for value in uniqueValues:
         query = utilization_isopleth.BuildQuery(locationLayer, subsetIdentifier, value)
-        utils.info("Calculating h for " + query)
+        utils.info("Calculating h for {0}.".format(query))
         if arcpy.Exists(layer):
             arcpy.Delete_management(layer)
         arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
@@ -218,7 +218,7 @@ def BuildNormalizedRaster(
             query = utilization_isopleth.BuildQuery(
                 locationLayer, subsetIdentifier, value
             )
-            utils.info("Creating KDE raster for " + query)
+            utils.info("Creating KDE raster for {0}.".format(query))
             if arcpy.Exists(layer):
                 arcpy.Delete_management(layer)
             arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
@@ -356,15 +356,16 @@ if __name__ == "__main__":
 
     if not spatialReference or not spatialReference.name:
         utils.die(
-            "The fixes layer does not have a coordinate system, and you have not provided one. Quitting."
+            "The fixes layer does not have a coordinate system, "
+            "and you have not provided one. Quitting."
         )
 
     if spatialReference.type != "Projected":
-        utils.die(
-            "The output projection is '"
-            + spatialReference.type
-            + "'.  It must be a projected coordinate system. Quitting."
+        msg = (
+            "The output projection is '{0}'. "
+            "It must be a projected coordinate system. Quitting."
         )
+        utils.die(msg.format(spatialReference.type))
 
     if usingInputSR or (
         inputSR
@@ -379,7 +380,7 @@ if __name__ == "__main__":
             os.mkdir(rasterFolder)  # may throw an exception (thats ok)
         else:
             if not os.path.isdir(rasterFolder):
-                utils.die(rasterFolder + " is not a folder. Quitting.")
+                utils.die("{0} is not a folder. Quitting.".format(rasterFolder))
 
     uniqueValues = None
     if subsetIdentifier in [field.name for field in arcpy.ListFields(locationLayer)]:
@@ -387,11 +388,8 @@ if __name__ == "__main__":
             locationLayer, subsetIdentifier
         )
     if not uniqueValues:
-        utils.die(
-            "Could not generate a list of unique values for "
-            + subsetIdentifier
-            + ". Quitting."
-        )
+        msg = "Could not generate a list of unique values for {0}'. Quitting."
+        utils.die(msg.format(subsetIdentifier))
 
     #
     # Calculate smoothing factor(s)

@@ -322,11 +322,11 @@ if __name__ == "__main__":
 
     status = arcpy.CheckProduct("ArcInfo")
     if status != "Available" and status != "AlreadyInitialized":
-        utils.die(
-            "This tool requires an ArcInfo License.  License check status = "
-            + status
-            + ".  Quitting."
+        msg = (
+            "This tool requires an ArcInfo License. "
+            "License check status = {0}. Quitting."
         )
+        utils.die(msg.format(status))
 
     locationLayer = arcpy.GetParameterAsText(0)
     mcpFeatureClass = arcpy.GetParameterAsText(1)
@@ -402,11 +402,11 @@ if __name__ == "__main__":
         )
 
     if spatialReference.type != "Projected":
-        utils.die(
-            "The output projection is '"
-            + spatialReference.type
-            + "'.  It must be a projected coordinate system. Quitting."
+        msg = (
+            "The output projection is '{0}'. "
+            "It must be a projected coordinate system. Quitting."
         )
+        utils.die(msg.format(spatialReference.type))
 
     # I need to set the output Coordinate System, otherwise the geometry creation doesn't get an SR
     saveSR = arcpy.env.outputCoordinateSystem
