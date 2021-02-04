@@ -195,7 +195,7 @@ def Mcp(pointList):
 def FloatingCenter(
     locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr=None, shapeName=None
 ):
-    points = utils.GetPoints(locationLayer, sr)
+    points = utils.float_range(locationLayer, sr)
     countOfPointsToRemove = int((1.0 - percentUsed / 100.0) * len(points))
     # This will limit the number of center point recalculations to 50
     # This can be a real time saver for very large datasets.

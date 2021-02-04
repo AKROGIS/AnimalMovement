@@ -27,7 +27,7 @@ def info(msg):
     print("Info: " + str(msg))
 
 
-def IsFloat(something):
+def is_float(something):
     try:
         float(something)
     except (ValueError, TypeError):
@@ -35,7 +35,7 @@ def IsFloat(something):
     return True
 
 
-def IsInt(something):
+def is_int(something):
     try:
         int(something)
     except (ValueError, TypeError):
@@ -43,26 +43,26 @@ def IsInt(something):
     return True
 
 
-def frange(x, y, jump):
+def float_range(start, stop, step):
     """Return a range of numbers from x to y by jump increments.
     It is intended to be a floating point version of range()."""
 
-    if jump == 0:
+    if step == 0:
         raise ValueError("jump must be non-zero")
-    if jump > 0:
-        while x < y:
-            yield x
-            x += jump
+    if step > 0:
+        while start < stop:
+            yield start
+            start += step
     else:
-        while x > y:
-            yield x
-            x += jump
+        while start > stop:
+            yield start
+            start += step
 
 
-def GetPoints(pointsFeature, sr=None):
+def get_points(point_feature, spatial_reference=None):
     """returns a python list of (x,y) pairs"""
     with arcpy.da.SearchCursor(
-        pointsFeature, "SHAPE@XY", spatial_reference=sr
-    ) as searchCursor:
-        points = [row[0] for row in searchCursor]
+        point_feature, "SHAPE@XY", spatial_reference=spatial_reference
+    ) as cursor:
+        points = [row[0] for row in cursor]
     return points

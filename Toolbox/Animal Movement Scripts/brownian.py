@@ -191,9 +191,9 @@ def CreateBBGrid(
 
     grid = []
     # build the grid from the top down
-    for y in utils.frange(yMax, yMin, -cellSize):
+    for y in utils.float_range(yMax, yMin, -cellSize):
         row = []
-        for x in utils.frange(xMin, xMax, cellSize):
+        for x in utils.float_range(xMin, xMax, cellSize):
             if searchArea is None:
                 cell = EvaluateGridPoint(x, y, fixes, intervals)
                 # cell = 1
@@ -248,7 +248,7 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
         raise ValueError("Not enough fixes provided")
 
     results = []
-    for vm in utils.frange(lowerBound, (upperBound + step), step):
+    for vm in utils.float_range(lowerBound, (upperBound + step), step):
         # print("vm = ",vm)
         likelihood = 1
         for i in range(1, (len(fixes) - 1)):

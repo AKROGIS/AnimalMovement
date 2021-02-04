@@ -404,7 +404,7 @@ def BrownianBridge(
         utils.info("Reading features...")
 
         # Get Intervals
-        if utils.IsInt(intervalsConstant):
+        if utils.is_int(intervalsConstant):
             intervals = int(intervalsConstant)
         else:
             intervals = 10
@@ -481,7 +481,7 @@ def BrownianBridge(
 
             # Get LocationalVariance
             if not locationVarianceField:
-                if utils.IsFloat(locationVarianceConstant):
+                if utils.is_float(locationVarianceConstant):
                     locationVariance = float(locationVarianceConstant)
                 else:
                     locationVariance = EstimateLocationVariance()
@@ -502,7 +502,7 @@ def BrownianBridge(
 
             # Get MobilityVariance
             if not mobilityVarianceField:
-                if utils.IsFloat(mobilityVarianceConstant):
+                if utils.is_float(mobilityVarianceConstant):
                     mobilityVariance = float(mobilityVarianceConstant)
                 else:
                     utils.info("  Calculating most likely mobility variance...")
@@ -547,7 +547,7 @@ def BrownianBridge(
             overhead = 0.000000429  # per gridpoint
             secondsPerCheck = 0.00051443  # per gridpoint (includes overhead)
             secondsPerCalculation = 0.000002756  # 236
-            if utils.IsFloat(cellSizeConstant):
+            if utils.is_float(cellSizeConstant):
                 cellSize = float(
                     cellSizeConstant
                 )  # all parameters from ArcToolbox are text

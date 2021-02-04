@@ -93,9 +93,9 @@ def test2():
 
 
 def test3():
-    for f in utils.frange(1, 2, 0.16):
+    for f in utils.float_range(1, 2, 0.16):
         print(f)
-    for f in utils.frange(3, 2, -0.16):
+    for f in utils.float_range(3, 2, -0.16):
         print(f)
 
 

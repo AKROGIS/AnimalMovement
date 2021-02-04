@@ -107,7 +107,7 @@ def SetupRaster(features, smoothingFactor, sr=None, cellSize=None):
         features, arcpy.Geometry(), "ENVELOPE", "ALL"
     )
     extent = mcpList[0].extent
-    if utils.IsFloat(cellSize):
+    if utils.is_float(cellSize):
         cellSize = float(cellSize)  # all parameters from ArcToolbox are text
     else:
         cellSize = DefaultCellSize(extent)

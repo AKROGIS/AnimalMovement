@@ -175,7 +175,7 @@ def Search(func, allSquaredDistances, n, h_ref, min_percent, max_percent, step_p
     h_res = h_max
     minErr = func(allSquaredDistances, n, h_max)
 
-    for h_test in utils.frange(h_min, h_max, h_step):
+    for h_test in utils.float_range(h_min, h_max, h_step):
         err = func(allSquaredDistances, n, h_test)
         if err < minErr:
             minErr = err
@@ -355,6 +355,6 @@ if __name__ == "__main__":
     ):
         spatialReference = None
 
-    points = utils.GetPoints(locationLayer, spatialReference, shapeName)
+    points = utils.float_range(locationLayer, spatialReference)
     h = GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
     arcpy.SetParameterAsText(4, str(h))
