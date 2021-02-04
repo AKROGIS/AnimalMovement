@@ -14,20 +14,20 @@ import arcpy
 def die(msg):
     """Print error message to console and ArcGIS and exit."""
     arcpy.AddError(msg)
-    print("ERROR: " + str(msg))
+    print("ERROR: {0}".format(msg))
     sys.exit()
 
 
 def warn(msg):
     """Print warning message to console and ArcGIS and exit."""
     arcpy.AddWarning(msg)
-    print("Warning: " + str(msg))
+    print("Warning: {0}".format(msg))
 
 
 def info(msg):
     """Print info message to console and ArcGIS and exit."""
     arcpy.AddMessage(msg)
-    print("Info: " + str(msg))
+    print("Info: {0}".format(msg))
 
 
 def is_float(something):

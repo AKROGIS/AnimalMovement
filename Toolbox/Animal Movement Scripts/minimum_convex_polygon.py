@@ -200,18 +200,12 @@ def FloatingCenter(
     # This will limit the number of center point recalculations to 50
     # This can be a real time saver for very large datasets.
     pointsRemovedPerIteration = max(1, countOfPointsToRemove // 50)
-    utils.info(
-        "Removing "
-        + str(countOfPointsToRemove)
-        + " of "
-        + str(len(points))
-        + " points."
-    )
+    utils.info("Removing {0} of {1} points.".format(countOfPointsToRemove, len(points)))
     countOfPointsRemoved = 0
     while countOfPointsRemoved < countOfPointsToRemove:
         if countOfPointsRemoved % pointsRemovedPerIteration == 0:
             center = centerMethod(points)
-            utils.info("New Center Point at " + str(center) + ".")
+            utils.info("New Center Point at {0}.".format(center))
         points = RemovePoints(points, pointsRemovedPerIteration, center)
         countOfPointsRemoved += pointsRemovedPerIteration
     mcp = Mcp(points)
@@ -223,15 +217,9 @@ def FixedCenter(
 ):
     points = utils.get_points(locationLayer, sr)
     countOfPointsToRemove = int((1.0 - percentUsed / 100.0) * len(points))
-    utils.info(
-        "Removing "
-        + str(countOfPointsToRemove)
-        + " of "
-        + str(len(points))
-        + " points."
-    )
+    utils.info("Removing {0} of {1} points.".format(countOfPointsToRemove, len(points)))
     center = centerMethod(points)
-    utils.info("Center = " + str(center) + ".")
+    utils.info("Center =  {0}.".format(center))
     points = RemovePoints(points, countOfPointsToRemove, center)
     mcp = Mcp(points)
     arcpy.CopyFeatures_management(mcp, mcpFeatureClass)
@@ -241,13 +229,7 @@ def AddArea(locationLayer, mcpFeatureClass, percentUsed, sr=None, shapeName=None
     # using arcpyPoints here is 8% (143points) to 44% (18407points) faster
     points = utils.get_points(locationLayer, sr)
     finalLength = int(0.5 + (percentUsed / 100.0) * len(points))
-    utils.info(
-        "Removing "
-        + str(len(points) - finalLength)
-        + " of "
-        + str(len(points))
-        + " points."
-    )
+    utils.info("Removing {0} of {1} points.".format(len(points) - finalLength, len(points)))
     arcpy.SetProgressor(
         "step", "Finding points to ignore...", 0, len(points) - finalLength, 1
     )

@@ -282,7 +282,7 @@ def BuildFixesFromPoints(
                 fixes.append(fix)
 
         results[groupName] = fixes
-        utils.info("fixes " + str(len(fixes)) + " first fix: " + str(fixes[0]))
+        utils.info("fixes {0}; first fix: {1}".format(len(fixes), fixes[0]))
     return results
 
 
@@ -366,7 +366,7 @@ def CreateBBRaster(extents, cellSize, searchArea, fixes, intervals, spatialRefer
         arcpy,
     )
 
-    utils.info("Got Grid " + str(datetime.datetime.now() - start))
+    utils.info("Got Grid {0}".format(datetime.datetime.now() - start))
     start = datetime.datetime.now()
 
     array = numpy.array(grid)
@@ -374,7 +374,7 @@ def CreateBBRaster(extents, cellSize, searchArea, fixes, intervals, spatialRefer
     raster = arcpy.NumPyArrayToRaster(array, lowerLeft, cellSize)
     arcpy.DefineProjection_management(raster, spatialReference)
 
-    utils.info("Got raster " + str(datetime.datetime.now() - start))
+    utils.info("Got raster {0}".format(datetime.datetime.now() - start))
     return raster
 
 
@@ -436,7 +436,7 @@ def BrownianBridge(
         else:
             raise TypeError("Features must be points or lines.")
 
-        utils.info("Got Fix Sets " + str(datetime.datetime.now() - start))
+        utils.info("Got Fix Sets {0}".format(datetime.datetime.now() - start))
         start = datetime.datetime.now()
 
         for groupName, fixes in fixSets.iteritems():
@@ -565,7 +565,7 @@ def BrownianBridge(
 
             searchArea = GetBufferForPath(extents, cellSize, fixes, maxTime)
 
-            utils.info("  Got buffer " + str(datetime.datetime.now() - start))
+            utils.info("  Got buffer {0}".format(datetime.datetime.now() - start))
             start = datetime.datetime.now()
 
             PrintCellSizeEvaluation(cellSize, maxLocationVariance, maxMobilityVariance)
@@ -598,7 +598,7 @@ def BrownianBridge(
             if arcpy.Exists(newName):
                 arcpy.Delete_management(newName)
             raster.save(newName)
-            utils.info("Done " + str(datetime.datetime.now() - start))
+            utils.info("Done {0}".format(datetime.datetime.now() - start))
     except:
         utils.die(sys.exc_info()[1])
 

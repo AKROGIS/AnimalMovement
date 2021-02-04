@@ -176,8 +176,8 @@ def GetKernelRaster(features, searchRadius):
         )
 
         return True, kernel
-    except:
-        return False, str(sys.exc_info()[1])
+    except Exception as ex:
+        return False, "{0}".format(ex)
 
 
 def NormalizeRaster(raster, bins):
@@ -185,8 +185,8 @@ def NormalizeRaster(raster, bins):
     try:
         raster = (1 + bins) - arcpy.sa.Slice(raster, bins, "EQUAL_INTERVAL")
         return True, raster
-    except:
-        return False, str(sys.exc_info()[1])
+    except Exception as ex:
+        return False, "{0}".format(ex)
 
 
 if __name__ == "__main__":

@@ -282,8 +282,8 @@ def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
     else:
         h = hRef
 
-    utils.info("hRef (" + hRefmethod + ") = " + str(hRef))
-    utils.info("Using h = " + str(h))
+    utils.info("hRef ({0}) = {2}".format(hRefmethod, hRef))
+    utils.info("Using h = {0}".format(h))
     return h
 
 
@@ -357,4 +357,4 @@ if __name__ == "__main__":
 
     points = utils.get_points(locationLayer, spatialReference)
     h = GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
-    arcpy.SetParameterAsText(4, str(h))
+    arcpy.SetParameterAsText(4, "{0}".format(h))

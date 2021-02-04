@@ -174,7 +174,7 @@ def GetSmoothingFactors(
             points = utils.get_points(layer, sr)
             if len(points) < 3:
                 utils.warn(
-                    "Insufficient locations (" + str(len(points)) + ") for " + value
+                    "Insufficient locations ({0}) for {1}.".format(len(points), value)
                 )
             else:
                 h = utilization_smoothing.GetSmoothingFactor(
@@ -231,20 +231,19 @@ def BuildNormalizedRaster(
                     if save_isopleths:
                         lines, polys, donuts = None, None, None
                         if isoplethLines:
-                            lines = isoplethLines + "_" + str(value)
+                            lines = "{0}_{1}".format(isoplethLines, value)
                         if isoplethPolys:
-                            polys = isoplethPolys + "_" + str(value)
+                            polys = "{0}_{1}".format(isoplethPolys, value)
                         if isoplethDonuts:
-                            donuts = isoplethDonuts + "_" + str(value)
+                            donuts = "{0}_{1}".format(isoplethDonuts, value)
                         utilization_isopleth.CreateIsopleths(
                             isoplethList, probRaster, lines, polys, donuts
                         )
                     if saveRasters:
                         # Save individual probability rasters
-                        name = os.path.join(
-                            rasterFolder, "praster_" + str(value) + ".tif"
-                        )
-                        probRaster.save(name)
+                        name = "praster_{0}.tif".format(value)
+                        path = os.path.join(rasterFolder, name)
+                        probRaster.save(path)
                     if n:
                         raster = raster + probRaster
                         n = n + 1
@@ -252,10 +251,8 @@ def BuildNormalizedRaster(
                         raster = probRaster
                         n = 1
                 else:
-                    errorMsg = str(probRaster)  # only if gotRaster is False
-                    utils.warn(
-                        "  Raster creation failed, not included in total. " + errorMsg
-                    )
+                    msg = "  Raster creation failed, not included in total. {0}".format(probRaster)
+                    utils.warn(msg)
             finally:
                 arcpy.Delete_management(layer)
     finally:
@@ -414,7 +411,7 @@ if __name__ == "__main__":
         )
         if hRefToUse.lower() != "bydataset":
             h = ChooseSmoothingFactor(hList, hRefToUse)
-            utils.info("Using h = " + str(h) + " (" + hRefToUse + ")")
+            utils.info("Using h = {0} ({2})".format(h, hRefToUse))
             hList = [h for eachItem in uniqueValues]
     #
     # Create density raster(s)

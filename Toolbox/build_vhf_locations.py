@@ -31,6 +31,15 @@ def make_datetime(date, time):
             hour, minute = time[0:2], time[2:4]
     return datetime.datetime(int(year), int(month), int(day), int(hour), int(minute))
 
+def quote(item):
+    """Wrap item in single quotes; replace single quote with double single quote."""
+
+    try:
+        item = item.replace("'", "''")
+    except AttributeError:
+        pass
+    return "'{0}'".format(item)
+
 
 def make_sql():
     header = "FileId,LineNumber,ProjectID,AnimalId,Species,GroupName,Description,LocalFixDate,Location"
@@ -41,10 +50,10 @@ def make_sql():
             # throw away the header (two lines)
             next(csv_reader)
             next(csv_reader)
-            line = 2
+            line_number = 2
             for row in csv_reader:
                 row = csv23.fix(row)
-                line += 1
+                line_number += 1
                 date = make_datetime(row[0], row[12])
                 wolves = row[7:11]
                 lat, lon = row[39], row[40]
@@ -53,19 +62,19 @@ def make_sql():
                         lat = float(lat)
                         lon = float(lon)
                     except (ValueError, TypeError):
-                        print("lat or lon is not a float at", line, lat, lon)
+                        print("lat or lon is not a float at", line_number, lat, lon)
                     if lat and lon:
                         for wolf in wolves:
                             if wolf and wolf != "0":
                                 values = [
                                     file_id,
-                                    str(line),
-                                    "'" + project_id + "'",
-                                    "'" + wolf + "'",
-                                    "'" + species + "'",
-                                    "'" + row[5] + "'",
-                                    "'" + row[43].replace("'", "''") + "'",
-                                    "'" + str(date) + "'",
+                                    "{0}".format(line_number),
+                                    quote(project_id),
+                                    quote(wolf),
+                                    quote(species),
+                                    quote(row[5]),
+                                    quote(row[43]),
+                                    quote(date),
                                     build_geom(lat, lon),
                                 ]
                                 values = ",".join(values)

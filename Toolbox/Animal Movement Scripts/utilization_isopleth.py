@@ -314,7 +314,7 @@ def BuildQuery(featureClass, whereField, value):
         quote = "'"
     else:
         quote = ""
-    return field + " = " + quote + str(value) + quote
+    return "{0} = {1}{2}{1}".format(field, quote, value)
 
 
 if __name__ == "__main__":
