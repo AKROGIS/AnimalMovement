@@ -81,8 +81,8 @@ def CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
     CreateSchema(outputFeature, animalField, startFieldName, endFieldName,
                  durationFieldName, velocityFieldName, directionFieldName, spatialReference)
 
-    with arcpy.da.InsertCursor(outputFeature, insertFields) as updateCursor,\
-            arcpy.da.SearchCursor(telemetryLayer, searchFields, spatial_reference=spatialReference) as searchCursor:
+    insert_cursor = arcpy.da.InsertCursor(outputFeature, insertFields)
+    with arcpy.da.SearchCursor(telemetryLayer, searchFields, spatial_reference=spatialReference) as searchCursor:
         # searchCursor does not support orderby for all datasources
         # particularly shapefiles, so I will do the sorting in python
         # the cursor returns each row as a comparable tuple
@@ -98,8 +98,9 @@ def CreateMovementVectors(telemetryLayer, outputFeature, animalFieldName,
             if previousRow:
                 line = BuildVelocityVector(previousRow, row, hasAnimal)
                 if line:
-                    updateCursor.insertRow(line)
+                    insert_cursor.insertRow(line)
             previousRow = row
+    del insert_cursor
 
 
 def BuildVelocityVector(fix1, fix2, hasAnimal):

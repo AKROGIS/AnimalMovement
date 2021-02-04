@@ -99,7 +99,7 @@ Limitations:
 Public Domain
 
 Requirements
-arcpy module - requires ArcGIS v10+ and a valid license
+arcpy module - requires ArcGIS v10.1+ and a valid license
 arcpy.sa module - requires a valid license to Spatial Analyst Extension
 
 Disclaimer:
@@ -199,14 +199,14 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
 
     #FIXME - verify field types
     dateFieldDelimited = arcpy.AddFieldDelimiters(features, dateField)
-    sort = dateField  + " A"
-    fields = shapeFieldName + ";" + dateField
+    sort = "ORDER BY " + dateField
+    fields = ['SHAPE@XY', dateField]
     if locationVarianceField and locationVarianceField in fieldNames:
-        fields += ";" + arcpy.AddFieldDelimiters(features, locationVarianceField)
+        fields += [locationVarianceField]
     else:
         locationVarianceField = None
     if mobilityVarianceField and mobilityVarianceField in fieldNames:
-        fields += ";" + arcpy.AddFieldDelimiters(features, mobilityVarianceField)
+        fields += [mobilityVarianceField]
     else:
         mobilityVarianceField = None
     if spatialReference.factoryCode != arcpy.Describe(features).spatialReference.factoryCode:
@@ -229,20 +229,24 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
         fixes = []
         firstTime = None
         #print(whereClaus, spatialRef, fields, sort)
-        points = arcpy.SearchCursor(features, whereClaus, spatialReference, fields, sort)
-        for point in points:
-            fix = [0,0,0,0,0]
-            newTime = point.getValue(dateField)
-            if firstTime == None:
-                firstTime = newTime
-            fix[0] = GetMinutes(newTime, firstTime)
-            fix[1] = point.getValue(shapeFieldName).getPart().X
-            fix[2] = point.getValue(shapeFieldName).getPart().Y
-            if locationVarianceField:
-                fix[3] = point.getValue(locationVarianceField)
-            if mobilityVarianceField:
-                fix[4] = point.getValue(mobilityVarianceField)
-            fixes.append(fix)
+        #fields: 0 = shape, 1 = date, 2 = locVar, 3 = mobVar 2 and 3 are optional, mobVar may be @ 2 if locVar is None
+        with arcpy.da.SearchCursor(features, fields, where_clause=whereClaus, spatial_reference=spatialReference, sql_clause=(None, sort)) as cursor:
+            for point in cursor:
+                fix = [0,0,0,0,0]
+                newTime = row[1]
+                if firstTime == None:
+                    firstTime = newTime
+                fix[0] = GetMinutes(newTime, firstTime)
+                fix[1] = row[0][0]
+                fix[2] = row[0][1]
+                if locationVarianceField:
+                    fix[3] = row[2]
+                    if mobilityVarianceField:
+                        fix[4] = row[3]
+                else:
+                    if mobilityVarianceField:
+                        fix[4] = row[2]
+                fixes.append(fix)
 
         results[groupName] = fixes
         utils.info("fixes "+ str(len(fixes)) +" first fix: " + str(fixes[0]))

@@ -65,7 +65,7 @@ Limitations:
 Public Domain
 
 Requirements
-arcpy module - requires ArcGIS v10+ and a valid license
+arcpy module - requires ArcGIS v10.1+ and a valid license
 arcpy.sa module - requires a valid license to Spatial Analyst Extension
 
 Disclaimer:
@@ -181,24 +181,20 @@ def IsoplethLinesToPolygons(lineFC, polyFC, fieldname="contour"):
     uniqueValues = list(uniqueValues)
     uniqueValues.sort()
     uniqueValues.reverse() #builds biggest to smallest
-    polys = arcpy.InsertCursor(polyFC)
+    fields = ['SHAPE@', fieldname]
+    cursor = arcpy.da.InsertCursor(polyFC, fields)
     for value in uniqueValues:
         query = BuildQuery(lineFC,fieldname,value)
-        lines = arcpy.SearchCursor(lineFC,query)
-        poly = polys.newRow()
-        array = arcpy.Array()
-        for line in lines:
-            shape = line.getValue(lineDescription.shapeFieldName)
-            for i in range(shape.partCount):
-                array.add(shape.getPart(i))
-        newshape = arcpy.Polygon(array)
-        poly.setValue(polyDescription.shapeFieldName, newshape)
-        poly.setValue(fieldname, value)
-        polys.insertRow(poly)
+        with arcpy.da.SearchCursor(lineFC, ['SHAPE@'], where_clause=query) as lines:
+            array = arcpy.Array()
+            for line in lines:
+                shape = line[0]
+                for i in range(shape.partCount):
+                    array.add(shape.getPart(i))
+            newshape = arcpy.Polygon(array)
+            cursor.insertRow([newshape, value])
+    del cursor
 
-    #Close/Delete row/cursor objects to remove the exclusive lock
-    del poly
-    del polys
 
 def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     """Builds a featureclass named polyFC, by creating a polygon
@@ -239,7 +235,9 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     uniqueValues = list(uniqueValues)
     uniqueValues.sort()
     uniqueValues.reverse() #sort biggest to smallest
-    polys = arcpy.InsertCursor(polyFC)
+    fields = ['SHAPE@', fieldname]
+    # InsertCursors do not support the with statement.
+    cursor = arcpy.da.InsertCursor(polyFC, fields)
     lines2 = []
     for i in range(len(uniqueValues)):
         # We could use the inner polygon from the last loop
@@ -248,32 +246,29 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
         # not noticably
         value1 = uniqueValues[i]
         query1 = BuildQuery(lineFC,fieldname,value1)
-        lines1 = arcpy.SearchCursor(lineFC,query1)
+        # TODO: Restructure to use with statement on two search cursors.
+        lines1 = arcpy.da.SearchCursor(lineFC, ['SHAPE@'], where_clause=query1)
         if i == len(uniqueValues) - 1: #last one
             lines2 = []
         else:
             value2 = uniqueValues[i+1]
             query2 = BuildQuery(lineFC,fieldname,value2)
-            lines2 = arcpy.SearchCursor(lineFC,query2)
-        poly = polys.newRow()
+            lines2 = arcpy.da.SearchCursor(lineFC, ['SHAPE@'], where_clause=query2)
         array = arcpy.Array()
         for line in lines1:
-            shape = line.getValue(lineDescription.shapeFieldName)
+            shape = line[0]
             for j in range(shape.partCount):
                 array.add(shape.getPart(j))
         #lines1/2 are arcpy.Cursors, and cannot be added, so we iterate each separately
         for line in lines2:
-            shape = line.getValue(lineDescription.shapeFieldName)
+            shape = line[0]
             for j in range(shape.partCount):
                 array.add(shape.getPart(j))
         newshape = arcpy.Polygon(array)
-        poly.setValue(polyDescription.shapeFieldName, newshape)
-        poly.setValue(fieldname, value1)
-        polys.insertRow(poly)
-
-    #Close/Delete row/cursor objects to remove the exclusive lock
-    del poly
-    del polys
+        cursor.insertRow([newshape, value1])
+        del lines1
+        del lines2
+    del cursor
 
 
 def GetUniqueValues(featureClass,whereField):
@@ -282,11 +277,11 @@ def GetUniqueValues(featureClass,whereField):
     That is multiple identical values are only reported once."""
 
     # members in a set are guaranteed to be unique
-    values = set([])
-    rows = arcpy.SearchCursor(featureClass,"","",whereField)
-    for row in rows:
-        if not row.isNull(whereField):
-            values.add(row.getValue(whereField))
+    values = set()
+    with arcpy.da.SearchCursor(featureClass, [whereField]) as cursor:
+        for row in cursor:
+            if row[0]:
+                values.add(row[0])
     return values
 
 

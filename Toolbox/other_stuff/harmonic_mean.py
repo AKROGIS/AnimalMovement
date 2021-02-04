@@ -5,6 +5,8 @@
 import math
 import random
 import datetime
+
+import arcpy
 import numpy
 
 def GetPoints(pointsFeature, shapeName, idName):
@@ -16,10 +18,12 @@ def GetPoints(pointsFeature, shapeName, idName):
     if not idName:
         idName = arcpy.Describe(pointsFeature).OIDFieldName
 
-    for row in arcpy.SearchCursor(pointsFeature):
-        id = row.getValue(idName)
-        shape = row.getValue(shapeName)
-        data[id] = (shape.getPart().X, shape.getPart().Y, 0.0)
+    fields = [idName, 'SHAPE@XY']
+    with arcpy.da.SearchCursor(pointsFeature, fields) as cursor:
+        for row in cursor:
+            oid = row[0]
+            x, y = row[1]
+            data[oid] = (x, y, 0.0)
     return data
 
 def HarmonicMeanDistance(points):
@@ -196,12 +200,11 @@ def test2():
         arcpy.AddField_management(feature, fieldName, "Double", "", "", "", "",
                                   "NULLABLE", "NON_REQUIRED", "")
 
-    rows = arcpy.UpdateCursor(feature)
-    for row in rows:
-        id =  row.getValue(idName)
-        row.setValue(fieldName,data[id][2])
-        rows.updateRow(row)
-    del row
-    del rows
+    fields = [idName, fieldName]
+    with arcpy.da.UpdateCursor(feature, fields) as cursor:
+        for row in cursor:
+            oid =  row[0]
+            row[1] = data[oid][2]
+            cursor.updateRow(row)
 
 test2()
