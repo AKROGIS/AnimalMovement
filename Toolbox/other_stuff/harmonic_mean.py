@@ -44,7 +44,10 @@ def GetPoints(pointsFeature, shapeName, idName):
 def HarmonicMeanDistance(points):
     # Low memory solution; takes twice as long, because distance ab and ba are both calculated
     n = len(points)
-    msg = "Object IDs {0} and {1} are at the same location ({2},{3}) using distance of 1."
+    msg = (
+        "Object IDs {0} and {1} are at the same location ({2},{3}). "
+        "Using distance of 1."
+    )
     for k1 in points:
         x1, y1, _ = points[k1]
         # print(k1,x1,y1,m1)

@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     try:
         bbRaster = arcpy.sa.Raster(rasterLayer)
-    except Exception ex:
+    except Exception as ex:
         utils.die(
             "Brownian Bridge Raster cannot be loaded.\n{0}\n Quitting.".format(ex)
         )
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     try:
         isoplethList = utilization_isopleth.GetIsoplethList(isoplethInput)
-    except Exception ex:
+    except Exception as ex:
         utils.die(
             "Unable to interpret the list of isopleths.\n{0}\n Quitting.".format(ex)
         )

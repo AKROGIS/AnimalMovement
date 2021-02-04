@@ -31,6 +31,7 @@ def make_datetime(date, time):
             hour, minute = time[0:2], time[2:4]
     return datetime.datetime(int(year), int(month), int(day), int(hour), int(minute))
 
+
 def quote(item):
     """Wrap item in single quotes; replace single quote with double single quote."""
 
@@ -45,8 +46,8 @@ def make_sql():
     # print following sql statement as a single line of text.
     sql = (
         "INSERT INTO [VHFLocations] ("
-            "FileId, LineNumber, ProjectID, AnimalId, Species, "
-            "GroupName, Description, LocalFixDate, Location"
+        "FileId, LineNumber, ProjectID, AnimalId, Species, "
+        "GroupName, Description, LocalFixDate, Location"
         ") VALUES ({0})\n"
     )
     with csv23.open(csv_path, "r") as csv_file:

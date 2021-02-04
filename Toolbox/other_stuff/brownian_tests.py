@@ -143,7 +143,9 @@ def test5():
     print("Estimated running time", 0.000002 * n, "seconds")
     print("CreateBBGrid", xMin, xMax, yMin, yMax, cellSize, intervals)
     start = datetime.datetime.now()
-    grid = brownian.CreateBBGrid(xMin, xMax, yMin, yMax, cellSize, fixes, intervals, None, True)
+    grid = brownian.CreateBBGrid(
+        xMin, xMax, yMin, yMax, cellSize, fixes, intervals, None, True
+    )
     time = datetime.datetime.now() - start
     print(
         "len(grid)", len(grid), "len(row)", len(grid[0]), "grid[20][20]", grid[20][20]

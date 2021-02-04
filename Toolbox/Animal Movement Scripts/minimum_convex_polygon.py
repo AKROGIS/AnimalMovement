@@ -229,7 +229,9 @@ def AddArea(locationLayer, mcpFeatureClass, percentUsed, sr=None, shapeName=None
     # using arcpyPoints here is 8% (143points) to 44% (18407points) faster
     points = utils.get_points(locationLayer, sr)
     finalLength = int(0.5 + (percentUsed / 100.0) * len(points))
-    utils.info("Removing {0} of {1} points.".format(len(points) - finalLength, len(points)))
+    utils.info(
+        "Removing {0} of {1} points.".format(len(points) - finalLength, len(points))
+    )
     arcpy.SetProgressor(
         "step", "Finding points to ignore...", 0, len(points) - finalLength, 1
     )

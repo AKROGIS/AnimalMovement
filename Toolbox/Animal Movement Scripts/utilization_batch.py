@@ -251,8 +251,8 @@ def BuildNormalizedRaster(
                         raster = probRaster
                         n = 1
                 else:
-                    msg = "  Raster creation failed, not included in total. {0}".format(probRaster)
-                    utils.warn(msg)
+                    msg = "  Raster creation failed, not included in total. {0}"
+                    utils.warn(msg.format(probRaster))
             finally:
                 arcpy.Delete_management(layer)
     finally:
