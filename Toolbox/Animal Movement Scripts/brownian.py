@@ -337,7 +337,7 @@ def BestV(fixes, minV, maxV, steps, scaleFactor):
     return True, result[0]
 
 
-def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps=10, error=0.001):
+def MobilityVariance(fixes, maxGuess, scaleFactorGuess=None, steps=10, error=0.001):
     """Return the most likely mobility variance for the set of fixes.  See CVL() for
     a description of the mobility variance likelihood.
     This generate step results between zero and maxGuess.  If the best guess is near
@@ -347,7 +347,7 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps=10, error=0.001):
     on our guess are within the error requested.
 
     Note: this solution is not guaranteed to work if there are multiple maximums, or
-    if there is no upper bound on the variance.  The graph of liklihood at suitable
+    if there is no upper bound on the variance.  The graph of likelihood at suitable
     resolution should be reviewed to correctly identify the true solution."""
 
     # print("In MobilityVariance(), len(fixes) =",len(fixes),"maxGuess =",maxGuess,"steps =", "scaleFactorGuess =", scaleFactorGuess, steps,"error =",error)
@@ -355,7 +355,7 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps=10, error=0.001):
     ### FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME ###
     ###
     ### potential problems:
-    ###  a factor of ten being too coarse and scalefactor oscilates
+    ###  a factor of ten being too coarse and scalefactor oscillates
     ###    i.e 1e8 has all zero, but 1e9 has infinity.
     ###  selected scale factor too close to the 'edge'
     ###    i.e. refining or increasing the maxV requires a rework of the scalefactor
@@ -363,36 +363,32 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps=10, error=0.001):
     ### FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME ###
 
     maxV = maxGuess
-    # Make a first guess
-    scaleFactor = scaleFactorGuess
-    scaleFactorUnknown = True
-    while scaleFactorUnknown:
+    # The first guess is provided by the caller input, or at the mid point.
+    if scaleFactorGuess is None:
+        scaleFactor = 1e10
+    else:
+        scaleFactor = scaleFactorGuess
+    multiple = 10.0
+    scale_factors = set()
+    success = False
+    last_result = 1.0
+    msg = "success = {0}, result = {1}, scaleFactor = {2}"
+    while not success:
         success, result = BestV(fixes, 0, maxV, steps, scaleFactor)
-        print(
-            "success =",
-            success,
-            "scaleFactorUnknown =",
-            scaleFactorUnknown,
-            "scaleFactor =",
-            scaleFactor,
-        )
-        if success:
-            scaleFactorUnknown = False
-        else:
+        print(msg.format(success, result, scaleFactor))
+        if not success:
+            if last_result != result:
+                multiple *= .5 # decrease multiple by 50%
             if result < 0:
-                scaleFactor = scaleFactor * 10.0
+                scaleFactor = scaleFactor * multiple
             else:
-                scaleFactor = scaleFactor / 10.0
-        ###FIXME - check previous results, and make sure we are not oscillating
-
-    print(
-        "success =",
-        success,
-        "scaleFactorUnknown =",
-        scaleFactorUnknown,
-        "scaleFactor =",
-        scaleFactor,
-    )
+                scaleFactor = scaleFactor / multiple
+            last_result = result
+            if scaleFactor < 1e-15 or scaleFactor in scale_factors:
+                raise ValueError("MobilityVariance failed to converge.")
+            else:
+                scale_factors.add(scaleFactor)
+    print("Found the scale factor!")
 
     # gap = (maxV - minV)/steps where minV = 0
     gap = maxV / steps
