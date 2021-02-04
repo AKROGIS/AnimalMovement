@@ -179,7 +179,7 @@ def ChooseSmoothingFactor(hList, hRefToUse):
         return max(hList)
     return numpy.average(hList)
 
-def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, sr = None, cellSize = None):
+def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, sr = None, cellSize = None, save_isopleths=False):
     n = 0
     layer = "subsetSelectionForRaster"
     savedState, searchRadius = utilization_raster.SetRasterEnvironment(locationLayer, max(hList), sr, cellSize)
@@ -197,6 +197,15 @@ def BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, 
                 searchRadius = 2 * hDict[value]
                 gotRaster, probRaster = utilization_raster.GetNormalizedKernelRaster(layer, searchRadius)
                 if gotRaster:
+                    if save_isopleths:
+                        lines, polys, donuts = None, None, None
+                        if isoplethLines:
+                            lines = isoplethLines + "_" + str(value)
+                        if isoplethPolys:
+                            polys = isoplethPolys + "_" + str(value)
+                        if isoplethDonuts:
+                            donuts = isoplethDonuts + "_" + str(value)
+                        utilization_isopleth.CreateIsopleths(isoplethList, probRaster, lines, polys, donuts)
                     if saveRasters:
                         # Save individual probability rasters
                         name = os.path.join(rasterFolder,"praster_"+str(value)+".tif")
@@ -246,6 +255,7 @@ if __name__ == "__main__":
     isoplethDonuts = arcpy.GetParameterAsText(12)
     spatialReference = arcpy.GetParameter(13)
     cellSize = arcpy.GetParameterAsText(14)
+    save_isopleths = arcpy.GetParameterAsText(14)
 
     test = False
     if test:
@@ -267,6 +277,7 @@ if __name__ == "__main__":
         #arcpy.env.outputCoordinateSystem = spatialReference
         arcpy.env.outputCoordinateSystem = None
         cellSize =  "#"
+        save_isopleths = "True"
 
     #
     # Input validation
@@ -345,7 +356,7 @@ if __name__ == "__main__":
     #
     # Create density raster(s)
     #
-    gotRaster, raster = BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, spatialReference, cellSize)
+    gotRaster, raster = BuildNormalizedRaster(subsetIdentifier, uniqueValues, locationLayer, hList, saveRasters, rasterFolder, spatialReference, cellSize, save_isopleths)
     if gotRaster:
         utils.info("Created the temporary KDE raster")
     else:
