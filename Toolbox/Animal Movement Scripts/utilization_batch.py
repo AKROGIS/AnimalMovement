@@ -171,7 +171,7 @@ def GetSmoothingFactors(
             arcpy.Delete_management(layer)
         arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
         try:
-            points = utils.float_range(layer, sr)
+            points = utils.get_points(layer, sr)
             if len(points) < 3:
                 utils.warn(
                     "Insufficient locations (" + str(len(points)) + ") for " + value

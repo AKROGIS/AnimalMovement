@@ -225,7 +225,7 @@ if __name__ == "__main__":
     if hRefmethod.lower() == "fixed":
         h = fixedHRef
     else:
-        points = utils.float_range(locationLayer, spatialReference)
+        points = utils.get_points(locationLayer, spatialReference)
         h = utilization_smoothing.GetSmoothingFactor(
             points, hRefmethod, modifier, proportionAmount
         )

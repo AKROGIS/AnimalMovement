@@ -355,6 +355,6 @@ if __name__ == "__main__":
     ):
         spatialReference = None
 
-    points = utils.float_range(locationLayer, spatialReference)
+    points = utils.get_points(locationLayer, spatialReference)
     h = GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
     arcpy.SetParameterAsText(4, str(h))

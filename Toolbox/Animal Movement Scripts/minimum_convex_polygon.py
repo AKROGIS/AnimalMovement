@@ -195,7 +195,7 @@ def Mcp(pointList):
 def FloatingCenter(
     locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr=None, shapeName=None
 ):
-    points = utils.float_range(locationLayer, sr)
+    points = utils.get_points(locationLayer, sr)
     countOfPointsToRemove = int((1.0 - percentUsed / 100.0) * len(points))
     # This will limit the number of center point recalculations to 50
     # This can be a real time saver for very large datasets.
@@ -221,7 +221,7 @@ def FloatingCenter(
 def FixedCenter(
     locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr=None, shapeName=None
 ):
-    points = utils.GetArcpyPoints(locationLayer, sr, shapeName)
+    points = utils.get_points(locationLayer, sr)
     countOfPointsToRemove = int((1.0 - percentUsed / 100.0) * len(points))
     utils.info(
         "Removing "
@@ -239,8 +239,7 @@ def FixedCenter(
 
 def AddArea(locationLayer, mcpFeatureClass, percentUsed, sr=None, shapeName=None):
     # using arcpyPoints here is 8% (143points) to 44% (18407points) faster
-    # points = GetPoints(locationLayer, sr, shapeName)
-    points = utils.GetArcpyPoints(locationLayer, sr, shapeName)
+    points = utils.get_points(locationLayer, sr)
     finalLength = int(0.5 + (percentUsed / 100.0) * len(points))
     utils.info(
         "Removing "
