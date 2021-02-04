@@ -48,7 +48,7 @@ def is_int(something):
     return True
 
 
-def float_range(start, stop, step):
+def float_range(start, stop, step=1.0):
     """Return a range of numbers from x to y by jump increments.
     It is intended to be a floating point version of range()."""
 
