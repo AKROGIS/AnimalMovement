@@ -58,15 +58,15 @@ Example1:
 Scripting Example
 The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
 It creates the MCP without the 3% of the points furthest from a floating median.
- fixes = r"C:\tmp\test.gdb\fixes"
- mcp = r"C:\tmp\test.gdb\mcp97"
+ fixes = r"C:/tmp/test.gdb/fixes"
+ mcp = r"C:/tmp/test.gdb/mcp97"
  MinimumConvexPolygon (fixes, mcp, "97" "Floating Median", "", "")
 
 Example2:
 Command Line Example
 The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
 It creates the MCP without the 5% of the points furthest from a fixed mean.
- C:\folder> MinimumConvexPolygon.py test.gdb\fixes test.gdb\mcp95 95
+ C:/folder> MinimumConvexPolygon.py test.gdb/fixes test.gdb/mcp95 95
 
 Credits:
 Regan Sarwas, Alaska Region GIS Team, National Park Service
@@ -191,7 +191,7 @@ def Mcp(pointList):
 
 
 def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr = None, shapeName = None):
-    points = utils.GetPoints(locationLayer, sr, shapeName)
+    points = utils.GetPoints(locationLayer, sr)
     countOfPointsToRemove = int((1.0 - percentUsed/100.0) * len(points))
     #This will limit the number of center point recalculations to 50
     #This can be a real time saver for very large datasets.

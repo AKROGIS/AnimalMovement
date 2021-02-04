@@ -48,15 +48,15 @@ Example1:
 Scripting Example
 The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
 It creates a UD raster with a smoothing factor of 4500
- raster = r"C:\tmp\ud.tif"
- fixes = r"C:\tmp\test.gdb\fixes"
+ raster = r"C:/tmp/ud.tif"
+ fixes = r"C:/tmp/test.gdb/fixes"
  UDRaster(fixes, raster, 4500)
 
 Example2:
 Command Line Example
 The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
 It creates a UD raster with a smoothing factor of 4500
- C:\folder> python UD_Raster.py test.gdb\location kde.tif 4500
+ C:/folder> python UD_Raster.py test.gdb/location kde.tif 4500
 
 Credits:
 Regan Sarwas, Alaska Region GIS Team, National Park Service

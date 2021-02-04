@@ -84,15 +84,15 @@ Example1:
 Scripting Example
 The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
 It creates the 65%, 90% UD polylines for alla single animal using the smoothing facter as determined by LSCV
- fixes = r"C:\tmp\test.gdb\locations"
- lines = r"C:\tmp\test.gdb\contours"
+ fixes = r"C:/tmp/test.gdb/locations"
+ lines = r"C:/tmp/test.gdb/contours"
  UtilizationDistribution_AnimalMovement (fixes, "Worton", "", "LSCV", "", "65;90", lines, "", "")
 
 Example2:
 Command Line Example
 The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
 It creates the 65%, 90% UD polylines for alla single animal using the smoothing facter as determined by LSCV
- C:\folder> python UtilizationDistribution.py locations.shp Worton # LSCV # "65;90" test.gdb\contours
+ C:/folder> python UtilizationDistribution.py locations.shp Worton # LSCV # "65;90" test.gdb/contours
 
 Credits:
 Regan Sarwas, Alaska Region GIS Team, National Park Service
@@ -119,7 +119,6 @@ software and aggregate use with other software.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import arcpy
-import numpy
 
 import utilization_smoothing
 import utilization_raster
@@ -214,7 +213,7 @@ if __name__ == "__main__":
     if hRefmethod.lower() == "fixed":
         h = fixedHRef
     else:
-        points = utils.GetPoints(locationLayer, spatialReference, shapeName)
+        points = utils.GetPoints(locationLayer, spatialReference)
         h = utilization_smoothing.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
     #
     # Create density raster

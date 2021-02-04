@@ -56,14 +56,14 @@ Example1:
 Scripting Example
 The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
 This calculates the least squares cross validation smoothing factor for the fixes in the shapefile
- fixes = r"C:\tmp\locations.shp"
+ fixes = r"C:/tmp/locations.shp"
  h = UDSmoothingFactor (fixes, "Worton", "LSCV", "")
 
 Example2:
 Command Line Example
 The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
 This prints the least squares cross validation smoothing factor for the fixes in the FGDB
- C:\folder> python UD_SmoothingFactor.py test.gdb\fixes Worton LSCV
+ C:/folder> python UD_SmoothingFactor.py test.gdb/fixes Worton LSCV
 
 Credits:
 Regan Sarwas, Alaska Region GIS Team, National Park Service

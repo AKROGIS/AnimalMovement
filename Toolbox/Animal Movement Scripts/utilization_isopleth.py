@@ -48,15 +48,15 @@ Example1:
 Scripting Example
 The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
 It creates the 65%, 90% UD polygons (with holes) in a file geodatabase
- raster = r"C:\tmp\kde.tif"
- donuts = r"C:\tmp\test.gdb\ud_donuts"
+ raster = "C:/tmp/kde.tif"
+ donuts = "C:/tmp/test.gdb/ud_donuts"
  UD_Isopleths("65;90", raster, "", "", donuts)
 
 Example2:
 Command Line Example
 The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
 It creates the 50%, 90% and 95% UD polygons in a file geodatabase
- C:\folder> python UD_Isopleths.py "50,90,95" kde.tif # test.gdb\ud_poly #
+ C:/folder> python UD_Isopleths.py "50,90,95" kde.tif # test.gdb/ud_poly #
 
 Credits:
 Regan Sarwas, Alaska Region GIS Team, National Park Service
@@ -111,7 +111,7 @@ def CreateIsopleths(isopleths, raster1, lineFc, polyFc, donutFc):
         if donutFc:
             IsoplethLinesToDonuts(lineFc, donutFc)
     else:
-        tmpLayer = "in_memory\IsoplethPolylines"
+        tmpLayer = r"in_memory\IsoplethPolylines"
         if arcpy.Exists(tmpLayer):
             arcpy.Delete_management(tmpLayer)
         arcpy.sa.ContourList(raster1, tmpLayer, isopleths)

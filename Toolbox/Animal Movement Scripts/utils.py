@@ -12,17 +12,17 @@ import arcpy
 
 
 def die(msg):
-        arcpy.AddError(msg)
-        print("ERROR: " + str(msg))
-        sys.exit()
+    arcpy.AddError(msg)
+    print("ERROR: " + str(msg))
+    sys.exit()
 
 def warn(msg):
-        arcpy.AddWarning(msg)
-        print("Warning: " + str(msg))
+    arcpy.AddWarning(msg)
+    print("Warning: " + str(msg))
 
 def info(msg):
-        arcpy.AddMessage(msg)
-        print("Info: " + str(msg))
+    arcpy.AddMessage(msg)
+    print("Info: " + str(msg))
 
 def IsFloat(something):
     try:
@@ -43,7 +43,7 @@ def frange(x, y, jump):
     It is intended to be a floating point version of range()."""
 
     if jump == 0:
-        raise ValueError, "jump must be non-zero"
+        raise ValueError("jump must be non-zero")
     if jump > 0:
         while x < y:
             yield x

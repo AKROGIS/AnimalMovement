@@ -228,7 +228,7 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
     #print("In CVL(); len(fixes) =", len(fixes), "lowerBound =",lowerBound, "upperBound =",upperBound, "step =", step, "scaleFactor =", scaleFactor)
 
     if len(fixes) < 3:
-        raise ValueError, "Not enough fixes provided"
+        raise ValueError("Not enough fixes provided")
 
     results = []
     for vm in utils.frange(lowerBound, (upperBound + step), step):

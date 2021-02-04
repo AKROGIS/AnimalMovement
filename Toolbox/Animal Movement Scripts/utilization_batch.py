@@ -106,15 +106,15 @@ Example1:
 Scripting Example
 The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
 It creates the 65%, 90% UD polygons (with holes) for a group of animals using the average of each animals smoothing facter as determined by LSCV
- fixes = r"C:\tmp\test.gdb\locations"
- donuts = r"C:\tmp\test.gdb\ud_donuts"
+ fixes = "C:/tmp/test.gdb/locations"
+ donuts = "C:/tmp/test.gdb/ud_donuts"
  UD_Batch_AnimalMovement (fixes, "AnimalId", "Worton", "", "LSCV", "", "Average", "","", "65;90", "", "", donuts)
 
 Example2:
 Command Line Example
 The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
 It creates the 65%, 90% UD polygons (with holes) for a group of animals using the average of each animals smoothing facter as determined by LSCV
- C:\folder> python UD_Batch.py locations.shp AnimalId Worton # LSCV # Average # "65;90" # # test.gdb\ud_donuts
+ C:/folder> python UD_Batch.py locations.shp AnimalId Worton # LSCV # Average # "65;90" # # test.gdb/ud_donuts
 
 
 Credits:
@@ -162,13 +162,12 @@ def GetSmoothingFactors(subsetIdentifier, uniqueValues, locationLayer, hRefmetho
             arcpy.Delete_management(layer)
         arcpy.MakeFeatureLayer_management(locationLayer, layer, query)
         try:
-            points = utils.GetPoints(layer, sr, shapeName)
-            #points = utils.GetPoints(layer, sr)
+            points = utils.GetPoints(layer, sr)
             if len(points) < 3:
-              utils.warn("Insufficient locations ("+str(len(points))+") for "+value)
+                utils.warn("Insufficient locations ("+str(len(points))+") for "+value)
             else:
-              h = utilization_smoothing.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
-              hList.append(h)
+                h = utilization_smoothing.GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
+                hList.append(h)
         finally:
             arcpy.Delete_management(layer)
     return hList

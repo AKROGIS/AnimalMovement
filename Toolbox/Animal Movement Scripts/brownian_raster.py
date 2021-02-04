@@ -175,14 +175,14 @@ def GetMinutes(newTime, firstTime):
             return newTime - firstTime
         if type(newTime) == int:
             return newTime - firstTime
-    raise TypeError, "Unsupported Date type"
+    raise TypeError("Unsupported Date type")
 
 
 def GetFixedRasterName(rasterName, groupName):
     if not groupName:
         return rasterName
     else:
-        raise NameError, "GetFixRasterName Function not complete"
+        raise NameError("GetFixRasterName Function not complete")
 
 
 def BuildFixesFromLines(features, shapeFieldName, dateField, groupingFields,
@@ -195,7 +195,7 @@ def BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
 
     fieldNames = [f.name for f in arcpy.ListFields(features)]
     if not dateField or dateField not in fieldNames:
-        raise ValueError, "date field is not found in the dataset"
+        raise ValueError("date field is not found in the dataset")
 
     #FIXME - verify field types
     dateFieldDelimited = arcpy.AddFieldDelimiters(features, dateField)
@@ -366,7 +366,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
             fixSets = BuildFixesFromPoints(features, shapeFieldName, dateField, groupingFields,
                                            locationVarianceField, mobilityVarianceField, spatialReference)
         else:
-            raise TypeError, "Features must be points or lines."
+            raise TypeError("Features must be points or lines.")
 
         utils.info("Got Fix Sets " + str(datetime.datetime.now() - start))
         start = datetime.datetime.now()
@@ -377,7 +377,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
             #print(fixes[1])
             if len(fixes) < 2:
                 if name == '':
-                    raise ValueError, "The feature class does not have two or more fix locations."
+                    raise ValueError("The feature class does not have two or more fix locations.")
                 else:
                     utils.warn("The group named " + groupName + "does not have enough fix locations.  Skipping")
                     continue
@@ -418,7 +418,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                 maxLocationVariance = 0
                 for fix in fixes:
                     if fix[3] == None or fix[3] <= 0:
-                        raise ValueError, "Invalid location variance in data. Use constant or none for default."
+                        raise ValueError("Invalid location variance in data. Use constant or none for default.")
                     if fix[3] > maxLocationVariance:
                         maxLocationVariance = fix[3]
 
@@ -445,7 +445,7 @@ def BrownianBridge(features, rasterName, dateField, groupingFields,
                 maxMobilityVariance = 0
                 for fix in fixes:
                     if fix[4] == None or fix[4] <= 0:
-                        raise ValueError, "Invalid mobility variance in data. Use constant or none for default."
+                        raise ValueError("Invalid mobility variance in data. Use constant or none for default.")
                     if fix[4] > maxMobilityVariance:
                         maxMobilityVariance = fix[4]
 
