@@ -1,6 +1,16 @@
-# CAUTION this is an O(n^2) algorithm.  Avoid large datasets.
-# on my 3 GHz Xeon, it takes about 0.6e-6*n*n seconds, where n is the number of points in your dataset.
-# 1000 points ~ .6 seconds, 10,000 points ~ 1 minute, 100,000 points ~ 1hour 40minutes
+# -*- coding: utf-8 -*-
+"""
+Calculate the Harmonic mean of all distances between n points.
+
+With n points there are approx n*n/2 distances, so this can become a
+very time consuming problem for large numbers of points.
+
+CAUTION this is an O(n^2) algorithm.  Avoid large datasets. On my 3 GHz Xeon,
+it takes about 0.6e-6*n*n seconds, where n is the number of points in your dataset.
+1000 points ~ .6 seconds, 10,000 points ~ 1 minute, 100,000 points ~ 1hour 40minutes.
+"""
+
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import math
 import random
