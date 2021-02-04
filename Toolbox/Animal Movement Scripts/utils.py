@@ -12,22 +12,26 @@ import arcpy
 
 
 def die(msg):
+    """Print error message to console and ArcGIS and exit."""
     arcpy.AddError(msg)
     print("ERROR: " + str(msg))
     sys.exit()
 
 
 def warn(msg):
+    """Print warning message to console and ArcGIS and exit."""
     arcpy.AddWarning(msg)
     print("Warning: " + str(msg))
 
 
 def info(msg):
+    """Print info message to console and ArcGIS and exit."""
     arcpy.AddMessage(msg)
     print("Info: " + str(msg))
 
 
 def is_float(something):
+    """Return True is something is convertible to a floating point number."""
     try:
         float(something)
     except (ValueError, TypeError):
@@ -36,6 +40,7 @@ def is_float(something):
 
 
 def is_int(something):
+    """Return True is something is convertible to a integer number."""
     try:
         int(something)
     except (ValueError, TypeError):
