@@ -528,13 +528,13 @@ def PrintRunTime(extents, cellSize, searchArea, nFixes, intervals, secondsPerChe
     seconds = cols * rows * (secondsPerCheck + searchPercent * (segments*intervals) * secondsPerCalculation)
     seconds = int(seconds)
     if seconds > 60:
-        minutes = seconds / 60
+        minutes = seconds // 60
         seconds = seconds - minutes * 60
         if minutes > 60:
-            hours = minutes / 60
+            hours = minutes // 60
             minutes = minutes - hours * 60
             if hours > 24:
-                days = hours / 24
+                days = hours // 24
                 hours = hours - days * 24
                 time = "%d days and %d hours" % (days, hours)
             else:

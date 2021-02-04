@@ -10,7 +10,7 @@ def Integrate1D(f, x1, x2, n):
     #integrate f(x) from x1 to x2 using piecewise integration with n pieces
     #Uses the Newton-Cotes rectangle (or midpoint) rule
 
-    stepSize = float(x2 - x1) / n
+    stepSize = (x2 - x1) / n
     x = x1 + stepSize / 2
     accumulator = 0.0
     while x < x2:
@@ -25,8 +25,8 @@ def Integrate2D(f, x1, x2, y1, y2, n):
     #integrate f(x) from x1 to x2 using piecewise integration with n pieces
     #Uses the Newton-Cotes rectangle (or midpoint) rule
 
-    xStepSize = float(x2 - x1) / n
-    yStepSize = float(y2 - y1) / n
+    xStepSize = (x2 - x1) / n
+    yStepSize = (y2 - y1) / n
     x = x1 + xStepSize / 2
     y0 = y1 + yStepSize / 2
     unitArea = xStepSize * yStepSize

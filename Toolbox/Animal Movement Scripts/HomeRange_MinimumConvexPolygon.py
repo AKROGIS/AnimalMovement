@@ -195,7 +195,7 @@ def FloatingCenter(locationLayer, mcpFeatureClass, percentUsed, centerMethod, sr
     countOfPointsToRemove = int((1.0 - percentUsed/100.0) * len(points))
     #This will limit the number of center point recalculations to 50
     #This can be a real time saver for very large datasets.
-    pointsRemovedPerIteration = max(1, countOfPointsToRemove/50)
+    pointsRemovedPerIteration = max(1, countOfPointsToRemove//50)
     utils.info("Removing " + str(countOfPointsToRemove) + " of " + str(len(points)) + " points.")
     countOfPointsRemoved = 0
     while countOfPointsRemoved < countOfPointsToRemove:

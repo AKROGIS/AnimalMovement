@@ -252,7 +252,7 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
 
             T = nextTime - prevTime
             #a = alphai = percent of path
-            a = float(thisTime - prevTime) / T
+            a = (thisTime - prevTime) / T
 
             # (meanX, meanY) = mui(ti) = mean predicted location at time i
             meanX = prevX + a * (nextX - prevX)
@@ -296,7 +296,7 @@ def BestV(fixes, minV, maxV, steps, scaleFactor):
 
     #print("In BestV() len(fixes) =",len(fixes), "minV =",minV, "maxV =",maxV, "steps =",steps, "scaleFactor =",scaleFactor)
 
-    stepSize = float(maxV - minV) / steps
+    stepSize = (maxV - minV) / steps
     likelihoods = CVL(fixes, minV, maxV, stepSize, scaleFactor)
 
     #if all the likelihoods are 0, then the scaleFactor is too small
@@ -363,7 +363,8 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps = 10, error = 0.00
 
     print("success =",success, "scaleFactorUnknown =",scaleFactorUnknown, "scaleFactor =", scaleFactor)
 
-    gap = float(maxV - 0)/steps
+    # gap = (maxV - minV)/steps where minV = 0
+    gap = maxV/steps
 
 #    print(result, "+/-", gap, "scaleFactor =", scaleFactor)
 #    sys.exit()
@@ -376,7 +377,7 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess, steps = 10, error = 0.00
         if not success:
             raise ValueError
             ###FIXME, check success and adjust scalefactor
-        gap = float(maxV - 0)/steps
+        gap = maxV/steps
         #print(result, "+/-", gap)
 
     #keep zeroing in on the previous result until we have good resolution
