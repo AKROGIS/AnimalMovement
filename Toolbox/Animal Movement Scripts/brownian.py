@@ -378,7 +378,7 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess=None, steps=10, error=0.0
         print(msg.format(success, result, scaleFactor))
         if not success:
             if last_result != result:
-                multiple *= .5 # decrease multiple by 50%
+                multiple *= 0.5  # decrease multiple by 50%
             if result < 0:
                 scaleFactor = scaleFactor * multiple
             else:
