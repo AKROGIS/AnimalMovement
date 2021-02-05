@@ -15,7 +15,6 @@ This code is public domain
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import datetime
 import math
 
 import arcpy
@@ -75,7 +74,7 @@ def IntegratePath(
     """
 
     # Create a list of median value for each interval
-    values = []
+    # values = []
     unitWidth = T / intervals
     stepSize = 1.0 / intervals
     # a = Horne's alpha (0 to 100% of the distance from start to end)

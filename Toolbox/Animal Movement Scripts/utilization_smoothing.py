@@ -324,7 +324,7 @@ def HrefGaussianApproximation(points):
 
 
 def HrefSilverman(points):
-    # FIXME
+    # TODO: Implement this method
     return HrefWorton(points)
 
 
@@ -338,7 +338,7 @@ def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
         hRef = HrefSilverman(points)
     elif hRefmethod.lower() == "gaussian":
         hRef = HrefGaussianApproximation(points)
-    elif not hrefmethod or hrefmethod == "#":
+    elif not hRefmethod or hRefmethod == "#":
         hRef = HrefWorton(points)
 
     if hRef == 0:

@@ -270,7 +270,8 @@ def BuildFixesFromLines(
     mobilityVarianceConstant,
     spatialReference,
 ):
-    pass
+    # TODO: Implement (or delete)
+    return {}
 
 
 def BuildFixesFromPoints(
@@ -318,9 +319,9 @@ def BuildFixesFromPoints(
 
     results = {}
     # print(groupingFields, dateFieldDelimited)
-    for groupName, whereClaus in GetGroupings(
-        groupingFields, dateFieldDelimited
-    ).iteritems():
+    groupings = GetGroupings(groupingFields, dateFieldDelimited)
+    for groupName in groupings:
+        whereClaus = groupings[groupName]
         # print(groupName, whereClaus)
         # utils.info("Where = {0}; Fields = {1}; Sort = {1}".format(where, fields, sort))
         # FIXME - ESRI BUG - reprojection does not work if the data is in a
@@ -338,7 +339,7 @@ def BuildFixesFromPoints(
             spatial_reference=spatialReference,
             sql_clause=(None, sort),
         ) as cursor:
-            for point in cursor:
+            for row in cursor:
                 fix = [0, 0, 0, 0, 0]
                 newTime = row[1]
                 if firstTime == None:
@@ -519,7 +520,8 @@ def BrownianBridge(
         utils.info("Got Fix Sets {0}".format(datetime.datetime.now() - start))
         start = datetime.datetime.now()
 
-        for groupName, fixes in fixSets.iteritems():
+        for groupName in fixSets:
+            fixes = fixSets[groupName]
             # print("groupName",groupName, "len(fixes)",len(fixes))
             # print(fixes[0])
             # print(fixes[1])

@@ -362,8 +362,8 @@ def BuildQuery(featureClass, whereField, value):
 
     field = arcpy.AddFieldDelimiters(featureClass, whereField)
     fields = arcpy.ListFields(featureClass)
-    type = [f.type.lower() for f in fields if f.name == whereField]
-    if type and type[0] == "string":
+    data_types = [f.type.lower() for f in fields if f.name == whereField]
+    if data_types and data_types[0] == "string":
         quote = "'"
     else:
         quote = ""
