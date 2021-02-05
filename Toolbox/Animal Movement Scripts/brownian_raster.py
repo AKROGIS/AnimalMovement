@@ -455,7 +455,7 @@ def CreateBBRaster(extents, cellSize, searchArea, fixes, intervals, spatialRefer
     return raster
 
 
-def BrownianBridge(
+def create_raster(
     features,
     rasterName,
     dateField,
@@ -780,118 +780,282 @@ def PrintRunTime(
     utils.info("  Estimated running time %s" % time)
 
 
-if __name__ == "__main__":
+def validate(
+    fixes_name,
+    raster_name,
+    date_fieldname,
+    grouping_fieldnames,
+    cell_size_constant,
+    integration_interval,
+    location_variance_fieldname,
+    location_variance_constant,
+    mobility_variance_fieldname,
+    mobility_variance_constant,
+    spatial_reference,
+):
+    """
+    Validate the input.
 
-    fixesLayer = arcpy.GetParameterAsText(0)
-    rasterName = arcpy.GetParameterAsText(1)
-    dateFieldName = arcpy.GetParameterAsText(2)
-    groupingFieldNames = arcpy.GetParameterAsText(3)
-    cellSizeConstant = arcpy.GetParameterAsText(4)
-    IntegrationIntervalConstant = arcpy.GetParameterAsText(5)
-    locationVarianceConstant = arcpy.GetParameterAsText(6)
-    locationVarianceFieldName = arcpy.GetParameterAsText(7)
-    mobilityVarianceConstant = arcpy.GetParameterAsText(8)
-    mobilityVarianceFieldName = arcpy.GetParameterAsText(9)
-    spatialReference = arcpy.GetParameter(10)
+    Exit with a message if the input is not valid.  Otherwise return a tuple
+    containing most of the validated format of the input parameters.
+    """
+    no_value = ["#", "", "None", "NONE", "none"]
 
-    test = False
-    if test:
-        fixesLayer = r"C:\tmp\test.gdb\fix_a_c96"
-        rasterName = r"C:\tmp\test.gdb\bb7"
-        dateFieldName = "FixDate"
-        groupingFieldNames = ""
-        cellSizeConstant = "#"
-        IntegrationIntervalConstant = "#"
-        locationVarianceFieldName = "#"
-        locationVarianceConstant = None
-        mobilityVarianceFieldName = ""
-        mobilityVarianceConstant = ""
-        spatialReference = arcpy.SpatialReference()
-        spatialReference.loadFromString(
-            "PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',"
-            "DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],"
-            "PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],"
-            "PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],"
-            "PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],"
-            "PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],"
-            "UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;"
-            "0.001;0.001;0.001;IsHighPrecision"
-        )
-        # arcpy.env.outputCoordinateSystem = spatialReference
-        arcpy.env.outputCoordinateSystem = None
-        spatialReference = None
-
-    testHorne = False
-    if testHorne:
-        rasterName = r"C:\tmp\kd_test\bb_h_smallv.tif"
-        extents = arcpy.Extent(-90, -180, 370, 180)
-        cellSize = 1.0
-        intervals = 10
-        searchArea = None
-        fixes = [
-            # time, x, y, locational_variance, mobility_variance
-            [0.0, 0, 0, 8.32, 6.42],
-            [20.0, 280, 0, 8.32, 6.42],
-        ]
-        print("Horne Test", extents, cellSize, searchArea, fixes, intervals)
-        raster = CreateBBRaster(extents, cellSize, searchArea, fixes, intervals)
-        # arcpy.Delete_management(rasterName)
-        raster.save(rasterName)
-        sys.exit()
-
-    #
-    # Input validation
-    #
-    if dateFieldName == "#":
-        dateFieldName = None
-    if groupingFieldNames == "#":
-        groupingFieldNames = None
-    if locationVarianceFieldName == "#":
-        locationVarianceFieldName = None
-    if mobilityVarianceFieldName == "#":
-        mobilityVarianceFieldName = None
-
-    if not rasterName:
-        utils.die("No output requested. Quitting.")
-
-    if not fixesLayer:
+    if not fixes_name:
         utils.die("No fixes layer was provided. Quitting.")
 
-    if not arcpy.Exists(fixesLayer):
+    if not arcpy.Exists(fixes_name):
         utils.die("Location layer cannot be found. Quitting.")
 
-    if not spatialReference or not spatialReference.name:
-        spatialReference = arcpy.env.outputCoordinateSystem
+    date_field_names = [field.name for field in arcpy.ListFields(fixes_name, "Date")]
+    double_field_names = [
+        field.name for field in arcpy.ListFields(fixes_name, "Double")
+    ]
+    all_field_names = [field.name for field in arcpy.ListFields(fixes_name)]
+    bad_field_msg = "Field {0} does not exist in {1}. Quitting."
 
-    if not spatialReference or not spatialReference.name:
-        spatialReference = arcpy.Describe(fixesLayer).spatialReference
+    if not raster_name:
+        utils.die("No output requested. Quitting.")
 
-    if not spatialReference or not spatialReference.name:
+    if date_fieldname in no_value:
+        date_fieldname = None
+    if date_fieldname and date_fieldname not in date_field_names:
+        utils.die(bad_field_msg.format(date_fieldname, fixes_name))
+
+    if grouping_fieldnames in no_value:
+        grouping_fieldnames = None
+    grouping_fieldnames = (
+        grouping_fieldnames.replace(",", " ").replace(";", " ").replace(":", " ")
+    )
+    grouping_fieldnames = grouping_fieldnames.split()
+    if grouping_fieldnames:
+        for group_fieldname in grouping_fieldnames:
+            if group_fieldname not in all_field_names:
+                utils.die(bad_field_msg.format(group_fieldname, fixes_name))
+
+    if cell_size_constant in no_value:
+        cell_size_constant = None
+    else:
+        try:
+            cell_size_constant = float(cell_size_constant)
+        except ValueError:
+            utils.die("Cell size is not a number. Quitting.")
+
+    if integration_interval in no_value:
+        integration_interval = None
+    else:
+        try:
+            integration_interval = int(integration_interval)
+        except ValueError:
+            utils.die("Cell size is not a number. Quitting.")
+
+    if location_variance_fieldname in no_value:
+        locationVarianceFieldName = None
+    if (
+        location_variance_fieldname
+        and location_variance_fieldname not in double_field_names
+    ):
+        utils.die(bad_field_msg.format(location_variance_fieldname, fixes_name))
+
+    if location_variance_constant in no_value:
+        location_variance_constant = None
+    else:
+        try:
+            location_variance_constant = float(location_variance_constant)
+        except ValueError:
+            utils.die("Location Variance is not a number. Quitting.")
+
+    if mobility_variance_fieldname in no_value:
+        mobility_variance_fieldname = None
+    if (
+        mobility_variance_fieldname
+        and mobility_variance_fieldname not in double_field_names
+    ):
+        utils.die(bad_field_msg.format(mobility_variance_fieldname, fixes_name))
+
+    if mobility_variance_constant in no_value:
+        mobility_variance_constant = None
+    else:
+        try:
+            mobility_variance_constant = float(mobility_variance_constant)
+        except ValueError:
+            utils.die("Mobility Variance is not a number. Quitting.")
+
+    if not spatial_reference or not spatial_reference.name:
+        spatial_reference = arcpy.env.outputCoordinateSystem
+
+    if not spatial_reference or not spatial_reference.name:
+        spatial_reference = arcpy.Describe(fixes_name).spatialReference
+
+    if not spatial_reference or not spatial_reference.name:
         utils.die(
             "The fixes layer does not have a coordinate system, "
             "and you have not provided one. Quitting."
         )
 
-    if spatialReference.type != "Projected":
+    if spatial_reference.type != "Projected":
         msg = (
             "The output projection is '{0}'. "
             "It must be a projected coordinate system. Quitting."
         )
-        utils.die(msg.format(spatialReference.type))
+        utils.die(msg.format(spatial_reference.type))
 
-    #
-    # Create brownian bridge raster(s)
-    #
-    BrownianBridge(
-        fixesLayer,
-        rasterName,
-        dateFieldName,
-        groupingFieldNames,
-        cellSizeConstant,
-        IntegrationIntervalConstant,
-        locationVarianceFieldName,
-        locationVarianceConstant,
-        mobilityVarianceFieldName,
-        mobilityVarianceConstant,
-        spatialReference,
+    return (
+        date_fieldname,
+        grouping_fieldnames,
+        cell_size_constant,
+        integration_interval,
+        location_variance_fieldname,
+        location_variance_constant,
+        mobility_variance_fieldname,
+        mobility_variance_constant,
+        spatial_reference,
     )
+
+
+def validate_create_raster(
+    fixes_name,
+    raster_name,
+    date_fieldname,
+    grouping_fieldnames,
+    cell_size_constant,
+    integration_interval,
+    location_variance_fieldname,
+    location_variance_constant,
+    mobility_variance_fieldname,
+    mobility_variance_constant,
+    spatial_reference,
+):
+    """Validate input and create raster."""
+
+    (
+        date_fieldname,
+        grouping_fieldnames,
+        cell_size_constant,
+        integration_interval,
+        location_variance_fieldname,
+        location_variance_constant,
+        mobility_variance_fieldname,
+        mobility_variance_constant,
+        spatial_reference,
+    ) = validate(
+        fixes_name,
+        raster_name,
+        date_fieldname,
+        grouping_fieldnames,
+        cell_size_constant,
+        integration_interval,
+        location_variance_fieldname,
+        location_variance_constant,
+        mobility_variance_fieldname,
+        mobility_variance_constant,
+        spatial_reference,
+    )
+    create_raster(
+        fixes_name,
+        raster_name,
+        date_fieldname,
+        grouping_fieldnames,
+        cell_size_constant,
+        integration_interval,
+        location_variance_fieldname,
+        location_variance_constant,
+        mobility_variance_fieldname,
+        mobility_variance_constant,
+        spatial_reference,
+    )
+
+
+def test():
+    """Set up manual test parameters and process."""
+
+    fixes_name = r"C:\tmp\test.gdb\fix_a_c96"
+    raster_name = r"C:\tmp\test.gdb\bb7"
+    date_fieldname = "FixDate"
+    grouping_fieldnames = ""
+    cell_size_constant = "#"
+    integration_interval = "#"
+    location_variance_fieldname = "#"
+    location_variance_constant = None
+    mobility_variance_fieldname = ""
+    mobility_variance_constant = ""
+    spatial_reference = arcpy.SpatialReference()
+    spatial_reference.loadFromString(
+        "PROJCS['NAD_1983_Alaska_Albers',GEOGCS['GCS_North_American_1983',"
+        "DATUM['D_North_American_1983',SPHEROID['GRS_1980',6378137.0,298.257222101]],"
+        "PRIMEM['Greenwich',0.0],UNIT['Degree',0.0174532925199433]],"
+        "PROJECTION['Albers'],PARAMETER['False_Easting',0.0],PARAMETER['False_Northing',0.0],"
+        "PARAMETER['Central_Meridian',-154.0],PARAMETER['Standard_Parallel_1',55.0],"
+        "PARAMETER['Standard_Parallel_2',65.0],PARAMETER['Latitude_Of_Origin',50.0],"
+        "UNIT['Meter',1.0]];-13752200 -8948200 10000;-100000 10000;-100000 10000;"
+        "0.001;0.001;0.001;IsHighPrecision"
+    )
+    arcpy.Delete_management(raster_name)
+    validate_create_raster(
+        fixes_name,
+        raster_name,
+        date_fieldname,
+        grouping_fieldnames,
+        cell_size_constant,
+        integration_interval,
+        location_variance_fieldname,
+        location_variance_constant,
+        mobility_variance_fieldname,
+        mobility_variance_constant,
+        spatial_reference,
+    )
+
+
+def test_horne():
+    """Set up manual test parameters and process."""
+
+    rasterName = r"C:\tmp\kd_test\bb_h_smallv.tif"
+    extents = arcpy.Extent(-90, -180, 370, 180)
+    cellSize = 1.0
+    intervals = 10
+    searchArea = None
+    fixes = [
+        # time, x, y, locational_variance, mobility_variance
+        [0.0, 0, 0, 8.32, 6.42],
+        [20.0, 280, 0, 8.32, 6.42],
+    ]
+    print("Horne Test", extents, cellSize, searchArea, fixes, intervals)
+    raster = CreateBBRaster(extents, cellSize, searchArea, fixes, intervals, None)
+    arcpy.Delete_management(rasterName)
+    raster.save(rasterName)
+
+
+def main():
+    """Get the input from arcpy (tbx or command line) and process."""
+
+    fixes_name = arcpy.GetParameterAsText(0)
+    raster_name = arcpy.GetParameterAsText(1)
+    date_fieldname = arcpy.GetParameterAsText(2)
+    grouping_fieldnames = arcpy.GetParameterAsText(3)
+    cell_size_constant = arcpy.GetParameterAsText(4)
+    integration_interval = arcpy.GetParameterAsText(5)
+    location_variance_fieldname = arcpy.GetParameterAsText(7)
+    location_variance_constant = arcpy.GetParameterAsText(6)
+    mobility_variance_fieldname = arcpy.GetParameterAsText(9)
+    mobility_variance_constant = arcpy.GetParameterAsText(8)
+    spatial_reference = arcpy.GetParameterAsText(10)
+
+    validate_create_raster(
+        fixes_name,
+        raster_name,
+        date_fieldname,
+        grouping_fieldnames,
+        cell_size_constant,
+        integration_interval,
+        location_variance_fieldname,
+        location_variance_constant,
+        mobility_variance_fieldname,
+        mobility_variance_constant,
+        spatial_reference,
+    )
+
+
+if __name__ == "__main__":
+    # test()
+    # test_horne()
+    main()
