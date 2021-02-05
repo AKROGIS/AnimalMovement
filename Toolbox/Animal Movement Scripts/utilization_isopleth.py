@@ -10,53 +10,103 @@ Tags:
 contour, home, range, animal, tracking, telemetry, ecology, kernel, density
 
 Summary:
-Creates polylines and/or polygons based on the requested list of isopleths. Input is a UD raster (typically created from the UD_Raster tool)
+
+Creates polylines and/or polygons based on the requested list of isopleths.
+Input is a UD raster (typically created from the UD_Raster tool)
 
 Usage:
-Either a floating point or integer raster is acceptable as input.  There is no limits on the range of the cell values.
-The isopleth values provided should be appropriate for the input raster. (Integers between 1 and 99 for rasters created with the UD Raster tool).
-At least one of the output feature classes (lines, polygons, or donuts) must be requested
+
+Either a floating point or integer raster is acceptable as input. There is no
+limits on the range of the cell values.
+
+The isopleth values provided should be appropriate for the input raster.
+(Integers between 1 and 99 for rasters created with the UD Raster tool).
+
+At least one of the output feature classes (lines, polygons, or donuts) must be
+requested
 
 Parameter 1:
 Isopleths
-This is a list of isopleth values separated by commas, semicolons, or whitespace. The values provided should be appropriate for the input raster (integers between 1 and 99 for rasters created with the UD Raster tool).
+
+This is a list of isopleth values separated by commas, semicolons, or
+whitespace. The values provided should be appropriate for the input raster
+(integers between 1 and 99 for rasters created with the UD Raster tool).
 
 Parameter 2:
 Raster_Layer
-The input raster. Any raster is acceptable, however this tool is typically used with a utilization distribution probability raster (created by the UD Raster tool).  UD Rasters have integer values in the range from 1 to 100 with 100 at the edges of the universe, and 1 at the center(s) of the concentration.  This is important when when selecting the Isopleths, and when stacking isopleth polygons.  See the discussion for the Polygon parameter.
 
+The input raster. Any raster is acceptable, however this tool is typically used
+with a utilization distribution probability raster (created by the UD Raster
+tool). UD Rasters have integer values in the range from 1 to 100 with 100 at
+the edges of the universe, and 1 at the center(s) of the concentration. This is
+important when when selecting the Isopleths, and when stacking isopleth
+polygons. See the discussion for the Polygon parameter.
 
 Parameter 3:
 Lines (optional)
-The name of a new output polyline feature class. One of Lines, Polygons, or Donut_Polygons must be provided.  If this parameter is left blank, no lines will be created. The output feature class will have a field named 'contour' with the value of the isopleth, and one or more features for each isopleth requested that exists in the input raster.  There may be multiple polylines for each isopleth.  Polylines may not close, but they should if the input is a UD Raster from the UD Raster tool.
-No smoothing is done, and depending on the cell size the output can be very dense (small cell size), or very blocky (large cell size)
+
+The name of a new output polyline feature class. One of `Lines`, `Polygons`, or
+`Donut_Polygons` must be provided.
+
+If this parameter is left blank, no lines will be created. The output feature
+class will have a field named 'contour' with the value of the isopleth, and one
+or more features for each isopleth requested that exists in the input raster.
+There may be multiple polylines for each isopleth. Polylines may not close, but
+they should if the input is a UD Raster from the UD Raster tool.
+
+No smoothing is done, and depending on the cell size the output can be very
+dense (small cell size), or very blocky (large cell size)
 
 Parameter 4:
 Polygons (optional)
-Name of the new output polygon feature class. One of Lines, Polygons, or Donut_Polygons must be provided
-Contains a polygon for each isopleth.  Each polygon contains the entire are covered by the isopleth. These polygons are overlapping.  The polygons are written to the featureclass with the largest isopleth values first. (for UD analysis, this provides a correctly stacked results set). These polygons are created from the isopleth lines
+
+Name of the new output polygon feature class. One of `Lines`, `Polygons`, or
+`Donut_Polygons` must be provided.
+
+Contains a polygon for each isopleth. Each polygon contains the entire are
+covered by the isopleth. These polygons are overlapping. The polygons are
+written to the featureclass with the largest isopleth values first. (for UD
+analysis, this provides a correctly stacked results set). These polygons are
+created from the isopleth lines
 
 Parameter 5:
 Donut_Polygons (optional)
-Name of the new output polygon feature class. One of Lines, Polygons, or Donut_Polygons must be provided
-Contains a polygon for each isopleth range.  Assumes the isopleths are ordered with the largest values containing the most area (so the last range is a donut without a hole). There is no donut for the first range range (i.e. from the universe to the first isopleth). These polygons are created from the lines
+
+Name of the new output polygon feature class. One of `Lines`, `Polygons`, or
+`Donut_Polygons` must be provided.
+
+Contains a polygon for each isopleth range. Assumes the isopleths are ordered
+with the largest values containing the most area (so the last range is a donut
+without a hole). There is no donut for the first range range (i.e. from the
+universe to the first isopleth). These polygons are created from the lines
 
 Scripting Syntax:
+
 UD_Isopleths_AnimalMovement (Isopleths, Raster_Layer, Lines, Polygons, Donut_Polygons)
 
 Example1:
 Scripting Example
-The following example shows how this script can be used in the ArcGIS Python Window. It assumes that the script has been loaded into a toolbox, and the toolbox has been loaded into the active session of ArcGIS.
+
+The following example shows how this script can be used in the ArcGIS Python
+Window. It assumes that the script has been loaded into a toolbox, and the
+toolbox has been loaded into the active session of ArcGIS.
+
 It creates the 65%, 90% UD polygons (with holes) in a file geodatabase
- raster = "C:/tmp/kde.tif"
- donuts = "C:/tmp/test.gdb/ud_donuts"
- UD_Isopleths("65;90", raster, "", "", donuts)
+
+  raster = "C:/tmp/kde.tif"
+  donuts = "C:/tmp/test.gdb/ud_donuts"
+  UD_Isopleths("65;90", raster, "", "", donuts)
 
 Example2:
 Command Line Example
-The following example shows how the script can be used from the operating system command line. It assumes that the script and the data sources are in the current directory and that the python interpeter is the path.
+
+The following example shows how the script can be used from the operating
+system command line. It assumes that the script and the data sources are in
+the current directory and that the python interpeter is the path.
+
 It creates the 50%, 90% and 95% UD polygons in a file geodatabase
- C:/folder> python UD_Isopleths.py "50,90,95" kde.tif # test.gdb/ud_poly #
+
+  C:/folder> python UD_Isopleths.py "50,90,95" kde.tif # test.gdb/ud_poly #
 
 Credits:
 Regan Sarwas, Alaska Region GIS Team, National Park Service
@@ -94,7 +144,7 @@ import utils
 
 def CreateIsopleths(isopleths, raster1, lineFc, polyFc, donutFc):
     """Creates a set of Isopleths as polylines, polygons (entire area of
-    each isopleth) or donuts (area between isopleths).  If only one
+    each isopleth) or donuts (area between isopleths). If only one
     isopleth is requested, then the donutFc is the same as the polyFc.
 
     isopleths is a list of floating point values expected in the raster.
@@ -157,7 +207,7 @@ def TestGetIsopleth():
 def IsoplethLinesToPolygons(lineFC, polyFC, fieldname="contour"):
     """Builds a featureclass named polyFC, by creating a polygon
     from all the lines in lineFC that have the same value in the
-    field named fieldname.  The largest values in fieldname are
+    field named fieldname. The largest values in fieldname are
     written first, this will provide the expected polygon stacking.
 
     arcpy.FeatureToPolygon_management creates polygons from lines,
@@ -209,9 +259,9 @@ def IsoplethLinesToPolygons(lineFC, polyFC, fieldname="contour"):
 def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     """Builds a featureclass named polyFC, by creating a polygon
     from all the lines in lineFC that have the same value in the
-    field named fieldname.  Polygons do not include the area of
+    field named fieldname. Polygons do not include the area of
     the isopleths contained within them (that is all polygons
-    except the innermost are donuts).  In this case the polygons
+    except the innermost are donuts). In this case the polygons
     do not overlap, and there is no concern about order or stacking.
     If there is only one isopleth in lines, then this result is the
     same as IsoplethLinesToPolygons().
@@ -258,7 +308,7 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
     for i in range(len(uniqueValues)):
         # We could use the inner polygon from the last loop
         # but ESRI's cursors are funny things, so we are doing
-        # this the brute force way.  It's a little slower, but
+        # this the brute force way. It's a little slower, but
         # not noticably
         value1 = uniqueValues[i]
         query1 = BuildQuery(lineFC, fieldname, value1)
@@ -289,7 +339,7 @@ def IsoplethLinesToDonuts(lineFC, polyFC, fieldname="contour"):
 
 def GetUniqueValues(featureClass, whereField):
     """Make a list of all values in the whereField of
-    featureClass.  Each value in the returned list is unique.
+    featureClass. Each value in the returned list is unique.
     That is multiple identical values are only reported once."""
 
     # members in a set are guaranteed to be unique
@@ -323,7 +373,7 @@ def BuildQuery(featureClass, whereField, value):
 if __name__ == "__main__":
 
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
-        utils.die("Unable to checkout the Spatial Analyst Extension.  Quitting.")
+        utils.die("Unable to checkout the Spatial Analyst Extension. Quitting.")
 
     isoplethInput = arcpy.GetParameterAsText(0)
     rasterLayer = arcpy.GetParameterAsText(1)

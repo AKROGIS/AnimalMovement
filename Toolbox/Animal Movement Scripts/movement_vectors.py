@@ -20,7 +20,7 @@ Created by: Regan Sarwas, GIS Team, Alaska Region, National Park Service
          3) the spatial reference of the input feature class
   2) Duration will always be in hours
   3) Speed will always be in projected units per hour
-  4) The input feature must have an ArcGIS date field.  The shapefile date
+  4) The input feature must have an ArcGIS date field. The shapefile date
      field does not have a time component, so you are limited to one point
      per day, and duration/speed will always be on 24 hour intervals
   5) Works with Animal Movements database
@@ -267,8 +267,6 @@ if __name__ == "__main__":
         durationFieldName = "Duration_Hour"
         velocityFieldName = "Speed_PerHour"
         directionFieldName = "Direction_Degrees"
-        # spatialReference = arcpy.SpatialReference()
-        # spatialReference.loadFromString("Projected Coordinate Systems/State Systems/NAD 1927 Alaska Albers (US Feet)")
         spatialReference = None
 
     #

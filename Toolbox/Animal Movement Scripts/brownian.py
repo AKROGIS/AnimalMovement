@@ -37,7 +37,7 @@ def Normal(x, mu, v):
 
 
 def Horne2dNormal(x1, x2, mu1, mu2, v):
-    """Probability function for (x1, x2) for a Bivariate Normal
+    """Probability function for (x1, x2) for a bi-variate Normal
     (Gaussian) distribution with no correlation between x1 and x2,
     and equal variance in both dimensions. (mu1, mu2) is the mean
     value of (x1, x2) and v is a scalar variance.
@@ -69,7 +69,7 @@ def IntegratePath(
     Return the value of the probability density function at (gridX, gridY), by step-wise
     integration of the straight line path from (startX, startY) to (endX, endY). intervals is
     the number of intervals, or steps to consider along the path. Vm is the mobility variance
-    T is the total time from start to end.  startV and endV are the locational variance
+    T is the total time from start to end. startV and endV are the locational variance
     (usually gps error) of the start and end points respectively.
 
     """
@@ -106,7 +106,7 @@ def IntegratePathFast(
     Return the value of the probability density function at (gridX, gridY), by step-wise
     integration of the straight line path from (startX, startY) to (endX, endY). intervals is
     the number of intervals, or steps to consider along the path. Vm is the mobility variance
-    T is the total time from start to end.  startV and endV are the locational variance
+    T is the total time from start to end. startV and endV are the locational variance
     (usually gps error) of the start and end points respectively.
 
     """
@@ -136,10 +136,10 @@ def IntegratePathFast(
 
 def EvaluateGridPoint(gridX, gridY, fixes, intervals):
     """Return the probability of finding an animal at location (gridX, gridY) by
-    adding up the probablity functions for all the paths between fixes.
+    adding up the probability functions for all the paths between fixes.
     fixes is a list of fixes where each fix has the following elements:
     (time, x, y, locational_variance, mobility_variance).
-    fixes are assumed to be in chronological order, and time is a number.  The units
+    fixes are assumed to be in chronological order, and time is a number. The units
     of time is unimportant, so long as the mobility variance is appropriate for the
     units chosen. vm is the animal's mobility variance, and intervals is the number
     of intervals along the path to evaluate along the path."""
@@ -176,9 +176,9 @@ def CreateBBGrid(
     xMin, xMax, yMin, yMax, cellSize, fixes, intervals, searchArea=None, progressor=None
 ):
     """Build a brownian bridge grid by dividing the extents into
-    square cells of size cellSize.  The grid is a list of rows.  Each
-    row is a list of cell value.  Each row is built left to right, and the
-    rows are built top to bottom.  See the EvaluateGridPoint() for details
+    square cells of size cellSize. The grid is a list of rows. Each
+    row is a list of cell value. Each row is built left to right, and the
+    rows are built top to bottom. See the EvaluateGridPoint() for details
     on the remaining parameters."""
 
     if progressor is not None:
@@ -226,26 +226,27 @@ def CreateBBGrid(
 
 
 def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
-    """Return a list (with step number of items).  Each item is a tuple of
-    (variance, likelihood).  Variances in the list are equally distributed between
+    """Return a list (with step number of items). Each item is a tuple of
+    (variance, likelihood). Variances in the list are equally distributed between
     lowerBound to upperBound. The likelihood is based on Equation 7 in Horne, et al
-    and I beleive it is a likelihood cross validation.
+    and I believe it is a likelihood cross validation.
     fixes is a list of fixes where each fix is (time, x, y, locational_variance).
-    fixes are assumed to be in chronological order, and time is a number.  The units
+    fixes are assumed to be in chronological order, and time is a number. The units
     of time are unimportant, as the mobility variance varies with the units chosen.
 
-    The algorithm is as follows: Assume a mobility variance, vm.  For the first three fixes,
+    The algorithm is as follows: Assume a mobility variance, vm. For the first three fixes,
     pretend that fix2 is missing, and calculate the normal distribution at the observed
     location of fix2 based on the predicted (part way between fix1 and fix3) mean location of
-    fix2.  Do this again for fixes 2,3,4 then 3,4,5 etc until the last 3 fixes.  The product
+    fix2. Do this again for fixes 2,3,4 then 3,4,5 etc until the last 3 fixes. The product
     of the normal distributions is the indicator of the likelihood of the assumed mobility
     variance.
 
     In Horne, et al (2007), only odd numbered fixes are considered independent.
-    in the adehabitat code, each group of three is considered.  This code uses
+    in the adehabitat code, each group of three is considered. This code uses
     the second approach."""
 
-    # print("In CVL(); len(fixes) =", len(fixes), "lowerBound =",lowerBound, "upperBound =",upperBound, "step =", step, "scaleFactor =", scaleFactor)
+    # print("In CVL(); len(fixes) =", len(fixes), "lowerBound =",lowerBound,
+    # "upperBound =",upperBound, "step =", step, "scaleFactor =", scaleFactor)
 
     if len(fixes) < 3:
         raise ValueError("Not enough fixes provided")
@@ -283,7 +284,8 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
 
             # distanceSquared = ((thisX - meanX)**2 + (thisY - meanY)**2)
             # print("thisX =",thisX,"thisY =",thisY,"meanX =",meanX,"meanY =",meanY, "v =", v)
-            # print("distanceSquared =",distanceSquared, "T =", T, "a =", a, "vm =", vm, "prevV =", prevV, "nextV =", nextV,)
+            # print("distanceSquared =",distanceSquared, "T =", T, "a =", a,
+            # "vm =", vm, "prevV =", prevV, "nextV =", nextV,)
 
             # (thisX, thisY) = Zi = location at which to get value of PDF
             normal = Horne2dNormal(thisX, thisY, meanX, meanY, v)
@@ -291,7 +293,7 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
 
             # The normal is typically very small (the total area under the normal curve = 1.0)
             # the scale factor keeps the product from decaying to zero with a
-            # large number of fixes.  Since the likelihoods are relative, the
+            # large number of fixes. Since the likelihoods are relative, the
             # scale factor will not alter the relative likelihood of the Vm
             likelihood *= normal * scaleFactor
             # print("likelihood =",likelihood)
@@ -303,18 +305,19 @@ def CVL(fixes, lowerBound, upperBound, step, scaleFactor):
 
 
 def BestV(fixes, minV, maxV, steps, scaleFactor):
-    """Returns a boolean flag and a result.  The boolean flag indicates if
-    the scale factor was appropriate and the result is valid.  If the flag is false,
+    """Returns a boolean flag and a result. The boolean flag indicates if
+    the scale factor was appropriate and the result is valid. If the flag is false,
     a negative result indicates to the caller that the scaleFactor was too small,
-    otherwise the scale factor was too large.  If the flag is true, this method
+    otherwise the scale factor was too large. If the flag is true, this method
     returns the mobility variance between minV and maxV with the highest likelihood.
     The scalefactor is used to keep the likelihood from decaying to zero.
-    See the CVL() method for a description of likelihood.  steps is the number of
-    values to try between minV and maxV.  The precision of the mobility variance
-    is proportional to the number of steps.   The time to compute is proportional to
+    See the CVL() method for a description of likelihood. steps is the number of
+    values to try between minV and maxV. The precision of the mobility variance
+    is proportional to the number of steps. The time to compute is proportional to
     the number of fixes times the number of steps."""
 
-    # print("In BestV() len(fixes) =",len(fixes), "minV =",minV, "maxV =",maxV, "steps =",steps, "scaleFactor =",scaleFactor)
+    # print("In BestV() len(fixes) =",len(fixes), "minV =",minV, "maxV =",maxV,
+    # "steps =",steps, "scaleFactor =",scaleFactor)
 
     stepSize = (maxV - minV) / steps
     likelihoods = CVL(fixes, minV, maxV, stepSize, scaleFactor)
@@ -341,19 +344,20 @@ def BestV(fixes, minV, maxV, steps, scaleFactor):
 
 
 def MobilityVariance(fixes, maxGuess, scaleFactorGuess=None, steps=10, error=0.001):
-    """Return the most likely mobility variance for the set of fixes.  See CVL() for
+    """Return the most likely mobility variance for the set of fixes. See CVL() for
     a description of the mobility variance likelihood.
-    This generate step results between zero and maxGuess.  If the best guess is near
+    This generate step results between zero and maxGuess. If the best guess is near
     the maxGuess, then the true max may be about maxGuess, so we double the max, and
-    keep repeating until we know we have a good range.  Then we begin zeroing in on
+    keep repeating until we know we have a good range. Then we begin zeroing in on
     the best result, generating step results at each turn, until the the error bars
     on our guess are within the error requested.
 
     Note: this solution is not guaranteed to work if there are multiple maximums, or
-    if there is no upper bound on the variance.  The graph of likelihood at suitable
+    if there is no upper bound on the variance. The graph of likelihood at suitable
     resolution should be reviewed to correctly identify the true solution."""
 
-    # print("In MobilityVariance(), len(fixes) =",len(fixes),"maxGuess =",maxGuess,"steps =", "scaleFactorGuess =", scaleFactorGuess, steps,"error =",error)
+    # print("In MobilityVariance(), len(fixes) =",len(fixes),"maxGuess =",
+    # maxGuess,"steps =", "scaleFactorGuess =", scaleFactorGuess, steps,"error =",error)
 
     ### FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME ###
     ###
@@ -399,8 +403,8 @@ def MobilityVariance(fixes, maxGuess, scaleFactorGuess=None, steps=10, error=0.0
     #    print(result, "+/-", gap, "scaleFactor =", scaleFactor)
     #    sys.exit()
 
-    # make sure the guess was big enough.  keep doubling until we get it
-    # FIXME - we may keep doubling until we throw a math exception.  Check and bail.
+    # make sure the guess was big enough. keep doubling until we get it
+    # FIXME - we may keep doubling until we throw a math exception. Check and bail.
     while result > maxV - gap:
         maxV = maxV * 2
         success, result = BestV(fixes, 0, maxV, steps, scaleFactor)
