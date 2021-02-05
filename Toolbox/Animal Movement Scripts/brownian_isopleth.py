@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-BB_Isopleths.py
+brownian_isopleths.py
 Created: 2012-12-04
+Edited: 2021-02-04
 
 Title:
 Brownian Bridge Isopleths
@@ -27,9 +28,10 @@ requested.
 
 Parameter 1:
 Isopleths
-This is a list of isopleth values separated by commas, semicolons, or whitespace.
-The values provided should be in the range 1 to 99 where the larger then number,
-the greater the area encompassed.
+This is a list of isopleth values separated by commas, colons, semicolons, or
+whitespace. The values provided should be in the range [0...100] where the
+larger then number, the greater the area encompassed.  Values outside the
+range are silently ignored.
 
 Parameter 2:
 Raster_Layer
@@ -74,7 +76,7 @@ without a hole). There is no donut for the first range range (i.e. from the
 universe to the first isopleth). These polygons are created from the lines.
 
 Scripting Syntax:
-BB_Isopleths_AnimalMovement(Isopleths, Raster_Layer, Lines, Polygons, Donut_Polygons)
+brownian_isopleths_AnimalMovement(Isopleths, Raster_Layer, Lines, Polygons, Donut_Polygons)
 
 Example1:
 Scripting Example
@@ -83,9 +85,9 @@ Window. It assumes that the script has been loaded into a toolbox, and the
 toolbox has been loaded into the active session of ArcGIS.
 
 It creates the 65%, 90% polygons (with holes) in a file geodatabase
-  raster = r"C:\tmp\bb.tif"
-  donuts = r"C:\tmp\test.gdb\bb_donuts"
-  BB_Isopleths("65;90", raster, "", "", donuts)
+  raster = r"C:/tmp/bb.tif"
+  donuts = r"C:/tmp/test.gdb/bb_donuts"
+  brownian_isopleths("65;90", raster, "", "", donuts)
 
 Example2:
 Command Line Example
@@ -94,7 +96,7 @@ command line. It assumes that the script and the data sources are in the current
 directory and that the python interpeter is the path.
 
 It creates the 50%, 90% and 95% polygons in a file geodatabase
-  C:\folder> python BB_Isopleths.py "50,90,95" bb.tif # test.gdb\bb_poly #
+  C:/folder> python brownian_isopleths.py "50,90,95" bb.tif # test.gdb/bb_poly #
 
 Credits:
 Regan Sarwas, Alaska Region GIS Team, National Park Service
@@ -127,58 +129,102 @@ import utils
 import utilization_isopleth
 
 
-if __name__ == "__main__":
+def isopleth(iso_input, raster, lines_name=None, poly_name=None, donut_name=None):
+    """
+    Creates isopleth (contour line) feature classes for the raster_name.
+
+    iso_input is either a list of list of floats, or a string of comma separated
+    numbers that will be converted to a list of floats
+
+    raster is either an arcpy.raster object, or a data source path (string) or
+    a arcpy.layer object.
+
+    The others are ArcGIS data source paths (strings).
+
+    It is assumed that the input has already been validated.
+
+    No return value.
+    """
+
+    if not iso_input.instance_of(list):
+        iso_input = utilization_isopleth.GetIsoplethList(iso_input)
+
+    if not raster.instance_of(arcpy.Raster):
+        raster = arcpy.sa.Raster(raster)
+
+    # Normalize the raster
+    # classify the results into 100 equal interval bins, and invert (0..100 -> 100..0)
+    norm_raster = 101 - arcpy.sa.Slice(raster, 100, "EQUAL_INTERVAL")
+    utilization_isopleth.CreateIsopleths(
+        iso_input, norm_raster, lines_name, poly_name, donut_name
+    )
+
+
+def validate(iso_input, raster_name, lines_name=None, poly_name=None, donut_name=None):
+    """
+    Validate the input.
+
+    Exit with a message if the input is not valid.  Otherwise return a tuple
+    containing a list of floats, and an arcpy.Raster object.
+    """
 
     if arcpy.CheckOutExtension("Spatial") != "CheckedOut":
         utils.die("Unable to checkout the Spatial Analyst Extension. Quitting.")
 
-    isoplethInput = arcpy.GetParameterAsText(0)
-    rasterLayer = arcpy.GetParameterAsText(1)
-    isoplethLines = arcpy.GetParameterAsText(2)
-    isoplethPolys = arcpy.GetParameterAsText(3)
-    isoplethDonuts = arcpy.GetParameterAsText(4)
-
-    test = False
-    if test:
-        isoplethInput = "50,65,90,95"
-        rasterLayer = r"C:\tmp\test.gdb\bb9"
-        isoplethLines = r"C:\tmp\test.gdb\lines1"
-        isoplethPolys = r"C:\tmp\test.gdb\polys1"
-        isoplethDonuts = r"C:\tmp\test.gdb\donut1"
-
-    #
-    # Input validation
-    #
-    if not rasterLayer:
+    if not raster_name:
         utils.die("No Brownian Bridge Raster was provided. Quitting.")
 
-    if not arcpy.Exists(rasterLayer):
+    if not arcpy.Exists(raster_name):
         utils.die("Brownian Bridge Raster cannot be found. Quitting.")
 
     try:
-        bbRaster = arcpy.sa.Raster(rasterLayer)
-    except Exception as ex:
+        raster = arcpy.sa.Raster(raster_name)
+    except arcpy.ExecuteError as ex:
         utils.die(
             "Brownian Bridge Raster cannot be loaded.\n{0}\n Quitting.".format(ex)
         )
-    if not (isoplethLines or isoplethPolys or isoplethDonuts):
+    if not (lines_name or poly_name or donut_name):
         utils.die("No output requested. Quitting.")
 
     try:
-        isoplethList = utilization_isopleth.GetIsoplethList(isoplethInput)
-    except Exception as ex:
-        utils.die(
-            "Unable to interpret the list of isopleths.\n{0}\n Quitting.".format(ex)
-        )
+        iso_list = utilization_isopleth.GetIsoplethList(iso_input)
+    except AttributeError:
+        utils.die("Unable to interpret the list of isopleths.")
 
-    if not isoplethList:
+    if not iso_list:
         utils.die("List of valid isopleths is empty. Quitting.")
 
-    #
-    # Create isopleth from "normalized" raster
-    #
-    # classify the results into 100 equal interval bins, and invert (0..100 -> 100..0)
-    raster = 101 - arcpy.sa.Slice(bbRaster, 100, "EQUAL_INTERVAL")
-    utilization_isopleth.CreateIsopleths(
-        isoplethList, raster, isoplethLines, isoplethPolys, isoplethDonuts
+    return (iso_list, raster)
+
+
+def test():
+    """Set up manual test parameters and process."""
+
+    iso_input = "50,65,90,95"
+    raster_name = r"C:\tmp\test.gdb\bb9"
+    iso_lines = r"C:\tmp\test.gdb\lines1"
+    iso_polys = r"C:\tmp\test.gdb\polys1"
+    iso_donuts = r"C:\tmp\test.gdb\donut1"
+    iso_list, raster = validate(
+        iso_input, raster_name, iso_lines, iso_polys, iso_donuts
     )
+    isopleth(iso_list, raster, iso_lines, iso_polys, iso_donuts)
+
+
+def main():
+    """Get the input from arcpy (tbx or command line) and process."""
+
+    iso_input = arcpy.GetParameterAsText(0)
+    raster_name = arcpy.GetParameterAsText(1)
+    iso_lines = arcpy.GetParameterAsText(2)
+    iso_polys = arcpy.GetParameterAsText(3)
+    iso_donuts = arcpy.GetParameterAsText(4)
+    iso_list, raster = validate(
+        iso_input, raster_name, iso_lines, iso_polys, iso_donuts
+    )
+    isopleth(iso_list, raster, iso_lines, iso_polys, iso_donuts)
+
+
+if __name__ == "__main__":
+    # test()
+    main()
