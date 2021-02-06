@@ -179,7 +179,7 @@ def DistancesSquared(points):
     allSquaredDistances = []
     n = len(points)
     for i in range(n):
-        #unique set of distances dij = dji is faster; however produces different LSCV
+        # unique set of distances dij = dji is faster; however produces different LSCV
         # for j in range(i+1, n):
         for j in range(n):
             if i == j:
