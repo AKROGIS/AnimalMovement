@@ -141,6 +141,11 @@ import utils
 # pylint: disable=invalid-name, missing-function-docstring
 # TODO: Fix names and add doc strings
 
+# Python 2/3 compatible xrange() cabability
+# pylint: disable=undefined-variable,redefined-builtin
+if sys.version_info[0] < 3:
+    range = xrange
+
 
 def CreateIsopleths(isopleths, raster1, lineFc, polyFc, donutFc):
     """Creates a set of Isopleths as polylines, polygons (entire area of

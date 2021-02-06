@@ -24,6 +24,11 @@ import utils
 # pylint: disable=invalid-name, missing-function-docstring
 # TODO: Fix names and add doc strings
 
+# Python 2/3 compatible xrange() cabability
+# pylint: disable=undefined-variable,redefined-builtin
+if sys.version_info[0] < 3:
+    range = xrange
+
 
 def Normal(x, mu, v):
     """Probability function for x for a Normal (Gaussian) distribution.

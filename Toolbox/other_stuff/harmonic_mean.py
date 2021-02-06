@@ -22,6 +22,11 @@ import arcpy
 # pylint: disable=invalid-name, missing-function-docstring
 # TODO: Fix names and add doc strings
 
+# Python 2/3 compatible xrange() cabability
+# pylint: disable=undefined-variable,redefined-builtin
+if sys.version_info[0] < 3:
+    range = xrange
+
 
 def GetPoints(pointsFeature, shapeName, idName):
     # return a tuple (x,y,m) for each oid, m will be calculated later
