@@ -25,6 +25,15 @@ Created by: Regan Sarwas, GIS Team, Alaska Region, National Park Service
      per day, and duration/speed will always be on 24 hour intervals
   5) Works with Animal Movements database
   6) Honors the definition query and selection set in ArcMap
+
+Tags:
+velocity vectors, animal movement, tracks, lines, gps
+Parameter Notes:
+Output Name: New projected polyline feature class
+Animal ID Field: This provides a means of separating points into separate groups, typically animals.
+  If it is not provided, all points will be treated as belonging to the same group (animal)
+Date Field: This is the name of the date/time field in the input telemetry data. It must be an ArcGIS date field.
+Spatial Reference: Data must be projected
 """
 
 from __future__ import absolute_import, division, print_function, unicode_literals
