@@ -140,7 +140,10 @@ class KernelDensityRaster(object):
 
     def __init__(self):
         self.label = "Kernel Density Raster"
-        self.description = "Create a utilization raster from random animal locations and a smoothing factor."
+        self.description = (
+            "Create a utilization raster from random animal "
+            "locations and a smoothing factor."
+        )
         self.category = "Kernel Density Home Range"
         self.canRunInBackground = True
 

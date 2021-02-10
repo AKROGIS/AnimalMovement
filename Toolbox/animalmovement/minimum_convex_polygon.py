@@ -141,6 +141,14 @@ import utils
 
 arcpyPointType = type(arcpy.Point())
 
+removal_methods = [
+    "Area_Added",
+    "User_Point",
+    "Floating_Mean",
+    "Floating_Median",
+    "Fixed_Median",
+    "Fixed_Mean",
+]
 
 def Distance(pt1, pt2):
     return math.sqrt(Distance2(pt1, pt2))
@@ -303,7 +311,7 @@ def RemovePointWithMostArea(allPoints):
     return bestPoints
 
 
-def CreateMCP(
+def create_mcp(
     locationLayer,
     mcpFeatureClass,
     percentUsed,
