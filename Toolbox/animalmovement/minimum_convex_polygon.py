@@ -150,6 +150,7 @@ removal_methods = [
     "Fixed_Mean",
 ]
 
+
 def Distance(pt1, pt2):
     return math.sqrt(Distance2(pt1, pt2))
 
