@@ -10,8 +10,14 @@ from io import open
 
 import csv23
 
+# pylint: disable=invalid-name
+
 
 def make_csv(in_file, out_file):
+    """Make the CSV out_file from the CSV in_file."""
+
+    # pylint: disable=too-many-locals
+
     header = [
         "Id",
         "Date",
@@ -52,13 +58,13 @@ def make_csv(in_file, out_file):
                     csv23.write(csv_writer, row)
                     line0 = line4
                     continue
-                else:
-                    line0 = line1
-                    continue
+                line0 = line1
+                continue
 
 
 def make_csv2(in_file, out_file):
-    """Convert John's XLS data into database format L (as expected by the make_aws function below"""
+    """Convert John's XLS data into database format L
+    (as expected by the make_aws function below)."""
     header = [
         "Id",
         "Date",
@@ -115,18 +121,20 @@ def fix_date2(d, t):
     if len(t) == 7:
         # pad "1:23:45" to "01:23:45"
         t = "0{0}".format(t)
-    if not ":" in t:
+    if ":" not in t:
         t = "{0:02d}:00:00".format(int(t))
     return "{0:02d}.{1:02d}.{2:02d} {3}".format(d, m, y, t)
 
 
 def fix_date(d):
+    """Reformat the string d as a date."""
     date, time = d.split(" ")
     d, m, y = date.split(".")
     return "20{0}-{1}-{2}T{3}.000Z".format(y, m, d, time)
 
 
 def fix_lat(l):
+    """Reformat the string l as a latitude."""
     l = l.replace("?", "")
     if l[-1:] == "N":
         return float(l[:-1])
@@ -136,6 +144,7 @@ def fix_lat(l):
 
 
 def fix_lon(l):
+    """Reformat the string l as a longitude."""
     l = l.replace("?", "")
     if l[-1:] == "E":
         return float(l[:-1])
@@ -161,14 +170,17 @@ def fix_freq(a):
 
 
 def fix_nopc(n):
+    """Reformat the string n from the NOPC field."""
     return n.replace("?", "")
 
 
 def fix_level(l):
+    """Reformat the string l from the best level field."""
     return l.replace(" dB", "")
 
 
 def make_aws(in_file, out_file):
+    """Create an AWS formatted file."""
     header = (
         (
             '"programNumber";"platformId";"platformType";"platformModel";'
