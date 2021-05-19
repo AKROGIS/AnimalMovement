@@ -1,11 +1,14 @@
+-- A function to return a table of intermediate points given an Animal Movement vector
+-- Part of the WACH Gridpoint Analysis
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER FUNCTION [dbo].[VectorToPoints] 
+ALTER FUNCTION [dbo].[VectorToPoints]
 (
-	@ProjectID  NVARCHAR(255), 
+	@ProjectID  NVARCHAR(255),
 	@AnimalId   NVARCHAR(255),
 	@StartDate  DateTime2
 )
@@ -19,7 +22,7 @@ RETURNS @summary TABLE
     Speed      Float,
     Duration   Float,
     Distance   Float
-) 
+)
 AS
 BEGIN
 	DECLARE @lat float;
@@ -39,7 +42,7 @@ BEGIN
     DECLARE @Speed FLOAT;
     DECLARE @Distance FLOAT;
     DECLARE @Duration FLOAT;
-	
+
     -- Use 3 and 1000 for 3 significant digits (i.e ~110 meter cells)
     -- Use 4 and 10000 for 4 significant digits (i.e ~11 meter cells)
 
@@ -58,7 +61,7 @@ BEGIN
       @EndDate = EndDate
     From Movements
 	WHERE ProjectId = @ProjectId AND AnimalId = @AnimalId AND StartDate = @StartDate
-	
+
     IF @lat1 is not NULL
     BEGIN
         select @deltaX = @lon2 - @lon1
@@ -77,9 +80,9 @@ BEGIN
         select @deltaS = @deltaS/@n
         select @Duration = @Duration/@n
         select @Distance = @Distance/@n
-        
+
         -- Start point
-        insert @summary 
+        insert @summary
         values(@projectId, @animalId, @lat1, @lon1, @startDate, @Speed, @Duration, @Distance)
 
         -- Intermediate points
@@ -91,17 +94,17 @@ BEGIN
             -- select @lat = Round(@lat1 + @deltaY * @cnt, 4)
             -- select @lon = Round(@lon1 + @deltaX * @cnt, 4)
             select @date = DATEADD(SECOND, @deltaS * @cnt, @StartDate)
-            insert @summary 
+            insert @summary
                values(@projectId, @animalId, @lat, @lon, @date, @Speed, @Duration, @Distance)
         SET @cnt = @cnt + 1;
         END;
 
         -- End point
-        --insert @summary 
+        --insert @summary
         --values(@projectId, @animalId, @lat2, @lon2, @EndDate, @Speed, @Duration, @Distance)
 
     END
-	
+
 	RETURN
 END
 
