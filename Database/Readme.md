@@ -15,7 +15,7 @@ The queries in this folder are for building the database:
   triggers, procedures, and other database objects needed by the system.
 * `CreateReplicationUsers.sql` - Creates users that can be used to replicate
   the database to remote servers.
-* `CreateUsers.sql` - Creates generic users and roles. 
+* `CreateUsers.sql` - Creates generic users and roles.
 * `LookupTableData.sql` - Populates look up tables (domains) with well known
   values.
 * `Settings.sql` - Populates the Settings table with expected system settings.
@@ -28,7 +28,7 @@ are retained here as examples in case there is a similar need in the future.
 
 * `Additional Helpful Queries.sql` - A suite of queries to check for errors
   and/or invalid state in the database.  See the code for comments on the
-  various queries. 
+  various queries.
 * `CollarReports.sql` - A collection of reports on the collars in the
   database.
 * `Example - Change Animals Table Schema.sql` - An example of how to change
@@ -39,12 +39,12 @@ are retained here as examples in case there is a similar need in the future.
   data for a given project.
 * `Helpful Queries.sql` - A suite of queries to check for errors and/or
   invalid state in the database.  See the code for comments on the various
-  queries. 
+  queries.
 * `HideFirstLocationInZeroDistanceShortDurationMovements.sql` - A modification
   query to hide bad locations.
 * `PTT Locations for Kyle.sql` - Locations of collars using the Argos
   based location method (not GPS)
-* `Processing Issues Queries.sql` - 
+* `Processing Issues Queries.sql` -
 * `Project Investigator Summary Queries.sql` - A list of queries that are
   provided to project investigators in the Animal Movements application.
   **This file is deployed with the Animal Movements application.**
@@ -74,6 +74,28 @@ procedures behaved properly and were performed well.
   procedures.  See the code for details.
 * `Test Views.sql` - Simply checks that the views are not broken by issuing
   a query against the view.  Good to run this after any schema change.
-* `Timing Tests for Locations.sql` - Timing of the location triggers 
+* `Timing Tests for Locations.sql` - Timing of the location triggers
   (creation of the movement vectors).  Validated that the solution was not
   horribly slow. Could be used to test alternative optimizations.
+
+## MiscQueries
+
+These are recent queries that were useful for tackling a specific issue or
+request.  They may be a good starting point for similar problems.
+
+* `Iridium *.sql` -
+  Three scripts for helping to find and resolve issues with the Iridium
+  emails.
+* `Kyle's AM queries.sql` -
+  Miscellaneous queries to help Kyle with various issues.
+* `Projects with recent locations.sql` -
+  A List of the projects with the last fix date.  Useful for determing
+  which projects should be creating current layer packages.
+* `TPF_Fix_Periods.sql` -
+  A query to show the fix period set for the animals in a project.  Uses the
+  Collar parameter file data (summarized by a Python script)
+* `VectorToPoints.sql` -
+  A database function used by the following file.
+* `WACH_Gridpoint_analysis.sql` -
+  Creates a grid point table with a summary of all the Caribou that traveled
+  through each 100m^2 cell in the state.
