@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Pro_AddIn")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Animal Movements")]
+[assembly: AssemblyDescription("Tools for viewing, editing and analyzing data in the NPS Animal_Movement database.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Acme")]
-[assembly: AssemblyProduct("Pro_AddIn")]
-[assembly: AssemblyCopyright("Copyright © Acme 2021")]
+[assembly: AssemblyCompany("National Park Service, Alaska Region GIS Team")]
+[assembly: AssemblyProduct("Animal Movements")]
+[assembly: AssemblyCopyright("Copyright © NPS 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -8,8 +8,8 @@
     <ProjectGuid>{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pro_AddIn</RootNamespace>
-    <AssemblyName>Pro_AddIn</AssemblyName>
+    <RootNamespace>AnimalMovement</RootNamespace>
+    <AssemblyName>AnimalMovement</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -117,14 +117,14 @@
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Config.daml" />
-    <AddInContent Include="Images\AddInDesktop16.png" />
-    <AddInContent Include="Images\AddInDesktop32.png" />
-    <AddInContent Include="DarkImages\AddInDesktop16.png" />
-    <AddInContent Include="DarkImages\AddInDesktop32.png" />
+    <AddInContent Include="Images\PawPrint16.png" />
+    <AddInContent Include="Images\PawPrint32.png" />
+    <AddInContent Include="DarkImages\PawPrint16.png" />
+    <AddInContent Include="DarkImages\PawPrint32.png" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnimalLocationStatusButton.cs" />
-    <Compile Include="Module1.cs" />
+    <Compile Include="ChangeLocationStatusButton.cs" />
+    <Compile Include="AnimalMovementModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -145,7 +145,7 @@
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.ConvertToRelativePath" />
   <!--<Import Project="Esri.ArcGISPro.Extensions.targets" Condition="Exists('Esri.ArcGISPro.Extensions.targets')" />-->
   <Import Project="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets" Condition="Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets') AND !Exists('Esri.ArcGISPro.Extensions.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

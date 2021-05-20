@@ -1,35 +1,28 @@
-﻿<ArcGIS defaultAssembly="Pro_AddIn.dll" defaultNamespace="Pro_AddIn" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
+﻿<ArcGIS defaultAssembly="AnimalMovement.dll" defaultNamespace="AnimalMovement" xmlns="http://schemas.esri.com/DADF/Registry" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
   <AddInInfo id="{7134f1bb-8a69-49f0-becb-9a6357e7e9de}" version="1.0" desktopVersion="2.7.26828">
-    <Name>Pro_AddIn</Name>
-    <Description>Pro_AddIn description</Description>
-    <Image>Images\AddinDesktop32.png</Image>
-    <Author>RESarwas</Author>
-    <Company>Acme</Company>
+    <Name>Animal Movements</Name>
+    <Description>Tools for viewing, editing and analyzing data in the NPS Animal_Movement database.</Description>
+    <Image>Images\PawPrint32.png</Image>
+    <Author>Regan Sarwas</Author>
+    <Company>National Park Service, Alaska Region GIS Team</Company>
     <Date>5/19/2021 8:22:05 PM</Date>
-    <Subject>Framework</Subject>
-    <!-- Note subject can be one or more of these topics:
-                    Content, Framework, Editing, Geodatabase, Geometry, Geoprocessing, Layouts, Map Authoring, Map Exploration -->
+    <Subject>Editing</Subject>
   </AddInInfo>
   <modules>
-    <insertModule id="Pro_AddIn_Module" className="Module1" autoLoad="false" caption="Module1">
-      <!-- uncomment to have the control hosted on a separate tab-->
-      <tabs>
-        <!--<tab id="Pro_AddIn_Tab1" caption="New Tab">
-          <group refID="Pro_AddIn_Group1"/>
-        </tab>-->
-      </tabs>
+    <insertModule id="AnimalMovement_Module" className="AnimalMovementModule"
+                  autoLoad="false" caption="Animal Movement Tools">
       <groups>
-        <!-- comment this out if you have no controls on the Addin tab to avoid
-              an empty group-->
-        <group id="Pro_AddIn_Group1" caption="Group 1" appearsOnAddInTab="true">
-          <!-- host controls within groups -->
-          <button refID="Pro_AddIn_AnimalLocationStatusButton" size="large" />
+        <group id="AnimalMovement_Group" caption="Animal Movement Tools" appearsOnAddInTab="true" keytip="AM">
+          <button refID="AnimalMovement_ChangeLocationStatusButton" size="large" />
         </group>
       </groups>
       <controls>
-        <!-- add your controls here -->
-        <button id="Pro_AddIn_AnimalLocationStatusButton" caption="AnimalLocationStatusButton" className="AnimalLocationStatusButton" loadOnClick="true" smallImage="pack://application:,,,/ArcGIS.Desktop.Resources;component/Images/GenericButtonBlue16.png" largeImage="pack://application:,,,/ArcGIS.Desktop.Resources;component/Images/GenericButtonBlue32.png">
-          <tooltip heading="Tooltip Heading">Tooltip text<disabledText /></tooltip>
+        <button id="AnimalMovement_ChangeLocationStatusButton" caption="Edit Location Status" 
+                className="ChangeLocationStatusButton" loadOnClick="true" keytip="E"
+                smallImage="Images\PawPrint16.png" largeImage="Images\PawPrint32.png">
+          <tooltip heading="Edit Location Status">Hides/Unhides the selected animal locations.<disabledText /></tooltip>
         </button>
       </controls>
     </insertModule>
