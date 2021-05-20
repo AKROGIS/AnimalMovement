@@ -1,7 +1,9 @@
 # Layer Packages
 
 Layer packages contain the data and symbology in a convenient package.
-
+Layer packages are created from the layer file and the data in the Animal
+Movements database by the python scripts which are executed on a regular
+schedule.
 
 The master copy of the scripts and layer files in this folder is
 <https://github.com/AKROGIS/AnimalMovement/tree/master/LayerFiles/LayerPackages>.
