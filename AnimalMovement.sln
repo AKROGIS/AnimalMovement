@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IridiumDownloader", "Iridiu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VectronicDownloader", "VectronicDownloader\VectronicDownloader.csproj", "{C93251F3-43DD-4B0C-8986-367ACA7C410B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pro_AddIn", "Pro_AddIn\Pro_AddIn.csproj", "{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -239,6 +241,18 @@ Global
 		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|x86.ActiveCfg = Release|Any CPU
 		{C93251F3-43DD-4B0C-8986-367ACA7C410B}.Release|x86.Build.0 = Release|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Debug|x86.Build.0 = Debug|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Release|x86.ActiveCfg = Release|Any CPU
+		{7134F1BB-8A69-49F0-BECB-9A6357E7E9DE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
