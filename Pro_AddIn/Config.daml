@@ -1,7 +1,7 @@
-﻿<ArcGIS defaultAssembly="AnimalMovement.dll" defaultNamespace="AnimalMovement" xmlns="http://schemas.esri.com/DADF/Registry" 
+﻿<ArcGIS defaultAssembly="AnimalMovement.dll" defaultNamespace="AnimalMovement" xmlns="http://schemas.esri.com/DADF/Registry"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
-  <AddInInfo id="{7134f1bb-8a69-49f0-becb-9a6357e7e9de}" version="1.0" desktopVersion="2.7.26828">
+  <AddInInfo id="{7134f1bb-8a69-49f0-becb-9a6357e7e9de}" version="1.0" desktopVersion="2.5">
     <Name>Animal Movements</Name>
     <Description>Tools for viewing, editing and analyzing data in the NPS Animal_Movement database.</Description>
     <Image>Images\PawPrint32.png</Image>
@@ -19,7 +19,7 @@
         </group>
       </groups>
       <controls>
-        <button id="AnimalMovement_ChangeLocationStatusButton" caption="Edit Location Status" 
+        <button id="AnimalMovement_ChangeLocationStatusButton" caption="Edit Location Status"
                 className="ChangeLocationStatusButton" loadOnClick="true" keytip="E"
                 smallImage="Images\PawPrint16.png" largeImage="Images\PawPrint32.png">
           <tooltip heading="Edit Location Status">Hides/Unhides the selected animal locations.<disabledText /></tooltip>
