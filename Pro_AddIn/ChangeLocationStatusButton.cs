@@ -125,13 +125,8 @@ namespace AnimalMovement
         {
             var results = new Dictionary<FeatureLayer, int>();
             // A valid layer is a Query Layer connection to SQL Server database
-            // 
-            // wherein the resulting query class (ITable) has a text(8) column named ProjectId,
-            // a text(8) column named AnimalId, and a datetime column named 'FixDate'
-            // The layer does NOT need the status field, as it is not read by this add-in,
-            // However, the Location table must have a status field.
-            // There may be more other layers that meet this description, so it is up to the user
-            // to ensure that the correct layer has selected features before being modified.
+            // We do not check the server name or the database name, as the layer could be pointing to a replica
+            // A valid layer is also a point layer with 3 fields we need values from to write the update query
             var layers = MapView.Active.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>();
             await QueuedTask.Run(() => {
                 foreach (FeatureLayer layer in layers)
@@ -142,6 +137,7 @@ namespace AnimalMovement
                     }
                     var isSqlServer = connection.WorkspaceConnectionString.Contains("sqlserver", StringComparison.OrdinalIgnoreCase);
                     var isPoint = connection.GeometryType == esriGeometryType.esriGeometryPoint;
+                    // Note that CIMSqlQueryDataConnection has a queryFields property that has the field info we need, but it is not exposed in the API
                     if (isSqlServer && isPoint && HasCorrectColumns(layer.GetFeatureClass().GetDefinition()))
                     {
                         results[layer] = layer.SelectionCount;
