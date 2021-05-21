@@ -33,6 +33,9 @@ namespace AnimalMovement
     /// </summary>
     internal class ChangeLocationStatusButton : Button
     {
+        /// <summary>
+        /// The user clicked the button, Check the state and if possible, change the location status.
+        /// </summary>
         async protected override void OnClick()
         {
             if (MapView.Active == null)
@@ -121,12 +124,18 @@ namespace AnimalMovement
 
         }
 
+        /// <summary>
+        /// Scans the map for layers this tool can work with.
+        /// </summary>
+        /// <remarks>
+        /// A valid layer is a Query Layer connection to SQL Server database.
+        /// We do not check the server name or the database name, as the layer could be pointing to a replica
+        /// A valid layer is also a point layer with 3 fields we need values from to write the update query
+        /// </remarks>
+        /// <returns>All the valid layers and the count of selected features in each valid layer</returns>
         private async Task<Dictionary<FeatureLayer, int>> GetValidLayersAsync()
         {
             var results = new Dictionary<FeatureLayer, int>();
-            // A valid layer is a Query Layer connection to SQL Server database
-            // We do not check the server name or the database name, as the layer could be pointing to a replica
-            // A valid layer is also a point layer with 3 fields we need values from to write the update query
             var layers = MapView.Active.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>();
             await QueuedTask.Run(() => {
                 foreach (FeatureLayer layer in layers)
@@ -147,6 +156,11 @@ namespace AnimalMovement
             return results;
         }
 
+        /// <summary>
+        /// A valid layer must have three specific fields, so we can retieve the data necesary for the update query.
+        /// </summary>
+        /// <param name="tableDef">Information about the table and its fields</param>
+        /// <returns>True if the tableDef has the necessary fields, False otherwise.</returns>
         private static bool HasCorrectColumns(TableDefinition tableDef)
         {
             Field projectIdField = tableDef.GetFields().FirstOrDefault(x => x.Name.Equals("ProjectId"));
@@ -170,16 +184,32 @@ namespace AnimalMovement
             return true;
         }
 
-        private static async Task HideSelectedFeaturesAsync(FeatureLayer actionLayer)
+        /// <summary>
+        /// Hides the selected locations in layer.
+        /// </summary>
+        /// <param name="layer">The feature layer with selected points to modify.</param>
+        /// <returns>An async Task with no return value.</returns>
+        private static async Task HideSelectedFeaturesAsync(FeatureLayer layer)
         {
-            await UpdateRowsAsync(actionLayer, "H");
+            await UpdateRowsAsync(layer, "H");
         }
 
-        private static async Task UnHideSelectedFeaturesAsync(FeatureLayer actionLayer)
+        /// <summary>
+        /// Unhides the selected locations in layer.
+        /// </summary>
+        /// <param name="layer">The feature layer with selected points to modify.</param>
+        /// <returns>An async Task with no return value.</returns>
+        private static async Task UnHideSelectedFeaturesAsync(FeatureLayer layer)
         {
-            await UpdateRowsAsync(actionLayer, null);
+            await UpdateRowsAsync(layer, null);
         }
 
+        /// <summary>
+        /// Sends an update query to the SQL Server to update the location status.
+        /// </summary>
+        /// <param name="actionLayer"></param>
+        /// <param name="status">The new status value, either a single character string or Null.</param>
+        /// <returns>An async Task with no return value.</returns>
         private static async Task UpdateRowsAsync(FeatureLayer actionLayer, string status)
         {
             const string sql = "EXEC [dbo].[Location_UpdateStatus] @ProjectId, @AnimalId, @FixDate, @Status;";
