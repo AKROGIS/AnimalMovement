@@ -185,12 +185,8 @@ namespace AnimalMovement
             const string sql = "EXEC [dbo].[Location_UpdateStatus] @ProjectId, @AnimalId, @FixDate, @Status;";
 
             await QueuedTask.Run(() => {
-                var dataConnection = (CIMSqlQueryDataConnection)actionLayer.GetDataConnection();
-                var connectionString = dataConnection.WorkspaceConnectionString;
-                // TODO: Fails on the following line
-                // connectionString = "SERVER=INPAKROVMAIS;INSTANCE=sde:sqlserver:INPAKROVMAIS;DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=INPAKROVMAIS;DATABASE=Animal_Movement;AUTHENTICATION_MODE=OSA"
-                // needs to be a SQL Server connection string, like in the old code
-                using (var connection = new SqlConnection(connectionString))
+                var connectionString = BuildSqlConnectionString(actionLayer);
+                 using (var connection = new SqlConnection(connectionString))
                 {
                     using (var cmd = new SqlCommand(sql, connection))
                     {
@@ -221,6 +217,79 @@ namespace AnimalMovement
             });
         }
 
+        /// <summary>
+        /// Use the layer's database connection information to get a SQL Server Connection string.
+        /// 
+        /// The layer may be connected to a replica.  We will ask the replica for the name of the
+        /// master server and database.  See https://www.connectionstrings.com/sql-server/.
+        /// </summary>
+        /// <remarks>
+        /// I could not find official documentation on the CIMSqlQueryDataConnection.WorkspaceConnectionString
+        /// Samples from a Pro Layer file (consistent across several ways of creating a Query layer):
+        /// Keys: [SERVER, INSTANCE, DBCLIENT, DB_CONNECTION_PROPERTIES, DATABASE, AUTHENTICATION_MODE]
+        /// From other samples online had VERSION, USER and ENCRYPTED_PASSWORD when using AUTHENTICATION_MODE=DBMS (vs. OSA) 
+        /// </remarks>
+        /// <param name="layer">A feature layer with a data connection to location points in SQL database</param>
+        /// <returns>A SQL Server Connection string</returns>
+        private static string BuildSqlConnectionString(FeatureLayer layer)
+        {
+            var dataConnection = (CIMSqlQueryDataConnection)layer.GetDataConnection();
+            var connectionProperties = ConnectionProperties(dataConnection.WorkspaceConnectionString);
+            string localServer = connectionProperties["SERVER"];
+            string localDatabase = connectionProperties["DATABASE"];
+            string connectionString = string.Format("server={0};Database={1};",
+                                                    localServer,
+                                                    localDatabase);
+            if (connectionProperties["AUTHENTICATION_MODE"] == "OSA")
+            {
+                connectionString += "Trusted_Connection=True;";
+            }
+            else
+            {
+                connectionString += "Trusted_Connection=False;" +
+                                    string.Format("User Id={0};Password={1};",
+                                    connectionProperties["USER"],
+                                    connectionProperties["PASSWORD"]);
+            }
+
+            //Connect to the local server to find the master server, and change the connection string appropriately
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var cmd = new SqlCommand("SELECT [Connection],[Database] FROM [dbo].[LookupQueryLayerServers] WHERE [Location] = 'AKRO'", connection))
+                {
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        var masterServer = (string)reader["Connection"];
+                        var masterDatabase = (string)reader["Database"];
+                        connectionString = connectionString.Replace(localServer, masterServer).Replace(localDatabase, masterDatabase);
+                    }
+                }
+            }
+
+            return connectionString;
+        }
+
+        /// <summary>
+        /// Converts an ArcGIS Connection string to a key/value dictionary.
+        ///
+        /// Problems with connection string are silently ignored.
+        /// </summary>
+        /// <param name="arcgisConnection">A string in the form 'key1=value1;...;keyN=valueN'</param>
+        /// <returns>The dictionary of keys and values</returns>
+        private static Dictionary<string,string> ConnectionProperties(string arcgisConnection)
+        {
+            var properties = new Dictionary<string, string>();
+            foreach (var pair in arcgisConnection.Split(';'))
+            {
+                var keyValue = pair.Split('=');
+                if (keyValue.Length < 2) { continue; }
+                properties[keyValue[0]] = keyValue[1];
+            }
+            return properties;
+        }
     }
 
     public static class StringExtensions
