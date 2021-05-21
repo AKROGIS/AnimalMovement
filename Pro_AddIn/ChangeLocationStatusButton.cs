@@ -191,6 +191,9 @@ namespace AnimalMovement
             await QueuedTask.Run(() => {
                 var dataConnection = (CIMSqlQueryDataConnection)actionLayer.GetDataConnection();
                 var connectionString = dataConnection.WorkspaceConnectionString;
+                // TODO: Fails on the following line
+                // connectionString = "SERVER=INPAKROVMAIS;INSTANCE=sde:sqlserver:INPAKROVMAIS;DBCLIENT=sqlserver;DB_CONNECTION_PROPERTIES=INPAKROVMAIS;DATABASE=Animal_Movement;AUTHENTICATION_MODE=OSA"
+                // needs to be a SQL Server connection string, like in the old code
                 using (var connection = new SqlConnection(connectionString))
                 {
                     using (var cmd = new SqlCommand(sql, connection))
