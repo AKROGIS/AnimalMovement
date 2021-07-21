@@ -543,7 +543,7 @@ if __name__ == "__main__":
         )
         if hRefToUse.lower() != "bydataset":
             h = ChooseSmoothingFactor(hList, hRefToUse)
-            utils.info("Using h = {0} ({2})".format(h, hRefToUse))
+            utils.info("Using h = {0} ({1})".format(h, hRefToUse))
             hList = [h for eachItem in uniqueValues]
     #
     # Create density raster(s)

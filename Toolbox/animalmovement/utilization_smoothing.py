@@ -159,6 +159,7 @@ software and aggregate use with other software.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import math
+import sys
 
 import arcpy
 import numpy
@@ -358,7 +359,7 @@ def GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount):
     else:
         h = hRef
 
-    utils.info("hRef ({0}) = {2}".format(hRefmethod, hRef))
+    utils.info("hRef ({0}) = {1}".format(hRefmethod, hRef))
     utils.info("Using h = {0}".format(h))
     return h
 
@@ -441,4 +442,4 @@ if __name__ == "__main__":
 
     points = utils.get_points(locationLayer, spatialReference)
     h = GetSmoothingFactor(points, hRefmethod, modifier, proportionAmount)
-    arcpy.SetParameterAsText(4, "{0}".format(h))
+    arcpy.SetParameterAsText(5, "{0}".format(h))
