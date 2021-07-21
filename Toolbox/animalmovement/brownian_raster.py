@@ -526,14 +526,9 @@ def create_raster(
             # print(fixes[0])
             # print(fixes[1])
             if len(fixes) < 2:
-                if name == "":
-                    raise ValueError(
-                        "The feature class does not have two or more fix locations."
-                    )
-                else:
-                    msg = "The group named {0} does not have enough fix locations. Skipping"
-                    utils.warn(msg.format(groupName))
-                    continue
+                msg = "The group named {0} does not have enough fix locations. Skipping"
+                utils.warn(msg.format(groupName))
+                continue
 
             # Get Extents - based on selection of fixes, not feature class.
             xmin = xmax = fixes[0][1]
@@ -807,9 +802,9 @@ def validate(
     if not arcpy.Exists(fixes_name):
         utils.die("Location layer cannot be found. Quitting.")
 
-    date_field_names = [field.name for field in arcpy.ListFields(fixes_name, "Date")]
+    date_field_names = [field.name for field in arcpy.ListFields(fixes_name, None, "Date")]
     double_field_names = [
-        field.name for field in arcpy.ListFields(fixes_name, "Double")
+        field.name for field in arcpy.ListFields(fixes_name, None, "Double")
     ]
     all_field_names = [field.name for field in arcpy.ListFields(fixes_name)]
     bad_field_msg = "Field {0} does not exist in {1}. Quitting."
@@ -824,11 +819,11 @@ def validate(
 
     if grouping_fieldnames in no_value:
         grouping_fieldnames = None
-    grouping_fieldnames = (
-        grouping_fieldnames.replace(",", " ").replace(";", " ").replace(":", " ")
-    )
-    grouping_fieldnames = grouping_fieldnames.split()
     if grouping_fieldnames:
+        grouping_fieldnames = (
+            grouping_fieldnames.replace(",", " ").replace(";", " ").replace(":", " ")
+        )
+        grouping_fieldnames = grouping_fieldnames.split()
         for group_fieldname in grouping_fieldnames:
             if group_fieldname not in all_field_names:
                 utils.die(bad_field_msg.format(group_fieldname, fixes_name))

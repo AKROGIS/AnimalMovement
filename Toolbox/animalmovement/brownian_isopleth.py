@@ -146,10 +146,10 @@ def isopleth(iso_input, raster, lines_name=None, poly_name=None, donut_name=None
     No return value.
     """
 
-    if not iso_input.instance_of(list):
+    if not isinstance(iso_input, list):
         iso_input = utilization_isopleth.GetIsoplethList(iso_input)
 
-    if not raster.instance_of(arcpy.Raster):
+    if not isinstance(raster, arcpy.Raster):
         raster = arcpy.sa.Raster(raster)
 
     # Normalize the raster
