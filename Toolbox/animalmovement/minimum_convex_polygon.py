@@ -157,11 +157,19 @@ def Distance(pt1, pt2):
 
 def Distance2(pt1, pt2):
     if type(pt1) == arcpyPointType:
-        dx = pt2.X - pt1.X
-        dy = pt2.Y - pt1.Y
+        x1 = pt1.X
+        y1 = pt1.Y
     else:
-        dx = pt2[0] - pt1[0]
-        dy = pt2[1] - pt1[1]
+        x1 = pt1[0]
+        y1 = pt1[1]
+    if type(pt2) == arcpyPointType:
+        x2 = pt2.X
+        y2 = pt2.Y
+    else:
+        x2 = pt2[0]
+        y2 = pt2[1]
+    dx = x2 - x1
+    dy = y2 - y1
     return dx * dx + dy * dy
 
 
@@ -481,7 +489,7 @@ if __name__ == "__main__":
     #
     try:
         # projected spatial reference is required for doing distance calculations
-        CreateMCP(
+        create_mcp(
             locationLayer,
             mcpFeatureClass,
             percentUsed,
