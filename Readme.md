@@ -55,6 +55,8 @@ The other folders are
 * `Database` - SQL scripts to create, test and query the database.
 * `Distribution` - Tools to assist with deploying the Animal Movements system.
 * `Documentation` - Information for developers, administrators, and users.
+* `LayerFiles` - ArcGIS 10.x layer files with query layers to the animal
+  movements data.  See the readme file for details.
 * `Toolbox` - An ArcGIS toolbox and Python scripts for analyzing the movement
   data with ArcGIS.
 
