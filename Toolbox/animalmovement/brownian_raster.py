@@ -802,7 +802,9 @@ def validate(
     if not arcpy.Exists(fixes_name):
         utils.die("Location layer cannot be found. Quitting.")
 
-    date_field_names = [field.name for field in arcpy.ListFields(fixes_name, None, "Date")]
+    date_field_names = [
+        field.name for field in arcpy.ListFields(fixes_name, None, "Date")
+    ]
     double_field_names = [
         field.name for field in arcpy.ListFields(fixes_name, None, "Double")
     ]
