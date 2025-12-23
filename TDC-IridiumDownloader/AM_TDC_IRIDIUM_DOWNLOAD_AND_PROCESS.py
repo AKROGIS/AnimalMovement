@@ -217,10 +217,7 @@ def download_tdcweb_iridium_data(tdcexe, datapath, tdcuser, tdcpassword, startda
     newfile.write(spacer + spacer + "<Password>" + tdcpassword + "</Password>" + "\n")
     newfile.write(spacer + "</Iridium>" + "\n")
     newfile.write(spacer + "<DownloadData>true</DownloadData>" + "\n")
-    newfile.write(spacer + "<ConvertDateRange>" + "\n")
-    newfile.write(spacer + spacer + "<Start>" + startdate + "T00:00:00Z" + "</Start>" + "\n")
-    newfile.write(spacer + spacer + "<End>" + enddate + "T23:59:59Z" + "</End>" + "\n")
-    newfile.write(spacer + "</ConvertDateRange>" + "\n")
+    newfile.write(spacer + "<ConvertNewDataOnly>" + "\n")
     newfile.write(spacer + "<BatchLog>" + newpath + "\\" + "TDC_IRIDIUM_DOWNLOAD_BATCH_LOG.TXT" + "</BatchLog>" + "\n")
     newfile.write(spacer + "<OutputFolder>" + newpath + "</OutputFolder>" + "\n")
     newfile.write(spacer + "<ReportFormat>both</ReportFormat>" + "\n")
@@ -258,12 +255,7 @@ def download_tdcweb_iridium_data(tdcexe, datapath, tdcuser, tdcpassword, startda
         shutil.move(newpath + "\\" + trashfile, otherfolder + "\\" + trashfile)
 
     #Rename essential files
-    if enddate == "2099-12-31":
-        daterange = startdate + "_" + datetime.now().strftime("%Y%m%d")
-    else:
-        daterange = startdate + "_" + enddate
-
-    daterange = daterange.replace("-", "")
+    daterange = datetime.now().strftime("%Y%m%d")
 
     write_log(logfile, ">>Renaming data files to {COLLARID}_Condensed_TDCWEB_" + daterange + ".csv")
     keepfiles = [checkfile for checkfile in os.listdir(newpath) if "condensed" in checkfile.lower()]
@@ -324,7 +316,7 @@ if __name__ == "__main__":
     if args.TESTRUN:
         write_log(logfile, "NOTE: THIS IS A TEST RUN.")
         write_log(logfile, "NOTE: Data may be downloaded, but the configuration settings will not be updated and no data will be loaded into Animal Movement!")
-
+        write_log(logfile, "WARNING: If run with the <ConvertNewDataOnly> batchfile option, Downloaded data will no longer be flagged as new on the Telonics Server.")
     if args.yamlfile != None:
         #Load yaml file
         yamlfile = args.yamlfile
