@@ -76,3 +76,5 @@ packages/
 #JetBrains (PyCharm) IDE
 .idea/
 *.jfm
+# Visual Studio Code Cache files
+/.vs
