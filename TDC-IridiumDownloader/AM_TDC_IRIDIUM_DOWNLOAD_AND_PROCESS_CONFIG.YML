@@ -1,0 +1,25 @@
+EMAIL:
+  USERS: me@mailserver.domain
+  SERVER: mailserver IP address
+  PORT: 25
+  FROM: no_reply@server.domain
+TOOLS:
+  SKIPTDCDOWNLOAD: false
+  SKIPAMUPLOAD: false
+PATHS:
+  TDCEXE: C:\Program Files (x86)\Telonics\Data Converter\TDC.exe
+  CFLEXE: C:\Users\sql_proxy\AM\CollarFileLoader.exe
+  TOOLPATH: E:\AM\TOOLS
+  DATAPATH: E:\AM\DATA
+  LOGPATH: E:\AM\LOGS
+STARTDATE: "2025-12-22"
+ENDDATE: "2025-12-23"
+USERS:
+  - NPSUSER: Animal Movements Principal Investigator Name
+    TDCUSER: Telonics User Name
+    TDCPASS: Telonics Password
+    LOADPATH: null
+  - NPSUSER: repeat for each PI
+    TDCUSER:
+    TDCPASS:
+    LOADPATH: null

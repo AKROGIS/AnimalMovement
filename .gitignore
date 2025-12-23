@@ -5,6 +5,10 @@ Distribution/Client/*
 Distribution/Server/*
 Distribution/Documentation/*
 
+#Ignore Files with Passwords and other Secrets
+*.secret
+*.secrets
+
 #OS junk files
 [Tt]humbs.db
 *.DS_Store
