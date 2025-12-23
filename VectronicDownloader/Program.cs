@@ -122,7 +122,7 @@ namespace VectronicDownloader
                     BaseAddress = new Uri(Properties.Settings.Default.ApiBaseUrl)
                 };
             }
-            var uri = $"{collarId}/{sensorCode}/?collarkey={collarKey}";
+            var uri = $"{collarId}/{sensorCode}?collarkey={collarKey}";
             if (lastId != null)
             {
                 uri += $"&gt-id={lastId}";
